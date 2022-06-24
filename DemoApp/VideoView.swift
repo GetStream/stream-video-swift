@@ -23,14 +23,30 @@ struct VideoView: View {
                 CameraView(
                     webRTCClient: viewModel.webRTCClient,
                     frame: CGRect(origin: .zero, size: CGSize(width: reader.size.width, height: reader.size.height / 2)),
-                    isCurrentUser: true
+                    isCurrentUser: true,
+                    cameraPosition: viewModel.cameraPosition
                 )
                 .frame(maxHeight: reader.size.height / 2)
+                .overlay(
+                    BottomRightView {
+                        Button {
+                            viewModel.changeCameraPosition()
+                        } label: {
+                            Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                                .resizable()
+                                .foregroundColor(.black)
+                                .aspectRatio(contentMode: .fit)
+                                .frame(width: 32)
+                        }
+                        .padding(.horizontal)
+                    }
+                )
                 
                 CameraView(
                     webRTCClient: viewModel.webRTCClient,
                     frame: CGRect(origin: CGPoint(x: 0, y: reader.size.height / 2), size: CGSize(width: reader.size.width, height: reader.size.height / 2)),
-                    isCurrentUser: false
+                    isCurrentUser: false,
+                    cameraPosition: viewModel.cameraPosition
                 )
                 .frame(maxHeight: reader.size.height / 2)
             }
@@ -41,7 +57,7 @@ struct VideoView: View {
                     } label: {
                         Image(systemName: "xmark.circle.fill")
                             .resizable()
-                            .foregroundColor(.blue)
+                            .foregroundColor(.black)
                             .frame(width: 36, height: 36)
                     }
                     .offset(y: 40)
@@ -69,6 +85,24 @@ public struct TopRightView<Content: View>: View {
             VStack {
                 content()
                 Spacer()
+            }
+        }
+    }
+}
+
+public struct BottomRightView<Content: View>: View {
+    var content: () -> Content
+    
+    public init(content: @escaping () -> Content) {
+        self.content = content
+    }
+        
+    public var body: some View {
+        HStack {
+            Spacer()
+            VStack {
+                Spacer()
+                content()
             }
         }
     }

@@ -13,8 +13,14 @@ class VideoViewModel: ObservableObject {
     
     let webRTCClient: WebRTCClient
     
+    @Published var cameraPosition: AVCaptureDevice.Position = .front
+    
     init(webRTCClient: WebRTCClient) {
         self.webRTCClient = webRTCClient
+    }
+    
+    func changeCameraPosition() {
+        cameraPosition = cameraPosition == .front ? .back : .front
     }
     
 }
