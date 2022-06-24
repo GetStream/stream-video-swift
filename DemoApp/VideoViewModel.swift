@@ -8,19 +8,46 @@
 import Foundation
 import WebRTC
 
-@MainActor
 class VideoViewModel: ObservableObject {
     
     let webRTCClient: WebRTCClient
+    let signalClient: SignalingClient
     
     @Published var cameraPosition: AVCaptureDevice.Position = .front
     
-    init(webRTCClient: WebRTCClient) {
+    @Published private(set) var videoShown = true
+    @Published private(set) var muteOn = false
+    
+    init(webRTCClient: WebRTCClient, signalClient: SignalingClient) {
         self.webRTCClient = webRTCClient
+        self.signalClient = signalClient
     }
     
     func changeCameraPosition() {
         cameraPosition = cameraPosition == .front ? .back : .front
+    }
+    
+    func changeVideoState() {
+        videoShown.toggle()
+        if videoShown {
+            webRTCClient.showVideo()
+        } else {
+            webRTCClient.hideVideo()
+        }
+    }
+    
+    func stopCall(completion: @escaping () -> ()) {
+        webRTCClient.closeConnection()
+        completion()
+    }
+    
+    func changeMuteState() {
+        muteOn.toggle()
+        if muteOn {
+            self.webRTCClient.muteAudio()
+        } else {
+            self.webRTCClient.unmuteAudio()
+        }
     }
     
 }

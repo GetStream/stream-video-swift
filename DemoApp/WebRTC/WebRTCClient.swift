@@ -137,6 +137,10 @@ final class WebRTCClient: NSObject {
         self.remoteVideoTrack?.add(renderer)
     }
     
+    func closeConnection() {
+        peerConnection.close()
+    }
+    
     private func configureAudioSession() {
         self.rtcAudioSession.lockForConfiguration()
         do {

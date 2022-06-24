@@ -25,6 +25,7 @@
 		842D8BF92865BC9900801910 /* VideoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BF82865BC9900801910 /* VideoViewModel.swift */; };
 		842D8BFB2865C23800801910 /* ViewModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BFA2865C23800801910 /* ViewModelFactory.swift */; };
 		842D8BFD2865CEA200801910 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BFC2865CEA200801910 /* CameraView.swift */; };
+		842D8BFF2865F26300801910 /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BFE2865F26300801910 /* HelperViews.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -46,6 +47,7 @@
 		842D8BF82865BC9900801910 /* VideoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoViewModel.swift; sourceTree = "<group>"; };
 		842D8BFA2865C23800801910 /* ViewModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModelFactory.swift; sourceTree = "<group>"; };
 		842D8BFC2865CEA200801910 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
+		842D8BFE2865F26300801910 /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -84,8 +86,9 @@
 				842D8BF22865B9FF00801910 /* HomeView.swift */,
 				842D8BF42865BA5B00801910 /* HomeViewModel.swift */,
 				842D8BF62865BC8D00801910 /* VideoView.swift */,
-				842D8BFC2865CEA200801910 /* CameraView.swift */,
 				842D8BF82865BC9900801910 /* VideoViewModel.swift */,
+				842D8BFC2865CEA200801910 /* CameraView.swift */,
+				842D8BFE2865F26300801910 /* HelperViews.swift */,
 				842D8BFA2865C23800801910 /* ViewModelFactory.swift */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
 				842D8BD72865B37800801910 /* Preview Content */,
@@ -202,6 +205,7 @@
 				842D8BF32865B9FF00801910 /* HomeView.swift in Sources */,
 				842D8BF52865BA5B00801910 /* HomeViewModel.swift in Sources */,
 				842D8BE72865B70C00801910 /* Message.swift in Sources */,
+				842D8BFF2865F26300801910 /* HelperViews.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				842D8BE02865B5CB00801910 /* WebSocketProvider.swift in Sources */,
 				842D8BED2865B78A00801910 /* RTCStates.swift in Sources */,

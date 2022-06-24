@@ -51,17 +51,35 @@ struct VideoView: View {
                 .frame(maxHeight: reader.size.height / 2)
             }
             .overlay(
-                TopRightView {
-                    Button {
-                        presentationMode.wrappedValue.dismiss()
-                    } label: {
-                        Image(systemName: "xmark.circle.fill")
-                            .resizable()
-                            .foregroundColor(.black)
-                            .frame(width: 36, height: 36)
+                ZStack {
+                    TopRightView {
+                        Button {
+                            presentationMode.wrappedValue.dismiss()
+                        } label: {
+                            Image(systemName: "xmark.circle.fill")
+                                .resizable()
+                                .foregroundColor(.black)
+                                .frame(width: 36, height: 36)
+                        }
+                        .offset(y: 40)
+                        .padding()
                     }
-                    .offset(y: 40)
-                    .padding()
+                    
+                    VStack {
+                        Spacer()
+                        VideoControlsView(
+                            videoShown: viewModel.videoShown,
+                            muteOn: viewModel.muteOn,
+                            onVideoIconTap: viewModel.changeVideoState,
+                            onStopCallTap: {
+                                viewModel.stopCall {
+                                    presentationMode.wrappedValue.dismiss()
+                                }
+                            },
+                            onMuteTap: viewModel.changeMuteState
+                        )
+                        .padding(.bottom)
+                    }
                 }
             )
         }
@@ -72,38 +90,48 @@ struct VideoView: View {
     
 }
 
-public struct TopRightView<Content: View>: View {
-    var content: () -> Content
+struct VideoControlsView: View {
     
-    public init(content: @escaping () -> Content) {
-        self.content = content
-    }
-        
-    public var body: some View {
-        HStack {
-            Spacer()
-            VStack {
-                content()
-                Spacer()
-            }
-        }
-    }
-}
+    private let iconSize: CGFloat = 60
 
-public struct BottomRightView<Content: View>: View {
-    var content: () -> Content
+    var videoShown: Bool
+    var muteOn: Bool
+    var onVideoIconTap: () -> ()
+    var onStopCallTap: () -> ()
+    var onMuteTap: () -> ()
     
-    public init(content: @escaping () -> Content) {
-        self.content = content
-    }
-        
-    public var body: some View {
-        HStack {
-            Spacer()
-            VStack {
-                Spacer()
-                content()
+    var body: some View {
+        HStack(spacing: 32) {
+            Button {
+                onMuteTap()
+            } label: {
+                Image(systemName: muteOn ? "mic.circle.fill" : "mic.slash.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: iconSize)
+            }
+            
+            Button {
+                onStopCallTap()
+            } label: {
+                Image(systemName: "phone.circle.fill")
+                    .resizable()
+                    .renderingMode(.template)
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: iconSize)
+                    .foregroundColor(.red)
+            }
+
+            Button {
+                onVideoIconTap()
+            } label: {
+                Image(systemName: videoShown ? "video.slash.fill" : "video.circle.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: iconSize)
             }
         }
+        .padding()
     }
+    
 }

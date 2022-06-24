@@ -26,7 +26,7 @@ class ViewModelFactory {
     }
     
     @MainActor func makeVideoViewModel() -> VideoViewModel {
-        VideoViewModel(webRTCClient: webRTCClient)
+        VideoViewModel(webRTCClient: webRTCClient, signalClient: signalClient)
     }
     
 }
