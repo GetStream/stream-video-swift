@@ -34,8 +34,21 @@ class CallViewModel: ObservableObject {
     
     @Published var selectedUser: User?
     
+    let callCoordinatorService = Stream_Video_CallCoordinatorService(
+        hostname: "http://localhost:26991",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
+    )
+    
     init() {
         room.room.add(delegate: self)
+    }
+    
+    func test() {
+        Task {
+            let createCallRequest = Stream_Video_CreateCallRequest()
+            let createCall = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
+            print(createCall)
+        }
     }
     
     func connect() -> Promise<Room> {

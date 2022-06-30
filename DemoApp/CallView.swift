@@ -17,6 +17,9 @@ struct CallView: View {
                 RoomView(viewModel: viewModel)
             } else {
                 ConnectView(viewModel: viewModel)
+                    .onAppear() {
+                        viewModel.test()
+                    }
             }
 
         }
