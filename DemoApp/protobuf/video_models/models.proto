@@ -1,0 +1,176 @@
+syntax = "proto3";
+
+package stream.video;
+
+option go_package = "github.com/GetStream/video/protobuf/video_models";
+
+import "google/protobuf/timestamp.proto";
+import "validate/validate.proto";
+
+// Edges are where we deploy video servers
+message Edge {
+  string Name = 1 [(validate.rules).string.min_len = 1];
+  string LatencyURL = 2 [(validate.rules).string.min_len = 1];
+}
+
+// TODO: to discuss. do we keep a log per call of
+// - people joining
+// - reactions
+// - etc?
+// - maybe it only makes sense when you transcribe the call
+
+// Edges are where we deploy video servers
+message EdgeServer {
+  string url = 1;
+}
+
+message Latency {
+  repeated float measurements = 1;
+}
+
+// 3 different type of broadcast
+message Broadcast {
+  string ID = 1;
+  oneof Details {
+    RTMPBroadcast rtmp = 2;
+    HLSBroadcast hls = 3;
+    RecordBroadcast record = 4;
+  }
+}
+
+message RTMPBroadcast {
+  string CallID = 1;
+  repeated string RTMPUrls = 2;
+  int32 Width = 3;
+  int32 Height = 4;
+}
+message HLSBroadcast {
+
+}
+
+message File {
+  string Type = 1;
+  bool Composite = 2;
+  string UserID = 3;
+  string URL = 4;
+}
+
+message RecordBroadcast {
+  bool Composite = 1; // if true merge all audio and video, if false split them
+  repeated File Files = 2;
+}
+
+
+message User {
+  string ID = 1 [(validate.rules).string.min_len = 1];
+  // TODO: zoom allows you to invite any of your colleagues in their invite screen
+  repeated string Teams = 2;
+  string Type = 3;
+  google.protobuf.Timestamp CreatedAt = 7;
+  google.protobuf.Timestamp UpdatedAt = 8;
+}
+
+message Device {
+  string UserID = 1;
+  string ID = 2;
+  string PushProvider = 3;
+  bool Disabled = 4;
+  string DisabledReason = 5;
+  string PushProviderName = 6;
+  google.protobuf.Timestamp CreatedAt = 7;
+  google.protobuf.Timestamp UpdatedAt = 8;
+
+}
+
+enum Codec {
+  H264 = 0;
+  VP8 = 1;
+  VP9 = 2;
+}
+
+enum RecordingStorage {
+  S3 = 0;
+}
+
+message RecordingStorageOptions {
+  RecordingStorage Storage = 2;
+  string AccessKey = 3;
+  string SecretKey = 4;
+  string BucketName = 5;
+  string Region = 6;
+  string Path = 7;
+}
+
+message BroadcastOptions {
+  string RtmpURL = 1;
+  string HlsUrl = 2;
+}
+
+message TranscribeOptions {
+
+}
+
+message CallType {
+  string Name = 1;
+  Security Security = 2;
+
+  // enable broadcasting by default when creating a call of this type
+  bool Broadcast = 3;
+  repeated BroadcastOptions BroadcastOptions = 4;
+
+  // enable transcription by default
+  bool Transcribe = 5;
+  TranscribeOptions TranscribeOptions = 6;
+
+  google.protobuf.Timestamp CreatedAt = 7;
+  google.protobuf.Timestamp UpdatedAt = 8;
+}
+
+message Security {
+  // TODO this is actually one of the most complex UI things in zoom :)
+  // controls if regular users are allowed to do the following
+  // yes/no/request
+  enum IsAllowed {
+    YES = 0;
+    NO = 1;
+    REQUEST = 2;
+  }
+  bool HideProfilePictures = 1;
+  IsAllowed ShareScreen = 2;
+  bool RenameUser = 3;
+  IsAllowed Unmute = 4;
+  IsAllowed StartVideo = 5;
+  IsAllowed ScreenShare = 6;
+  IsAllowed Record = 7;
+  IsAllowed Broadcast = 8;
+
+}
+
+// those who are online in the call
+message Participant {
+  string UserID = 1;
+  string Role = 2;
+  bool Online = 3;
+}
+
+message CallState {
+  // Little different to member/watcher concept. Both are in the participant list
+  string CallId = 1;
+  repeated Participant Participants = 2;
+}
+
+message Call {
+  string ID = 1 [(validate.rules).string.min_len = 1];
+  string Name = 2;
+  string CreatedByUserID = 3;
+  google.protobuf.Timestamp CreatedAt = 4;
+  google.protobuf.Timestamp UpdatedAt = 5;
+
+  // enable broadcasting by default when creating a call of this type
+  bool Broadcast = 6;
+  repeated BroadcastOptions BroadcastOptions = 7;
+
+  // enable transcription by default
+  bool Transcribe = 8;
+  TranscribeOptions TranscribeOptions = 9;
+}

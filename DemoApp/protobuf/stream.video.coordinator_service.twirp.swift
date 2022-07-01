@@ -5,112 +5,112 @@ import SwiftProtobuf;typealias ProtoModel = SwiftProtobuf.Message & SwiftProtobu
 
 
 class Stream_Video_CallCoordinatorService {
-    var hostname: String
-    var token: String
+	var hostname: String
+	var token: String
 
-    let pathPrefix: String = "/stream.video.CallCoordinatorService/"
+	let pathPrefix: String = "/stream.video.CallCoordinatorService/"
 
-    init(hostname: String, token: String) {
-        self.hostname = hostname
-        self.token = token
-    }
+	init(hostname: String, token: String) {
+		self.hostname = hostname
+		self.token = token
+	}
 
     
-    func createCall(createCallRequest: Stream_Video_CreateCallRequest) async throws -> Stream_Video_CreateCallResponse {
+	func createCall(createCallRequest: Stream_Video_CreateCallRequest) async throws -> Stream_Video_CreateCallResponse {
         return try await execute(request: createCallRequest, path: "CreateCall")
-    }
+	}
     
-    func getCall(getCallRequest: Stream_Video_GetCallRequest) async throws -> Stream_Video_GetCallResponse {
+	func getCall(getCallRequest: Stream_Video_GetCallRequest) async throws -> Stream_Video_GetCallResponse {
         return try await execute(request: getCallRequest, path: "GetCall")
-    }
+	}
     
-    func updateCall(updateCallRequest: Stream_Video_UpdateCallRequest) async throws -> Stream_Video_UpdateCallResponse {
+	func updateCall(updateCallRequest: Stream_Video_UpdateCallRequest) async throws -> Stream_Video_UpdateCallResponse {
         return try await execute(request: updateCallRequest, path: "UpdateCall")
-    }
+	}
     
-    func deleteCall(deleteCallRequest: Stream_Video_DeleteCallRequest) async throws -> Stream_Video_DeleteCallResponse {
+	func deleteCall(deleteCallRequest: Stream_Video_DeleteCallRequest) async throws -> Stream_Video_DeleteCallResponse {
         return try await execute(request: deleteCallRequest, path: "DeleteCall")
-    }
+	}
     
-    func joinCall(joinCallRequest: Stream_Video_JoinCallRequest) async throws -> Stream_Video_JoinCallResponse {
+	func joinCall(joinCallRequest: Stream_Video_JoinCallRequest) async throws -> Stream_Video_JoinCallResponse {
         return try await execute(request: joinCallRequest, path: "JoinCall")
-    }
+	}
     
-    func selectEdgeServer(selectEdgeServerRequest: Stream_Video_SelectEdgeServerRequest) async throws -> Stream_Video_SelectEdgeServerResponse {
+	func selectEdgeServer(selectEdgeServerRequest: Stream_Video_SelectEdgeServerRequest) async throws -> Stream_Video_SelectEdgeServerResponse {
         return try await execute(request: selectEdgeServerRequest, path: "SelectEdgeServer")
-    }
+	}
     
-    func leaveCall(leaveCallRequest: Stream_Video_LeaveCallRequest) async throws -> Stream_Video_LeaveCallResponse {
+	func leaveCall(leaveCallRequest: Stream_Video_LeaveCallRequest) async throws -> Stream_Video_LeaveCallResponse {
         return try await execute(request: leaveCallRequest, path: "LeaveCall")
-    }
+	}
     
-    func endCall(endCallRequest: Stream_Video_EndCallRequest) async throws -> Stream_Video_EndCallResponse {
+	func endCall(endCallRequest: Stream_Video_EndCallRequest) async throws -> Stream_Video_EndCallResponse {
         return try await execute(request: endCallRequest, path: "EndCall")
-    }
+	}
     
-    func addDevice(addDeviceRequest: Stream_Video_AddDeviceRequest) async throws -> Stream_Video_AddDeviceResponse {
+	func addDevice(addDeviceRequest: Stream_Video_AddDeviceRequest) async throws -> Stream_Video_AddDeviceResponse {
         return try await execute(request: addDeviceRequest, path: "AddDevice")
-    }
+	}
     
-    func removeDevice(removeDeviceRequest: Stream_Video_RemoveDeviceRequest) async throws -> Stream_Video_RemoveDeviceResponse {
+	func removeDevice(removeDeviceRequest: Stream_Video_RemoveDeviceRequest) async throws -> Stream_Video_RemoveDeviceResponse {
         return try await execute(request: removeDeviceRequest, path: "RemoveDevice")
-    }
+	}
     
-    func listDevices(listDevicesRequest: Stream_Video_ListDevicesRequest) async throws -> Stream_Video_ListDevicesResponse {
+	func listDevices(listDevicesRequest: Stream_Video_ListDevicesRequest) async throws -> Stream_Video_ListDevicesResponse {
         return try await execute(request: listDevicesRequest, path: "ListDevices")
-    }
+	}
     
-    func sendCustomEvent(sendCustomEventRequest: Stream_Video_SendCustomEventRequest) async throws -> Stream_Video_SendCustomEventResponse {
+	func sendCustomEvent(sendCustomEventRequest: Stream_Video_SendCustomEventRequest) async throws -> Stream_Video_SendCustomEventResponse {
         return try await execute(request: sendCustomEventRequest, path: "SendCustomEvent")
-    }
+	}
     
-    func createOrUpdateCalls(createOrUpdateCallsRequest: Stream_Video_CreateOrUpdateCallsRequest) async throws -> Stream_Video_CreateOrUpdateCallsResponse {
+	func createOrUpdateCalls(createOrUpdateCallsRequest: Stream_Video_CreateOrUpdateCallsRequest) async throws -> Stream_Video_CreateOrUpdateCallsResponse {
         return try await execute(request: createOrUpdateCallsRequest, path: "CreateOrUpdateCalls")
-    }
+	}
     
-    func createOrUpdateUsers(createOrUpdateUsersRequest: Stream_Video_CreateOrUpdateUsersRequest) async throws -> Stream_Video_CreateOrUpdateUsersResponse {
+	func createOrUpdateUsers(createOrUpdateUsersRequest: Stream_Video_CreateOrUpdateUsersRequest) async throws -> Stream_Video_CreateOrUpdateUsersResponse {
         return try await execute(request: createOrUpdateUsersRequest, path: "CreateOrUpdateUsers")
-    }
+	}
     
-    func transcribeCall(transcribeCallRequest: Stream_Video_TranscribeCallRequest) async throws -> Stream_Video_TranscribeCallResponse {
+	func transcribeCall(transcribeCallRequest: Stream_Video_TranscribeCallRequest) async throws -> Stream_Video_TranscribeCallResponse {
         return try await execute(request: transcribeCallRequest, path: "TranscribeCall")
-    }
+	}
     
-    func stopTranscribeCall(stopTranscribeCallRequest: Stream_Video_StopTranscribeCallRequest) async throws -> Stream_Video_StopTranscribeCallResponse {
+	func stopTranscribeCall(stopTranscribeCallRequest: Stream_Video_StopTranscribeCallRequest) async throws -> Stream_Video_StopTranscribeCallResponse {
         return try await execute(request: stopTranscribeCallRequest, path: "StopTranscribeCall")
-    }
+	}
     
-    func startBroadcast(startBroadcastRequest: Stream_Video_StartBroadcastRequest) async throws -> Stream_Video_StartBroadcastResponse {
+	func startBroadcast(startBroadcastRequest: Stream_Video_StartBroadcastRequest) async throws -> Stream_Video_StartBroadcastResponse {
         return try await execute(request: startBroadcastRequest, path: "StartBroadcast")
-    }
+	}
     
-    func stopBroadcast(stopBroadcastRequest: Stream_Video_StopBroadcastRequest) async throws -> Stream_Video_StartBroadcastResponse {
+	func stopBroadcast(stopBroadcastRequest: Stream_Video_StopBroadcastRequest) async throws -> Stream_Video_StartBroadcastResponse {
         return try await execute(request: stopBroadcastRequest, path: "StopBroadcast")
-    }
+	}
     
-    func createUser(createUserRequest: Stream_Video_CreateUserRequest) async throws -> Stream_Video_CreateUserResponse {
+	func createUser(createUserRequest: Stream_Video_CreateUserRequest) async throws -> Stream_Video_CreateUserResponse {
         return try await execute(request: createUserRequest, path: "CreateUser")
-    }
+	}
     
-    func deleteUser(deleteUserRequest: Stream_Video_DeleteUserRequest) async throws -> Stream_Video_DeleteUserResponse {
+	func deleteUser(deleteUserRequest: Stream_Video_DeleteUserRequest) async throws -> Stream_Video_DeleteUserResponse {
         return try await execute(request: deleteUserRequest, path: "DeleteUser")
-    }
+	}
     
-    func exportUser(exportUserRequest: Stream_Video_ExportUserRequest) async throws -> Stream_Video_ExportUserResponse {
+	func exportUser(exportUserRequest: Stream_Video_ExportUserRequest) async throws -> Stream_Video_ExportUserResponse {
         return try await execute(request: exportUserRequest, path: "ExportUser")
-    }
+	}
     
-    func startRecording(startRecordingRequest: Stream_Video_StartRecordingRequest) async throws -> Stream_Video_StartRecordingResponse {
+	func startRecording(startRecordingRequest: Stream_Video_StartRecordingRequest) async throws -> Stream_Video_StartRecordingResponse {
         return try await execute(request: startRecordingRequest, path: "StartRecording")
-    }
+	}
     
-    func stopRecording(stopRecordingRequest: Stream_Video_StopRecordingRequest) async throws -> Stream_Video_StopRecordingResponse {
+	func stopRecording(stopRecordingRequest: Stream_Video_StopRecordingRequest) async throws -> Stream_Video_StopRecordingResponse {
         return try await execute(request: stopRecordingRequest, path: "StopRecording")
-    }
+	}
     
-    func getRecordings(getRecordingsRequest: Stream_Video_GetRecordingsRequest) async throws -> Stream_Video_GetRecordingsResponse {
+	func getRecordings(getRecordingsRequest: Stream_Video_GetRecordingsRequest) async throws -> Stream_Video_GetRecordingsResponse {
         return try await execute(request: getRecordingsRequest, path: "GetRecordings")
-    }
+	}
     
     private func execute<Request: ProtoModel, Response: ProtoModel>(request: Request, path: String) async throws -> Response {
         let requestData = try request.serializedData()
@@ -122,7 +122,7 @@ class Stream_Video_CallCoordinatorService {
     }
     
     private func makeRequest(for path: String) throws -> URLRequest {
-        let url = hostname + pathPrefix + path
+    	let url = hostname + pathPrefix + path
         guard let url = URL(string: url) else {
             throw NSError(domain: "stream", code: 123)
         }

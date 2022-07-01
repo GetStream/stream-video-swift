@@ -31,9 +31,11 @@
 		84ED2413286CA414002A3186 /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2412286CA414002A3186 /* RoomView.swift */; };
 		84ED2415286CABD1002A3186 /* ParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2414286CABD1002A3186 /* ParticipantView.swift */; };
 		84ED2417286D86AE002A3186 /* ParticipantLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2416286D86AE002A3186 /* ParticipantLayout.swift */; };
-		84F73F8F286A0298006A39C3 /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F73F8E286A0298006A39C3 /* models.pb.swift */; };
-		84F73F9B286AE917006A39C3 /* coordinator_service.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F73F9A286AE917006A39C3 /* coordinator_service.pb.swift */; };
-		84F73F9D286B09B1006A39C3 /* stream.video.coordinator_service.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F73F9C286B09B1006A39C3 /* stream.video.coordinator_service.twirp.swift */; };
+		84ED241C286F12B5002A3186 /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2418286F12B5002A3186 /* models.pb.swift */; };
+		84ED241D286F12B5002A3186 /* validate.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2419286F12B5002A3186 /* validate.pb.swift */; };
+		84ED241E286F12B5002A3186 /* coordinator_service.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED241A286F12B5002A3186 /* coordinator_service.pb.swift */; };
+		84ED241F286F12B5002A3186 /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED241B286F12B5002A3186 /* events.pb.swift */; };
+		84ED2421286F199E002A3186 /* stream.video.coordinator_service.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2420286F199E002A3186 /* stream.video.coordinator_service.twirp.swift */; };
 		84F73FA0286C5011006A39C3 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84F73F9F286C5011006A39C3 /* LiveKit */; };
 /* End PBXBuildFile section */
 
@@ -63,9 +65,11 @@
 		84ED2412286CA414002A3186 /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomView.swift; sourceTree = "<group>"; };
 		84ED2414286CABD1002A3186 /* ParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantView.swift; sourceTree = "<group>"; };
 		84ED2416286D86AE002A3186 /* ParticipantLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantLayout.swift; sourceTree = "<group>"; };
-		84F73F8E286A0298006A39C3 /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
-		84F73F9A286AE917006A39C3 /* coordinator_service.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = coordinator_service.pb.swift; sourceTree = "<group>"; };
-		84F73F9C286B09B1006A39C3 /* stream.video.coordinator_service.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.coordinator_service.twirp.swift; sourceTree = "<group>"; };
+		84ED2418286F12B5002A3186 /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
+		84ED2419286F12B5002A3186 /* validate.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = validate.pb.swift; sourceTree = "<group>"; };
+		84ED241A286F12B5002A3186 /* coordinator_service.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = coordinator_service.pb.swift; sourceTree = "<group>"; };
+		84ED241B286F12B5002A3186 /* events.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = events.pb.swift; sourceTree = "<group>"; };
+		84ED2420286F199E002A3186 /* stream.video.coordinator_service.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.coordinator_service.twirp.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -155,9 +159,11 @@
 		84ED240B286C9500002A3186 /* protobuf */ = {
 			isa = PBXGroup;
 			children = (
-				84F73F9C286B09B1006A39C3 /* stream.video.coordinator_service.twirp.swift */,
-				84F73F9A286AE917006A39C3 /* coordinator_service.pb.swift */,
-				84F73F8E286A0298006A39C3 /* models.pb.swift */,
+				84ED2420286F199E002A3186 /* stream.video.coordinator_service.twirp.swift */,
+				84ED241A286F12B5002A3186 /* coordinator_service.pb.swift */,
+				84ED241B286F12B5002A3186 /* events.pb.swift */,
+				84ED2418286F12B5002A3186 /* models.pb.swift */,
+				84ED2419286F12B5002A3186 /* validate.pb.swift */,
 			);
 			path = protobuf;
 			sourceTree = "<group>";
@@ -247,21 +253,23 @@
 				84ED240F286C9530002A3186 /* CallViewModel.swift in Sources */,
 				842D8BE92865B74E00801910 /* SessionDescription.swift in Sources */,
 				842D8BF32865B9FF00801910 /* HomeView.swift in Sources */,
+				84ED241F286F12B5002A3186 /* events.pb.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
 				842D8BF52865BA5B00801910 /* HomeViewModel.swift in Sources */,
-				84F73F9D286B09B1006A39C3 /* stream.video.coordinator_service.twirp.swift in Sources */,
 				842D8BE72865B70C00801910 /* Message.swift in Sources */,
 				84ED2417286D86AE002A3186 /* ParticipantLayout.swift in Sources */,
 				842D8BFF2865F26300801910 /* HelperViews.swift in Sources */,
+				84ED241D286F12B5002A3186 /* validate.pb.swift in Sources */,
+				84ED241C286F12B5002A3186 /* models.pb.swift in Sources */,
 				84ED2413286CA414002A3186 /* RoomView.swift in Sources */,
 				84ED2411286C9B03002A3186 /* ExampleObservableRoom.swift in Sources */,
+				84ED2421286F199E002A3186 /* stream.video.coordinator_service.twirp.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				842D8BE02865B5CB00801910 /* WebSocketProvider.swift in Sources */,
 				84ED2415286CABD1002A3186 /* ParticipantView.swift in Sources */,
-				84F73F9B286AE917006A39C3 /* coordinator_service.pb.swift in Sources */,
 				842D8BED2865B78A00801910 /* RTCStates.swift in Sources */,
-				84F73F8F286A0298006A39C3 /* models.pb.swift in Sources */,
 				842D8BF72865BC8D00801910 /* VideoView.swift in Sources */,
+				84ED241E286F12B5002A3186 /* coordinator_service.pb.swift in Sources */,
 				842D8BFB2865C23800801910 /* ViewModelFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
