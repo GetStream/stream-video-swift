@@ -45,9 +45,9 @@ class CallViewModel: ObservableObject {
     
     func test() {
         Task {
-            let createCallRequest = Stream_Video_CreateCallRequest()
-            let createCall = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
-            print(createCall)
+            let selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
+            let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
+            print(response)
         }
     }
     

@@ -2,72 +2,68 @@ syntax = "proto3";
 
 package stream.video;
 
-option go_package = "github.com/GetStream/video/protobuf/video_events";
-
 import "video_models/models.proto";
 
+option go_package = "github.com/GetStream/video/protobuf/video_events";
 
 /**
 CallRinging is fired when a call is created with the ring=true option
 Or when you manually call call.ring()
  */
 message CallRinging {
-  Call Call = 1;
+  Call call = 1;
 }
 
 /**
 CallCreated is fired when a call is created
  */
 message CallCreated {
-  Call Call = 1;
+  Call call = 1;
 }
 
 message CallUpdated {
-  Call Call = 1;
+  Call call = 1;
 }
 
 message CallEnded {
-  Call Call = 1;
+  Call call = 1;
 }
 
 message CallDeleted {
-  Call Call = 1;
+  Call call = 1;
 }
 
 message UserUpdated {
-  User User = 1;
+  User user = 1;
 }
 
 message ParticipantInvited {
-  Participant Participant = 1;
+  Participant participant = 1;
 }
 
 message ParticipantUpdated {
-  Participant Participant = 1;
+  Participant participant = 1;
 }
 
 message ParticipantDeleted {
-  string UserID = 1;
+  string user_id = 1;
 }
 
 message ParticipantJoined {
-  Participant Participant = 1;
+  Participant participant = 1;
 }
 
 message ParticipantLeft {
-  Participant Participant = 1;
+  Participant participant = 1;
 }
 
 message BroadcastStarted {
-  Broadcast Broadcast = 1;
+  Broadcast broadcast = 1;
 }
 
 message BroadcastEnded {
-  Broadcast Broadcast = 1;
+  Broadcast broadcast = 1;
 }
-
-
-
 
 // events
 

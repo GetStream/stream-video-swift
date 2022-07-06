@@ -22,18 +22,18 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
 
 enum Stream_Video_Codec: SwiftProtobuf.Enum {
   typealias RawValue = Int
-  case h264 // = 0
+  case h264Unspecified // = 0
   case vp8 // = 1
   case vp9 // = 2
   case UNRECOGNIZED(Int)
 
   init() {
-    self = .h264
+    self = .h264Unspecified
   }
 
   init?(rawValue: Int) {
     switch rawValue {
-    case 0: self = .h264
+    case 0: self = .h264Unspecified
     case 1: self = .vp8
     case 2: self = .vp9
     default: self = .UNRECOGNIZED(rawValue)
@@ -42,7 +42,7 @@ enum Stream_Video_Codec: SwiftProtobuf.Enum {
 
   var rawValue: Int {
     switch self {
-    case .h264: return 0
+    case .h264Unspecified: return 0
     case .vp8: return 1
     case .vp9: return 2
     case .UNRECOGNIZED(let i): return i
@@ -56,7 +56,7 @@ enum Stream_Video_Codec: SwiftProtobuf.Enum {
 extension Stream_Video_Codec: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static var allCases: [Stream_Video_Codec] = [
-    .h264,
+    .h264Unspecified,
     .vp8,
     .vp9,
   ]
@@ -66,23 +66,23 @@ extension Stream_Video_Codec: CaseIterable {
 
 enum Stream_Video_RecordingStorage: SwiftProtobuf.Enum {
   typealias RawValue = Int
-  case s3 // = 0
+  case s3Unspecified // = 0
   case UNRECOGNIZED(Int)
 
   init() {
-    self = .s3
+    self = .s3Unspecified
   }
 
   init?(rawValue: Int) {
     switch rawValue {
-    case 0: self = .s3
+    case 0: self = .s3Unspecified
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
 
   var rawValue: Int {
     switch self {
-    case .s3: return 0
+    case .s3Unspecified: return 0
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -94,7 +94,7 @@ enum Stream_Video_RecordingStorage: SwiftProtobuf.Enum {
 extension Stream_Video_RecordingStorage: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static var allCases: [Stream_Video_RecordingStorage] = [
-    .s3,
+    .s3Unspecified,
   ]
 }
 
@@ -281,30 +281,13 @@ struct Stream_Video_User {
 
   var type: String = String()
 
-  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_createdAt = newValue}
-  }
-  /// Returns true if `createdAt` has been explicitly set.
-  var hasCreatedAt: Bool {return self._createdAt != nil}
-  /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
-  mutating func clearCreatedAt() {self._createdAt = nil}
+  var createdAt: String = String()
 
-  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_updatedAt = newValue}
-  }
-  /// Returns true if `updatedAt` has been explicitly set.
-  var hasUpdatedAt: Bool {return self._updatedAt != nil}
-  /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
-  mutating func clearUpdatedAt() {self._updatedAt = nil}
+  var updatedAt: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
-
-  fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 struct Stream_Video_Device {
@@ -324,30 +307,13 @@ struct Stream_Video_Device {
 
   var pushProviderName: String = String()
 
-  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_createdAt = newValue}
-  }
-  /// Returns true if `createdAt` has been explicitly set.
-  var hasCreatedAt: Bool {return self._createdAt != nil}
-  /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
-  mutating func clearCreatedAt() {self._createdAt = nil}
+  var createdAt: String = String()
 
-  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_updatedAt = newValue}
-  }
-  /// Returns true if `updatedAt` has been explicitly set.
-  var hasUpdatedAt: Bool {return self._updatedAt != nil}
-  /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
-  mutating func clearUpdatedAt() {self._updatedAt = nil}
+  var updatedAt: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
-
-  fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 struct Stream_Video_RecordingStorageOptions {
@@ -355,7 +321,7 @@ struct Stream_Video_RecordingStorageOptions {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var storage: Stream_Video_RecordingStorage = .s3
+  var storage: Stream_Video_RecordingStorage = .s3Unspecified
 
   var accessKey: String = String()
 
@@ -429,23 +395,9 @@ struct Stream_Video_CallType {
   /// Clears the value of `transcribeOptions`. Subsequent reads from it will return its default value.
   mutating func clearTranscribeOptions() {self._transcribeOptions = nil}
 
-  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_createdAt = newValue}
-  }
-  /// Returns true if `createdAt` has been explicitly set.
-  var hasCreatedAt: Bool {return self._createdAt != nil}
-  /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
-  mutating func clearCreatedAt() {self._createdAt = nil}
+  var createdAt: String = String()
 
-  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_updatedAt = newValue}
-  }
-  /// Returns true if `updatedAt` has been explicitly set.
-  var hasUpdatedAt: Bool {return self._updatedAt != nil}
-  /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
-  mutating func clearUpdatedAt() {self._updatedAt = nil}
+  var updatedAt: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -453,8 +405,6 @@ struct Stream_Video_CallType {
 
   fileprivate var _security: Stream_Video_Security? = nil
   fileprivate var _transcribeOptions: Stream_Video_TranscribeOptions? = nil
-  fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
 }
 
 struct Stream_Video_Security {
@@ -464,19 +414,19 @@ struct Stream_Video_Security {
 
   var hideProfilePictures: Bool = false
 
-  var shareScreen: Stream_Video_Security.IsAllowed = .yes
+  var shareScreen: Stream_Video_Security.IsAllowed = .yesUnspecified
 
   var renameUser: Bool = false
 
-  var unmute: Stream_Video_Security.IsAllowed = .yes
+  var unmute: Stream_Video_Security.IsAllowed = .yesUnspecified
 
-  var startVideo: Stream_Video_Security.IsAllowed = .yes
+  var startVideo: Stream_Video_Security.IsAllowed = .yesUnspecified
 
-  var screenShare: Stream_Video_Security.IsAllowed = .yes
+  var screenShare: Stream_Video_Security.IsAllowed = .yesUnspecified
 
-  var record: Stream_Video_Security.IsAllowed = .yes
+  var record: Stream_Video_Security.IsAllowed = .yesUnspecified
 
-  var broadcast: Stream_Video_Security.IsAllowed = .yes
+  var broadcast: Stream_Video_Security.IsAllowed = .yesUnspecified
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -485,18 +435,18 @@ struct Stream_Video_Security {
   /// yes/no/request
   enum IsAllowed: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case yes // = 0
+    case yesUnspecified // = 0
     case no // = 1
     case request // = 2
     case UNRECOGNIZED(Int)
 
     init() {
-      self = .yes
+      self = .yesUnspecified
     }
 
     init?(rawValue: Int) {
       switch rawValue {
-      case 0: self = .yes
+      case 0: self = .yesUnspecified
       case 1: self = .no
       case 2: self = .request
       default: self = .UNRECOGNIZED(rawValue)
@@ -505,7 +455,7 @@ struct Stream_Video_Security {
 
     var rawValue: Int {
       switch self {
-      case .yes: return 0
+      case .yesUnspecified: return 0
       case .no: return 1
       case .request: return 2
       case .UNRECOGNIZED(let i): return i
@@ -522,7 +472,7 @@ struct Stream_Video_Security {
 extension Stream_Video_Security.IsAllowed: CaseIterable {
   // The compiler won't synthesize support with the UNRECOGNIZED case.
   static var allCases: [Stream_Video_Security.IsAllowed] = [
-    .yes,
+    .yesUnspecified,
     .no,
     .request,
   ]
@@ -573,23 +523,9 @@ struct Stream_Video_Call {
 
   var createdByUserID: String = String()
 
-  var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_createdAt = newValue}
-  }
-  /// Returns true if `createdAt` has been explicitly set.
-  var hasCreatedAt: Bool {return self._createdAt != nil}
-  /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
-  mutating func clearCreatedAt() {self._createdAt = nil}
+  var createdAt: String = String()
 
-  var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-    get {return _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
-    set {_updatedAt = newValue}
-  }
-  /// Returns true if `updatedAt` has been explicitly set.
-  var hasUpdatedAt: Bool {return self._updatedAt != nil}
-  /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
-  mutating func clearUpdatedAt() {self._updatedAt = nil}
+  var updatedAt: String = String()
 
   /// enable broadcasting by default when creating a call of this type
   var broadcast: Bool = false
@@ -612,8 +548,6 @@ struct Stream_Video_Call {
 
   init() {}
 
-  fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
-  fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
   fileprivate var _transcribeOptions: Stream_Video_TranscribeOptions? = nil
 }
 
@@ -648,23 +582,23 @@ fileprivate let _protobuf_package = "stream.video"
 
 extension Stream_Video_Codec: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "H264"),
-    1: .same(proto: "VP8"),
-    2: .same(proto: "VP9"),
+    0: .same(proto: "CODEC_H264_UNSPECIFIED"),
+    1: .same(proto: "CODEC_VP8"),
+    2: .same(proto: "CODEC_VP9"),
   ]
 }
 
 extension Stream_Video_RecordingStorage: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "S3"),
+    0: .same(proto: "RECORDING_STORAGE_S3_UNSPECIFIED"),
   ]
 }
 
 extension Stream_Video_Edge: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Edge"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Name"),
-    2: .same(proto: "LatencyURL"),
+    1: .same(proto: "name"),
+    2: .standard(proto: "latency_url"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -765,7 +699,7 @@ extension Stream_Video_Latency: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
 extension Stream_Video_Broadcast: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Broadcast"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
     2: .same(proto: "rtmp"),
     3: .same(proto: "hls"),
     4: .same(proto: "record"),
@@ -859,10 +793,10 @@ extension Stream_Video_Broadcast: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 extension Stream_Video_RTMPBroadcast: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RTMPBroadcast"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "CallID"),
-    2: .same(proto: "RTMPUrls"),
-    3: .same(proto: "Width"),
-    4: .same(proto: "Height"),
+    1: .standard(proto: "call_id"),
+    2: .same(proto: "rtmpurls"),
+    3: .same(proto: "width"),
+    4: .same(proto: "height"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -928,10 +862,10 @@ extension Stream_Video_HLSBroadcast: SwiftProtobuf.Message, SwiftProtobuf._Messa
 extension Stream_Video_File: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".File"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Type"),
-    2: .same(proto: "Composite"),
-    3: .same(proto: "UserID"),
-    4: .same(proto: "URL"),
+    1: .same(proto: "type"),
+    2: .same(proto: "composite"),
+    3: .standard(proto: "user_id"),
+    4: .same(proto: "url"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -978,8 +912,8 @@ extension Stream_Video_File: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
 extension Stream_Video_RecordBroadcast: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RecordBroadcast"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Composite"),
-    2: .same(proto: "Files"),
+    1: .same(proto: "composite"),
+    2: .same(proto: "files"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1016,11 +950,11 @@ extension Stream_Video_RecordBroadcast: SwiftProtobuf.Message, SwiftProtobuf._Me
 extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".User"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
-    2: .same(proto: "Teams"),
-    3: .same(proto: "Type"),
-    7: .same(proto: "CreatedAt"),
-    8: .same(proto: "UpdatedAt"),
+    1: .same(proto: "id"),
+    2: .same(proto: "teams"),
+    3: .same(proto: "type"),
+    7: .standard(proto: "created_at"),
+    8: .standard(proto: "updated_at"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1032,18 +966,14 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 2: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.type) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
-      case 8: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
     }
@@ -1053,12 +983,12 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.type.isEmpty {
       try visitor.visitSingularStringField(value: self.type, fieldNumber: 3)
     }
-    try { if let v = self._createdAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    } }()
-    try { if let v = self._updatedAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-    } }()
+    if !self.createdAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
+    }
+    if !self.updatedAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1066,8 +996,8 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.id != rhs.id {return false}
     if lhs.teams != rhs.teams {return false}
     if lhs.type != rhs.type {return false}
-    if lhs._createdAt != rhs._createdAt {return false}
-    if lhs._updatedAt != rhs._updatedAt {return false}
+    if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1076,14 +1006,14 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
 extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Device"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "UserID"),
-    2: .same(proto: "ID"),
-    3: .same(proto: "PushProvider"),
-    4: .same(proto: "Disabled"),
-    5: .same(proto: "DisabledReason"),
-    6: .same(proto: "PushProviderName"),
-    7: .same(proto: "CreatedAt"),
-    8: .same(proto: "UpdatedAt"),
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "id"),
+    3: .standard(proto: "push_provider"),
+    4: .same(proto: "disabled"),
+    5: .standard(proto: "disabled_reason"),
+    6: .standard(proto: "push_provider_name"),
+    7: .standard(proto: "created_at"),
+    8: .standard(proto: "updated_at"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1098,18 +1028,14 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       case 4: try { try decoder.decodeSingularBoolField(value: &self.disabled) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.disabledReason) }()
       case 6: try { try decoder.decodeSingularStringField(value: &self.pushProviderName) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
-      case 8: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.userID.isEmpty {
       try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
     }
@@ -1128,12 +1054,12 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if !self.pushProviderName.isEmpty {
       try visitor.visitSingularStringField(value: self.pushProviderName, fieldNumber: 6)
     }
-    try { if let v = self._createdAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    } }()
-    try { if let v = self._updatedAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-    } }()
+    if !self.createdAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
+    }
+    if !self.updatedAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1144,8 +1070,8 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if lhs.disabled != rhs.disabled {return false}
     if lhs.disabledReason != rhs.disabledReason {return false}
     if lhs.pushProviderName != rhs.pushProviderName {return false}
-    if lhs._createdAt != rhs._createdAt {return false}
-    if lhs._updatedAt != rhs._updatedAt {return false}
+    if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1154,12 +1080,12 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
 extension Stream_Video_RecordingStorageOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RecordingStorageOptions"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    2: .same(proto: "Storage"),
-    3: .same(proto: "AccessKey"),
-    4: .same(proto: "SecretKey"),
-    5: .same(proto: "BucketName"),
-    6: .same(proto: "Region"),
-    7: .same(proto: "Path"),
+    2: .same(proto: "storage"),
+    3: .standard(proto: "access_key"),
+    4: .standard(proto: "secret_key"),
+    5: .standard(proto: "bucket_name"),
+    6: .same(proto: "region"),
+    7: .same(proto: "path"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1180,7 +1106,7 @@ extension Stream_Video_RecordingStorageOptions: SwiftProtobuf.Message, SwiftProt
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.storage != .s3 {
+    if self.storage != .s3Unspecified {
       try visitor.visitSingularEnumField(value: self.storage, fieldNumber: 2)
     }
     if !self.accessKey.isEmpty {
@@ -1216,8 +1142,8 @@ extension Stream_Video_RecordingStorageOptions: SwiftProtobuf.Message, SwiftProt
 extension Stream_Video_BroadcastOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BroadcastOptions"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "RtmpURL"),
-    2: .same(proto: "HlsUrl"),
+    1: .standard(proto: "rtmp_url"),
+    2: .standard(proto: "hls_url"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1273,14 +1199,14 @@ extension Stream_Video_TranscribeOptions: SwiftProtobuf.Message, SwiftProtobuf._
 extension Stream_Video_CallType: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallType"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Name"),
-    2: .same(proto: "Security"),
-    3: .same(proto: "Broadcast"),
-    4: .same(proto: "BroadcastOptions"),
-    5: .same(proto: "Transcribe"),
-    6: .same(proto: "TranscribeOptions"),
-    7: .same(proto: "CreatedAt"),
-    8: .same(proto: "UpdatedAt"),
+    1: .same(proto: "name"),
+    2: .same(proto: "security"),
+    3: .same(proto: "broadcast"),
+    4: .standard(proto: "broadcast_options"),
+    5: .same(proto: "transcribe"),
+    6: .standard(proto: "transcribe_options"),
+    7: .standard(proto: "created_at"),
+    8: .standard(proto: "updated_at"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1295,8 +1221,8 @@ extension Stream_Video_CallType: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
       case 4: try { try decoder.decodeRepeatedMessageField(value: &self.broadcastOptions) }()
       case 5: try { try decoder.decodeSingularBoolField(value: &self.transcribe) }()
       case 6: try { try decoder.decodeSingularMessageField(value: &self._transcribeOptions) }()
-      case 7: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
-      case 8: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
       }
     }
@@ -1325,12 +1251,12 @@ extension Stream_Video_CallType: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     try { if let v = self._transcribeOptions {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     } }()
-    try { if let v = self._createdAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
-    } }()
-    try { if let v = self._updatedAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-    } }()
+    if !self.createdAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
+    }
+    if !self.updatedAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 8)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1341,8 +1267,8 @@ extension Stream_Video_CallType: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     if lhs.broadcastOptions != rhs.broadcastOptions {return false}
     if lhs.transcribe != rhs.transcribe {return false}
     if lhs._transcribeOptions != rhs._transcribeOptions {return false}
-    if lhs._createdAt != rhs._createdAt {return false}
-    if lhs._updatedAt != rhs._updatedAt {return false}
+    if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1351,14 +1277,14 @@ extension Stream_Video_CallType: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
 extension Stream_Video_Security: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Security"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "HideProfilePictures"),
-    2: .same(proto: "ShareScreen"),
-    3: .same(proto: "RenameUser"),
-    4: .same(proto: "Unmute"),
-    5: .same(proto: "StartVideo"),
-    6: .same(proto: "ScreenShare"),
-    7: .same(proto: "Record"),
-    8: .same(proto: "Broadcast"),
+    1: .standard(proto: "hide_profile_pictures"),
+    2: .standard(proto: "share_screen"),
+    3: .standard(proto: "rename_user"),
+    4: .same(proto: "unmute"),
+    5: .standard(proto: "start_video"),
+    6: .standard(proto: "screen_share"),
+    7: .same(proto: "record"),
+    8: .same(proto: "broadcast"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1384,25 +1310,25 @@ extension Stream_Video_Security: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
     if self.hideProfilePictures != false {
       try visitor.visitSingularBoolField(value: self.hideProfilePictures, fieldNumber: 1)
     }
-    if self.shareScreen != .yes {
+    if self.shareScreen != .yesUnspecified {
       try visitor.visitSingularEnumField(value: self.shareScreen, fieldNumber: 2)
     }
     if self.renameUser != false {
       try visitor.visitSingularBoolField(value: self.renameUser, fieldNumber: 3)
     }
-    if self.unmute != .yes {
+    if self.unmute != .yesUnspecified {
       try visitor.visitSingularEnumField(value: self.unmute, fieldNumber: 4)
     }
-    if self.startVideo != .yes {
+    if self.startVideo != .yesUnspecified {
       try visitor.visitSingularEnumField(value: self.startVideo, fieldNumber: 5)
     }
-    if self.screenShare != .yes {
+    if self.screenShare != .yesUnspecified {
       try visitor.visitSingularEnumField(value: self.screenShare, fieldNumber: 6)
     }
-    if self.record != .yes {
+    if self.record != .yesUnspecified {
       try visitor.visitSingularEnumField(value: self.record, fieldNumber: 7)
     }
-    if self.broadcast != .yes {
+    if self.broadcast != .yesUnspecified {
       try visitor.visitSingularEnumField(value: self.broadcast, fieldNumber: 8)
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -1424,18 +1350,18 @@ extension Stream_Video_Security: SwiftProtobuf.Message, SwiftProtobuf._MessageIm
 
 extension Stream_Video_Security.IsAllowed: SwiftProtobuf._ProtoNameProviding {
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    0: .same(proto: "YES"),
-    1: .same(proto: "NO"),
-    2: .same(proto: "REQUEST"),
+    0: .same(proto: "IS_ALLOWED_YES_UNSPECIFIED"),
+    1: .same(proto: "IS_ALLOWED_NO"),
+    2: .same(proto: "IS_ALLOWED_REQUEST"),
   ]
 }
 
 extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Participant"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "UserID"),
-    2: .same(proto: "Role"),
-    3: .same(proto: "Online"),
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "role"),
+    3: .same(proto: "online"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1477,8 +1403,8 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallState"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "CallId"),
-    2: .same(proto: "Participants"),
+    1: .standard(proto: "call_id"),
+    2: .same(proto: "participants"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1515,15 +1441,15 @@ extension Stream_Video_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Call"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
-    2: .same(proto: "Name"),
-    3: .same(proto: "CreatedByUserID"),
-    4: .same(proto: "CreatedAt"),
-    5: .same(proto: "UpdatedAt"),
-    6: .same(proto: "Broadcast"),
-    7: .same(proto: "BroadcastOptions"),
-    8: .same(proto: "Transcribe"),
-    9: .same(proto: "TranscribeOptions"),
+    1: .same(proto: "id"),
+    2: .same(proto: "name"),
+    3: .standard(proto: "created_by_user_id"),
+    4: .standard(proto: "created_at"),
+    5: .standard(proto: "updated_at"),
+    6: .same(proto: "broadcast"),
+    7: .standard(proto: "broadcast_options"),
+    8: .same(proto: "transcribe"),
+    9: .standard(proto: "transcribe_options"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1535,8 +1461,8 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
-      case 4: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
-      case 5: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       case 6: try { try decoder.decodeSingularBoolField(value: &self.broadcast) }()
       case 7: try { try decoder.decodeRepeatedMessageField(value: &self.broadcastOptions) }()
       case 8: try { try decoder.decodeSingularBoolField(value: &self.transcribe) }()
@@ -1560,12 +1486,12 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.createdByUserID.isEmpty {
       try visitor.visitSingularStringField(value: self.createdByUserID, fieldNumber: 3)
     }
-    try { if let v = self._createdAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-    } }()
-    try { if let v = self._updatedAt {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-    } }()
+    if !self.createdAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 4)
+    }
+    if !self.updatedAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 5)
+    }
     if self.broadcast != false {
       try visitor.visitSingularBoolField(value: self.broadcast, fieldNumber: 6)
     }
@@ -1585,8 +1511,8 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.id != rhs.id {return false}
     if lhs.name != rhs.name {return false}
     if lhs.createdByUserID != rhs.createdByUserID {return false}
-    if lhs._createdAt != rhs._createdAt {return false}
-    if lhs._updatedAt != rhs._updatedAt {return false}
+    if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.broadcast != rhs.broadcast {return false}
     if lhs.broadcastOptions != rhs.broadcastOptions {return false}
     if lhs.transcribe != rhs.transcribe {return false}

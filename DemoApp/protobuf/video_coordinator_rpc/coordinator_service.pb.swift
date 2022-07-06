@@ -488,8 +488,6 @@ struct Stream_Video_JoinCallRequest {
 
   var callID: String = String()
 
-  var clientIp: String = String()
-
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -718,7 +716,7 @@ struct Stream_Video_StartRecordingRequest {
   /// Clears the value of `storageOptions`. Subsequent reads from it will return its default value.
   mutating func clearStorageOptions() {self._storageOptions = nil}
 
-  var codec: Stream_Video_Codec = .h264
+  var codec: Stream_Video_Codec = .h264Unspecified
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -844,9 +842,9 @@ fileprivate let _protobuf_package = "stream.video"
 extension Stream_Video_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Error"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Code"),
-    2: .same(proto: "Description"),
-    3: .same(proto: "Data"),
+    1: .same(proto: "code"),
+    2: .same(proto: "description"),
+    3: .same(proto: "data"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -888,8 +886,8 @@ extension Stream_Video_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImple
 extension Stream_Video_GetCallRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GetCallRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
-    2: .same(proto: "Type"),
+    1: .same(proto: "id"),
+    2: .same(proto: "type"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -926,8 +924,8 @@ extension Stream_Video_GetCallRequest: SwiftProtobuf.Message, SwiftProtobuf._Mes
 extension Stream_Video_GetCallResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GetCallResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Call"),
-    2: .same(proto: "CallState"),
+    1: .same(proto: "call"),
+    2: .standard(proto: "call_state"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1032,16 +1030,16 @@ extension Stream_Video_CreateOrUpdateCallsResponse: SwiftProtobuf.Message, Swift
 extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CreateCallRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
-    2: .same(proto: "Type"),
-    3: .same(proto: "JSONEncodedCustomData"),
-    4: .same(proto: "Participants"),
-    6: .same(proto: "Broadcast"),
-    7: .same(proto: "BroadcastOptions"),
-    8: .same(proto: "Transcribe"),
-    9: .same(proto: "TranscribeOptions"),
-    10: .same(proto: "Recording"),
-    11: .same(proto: "Ring"),
+    1: .same(proto: "id"),
+    2: .same(proto: "type"),
+    3: .standard(proto: "jsonencoded_custom_data"),
+    4: .same(proto: "participants"),
+    6: .same(proto: "broadcast"),
+    7: .standard(proto: "broadcast_options"),
+    8: .same(proto: "transcribe"),
+    9: .standard(proto: "transcribe_options"),
+    10: .same(proto: "recording"),
+    11: .same(proto: "ring"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1158,10 +1156,10 @@ extension Stream_Video_CreateCallResponse: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_UpdateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UpdateCallRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
-    2: .same(proto: "Type"),
-    3: .same(proto: "JSONEncodedCustomData"),
-    4: .same(proto: "AuthToken"),
+    1: .same(proto: "id"),
+    2: .same(proto: "type"),
+    3: .standard(proto: "jsonencoded_custom_data"),
+    4: .standard(proto: "auth_token"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1244,7 +1242,7 @@ extension Stream_Video_UpdateCallResponse: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_DeleteCallRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DeleteCallRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1295,9 +1293,9 @@ extension Stream_Video_DeleteCallResponse: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_SelectEdgeServerRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SelectEdgeServerRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "CallID"),
-    2: .same(proto: "UserID"),
-    3: .same(proto: "LatencyByEdge"),
+    1: .standard(proto: "call_id"),
+    2: .standard(proto: "user_id"),
+    3: .standard(proto: "latency_by_edge"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1339,8 +1337,8 @@ extension Stream_Video_SelectEdgeServerRequest: SwiftProtobuf.Message, SwiftProt
 extension Stream_Video_SelectEdgeServerResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".SelectEdgeServerResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "EdgeServer"),
-    2: .same(proto: "Token"),
+    1: .standard(proto: "edge_server"),
+    2: .same(proto: "token"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1381,12 +1379,12 @@ extension Stream_Video_SelectEdgeServerResponse: SwiftProtobuf.Message, SwiftPro
 extension Stream_Video_AddDeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".AddDeviceRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "UserID"),
-    2: .same(proto: "ID"),
-    3: .same(proto: "PushProvider"),
-    4: .same(proto: "Disabled"),
-    5: .same(proto: "DisabledReason"),
-    6: .same(proto: "PushProviderName"),
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "id"),
+    3: .standard(proto: "push_provider"),
+    4: .same(proto: "disabled"),
+    5: .standard(proto: "disabled_reason"),
+    6: .standard(proto: "push_provider_name"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1462,7 +1460,7 @@ extension Stream_Video_AddDeviceResponse: SwiftProtobuf.Message, SwiftProtobuf._
 extension Stream_Video_RemoveDeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".RemoveDeviceRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1513,7 +1511,7 @@ extension Stream_Video_RemoveDeviceResponse: SwiftProtobuf.Message, SwiftProtobu
 extension Stream_Video_ListDevicesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ListDevicesRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "UserID"),
+    1: .standard(proto: "user_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1577,7 +1575,7 @@ extension Stream_Video_ListDevicesResponse: SwiftProtobuf.Message, SwiftProtobuf
 extension Stream_Video_CreateUserRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CreateUserRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1673,7 +1671,7 @@ extension Stream_Video_CreateOrUpdateUsersResponse: SwiftProtobuf.Message, Swift
 extension Stream_Video_DeleteUserRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DeleteUserRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1705,7 +1703,7 @@ extension Stream_Video_DeleteUserRequest: SwiftProtobuf.Message, SwiftProtobuf._
 extension Stream_Video_ExportUserRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ExportUserRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1737,7 +1735,7 @@ extension Stream_Video_ExportUserRequest: SwiftProtobuf.Message, SwiftProtobuf._
 extension Stream_Video_ExportUserResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ExportUserResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1769,7 +1767,7 @@ extension Stream_Video_ExportUserResponse: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_DeleteUserResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".DeleteUserResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "ID"),
+    1: .same(proto: "id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1894,8 +1892,7 @@ extension Stream_Video_SendCustomEventResponse: SwiftProtobuf.Message, SwiftProt
 extension Stream_Video_JoinCallRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".JoinCallRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "CallID"),
-    2: .same(proto: "ClientIP"),
+    1: .standard(proto: "call_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1905,7 +1902,6 @@ extension Stream_Video_JoinCallRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.callID) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.clientIp) }()
       default: break
       }
     }
@@ -1915,15 +1911,11 @@ extension Stream_Video_JoinCallRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
     if !self.callID.isEmpty {
       try visitor.visitSingularStringField(value: self.callID, fieldNumber: 1)
     }
-    if !self.clientIp.isEmpty {
-      try visitor.visitSingularStringField(value: self.clientIp, fieldNumber: 2)
-    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_JoinCallRequest, rhs: Stream_Video_JoinCallRequest) -> Bool {
     if lhs.callID != rhs.callID {return false}
-    if lhs.clientIp != rhs.clientIp {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1972,9 +1964,9 @@ extension Stream_Video_JoinCallResponse: SwiftProtobuf.Message, SwiftProtobuf._M
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "user"),
     2: .same(proto: "call"),
-    3: .same(proto: "CallState"),
-    4: .same(proto: "Edges"),
-    5: .same(proto: "OwnCapabilities"),
+    3: .standard(proto: "call_state"),
+    4: .same(proto: "edges"),
+    5: .standard(proto: "own_capabilities"),
   ]
 
   fileprivate class _StorageClass {
@@ -2349,9 +2341,9 @@ extension Stream_Video_StoreLatencyResponse: SwiftProtobuf.Message, SwiftProtobu
 extension Stream_Video_StartRecordingRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".StartRecordingRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "CallID"),
-    2: .same(proto: "StorageOptions"),
-    3: .same(proto: "Codec"),
+    1: .standard(proto: "call_id"),
+    2: .standard(proto: "storage_options"),
+    3: .same(proto: "codec"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2379,7 +2371,7 @@ extension Stream_Video_StartRecordingRequest: SwiftProtobuf.Message, SwiftProtob
     try { if let v = self._storageOptions {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
     } }()
-    if self.codec != .h264 {
+    if self.codec != .h264Unspecified {
       try visitor.visitSingularEnumField(value: self.codec, fieldNumber: 3)
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -2416,7 +2408,7 @@ extension Stream_Video_StartRecordingResponse: SwiftProtobuf.Message, SwiftProto
 extension Stream_Video_StopRecordingRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".StopRecordingRequest"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "CallID"),
+    1: .standard(proto: "call_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {

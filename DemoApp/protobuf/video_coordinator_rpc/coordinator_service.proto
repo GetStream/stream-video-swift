@@ -2,10 +2,10 @@ syntax = "proto3";
 
 package stream.video;
 
-option go_package = "github.com/GetStream/video/protobuf/video_coordinator_rpc";
-
-import "video_models/models.proto";
 import "validate/validate.proto";
+import "video_models/models.proto";
+
+option go_package = "github.com/GetStream/video/protobuf/video_coordinator_rpc";
 
 // PROTO questions
 /*
@@ -17,9 +17,9 @@ Auth headers
 
 // TODO: how do we include a common error to all responses?
 message Error {
-  int64 Code = 1;
-  string Description = 2;
-  bytes Data = 3;
+  int64 code = 1;
+  string description = 2;
+  bytes data = 3;
 }
 
 service CallCoordinatorService {
@@ -83,13 +83,13 @@ service CallCoordinatorService {
 }
 
 message GetCallRequest {
-  string ID = 1;
-  string Type = 2;
+  string id = 1;
+  string type = 2;
 }
 
 message GetCallResponse {
-  Call Call = 1;
-  CallState CallState = 2;
+  Call call = 1;
+  CallState call_state = 2;
 }
 
 message CreateOrUpdateCallsRequest {
@@ -101,22 +101,22 @@ message CreateOrUpdateCallsResponse {
 }
 
 message CreateCallRequest {
-  string ID = 1;
-  string Type = 2;
-  bytes JSONEncodedCustomData = 3;
-  repeated string Participants = 4;
+  string id = 1;
+  string type = 2;
+  bytes jsonencoded_custom_data = 3;
+  repeated string participants = 4;
 
   // TODO: additional options and overrides to default settings
   // enable broadcasting
-  bool Broadcast = 6;
-  repeated BroadcastOptions BroadcastOptions = 7;
+  bool broadcast = 6;
+  repeated BroadcastOptions broadcast_options = 7;
 
   // enable transcription
-  bool Transcribe = 8;
-  TranscribeOptions TranscribeOptions = 9;
+  bool transcribe = 8;
+  TranscribeOptions transcribe_options = 9;
 
-  bool Recording = 10;
-  bool Ring = 11; // if true, will call/ring on the browser and phone. default is false
+  bool recording = 10;
+  bool ring = 11; // if true, will call/ring on the browser and phone. default is false
 }
 
 message CreateCallResponse {
@@ -124,10 +124,10 @@ message CreateCallResponse {
 }
 
 message UpdateCallRequest {
-  string ID = 1;
-  string Type = 2;
-  bytes JSONEncodedCustomData = 3;
-  string AuthToken = 4;
+  string id = 1;
+  string type = 2;
+  bytes jsonencoded_custom_data = 3;
+  string auth_token = 4;
   // TODO: additional options and overrides to default settings
 }
 message UpdateCallResponse {
@@ -135,43 +135,43 @@ message UpdateCallResponse {
 }
 
 message DeleteCallRequest {
-  string ID = 1;
+  string id = 1;
 }
 message DeleteCallResponse {
 }
 
 message SelectEdgeServerRequest {
-  string CallID = 1;
-  string UserID = 2;
-  map<string, Latency> LatencyByEdge = 3;
+  string call_id = 1;
+  string user_id = 2;
+  map<string, Latency> latency_by_edge = 3;
 }
 
 message SelectEdgeServerResponse {
-  EdgeServer EdgeServer = 1;
-  string Token = 2; // this is the token livekit needs, not the same token
+  EdgeServer edge_server = 1;
+  string token = 2; // this is the token livekit needs, not the same token
 }
 
 message AddDeviceRequest {
-  string UserID = 1;
-  string ID = 2;
-  string PushProvider = 3;
-  bool Disabled = 4;
-  string DisabledReason = 5;
-  string PushProviderName = 6;
+  string user_id = 1;
+  string id = 2;
+  string push_provider = 3;
+  bool disabled = 4;
+  string disabled_reason = 5;
+  string push_provider_name = 6;
 }
 
 message AddDeviceResponse {
 }
 
 message RemoveDeviceRequest {
-  string ID = 1;
+  string id = 1;
 }
 
 message RemoveDeviceResponse {
 }
 
 message ListDevicesRequest {
-  string UserID = 1;
+  string user_id = 1;
 }
 
 message ListDevicesResponse {
@@ -179,7 +179,7 @@ message ListDevicesResponse {
 }
 
 message CreateUserRequest {
-  string ID = 1;
+  string id = 1;
 }
 
 message CreateOrUpdateUsersRequest {
@@ -191,21 +191,21 @@ message CreateOrUpdateUsersResponse {
 }
 
 message DeleteUserRequest {
-  string ID = 1;
+  string id = 1;
 }
 
 // TODO: do we support both soft and hard delete
 message ExportUserRequest {
-  string ID = 1;
+  string id = 1;
 }
 
 // TODO: talk about what data we should export on the GDPR endpoints for a user
 message ExportUserResponse {
-  string ID = 1;
+  string id = 1;
 }
 
 message DeleteUserResponse {
-  string ID = 1;
+  string id = 1;
 }
 
 message CreateUserResponse {
@@ -221,8 +221,7 @@ message SendCustomEventResponse {
 }
 
 message JoinCallRequest {
-  string CallID = 1;
-  string ClientIP = 2;
+  string call_id = 1;
 }
 
 message UserCapability {
@@ -233,9 +232,9 @@ message UserCapability {
 message JoinCallResponse {
   User user = 1;
   Call call = 2;
-  CallState CallState = 3;
-  repeated Edge Edges = 4;
-  repeated UserCapability OwnCapabilities = 5;
+  CallState call_state = 3;
+  repeated Edge edges = 4;
+  repeated UserCapability own_capabilities = 5;
 }
 
 message LeaveCallRequest {
@@ -279,27 +278,33 @@ message StopTranscribeCallRequest {
 message StopTranscribeCallResponse {
 }
 
-message StoreLatencyRequest {}
+message StoreLatencyRequest {
+}
 
-message StoreLatencyResponse {}
+message StoreLatencyResponse {
+}
 
 message StartRecordingRequest {
-  string CallID = 1;
-  RecordingStorageOptions StorageOptions = 2;
-  Codec Codec = 3;
+  string call_id = 1;
+  RecordingStorageOptions storage_options = 2;
+  Codec codec = 3;
 }
 
-message StartRecordingResponse {}
+message StartRecordingResponse {
+}
 
 message StopRecordingRequest {
-  string CallID = 1;
+  string call_id = 1;
 }
 
-message StopRecordingResponse {}
+message StopRecordingResponse {
+}
 
 // TODO: how do we do filtering and pagination with proto?
 // here we need to be able to filter, sort and limit by
 // call id, call custom attribute, call creation time, call including a user, call by type
-message GetRecordingsRequest {}
+message GetRecordingsRequest {
+}
 
-message GetRecordingsResponse {}
+message GetRecordingsResponse {
+}

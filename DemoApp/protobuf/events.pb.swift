@@ -312,7 +312,7 @@ fileprivate let _protobuf_package = "stream.video"
 extension Stream_Video_CallRinging: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallRinging"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Call"),
+    1: .same(proto: "call"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -348,7 +348,7 @@ extension Stream_Video_CallRinging: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_CallCreated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallCreated"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Call"),
+    1: .same(proto: "call"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -384,7 +384,7 @@ extension Stream_Video_CallCreated: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_CallUpdated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallUpdated"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Call"),
+    1: .same(proto: "call"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -420,7 +420,7 @@ extension Stream_Video_CallUpdated: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_CallEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallEnded"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Call"),
+    1: .same(proto: "call"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -456,7 +456,7 @@ extension Stream_Video_CallEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 extension Stream_Video_CallDeleted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallDeleted"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Call"),
+    1: .same(proto: "call"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -492,7 +492,7 @@ extension Stream_Video_CallDeleted: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_UserUpdated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UserUpdated"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "User"),
+    1: .same(proto: "user"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -528,7 +528,7 @@ extension Stream_Video_UserUpdated: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_ParticipantInvited: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ParticipantInvited"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Participant"),
+    1: .same(proto: "participant"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -564,7 +564,7 @@ extension Stream_Video_ParticipantInvited: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_ParticipantUpdated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ParticipantUpdated"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Participant"),
+    1: .same(proto: "participant"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -600,7 +600,7 @@ extension Stream_Video_ParticipantUpdated: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_ParticipantDeleted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ParticipantDeleted"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "UserID"),
+    1: .standard(proto: "user_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -632,7 +632,7 @@ extension Stream_Video_ParticipantDeleted: SwiftProtobuf.Message, SwiftProtobuf.
 extension Stream_Video_ParticipantJoined: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ParticipantJoined"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Participant"),
+    1: .same(proto: "participant"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -668,7 +668,7 @@ extension Stream_Video_ParticipantJoined: SwiftProtobuf.Message, SwiftProtobuf._
 extension Stream_Video_ParticipantLeft: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ParticipantLeft"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Participant"),
+    1: .same(proto: "participant"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -704,7 +704,7 @@ extension Stream_Video_ParticipantLeft: SwiftProtobuf.Message, SwiftProtobuf._Me
 extension Stream_Video_BroadcastStarted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BroadcastStarted"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Broadcast"),
+    1: .same(proto: "broadcast"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -740,7 +740,7 @@ extension Stream_Video_BroadcastStarted: SwiftProtobuf.Message, SwiftProtobuf._M
 extension Stream_Video_BroadcastEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".BroadcastEnded"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "Broadcast"),
+    1: .same(proto: "broadcast"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {

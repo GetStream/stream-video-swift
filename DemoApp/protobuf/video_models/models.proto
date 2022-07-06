@@ -2,15 +2,14 @@ syntax = "proto3";
 
 package stream.video;
 
-option go_package = "github.com/GetStream/video/protobuf/video_models";
-
-import "google/protobuf/timestamp.proto";
 import "validate/validate.proto";
+
+option go_package = "github.com/GetStream/video/protobuf/video_models";
 
 // Edges are where we deploy video servers
 message Edge {
-  string Name = 1 [(validate.rules).string.min_len = 1];
-  string LatencyURL = 2 [(validate.rules).string.min_len = 1];
+  string name = 1 [(validate.rules).string.min_len = 1];
+  string latency_url = 2 [(validate.rules).string.min_len = 1];
 }
 
 // TODO: to discuss. do we keep a log per call of
@@ -30,7 +29,7 @@ message Latency {
 
 // 3 different type of broadcast
 message Broadcast {
-  string ID = 1;
+  string id = 1;
   oneof Details {
     RTMPBroadcast rtmp = 2;
     HLSBroadcast hls = 3;
@@ -39,71 +38,71 @@ message Broadcast {
 }
 
 message RTMPBroadcast {
-  string CallID = 1;
-  repeated string RTMPUrls = 2;
-  int32 Width = 3;
-  int32 Height = 4;
+  string call_id = 1;
+  repeated string rtmpurls = 2;
+  int32 width = 3;
+  int32 height = 4;
 }
 message HLSBroadcast {
 
 }
 
 message File {
-  string Type = 1;
-  bool Composite = 2;
-  string UserID = 3;
-  string URL = 4;
+  string type = 1;
+  bool composite = 2;
+  string user_id = 3;
+  string url = 4;
 }
 
 message RecordBroadcast {
-  bool Composite = 1; // if true merge all audio and video, if false split them
-  repeated File Files = 2;
+  bool composite = 1; // if true merge all audio and video, if false split them
+  repeated File files = 2;
 }
 
-
 message User {
-  string ID = 1 [(validate.rules).string.min_len = 1];
+  string id = 1 [(validate.rules).string.min_len = 1];
   // TODO: zoom allows you to invite any of your colleagues in their invite screen
-  repeated string Teams = 2;
-  string Type = 3;
-  google.protobuf.Timestamp CreatedAt = 7;
-  google.protobuf.Timestamp UpdatedAt = 8;
+  repeated string teams = 2;
+  string type = 3;
+
+  string created_at = 7;
+  string updated_at = 8;
 }
 
 message Device {
-  string UserID = 1;
-  string ID = 2;
-  string PushProvider = 3;
-  bool Disabled = 4;
-  string DisabledReason = 5;
-  string PushProviderName = 6;
-  google.protobuf.Timestamp CreatedAt = 7;
-  google.protobuf.Timestamp UpdatedAt = 8;
+  string user_id = 1;
+  string id = 2;
+  string push_provider = 3;
+  bool disabled = 4;
+  string disabled_reason = 5;
+  string push_provider_name = 6;
+  string created_at = 7;
+  string updated_at = 8;
 
 }
 
 enum Codec {
-  H264 = 0;
-  VP8 = 1;
-  VP9 = 2;
+  CODEC_H264_UNSPECIFIED = 0;
+  CODEC_VP8 = 1;
+  CODEC_VP9 = 2;
 }
 
 enum RecordingStorage {
-  S3 = 0;
+  RECORDING_STORAGE_S3_UNSPECIFIED = 0;
 }
 
 message RecordingStorageOptions {
-  RecordingStorage Storage = 2;
-  string AccessKey = 3;
-  string SecretKey = 4;
-  string BucketName = 5;
-  string Region = 6;
-  string Path = 7;
+  RecordingStorage storage = 2;
+  string access_key = 3;
+  string secret_key = 4;
+  string bucket_name = 5;
+  string region = 6;
+  string path = 7;
 }
 
 message BroadcastOptions {
-  string RtmpURL = 1;
-  string HlsUrl = 2;
+  string rtmp_url = 1;
+  string hls_url = 2;
 }
 
 message TranscribeOptions {
@@ -111,19 +110,19 @@ message TranscribeOptions {
 }
 
 message CallType {
-  string Name = 1;
-  Security Security = 2;
+  string name = 1;
+  Security security = 2;
 
   // enable broadcasting by default when creating a call of this type
-  bool Broadcast = 3;
-  repeated BroadcastOptions BroadcastOptions = 4;
+  bool broadcast = 3;
+  repeated BroadcastOptions broadcast_options = 4;
 
   // enable transcription by default
-  bool Transcribe = 5;
-  TranscribeOptions TranscribeOptions = 6;
+  bool transcribe = 5;
+  TranscribeOptions transcribe_options = 6;
 
-  google.protobuf.Timestamp CreatedAt = 7;
-  google.protobuf.Timestamp UpdatedAt = 8;
+  string created_at = 7;
+  string updated_at = 8;
 }
 
 message Security {
@@ -131,46 +130,46 @@ message Security {
   // controls if regular users are allowed to do the following
   // yes/no/request
   enum IsAllowed {
-    YES = 0;
-    NO = 1;
-    REQUEST = 2;
+    IS_ALLOWED_YES_UNSPECIFIED = 0;
+    IS_ALLOWED_NO = 1;
+    IS_ALLOWED_REQUEST = 2;
   }
-  bool HideProfilePictures = 1;
-  IsAllowed ShareScreen = 2;
-  bool RenameUser = 3;
-  IsAllowed Unmute = 4;
-  IsAllowed StartVideo = 5;
-  IsAllowed ScreenShare = 6;
-  IsAllowed Record = 7;
-  IsAllowed Broadcast = 8;
+  bool hide_profile_pictures = 1;
+  IsAllowed share_screen = 2;
+  bool rename_user = 3;
+  IsAllowed unmute = 4;
+  IsAllowed start_video = 5;
+  IsAllowed screen_share = 6;
+  IsAllowed record = 7;
+  IsAllowed broadcast = 8;
 
 }
 
 // those who are online in the call
 message Participant {
-  string UserID = 1;
-  string Role = 2;
-  bool Online = 3;
+  string user_id = 1;
+  string role = 2;
+  bool online = 3;
 }
 
 message CallState {
   // Little different to member/watcher concept. Both are in the participant list
-  string CallId = 1;
-  repeated Participant Participants = 2;
+  string call_id = 1;
+  repeated Participant participants = 2;
 }
 
 message Call {
-  string ID = 1 [(validate.rules).string.min_len = 1];
-  string Name = 2;
-  string CreatedByUserID = 3;
-  google.protobuf.Timestamp CreatedAt = 4;
-  google.protobuf.Timestamp UpdatedAt = 5;
+  string id = 1 [(validate.rules).string.min_len = 1];
+  string name = 2;
+  string created_by_user_id = 3;
+  string created_at = 4;
+  string updated_at = 5;
 
   // enable broadcasting by default when creating a call of this type
-  bool Broadcast = 6;
-  repeated BroadcastOptions BroadcastOptions = 7;
+  bool broadcast = 6;
+  repeated BroadcastOptions broadcast_options = 7;
 
   // enable transcription by default
-  bool Transcribe = 8;
-  TranscribeOptions TranscribeOptions = 9;
+  bool transcribe = 8;
+  TranscribeOptions transcribe_options = 9;
 }

@@ -161,7 +161,7 @@ func (m *GetCallRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	// no validation rules for Type
 
@@ -696,11 +696,11 @@ func (m *CreateCallRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	// no validation rules for Type
 
-	// no validation rules for JSONEncodedCustomData
+	// no validation rules for JsonencodedCustomData
 
 	// no validation rules for Broadcast
 
@@ -1017,11 +1017,11 @@ func (m *UpdateCallRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	// no validation rules for Type
 
-	// no validation rules for JSONEncodedCustomData
+	// no validation rules for JsonencodedCustomData
 
 	// no validation rules for AuthToken
 
@@ -1258,7 +1258,7 @@ func (m *DeleteCallRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return DeleteCallRequestMultiError(errors)
@@ -1464,9 +1464,9 @@ func (m *SelectEdgeServerRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallID
+	// no validation rules for CallId
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
 	{
 		sorted_keys := make([]string, len(m.GetLatencyByEdge()))
@@ -1749,9 +1749,9 @@ func (m *AddDeviceRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	// no validation rules for PushProvider
 
@@ -1963,7 +1963,7 @@ func (m *RemoveDeviceRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return RemoveDeviceRequestMultiError(errors)
@@ -2169,7 +2169,7 @@ func (m *ListDevicesRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
 	if len(errors) > 0 {
 		return ListDevicesRequestMultiError(errors)
@@ -2409,7 +2409,7 @@ func (m *CreateUserRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return CreateUserRequestMultiError(errors)
@@ -2786,7 +2786,7 @@ func (m *DeleteUserRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return DeleteUserRequestMultiError(errors)
@@ -2890,7 +2890,7 @@ func (m *ExportUserRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return ExportUserRequestMultiError(errors)
@@ -2994,7 +2994,7 @@ func (m *ExportUserResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return ExportUserResponseMultiError(errors)
@@ -3098,7 +3098,7 @@ func (m *DeleteUserResponse) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	if len(errors) > 0 {
 		return DeleteUserResponseMultiError(errors)
@@ -3541,9 +3541,7 @@ func (m *JoinCallRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallID
-
-	// no validation rules for ClientIP
+	// no validation rules for CallId
 
 	if len(errors) > 0 {
 		return JoinCallRequestMultiError(errors)
@@ -5428,7 +5426,7 @@ func (m *StartRecordingRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallID
+	// no validation rules for CallId
 
 	if all {
 		switch v := interface{}(m.GetStorageOptions()).(type) {
@@ -5665,7 +5663,7 @@ func (m *StopRecordingRequest) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallID
+	// no validation rules for CallId
 
 	if len(errors) > 0 {
 		return StopRecordingRequestMultiError(errors)

@@ -1087,7 +1087,7 @@ func (m *ParticipantDeleted) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
 	if len(errors) > 0 {
 		return ParticipantDeletedMultiError(errors)

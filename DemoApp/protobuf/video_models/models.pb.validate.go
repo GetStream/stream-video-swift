@@ -67,9 +67,9 @@ func (m *Edge) validate(all bool) error {
 		errors = append(errors, err)
 	}
 
-	if utf8.RuneCountInString(m.GetLatencyURL()) < 1 {
+	if utf8.RuneCountInString(m.GetLatencyUrl()) < 1 {
 		err := EdgeValidationError{
-			field:  "LatencyURL",
+			field:  "LatencyUrl",
 			reason: "value length must be at least 1 runes",
 		}
 		if !all {
@@ -376,7 +376,7 @@ func (m *Broadcast) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	switch m.Details.(type) {
 
@@ -574,7 +574,7 @@ func (m *RTMPBroadcast) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for CallID
+	// no validation rules for CallId
 
 	// no validation rules for Width
 
@@ -782,9 +782,9 @@ func (m *File) validate(all bool) error {
 
 	// no validation rules for Composite
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
-	// no validation rules for URL
+	// no validation rules for Url
 
 	if len(errors) > 0 {
 		return FileMultiError(errors)
@@ -1020,9 +1020,9 @@ func (m *User) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetID()) < 1 {
+	if utf8.RuneCountInString(m.GetId()) < 1 {
 		err := UserValidationError{
-			field:  "ID",
+			field:  "Id",
 			reason: "value length must be at least 1 runes",
 		}
 		if !all {
@@ -1033,63 +1033,9 @@ func (m *User) validate(all bool) error {
 
 	// no validation rules for Type
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UserValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UserValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UserValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
-	if all {
-		switch v := interface{}(m.GetUpdatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, UserValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, UserValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return UserValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for UpdatedAt
 
 	if len(errors) > 0 {
 		return UserMultiError(errors)
@@ -1189,9 +1135,9 @@ func (m *Device) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
-	// no validation rules for ID
+	// no validation rules for Id
 
 	// no validation rules for PushProvider
 
@@ -1201,63 +1147,9 @@ func (m *Device) validate(all bool) error {
 
 	// no validation rules for PushProviderName
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DeviceValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DeviceValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeviceValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
-	if all {
-		switch v := interface{}(m.GetUpdatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, DeviceValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, DeviceValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return DeviceValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for UpdatedAt
 
 	if len(errors) > 0 {
 		return DeviceMultiError(errors)
@@ -1472,7 +1364,7 @@ func (m *BroadcastOptions) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for RtmpURL
+	// no validation rules for RtmpUrl
 
 	// no validation rules for HlsUrl
 
@@ -1776,63 +1668,9 @@ func (m *CallType) validate(all bool) error {
 		}
 	}
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CallTypeValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CallTypeValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CallTypeValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
-	if all {
-		switch v := interface{}(m.GetUpdatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CallTypeValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CallTypeValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CallTypeValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for UpdatedAt
 
 	if len(errors) > 0 {
 		return CallTypeMultiError(errors)
@@ -2048,7 +1886,7 @@ func (m *Participant) validate(all bool) error {
 
 	var errors []error
 
-	// no validation rules for UserID
+	// no validation rules for UserId
 
 	// no validation rules for Role
 
@@ -2287,9 +2125,9 @@ func (m *Call) validate(all bool) error {
 
 	var errors []error
 
-	if utf8.RuneCountInString(m.GetID()) < 1 {
+	if utf8.RuneCountInString(m.GetId()) < 1 {
 		err := CallValidationError{
-			field:  "ID",
+			field:  "Id",
 			reason: "value length must be at least 1 runes",
 		}
 		if !all {
@@ -2300,65 +2138,11 @@ func (m *Call) validate(all bool) error {
 
 	// no validation rules for Name
 
-	// no validation rules for CreatedByUserID
+	// no validation rules for CreatedByUserId
 
-	if all {
-		switch v := interface{}(m.GetCreatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CallValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CallValidationError{
-					field:  "CreatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetCreatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CallValidationError{
-				field:  "CreatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for CreatedAt
 
-	if all {
-		switch v := interface{}(m.GetUpdatedAt()).(type) {
-		case interface{ ValidateAll() error }:
-			if err := v.ValidateAll(); err != nil {
-				errors = append(errors, CallValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		case interface{ Validate() error }:
-			if err := v.Validate(); err != nil {
-				errors = append(errors, CallValidationError{
-					field:  "UpdatedAt",
-					reason: "embedded message failed validation",
-					cause:  err,
-				})
-			}
-		}
-	} else if v, ok := interface{}(m.GetUpdatedAt()).(interface{ Validate() error }); ok {
-		if err := v.Validate(); err != nil {
-			return CallValidationError{
-				field:  "UpdatedAt",
-				reason: "embedded message failed validation",
-				cause:  err,
-			}
-		}
-	}
+	// no validation rules for UpdatedAt
 
 	// no validation rules for Broadcast
 
