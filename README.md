@@ -1,5 +1,5 @@
-# stream-video-swiftui
-Repo for Stream Video in SwiftUI.
+# Stream Video iOS
+Repo for Stream Video on iOS.
 
 # Introduction
 
@@ -14,7 +14,7 @@ For now, this repo contains the following parts:
 
 This tool creates async/await versions of all the twirp service methods in the CallCoordinatorService from the backend.
 
-It's written in go, so if you want to change something, you will need to open client.go in `DemoApp/protobuf/twirp/generator and run:
+It's written in go, so if you want to change something, you will need to open client.go in `DemoApp/protobuf/twirp/generator` and run:
 ```
 go build
 ```
@@ -36,6 +36,28 @@ Next, you will need to cd to `DemoApp/protobuf` and run `generate.sh`:
 ```
 ./generate.sh
 ```
-This will create the .swift files. The ones from the folders above are already automatically added in the Xcode project.
+This will create the .swift files. The ones from the folders above are already automatically added in the Xcode project. If you create new ones, you would need to explicitly add them to the Xcode project, only the first time.
 
-//TODO: WIP
+### Sample app
+
+The project contains a sample app, with LiveKit integration. There are two users available, that you can use to test video calls.
+
+The sample does edge server selection in the background, with the generated twirp async/await methods from above.
+```swift
+     func selectEdgeServer() {
+        Task {
+            let selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
+            let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
+            url = "wss://\(response.edgeServer.url)"
+        }
+     }
+```
+At the moment, you need to setup the server on your local machine. In order to do this, follow the guide from the backend repo: https://github.com/GetStream/video.
+
+After you have the server up and running, you can test the edge server selection.
+
+If you test the video call, you will need to explicitly open the video camera, by tapping the camera icon, it's disabled by default (for now).
+
+### WebRTC sample app
+
+In the `old` folder, there's another sample app, that doesn't use LiveKit, but a low-level WebRTC implementation. You can also try it out, by running a node.js server, but for now it will be just used as a reference (or maybe deleted).
