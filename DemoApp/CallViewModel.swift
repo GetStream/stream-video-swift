@@ -21,7 +21,7 @@ class CallViewModel: ObservableObject {
     @Published var shouldShowError: Bool = false
     public var latestError: Error?
     
-    private let url: String = "wss://livekit.fucking-go-slices.com"
+    private var url: String = "wss://livekit.fucking-go-slices.com"
     
     @Published var users = [
         User(
@@ -43,11 +43,11 @@ class CallViewModel: ObservableObject {
         room.room.add(delegate: self)
     }
     
-    func test() {
+    func selectEdgeServer() {
         Task {
             let selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
             let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
-            print(response)
+            url = "wss://\(response.edgeServer.url)"
         }
     }
     

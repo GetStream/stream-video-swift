@@ -59,6 +59,7 @@
 		842D8BFA2865C23800801910 /* ViewModelFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModelFactory.swift; sourceTree = "<group>"; };
 		842D8BFC2865CEA200801910 /* CameraView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraView.swift; sourceTree = "<group>"; };
 		842D8BFE2865F26300801910 /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
+		84C2996928757F820034B735 /* StreamVideoSwiftUI-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = "StreamVideoSwiftUI-Info.plist"; sourceTree = "<group>"; };
 		84ED240C286C9515002A3186 /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
 		84ED240E286C9530002A3186 /* CallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewModel.swift; sourceTree = "<group>"; };
 		84ED2410286C9B03002A3186 /* ExampleObservableRoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExampleObservableRoom.swift; sourceTree = "<group>"; };
@@ -87,6 +88,7 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
+				84C2996928757F820034B735 /* StreamVideoSwiftUI-Info.plist */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				842D8BC42865B31B00801910 /* Products */,
 			);
@@ -404,6 +406,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "StreamVideoSwiftUI-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access needed for a video call.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access needed for establishing a call.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
@@ -435,6 +438,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = "StreamVideoSwiftUI-Info.plist";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access needed for a video call.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access needed for establishing a call.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;

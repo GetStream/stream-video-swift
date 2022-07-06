@@ -18,7 +18,7 @@ struct CallView: View {
             } else {
                 ConnectView(viewModel: viewModel)
                     .onAppear() {
-                        viewModel.test()
+                        viewModel.selectEdgeServer()
                     }
             }
 
