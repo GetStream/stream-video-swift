@@ -1,16 +1,13 @@
 import SwiftUI
-import LiveKit
 
 struct ParticipantView: View {
 
-    var room: VideoRoom
-    @ObservedObject var participant: ObservableParticipant
+    @ObservedObject var viewModel: CallViewModel
+    var participant: RoomParticipant
 
-    var onTap: ((_ participant: ObservableParticipant) -> Void)?
+    var onTap: ((_ participant: RoomParticipant) -> Void)?
 
     @State private var isRendering: Bool = false
-    @State private var dimensions: Dimensions?
-    @State private var trackStats: TrackStats?
 
     var body: some View {
         GeometryReader { geometry in
@@ -23,16 +20,11 @@ struct ParticipantView: View {
                 // VideoView for the Participant
                 if let publication = participant.mainVideoPublication,
                    !publication.muted,
-                   let track = publication.track as? VideoTrack {
+                   let track = publication.track as? StreamVideoTrack {
                     ZStack(alignment: .topLeading) {
-                        SwiftUIVideoView(track,
-                                         layoutMode: .fill,
-                                         mirrorMode: .auto,
-                                         debugMode: false,
-                                         dimensions: $dimensions,
-                                         trackStats: $trackStats)
+                        StreamVideoView(track)
                     }
-                } else if let publication = participant.mainVideoPublication as? RemoteTrackPublication,
+                } else if let publication = participant.mainVideoPublication as? StreamRemoteTrackPublication,
                           case .notAllowed = publication.subscriptionState {
                     // Show no permission icon
                 } else {
@@ -42,32 +34,28 @@ struct ParticipantView: View {
                 VStack(alignment: .trailing, spacing: 0) {
                     // Show the sub-video view
                     if let subVideoTrack = participant.subVideoTrack {
-                        SwiftUIVideoView(subVideoTrack,
-                                         layoutMode: .fill,
-                                         mirrorMode: .auto
-                        )
-                        .background(Color.black)
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: min(geometry.size.width, geometry.size.height) * 0.3)
-                        .cornerRadius(8)
-                        .padding()
+                        StreamVideoView(subVideoTrack)
+                            .background(Color.black)
+                            .aspectRatio(contentMode: .fit)
+                            .frame(width: min(geometry.size.width, geometry.size.height) * 0.3)
+                            .cornerRadius(8)
+                            .padding()
                     }
 
                     // Bottom user info bar
                     HStack {
-                        Text("\(participant.identity)") //  (\(participant.publish ?? "-"))
+                        Text("\(participant.name)")
                             .lineLimit(1)
                             .truncationMode(.tail)
 
                         Button(action: {
-                            room.toggleCameraEnabled()
+                            viewModel.toggleCameraEnabled()
                         },
                         label: {
                             Image(systemName: "video.fill")
-                                .renderingMode(room.cameraTrackState.isPublished ? .original : .template)
+                                .renderingMode(viewModel.cameraTrackState.isPublished ? .original : .template)
                         })
-                        // disable while publishing/un-publishing
-                        .disabled(room.cameraTrackState.isBusy)
+                        .disabled(viewModel.cameraTrackState.isBusy)
 
                         if participant.connectionQuality == .excellent {
                             Image(systemName: "wifi")
@@ -93,10 +81,13 @@ struct ParticipantView: View {
                     .stroke(Color.blue, lineWidth: 5.0)
                     : nil
             )
-        }.gesture(TapGesture()
-                    .onEnded { _ in
-                        // Pass the tap event
-                        onTap?(participant)
-                    })
+        }
+        .gesture(
+            TapGesture()
+                .onEnded { _ in
+                    // Pass the tap event
+                    onTap?(participant)
+                }
+        )
     }
 }

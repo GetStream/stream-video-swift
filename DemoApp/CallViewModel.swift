@@ -9,39 +9,37 @@ import SwiftUI
 import Combine
 import LiveKit
 import Promises
+import LiveKit
+import OrderedCollections
 
 @MainActor
-class CallViewModel: ObservableObject {
+class CallViewModel: ObservableObject, VideoRoomDelegate {
     
     @Injected(\.streamVideo) var streamVideo
     
     @Published var room: VideoRoom? {
         didSet {
-            room?.$connectionStatus
-                .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] status in
-                    self?.shouldShowRoomView = status == .connected || status == .reconnecting
-            })
-            .store(in: &cancellables)
+            self.connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
         }
     }
+    @Published var focusParticipant: RoomParticipant?
+    @Published var connectionStatus: ConnectionStatus = .disconnected(reason: nil) {
+        didSet {
+            self.shouldShowRoomView = connectionStatus == .connected || connectionStatus == .reconnecting
+        }
+    }
+    @Published var cameraTrackState: StreamTrackPublishState = .notPublished()
+    @Published var microphoneTrackState: StreamTrackPublishState = .notPublished()
+
     
-    @Published var shouldShowRoomView: Bool = false
+    var shouldShowRoomView: Bool = false
     
     @Published var shouldShowError: Bool = false
     public var latestError: Error?
     
     private var url: String = "wss://livekit.fucking-go-slices.com"
-    private var cancellables = Set<AnyCancellable>()
     
-    @Published var users = [
-        User(
-            name: "User 1",
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTkwMjI0NjEsImlzcyI6IkFQSVM0Y2F6YXg5dnFRUSIsIm5iZiI6MTY1NjQzMDQ2MSwic3ViIjoicm9iIiwidmlkZW8iOnsicm9vbSI6InN0YXJrLXRvd2VyIiwicm9vbUpvaW4iOnRydWV9fQ.vKC-RXDSYGqeyChwazQLO15mV1S1n4LxyeJLrJASYPA"),
-        User(
-            name: "User 2",
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTkwMjI1MzMsImlzcyI6IkFQSVM0Y2F6YXg5dnFRUSIsIm5iZiI6MTY1NjQzMDUzMywic3ViIjoiYm9iIiwidmlkZW8iOnsicm9vbSI6InN0YXJrLXRvd2VyIiwicm9vbUpvaW4iOnRydWV9fQ.XTQ9nU5BJ3FdWUaOrge-u977YibNTfK-sTDRaI0_vRc")
-    ]
+    @Published var users = mockUsers
     
     @Published var selectedUser: User?
     
@@ -49,6 +47,56 @@ class CallViewModel: ObservableObject {
         hostname: "http://localhost:26991",
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
     )
+    
+    public var remoteParticipants: OrderedDictionary<String, RoomParticipant> {
+        guard let room = room else {
+            return [:]
+        }
+        return OrderedDictionary(uniqueKeysWithValues: room.remoteParticipants.map { (sid, participant) in
+            (sid, RoomParticipant(participant: participant))
+        })
+    }
+
+    public var allParticipants: OrderedDictionary<String, RoomParticipant> {
+        var result = remoteParticipants
+        if let localParticipant = room?.localParticipant {
+            result.updateValue(
+                RoomParticipant(participant: localParticipant),
+                forKey: localParticipant.sid,
+                insertingAt: 0
+            )
+        }
+        return result
+    }
+    
+    public func toggleCameraEnabled() {
+        guard let localParticipant = room?.localParticipant else {
+            return
+        }
+
+        guard !cameraTrackState.isBusy else {
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.cameraTrackState = .busy(isPublishing: !self.cameraTrackState.isPublished)
+        }
+
+        localParticipant.setCamera(enabled: !cameraTrackState.isPublished).then(on: .sdk) { publication in
+            DispatchQueue.main.async {
+                guard let publication = publication else {
+                    self.cameraTrackState = .notPublished()
+                    return
+                }
+
+                self.cameraTrackState = .published(publication)
+            }
+        }.catch(on: .sdk) { error in
+            DispatchQueue.main.async {
+                self.cameraTrackState = .notPublished(error: error)
+            }
+        }
+    }
 
     func selectEdgeServer() {
         Task {
@@ -64,9 +112,44 @@ class CallViewModel: ObservableObject {
         }
         
         let token = selectedUser?.token ?? ""
-
-        room = try await streamVideo.connect(url: url, token: token, options: VideoOptions())
+        
+        let room = try await streamVideo.connect(url: url, token: token, options: VideoOptions())
+        self.room = room
+        self.room?.addDelegate(self)
+        toggleCameraEnabled()
     }
+    
+    // MARK: - RoomDelegate
+
+    nonisolated func room(_ room: Room, didUpdate connectionState: ConnectionState, oldValue: ConnectionState) {
+        DispatchQueue.main.async {
+            self.connectionStatus = connectionState.mapped
+        }
+        
+        if case .disconnected = connectionState {
+            DispatchQueue.main.async {
+                // Reset state
+                self.focusParticipant = nil
+                self.objectWillChange.send()
+            }
+        }
+    }
+
+    nonisolated func room(
+        _ room: Room,
+        participantDidLeave participant: RemoteParticipant
+    ) {
+        let remoteParticipant = RoomParticipant(participant: participant)
+        DispatchQueue.main.async {
+            // self.participants.removeValue(forKey: participant.sid)
+            if let focusParticipant = self.focusParticipant,
+               focusParticipant.id == remoteParticipant.id {
+                self.focusParticipant = nil
+            }
+            self.objectWillChange.send()
+        }
+    }
+
     
 }
 
