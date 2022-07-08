@@ -13,10 +13,10 @@ struct RoomView: View {
     
     var body: some View {
         Group {
-            if let focusParticipant = viewModel.room.focusParticipant {
+            if let focusParticipant = viewModel.room?.focusParticipant {
                 ZStack(alignment: .bottomTrailing) {
-                    ParticipantView(room: viewModel.room, participant: focusParticipant) { _ in
-                        viewModel.room.focusParticipant = nil
+                    ParticipantView(room: viewModel.room!, participant: focusParticipant) { _ in
+                        viewModel.room?.focusParticipant = nil
                     }
                     .overlay(RoundedRectangle(cornerRadius: 5)
                                 .stroke(Color.red.opacity(0.7), lineWidth: 5.0))
@@ -33,9 +33,9 @@ struct RoomView: View {
                 }
 
             } else {
-                ParticipantLayout(viewModel.room.allParticipants.values, spacing: 5) { participant in
-                    ParticipantView(room: viewModel.room, participant: participant) { participant in
-                        viewModel.room.focusParticipant = participant
+                ParticipantLayout(viewModel.room!.allParticipants.values, spacing: 5) { participant in
+                    ParticipantView(room: viewModel.room!, participant: participant) { participant in
+                        viewModel.room?.focusParticipant = participant
                     }
                 }
             }

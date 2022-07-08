@@ -10,18 +10,29 @@ import Combine
 import LiveKit
 import Promises
 
+@MainActor
 class CallViewModel: ObservableObject {
     
-    let room = ExampleObservableRoom()
+    @Injected(\.streamVideo) var streamVideo
     
-    var shouldShowRoomView: Bool {
-        room.room.connectionState.isConnected || room.room.connectionState.isReconnecting
+    @Published var room: VideoRoom? {
+        didSet {
+            room?.$connectionStatus
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] status in
+                    self?.shouldShowRoomView = status == .connected || status == .reconnecting
+            })
+            .store(in: &cancellables)
+        }
     }
+    
+    @Published var shouldShowRoomView: Bool = false
     
     @Published var shouldShowError: Bool = false
     public var latestError: Error?
     
     private var url: String = "wss://livekit.fucking-go-slices.com"
+    private var cancellables = Set<AnyCancellable>()
     
     @Published var users = [
         User(
@@ -38,11 +49,7 @@ class CallViewModel: ObservableObject {
         hostname: "http://localhost:26991",
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
     )
-    
-    init() {
-        room.room.add(delegate: self)
-    }
-    
+
     func selectEdgeServer() {
         Task {
             let selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
@@ -51,58 +58,17 @@ class CallViewModel: ObservableObject {
         }
     }
     
-    func connect() -> Promise<Room> {
+    func makeCall() async throws {
         if selectedUser == nil {
             selectedUser = users.first
         }
+        
+        let token = selectedUser?.token ?? ""
 
-        let connectOptions = ConnectOptions(
-            autoSubscribe: true,
-            publishOnlyMode: nil
-        )
-
-        let roomOptions = RoomOptions(
-            defaultScreenShareCaptureOptions: ScreenShareCaptureOptions(
-            ),
-            // Pass the simulcast option
-            defaultVideoPublishOptions: VideoPublishOptions(
-                simulcast: true
-            ),
-            adaptiveStream: false,
-            dynacast: false,
-            reportStats: false
-        )
-
-        return room.room.connect(url,
-                                 selectedUser!.token,
-                                 connectOptions: connectOptions,
-                                 roomOptions: roomOptions)
+        room = try await streamVideo.connect(url: url, token: token, options: VideoOptions())
     }
     
 }
-
-extension CallViewModel: RoomDelegate {
-
-    func room(_ room: Room, didUpdate connectionState: ConnectionState, oldValue: ConnectionState) {
-
-        print("Did update connectionState \(connectionState) \(room.connectionState)")
-
-        if let error = connectionState.disconnectedWithError {
-            latestError = error
-            DispatchQueue.main.async {
-                self.shouldShowError = true
-            }
-        }
-
-        DispatchQueue.main.async {
-            withAnimation {
-                self.objectWillChange.send()
-            }
-        }
-    }
-}
-
-
 
 struct User: Identifiable, Equatable {
     let name: String

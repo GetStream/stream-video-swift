@@ -3,7 +3,7 @@ import LiveKit
 
 struct ParticipantView: View {
 
-    var room: ExampleObservableRoom
+    var room: VideoRoom
     @ObservedObject var participant: ObservableParticipant
 
     var onTap: ((_ participant: ObservableParticipant) -> Void)?

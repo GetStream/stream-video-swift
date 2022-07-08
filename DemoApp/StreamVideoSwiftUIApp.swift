@@ -9,6 +9,13 @@ import SwiftUI
 
 @main
 struct StreamVideoSwiftUIApp: App {
+    
+    var streamVideo: StreamVideo
+    
+    init() {
+        streamVideo = StreamVideo(apiKey: "1234")
+    }
+    
     var body: some Scene {
         WindowGroup {
             CallView()

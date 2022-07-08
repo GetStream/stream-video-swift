@@ -9,8 +9,12 @@ import SwiftUI
 
 struct CallView: View {
     
-    @StateObject var viewModel = CallViewModel()
+    @StateObject var viewModel: CallViewModel
     
+    init() {
+        _viewModel = StateObject(wrappedValue: CallViewModel())
+    }
+        
     var body: some View {
         ZStack {
             if viewModel.shouldShowRoomView {
@@ -48,7 +52,9 @@ struct ConnectView: View {
             Spacer()
             
             Button {
-                _ = viewModel.connect()
+                Task {
+                    try? await viewModel.makeCall()
+                }
             } label: {
                 Text("Start a call")
             }
