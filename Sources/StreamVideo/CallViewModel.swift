@@ -9,40 +9,39 @@ import SwiftUI
 import Combine
 import LiveKit
 import Promises
-import LiveKit
 import OrderedCollections
 
 @MainActor
-class CallViewModel: ObservableObject, VideoRoomDelegate {
+public class CallViewModel: ObservableObject  {
     
     @Injected(\.streamVideo) var streamVideo
     
-    @Published var room: VideoRoom? {
+    @Published public var room: VideoRoom? {
         didSet {
             self.connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
             self.remoteParticipants = roomParticipants
         }
     }
-    @Published var focusParticipant: RoomParticipant?
-    @Published var connectionStatus: ConnectionStatus = .disconnected(reason: nil) {
+    @Published public var focusParticipant: RoomParticipant?
+    @Published public var connectionStatus: ConnectionStatus = .disconnected(reason: nil) {
         didSet {
             self.shouldShowRoomView = connectionStatus == .connected || connectionStatus == .reconnecting
         }
     }
-    @Published var cameraTrackState: StreamTrackPublishState = .notPublished()
-    @Published var microphoneTrackState: StreamTrackPublishState = .notPublished()
+    @Published public var cameraTrackState: StreamTrackPublishState = .notPublished()
+    @Published public var microphoneTrackState: StreamTrackPublishState = .notPublished()
 
     
-    var shouldShowRoomView: Bool = false
+    public var shouldShowRoomView: Bool = false
     
-    @Published var shouldShowError: Bool = false
+    @Published public var shouldShowError: Bool = false
     public var latestError: Error?
     
     private var url: String = "wss://livekit.fucking-go-slices.com"
     
-    @Published var users = mockUsers
+    @Published public var users = mockUsers
     
-    @Published var selectedUser: User?
+    @Published public var selectedUser: User?
     
     let callCoordinatorService = Stream_Video_CallCoordinatorService(
         hostname: "http://localhost:26991",
@@ -50,6 +49,8 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
     )
     
     @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:]
+    
+    public init() {}
 
     public var allParticipants: OrderedDictionary<String, RoomParticipant> {
         var result = remoteParticipants
@@ -101,7 +102,7 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
         }
     }
 
-    func selectEdgeServer() {
+    public func selectEdgeServer() {
         Task {
             let selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
             let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
@@ -109,7 +110,7 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
         }
     }
     
-    func makeCall() async throws {
+    public func makeCall() async throws {
         if selectedUser == nil {
             selectedUser = users.first
         }
@@ -122,9 +123,13 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
         toggleCameraEnabled()
     }
     
+}
+
+extension CallViewModel: VideoRoomDelegate {
+    
     // MARK: - RoomDelegate
 
-    nonisolated func room(_ room: Room, didUpdate connectionState: ConnectionState, oldValue: ConnectionState) {
+    nonisolated public func room(_ room: Room, didUpdate connectionState: ConnectionState, oldValue: ConnectionState) {
         DispatchQueue.main.async {
             self.connectionStatus = connectionState.mapped
         }
@@ -137,7 +142,7 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
         }
     }
 
-    nonisolated func room(
+    nonisolated public func room(
         _ room: Room,
         participantDidLeave participant: RemoteParticipant
     ) {
@@ -151,19 +156,27 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
         }
     }
     
-    nonisolated func room(_ room: Room, participantDidJoin participant: RemoteParticipant) {
+    nonisolated public func room(_ room: Room, participantDidJoin participant: RemoteParticipant) {
         DispatchQueue.main.async {
             self.remoteParticipants = self.roomParticipants
         }
     }
-
-    
 }
 
-struct User: Identifiable, Equatable {
-    let name: String
-    let token: String
-    var id: String {
+public struct User: Identifiable, Equatable {
+    public let name: String
+    public let token: String
+    public var id: String {
         name
     }
 }
+
+//TODO: Remove from here.
+let mockUsers = [
+    User(
+        name: "User 1",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTkwMjI0NjEsImlzcyI6IkFQSVM0Y2F6YXg5dnFRUSIsIm5iZiI6MTY1NjQzMDQ2MSwic3ViIjoicm9iIiwidmlkZW8iOnsicm9vbSI6InN0YXJrLXRvd2VyIiwicm9vbUpvaW4iOnRydWV9fQ.vKC-RXDSYGqeyChwazQLO15mV1S1n4LxyeJLrJASYPA"),
+    User(
+        name: "User 2",
+        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTkwMjI1MzMsImlzcyI6IkFQSVM0Y2F6YXg5dnFRUSIsIm5iZiI6MTY1NjQzMDUzMywic3ViIjoiYm9iIiwidmlkZW8iOnsicm9vbSI6InN0YXJrLXRvd2VyIiwicm9vbUpvaW4iOnRydWV9fQ.XTQ9nU5BJ3FdWUaOrge-u977YibNTfK-sTDRaI0_vRc")
+]

@@ -6,12 +6,17 @@
 //
 
 import SwiftUI
+import StreamVideo
 
-struct RoomView: View {
+public struct RoomView: View {
     
     @ObservedObject var viewModel: CallViewModel
     
-    var body: some View {
+    public init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+    }
+    
+    public var body: some View {
         Group {
             if let focusParticipant = viewModel.focusParticipant {
                 ZStack(alignment: .bottomTrailing) {

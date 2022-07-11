@@ -8,14 +8,14 @@
 import Foundation
 import LiveKit
 
-class RoomParticipant {
+public class RoomParticipant {
     private let participant: Participant
     
     var id: String {
         self.participant.sid
     }
     
-    var name: String {
+    public var name: String {
         self.participant.name
     }
     

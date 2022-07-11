@@ -9,7 +9,7 @@ import SwiftUI
 import LiveKit
 import AVFoundation
 
-class VideoRoom: ObservableObject {
+public class VideoRoom: ObservableObject {
         
     private let room: Room
     
@@ -40,6 +40,6 @@ class VideoRoom: ObservableObject {
 
 typealias VideoRoomDelegate = RoomDelegate
 
-struct VideoOptions {
+public struct VideoOptions {
     //TODO:
 }

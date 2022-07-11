@@ -25,26 +25,9 @@
 		842D8BFB2865C23800801910 /* ViewModelFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BFA2865C23800801910 /* ViewModelFactory.swift */; };
 		842D8BFD2865CEA200801910 /* CameraView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BFC2865CEA200801910 /* CameraView.swift */; };
 		842D8BFF2865F26300801910 /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BFE2865F26300801910 /* HelperViews.swift */; };
-		84C2996C2876D93D0034B735 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996B2876D93D0034B735 /* Room.swift */; };
-		84C2996E2876E42E0034B735 /* StreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996D2876E42D0034B735 /* StreamVideo.swift */; };
-		84C299702876E5DC0034B735 /* VideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996F2876E5DC0034B735 /* VideoService.swift */; };
-		84C299732876E8C90034B735 /* InjectedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299722876E8C90034B735 /* InjectedValues.swift */; };
-		84C299752876E8F80034B735 /* InjectedValuesExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299742876E8F80034B735 /* InjectedValuesExtensions.swift */; };
-		84C2997728784AA50034B735 /* RoomParticipant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997628784AA40034B735 /* RoomParticipant.swift */; };
-		84C2997928784B180034B735 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997828784B180034B735 /* Typealiases.swift */; };
-		84C2997B28784B500034B735 /* ConnectionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997A28784B500034B735 /* ConnectionStatus.swift */; };
-		84C2997D28784BB30034B735 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997C28784BB30034B735 /* Utils.swift */; };
-		84C2997F287865560034B735 /* StreamVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997E287865560034B735 /* StreamVideoView.swift */; };
+		84AF64BC287C34320012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BB287C34320012A503 /* WebRTC */; };
+		84AF64BE287C34450012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BD287C34450012A503 /* WebRTC */; };
 		84ED240D286C9515002A3186 /* CallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240C286C9515002A3186 /* CallView.swift */; };
-		84ED240F286C9530002A3186 /* CallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240E286C9530002A3186 /* CallViewModel.swift */; };
-		84ED2413286CA414002A3186 /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2412286CA414002A3186 /* RoomView.swift */; };
-		84ED2415286CABD1002A3186 /* ParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2414286CABD1002A3186 /* ParticipantView.swift */; };
-		84ED2417286D86AE002A3186 /* ParticipantLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2416286D86AE002A3186 /* ParticipantLayout.swift */; };
-		84ED241C286F12B5002A3186 /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2418286F12B5002A3186 /* models.pb.swift */; };
-		84ED241D286F12B5002A3186 /* validate.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2419286F12B5002A3186 /* validate.pb.swift */; };
-		84ED241E286F12B5002A3186 /* coordinator_service.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED241A286F12B5002A3186 /* coordinator_service.pb.swift */; };
-		84ED241F286F12B5002A3186 /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED241B286F12B5002A3186 /* events.pb.swift */; };
-		84ED2421286F199E002A3186 /* stream.video.coordinator_service.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2420286F199E002A3186 /* stream.video.coordinator_service.twirp.swift */; };
 		84F737F5287C13AD00A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F737FA287C13AD00A363F4 /* StreamVideoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F737F9287C13AD00A363F4 /* StreamVideoTests.swift */; };
 		84F737FB287C13AD00A363F4 /* StreamVideo.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F737EF287C13AC00A363F4 /* StreamVideo.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -56,7 +39,30 @@
 		84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; };
 		84F73835287C146D00A363F4 /* StreamVideoUIKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F73834287C146D00A363F4 /* StreamVideoUIKitTests.swift */; };
 		84F73836287C146D00A363F4 /* StreamVideoUIKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F7382A287C146D00A363F4 /* StreamVideoUIKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		84F73FA0286C5011006A39C3 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84F73F9F286C5011006A39C3 /* LiveKit */; };
+		84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240E286C9530002A3186 /* CallViewModel.swift */; };
+		84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2416286D86AE002A3186 /* ParticipantLayout.swift */; };
+		84F7383F287C193300A363F4 /* StreamVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997E287865560034B735 /* StreamVideoView.swift */; };
+		84F73840287C193300A363F4 /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2412286CA414002A3186 /* RoomView.swift */; };
+		84F73841287C193300A363F4 /* ParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2414286CABD1002A3186 /* ParticipantView.swift */; };
+		84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
+		84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
+		84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
+		84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		84F73852287C19B500A363F4 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84F73851287C19B500A363F4 /* LiveKit */; };
+		84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299722876E8C90034B735 /* InjectedValues.swift */; };
+		84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299742876E8F80034B735 /* InjectedValuesExtensions.swift */; };
+		84F73855287C1A3400A363F4 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997C28784BB30034B735 /* Utils.swift */; };
+		84F73856287C1A3400A363F4 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997828784B180034B735 /* Typealiases.swift */; };
+		84F73857287C1A3400A363F4 /* RoomParticipant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997628784AA40034B735 /* RoomParticipant.swift */; };
+		84F73858287C1A3400A363F4 /* ConnectionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997A28784B500034B735 /* ConnectionStatus.swift */; };
+		84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996D2876E42D0034B735 /* StreamVideo.swift */; };
+		84F7385A287C1A3400A363F4 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996B2876D93D0034B735 /* Room.swift */; };
+		84F7385B287C1A3400A363F4 /* VideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996F2876E5DC0034B735 /* VideoService.swift */; };
+		84F7385C287C1A4C00A363F4 /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2418286F12B5002A3186 /* models.pb.swift */; };
+		84F7385D287C1A4C00A363F4 /* coordinator_service.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED241A286F12B5002A3186 /* coordinator_service.pb.swift */; };
+		84F7385E287C1A4C00A363F4 /* stream.video.coordinator_service.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2420286F199E002A3186 /* stream.video.coordinator_service.twirp.swift */; };
+		84F7385F287C1A4C00A363F4 /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED241B286F12B5002A3186 /* events.pb.swift */; };
+		84F73860287C1A4C00A363F4 /* validate.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2419286F12B5002A3186 /* validate.pb.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -95,6 +101,27 @@
 			remoteGlobalIDString = 84F73827287C146D00A363F4;
 			remoteInfo = StreamVideoUIKit;
 		};
+		84F73845287C195600A363F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F737EC287C13AC00A363F4;
+			remoteInfo = StreamVideo;
+		};
+		84F7384A287C196B00A363F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F737EC287C13AC00A363F4;
+			remoteInfo = StreamVideo;
+		};
+		84F7384F287C198500A363F4 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F737EC287C13AC00A363F4;
+			remoteInfo = StreamVideo;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -104,6 +131,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */,
 				84F7381B287C141000A363F4 /* StreamVideoSwiftUI.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
@@ -172,7 +200,8 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
-				84F73FA0286C5011006A39C3 /* LiveKit in Frameworks */,
+				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
+				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -180,6 +209,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84F73852287C19B500A363F4 /* LiveKit in Frameworks */,
+				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -195,6 +226,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -210,6 +242,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -233,6 +266,7 @@
 				84F73833287C146D00A363F4 /* StreamVideoUIKitTests */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				842D8BC42865B31B00801910 /* Products */,
+				84F73842287C195600A363F4 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -253,16 +287,9 @@
 		842D8BD42865B37800801910 /* DemoApp */ = {
 			isa = PBXGroup;
 			children = (
-				84C2996A2876D8B50034B735 /* VideoService */,
-				84ED240B286C9500002A3186 /* protobuf */,
 				84ED240A286C94C5002A3186 /* old */,
 				842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */,
-				84ED2412286CA414002A3186 /* RoomView.swift */,
 				84ED240C286C9515002A3186 /* CallView.swift */,
-				84ED240E286C9530002A3186 /* CallViewModel.swift */,
-				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
-				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
-				84C2997E287865560034B735 /* StreamVideoView.swift */,
 				84C2996928757F820034B735 /* DemoApp-Info.plist */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
 				842D8BD72865B37800801910 /* Preview Content */,
@@ -357,6 +384,9 @@
 		84F737EE287C13AC00A363F4 /* StreamVideo */ = {
 			isa = PBXGroup;
 			children = (
+				84ED240E286C9530002A3186 /* CallViewModel.swift */,
+				84C2996A2876D8B50034B735 /* VideoService */,
+				84ED240B286C9500002A3186 /* protobuf */,
 				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
 			);
 			path = StreamVideo;
@@ -373,6 +403,10 @@
 		84F73808287C141000A363F4 /* StreamVideoSwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				84ED2412286CA414002A3186 /* RoomView.swift */,
+				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
+				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
+				84C2997E287865560034B735 /* StreamVideoView.swift */,
 				84F73809287C141000A363F4 /* StreamVideoSwiftUI.h */,
 			);
 			path = StreamVideoSwiftUI;
@@ -400,6 +434,13 @@
 				84F73834287C146D00A363F4 /* StreamVideoUIKitTests.swift */,
 			);
 			path = StreamVideoUIKitTests;
+			sourceTree = "<group>";
+		};
+		84F73842287C195600A363F4 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -445,10 +486,11 @@
 			);
 			dependencies = (
 				84F73819287C141000A363F4 /* PBXTargetDependency */,
+				84F73850287C198500A363F4 /* PBXTargetDependency */,
 			);
 			name = DemoApp;
 			packageProductDependencies = (
-				84F73F9F286C5011006A39C3 /* LiveKit */,
+				84AF64BD287C34450012A503 /* WebRTC */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* DemoApp.app */;
@@ -468,6 +510,10 @@
 			dependencies = (
 			);
 			name = StreamVideo;
+			packageProductDependencies = (
+				84F73851287C19B500A363F4 /* LiveKit */,
+				84AF64BB287C34320012A503 /* WebRTC */,
+			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
 			productType = "com.apple.product-type.framework";
@@ -502,6 +548,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				84F73846287C195600A363F4 /* PBXTargetDependency */,
 			);
 			name = StreamVideoSwiftUI;
 			productName = StreamVideoSwiftUI;
@@ -539,6 +586,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				84F7384B287C196B00A363F4 /* PBXTargetDependency */,
 			);
 			name = StreamVideoUIKit;
 			productName = StreamVideoUIKit;
@@ -608,6 +656,7 @@
 			mainGroup = 842D8BBA2865B31B00801910;
 			packageReferences = (
 				84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
+				84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -685,40 +734,21 @@
 			files = (
 				842D8BEB2865B76A00801910 /* IceCandidate.swift in Sources */,
 				842D8BF12865B81800801910 /* WebRTCClient.swift in Sources */,
-				84C2996C2876D93D0034B735 /* Room.swift in Sources */,
 				842D8BE22865B62A00801910 /* SignallingClient.swift in Sources */,
 				842D8BFD2865CEA200801910 /* CameraView.swift in Sources */,
 				842D8BEF2865B7E100801910 /* Config.swift in Sources */,
 				842D8BF92865BC9900801910 /* VideoViewModel.swift in Sources */,
-				84ED240F286C9530002A3186 /* CallViewModel.swift in Sources */,
-				84C299732876E8C90034B735 /* InjectedValues.swift in Sources */,
 				842D8BE92865B74E00801910 /* SessionDescription.swift in Sources */,
-				84C2997D28784BB30034B735 /* Utils.swift in Sources */,
 				842D8BF32865B9FF00801910 /* HomeView.swift in Sources */,
-				84ED241F286F12B5002A3186 /* events.pb.swift in Sources */,
-				84C2997728784AA50034B735 /* RoomParticipant.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
 				842D8BF52865BA5B00801910 /* HomeViewModel.swift in Sources */,
-				84C299752876E8F80034B735 /* InjectedValuesExtensions.swift in Sources */,
 				842D8BE72865B70C00801910 /* Message.swift in Sources */,
-				84ED2417286D86AE002A3186 /* ParticipantLayout.swift in Sources */,
 				842D8BFF2865F26300801910 /* HelperViews.swift in Sources */,
-				84C2997B28784B500034B735 /* ConnectionStatus.swift in Sources */,
-				84ED241D286F12B5002A3186 /* validate.pb.swift in Sources */,
-				84ED241C286F12B5002A3186 /* models.pb.swift in Sources */,
-				84ED2413286CA414002A3186 /* RoomView.swift in Sources */,
-				84C2997F287865560034B735 /* StreamVideoView.swift in Sources */,
-				84ED2421286F199E002A3186 /* stream.video.coordinator_service.twirp.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				842D8BE02865B5CB00801910 /* WebSocketProvider.swift in Sources */,
-				84C299702876E5DC0034B735 /* VideoService.swift in Sources */,
-				84ED2415286CABD1002A3186 /* ParticipantView.swift in Sources */,
 				842D8BED2865B78A00801910 /* RTCStates.swift in Sources */,
 				842D8BF72865BC8D00801910 /* VideoView.swift in Sources */,
-				84C2997928784B180034B735 /* Typealiases.swift in Sources */,
-				84ED241E286F12B5002A3186 /* coordinator_service.pb.swift in Sources */,
 				842D8BFB2865C23800801910 /* ViewModelFactory.swift in Sources */,
-				84C2996E2876E42E0034B735 /* StreamVideo.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -726,6 +756,21 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84F7385E287C1A4C00A363F4 /* stream.video.coordinator_service.twirp.swift in Sources */,
+				84F73858287C1A3400A363F4 /* ConnectionStatus.swift in Sources */,
+				84F73857287C1A3400A363F4 /* RoomParticipant.swift in Sources */,
+				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
+				84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */,
+				84F73856287C1A3400A363F4 /* Typealiases.swift in Sources */,
+				84F7385C287C1A4C00A363F4 /* models.pb.swift in Sources */,
+				84F7385A287C1A3400A363F4 /* Room.swift in Sources */,
+				84F7385D287C1A4C00A363F4 /* coordinator_service.pb.swift in Sources */,
+				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
+				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
+				84F7385F287C1A4C00A363F4 /* events.pb.swift in Sources */,
+				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
+				84F7385B287C1A3400A363F4 /* VideoService.swift in Sources */,
+				84F73860287C1A4C00A363F4 /* validate.pb.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -741,6 +786,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84F73840287C193300A363F4 /* RoomView.swift in Sources */,
+				84F7383F287C193300A363F4 /* StreamVideoView.swift in Sources */,
+				84F73841287C193300A363F4 /* ParticipantView.swift in Sources */,
+				84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -794,6 +843,21 @@
 			isa = PBXTargetDependency;
 			target = 84F73827287C146D00A363F4 /* StreamVideoUIKit */;
 			targetProxy = 84F73831287C146D00A363F4 /* PBXContainerItemProxy */;
+		};
+		84F73846287C195600A363F4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
+			targetProxy = 84F73845287C195600A363F4 /* PBXContainerItemProxy */;
+		};
+		84F7384B287C196B00A363F4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
+			targetProxy = 84F7384A287C196B00A363F4 /* PBXContainerItemProxy */;
+		};
+		84F73850287C198500A363F4 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
+			targetProxy = 84F7384F287C198500A363F4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -917,6 +981,7 @@
 		842D8BD22865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -934,6 +999,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -950,6 +1016,7 @@
 		842D8BD32865B31D00801910 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_STYLE = Automatic;
@@ -967,6 +1034,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -1045,6 +1113,7 @@
 		84F73800287C13AD00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -1062,6 +1131,7 @@
 		84F73801287C13AD00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -1350,6 +1420,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/webrtc-sdk/Specs.git";
+			requirement = {
+				kind = exactVersion;
+				version = 97.4692.5;
+			};
+		};
 		84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/livekit/client-sdk-swift.git";
@@ -1361,7 +1439,17 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		84F73F9F286C5011006A39C3 /* LiveKit */ = {
+		84AF64BB287C34320012A503 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
+			productName = WebRTC;
+		};
+		84AF64BD287C34450012A503 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
+			productName = WebRTC;
+		};
+		84F73851287C19B500A363F4 /* LiveKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */;
 			productName = LiveKit;

@@ -7,6 +7,7 @@
 
 import SwiftUI
 import Combine
+import StreamVideo
 import LiveKit
 
 struct StreamVideoView: View {

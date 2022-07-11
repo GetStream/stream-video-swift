@@ -7,17 +7,17 @@
 
 import Foundation
 
-class StreamVideo {
+public class StreamVideo {
     
     let apiKey: String
     let videoService = VideoService()
     
-    init(apiKey: String) {
+    public init(apiKey: String) {
         self.apiKey = apiKey
         StreamVideoProviderKey.currentValue = self
     }
     
-    func connect(
+    public func connect(
         url: String,
         token: String,
         options: VideoOptions
