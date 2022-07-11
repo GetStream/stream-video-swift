@@ -1,0 +1,3 @@
+[submodule "Sources/StreamVideo/protobuf/backend"]
+	path = Sources/StreamVideo/protobuf/backend
+	url = https://github.com/GetStream/video.git
