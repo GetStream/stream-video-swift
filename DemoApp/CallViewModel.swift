@@ -20,6 +20,7 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
     @Published var room: VideoRoom? {
         didSet {
             self.connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
+            self.remoteParticipants = roomParticipants
         }
     }
     @Published var focusParticipant: RoomParticipant?
@@ -48,14 +49,7 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
         token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
     )
     
-    public var remoteParticipants: OrderedDictionary<String, RoomParticipant> {
-        guard let room = room else {
-            return [:]
-        }
-        return OrderedDictionary(uniqueKeysWithValues: room.remoteParticipants.map { (sid, participant) in
-            (sid, RoomParticipant(participant: participant))
-        })
-    }
+    @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:]
 
     public var allParticipants: OrderedDictionary<String, RoomParticipant> {
         var result = remoteParticipants
@@ -67,6 +61,15 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
             )
         }
         return result
+    }
+    
+    private var roomParticipants: OrderedDictionary<String, RoomParticipant> {
+        guard let room = room else {
+            return [:]
+        }
+        return OrderedDictionary(uniqueKeysWithValues: room.remoteParticipants.map { (sid, participant) in
+            (sid, RoomParticipant(participant: participant))
+        })
     }
     
     public func toggleCameraEnabled() {
@@ -130,7 +133,6 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
             DispatchQueue.main.async {
                 // Reset state
                 self.focusParticipant = nil
-                self.objectWillChange.send()
             }
         }
     }
@@ -141,12 +143,17 @@ class CallViewModel: ObservableObject, VideoRoomDelegate {
     ) {
         let remoteParticipant = RoomParticipant(participant: participant)
         DispatchQueue.main.async {
-            // self.participants.removeValue(forKey: participant.sid)
+            self.remoteParticipants = self.roomParticipants
             if let focusParticipant = self.focusParticipant,
                focusParticipant.id == remoteParticipant.id {
                 self.focusParticipant = nil
             }
-            self.objectWillChange.send()
+        }
+    }
+    
+    nonisolated func room(_ room: Room, participantDidJoin participant: RemoteParticipant) {
+        DispatchQueue.main.async {
+            self.remoteParticipants = self.roomParticipants
         }
     }
 
