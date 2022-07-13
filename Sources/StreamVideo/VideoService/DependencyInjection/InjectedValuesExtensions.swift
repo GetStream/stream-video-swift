@@ -6,7 +6,7 @@ import Foundation
 
 extension InjectedValues {
     /// Provides access to the `StreamVideo` instance in the views and view models.
-    var streamVideo: StreamVideo {
+    public var streamVideo: StreamVideo {
         get {
             guard let injected = Self[StreamVideoProviderKey.self] else {
                 fatalError("Video client was not setup")
