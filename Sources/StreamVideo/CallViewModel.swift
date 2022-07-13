@@ -102,13 +102,18 @@ public class CallViewModel: ObservableObject  {
             do {
                 loading = true
                 log.debug("Starting call")
-                try await selectEdgeServer()
-                log.debug("Joining room")
-                let room = try await streamVideo.joinRoom(url: url, token: token, options: VideoOptions())
+                let callType = CallType(name: "video")
+                let callId = UUID().uuidString
+                let room = try await streamVideo.joinCall(
+                    callType: callType,
+                    callId: callId,
+                    videoOptions: VideoOptions()
+                )
                 self.room = room
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
                 loading = false
+                log.debug("Started call")
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
                 loading = false
@@ -118,14 +123,6 @@ public class CallViewModel: ObservableObject  {
     
     public func leaveCall() {
         self.room?.disconnect()
-    }
-    
-    private func selectEdgeServer() async throws {
-        var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
-        selectEdgeRequest.callID = "1234"
-        let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
-        url = "wss://\(response.edgeServer.url)"
-        token = response.token
     }
     
 }

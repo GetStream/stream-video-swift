@@ -43,16 +43,71 @@ public class StreamVideo {
         self.token = token
     }
     
-    public func joinRoom(
-        url: String,
-        token: String,
-        options: VideoOptions
+    public func joinCall(
+        callType: CallType,
+        callId: String,
+        videoOptions: VideoOptions
     ) async throws -> VideoRoom {
-        return try await videoService.connect(
-            url: url,
-            token: token,
-            options: options
+        let createCallResponse = try await createCall()
+        
+        let edges = try await joinCall(
+            callId: createCallResponse.call.id,
+            type: createCallResponse.call.type
         )
+        
+        let latencyByEdge = try await measureLatencies(for: edges)
+        
+        let edgeServer = try await selectEdgeServer(
+            callId: createCallResponse.call.id,
+            latencyByEdge: latencyByEdge
+        )
+        
+        return try await videoService.connect(
+            url: edgeServer.url,
+            token: edgeServer.token,
+            options: videoOptions
+        )
+    }
+    
+    private func createCall() async throws -> Stream_Video_CreateCallResponse {
+        let createCallRequest = Stream_Video_CreateCallRequest()
+        let createCallResponse = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
+        return createCallResponse
+    }
+    
+    private func measureLatencies(
+        for edges: [Stream_Video_Edge]
+    ) async throws -> [String: Stream_Video_Latency] {
+        //TODO: implement
+        var result: [String: Stream_Video_Latency] = [:]
+        for edge in edges {
+            var latency = Stream_Video_Latency()
+            latency.measurements = [0.1, 0.2, 0.3]
+            result[edge.name] = latency
+        }
+        return result
+    }
+    
+    private func joinCall(callId: String, type: String) async throws -> [Stream_Video_Edge] {
+        var joinCallRequest = Stream_Video_JoinCallRequest()
+        joinCallRequest.id = callId
+        joinCallRequest.type = type
+        let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
+        let edges = joinCallResponse.edges
+        return edges
+    }
+    
+    private func selectEdgeServer(
+        callId: String,
+        latencyByEdge: [String: Stream_Video_Latency]
+    ) async throws -> (url: String, token: String) {
+        var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
+        selectEdgeRequest.callID = callId
+        selectEdgeRequest.latencyByEdge = latencyByEdge
+        let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
+        let url = "wss://\(response.edgeServer.url)"
+        let token = response.token
+        return (url: url, token: token)
     }
     
 }
