@@ -54,7 +54,7 @@ class LoginViewModel: ObservableObject {
                 AppState.shared.userState = .loggedIn
             } catch {
                 loading = false
-                print("error occurred")
+                log.error("Error occured: \(error.localizedDescription)")
             }
         }
     }

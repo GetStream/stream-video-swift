@@ -47,7 +47,7 @@ struct ConnectView: View {
             Spacer()
         }
         .overlay(
-            viewModel.loading ? ProgressView() : nil
+            viewModel.loading ? ProgressView().offset(y: 32) : nil
         )
     }
     

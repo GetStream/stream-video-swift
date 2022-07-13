@@ -13,6 +13,13 @@
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
+		8456E6D1287EC343004E180E /* Logger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C8287EC343004E180E /* Logger.swift */; };
+		8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CA287EC343004E180E /* ConsoleLogDestination.swift */; };
+		8456E6D3287EC343004E180E /* BaseLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CB287EC343004E180E /* BaseLogDestination.swift */; };
+		8456E6D4287EC343004E180E /* LogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CC287EC343004E180E /* LogDestination.swift */; };
+		8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */; };
+		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
+		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
 		84AF64BC287C34320012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BB287C34320012A503 /* WebRTC */; };
 		84AF64BE287C34450012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BD287C34450012A503 /* WebRTC */; };
 		84AF64CC287C545E0012A503 /* stream.video.coordinator_service.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64C7287C545D0012A503 /* stream.video.coordinator_service.twirp.swift */; };
@@ -140,6 +147,13 @@
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
+		8456E6C8287EC343004E180E /* Logger.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Logger.swift; sourceTree = "<group>"; };
+		8456E6CA287EC343004E180E /* ConsoleLogDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConsoleLogDestination.swift; sourceTree = "<group>"; };
+		8456E6CB287EC343004E180E /* BaseLogDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BaseLogDestination.swift; sourceTree = "<group>"; };
+		8456E6CC287EC343004E180E /* LogDestination.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogDestination.swift; sourceTree = "<group>"; };
+		8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrefixLogFormatter.swift; sourceTree = "<group>"; };
+		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
+		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
 		84AF64C7287C545D0012A503 /* stream.video.coordinator_service.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.coordinator_service.twirp.swift; sourceTree = "<group>"; };
 		84AF64C8287C545D0012A503 /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
 		84AF64C9287C545E0012A503 /* validate.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = validate.pb.swift; sourceTree = "<group>"; };
@@ -293,25 +307,72 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
-		84AF64D3287C79220012A503 /* utils */ = {
+		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
-				84AF64D4287C79320012A503 /* RawJSON.swift */,
+				8456E6C8287EC343004E180E /* Logger.swift */,
+				8456E6C9287EC343004E180E /* Destination */,
+				8456E6CD287EC343004E180E /* Formatter */,
 			);
-			path = utils;
+			path = Logger;
+			sourceTree = "<group>";
+		};
+		8456E6C9287EC343004E180E /* Destination */ = {
+			isa = PBXGroup;
+			children = (
+				8456E6CA287EC343004E180E /* ConsoleLogDestination.swift */,
+				8456E6CB287EC343004E180E /* BaseLogDestination.swift */,
+				8456E6CC287EC343004E180E /* LogDestination.swift */,
+			);
+			path = Destination;
+			sourceTree = "<group>";
+		};
+		8456E6CD287EC343004E180E /* Formatter */ = {
+			isa = PBXGroup;
+			children = (
+				8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */,
+				8456E6CF287EC343004E180E /* LogFormatter.swift */,
+			);
+			path = Formatter;
+			sourceTree = "<group>";
+		};
+		8456E6D8287EC436004E180E /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				84AF64D8287C79F60012A503 /* Errors.swift */,
+				84AF64DA287C7A2C0012A503 /* ErrorPayload.swift */,
+			);
+			path = Errors;
+			sourceTree = "<group>";
+		};
+		8456E6D9287EC46D004E180E /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				84AF64D1287C78E70012A503 /* UserInfo.swift */,
+				84AF64D6287C79610012A503 /* Token.swift */,
+				84C2996B2876D93D0034B735 /* Room.swift */,
+				84C2997628784AA40034B735 /* RoomParticipant.swift */,
+				84C2997828784B180034B735 /* Typealiases.swift */,
+				84C2997A28784B500034B735 /* ConnectionStatus.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		84AF64D3287C79220012A503 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				8456E6C7287EC343004E180E /* Logger */,
+				84C2997C28784BB30034B735 /* Utils.swift */,
+				84AF64D4287C79320012A503 /* RawJSON.swift */,
+				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
+			);
+			path = Utils;
 			sourceTree = "<group>";
 		};
 		84C2996A2876D8B50034B735 /* VideoService */ = {
 			isa = PBXGroup;
 			children = (
-				84C299712876E77E0034B735 /* DependencyInjection */,
-				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
-				84C2996B2876D93D0034B735 /* Room.swift */,
 				84C2996F2876E5DC0034B735 /* VideoService.swift */,
-				84C2997628784AA40034B735 /* RoomParticipant.swift */,
-				84C2997828784B180034B735 /* Typealiases.swift */,
-				84C2997A28784B500034B735 /* ConnectionStatus.swift */,
-				84C2997C28784BB30034B735 /* Utils.swift */,
 			);
 			path = VideoService;
 			sourceTree = "<group>";
@@ -351,14 +412,14 @@
 			isa = PBXGroup;
 			children = (
 				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
-				84AF64D3287C79220012A503 /* utils */,
+				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
 				84ED240E286C9530002A3186 /* CallViewModel.swift */,
+				8456E6D9287EC46D004E180E /* Models */,
+				84C299712876E77E0034B735 /* DependencyInjection */,
+				84AF64D3287C79220012A503 /* Utils */,
 				84C2996A2876D8B50034B735 /* VideoService */,
+				8456E6D8287EC436004E180E /* Errors */,
 				84ED240B286C9500002A3186 /* protobuf */,
-				84AF64D1287C78E70012A503 /* UserInfo.swift */,
-				84AF64D6287C79610012A503 /* Token.swift */,
-				84AF64D8287C79F60012A503 /* Errors.swift */,
-				84AF64DA287C7A2C0012A503 /* ErrorPayload.swift */,
 			);
 			path = StreamVideo;
 			sourceTree = "<group>";
@@ -719,10 +780,15 @@
 				84F73858287C1A3400A363F4 /* ConnectionStatus.swift in Sources */,
 				84F73857287C1A3400A363F4 /* RoomParticipant.swift in Sources */,
 				84AF64CD287C545E0012A503 /* models.pb.swift in Sources */,
+				8456E6D1287EC343004E180E /* Logger.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				84AF64D2287C78E70012A503 /* UserInfo.swift in Sources */,
+				8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */,
 				84AF64CE287C545E0012A503 /* validate.pb.swift in Sources */,
+				8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */,
 				84AF64D9287C79F60012A503 /* Errors.swift in Sources */,
+				8456E6D3287EC343004E180E /* BaseLogDestination.swift in Sources */,
+				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */,
 				84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */,
 				84AF64CC287C545E0012A503 /* stream.video.coordinator_service.twirp.swift in Sources */,
@@ -731,6 +797,8 @@
 				84F7385A287C1A3400A363F4 /* Room.swift in Sources */,
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
+				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
+				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
 				84AF64CF287C545E0012A503 /* events.pb.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				84AF64D0287C545E0012A503 /* coordinator_service.pb.swift in Sources */,

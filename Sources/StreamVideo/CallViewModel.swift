@@ -100,13 +100,17 @@ public class CallViewModel: ObservableObject  {
     public func makeCall() {
         Task {
             do {
+                loading = true
+                log.debug("Starting call")
                 try await selectEdgeServer()
+                log.debug("Joining room")
                 let room = try await streamVideo.joinRoom(url: url, token: token, options: VideoOptions())
                 self.room = room
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
                 loading = false
             } catch {
+                log.error("Error starting a call \(error.localizedDescription)")
                 loading = false
             }
         }
@@ -133,6 +137,7 @@ extension CallViewModel: VideoRoomDelegate {
     nonisolated public func room(_ room: Room, didUpdate connectionState: ConnectionState, oldValue: ConnectionState) {
         DispatchQueue.main.async {
             self.connectionStatus = connectionState.mapped
+            log.debug("Connection status changed to \(self.connectionStatus)")
         }
         
         if case .disconnected = connectionState {
@@ -148,6 +153,8 @@ extension CallViewModel: VideoRoomDelegate {
         participantDidLeave participant: RemoteParticipant
     ) {
         let remoteParticipant = RoomParticipant(participant: participant)
+        log.debug("Participant \(participant.name) left the room.")
+        
         DispatchQueue.main.async {
             self.remoteParticipants = self.roomParticipants
             if let focusParticipant = self.focusParticipant,
@@ -160,6 +167,7 @@ extension CallViewModel: VideoRoomDelegate {
     nonisolated public func room(_ room: Room, participantDidJoin participant: RemoteParticipant) {
         DispatchQueue.main.async {
             self.remoteParticipants = self.roomParticipants
+            log.debug("Participant \(participant.name) joined the room.")
         }
     }
 }

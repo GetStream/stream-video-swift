@@ -18,6 +18,7 @@ struct StreamVideoSwiftUIApp: App {
         
     init() {
         streamVideo = StreamVideo(apiKey: "1234")
+        LogConfig.level = .debug
     }
     
     var body: some Scene {
