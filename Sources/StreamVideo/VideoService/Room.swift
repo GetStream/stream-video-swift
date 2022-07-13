@@ -25,6 +25,10 @@ public class VideoRoom: ObservableObject {
         self.room.add(delegate: delegate)
     }
     
+    func disconnect() {
+        self.room.disconnect()
+    }
+    
     internal var remoteParticipants: [Sid : RemoteParticipant] {
         self.room.remoteParticipants
     }

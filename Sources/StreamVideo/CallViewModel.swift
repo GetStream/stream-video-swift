@@ -38,6 +38,8 @@ public class CallViewModel: ObservableObject  {
     @Published public var shouldShowError: Bool = false
     public var latestError: Error?
     
+    @Published public var loading = false
+    
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""
             
@@ -95,12 +97,23 @@ public class CallViewModel: ObservableObject  {
         }
     }
 
-    public func makeCall() async throws {
-        try await selectEdgeServer()
-        let room = try await streamVideo.joinRoom(url: url, token: token, options: VideoOptions())
-        self.room = room
-        self.room?.addDelegate(self)
-        toggleCameraEnabled()
+    public func makeCall() {
+        Task {
+            do {
+                try await selectEdgeServer()
+                let room = try await streamVideo.joinRoom(url: url, token: token, options: VideoOptions())
+                self.room = room
+                self.room?.addDelegate(self)
+                toggleCameraEnabled()
+                loading = false
+            } catch {
+                loading = false
+            }
+        }
+    }
+    
+    public func leaveCall() {
+        self.room?.disconnect()
     }
     
     private func selectEdgeServer() async throws {

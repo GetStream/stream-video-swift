@@ -38,20 +38,17 @@ struct ConnectView: View {
             Spacer()
             
             Button {
-                Task {
-                    do {
-                        try await viewModel.makeCall()
-                    } catch {
-                        print(error)
-                    }
-
-                }
+                viewModel.makeCall()
             } label: {
                 Text("Start a call")
             }
+            .disabled(viewModel.loading)
             
             Spacer()
         }
+        .overlay(
+            viewModel.loading ? ProgressView() : nil
+        )
     }
     
 }
