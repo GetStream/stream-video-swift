@@ -112,6 +112,10 @@ class Stream_Video_CallCoordinatorService {
         return try await execute(request: getRecordingsRequest, path: "GetRecordings")
 	}
     
+    func update(userToken: String) {
+        self.token = userToken
+    }
+    
     private func execute<Request: ProtoModel, Response: ProtoModel>(request: Request, path: String) async throws -> Response {
         let requestData = try request.serializedData()
         var request = try makeRequest(for: path)

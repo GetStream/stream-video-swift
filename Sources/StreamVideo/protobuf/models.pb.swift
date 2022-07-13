@@ -299,8 +299,6 @@ struct Stream_Video_Device {
 
   var id: String = String()
 
-  var pushProvider: String = String()
-
   var disabled: Bool = false
 
   var disabledReason: String = String()
@@ -502,9 +500,6 @@ struct Stream_Video_CallState {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// Little different to member/watcher concept. Both are in the participant list
-  var callID: String = String()
-
   var participants: [Stream_Video_Participant] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -517,14 +512,19 @@ struct Stream_Video_Call {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// the call type
+  var type: String = String()
+
+  /// the call id
   var id: String = String()
 
-  var name: String = String()
-
+  /// the id of the user that created this call
   var createdByUserID: String = String()
 
+  /// call creation date as RFC3339 string
   var createdAt: String = String()
 
+  /// call last update date as RFC3339 string
   var updatedAt: String = String()
 
   /// enable broadcasting by default when creating a call of this type
@@ -1008,12 +1008,11 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "user_id"),
     2: .same(proto: "id"),
-    3: .standard(proto: "push_provider"),
-    4: .same(proto: "disabled"),
-    5: .standard(proto: "disabled_reason"),
-    6: .standard(proto: "push_provider_name"),
-    7: .standard(proto: "created_at"),
-    8: .standard(proto: "updated_at"),
+    3: .same(proto: "disabled"),
+    4: .standard(proto: "disabled_reason"),
+    5: .standard(proto: "push_provider_name"),
+    6: .standard(proto: "created_at"),
+    7: .standard(proto: "updated_at"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1024,12 +1023,11 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.pushProvider) }()
-      case 4: try { try decoder.decodeSingularBoolField(value: &self.disabled) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.disabledReason) }()
-      case 6: try { try decoder.decodeSingularStringField(value: &self.pushProviderName) }()
-      case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
-      case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.disabled) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.disabledReason) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.pushProviderName) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
       }
     }
@@ -1042,23 +1040,20 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 2)
     }
-    if !self.pushProvider.isEmpty {
-      try visitor.visitSingularStringField(value: self.pushProvider, fieldNumber: 3)
-    }
     if self.disabled != false {
-      try visitor.visitSingularBoolField(value: self.disabled, fieldNumber: 4)
+      try visitor.visitSingularBoolField(value: self.disabled, fieldNumber: 3)
     }
     if !self.disabledReason.isEmpty {
-      try visitor.visitSingularStringField(value: self.disabledReason, fieldNumber: 5)
+      try visitor.visitSingularStringField(value: self.disabledReason, fieldNumber: 4)
     }
     if !self.pushProviderName.isEmpty {
-      try visitor.visitSingularStringField(value: self.pushProviderName, fieldNumber: 6)
+      try visitor.visitSingularStringField(value: self.pushProviderName, fieldNumber: 5)
     }
     if !self.createdAt.isEmpty {
-      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 6)
     }
     if !self.updatedAt.isEmpty {
-      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 8)
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 7)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1066,7 +1061,6 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
   static func ==(lhs: Stream_Video_Device, rhs: Stream_Video_Device) -> Bool {
     if lhs.userID != rhs.userID {return false}
     if lhs.id != rhs.id {return false}
-    if lhs.pushProvider != rhs.pushProvider {return false}
     if lhs.disabled != rhs.disabled {return false}
     if lhs.disabledReason != rhs.disabledReason {return false}
     if lhs.pushProviderName != rhs.pushProviderName {return false}
@@ -1403,8 +1397,7 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
 extension Stream_Video_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallState"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "call_id"),
-    2: .same(proto: "participants"),
+    1: .same(proto: "participants"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1413,25 +1406,20 @@ extension Stream_Video_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageI
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.callID) }()
-      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.participants) }()
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.participants) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.callID.isEmpty {
-      try visitor.visitSingularStringField(value: self.callID, fieldNumber: 1)
-    }
     if !self.participants.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.participants, fieldNumber: 2)
+      try visitor.visitRepeatedMessageField(value: self.participants, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_CallState, rhs: Stream_Video_CallState) -> Bool {
-    if lhs.callID != rhs.callID {return false}
     if lhs.participants != rhs.participants {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
@@ -1441,8 +1429,8 @@ extension Stream_Video_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageI
 extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Call"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "id"),
-    2: .same(proto: "name"),
+    1: .same(proto: "type"),
+    2: .same(proto: "id"),
     3: .standard(proto: "created_by_user_id"),
     4: .standard(proto: "created_at"),
     5: .standard(proto: "updated_at"),
@@ -1458,8 +1446,8 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
       case 4: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
@@ -1477,11 +1465,11 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    if !self.id.isEmpty {
-      try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
+    if !self.type.isEmpty {
+      try visitor.visitSingularStringField(value: self.type, fieldNumber: 1)
     }
-    if !self.name.isEmpty {
-      try visitor.visitSingularStringField(value: self.name, fieldNumber: 2)
+    if !self.id.isEmpty {
+      try visitor.visitSingularStringField(value: self.id, fieldNumber: 2)
     }
     if !self.createdByUserID.isEmpty {
       try visitor.visitSingularStringField(value: self.createdByUserID, fieldNumber: 3)
@@ -1508,8 +1496,8 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   }
 
   static func ==(lhs: Stream_Video_Call, rhs: Stream_Video_Call) -> Bool {
+    if lhs.type != rhs.type {return false}
     if lhs.id != rhs.id {return false}
-    if lhs.name != rhs.name {return false}
     if lhs.createdByUserID != rhs.createdByUserID {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}

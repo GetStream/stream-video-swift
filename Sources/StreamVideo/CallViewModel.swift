@@ -15,6 +15,7 @@ import OrderedCollections
 public class CallViewModel: ObservableObject  {
     
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.callCoordinatorService) var callCoordinatorService
     
     @Published public var room: VideoRoom? {
         didSet {
@@ -38,16 +39,8 @@ public class CallViewModel: ObservableObject  {
     public var latestError: Error?
     
     private var url: String = "wss://livekit.fucking-go-slices.com"
-    
-    @Published public var users = mockUsers
-    
-    @Published public var selectedUser: User?
-    
-    let callCoordinatorService = Stream_Video_CallCoordinatorService(
-        hostname: "http://localhost:26991",
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.XGkxJKi33fHr3cHyLFc6HRnbPgLuwNHuETWQ2MWzz5c"
-    )
-    
+    private var token: String = ""
+            
     @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:]
     
     public init() {}
@@ -102,25 +95,20 @@ public class CallViewModel: ObservableObject  {
         }
     }
 
-    public func selectEdgeServer() {
-        Task {
-            let selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
-            let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
-            url = "wss://\(response.edgeServer.url)"
-        }
-    }
-    
     public func makeCall() async throws {
-        if selectedUser == nil {
-            selectedUser = users.first
-        }
-        
-        let token = selectedUser?.token ?? ""
-        
-        let room = try await streamVideo.connect(url: url, token: token, options: VideoOptions())
+        try await selectEdgeServer()
+        let room = try await streamVideo.joinRoom(url: url, token: token, options: VideoOptions())
         self.room = room
         self.room?.addDelegate(self)
         toggleCameraEnabled()
+    }
+    
+    private func selectEdgeServer() async throws {
+        var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
+        selectEdgeRequest.callID = "1234"
+        let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
+        url = "wss://\(response.edgeServer.url)"
+        token = response.token
     }
     
 }
@@ -170,13 +158,3 @@ public struct User: Identifiable, Equatable {
         name
     }
 }
-
-//TODO: Remove from here.
-let mockUsers = [
-    User(
-        name: "User 1",
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTkwMjI0NjEsImlzcyI6IkFQSVM0Y2F6YXg5dnFRUSIsIm5iZiI6MTY1NjQzMDQ2MSwic3ViIjoicm9iIiwidmlkZW8iOnsicm9vbSI6InN0YXJrLXRvd2VyIiwicm9vbUpvaW4iOnRydWV9fQ.vKC-RXDSYGqeyChwazQLO15mV1S1n4LxyeJLrJASYPA"),
-    User(
-        name: "User 2",
-        token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJleHAiOjE2NTkwMjI1MzMsImlzcyI6IkFQSVM0Y2F6YXg5dnFRUSIsIm5iZiI6MTY1NjQzMDUzMywic3ViIjoiYm9iIiwidmlkZW8iOnsicm9vbSI6InN0YXJrLXRvd2VyIiwicm9vbUpvaW4iOnRydWV9fQ.XTQ9nU5BJ3FdWUaOrge-u977YibNTfK-sTDRaI0_vRc")
-]
