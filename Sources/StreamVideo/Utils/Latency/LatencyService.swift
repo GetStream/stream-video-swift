@@ -9,10 +9,10 @@ import Foundation
 
 class LatencyService {
     
-    private let urlSession: URLSession
+    private let httpClient: HTTPClient
     
-    init(urlSession: URLSession) {
-        self.urlSession = urlSession
+    init(httpClient: HTTPClient) {
+        self.httpClient = httpClient
     }
     
     func measureLatency(for edge: Stream_Video_Edge, tries: Int = 1) async -> [Float] {
@@ -22,7 +22,7 @@ class LatencyService {
             let startDate = Date()
             let request = URLRequest(url: url)
             do {
-                _ = try await urlSession.execute(request: request)
+                _ = try await httpClient.execute(request: request)
                 let diff = Float(Date().timeIntervalSince(startDate) * 1000)
                 results.append(diff)
             } catch {

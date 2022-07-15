@@ -5,14 +5,14 @@ import SwiftProtobuf;typealias ProtoModel = SwiftProtobuf.Message & SwiftProtobu
 
 
 class Stream_Video_CallCoordinatorService {
-	private let urlSession: URLSession
+	private let httpClient: HTTPClient
 	var hostname: String
 	var token: String
 
 	let pathPrefix: String = "/stream.video.CallCoordinatorService/"
 
-	init(urlSession: URLSession, hostname: String, token: String) {
-        self.urlSession = urlSession
+	init(httpClient: HTTPClient, hostname: String, token: String) {
+        self.httpClient = httpClient
 		self.hostname = hostname
 		self.token = token
 	}
@@ -121,7 +121,7 @@ class Stream_Video_CallCoordinatorService {
         let requestData = try request.serializedData()
         var request = try makeRequest(for: path)
         request.httpBody = requestData
-        let responseData = try await urlSession.execute(request: request)
+        let responseData = try await httpClient.execute(request: request)
         let response = try Response.init(serializedData: responseData)
         return response
     }

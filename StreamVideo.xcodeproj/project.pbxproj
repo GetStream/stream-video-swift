@@ -21,7 +21,7 @@
 		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
 		84A7E17428814D7400526C98 /* LatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17328814D7400526C98 /* LatencyService.swift */; };
-		84A7E1762881534E00526C98 /* URLSessionExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1752881534E00526C98 /* URLSessionExtensions.swift */; };
+		84A7E1792881922400526C98 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
 		84AF64BC287C34320012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BB287C34320012A503 /* WebRTC */; };
 		84AF64BE287C34450012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BD287C34450012A503 /* WebRTC */; };
 		84AF64CC287C545E0012A503 /* stream.video.coordinator_service.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64C7287C545D0012A503 /* stream.video.coordinator_service.twirp.swift */; };
@@ -157,7 +157,7 @@
 		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
 		84A7E17328814D7400526C98 /* LatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatencyService.swift; sourceTree = "<group>"; };
-		84A7E1752881534E00526C98 /* URLSessionExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionExtensions.swift; sourceTree = "<group>"; };
+		84A7E1782881922400526C98 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		84AF64C7287C545D0012A503 /* stream.video.coordinator_service.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.coordinator_service.twirp.swift; sourceTree = "<group>"; };
 		84AF64C8287C545D0012A503 /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
 		84AF64C9287C545E0012A503 /* validate.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = validate.pb.swift; sourceTree = "<group>"; };
@@ -370,6 +370,14 @@
 			path = Latency;
 			sourceTree = "<group>";
 		};
+		84A7E1772881921000526C98 /* HTTPClient */ = {
+			isa = PBXGroup;
+			children = (
+				84A7E1782881922400526C98 /* HTTPClient.swift */,
+			);
+			path = HTTPClient;
+			sourceTree = "<group>";
+		};
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
@@ -378,7 +386,6 @@
 				84C2997C28784BB30034B735 /* Utils.swift */,
 				84AF64D4287C79320012A503 /* RawJSON.swift */,
 				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
-				84A7E1752881534E00526C98 /* URLSessionExtensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -431,6 +438,7 @@
 				8456E6D9287EC46D004E180E /* Models */,
 				84C299712876E77E0034B735 /* DependencyInjection */,
 				84AF64D3287C79220012A503 /* Utils */,
+				84A7E1772881921000526C98 /* HTTPClient */,
 				84C2996A2876D8B50034B735 /* VideoService */,
 				8456E6D8287EC436004E180E /* Errors */,
 				84ED240B286C9500002A3186 /* protobuf */,
@@ -814,9 +822,9 @@
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
-				84A7E1762881534E00526C98 /* URLSessionExtensions.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
 				84AF64CF287C545E0012A503 /* events.pb.swift in Sources */,
+				84A7E1792881922400526C98 /* HTTPClient.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				84AF64D0287C545E0012A503 /* coordinator_service.pb.swift in Sources */,
 				84F7385B287C1A3400A363F4 /* VideoService.swift in Sources */,

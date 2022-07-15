@@ -7,6 +7,8 @@
 
 import Foundation
 
+public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
+
 public class StreamVideo {
     
     // Temporarly storing user in memory.
@@ -16,10 +18,11 @@ public class StreamVideo {
             callCoordinatorService.update(userToken: token.rawValue)
         }
     }
+    
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991"
     
-    private let urlSession = URLSession.shared
+    private let httpClient: HTTPClient
     
     var callCoordinatorService: Stream_Video_CallCoordinatorService
     
@@ -27,16 +30,21 @@ public class StreamVideo {
     let videoService = VideoService()
     let latencyService: LatencyService
     
-    public init(apiKey: String, user: UserInfo, token: Token) {
+    public init(
+        apiKey: String,
+        user: UserInfo,
+        token: Token
+    ) {
         self.apiKey = apiKey
         self.userInfo = user
         self.token = token
+        self.httpClient = URLSessionClient(urlSession: URLSession.shared)
         self.callCoordinatorService = Stream_Video_CallCoordinatorService(
-            urlSession: urlSession,
+            httpClient: httpClient,
             hostname: hostname,
             token: token.rawValue
         )
-        self.latencyService = LatencyService(urlSession: urlSession)
+        self.latencyService = LatencyService(httpClient: httpClient)
         StreamVideoProviderKey.currentValue = self
     }
 
