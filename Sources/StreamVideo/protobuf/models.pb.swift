@@ -279,7 +279,7 @@ struct Stream_Video_User {
   /// TODO: zoom allows you to invite any of your colleagues in their invite screen
   var teams: [String] = []
 
-  var type: String = String()
+  var role: String = String()
 
   var createdAt: String = String()
 
@@ -952,7 +952,7 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "id"),
     2: .same(proto: "teams"),
-    3: .same(proto: "type"),
+    3: .same(proto: "role"),
     7: .standard(proto: "created_at"),
     8: .standard(proto: "updated_at"),
   ]
@@ -965,7 +965,7 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 2: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.type) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.role) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
       case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
@@ -980,8 +980,8 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.teams.isEmpty {
       try visitor.visitRepeatedStringField(value: self.teams, fieldNumber: 2)
     }
-    if !self.type.isEmpty {
-      try visitor.visitSingularStringField(value: self.type, fieldNumber: 3)
+    if !self.role.isEmpty {
+      try visitor.visitSingularStringField(value: self.role, fieldNumber: 3)
     }
     if !self.createdAt.isEmpty {
       try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
@@ -995,7 +995,7 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   static func ==(lhs: Stream_Video_User, rhs: Stream_Video_User) -> Bool {
     if lhs.id != rhs.id {return false}
     if lhs.teams != rhs.teams {return false}
-    if lhs.type != rhs.type {return false}
+    if lhs.role != rhs.role {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

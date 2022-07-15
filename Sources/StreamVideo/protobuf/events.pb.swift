@@ -20,6 +20,226 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
+struct Stream_Video_WebsocketEvent {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var eventPayload: Stream_Video_WebsocketEvent.OneOf_EventPayload? = nil
+
+  var healthCheck: Stream_Video_Healthcheck {
+    get {
+      if case .healthCheck(let v)? = eventPayload {return v}
+      return Stream_Video_Healthcheck()
+    }
+    set {eventPayload = .healthCheck(newValue)}
+  }
+
+  var callRinging: Stream_Video_CallRinging {
+    get {
+      if case .callRinging(let v)? = eventPayload {return v}
+      return Stream_Video_CallRinging()
+    }
+    set {eventPayload = .callRinging(newValue)}
+  }
+
+  var callCreated: Stream_Video_CallCreated {
+    get {
+      if case .callCreated(let v)? = eventPayload {return v}
+      return Stream_Video_CallCreated()
+    }
+    set {eventPayload = .callCreated(newValue)}
+  }
+
+  var callUpdated: Stream_Video_CallUpdated {
+    get {
+      if case .callUpdated(let v)? = eventPayload {return v}
+      return Stream_Video_CallUpdated()
+    }
+    set {eventPayload = .callUpdated(newValue)}
+  }
+
+  var callEnded: Stream_Video_CallEnded {
+    get {
+      if case .callEnded(let v)? = eventPayload {return v}
+      return Stream_Video_CallEnded()
+    }
+    set {eventPayload = .callEnded(newValue)}
+  }
+
+  var callDeleted: Stream_Video_CallDeleted {
+    get {
+      if case .callDeleted(let v)? = eventPayload {return v}
+      return Stream_Video_CallDeleted()
+    }
+    set {eventPayload = .callDeleted(newValue)}
+  }
+
+  var userUpdated: Stream_Video_UserUpdated {
+    get {
+      if case .userUpdated(let v)? = eventPayload {return v}
+      return Stream_Video_UserUpdated()
+    }
+    set {eventPayload = .userUpdated(newValue)}
+  }
+
+  var participantInvited: Stream_Video_ParticipantInvited {
+    get {
+      if case .participantInvited(let v)? = eventPayload {return v}
+      return Stream_Video_ParticipantInvited()
+    }
+    set {eventPayload = .participantInvited(newValue)}
+  }
+
+  var participantUpdated: Stream_Video_ParticipantUpdated {
+    get {
+      if case .participantUpdated(let v)? = eventPayload {return v}
+      return Stream_Video_ParticipantUpdated()
+    }
+    set {eventPayload = .participantUpdated(newValue)}
+  }
+
+  var participantDeleted: Stream_Video_ParticipantDeleted {
+    get {
+      if case .participantDeleted(let v)? = eventPayload {return v}
+      return Stream_Video_ParticipantDeleted()
+    }
+    set {eventPayload = .participantDeleted(newValue)}
+  }
+
+  var participantJoined: Stream_Video_ParticipantJoined {
+    get {
+      if case .participantJoined(let v)? = eventPayload {return v}
+      return Stream_Video_ParticipantJoined()
+    }
+    set {eventPayload = .participantJoined(newValue)}
+  }
+
+  var participantLeft: Stream_Video_ParticipantLeft {
+    get {
+      if case .participantLeft(let v)? = eventPayload {return v}
+      return Stream_Video_ParticipantLeft()
+    }
+    set {eventPayload = .participantLeft(newValue)}
+  }
+
+  var broadcastStarted: Stream_Video_BroadcastStarted {
+    get {
+      if case .broadcastStarted(let v)? = eventPayload {return v}
+      return Stream_Video_BroadcastStarted()
+    }
+    set {eventPayload = .broadcastStarted(newValue)}
+  }
+
+  var broadcastEnded: Stream_Video_BroadcastEnded {
+    get {
+      if case .broadcastEnded(let v)? = eventPayload {return v}
+      return Stream_Video_BroadcastEnded()
+    }
+    set {eventPayload = .broadcastEnded(newValue)}
+  }
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  enum OneOf_EventPayload: Equatable {
+    case healthCheck(Stream_Video_Healthcheck)
+    case callRinging(Stream_Video_CallRinging)
+    case callCreated(Stream_Video_CallCreated)
+    case callUpdated(Stream_Video_CallUpdated)
+    case callEnded(Stream_Video_CallEnded)
+    case callDeleted(Stream_Video_CallDeleted)
+    case userUpdated(Stream_Video_UserUpdated)
+    case participantInvited(Stream_Video_ParticipantInvited)
+    case participantUpdated(Stream_Video_ParticipantUpdated)
+    case participantDeleted(Stream_Video_ParticipantDeleted)
+    case participantJoined(Stream_Video_ParticipantJoined)
+    case participantLeft(Stream_Video_ParticipantLeft)
+    case broadcastStarted(Stream_Video_BroadcastStarted)
+    case broadcastEnded(Stream_Video_BroadcastEnded)
+
+  #if !swift(>=4.1)
+    static func ==(lhs: Stream_Video_WebsocketEvent.OneOf_EventPayload, rhs: Stream_Video_WebsocketEvent.OneOf_EventPayload) -> Bool {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch (lhs, rhs) {
+      case (.healthCheck, .healthCheck): return {
+        guard case .healthCheck(let l) = lhs, case .healthCheck(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.callRinging, .callRinging): return {
+        guard case .callRinging(let l) = lhs, case .callRinging(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.callCreated, .callCreated): return {
+        guard case .callCreated(let l) = lhs, case .callCreated(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.callUpdated, .callUpdated): return {
+        guard case .callUpdated(let l) = lhs, case .callUpdated(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.callEnded, .callEnded): return {
+        guard case .callEnded(let l) = lhs, case .callEnded(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.callDeleted, .callDeleted): return {
+        guard case .callDeleted(let l) = lhs, case .callDeleted(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.userUpdated, .userUpdated): return {
+        guard case .userUpdated(let l) = lhs, case .userUpdated(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.participantInvited, .participantInvited): return {
+        guard case .participantInvited(let l) = lhs, case .participantInvited(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.participantUpdated, .participantUpdated): return {
+        guard case .participantUpdated(let l) = lhs, case .participantUpdated(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.participantDeleted, .participantDeleted): return {
+        guard case .participantDeleted(let l) = lhs, case .participantDeleted(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.participantJoined, .participantJoined): return {
+        guard case .participantJoined(let l) = lhs, case .participantJoined(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.participantLeft, .participantLeft): return {
+        guard case .participantLeft(let l) = lhs, case .participantLeft(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.broadcastStarted, .broadcastStarted): return {
+        guard case .broadcastStarted(let l) = lhs, case .broadcastStarted(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.broadcastEnded, .broadcastEnded): return {
+        guard case .broadcastEnded(let l) = lhs, case .broadcastEnded(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      default: return false
+      }
+    }
+  #endif
+  }
+
+  init() {}
+}
+
+struct Stream_Video_Healthcheck {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var userID: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 ///*
 ///CallRinging is fired when a call is created with the ring=true option
 ///Or when you manually call call.ring()
@@ -290,6 +510,9 @@ struct Stream_Video_BroadcastEnded {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
+extension Stream_Video_WebsocketEvent: @unchecked Sendable {}
+extension Stream_Video_WebsocketEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Healthcheck: @unchecked Sendable {}
 extension Stream_Video_CallRinging: @unchecked Sendable {}
 extension Stream_Video_CallCreated: @unchecked Sendable {}
 extension Stream_Video_CallUpdated: @unchecked Sendable {}
@@ -308,6 +531,324 @@ extension Stream_Video_BroadcastEnded: @unchecked Sendable {}
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "stream.video"
+
+extension Stream_Video_WebsocketEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".WebsocketEvent"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "health_check"),
+    2: .standard(proto: "call_ringing"),
+    3: .standard(proto: "call_created"),
+    4: .standard(proto: "call_updated"),
+    5: .standard(proto: "call_ended"),
+    6: .standard(proto: "call_deleted"),
+    7: .standard(proto: "user_updated"),
+    8: .standard(proto: "participant_invited"),
+    9: .standard(proto: "participant_updated"),
+    10: .standard(proto: "participant_deleted"),
+    11: .standard(proto: "participant_joined"),
+    12: .standard(proto: "participant_left"),
+    13: .standard(proto: "broadcast_started"),
+    14: .standard(proto: "broadcast_ended"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try {
+        var v: Stream_Video_Healthcheck?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .healthCheck(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .healthCheck(v)
+        }
+      }()
+      case 2: try {
+        var v: Stream_Video_CallRinging?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .callRinging(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .callRinging(v)
+        }
+      }()
+      case 3: try {
+        var v: Stream_Video_CallCreated?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .callCreated(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .callCreated(v)
+        }
+      }()
+      case 4: try {
+        var v: Stream_Video_CallUpdated?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .callUpdated(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .callUpdated(v)
+        }
+      }()
+      case 5: try {
+        var v: Stream_Video_CallEnded?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .callEnded(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .callEnded(v)
+        }
+      }()
+      case 6: try {
+        var v: Stream_Video_CallDeleted?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .callDeleted(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .callDeleted(v)
+        }
+      }()
+      case 7: try {
+        var v: Stream_Video_UserUpdated?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .userUpdated(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .userUpdated(v)
+        }
+      }()
+      case 8: try {
+        var v: Stream_Video_ParticipantInvited?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .participantInvited(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .participantInvited(v)
+        }
+      }()
+      case 9: try {
+        var v: Stream_Video_ParticipantUpdated?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .participantUpdated(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .participantUpdated(v)
+        }
+      }()
+      case 10: try {
+        var v: Stream_Video_ParticipantDeleted?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .participantDeleted(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .participantDeleted(v)
+        }
+      }()
+      case 11: try {
+        var v: Stream_Video_ParticipantJoined?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .participantJoined(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .participantJoined(v)
+        }
+      }()
+      case 12: try {
+        var v: Stream_Video_ParticipantLeft?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .participantLeft(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .participantLeft(v)
+        }
+      }()
+      case 13: try {
+        var v: Stream_Video_BroadcastStarted?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .broadcastStarted(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .broadcastStarted(v)
+        }
+      }()
+      case 14: try {
+        var v: Stream_Video_BroadcastEnded?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .broadcastEnded(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .broadcastEnded(v)
+        }
+      }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    switch self.eventPayload {
+    case .healthCheck?: try {
+      guard case .healthCheck(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    }()
+    case .callRinging?: try {
+      guard case .callRinging(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    }()
+    case .callCreated?: try {
+      guard case .callCreated(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    }()
+    case .callUpdated?: try {
+      guard case .callUpdated(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    }()
+    case .callEnded?: try {
+      guard case .callEnded(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+    }()
+    case .callDeleted?: try {
+      guard case .callDeleted(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+    }()
+    case .userUpdated?: try {
+      guard case .userUpdated(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+    }()
+    case .participantInvited?: try {
+      guard case .participantInvited(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+    }()
+    case .participantUpdated?: try {
+      guard case .participantUpdated(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+    }()
+    case .participantDeleted?: try {
+      guard case .participantDeleted(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
+    }()
+    case .participantJoined?: try {
+      guard case .participantJoined(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
+    }()
+    case .participantLeft?: try {
+      guard case .participantLeft(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+    }()
+    case .broadcastStarted?: try {
+      guard case .broadcastStarted(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 13)
+    }()
+    case .broadcastEnded?: try {
+      guard case .broadcastEnded(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
+    }()
+    case nil: break
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_WebsocketEvent, rhs: Stream_Video_WebsocketEvent) -> Bool {
+    if lhs.eventPayload != rhs.eventPayload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Healthcheck: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Healthcheck"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.userID.isEmpty {
+      try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Healthcheck, rhs: Stream_Video_Healthcheck) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
 
 extension Stream_Video_CallRinging: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallRinging"

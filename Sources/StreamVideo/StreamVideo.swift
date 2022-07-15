@@ -25,6 +25,7 @@ public class StreamVideo {
     
     let apiKey: String
     let videoService = VideoService()
+    let latencyService = LatencyService()
     
     public init(apiKey: String) {
         self.apiKey = apiKey
@@ -78,11 +79,11 @@ public class StreamVideo {
     private func measureLatencies(
         for edges: [Stream_Video_Edge]
     ) async throws -> [String: Stream_Video_Latency] {
-        //TODO: implement
         var result: [String: Stream_Video_Latency] = [:]
         for edge in edges {
             var latency = Stream_Video_Latency()
-            latency.measurements = [0.1, 0.2, 0.3]
+            let value = await latencyService.measureLatency(for: edge)
+            latency.measurements = value
             result[edge.name] = latency
         }
         return result

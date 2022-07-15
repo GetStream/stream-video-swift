@@ -97,14 +97,14 @@ struct Stream_Video_CreateCallRequest {
   /// the call type
   var type: String = String()
 
-  /// the call id
+  /// the call id, if not provided a unique value will be generated based on UUID v4
   var id: String = String()
 
   /// call custom data json encoded
   var jsonEncodedCustomData: Data = Data()
 
   /// the list of participant ids
-  var participants: [String] = []
+  var participantIds: [String] = []
 
   /// broadcasting, overrides the default call type setting if provided
   var broadcast: SwiftProtobuf.Google_Protobuf_BoolValue {
@@ -150,14 +150,14 @@ struct Stream_Video_CreateCallRequest {
   mutating func clearRecording() {self._recording = nil}
 
   /// the ring option, overrides the default call type setting if provided
-  var ring: SwiftProtobuf.Google_Protobuf_BoolValue {
-    get {return _ring ?? SwiftProtobuf.Google_Protobuf_BoolValue()}
-    set {_ring = newValue}
+  var notify: SwiftProtobuf.Google_Protobuf_BoolValue {
+    get {return _notify ?? SwiftProtobuf.Google_Protobuf_BoolValue()}
+    set {_notify = newValue}
   }
-  /// Returns true if `ring` has been explicitly set.
-  var hasRing: Bool {return self._ring != nil}
-  /// Clears the value of `ring`. Subsequent reads from it will return its default value.
-  mutating func clearRing() {self._ring = nil}
+  /// Returns true if `notify` has been explicitly set.
+  var hasNotify: Bool {return self._notify != nil}
+  /// Clears the value of `notify`. Subsequent reads from it will return its default value.
+  mutating func clearNotify() {self._notify = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -167,7 +167,7 @@ struct Stream_Video_CreateCallRequest {
   fileprivate var _transcribe: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
   fileprivate var _transcribeOptions: Stream_Video_TranscribeOptions? = nil
   fileprivate var _recording: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
-  fileprivate var _ring: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
+  fileprivate var _notify: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
 }
 
 struct Stream_Video_CreateCallResponse {
@@ -1002,13 +1002,13 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
     1: .same(proto: "type"),
     2: .same(proto: "id"),
     3: .standard(proto: "json_encoded_custom_data"),
-    4: .same(proto: "participants"),
+    4: .standard(proto: "participant_ids"),
     6: .same(proto: "broadcast"),
     7: .standard(proto: "broadcast_options"),
     8: .same(proto: "transcribe"),
     9: .standard(proto: "transcribe_options"),
     10: .same(proto: "recording"),
-    11: .same(proto: "ring"),
+    11: .same(proto: "notify"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1020,13 +1020,13 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
       case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 3: try { try decoder.decodeSingularBytesField(value: &self.jsonEncodedCustomData) }()
-      case 4: try { try decoder.decodeRepeatedStringField(value: &self.participants) }()
+      case 4: try { try decoder.decodeRepeatedStringField(value: &self.participantIds) }()
       case 6: try { try decoder.decodeSingularMessageField(value: &self._broadcast) }()
       case 7: try { try decoder.decodeRepeatedMessageField(value: &self.broadcastOptions) }()
       case 8: try { try decoder.decodeSingularMessageField(value: &self._transcribe) }()
       case 9: try { try decoder.decodeSingularMessageField(value: &self._transcribeOptions) }()
       case 10: try { try decoder.decodeSingularMessageField(value: &self._recording) }()
-      case 11: try { try decoder.decodeSingularMessageField(value: &self._ring) }()
+      case 11: try { try decoder.decodeSingularMessageField(value: &self._notify) }()
       default: break
       }
     }
@@ -1046,8 +1046,8 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
     if !self.jsonEncodedCustomData.isEmpty {
       try visitor.visitSingularBytesField(value: self.jsonEncodedCustomData, fieldNumber: 3)
     }
-    if !self.participants.isEmpty {
-      try visitor.visitRepeatedStringField(value: self.participants, fieldNumber: 4)
+    if !self.participantIds.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.participantIds, fieldNumber: 4)
     }
     try { if let v = self._broadcast {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
@@ -1064,7 +1064,7 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
     try { if let v = self._recording {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
     } }()
-    try { if let v = self._ring {
+    try { if let v = self._notify {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
     } }()
     try unknownFields.traverse(visitor: &visitor)
@@ -1074,13 +1074,13 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
     if lhs.type != rhs.type {return false}
     if lhs.id != rhs.id {return false}
     if lhs.jsonEncodedCustomData != rhs.jsonEncodedCustomData {return false}
-    if lhs.participants != rhs.participants {return false}
+    if lhs.participantIds != rhs.participantIds {return false}
     if lhs._broadcast != rhs._broadcast {return false}
     if lhs.broadcastOptions != rhs.broadcastOptions {return false}
     if lhs._transcribe != rhs._transcribe {return false}
     if lhs._transcribeOptions != rhs._transcribeOptions {return false}
     if lhs._recording != rhs._recording {return false}
-    if lhs._ring != rhs._ring {return false}
+    if lhs._notify != rhs._notify {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

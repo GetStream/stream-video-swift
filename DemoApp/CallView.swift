@@ -24,7 +24,6 @@ struct CallView: View {
             } else {
                 ConnectView(viewModel: viewModel)
             }
-
         }
     }
 }
