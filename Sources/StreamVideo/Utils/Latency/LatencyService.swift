@@ -15,9 +15,21 @@ class LatencyService {
         self.urlSession = urlSession
     }
     
-    func measureLatency(for edge: Stream_Video_Edge) async -> [Float] {
-        //TODO: implement
-        return [0.5, 0.4, 0.2]
+    func measureLatency(for edge: Stream_Video_Edge, tries: Int = 1) async -> [Float] {
+        guard let url = URL(string: edge.latencyURL) else { return [Float(Int.max)] }
+        var results = [Float]()
+        for _ in 0..<tries {
+            let startDate = Date()
+            let request = URLRequest(url: url)
+            do {
+                _ = try await urlSession.execute(request: request)
+                let diff = Float(Date().timeIntervalSince(startDate) * 1000)
+                results.append(diff)
+            } catch {
+                results.append(Float(Int.max))
+            }
+        }
+        return results
     }
     
 }
