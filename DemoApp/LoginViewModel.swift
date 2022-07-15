@@ -10,9 +10,7 @@ import StreamVideo
 
 @MainActor
 class LoginViewModel: ObservableObject {
-    
-    @Injected(\.streamVideo) var streamVideo
-    
+        
     @Published var loading = false
     
     @Published var userCredentials = [
@@ -45,18 +43,10 @@ class LoginViewModel: ObservableObject {
         )
     ]
     
-    func login(user: UserCredentials) {
-        Task {
-            do {
-                loading = true
-                try await streamVideo.connectUser(userInfo: user.userInfo, token: user.token)
-                loading = false
-                AppState.shared.userState = .loggedIn
-            } catch {
-                loading = false
-                log.error("Error occured: \(error.localizedDescription)")
-            }
-        }
+    func login(user: UserCredentials, completion: (UserCredentials) -> ()) {
+        AppState.shared.userState = .loggedIn
+        // Perform login
+        completion(user)
     }
     
 }

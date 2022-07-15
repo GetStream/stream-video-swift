@@ -10,12 +10,10 @@ import Foundation
 public class StreamVideo {
     
     // Temporarly storing user in memory.
-    private var userInfo: UserInfo?
-    private var token: Token? {
+    private var userInfo: UserInfo
+    private var token: Token {
         didSet {
-            if let token = token {
-                callCoordinatorService.update(userToken: token.rawValue)
-            }
+            callCoordinatorService.update(userToken: token.rawValue)
         }
     }
     // Change it to your local IP address.
@@ -29,25 +27,19 @@ public class StreamVideo {
     let videoService = VideoService()
     let latencyService: LatencyService
     
-    public init(apiKey: String) {
+    public init(apiKey: String, user: UserInfo, token: Token) {
         self.apiKey = apiKey
+        self.userInfo = user
+        self.token = token
         self.callCoordinatorService = Stream_Video_CallCoordinatorService(
             urlSession: urlSession,
             hostname: hostname,
-            token: ""
+            token: token.rawValue
         )
         self.latencyService = LatencyService(urlSession: urlSession)
         StreamVideoProviderKey.currentValue = self
     }
-    
-    public func connectUser(
-        userInfo: UserInfo,
-        token: Token
-    ) async throws {
-        self.userInfo = userInfo
-        self.token = token
-    }
-    
+
     public func joinCall(
         callType: CallType,
         callId: String,

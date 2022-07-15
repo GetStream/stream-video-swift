@@ -10,9 +10,11 @@ import SwiftUI
 struct LoginView: View {
     
     @StateObject var viewModel: LoginViewModel
+    var completion: (UserCredentials) -> ()
     
-    init() {
+    init(completion: @escaping (UserCredentials) -> ()) {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
+        self.completion = completion
     }
     
     var body: some View {
@@ -22,7 +24,7 @@ struct LoginView: View {
                 .bold()
             List(viewModel.userCredentials) { user in
                 Button {
-                    viewModel.login(user: user)
+                    viewModel.login(user: user, completion: completion)
                 } label: {
                     Text(user.userInfo.name ?? user.userInfo.id)
                 }

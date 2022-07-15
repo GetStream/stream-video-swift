@@ -12,12 +12,11 @@ import StreamVideoSwiftUI
 @main
 struct StreamVideoSwiftUIApp: App {
     
-    var streamVideo: StreamVideo
+    @State var streamVideo: StreamVideo?
     
     @ObservedObject var appState = AppState.shared
         
     init() {
-        streamVideo = StreamVideo(apiKey: "1234")
         LogConfig.level = .debug
     }
     
@@ -26,7 +25,13 @@ struct StreamVideoSwiftUIApp: App {
             if appState.userState == .loggedIn {
                 CallView()
             } else {
-                LoginView()
+                LoginView() { user in
+                    streamVideo = StreamVideo(
+                        apiKey: "1234",
+                        user: user.userInfo,
+                        token: user.token
+                    )
+                }
             }
         }
     }
