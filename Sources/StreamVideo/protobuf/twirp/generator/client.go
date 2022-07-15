@@ -120,16 +120,17 @@ typealias ProtoModel = SwiftProtobuf.Message & SwiftProtobuf._MessageImplementat
 {{range .Services}}
 
 class {{.ClassName}} {
+	private let urlSession: URLSession
 	var hostname: String
 	var token: String
 
 	let pathPrefix: String = "/{{.Package}}.{{.Name}}/"
 
-	init(hostname: String, token: String) {
+	init(urlSession: URLSession, hostname: String, token: String) {
+        self.urlSession = urlSession
 		self.hostname = hostname
 		self.token = token
 	}
-
     {{range .Methods}}
 	func {{.Name}}({{.InputArg}}: {{.InputType}}) async throws -> {{.OutputType}} {
         return try await execute(request: {{.InputArg}}, path: "{{.Path}}")
@@ -143,7 +144,7 @@ class {{.ClassName}} {
         let requestData = try request.serializedData()
         var request = try makeRequest(for: path)
         request.httpBody = requestData
-        let responseData = try await execute(request: request)
+        let responseData = try await urlSession.execute(request: request)
         let response = try Response.init(serializedData: responseData)
         return response
     }
@@ -158,26 +159,8 @@ class {{.ClassName}} {
         request.setValue(token, forHTTPHeaderField: "authorization")
         request.httpMethod = "POST"
         return request
-    }
-        
-    private func execute(request: URLRequest) async throws -> Data {
-        return try await withCheckedThrowingContinuation { continuation in
-            let task = URLSession.shared.dataTask(with: request) {data, response, error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                    return
-                }
-                guard let data = data else {
-                    //TODO: errors
-                    continuation.resume(throwing: NSError(domain: "stream", code: 123))
-                    return
-                }
-                
-                continuation.resume(returning: data)
-            }
-            task.resume()
-        }
-    }
+    }        
+
 }
 
 {{end}}

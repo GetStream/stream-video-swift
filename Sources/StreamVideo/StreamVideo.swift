@@ -21,18 +21,22 @@ public class StreamVideo {
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991"
     
+    private let urlSession = URLSession.shared
+    
     var callCoordinatorService: Stream_Video_CallCoordinatorService
     
     let apiKey: String
     let videoService = VideoService()
-    let latencyService = LatencyService()
+    let latencyService: LatencyService
     
     public init(apiKey: String) {
         self.apiKey = apiKey
         self.callCoordinatorService = Stream_Video_CallCoordinatorService(
+            urlSession: urlSession,
             hostname: hostname,
             token: ""
         )
+        self.latencyService = LatencyService(urlSession: urlSession)
         StreamVideoProviderKey.currentValue = self
     }
     
