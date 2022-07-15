@@ -56,6 +56,10 @@ extension ClientError {
     
     /// An unknown error.
     public class Unknown: ClientError {}
+    
+    /// Networking error.
+    public class NetworkError: ClientError {}
+    
 }
 
 // This should probably live only in the test target since it's not "true" equatable

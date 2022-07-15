@@ -8,6 +8,7 @@
 import Foundation
 
 public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
+public typealias TokenUpdater = (Token) -> ()
 
 public class StreamVideo {
     
@@ -18,6 +19,7 @@ public class StreamVideo {
             callCoordinatorService.update(userToken: token.rawValue)
         }
     }
+    private let tokenProvider: TokenProvider
     
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991"
@@ -33,18 +35,26 @@ public class StreamVideo {
     public init(
         apiKey: String,
         user: UserInfo,
-        token: Token
+        token: Token,
+        tokenProvider: @escaping TokenProvider
     ) {
         self.apiKey = apiKey
         self.userInfo = user
         self.token = token
-        self.httpClient = URLSessionClient(urlSession: URLSession.shared)
+        self.tokenProvider = tokenProvider
+        self.httpClient = URLSessionClient(
+            urlSession: URLSession.shared,
+            tokenProvider: tokenProvider
+        )
         self.callCoordinatorService = Stream_Video_CallCoordinatorService(
             httpClient: httpClient,
             hostname: hostname,
             token: token.rawValue
         )
         self.latencyService = LatencyService(httpClient: httpClient)
+        self.httpClient.setTokenUpdater { [weak self] token in
+            self?.token = token
+        }
         StreamVideoProviderKey.currentValue = self
     }
 

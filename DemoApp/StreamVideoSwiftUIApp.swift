@@ -29,7 +29,10 @@ struct StreamVideoSwiftUIApp: App {
                     streamVideo = StreamVideo(
                         apiKey: "1234",
                         user: user.userInfo,
-                        token: user.token
+                        token: user.token,
+                        tokenProvider: { result in
+                            result(.success(user.token))
+                        }
                     )
                 }
             }
