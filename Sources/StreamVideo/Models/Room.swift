@@ -37,7 +37,7 @@ public class VideoRoom: ObservableObject {
         self.room.localParticipant
     }
     
-    internal var connectionStatus: ConnectionStatus {
+    internal var connectionStatus: VideoConnectionStatus {
         self.room.connectionState.mapped
     }
 }

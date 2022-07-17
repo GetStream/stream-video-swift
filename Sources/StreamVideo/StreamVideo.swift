@@ -97,8 +97,8 @@ public class StreamVideo {
         for edge in edges {
             var latency = Stream_Video_Latency()
             let value = await latencyService.measureLatency(for: edge)
-            latency.measurements = value
-            result[edge.name] = latency
+            latency.measurementsSeconds = value
+            result[edge.latencyURL] = latency
         }
         return result
     }

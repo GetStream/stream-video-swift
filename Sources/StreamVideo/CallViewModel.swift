@@ -24,7 +24,7 @@ public class CallViewModel: ObservableObject  {
         }
     }
     @Published public var focusParticipant: RoomParticipant?
-    @Published public var connectionStatus: ConnectionStatus = .disconnected(reason: nil) {
+    @Published public var connectionStatus: VideoConnectionStatus = .disconnected(reason: nil) {
         didSet {
             self.shouldShowRoomView = connectionStatus == .connected || connectionStatus == .reconnecting
         }

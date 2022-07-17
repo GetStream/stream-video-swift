@@ -133,7 +133,7 @@ struct Stream_Video_Latency {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var measurements: [Float] = []
+  var measurementsSeconds: [Float] = []
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -667,7 +667,7 @@ extension Stream_Video_EdgeServer: SwiftProtobuf.Message, SwiftProtobuf._Message
 extension Stream_Video_Latency: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Latency"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "measurements"),
+    1: .standard(proto: "measurements_seconds"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -676,21 +676,21 @@ extension Stream_Video_Latency: SwiftProtobuf.Message, SwiftProtobuf._MessageImp
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeRepeatedFloatField(value: &self.measurements) }()
+      case 1: try { try decoder.decodeRepeatedFloatField(value: &self.measurementsSeconds) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if !self.measurements.isEmpty {
-      try visitor.visitPackedFloatField(value: self.measurements, fieldNumber: 1)
+    if !self.measurementsSeconds.isEmpty {
+      try visitor.visitPackedFloatField(value: self.measurementsSeconds, fieldNumber: 1)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Latency, rhs: Stream_Video_Latency) -> Bool {
-    if lhs.measurements != rhs.measurements {return false}
+    if lhs.measurementsSeconds != rhs.measurementsSeconds {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

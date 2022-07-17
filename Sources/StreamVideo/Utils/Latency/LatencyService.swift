@@ -23,7 +23,7 @@ class LatencyService {
             let request = URLRequest(url: url)
             do {
                 _ = try await httpClient.execute(request: request)
-                let diff = Float(Date().timeIntervalSince(startDate) * 1000)
+                let diff = Float(Date().timeIntervalSince(startDate))
                 results.append(diff)
             } catch {
                 results.append(Float(Int.max))
