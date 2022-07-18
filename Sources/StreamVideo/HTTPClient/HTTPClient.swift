@@ -70,14 +70,23 @@ class URLSessionClient: HTTPClient {
         return try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) {data, response, error in
                 if let error = error {
+                    log.debug("Error executing request \(error.localizedDescription)")
                     continuation.resume(throwing: error)
                     return
                 }
-                if let response = response as? HTTPURLResponse, response.statusCode == 403, !isRetry {
-                    continuation.resume(throwing: ClientError.InvalidToken())
-                    return
+                if let response = response as? HTTPURLResponse {
+                    if response.statusCode == 403, !isRetry {
+                        log.debug("Access token expired")
+                        continuation.resume(throwing: ClientError.InvalidToken())
+                        return
+                    } else if response.statusCode >= 400 {
+                        log.debug("Error executing request \(self.errorResponse(from: data, response: response))")
+                        continuation.resume(throwing: ClientError.NetworkError(response.description))
+                        return
+                    }
                 }
                 guard let data = data else {
+                    log.debug("Received empty response")
                     continuation.resume(throwing: ClientError.NetworkError())
                     return
                 }
@@ -92,6 +101,17 @@ class URLSessionClient: HTTPClient {
         var updated = request
         updated.setValue(token, forHTTPHeaderField: "authorization")
         return updated
+    }
+    
+    private func errorResponse(from data: Data?, response: HTTPURLResponse) -> Any {
+        guard let data = data else {
+            return response.description
+        }
+        do {
+            return try JSONSerialization.jsonObject(with: data)
+        } catch {
+            return response.description
+        }
     }
     
 }
