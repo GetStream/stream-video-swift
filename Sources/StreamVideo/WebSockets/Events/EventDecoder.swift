@@ -40,6 +40,8 @@ struct EventDecoder {
             return value
         case .broadcastEnded(let value):
             return value
+        case .authPayload(let value):
+            return value
         }
     }
 }

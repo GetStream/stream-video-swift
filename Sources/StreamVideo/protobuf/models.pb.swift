@@ -276,18 +276,34 @@ struct Stream_Video_User {
 
   var id: String = String()
 
-  /// TODO: zoom allows you to invite any of your colleagues in their invite screen
   var teams: [String] = []
 
   var role: String = String()
 
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
+
+  var name: String = String()
+
+  var profileImageURL: String = String()
+
+  /// user creation date as RFC3339 string
   var createdAt: String = String()
 
+  /// user last update date as RFC3339 string
   var updatedAt: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
 }
 
 struct Stream_Video_Device {
@@ -521,6 +537,16 @@ struct Stream_Video_Call {
   /// the id of the user that created this call
   var createdByUserID: String = String()
 
+  /// call custom data
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
+
   /// call creation date as RFC3339 string
   var createdAt: String = String()
 
@@ -548,6 +574,7 @@ struct Stream_Video_Call {
 
   init() {}
 
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
   fileprivate var _transcribeOptions: Stream_Video_TranscribeOptions? = nil
 }
 
@@ -953,6 +980,9 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     1: .same(proto: "id"),
     2: .same(proto: "teams"),
     3: .same(proto: "role"),
+    4: .same(proto: "custom"),
+    5: .same(proto: "name"),
+    6: .standard(proto: "profile_image_url"),
     7: .standard(proto: "created_at"),
     8: .standard(proto: "updated_at"),
   ]
@@ -966,6 +996,9 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 2: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.role) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.profileImageURL) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
       case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
@@ -974,6 +1007,10 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
     }
@@ -982,6 +1019,15 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     }
     if !self.role.isEmpty {
       try visitor.visitSingularStringField(value: self.role, fieldNumber: 3)
+    }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 5)
+    }
+    if !self.profileImageURL.isEmpty {
+      try visitor.visitSingularStringField(value: self.profileImageURL, fieldNumber: 6)
     }
     if !self.createdAt.isEmpty {
       try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
@@ -996,6 +1042,9 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.id != rhs.id {return false}
     if lhs.teams != rhs.teams {return false}
     if lhs.role != rhs.role {return false}
+    if lhs._custom != rhs._custom {return false}
+    if lhs.name != rhs.name {return false}
+    if lhs.profileImageURL != rhs.profileImageURL {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
@@ -1432,12 +1481,13 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     1: .same(proto: "type"),
     2: .same(proto: "id"),
     3: .standard(proto: "created_by_user_id"),
-    4: .standard(proto: "created_at"),
-    5: .standard(proto: "updated_at"),
-    6: .same(proto: "broadcast"),
-    7: .standard(proto: "broadcast_options"),
-    8: .same(proto: "transcribe"),
-    9: .standard(proto: "transcribe_options"),
+    4: .same(proto: "custom"),
+    5: .standard(proto: "created_at"),
+    6: .standard(proto: "updated_at"),
+    7: .same(proto: "broadcast"),
+    8: .standard(proto: "broadcast_options"),
+    9: .same(proto: "transcribe"),
+    10: .standard(proto: "transcribe_options"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1449,12 +1499,13 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
-      case 4: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
-      case 6: try { try decoder.decodeSingularBoolField(value: &self.broadcast) }()
-      case 7: try { try decoder.decodeRepeatedMessageField(value: &self.broadcastOptions) }()
-      case 8: try { try decoder.decodeSingularBoolField(value: &self.transcribe) }()
-      case 9: try { try decoder.decodeSingularMessageField(value: &self._transcribeOptions) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
+      case 7: try { try decoder.decodeSingularBoolField(value: &self.broadcast) }()
+      case 8: try { try decoder.decodeRepeatedMessageField(value: &self.broadcastOptions) }()
+      case 9: try { try decoder.decodeSingularBoolField(value: &self.transcribe) }()
+      case 10: try { try decoder.decodeSingularMessageField(value: &self._transcribeOptions) }()
       default: break
       }
     }
@@ -1474,23 +1525,26 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.createdByUserID.isEmpty {
       try visitor.visitSingularStringField(value: self.createdByUserID, fieldNumber: 3)
     }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
     if !self.createdAt.isEmpty {
-      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 4)
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 5)
     }
     if !self.updatedAt.isEmpty {
-      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 5)
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 6)
     }
     if self.broadcast != false {
-      try visitor.visitSingularBoolField(value: self.broadcast, fieldNumber: 6)
+      try visitor.visitSingularBoolField(value: self.broadcast, fieldNumber: 7)
     }
     if !self.broadcastOptions.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.broadcastOptions, fieldNumber: 7)
+      try visitor.visitRepeatedMessageField(value: self.broadcastOptions, fieldNumber: 8)
     }
     if self.transcribe != false {
-      try visitor.visitSingularBoolField(value: self.transcribe, fieldNumber: 8)
+      try visitor.visitSingularBoolField(value: self.transcribe, fieldNumber: 9)
     }
     try { if let v = self._transcribeOptions {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
     } }()
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1499,6 +1553,7 @@ extension Stream_Video_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.type != rhs.type {return false}
     if lhs.id != rhs.id {return false}
     if lhs.createdByUserID != rhs.createdByUserID {return false}
+    if lhs._custom != rhs._custom {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.broadcast != rhs.broadcast {return false}

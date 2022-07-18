@@ -28,3 +28,4 @@ extension Stream_Video_ParticipantJoined: Event {}
 extension Stream_Video_ParticipantLeft: Event {}
 extension Stream_Video_BroadcastStarted: Event {}
 extension Stream_Video_BroadcastEnded: Event {}
+extension Stream_Video_AuthPayload: Event {}

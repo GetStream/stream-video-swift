@@ -139,6 +139,14 @@ struct Stream_Video_WebsocketEvent {
     set {eventPayload = .broadcastEnded(newValue)}
   }
 
+  var authPayload: Stream_Video_AuthPayload {
+    get {
+      if case .authPayload(let v)? = eventPayload {return v}
+      return Stream_Video_AuthPayload()
+    }
+    set {eventPayload = .authPayload(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_EventPayload: Equatable {
@@ -156,6 +164,7 @@ struct Stream_Video_WebsocketEvent {
     case participantLeft(Stream_Video_ParticipantLeft)
     case broadcastStarted(Stream_Video_BroadcastStarted)
     case broadcastEnded(Stream_Video_BroadcastEnded)
+    case authPayload(Stream_Video_AuthPayload)
 
   #if !swift(>=4.1)
     static func ==(lhs: Stream_Video_WebsocketEvent.OneOf_EventPayload, rhs: Stream_Video_WebsocketEvent.OneOf_EventPayload) -> Bool {
@@ -219,6 +228,10 @@ struct Stream_Video_WebsocketEvent {
         guard case .broadcastEnded(let l) = lhs, case .broadcastEnded(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.authPayload, .authPayload): return {
+        guard case .authPayload(let l) = lhs, case .authPayload(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
       default: return false
       }
     }
@@ -235,9 +248,44 @@ struct Stream_Video_Healthcheck {
 
   var userID: String = String()
 
+  var clientID: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+}
+
+struct Stream_Video_AuthPayload {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var user: Stream_Video_User {
+    get {return _user ?? Stream_Video_User()}
+    set {_user = newValue}
+  }
+  /// Returns true if `user` has been explicitly set.
+  var hasUser: Bool {return self._user != nil}
+  /// Clears the value of `user`. Subsequent reads from it will return its default value.
+  mutating func clearUser() {self._user = nil}
+
+  var device: Stream_Video_Device {
+    get {return _device ?? Stream_Video_Device()}
+    set {_device = newValue}
+  }
+  /// Returns true if `device` has been explicitly set.
+  var hasDevice: Bool {return self._device != nil}
+  /// Clears the value of `device`. Subsequent reads from it will return its default value.
+  mutating func clearDevice() {self._device = nil}
+
+  var token: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _user: Stream_Video_User? = nil
+  fileprivate var _device: Stream_Video_Device? = nil
 }
 
 ///*
@@ -513,6 +561,7 @@ struct Stream_Video_BroadcastEnded {
 extension Stream_Video_WebsocketEvent: @unchecked Sendable {}
 extension Stream_Video_WebsocketEvent.OneOf_EventPayload: @unchecked Sendable {}
 extension Stream_Video_Healthcheck: @unchecked Sendable {}
+extension Stream_Video_AuthPayload: @unchecked Sendable {}
 extension Stream_Video_CallRinging: @unchecked Sendable {}
 extension Stream_Video_CallCreated: @unchecked Sendable {}
 extension Stream_Video_CallUpdated: @unchecked Sendable {}
@@ -549,6 +598,7 @@ extension Stream_Video_WebsocketEvent: SwiftProtobuf.Message, SwiftProtobuf._Mes
     12: .standard(proto: "participant_left"),
     13: .standard(proto: "broadcast_started"),
     14: .standard(proto: "broadcast_ended"),
+    15: .standard(proto: "auth_payload"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -739,6 +789,19 @@ extension Stream_Video_WebsocketEvent: SwiftProtobuf.Message, SwiftProtobuf._Mes
           self.eventPayload = .broadcastEnded(v)
         }
       }()
+      case 15: try {
+        var v: Stream_Video_AuthPayload?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .authPayload(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .authPayload(v)
+        }
+      }()
       default: break
       }
     }
@@ -806,6 +869,10 @@ extension Stream_Video_WebsocketEvent: SwiftProtobuf.Message, SwiftProtobuf._Mes
       guard case .broadcastEnded(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
     }()
+    case .authPayload?: try {
+      guard case .authPayload(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 15)
+    }()
     case nil: break
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -822,6 +889,7 @@ extension Stream_Video_Healthcheck: SwiftProtobuf.Message, SwiftProtobuf._Messag
   static let protoMessageName: String = _protobuf_package + ".Healthcheck"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "user_id"),
+    2: .standard(proto: "client_id"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -831,6 +899,7 @@ extension Stream_Video_Healthcheck: SwiftProtobuf.Message, SwiftProtobuf._Messag
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.clientID) }()
       default: break
       }
     }
@@ -840,11 +909,63 @@ extension Stream_Video_Healthcheck: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if !self.userID.isEmpty {
       try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
     }
+    if !self.clientID.isEmpty {
+      try visitor.visitSingularStringField(value: self.clientID, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Healthcheck, rhs: Stream_Video_Healthcheck) -> Bool {
     if lhs.userID != rhs.userID {return false}
+    if lhs.clientID != rhs.clientID {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_AuthPayload: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".AuthPayload"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "user"),
+    2: .same(proto: "device"),
+    3: .same(proto: "token"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._user) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._device) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.token) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._user {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._device {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    if !self.token.isEmpty {
+      try visitor.visitSingularStringField(value: self.token, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_AuthPayload, rhs: Stream_Video_AuthPayload) -> Bool {
+    if lhs._user != rhs._user {return false}
+    if lhs._device != rhs._device {return false}
+    if lhs.token != rhs.token {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

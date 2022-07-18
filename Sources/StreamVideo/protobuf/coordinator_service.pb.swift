@@ -100,8 +100,15 @@ struct Stream_Video_CreateCallRequest {
   /// the call id, if not provided a unique value will be generated based on UUID v4
   var id: String = String()
 
-  /// call custom data json encoded
-  var jsonEncodedCustomData: Data = Data()
+  /// call custom data
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
 
   /// the list of participant ids
   var participantIds: [String] = []
@@ -163,6 +170,7 @@ struct Stream_Video_CreateCallRequest {
 
   init() {}
 
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
   fileprivate var _broadcast: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
   fileprivate var _transcribe: SwiftProtobuf.Google_Protobuf_BoolValue? = nil
   fileprivate var _transcribeOptions: Stream_Video_TranscribeOptions? = nil
@@ -531,43 +539,47 @@ struct Stream_Video_JoinCallResponse {
   // methods supported on all messages.
 
   var user: Stream_Video_User {
-    get {return _user ?? Stream_Video_User()}
-    set {_user = newValue}
+    get {return _storage._user ?? Stream_Video_User()}
+    set {_uniqueStorage()._user = newValue}
   }
   /// Returns true if `user` has been explicitly set.
-  var hasUser: Bool {return self._user != nil}
+  var hasUser: Bool {return _storage._user != nil}
   /// Clears the value of `user`. Subsequent reads from it will return its default value.
-  mutating func clearUser() {self._user = nil}
+  mutating func clearUser() {_uniqueStorage()._user = nil}
 
   var call: Stream_Video_Call {
-    get {return _call ?? Stream_Video_Call()}
-    set {_call = newValue}
+    get {return _storage._call ?? Stream_Video_Call()}
+    set {_uniqueStorage()._call = newValue}
   }
   /// Returns true if `call` has been explicitly set.
-  var hasCall: Bool {return self._call != nil}
+  var hasCall: Bool {return _storage._call != nil}
   /// Clears the value of `call`. Subsequent reads from it will return its default value.
-  mutating func clearCall() {self._call = nil}
+  mutating func clearCall() {_uniqueStorage()._call = nil}
 
   var callState: Stream_Video_CallState {
-    get {return _callState ?? Stream_Video_CallState()}
-    set {_callState = newValue}
+    get {return _storage._callState ?? Stream_Video_CallState()}
+    set {_uniqueStorage()._callState = newValue}
   }
   /// Returns true if `callState` has been explicitly set.
-  var hasCallState: Bool {return self._callState != nil}
+  var hasCallState: Bool {return _storage._callState != nil}
   /// Clears the value of `callState`. Subsequent reads from it will return its default value.
-  mutating func clearCallState() {self._callState = nil}
+  mutating func clearCallState() {_uniqueStorage()._callState = nil}
 
-  var edges: [Stream_Video_Edge] = []
+  var edges: [Stream_Video_Edge] {
+    get {return _storage._edges}
+    set {_uniqueStorage()._edges = newValue}
+  }
 
-  var ownCapabilities: [Stream_Video_UserCapability] = []
+  var ownCapabilities: [Stream_Video_UserCapability] {
+    get {return _storage._ownCapabilities}
+    set {_uniqueStorage()._ownCapabilities = newValue}
+  }
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _user: Stream_Video_User? = nil
-  fileprivate var _call: Stream_Video_Call? = nil
-  fileprivate var _callState: Stream_Video_CallState? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Stream_Video_LeaveCallRequest {
@@ -1001,7 +1013,7 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "type"),
     2: .same(proto: "id"),
-    3: .standard(proto: "json_encoded_custom_data"),
+    3: .same(proto: "custom"),
     4: .standard(proto: "participant_ids"),
     6: .same(proto: "broadcast"),
     7: .standard(proto: "broadcast_options"),
@@ -1019,7 +1031,7 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
-      case 3: try { try decoder.decodeSingularBytesField(value: &self.jsonEncodedCustomData) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
       case 4: try { try decoder.decodeRepeatedStringField(value: &self.participantIds) }()
       case 6: try { try decoder.decodeSingularMessageField(value: &self._broadcast) }()
       case 7: try { try decoder.decodeRepeatedMessageField(value: &self.broadcastOptions) }()
@@ -1043,9 +1055,9 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
     if !self.id.isEmpty {
       try visitor.visitSingularStringField(value: self.id, fieldNumber: 2)
     }
-    if !self.jsonEncodedCustomData.isEmpty {
-      try visitor.visitSingularBytesField(value: self.jsonEncodedCustomData, fieldNumber: 3)
-    }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
     if !self.participantIds.isEmpty {
       try visitor.visitRepeatedStringField(value: self.participantIds, fieldNumber: 4)
     }
@@ -1073,7 +1085,7 @@ extension Stream_Video_CreateCallRequest: SwiftProtobuf.Message, SwiftProtobuf._
   static func ==(lhs: Stream_Video_CreateCallRequest, rhs: Stream_Video_CreateCallRequest) -> Bool {
     if lhs.type != rhs.type {return false}
     if lhs.id != rhs.id {return false}
-    if lhs.jsonEncodedCustomData != rhs.jsonEncodedCustomData {return false}
+    if lhs._custom != rhs._custom {return false}
     if lhs.participantIds != rhs.participantIds {return false}
     if lhs._broadcast != rhs._broadcast {return false}
     if lhs.broadcastOptions != rhs.broadcastOptions {return false}
@@ -1914,51 +1926,91 @@ extension Stream_Video_JoinCallResponse: SwiftProtobuf.Message, SwiftProtobuf._M
     5: .standard(proto: "own_capabilities"),
   ]
 
+  fileprivate class _StorageClass {
+    var _user: Stream_Video_User? = nil
+    var _call: Stream_Video_Call? = nil
+    var _callState: Stream_Video_CallState? = nil
+    var _edges: [Stream_Video_Edge] = []
+    var _ownCapabilities: [Stream_Video_UserCapability] = []
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _user = source._user
+      _call = source._call
+      _callState = source._callState
+      _edges = source._edges
+      _ownCapabilities = source._ownCapabilities
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._user) }()
-      case 2: try { try decoder.decodeSingularMessageField(value: &self._call) }()
-      case 3: try { try decoder.decodeSingularMessageField(value: &self._callState) }()
-      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.edges) }()
-      case 5: try { try decoder.decodeRepeatedMessageField(value: &self.ownCapabilities) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._user) }()
+        case 2: try { try decoder.decodeSingularMessageField(value: &_storage._call) }()
+        case 3: try { try decoder.decodeSingularMessageField(value: &_storage._callState) }()
+        case 4: try { try decoder.decodeRepeatedMessageField(value: &_storage._edges) }()
+        case 5: try { try decoder.decodeRepeatedMessageField(value: &_storage._ownCapabilities) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._user {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._call {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
-    try { if let v = self._callState {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-    } }()
-    if !self.edges.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.edges, fieldNumber: 4)
-    }
-    if !self.ownCapabilities.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.ownCapabilities, fieldNumber: 5)
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._user {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._call {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      } }()
+      try { if let v = _storage._callState {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+      } }()
+      if !_storage._edges.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._edges, fieldNumber: 4)
+      }
+      if !_storage._ownCapabilities.isEmpty {
+        try visitor.visitRepeatedMessageField(value: _storage._ownCapabilities, fieldNumber: 5)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_JoinCallResponse, rhs: Stream_Video_JoinCallResponse) -> Bool {
-    if lhs._user != rhs._user {return false}
-    if lhs._call != rhs._call {return false}
-    if lhs._callState != rhs._callState {return false}
-    if lhs.edges != rhs.edges {return false}
-    if lhs.ownCapabilities != rhs.ownCapabilities {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._user != rhs_storage._user {return false}
+        if _storage._call != rhs_storage._call {return false}
+        if _storage._callState != rhs_storage._callState {return false}
+        if _storage._edges != rhs_storage._edges {return false}
+        if _storage._ownCapabilities != rhs_storage._ownCapabilities {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
