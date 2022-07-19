@@ -29,8 +29,8 @@ class VideoService {
             defaultVideoPublishOptions: VideoPublishOptions(
                 simulcast: true
             ),
-            adaptiveStream: false,
-            dynacast: false,
+            adaptiveStream: true,
+            dynacast: true,
             reportStats: false
         )
 
