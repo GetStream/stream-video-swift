@@ -43,7 +43,7 @@ public class StreamVideo {
         self.token = token
         self.tokenProvider = tokenProvider
         self.httpClient = URLSessionClient(
-            urlSession: URLSession.shared,
+            urlSession: Self.makeURLSession(),
             tokenProvider: tokenProvider
         )
         self.callCoordinatorService = Stream_Video_CallCoordinatorService(
@@ -63,20 +63,20 @@ public class StreamVideo {
         callId: String,
         videoOptions: VideoOptions
     ) async throws -> VideoRoom {
-        let createCallResponse = try await createCall()
+        let createCallResponse = try await createCall(callType: callType.name, callId: callId)
         
         let edges = try await joinCall(
             callId: createCallResponse.call.id,
             type: createCallResponse.call.type
         )
         
-        let latencyByEdge = try await measureLatencies(for: edges)
+        let latencyByEdge = await measureLatencies(for: edges)
         
         let edgeServer = try await selectEdgeServer(
             callId: createCallResponse.call.id,
             latencyByEdge: latencyByEdge
         )
-        
+                
         return try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
@@ -84,23 +84,38 @@ public class StreamVideo {
         )
     }
     
-    private func createCall() async throws -> Stream_Video_CreateCallResponse {
-        let createCallRequest = Stream_Video_CreateCallRequest()
+    private func createCall(callType: String, callId: String) async throws -> Stream_Video_CreateCallResponse {
+        var createCallRequest = Stream_Video_CreateCallRequest()
+        createCallRequest.id = callId
+        createCallRequest.type = callType
         let createCallResponse = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
         return createCallResponse
     }
     
     private func measureLatencies(
         for edges: [Stream_Video_Edge]
-    ) async throws -> [String: Stream_Video_Latency] {
-        var result: [String: Stream_Video_Latency] = [:]
-        for edge in edges {
-            var latency = Stream_Video_Latency()
-            let value = await latencyService.measureLatency(for: edge)
-            latency.measurementsSeconds = value
-            result[edge.latencyURL] = latency
+    ) async -> [String: Stream_Video_Latency] {
+        return await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
+            var result: [String: Stream_Video_Latency] = [:]
+            for edge in edges {
+                group.addTask {
+                    var latency = Stream_Video_Latency()
+                    let value = await self.latencyService.measureLatency(for: edge, tries: 3)
+                    latency.measurementsSeconds = value
+                    return [edge.latencyURL: latency]
+                }
+            }
+            
+            for await latency in group {
+                for (key, value) in latency {
+                    result[key] = value
+                }
+            }
+            
+            log.debug("Reported latencies for edges: \(result)")
+            
+            return result
         }
-        return result
     }
     
     private func joinCall(callId: String, type: String) async throws -> [Stream_Video_Edge] {
@@ -122,7 +137,16 @@ public class StreamVideo {
         let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
         let url = "wss://\(response.edgeServer.url)"
         let token = response.token
+        log.debug("Selected edge server \(url)")
         return (url: url, token: token)
+    }
+    
+    private static func makeURLSession() -> URLSession {
+        let config = URLSessionConfiguration.default
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
+        let urlSession = URLSession(configuration: config)
+        return urlSession
     }
     
 }

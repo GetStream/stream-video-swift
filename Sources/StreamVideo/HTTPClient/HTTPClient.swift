@@ -80,7 +80,9 @@ class URLSessionClient: HTTPClient {
                         continuation.resume(throwing: ClientError.InvalidToken())
                         return
                     } else if response.statusCode >= 400 {
-                        log.debug("Error executing request \(self.errorResponse(from: data, response: response))")
+                        let requestURLString = request.url?.absoluteString ?? ""
+                        let errorResponse = self.errorResponse(from: data, response: response)
+                        log.debug("Error executing request \(requestURLString) \(errorResponse)")
                         continuation.resume(throwing: ClientError.NetworkError(response.description))
                         return
                     }
