@@ -14,7 +14,7 @@ public class StreamVideo {
     
     // Temporarly storing user in memory.
     private var userInfo: UserInfo
-    private var token: Token {
+    var token: Token {
         didSet {
             callCoordinatorService.update(userToken: token.rawValue)
         }
@@ -23,14 +23,36 @@ public class StreamVideo {
     
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991"
+    private let wsEndpoint = "ws://192.168.0.132:8989"
     
     private let httpClient: HTTPClient
     
+    private var webSocketClient: WebSocketClient?
+    
+    /// The notification center used to send and receive notifications about incoming events.
+    private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
+        let center = EventNotificationCenter()
+        let middlewares: [EventMiddleware] = []
+        center.add(middlewares: middlewares)
+        return center
+    }()
+    
+    /// Background worker that takes care about client connection recovery when the Internet comes back OR app transitions from background to foreground.
+    private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
+    private(set) var userConnectionProvider: UserConnectionProvider?
+    private(set) var timerType: Timer.Type = DefaultTimer.self
+    private var monitor: InternetConnectionMonitor?
+
+    var tokenRetryTimer: TimerControl?
+    var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
+    
     var callCoordinatorService: Stream_Video_CallCoordinatorService
     
-    let apiKey: String
-    let videoService = VideoService()
-    let latencyService: LatencyService
+    private let apiKey: APIKey
+    private let videoService = VideoService()
+    private let latencyService: LatencyService
+    
+    public internal(set) var connectionStatus: ConnectionStatus = .initialized
     
     public init(
         apiKey: String,
@@ -38,7 +60,7 @@ public class StreamVideo {
         token: Token,
         tokenProvider: @escaping TokenProvider
     ) {
-        self.apiKey = apiKey
+        self.apiKey = APIKey(apiKey)
         self.userInfo = user
         self.token = token
         self.tokenProvider = tokenProvider
@@ -76,12 +98,23 @@ public class StreamVideo {
             callId: createCallResponse.call.id,
             latencyByEdge: latencyByEdge
         )
+        
+        if let connectURL = URL(string: wsEndpoint) {
+            webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
+            webSocketClient?.connect()
+        }
                 
         return try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
             options: videoOptions
         )
+    }
+    
+    public func leaveCall() {
+        webSocketClient?.disconnect {
+            log.debug("Web socket connection closed")
+        }
     }
     
     private func createCall(callType: String, callId: String) async throws -> Stream_Video_CreateCallResponse {
@@ -147,6 +180,65 @@ public class StreamVideo {
         config.urlCache = nil
         let urlSession = URLSession(configuration: config)
         return urlSession
+    }
+    
+    private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {
+        let config = URLSessionConfiguration.default
+        config.waitsForConnectivity = false
+        
+        // Create a WebSocketClient.
+        let webSocketClient = WebSocketClient(
+            sessionConfiguration: config,
+            eventDecoder: EventDecoder(),
+            eventNotificationCenter: eventNotificationCenter,
+            connectURL: url,
+            userInfo: userInfo,
+            token: token.rawValue
+        )
+
+        webSocketClient.connectionStateDelegate = self
+        
+        return webSocketClient
+    }
+    
+    private func setupConnectionRecoveryHandler() {
+        guard let webSocketClient = webSocketClient else {
+            return
+        }
+
+        connectionRecoveryHandler = nil
+                
+        connectionRecoveryHandler = DefaultConnectionRecoveryHandler(
+            webSocketClient: webSocketClient,
+            eventNotificationCenter: eventNotificationCenter,
+            backgroundTaskScheduler: backgroundTaskSchedulerBuilder(),
+            internetConnection: InternetConnection(monitor: internetMonitor),
+            reconnectionStrategy: DefaultRetryStrategy(),
+            reconnectionTimerType: DefaultTimer.self,
+            keepConnectionAliveInBackground: true
+        )
+    }
+    
+    var internetMonitor: InternetConnectionMonitor {
+        if let monitor = monitor {
+            return monitor
+        } else {
+            return InternetConnection.Monitor()
+        }
+    }
+    
+    var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
+        if Bundle.main.isAppExtension {
+            // No background task scheduler exists for app extensions.
+            return nil
+        } else {
+            #if os(iOS)
+            return IOSBackgroundTaskScheduler()
+            #else
+            // No need for background schedulers on macOS, app continues running when inactive.
+            return nil
+            #endif
+        }
     }
     
 }

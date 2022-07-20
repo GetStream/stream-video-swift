@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		841947962886D6A30007B36E /* StreamVideoConnectionRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */; };
+		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
+		8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947992886EBD20007B36E /* UserConnectionProvider.swift */; };
+		84204C89288815E800C5F20F /* Atlantis in Frameworks */ = {isa = PBXBuildFile; productRef = 84204C88288815E800C5F20F /* Atlantis */; };
 		84274F4428840C9700CF8794 /* DataGzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F4328840C9700CF8794 /* DataGzip.swift */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
@@ -25,7 +29,6 @@
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
 		84A7E17428814D7400526C98 /* LatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17328814D7400526C98 /* LatencyService.swift */; };
 		84A7E1792881922400526C98 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
-		84A7E17F2883629700526C98 /* WebSocketConnectPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17B2883629700526C98 /* WebSocketConnectPayload.swift */; };
 		84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17C2883629700526C98 /* WebSocketClient.swift */; };
 		84A7E1812883629700526C98 /* WebSocketPingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17D2883629700526C98 /* WebSocketPingController.swift */; };
 		84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17E2883629700526C98 /* RetryStrategy.swift */; };
@@ -38,12 +41,8 @@
 		84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1932883652000526C98 /* EventMiddleware.swift */; };
 		84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */; };
 		84A7E198288366D000526C98 /* EventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E197288366D000526C98 /* EventDecoder.swift */; };
-		84A7E19C2883670800526C98 /* EventType.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E19A2883670800526C98 /* EventType.swift */; };
-		84A7E19E2883E1FE00526C98 /* Endpoint.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E19D2883E1FE00526C98 /* Endpoint.swift */; };
-		84A7E1A02883E23F00526C98 /* EndpointPath.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E19F2883E23F00526C98 /* EndpointPath.swift */; };
 		84A7E1A22883E29B00526C98 /* CodableExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A12883E29B00526C98 /* CodableExtensions.swift */; };
 		84A7E1A42883E2F400526C98 /* DBDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A32883E2F400526C98 /* DBDate.swift */; };
-		84A7E1A62883E3B200526C98 /* RequestEncoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A52883E3B200526C98 /* RequestEncoder.swift */; };
 		84A7E1A82883E46200526C98 /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A72883E46200526C98 /* Timers.swift */; };
 		84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A92883E4AD00526C98 /* APIKey.swift */; };
 		84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */; };
@@ -169,6 +168,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoConnectionRecovery.swift; sourceTree = "<group>"; };
+		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
+		841947992886EBD20007B36E /* UserConnectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserConnectionProvider.swift; sourceTree = "<group>"; };
 		84274F4328840C9700CF8794 /* DataGzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGzip.swift; sourceTree = "<group>"; };
 		84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionRecoveryHandler.swift; sourceTree = "<group>"; };
 		84274F472884251600CF8794 /* InternetConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternetConnection.swift; sourceTree = "<group>"; };
@@ -188,7 +190,6 @@
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
 		84A7E17328814D7400526C98 /* LatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatencyService.swift; sourceTree = "<group>"; };
 		84A7E1782881922400526C98 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
-		84A7E17B2883629700526C98 /* WebSocketConnectPayload.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocketConnectPayload.swift; sourceTree = "<group>"; };
 		84A7E17C2883629700526C98 /* WebSocketClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocketClient.swift; sourceTree = "<group>"; };
 		84A7E17D2883629700526C98 /* WebSocketPingController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocketPingController.swift; sourceTree = "<group>"; };
 		84A7E17E2883629700526C98 /* RetryStrategy.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RetryStrategy.swift; sourceTree = "<group>"; };
@@ -201,12 +202,8 @@
 		84A7E1932883652000526C98 /* EventMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMiddleware.swift; sourceTree = "<group>"; };
 		84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskScheduler.swift; sourceTree = "<group>"; };
 		84A7E197288366D000526C98 /* EventDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventDecoder.swift; sourceTree = "<group>"; };
-		84A7E19A2883670800526C98 /* EventType.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventType.swift; sourceTree = "<group>"; };
-		84A7E19D2883E1FE00526C98 /* Endpoint.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Endpoint.swift; sourceTree = "<group>"; };
-		84A7E19F2883E23F00526C98 /* EndpointPath.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointPath.swift; sourceTree = "<group>"; };
 		84A7E1A12883E29B00526C98 /* CodableExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableExtensions.swift; sourceTree = "<group>"; };
 		84A7E1A32883E2F400526C98 /* DBDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBDate.swift; sourceTree = "<group>"; };
-		84A7E1A52883E3B200526C98 /* RequestEncoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RequestEncoder.swift; sourceTree = "<group>"; };
 		84A7E1A72883E46200526C98 /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		84A7E1A92883E4AD00526C98 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
 		84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPHeader.swift; sourceTree = "<group>"; };
@@ -268,6 +265,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F73852287C19B500A363F4 /* LiveKit in Frameworks */,
+				84204C89288815E800C5F20F /* Atlantis in Frameworks */,
 				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -323,20 +321,8 @@
 				84A7E197288366D000526C98 /* EventDecoder.swift */,
 				84A7E1932883652000526C98 /* EventMiddleware.swift */,
 				84A7E18B288363AC00526C98 /* EventNotificationCenter.swift */,
-				84A7E19A2883670800526C98 /* EventType.swift */,
 			);
 			path = Events;
-			sourceTree = "<group>";
-		};
-		841947932884ABC60007B36E /* Endpoint */ = {
-			isa = PBXGroup;
-			children = (
-				84A7E1A92883E4AD00526C98 /* APIKey.swift */,
-				84A7E1A52883E3B200526C98 /* RequestEncoder.swift */,
-				84A7E19D2883E1FE00526C98 /* Endpoint.swift */,
-				84A7E19F2883E23F00526C98 /* EndpointPath.swift */,
-			);
-			path = Endpoint;
 			sourceTree = "<group>";
 		};
 		841947942884AC130007B36E /* Client */ = {
@@ -347,10 +333,10 @@
 				84A7E1882883638200526C98 /* URLSessionWebSocketEngine.swift */,
 				84A7E17D2883629700526C98 /* WebSocketPingController.swift */,
 				84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */,
-				84A7E17B2883629700526C98 /* WebSocketConnectPayload.swift */,
 				84A7E17E2883629700526C98 /* RetryStrategy.swift */,
 				84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */,
 				84A7E1852883632100526C98 /* ConnectionStatus.swift */,
+				84A7E1A92883E4AD00526C98 /* APIKey.swift */,
 			);
 			path = Client;
 			sourceTree = "<group>";
@@ -479,7 +465,6 @@
 			isa = PBXGroup;
 			children = (
 				841947942884AC130007B36E /* Client */,
-				841947932884ABC60007B36E /* Endpoint */,
 				841947922884ABB20007B36E /* Events */,
 			);
 			path = WebSockets;
@@ -498,6 +483,8 @@
 				84A7E1A32883E2F400526C98 /* DBDate.swift */,
 				84A7E1A72883E46200526C98 /* Timers.swift */,
 				84274F4328840C9700CF8794 /* DataGzip.swift */,
+				841947972886D9CD0007B36E /* BundleExtensions.swift */,
+				841947992886EBD20007B36E /* UserConnectionProvider.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -546,6 +533,7 @@
 			children = (
 				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
 				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
+				841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */,
 				84ED240E286C9530002A3186 /* CallViewModel.swift */,
 				8456E6D9287EC46D004E180E /* Models */,
 				84C299712876E77E0034B735 /* DependencyInjection */,
@@ -680,6 +668,7 @@
 			packageProductDependencies = (
 				84F73851287C19B500A363F4 /* LiveKit */,
 				84AF64BB287C34320012A503 /* WebRTC */,
+				84204C88288815E800C5F20F /* Atlantis */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -825,6 +814,7 @@
 			packageReferences = (
 				84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 				84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */,
+				84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -930,7 +920,6 @@
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				84A7E17428814D7400526C98 /* LatencyService.swift in Sources */,
-				84A7E19C2883670800526C98 /* EventType.swift in Sources */,
 				84AF64CE287C545E0012A503 /* validate.pb.swift in Sources */,
 				8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */,
 				84AF64D9287C79F60012A503 /* Errors.swift in Sources */,
@@ -939,14 +928,15 @@
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */,
 				84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */,
-				84A7E1A62883E3B200526C98 /* RequestEncoder.swift in Sources */,
 				84A7E1812883629700526C98 /* WebSocketPingController.swift in Sources */,
 				84AF64CC287C545E0012A503 /* stream.video.coordinator_service.twirp.swift in Sources */,
 				84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */,
+				8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */,
 				84AF64D7287C79610012A503 /* Token.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				84F73856287C1A3400A363F4 /* Typealiases.swift in Sources */,
 				84F7385A287C1A3400A363F4 /* Room.swift in Sources */,
+				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
 				84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */,
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
@@ -954,8 +944,8 @@
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
 				84A7E1A22883E29B00526C98 /* CodableExtensions.swift in Sources */,
-				84A7E1A02883E23F00526C98 /* EndpointPath.swift in Sources */,
 				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
+				841947962886D6A30007B36E /* StreamVideoConnectionRecovery.swift in Sources */,
 				84AF64CF287C545E0012A503 /* events.pb.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
@@ -963,10 +953,8 @@
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
 				84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */,
-				84A7E17F2883629700526C98 /* WebSocketConnectPayload.swift in Sources */,
 				84AF64D0287C545E0012A503 /* coordinator_service.pb.swift in Sources */,
 				84F7385B287C1A3400A363F4 /* VideoService.swift in Sources */,
-				84A7E19E2883E1FE00526C98 /* Endpoint.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1620,6 +1608,14 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ProxymanApp/atlantis.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/webrtc-sdk/Specs.git";
@@ -1639,6 +1635,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		84204C88288815E800C5F20F /* Atlantis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */;
+			productName = Atlantis;
+		};
 		84AF64BB287C34320012A503 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;

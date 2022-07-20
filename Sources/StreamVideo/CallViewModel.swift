@@ -15,7 +15,6 @@ import OrderedCollections
 public class CallViewModel: ObservableObject  {
     
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.callCoordinatorService) var callCoordinatorService
     
     @Published public var room: VideoRoom? {
         didSet {
@@ -122,6 +121,7 @@ public class CallViewModel: ObservableObject  {
     }
     
     public func leaveCall() {
+        self.streamVideo.leaveCall()
         self.room?.disconnect()
     }
     

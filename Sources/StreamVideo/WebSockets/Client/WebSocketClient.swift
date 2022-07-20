@@ -23,25 +23,12 @@ class WebSocketClient {
             log.info("Web socket connection state changed: \(connectionState)", subsystems: .webSocket)
                 
             connectionStateDelegate?.webSocketClient(self, didUpdateConnectionState: connectionState)
-
-            let previousStatus = ConnectionStatus(webSocketConnectionState: oldValue)
-            let event = ConnectionStatusUpdated(webSocketConnectionState: connectionState)
-
-            if event.connectionStatus != previousStatus {
-                // Publish Connection event with the new state
-                //TODO: 
-//                eventsBatcher.append(event)
-            }
         }
     }
     
     weak var connectionStateDelegate: ConnectionStateDelegate?
     
-    /// The endpoint used for creating a web socket connection.
-    ///
-    /// Changing this value doesn't automatically update the existing connection. You need to manually call `disconnect`
-    /// and `connect` to make a new connection to the updated endpoint.
-    var connectEndpoint: Endpoint<EmptyResponse>?
+    var connectURL: URL
 
     /// The decoder used to decode incoming events
     private let eventDecoder: AnyEventDecoder
@@ -50,10 +37,8 @@ class WebSocketClient {
     private(set) var engine: WebSocketEngine?
     
     /// The queue on which web socket engine methods are called
-    private let engineQueue: DispatchQueue = .init(label: "io.getStream.chat.core.web_socket_engine_queue", qos: .userInitiated)
-    
-    private let requestEncoder: RequestEncoder
-    
+    private let engineQueue: DispatchQueue = .init(label: "io.getStream.video.core.web_socket_engine_queue", qos: .userInitiated)
+        
     /// The session config used for the web socket engine
     private let sessionConfiguration: URLSessionConfiguration
     
@@ -66,13 +51,8 @@ class WebSocketClient {
         return pingController
     }()
     
-    private func createEngineIfNeeded(for connectEndpoint: Endpoint<EmptyResponse>) -> WebSocketEngine {
-        let request: URLRequest
-        do {
-            request = try requestEncoder.encodeRequest(for: connectEndpoint)
-        } catch {
-            fatalError("Failed to create WebSocketEngine with error: \(error)")
-        }
+    private func createEngineIfNeeded(for connectURL: URL) -> WebSocketEngine {
+        let request = URLRequest(url: connectURL)
 
         if let existedEngine = engine, existedEngine.request == request {
             return existedEngine
@@ -83,38 +63,39 @@ class WebSocketClient {
         return engine
     }
     
+    private var token: String
+    private var userInfo: UserInfo
+    
     init(
         sessionConfiguration: URLSessionConfiguration,
-        requestEncoder: RequestEncoder,
         eventDecoder: AnyEventDecoder,
         eventNotificationCenter: EventNotificationCenter,
-        environment: Environment = .init()
+        environment: Environment = .init(),
+        connectURL: URL,
+        userInfo: UserInfo,
+        token: String
     ) {
         self.environment = environment
-        self.requestEncoder = requestEncoder
         self.sessionConfiguration = sessionConfiguration
         self.eventDecoder = eventDecoder
-
+        self.connectURL = connectURL
         self.eventNotificationCenter = eventNotificationCenter
+        self.userInfo = userInfo
+        self.token = token
     }
     
     /// Connects the web connect.
     ///
     /// Calling this method has no effect is the web socket is already connected, or is in the connecting phase.
     func connect() {
-        guard let endpoint = connectEndpoint else {
-            log.assertionFailure("Attempt to connect `web-socket` while endpoint is missing", subsystems: .webSocket)
-            return
-        }
-
         switch connectionState {
         // Calling connect in the following states has no effect
-        case .connecting, .waitingForConnectionId, .connected(connectionId: _):
+        case .connecting, .authenticating, .connected(connectionId: _):
             return
         default: break
         }
         
-        engine = createEngineIfNeeded(for: endpoint)
+        engine = createEngineIfNeeded(for: connectURL)
         
         connectionState = .connecting
         
@@ -175,45 +156,50 @@ extension WebSocketClient {
 
 extension WebSocketClient: WebSocketEngineDelegate {
     func webSocketDidConnect() {
-        connectionState = .waitingForConnectionId
+        connectionState = .authenticating
+        
+        var payload = Stream_Video_AuthPayload()
+        payload.token = token
+        
+        var user = Stream_Video_UserRequest()
+        user.id = userInfo.id
+        user.name = userInfo.name ?? userInfo.id
+        payload.user = user
+        
+        engine?.send(message: payload)
     }
     
-    func webSocketDidReceiveMessage(_ message: String) {
+    func webSocketDidReceiveMessage(_ data: Data) {
         do {
-            let messageData = Data(message.utf8)
-            log.debug("Event received:\n\(messageData.debugPrettyPrintedJSON)", subsystems: .webSocket)
-
+            let messageData = data
+            log.debug("Event received")
             let event = try eventDecoder.decode(from: messageData)
+            log.debug("Event decoded: \(event)")
             if let healthCheckEvent = event as? Stream_Video_Healthcheck {
+                if connectionState == .authenticating {
+                    connectionState = .connected(connectionId: healthCheckEvent.userID)
+                }
                 eventNotificationCenter.process(healthCheckEvent, postNotification: false) { [weak self] in
                     self?.engineQueue.async { [weak self] in
                         self?.pingController.pongReceived()
-                        //TODO: this was connection id before
-                        self?.connectionState = .connected(connectionId: healthCheckEvent.userID)
+                        self?.connectionState = .connected(connectionId: healthCheckEvent.clientID)
                     }
                 }
             } else {
                 eventsBatcher.append(event)
             }
         } catch is ClientError.UnsupportedEventType {
-            log.info("Skipping unsupported event type with payload: \(message)", subsystems: .webSocket)
+            log.info("Skipping unsupported event type", subsystems: .webSocket)
         } catch {
             // Check if the message contains an error object from the server
-            let webSocketError = message
-                .data(using: .utf8)
-                .flatMap { try? JSONDecoder.default.decode(WebSocketErrorContainer.self, from: $0) }
-                .map { ClientError.WebSocket(with: $0?.error) }
-            
-            if let webSocketError = webSocketError {
-                // If there is an error from the server, the connection is about to be disconnected
-                connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
-            }
+            let webSocketError = ClientError.WebSocket()
+            connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
         }
     }
     
     func webSocketDidDisconnect(error engineError: WebSocketEngineError?) {
         switch connectionState {
-        case .connecting, .waitingForConnectionId, .connected:
+        case .connecting, .authenticating, .connected:
             let serverError = engineError.map { ClientError.WebSocket(with: $0) }
             
             connectionState = .disconnected(source: .serverInitiated(error: serverError))
@@ -247,11 +233,11 @@ extension WebSocketClient: WebSocketPingControllerDelegate {
 
 extension Notification.Name {
     /// The name of the notification posted when a new event is published/
-    static let NewEventReceived = Notification.Name("io.getStream.chat.core.new_event_received")
+    static let NewEventReceived = Notification.Name("io.getStream.video.core.new_event_received")
 }
 
 extension Notification {
-    private static let eventKey = "io.getStream.chat.core.event_key"
+    private static let eventKey = "io.getStream.video.core.event_key"
     
     init(newEventReceived event: Event, sender: Any) {
         self.init(name: .NewEventReceived, object: sender, userInfo: [Self.eventKey: event])

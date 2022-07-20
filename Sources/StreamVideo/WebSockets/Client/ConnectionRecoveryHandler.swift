@@ -152,7 +152,7 @@ extension DefaultConnectionRecoveryHandler {
             reconnectionStrategy.resetConsecutiveFailures()
         case .disconnected:
             scheduleReconnectionTimerIfNeeded()
-        case .initialized, .waitingForConnectionId, .disconnecting:
+        case .initialized, .authenticating, .disconnecting:
             break
         }
     }
@@ -173,7 +173,7 @@ private extension DefaultConnectionRecoveryHandler {
         let state = webSocketClient.connectionState
         
         switch state {
-        case .connecting, .waitingForConnectionId, .connected:
+        case .connecting, .authenticating, .connected:
             log.debug("Will disconnect automatically from \(state) state", subsystems: .webSocket)
             
             return true

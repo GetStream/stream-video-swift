@@ -14,12 +14,13 @@ protocol WebSocketEngine: AnyObject {
     func connect()
     func disconnect()
     func sendPing()
+    func send(message: Event)
 }
 
 protocol WebSocketEngineDelegate: AnyObject {
     func webSocketDidConnect()
     func webSocketDidDisconnect(error: WebSocketEngineError?)
-    func webSocketDidReceiveMessage(_ message: String)
+    func webSocketDidReceiveMessage(_ data: Data)
 }
 
 struct WebSocketEngineError: Error {

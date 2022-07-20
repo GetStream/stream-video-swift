@@ -8,6 +8,7 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import Atlantis
 
 @main
 struct StreamVideoSwiftUIApp: App {
@@ -17,6 +18,7 @@ struct StreamVideoSwiftUIApp: App {
     @ObservedObject var appState = AppState.shared
         
     init() {
+        Atlantis.start()
         LogConfig.level = .debug
     }
     

@@ -32,7 +32,7 @@ extension ConnectionStatus {
         case .initialized:
             self = .initialized
             
-        case .connecting, .waitingForConnectionId:
+        case .connecting, .authenticating:
             self = .connecting
             
         case .connected:
@@ -82,11 +82,11 @@ enum WebSocketConnectionState: Equatable {
     /// The web socket is not connected. Contains the source/reason why the disconnection has happened.
     case disconnected(source: DisconnectionSource)
     
-    /// The web socket is connecting
+    /// The web socket is connecting.
     case connecting
     
-    /// The web socket is connected, waiting for the connection id
-    case waitingForConnectionId
+    /// The web socket is connected, client is authenticating.
+    case authenticating
     
     /// The web socket was connected.
     case connected(connectionId: ConnectionId)

@@ -306,6 +306,37 @@ struct Stream_Video_User {
   fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
 }
 
+struct Stream_Video_UserRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var id: String = String()
+
+  var teams: [String] = []
+
+  var role: String = String()
+
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
+
+  var name: String = String()
+
+  var profileImageURL: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
+}
+
 struct Stream_Video_Device {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -324,6 +355,26 @@ struct Stream_Video_Device {
   var createdAt: String = String()
 
   var updatedAt: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_DeviceRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var userID: String = String()
+
+  var id: String = String()
+
+  var disabled: Bool = false
+
+  var disabledReason: String = String()
+
+  var pushProviderName: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -506,9 +557,58 @@ struct Stream_Video_Participant {
 
   var online: Bool = false
 
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
+
+  /// call creation date as RFC3339 string
+  var createdAt: String = String()
+
+  /// call last update date as RFC3339 string
+  var updatedAt: String = String()
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
+}
+
+struct Stream_Video_ParticipantRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var userID: String = String()
+
+  var role: String = String()
+
+  /// call custom data
+  var custom: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_custom = newValue}
+  }
+  /// Returns true if `custom` has been explicitly set.
+  var hasCustom: Bool {return self._custom != nil}
+  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+  mutating func clearCustom() {self._custom = nil}
+
+  /// call creation date as RFC3339 string
+  var createdAt: String = String()
+
+  /// call last update date as RFC3339 string
+  var updatedAt: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
 }
 
 struct Stream_Video_CallState {
@@ -591,7 +691,9 @@ extension Stream_Video_HLSBroadcast: @unchecked Sendable {}
 extension Stream_Video_File: @unchecked Sendable {}
 extension Stream_Video_RecordBroadcast: @unchecked Sendable {}
 extension Stream_Video_User: @unchecked Sendable {}
+extension Stream_Video_UserRequest: @unchecked Sendable {}
 extension Stream_Video_Device: @unchecked Sendable {}
+extension Stream_Video_DeviceRequest: @unchecked Sendable {}
 extension Stream_Video_RecordingStorageOptions: @unchecked Sendable {}
 extension Stream_Video_BroadcastOptions: @unchecked Sendable {}
 extension Stream_Video_TranscribeOptions: @unchecked Sendable {}
@@ -599,6 +701,7 @@ extension Stream_Video_CallType: @unchecked Sendable {}
 extension Stream_Video_Security: @unchecked Sendable {}
 extension Stream_Video_Security.IsAllowed: @unchecked Sendable {}
 extension Stream_Video_Participant: @unchecked Sendable {}
+extension Stream_Video_ParticipantRequest: @unchecked Sendable {}
 extension Stream_Video_CallState: @unchecked Sendable {}
 extension Stream_Video_Call: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
@@ -1052,6 +1155,72 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
   }
 }
 
+extension Stream_Video_UserRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".UserRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "id"),
+    2: .same(proto: "teams"),
+    3: .same(proto: "role"),
+    4: .same(proto: "custom"),
+    5: .same(proto: "name"),
+    6: .standard(proto: "profile_image_url"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
+      case 2: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.role) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.profileImageURL) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.id.isEmpty {
+      try visitor.visitSingularStringField(value: self.id, fieldNumber: 1)
+    }
+    if !self.teams.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.teams, fieldNumber: 2)
+    }
+    if !self.role.isEmpty {
+      try visitor.visitSingularStringField(value: self.role, fieldNumber: 3)
+    }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 5)
+    }
+    if !self.profileImageURL.isEmpty {
+      try visitor.visitSingularStringField(value: self.profileImageURL, fieldNumber: 6)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_UserRequest, rhs: Stream_Video_UserRequest) -> Bool {
+    if lhs.id != rhs.id {return false}
+    if lhs.teams != rhs.teams {return false}
+    if lhs.role != rhs.role {return false}
+    if lhs._custom != rhs._custom {return false}
+    if lhs.name != rhs.name {return false}
+    if lhs.profileImageURL != rhs.profileImageURL {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Device"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1115,6 +1284,62 @@ extension Stream_Video_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImpl
     if lhs.pushProviderName != rhs.pushProviderName {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_DeviceRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".DeviceRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "id"),
+    3: .same(proto: "disabled"),
+    4: .standard(proto: "disabled_reason"),
+    5: .standard(proto: "push_provider_name"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.disabled) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.disabledReason) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.pushProviderName) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.userID.isEmpty {
+      try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
+    }
+    if !self.id.isEmpty {
+      try visitor.visitSingularStringField(value: self.id, fieldNumber: 2)
+    }
+    if self.disabled != false {
+      try visitor.visitSingularBoolField(value: self.disabled, fieldNumber: 3)
+    }
+    if !self.disabledReason.isEmpty {
+      try visitor.visitSingularStringField(value: self.disabledReason, fieldNumber: 4)
+    }
+    if !self.pushProviderName.isEmpty {
+      try visitor.visitSingularStringField(value: self.pushProviderName, fieldNumber: 5)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_DeviceRequest, rhs: Stream_Video_DeviceRequest) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.id != rhs.id {return false}
+    if lhs.disabled != rhs.disabled {return false}
+    if lhs.disabledReason != rhs.disabledReason {return false}
+    if lhs.pushProviderName != rhs.pushProviderName {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1405,6 +1630,9 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     1: .standard(proto: "user_id"),
     2: .same(proto: "role"),
     3: .same(proto: "online"),
+    4: .same(proto: "custom"),
+    5: .standard(proto: "created_at"),
+    6: .standard(proto: "updated_at"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1416,12 +1644,19 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.role) }()
       case 3: try { try decoder.decodeSingularBoolField(value: &self.online) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.userID.isEmpty {
       try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
     }
@@ -1431,6 +1666,15 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if self.online != false {
       try visitor.visitSingularBoolField(value: self.online, fieldNumber: 3)
     }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
+    if !self.createdAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 5)
+    }
+    if !self.updatedAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 6)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1438,6 +1682,69 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.userID != rhs.userID {return false}
     if lhs.role != rhs.role {return false}
     if lhs.online != rhs.online {return false}
+    if lhs._custom != rhs._custom {return false}
+    if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.updatedAt != rhs.updatedAt {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_ParticipantRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ParticipantRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .same(proto: "role"),
+    3: .same(proto: "custom"),
+    4: .standard(proto: "created_at"),
+    5: .standard(proto: "updated_at"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.role) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 5: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    if !self.userID.isEmpty {
+      try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
+    }
+    if !self.role.isEmpty {
+      try visitor.visitSingularStringField(value: self.role, fieldNumber: 2)
+    }
+    try { if let v = self._custom {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    if !self.createdAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 4)
+    }
+    if !self.updatedAt.isEmpty {
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 5)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_ParticipantRequest, rhs: Stream_Video_ParticipantRequest) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.role != rhs.role {return false}
+    if lhs._custom != rhs._custom {return false}
+    if lhs.createdAt != rhs.createdAt {return false}
+    if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

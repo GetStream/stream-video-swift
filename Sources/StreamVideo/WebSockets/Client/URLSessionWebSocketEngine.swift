@@ -65,17 +65,33 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         task?.sendPing { _ in }
     }
     
+    func send(message: Event) {
+        do {
+            let data = try message.serializedData()
+            let message: URLSessionWebSocketTask.Message = .data(data)
+            task?.send(message) { [weak self] error in
+                if error == nil {
+                    log.debug("Auth payload message sent")
+                    self?.doRead()
+                }
+            }
+        } catch {
+            log.error("error occurred")
+        }
+    }
+    
     private func doRead() {
         task?.receive { [weak self] result in
+            log.debug("received new event \(result)")
             guard let self = self else {
                 return
             }
             
             switch result {
-            case let .success(message):
-                if case let .string(string) = message {
+            case .success(let message):
+                if case let .data(data) = message {
                     self.callbackQueue.async { [weak self] in
-                        self?.delegate?.webSocketDidReceiveMessage(string)
+                        self?.delegate?.webSocketDidReceiveMessage(data)
                     }
                 }
                 self.doRead()

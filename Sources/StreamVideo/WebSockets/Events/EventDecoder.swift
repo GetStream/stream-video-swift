@@ -60,9 +60,6 @@ extension ClientError {
             super.init("`\(missingValue)` field can't be `nil` for the `\(type)` event.", file, line)
         }
         
-        init(missingValue: String, for type: EventType, _ file: StaticString = #file, _ line: UInt = #line) {
-            super.init("`\(missingValue)` field can't be `nil` for the `\(type.rawValue)` event.", file, line)
-        }
     }
 }
 

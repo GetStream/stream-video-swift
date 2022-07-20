@@ -260,8 +260,8 @@ struct Stream_Video_AuthPayload {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var user: Stream_Video_User {
-    get {return _user ?? Stream_Video_User()}
+  var user: Stream_Video_UserRequest {
+    get {return _user ?? Stream_Video_UserRequest()}
     set {_user = newValue}
   }
   /// Returns true if `user` has been explicitly set.
@@ -269,8 +269,8 @@ struct Stream_Video_AuthPayload {
   /// Clears the value of `user`. Subsequent reads from it will return its default value.
   mutating func clearUser() {self._user = nil}
 
-  var device: Stream_Video_Device {
-    get {return _device ?? Stream_Video_Device()}
+  var device: Stream_Video_DeviceRequest {
+    get {return _device ?? Stream_Video_DeviceRequest()}
     set {_device = newValue}
   }
   /// Returns true if `device` has been explicitly set.
@@ -284,8 +284,8 @@ struct Stream_Video_AuthPayload {
 
   init() {}
 
-  fileprivate var _user: Stream_Video_User? = nil
-  fileprivate var _device: Stream_Video_Device? = nil
+  fileprivate var _user: Stream_Video_UserRequest? = nil
+  fileprivate var _device: Stream_Video_DeviceRequest? = nil
 }
 
 ///*
