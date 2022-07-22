@@ -13,13 +13,14 @@ public typealias TokenUpdater = (Token) -> ()
 public class StreamVideo {
     
     // Temporarly storing user in memory.
-    private var userInfo: UserInfo
+    public var userInfo: UserInfo
     var token: Token {
         didSet {
             callCoordinatorService.update(userToken: token.rawValue)
         }
     }
     private let tokenProvider: TokenProvider
+    private let videoConfig: VideoConfig
     
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991"
@@ -58,12 +59,14 @@ public class StreamVideo {
         apiKey: String,
         user: UserInfo,
         token: Token,
+        videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping TokenProvider
     ) {
         self.apiKey = APIKey(apiKey)
         self.userInfo = user
         self.token = token
         self.tokenProvider = tokenProvider
+        self.videoConfig = videoConfig
         self.httpClient = URLSessionClient(
             urlSession: Self.makeURLSession(),
             tokenProvider: tokenProvider
@@ -78,14 +81,23 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
+        
+        if videoConfig.persitingSocketConnection {
+            connectWebSocketClient()
+        }
     }
 
-    public func joinCall(
+    public func startCall(
         callType: CallType,
         callId: String,
-        videoOptions: VideoOptions
+        videoOptions: VideoOptions,
+        participantIds: [String]
     ) async throws -> VideoRoom {
-        let createCallResponse = try await createCall(callType: callType.name, callId: callId)
+        let createCallResponse = try await createCall(
+            callType: callType.name,
+            callId: callId,
+            participantIds: participantIds
+        )
         
         let edges = try await joinCall(
             callId: createCallResponse.call.id,
@@ -99,11 +111,10 @@ public class StreamVideo {
             latencyByEdge: latencyByEdge
         )
         
-        if let connectURL = URL(string: wsEndpoint) {
-            webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
-            webSocketClient?.connect()
+        if !videoConfig.persitingSocketConnection {
+            connectWebSocketClient()
         }
-                
+                        
         return try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
@@ -111,16 +122,60 @@ public class StreamVideo {
         )
     }
     
+    public func joinCall(
+        callType: CallType,
+        callId: String,
+        videoOptions: VideoOptions
+    ) async throws -> VideoRoom {
+        let edges = try await joinCall(
+            callId: callId,
+            type: callType.name
+        )
+        
+        let latencyByEdge = await measureLatencies(for: edges)
+        
+        let edgeServer = try await selectEdgeServer(
+            callId: callId,
+            latencyByEdge: latencyByEdge
+        )
+        
+        if !videoConfig.persitingSocketConnection {
+            connectWebSocketClient()
+        }
+                        
+        return try await videoService.connect(
+            url: edgeServer.url,
+            token: edgeServer.token,
+            options: videoOptions
+        )
+    }
+
+    
     public func leaveCall() {
+        if videoConfig.persitingSocketConnection {
+           return
+        }
         webSocketClient?.disconnect {
             log.debug("Web socket connection closed")
         }
     }
     
-    private func createCall(callType: String, callId: String) async throws -> Stream_Video_CreateCallResponse {
+    private func connectWebSocketClient() {
+        if let connectURL = URL(string: wsEndpoint) {
+            webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
+            webSocketClient?.connect()
+        }
+    }
+    
+    private func createCall(
+        callType: String,
+        callId: String,
+        participantIds: [String]
+    ) async throws -> Stream_Video_CreateCallResponse {
         var createCallRequest = Stream_Video_CreateCallRequest()
         createCallRequest.id = callId
         createCallRequest.type = callType
+        createCallRequest.participantIds = participantIds
         let createCallResponse = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
         return createCallResponse
     }

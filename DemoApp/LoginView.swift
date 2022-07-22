@@ -12,6 +12,8 @@ struct LoginView: View {
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> ()
     
+    @State var addUserShown = false
+    
     init(completion: @escaping (UserCredentials) -> ()) {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
         self.completion = completion
@@ -30,10 +32,25 @@ struct LoginView: View {
                 }
                 .padding(.all, 8)
             }
+         
+            Button {
+                addUserShown = true
+            } label: {
+                Text("Add user")
+                    .padding()
+            }
+            .foregroundColor(Color.white)
+            .background(Color.blue)
+            .cornerRadius(16)
         }
         .foregroundColor(.primary)
         .overlay(
             viewModel.loading ? ProgressView() : nil
         )
+        .sheet(isPresented: $addUserShown, onDismiss: {
+            viewModel.userCredentials = mockUsers
+        }) {
+            AddUserView()
+        }
     }
 }

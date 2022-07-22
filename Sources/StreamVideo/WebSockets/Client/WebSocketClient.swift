@@ -185,6 +185,17 @@ extension WebSocketClient: WebSocketEngineDelegate {
                         self?.connectionState = .connected(connectionId: healthCheckEvent.clientID)
                     }
                 }
+            } else if let callCreated = event as? Stream_Video_CallCreated {
+                log.debug("Received call created \(callCreated)")
+                //TODO: only temp for demo purposes
+                DispatchQueue.main.async {
+                    NotificationCenter.default.post(
+                        name: NSNotification.Name("callCreated"),
+                        object: nil,
+                        userInfo: ["callId": callCreated.call.id, "userId": callCreated.call.createdByUserID]
+                    )
+                }
+                eventsBatcher.append(event)
             } else {
                 eventsBatcher.append(event)
             }

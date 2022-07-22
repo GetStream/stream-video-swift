@@ -12,7 +12,7 @@ import Promises
 import OrderedCollections
 
 @MainActor
-public class CallViewModel: ObservableObject  {
+open class CallViewModel: ObservableObject  {
     
     @Injected(\.streamVideo) var streamVideo
     
@@ -96,13 +96,36 @@ public class CallViewModel: ObservableObject  {
         }
     }
 
-    public func makeCall() {
+    public func startCall(callId: String, participantIds: [String]) {
         Task {
             do {
                 loading = true
                 log.debug("Starting call")
                 let callType = CallType(name: "video")
-                let callId = UUID().uuidString
+                let room = try await streamVideo.startCall(
+                    callType: callType,
+                    callId: callId,
+                    videoOptions: VideoOptions(),
+                    participantIds: participantIds
+                )
+                self.room = room
+                self.room?.addDelegate(self)
+                toggleCameraEnabled()
+                loading = false
+                log.debug("Started call")
+            } catch {
+                log.error("Error starting a call \(error.localizedDescription)")
+                loading = false
+            }
+        }
+    }
+    
+    public func joinCall(callId: String) {
+        Task {
+            do {
+                loading = true
+                log.debug("Joining call")
+                let callType = CallType(name: "video")
                 let room = try await streamVideo.joinCall(
                     callType: callType,
                     callId: callId,
@@ -112,9 +135,9 @@ public class CallViewModel: ObservableObject  {
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
                 loading = false
-                log.debug("Started call")
+                log.debug("Joined call")
             } catch {
-                log.error("Error starting a call \(error.localizedDescription)")
+                log.error("Error joining a call \(error.localizedDescription)")
                 loading = false
             }
         }
