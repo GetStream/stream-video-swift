@@ -14,7 +14,7 @@ struct IncomingCallView: View {
     
     @ObservedObject var viewModel: CallViewModel
     
-    var callInfo: CallInfo
+    var callInfo: IncomingCall
     
     var body: some View {
         VStack {

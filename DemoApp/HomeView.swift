@@ -27,7 +27,7 @@ struct HomeView: View {
     
     @State var selectedParticipants = [String]()
     
-    @State var incomingCallInfo: CallInfo?
+    @State var incomingCallInfo: IncomingCall?
     
     var body: some View {
         VStack {
@@ -67,11 +67,11 @@ struct HomeView: View {
         .overlay(
             viewModel.loading ? ProgressView().offset(y: 32) : nil
         )
-        .onReceive(NotificationCenter.default.publisher(for: Notification.Name("callCreated"))) { output in
-            if let callId = output.userInfo?["callId"] as? String,
-                let userId = output.userInfo?["userId"] as? String,
-               userId != streamVideo.userInfo.id {
-                self.incomingCallInfo = CallInfo(id: callId, callerId: userId)
+        .onAppear() {
+            Task {
+                for await incomingCall in streamVideo.incomingCalls() {
+                    self.incomingCallInfo = incomingCall
+                }
             }
         }
         .fullScreenCover(item: $incomingCallInfo) { callInfo in
@@ -134,9 +134,4 @@ struct HomeView: View {
 enum CallAction: String {
     case startCall = "Start a call"
     case joinCall = "Join a call"
-}
-
-struct CallInfo: Identifiable {
-    let id: String
-    let callerId: String
 }

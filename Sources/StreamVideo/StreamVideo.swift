@@ -30,10 +30,12 @@ public class StreamVideo {
     
     private var webSocketClient: WebSocketClient?
     
+    private let callsMiddleware = CallsMiddleware()
+    
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
-        let middlewares: [EventMiddleware] = []
+        let middlewares: [EventMiddleware] = [callsMiddleware]
         center.add(middlewares: middlewares)
         return center
     }()
@@ -158,6 +160,15 @@ public class StreamVideo {
         webSocketClient?.disconnect {
             log.debug("Web socket connection closed")
         }
+    }
+        
+    public func incomingCalls() -> AsyncStream<IncomingCall> {
+        let incomingCalls = AsyncStream(IncomingCall.self) { [weak self] continuation in
+            self?.callsMiddleware.onCallCreated = { incomingCall in
+                continuation.yield(incomingCall)
+            }
+        }
+        return incomingCalls
     }
     
     private func connectWebSocketClient() {
