@@ -13,6 +13,12 @@ public class VideoRoom: ObservableObject {
         
     private let room: Room
     
+    private var participants = [String: Stream_Video_Participant]() {
+        didSet {
+            log.debug("Participants changed: \(participants)")
+        }
+    }
+    
     static func create(with room: Room) -> VideoRoom {
         return VideoRoom(room: room)
     }
@@ -27,6 +33,14 @@ public class VideoRoom: ObservableObject {
     
     func disconnect() {
         self.room.disconnect()
+    }
+    
+    func add(participant: Stream_Video_Participant) {
+        participants[participant.userID] = participant
+    }
+    
+    func remove(participant: Stream_Video_Participant) {
+        participants[participant.userID] = nil
     }
     
     internal var remoteParticipants: [Sid : RemoteParticipant] {

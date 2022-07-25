@@ -47,16 +47,49 @@ public struct RoomView: View {
                 }
              
                 HStack {
+                    Spacer()
+                    
+                    Button(action: {
+                        viewModel.toggleCameraEnabled()
+                    },
+                    label: {
+                        Image(systemName: viewModel.cameraTrackState.isPublished ? "video.slash.fill" : "video.fill")
+                            .applyCallButtonStyle(color: .gray)
+                    })
+                    .disabled(viewModel.cameraTrackState.isBusy)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        viewModel.toggleMicrophoneEnabled()
+                    },
+                    label: {
+                        Image(systemName: viewModel.microphoneTrackState.isPublished ? "mic.slash.circle.fill" : "mic.circle.fill")
+                            .applyCallButtonStyle(color: .gray)
+                    })
+                    .disabled(viewModel.microphoneTrackState.isBusy)
+                    
+                    Spacer()
+                    
+                    Button(action: {
+                        viewModel.toggleCameraPosition()
+                    },
+                    label: {
+                        Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                            .applyCallButtonStyle(color: .gray)
+                    })
+                    
+                    Spacer()
+                    
                     Button {
                         viewModel.leaveCall()
                     } label: {
                         Image(systemName: "phone.circle.fill")
-                            .resizable()
-                            .aspectRatio(contentMode: .fit)
-                            .frame(width: 60)
-                            .foregroundColor(.red)
+                            .applyCallButtonStyle(color: .red)
                     }
                     .padding(.all, 8)
+                    
+                    Spacer()
                 }
             }
         }

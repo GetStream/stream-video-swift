@@ -49,15 +49,6 @@ struct ParticipantView: View {
                             .lineLimit(1)
                             .truncationMode(.tail)
 
-                        Button(action: {
-                            viewModel.toggleCameraEnabled()
-                        },
-                        label: {
-                            Image(systemName: "video.fill")
-                                .renderingMode(viewModel.cameraTrackState.isPublished ? .original : .template)
-                        })
-                        .disabled(viewModel.cameraTrackState.isBusy)
-
                         if participant.connectionQuality == .excellent {
                             Image(systemName: "wifi")
                                 .foregroundColor(.green)

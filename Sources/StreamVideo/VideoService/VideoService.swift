@@ -31,7 +31,7 @@ class VideoService {
             ),
             adaptiveStream: true,
             dynacast: true,
-            reportStats: false
+            reportStats: true
         )
 
         return try await withCheckedThrowingContinuation { continuation in

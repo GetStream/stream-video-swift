@@ -31,11 +31,12 @@ public class StreamVideo {
     private var webSocketClient: WebSocketClient?
     
     private let callsMiddleware = CallsMiddleware()
+    private var participantsMiddleware = ParticipantsMiddleware()
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
-        let middlewares: [EventMiddleware] = [callsMiddleware]
+        let middlewares: [EventMiddleware] = [callsMiddleware, participantsMiddleware]
         center.add(middlewares: middlewares)
         return center
     }()
@@ -117,11 +118,15 @@ public class StreamVideo {
             connectWebSocketClient()
         }
                         
-        return try await videoService.connect(
+        let room = try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
             options: videoOptions
         )
+        
+        participantsMiddleware.room = room
+        
+        return room
     }
     
     public func joinCall(
@@ -145,11 +150,15 @@ public class StreamVideo {
             connectWebSocketClient()
         }
                         
-        return try await videoService.connect(
+        let room = try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
             options: videoOptions
         )
+        
+        participantsMiddleware.room = room
+        
+        return room
     }
 
     

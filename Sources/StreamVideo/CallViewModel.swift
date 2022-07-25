@@ -95,6 +95,45 @@ open class CallViewModel: ObservableObject  {
             }
         }
     }
+    
+    public func toggleMicrophoneEnabled() {
+        guard let localParticipant = room?.localParticipant else {
+            return
+        }
+
+        guard !microphoneTrackState.isBusy else {
+            return
+        }
+
+        DispatchQueue.main.async {
+            self.microphoneTrackState = .busy(isPublishing: !self.microphoneTrackState.isPublished)
+        }
+
+        localParticipant.setMicrophone(enabled: !microphoneTrackState.isPublished).then(on: .sdk) { publication in
+            DispatchQueue.main.async {
+                guard let publication = publication else {
+                    self.microphoneTrackState = .notPublished()
+                    return
+                }
+
+                self.microphoneTrackState = .published(publication)
+            }
+        }.catch(on: .sdk) { error in
+            DispatchQueue.main.async {
+                self.microphoneTrackState = .notPublished(error: error)
+            }
+        }
+    }
+    
+    public func toggleCameraPosition() {
+        guard case .published(let publication) = self.cameraTrackState,
+              let track = publication.track as? LocalVideoTrack,
+              let cameraCapturer = track.capturer as? CameraCapturer else {
+            return
+        }
+
+        cameraCapturer.switchCameraPosition()
+    }
 
     public func startCall(callId: String, participantIds: [String]) {
         Task {
@@ -111,6 +150,7 @@ open class CallViewModel: ObservableObject  {
                 self.room = room
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
+                toggleMicrophoneEnabled()                
                 loading = false
                 log.debug("Started call")
             } catch {
@@ -134,6 +174,7 @@ open class CallViewModel: ObservableObject  {
                 self.room = room
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
+                toggleMicrophoneEnabled()
                 loading = false
                 log.debug("Joined call")
             } catch {

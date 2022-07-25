@@ -14,6 +14,8 @@ struct StreamVideoView: View {
     
     private var track: StreamVideoTrack
     
+    @State var trackStats: TrackStats?
+    
     public init(_ track: StreamVideoTrack) {
         self.track = track
     }
@@ -23,7 +25,8 @@ struct StreamVideoView: View {
             track,
             layoutMode: .fill,
             mirrorMode: .auto,
-            debugMode: false
+            debugMode: false,
+            trackStats: $trackStats
         )
     }
 }
