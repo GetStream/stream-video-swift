@@ -29,3 +29,11 @@ extension Stream_Video_ParticipantLeft: Event {}
 extension Stream_Video_BroadcastStarted: Event {}
 extension Stream_Video_BroadcastEnded: Event {}
 extension Stream_Video_AuthPayload: Event {}
+extension Stream_Video_AudioMuted: Event {}
+extension Stream_Video_AudioUnmuted: Event {}
+extension Stream_Video_VideoStarted: Event {}
+extension Stream_Video_VideoStopped: Event {}
+extension Stream_Video_ScreenshareStarted: Event {}
+extension Stream_Video_ScreenshareStopped: Event {}
+extension Stream_Video_RecordingStarted: Event {}
+extension Stream_Video_RecordingStopped: Event {}

@@ -61,6 +61,10 @@ class Stream_Video_CallCoordinatorService {
         return try await execute(request: listDevicesRequest, path: "ListDevices")
 	}
     
+	func sendEvent(sendEventRequest: Stream_Video_SendEventRequest) async throws -> Stream_Video_SendEventResponse {
+        return try await execute(request: sendEventRequest, path: "SendEvent")
+	}
+    
 	func sendCustomEvent(sendCustomEventRequest: Stream_Video_SendCustomEventRequest) async throws -> Stream_Video_SendCustomEventResponse {
         return try await execute(request: sendCustomEventRequest, path: "SendCustomEvent")
 	}
@@ -85,20 +89,8 @@ class Stream_Video_CallCoordinatorService {
         return try await execute(request: startBroadcastRequest, path: "StartBroadcast")
 	}
     
-	func stopBroadcast(stopBroadcastRequest: Stream_Video_StopBroadcastRequest) async throws -> Stream_Video_StartBroadcastResponse {
+	func stopBroadcast(stopBroadcastRequest: Stream_Video_StopBroadcastRequest) async throws -> Stream_Video_StopBroadcastResponse {
         return try await execute(request: stopBroadcastRequest, path: "StopBroadcast")
-	}
-    
-	func createUser(createUserRequest: Stream_Video_CreateUserRequest) async throws -> Stream_Video_CreateUserResponse {
-        return try await execute(request: createUserRequest, path: "CreateUser")
-	}
-    
-	func deleteUser(deleteUserRequest: Stream_Video_DeleteUserRequest) async throws -> Stream_Video_DeleteUserResponse {
-        return try await execute(request: deleteUserRequest, path: "DeleteUser")
-	}
-    
-	func exportUser(exportUserRequest: Stream_Video_ExportUserRequest) async throws -> Stream_Video_ExportUserResponse {
-        return try await execute(request: exportUserRequest, path: "ExportUser")
 	}
     
 	func startRecording(startRecordingRequest: Stream_Video_StartRecordingRequest) async throws -> Stream_Video_StartRecordingResponse {
@@ -111,6 +103,18 @@ class Stream_Video_CallCoordinatorService {
     
 	func getRecordings(getRecordingsRequest: Stream_Video_GetRecordingsRequest) async throws -> Stream_Video_GetRecordingsResponse {
         return try await execute(request: getRecordingsRequest, path: "GetRecordings")
+	}
+    
+	func createUser(createUserRequest: Stream_Video_CreateUserRequest) async throws -> Stream_Video_CreateUserResponse {
+        return try await execute(request: createUserRequest, path: "CreateUser")
+	}
+    
+	func deleteUser(deleteUserRequest: Stream_Video_DeleteUserRequest) async throws -> Stream_Video_DeleteUserResponse {
+        return try await execute(request: deleteUserRequest, path: "DeleteUser")
+	}
+    
+	func exportUser(exportUserRequest: Stream_Video_ExportUserRequest) async throws -> Stream_Video_ExportUserResponse {
+        return try await execute(request: exportUserRequest, path: "ExportUser")
 	}
     
     func update(userToken: String) {

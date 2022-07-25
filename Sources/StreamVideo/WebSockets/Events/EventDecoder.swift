@@ -42,6 +42,22 @@ struct EventDecoder {
             return value
         case .authPayload(let value):
             return value
+        case .audioMuted(let value):
+            return value
+        case .audioUnmuted(let value):
+            return value
+        case .videoStarted(let value):
+            return value
+        case .videoStopped(let value):
+            return value
+        case .screenshareStarted(let value):
+            return value
+        case .screenshareStopped(let value):
+            return value
+        case .recordingStarted(let value):
+            return value
+        case .recordingStopped(let value):
+            return value
         }
     }
 }
