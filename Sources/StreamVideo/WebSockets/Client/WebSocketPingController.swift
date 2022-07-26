@@ -6,6 +6,10 @@ import Foundation
 
 /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
 protocol WebSocketPingControllerDelegate: AnyObject {
+    
+    /// Information about the ongoing call.
+    var callInfo: [String: String] { get set }
+    
     /// `WebSocketPingController` will call this function periodically to keep a connection alive.
     func sendPing(healthCheckEvent: Stream_Video_Healthcheck)
     
@@ -34,6 +38,12 @@ class WebSocketPingController {
     
     /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
     weak var delegate: WebSocketPingControllerDelegate?
+    
+    var callInfo = [String: String]() {
+        didSet {
+            sendPing()
+        }
+    }
     
     deinit {
         cancelPongTimeoutTimer()
@@ -73,7 +83,10 @@ class WebSocketPingController {
         schedulePongTimeoutTimer()
 
         log.info("WebSocket Ping")
-        delegate?.sendPing(healthCheckEvent: healthCheckInfo)
+        var healthCheckEvent = healthCheckInfo
+        healthCheckEvent.callID = callInfo[WebSocketConstants.callId] ?? ""
+        healthCheckEvent.callType = callInfo[WebSocketConstants.callType] ?? ""
+        delegate?.sendPing(healthCheckEvent: healthCheckEvent)
     }
     
     func pongReceived() {

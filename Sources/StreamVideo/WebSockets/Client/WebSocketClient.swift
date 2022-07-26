@@ -66,6 +66,12 @@ class WebSocketClient {
     private var token: String
     private var userInfo: UserInfo
     
+    internal var callInfo = [String: String]() {
+        didSet {
+            pingController.callInfo = callInfo
+        }
+    }
+    
     init(
         sessionConfiguration: URLSessionConfiguration,
         eventDecoder: AnyEventDecoder,
@@ -119,6 +125,11 @@ class WebSocketClient {
             eventsBatcher.processImmediately(completion: completion)
         }
     }
+    
+    func set(callInfo: [String: String]) {
+        self.callInfo = callInfo
+    }
+    
 }
 
 protocol ConnectionStateDelegate: AnyObject {

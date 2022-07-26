@@ -117,6 +117,11 @@ public class StreamVideo {
         if !videoConfig.persitingSocketConnection {
             connectWebSocketClient()
         }
+        
+        updateCallInfo(
+            callId: createCallResponse.call.id,
+            callType: createCallResponse.call.type
+        )
                         
         let room = try await videoService.connect(
             url: edgeServer.url,
@@ -149,6 +154,11 @@ public class StreamVideo {
         if !videoConfig.persitingSocketConnection {
             connectWebSocketClient()
         }
+        
+        updateCallInfo(
+            callId: callId,
+            callType: callType.name
+        )
                         
         let room = try await videoService.connect(
             url: edgeServer.url,
@@ -163,6 +173,7 @@ public class StreamVideo {
 
     
     public func leaveCall() {
+        webSocketClient?.set(callInfo: [:])
         if videoConfig.persitingSocketConnection {
            return
         }
@@ -255,6 +266,13 @@ public class StreamVideo {
         config.urlCache = nil
         let urlSession = URLSession(configuration: config)
         return urlSession
+    }
+    
+    private func updateCallInfo(callId: String, callType: String) {
+        webSocketClient?.set(callInfo: [
+            WebSocketConstants.callId: callId,
+            WebSocketConstants.callType: callType
+        ])
     }
     
     private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {
