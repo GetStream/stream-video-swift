@@ -13,7 +13,7 @@ protocol WebSocketEngine: AnyObject {
     
     func connect()
     func disconnect()
-    func sendPing()
+    func sendPing(healthCheckEvent: Stream_Video_Healthcheck)
     func send(message: Event)
 }
 

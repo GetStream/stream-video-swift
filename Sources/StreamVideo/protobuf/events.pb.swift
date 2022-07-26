@@ -372,8 +372,8 @@ struct Stream_Video_AuthPayload {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var user: Stream_Video_UserRequest {
-    get {return _user ?? Stream_Video_UserRequest()}
+  var user: Stream_Video_CreateUserRequest {
+    get {return _user ?? Stream_Video_CreateUserRequest()}
     set {_user = newValue}
   }
   /// Returns true if `user` has been explicitly set.
@@ -396,7 +396,7 @@ struct Stream_Video_AuthPayload {
 
   init() {}
 
-  fileprivate var _user: Stream_Video_UserRequest? = nil
+  fileprivate var _user: Stream_Video_CreateUserRequest? = nil
   fileprivate var _device: Stream_Video_DeviceRequest? = nil
 }
 
@@ -757,29 +757,28 @@ struct Stream_Video_ParticipantInvited {
   // methods supported on all messages.
 
   var call: Stream_Video_Call {
-    get {return _call ?? Stream_Video_Call()}
-    set {_call = newValue}
+    get {return _storage._call ?? Stream_Video_Call()}
+    set {_uniqueStorage()._call = newValue}
   }
   /// Returns true if `call` has been explicitly set.
-  var hasCall: Bool {return self._call != nil}
+  var hasCall: Bool {return _storage._call != nil}
   /// Clears the value of `call`. Subsequent reads from it will return its default value.
-  mutating func clearCall() {self._call = nil}
+  mutating func clearCall() {_uniqueStorage()._call = nil}
 
   var participant: Stream_Video_Participant {
-    get {return _participant ?? Stream_Video_Participant()}
-    set {_participant = newValue}
+    get {return _storage._participant ?? Stream_Video_Participant()}
+    set {_uniqueStorage()._participant = newValue}
   }
   /// Returns true if `participant` has been explicitly set.
-  var hasParticipant: Bool {return self._participant != nil}
+  var hasParticipant: Bool {return _storage._participant != nil}
   /// Clears the value of `participant`. Subsequent reads from it will return its default value.
-  mutating func clearParticipant() {self._participant = nil}
+  mutating func clearParticipant() {_uniqueStorage()._participant = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _call: Stream_Video_Call? = nil
-  fileprivate var _participant: Stream_Video_Participant? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Stream_Video_ParticipantUpdated {
@@ -788,29 +787,28 @@ struct Stream_Video_ParticipantUpdated {
   // methods supported on all messages.
 
   var call: Stream_Video_Call {
-    get {return _call ?? Stream_Video_Call()}
-    set {_call = newValue}
+    get {return _storage._call ?? Stream_Video_Call()}
+    set {_uniqueStorage()._call = newValue}
   }
   /// Returns true if `call` has been explicitly set.
-  var hasCall: Bool {return self._call != nil}
+  var hasCall: Bool {return _storage._call != nil}
   /// Clears the value of `call`. Subsequent reads from it will return its default value.
-  mutating func clearCall() {self._call = nil}
+  mutating func clearCall() {_uniqueStorage()._call = nil}
 
   var participant: Stream_Video_Participant {
-    get {return _participant ?? Stream_Video_Participant()}
-    set {_participant = newValue}
+    get {return _storage._participant ?? Stream_Video_Participant()}
+    set {_uniqueStorage()._participant = newValue}
   }
   /// Returns true if `participant` has been explicitly set.
-  var hasParticipant: Bool {return self._participant != nil}
+  var hasParticipant: Bool {return _storage._participant != nil}
   /// Clears the value of `participant`. Subsequent reads from it will return its default value.
-  mutating func clearParticipant() {self._participant = nil}
+  mutating func clearParticipant() {_uniqueStorage()._participant = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _call: Stream_Video_Call? = nil
-  fileprivate var _participant: Stream_Video_Participant? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Stream_Video_ParticipantDeleted {
@@ -842,29 +840,28 @@ struct Stream_Video_ParticipantJoined {
   // methods supported on all messages.
 
   var call: Stream_Video_Call {
-    get {return _call ?? Stream_Video_Call()}
-    set {_call = newValue}
+    get {return _storage._call ?? Stream_Video_Call()}
+    set {_uniqueStorage()._call = newValue}
   }
   /// Returns true if `call` has been explicitly set.
-  var hasCall: Bool {return self._call != nil}
+  var hasCall: Bool {return _storage._call != nil}
   /// Clears the value of `call`. Subsequent reads from it will return its default value.
-  mutating func clearCall() {self._call = nil}
+  mutating func clearCall() {_uniqueStorage()._call = nil}
 
   var participant: Stream_Video_Participant {
-    get {return _participant ?? Stream_Video_Participant()}
-    set {_participant = newValue}
+    get {return _storage._participant ?? Stream_Video_Participant()}
+    set {_uniqueStorage()._participant = newValue}
   }
   /// Returns true if `participant` has been explicitly set.
-  var hasParticipant: Bool {return self._participant != nil}
+  var hasParticipant: Bool {return _storage._participant != nil}
   /// Clears the value of `participant`. Subsequent reads from it will return its default value.
-  mutating func clearParticipant() {self._participant = nil}
+  mutating func clearParticipant() {_uniqueStorage()._participant = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _call: Stream_Video_Call? = nil
-  fileprivate var _participant: Stream_Video_Participant? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Stream_Video_ParticipantLeft {
@@ -873,29 +870,28 @@ struct Stream_Video_ParticipantLeft {
   // methods supported on all messages.
 
   var call: Stream_Video_Call {
-    get {return _call ?? Stream_Video_Call()}
-    set {_call = newValue}
+    get {return _storage._call ?? Stream_Video_Call()}
+    set {_uniqueStorage()._call = newValue}
   }
   /// Returns true if `call` has been explicitly set.
-  var hasCall: Bool {return self._call != nil}
+  var hasCall: Bool {return _storage._call != nil}
   /// Clears the value of `call`. Subsequent reads from it will return its default value.
-  mutating func clearCall() {self._call = nil}
+  mutating func clearCall() {_uniqueStorage()._call = nil}
 
   var participant: Stream_Video_Participant {
-    get {return _participant ?? Stream_Video_Participant()}
-    set {_participant = newValue}
+    get {return _storage._participant ?? Stream_Video_Participant()}
+    set {_uniqueStorage()._participant = newValue}
   }
   /// Returns true if `participant` has been explicitly set.
-  var hasParticipant: Bool {return self._participant != nil}
+  var hasParticipant: Bool {return _storage._participant != nil}
   /// Clears the value of `participant`. Subsequent reads from it will return its default value.
-  mutating func clearParticipant() {self._participant = nil}
+  mutating func clearParticipant() {_uniqueStorage()._participant = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _call: Stream_Video_Call? = nil
-  fileprivate var _participant: Stream_Video_Participant? = nil
+  fileprivate var _storage = _StorageClass.defaultInstance
 }
 
 struct Stream_Video_BroadcastStarted {
@@ -2102,36 +2098,70 @@ extension Stream_Video_ParticipantInvited: SwiftProtobuf.Message, SwiftProtobuf.
     2: .same(proto: "participant"),
   ]
 
+  fileprivate class _StorageClass {
+    var _call: Stream_Video_Call? = nil
+    var _participant: Stream_Video_Participant? = nil
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _call = source._call
+      _participant = source._participant
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
-      case 2: try { try decoder.decodeSingularMessageField(value: &self._participant) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._call) }()
+        case 2: try { try decoder.decodeSingularMessageField(value: &_storage._participant) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._call {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._participant {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._call {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._participant {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      } }()
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_ParticipantInvited, rhs: Stream_Video_ParticipantInvited) -> Bool {
-    if lhs._call != rhs._call {return false}
-    if lhs._participant != rhs._participant {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._call != rhs_storage._call {return false}
+        if _storage._participant != rhs_storage._participant {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2144,36 +2174,70 @@ extension Stream_Video_ParticipantUpdated: SwiftProtobuf.Message, SwiftProtobuf.
     2: .same(proto: "participant"),
   ]
 
+  fileprivate class _StorageClass {
+    var _call: Stream_Video_Call? = nil
+    var _participant: Stream_Video_Participant? = nil
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _call = source._call
+      _participant = source._participant
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
-      case 2: try { try decoder.decodeSingularMessageField(value: &self._participant) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._call) }()
+        case 2: try { try decoder.decodeSingularMessageField(value: &_storage._participant) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._call {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._participant {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._call {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._participant {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      } }()
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_ParticipantUpdated, rhs: Stream_Video_ParticipantUpdated) -> Bool {
-    if lhs._call != rhs._call {return false}
-    if lhs._participant != rhs._participant {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._call != rhs_storage._call {return false}
+        if _storage._participant != rhs_storage._participant {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2228,36 +2292,70 @@ extension Stream_Video_ParticipantJoined: SwiftProtobuf.Message, SwiftProtobuf._
     2: .same(proto: "participant"),
   ]
 
+  fileprivate class _StorageClass {
+    var _call: Stream_Video_Call? = nil
+    var _participant: Stream_Video_Participant? = nil
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _call = source._call
+      _participant = source._participant
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
-      case 2: try { try decoder.decodeSingularMessageField(value: &self._participant) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._call) }()
+        case 2: try { try decoder.decodeSingularMessageField(value: &_storage._participant) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._call {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._participant {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._call {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._participant {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      } }()
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_ParticipantJoined, rhs: Stream_Video_ParticipantJoined) -> Bool {
-    if lhs._call != rhs._call {return false}
-    if lhs._participant != rhs._participant {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._call != rhs_storage._call {return false}
+        if _storage._participant != rhs_storage._participant {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -2270,36 +2368,70 @@ extension Stream_Video_ParticipantLeft: SwiftProtobuf.Message, SwiftProtobuf._Me
     2: .same(proto: "participant"),
   ]
 
+  fileprivate class _StorageClass {
+    var _call: Stream_Video_Call? = nil
+    var _participant: Stream_Video_Participant? = nil
+
+    static let defaultInstance = _StorageClass()
+
+    private init() {}
+
+    init(copying source: _StorageClass) {
+      _call = source._call
+      _participant = source._participant
+    }
+  }
+
+  fileprivate mutating func _uniqueStorage() -> _StorageClass {
+    if !isKnownUniquelyReferenced(&_storage) {
+      _storage = _StorageClass(copying: _storage)
+    }
+    return _storage
+  }
+
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-    while let fieldNumber = try decoder.nextFieldNumber() {
-      // The use of inline closures is to circumvent an issue where the compiler
-      // allocates stack space for every case branch when no optimizations are
-      // enabled. https://github.com/apple/swift-protobuf/issues/1034
-      switch fieldNumber {
-      case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
-      case 2: try { try decoder.decodeSingularMessageField(value: &self._participant) }()
-      default: break
+    _ = _uniqueStorage()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      while let fieldNumber = try decoder.nextFieldNumber() {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every case branch when no optimizations are
+        // enabled. https://github.com/apple/swift-protobuf/issues/1034
+        switch fieldNumber {
+        case 1: try { try decoder.decodeSingularMessageField(value: &_storage._call) }()
+        case 2: try { try decoder.decodeSingularMessageField(value: &_storage._participant) }()
+        default: break
+        }
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    // The use of inline closures is to circumvent an issue where the compiler
-    // allocates stack space for every if/case branch local when no optimizations
-    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-    // https://github.com/apple/swift-protobuf/issues/1182
-    try { if let v = self._call {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-    } }()
-    try { if let v = self._participant {
-      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-    } }()
+    try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every if/case branch local when no optimizations
+      // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+      // https://github.com/apple/swift-protobuf/issues/1182
+      try { if let v = _storage._call {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+      } }()
+      try { if let v = _storage._participant {
+        try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+      } }()
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_ParticipantLeft, rhs: Stream_Video_ParticipantLeft) -> Bool {
-    if lhs._call != rhs._call {return false}
-    if lhs._participant != rhs._participant {return false}
+    if lhs._storage !== rhs._storage {
+      let storagesAreEqual: Bool = withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+        let _storage = _args.0
+        let rhs_storage = _args.1
+        if _storage._call != rhs_storage._call {return false}
+        if _storage._participant != rhs_storage._participant {return false}
+        return true
+      }
+      if !storagesAreEqual {return false}
+    }
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

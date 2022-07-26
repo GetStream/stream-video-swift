@@ -7,7 +7,7 @@ import Foundation
 /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
 protocol WebSocketPingControllerDelegate: AnyObject {
     /// `WebSocketPingController` will call this function periodically to keep a connection alive.
-    func sendPing()
+    func sendPing(healthCheckEvent: Stream_Video_Healthcheck)
     
     /// `WebSocketPingController` will call this function to force disconnect `WebSocketClient`.
     func disconnectOnNoPongReceived()
@@ -30,6 +30,8 @@ class WebSocketPingController {
     /// The pong timeout timer.
     private var pongTimeoutTimer: TimerControl?
     
+    private var healthCheckInfo = Stream_Video_Healthcheck()
+    
     /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
     weak var delegate: WebSocketPingControllerDelegate?
     
@@ -48,6 +50,10 @@ class WebSocketPingController {
     
     /// `WebSocketClient` should call this when the connection state did change.
     func connectionStateDidChange(_ connectionState: WebSocketConnectionState) {
+        if case let .connected(healthCheckInfo) = connectionState {
+            self.healthCheckInfo = healthCheckInfo
+        }
+        
         guard delegate != nil else { return }
         
         cancelPongTimeoutTimer()
@@ -67,7 +73,7 @@ class WebSocketPingController {
         schedulePongTimeoutTimer()
 
         log.info("WebSocket Ping")
-        delegate?.sendPing()
+        delegate?.sendPing(healthCheckEvent: healthCheckInfo)
     }
     
     func pongReceived() {

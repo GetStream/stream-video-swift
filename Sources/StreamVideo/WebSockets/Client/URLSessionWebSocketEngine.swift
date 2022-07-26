@@ -61,8 +61,8 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         urlSessionDelegateHandler = nil
     }
     
-    func sendPing() {
-        task?.sendPing { _ in }
+    func sendPing(healthCheckEvent: Stream_Video_Healthcheck) {
+        send(message: healthCheckEvent)
     }
     
     func send(message: Event) {
@@ -71,7 +71,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             let message: URLSessionWebSocketTask.Message = .data(data)
             task?.send(message) { [weak self] error in
                 if error == nil {
-                    log.debug("Auth payload message sent")
+                    log.debug("Event message sent")
                     self?.doRead()
                 }
             }

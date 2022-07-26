@@ -509,6 +509,10 @@ struct Stream_Video_Participant {
   /// Clears the value of `custom`. Subsequent reads from it will return its default value.
   mutating func clearCustom() {self._custom = nil}
 
+  var video: Bool = false
+
+  var audio: Bool = false
+
   /// call creation date as RFC3339 string
   var createdAt: String = String()
 
@@ -1491,8 +1495,10 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     2: .same(proto: "role"),
     3: .same(proto: "online"),
     4: .same(proto: "custom"),
-    5: .standard(proto: "created_at"),
-    6: .standard(proto: "updated_at"),
+    5: .same(proto: "video"),
+    6: .same(proto: "audio"),
+    7: .standard(proto: "created_at"),
+    8: .standard(proto: "updated_at"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1505,8 +1511,10 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
       case 2: try { try decoder.decodeSingularStringField(value: &self.role) }()
       case 3: try { try decoder.decodeSingularBoolField(value: &self.online) }()
       case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
-      case 5: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
-      case 6: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
+      case 5: try { try decoder.decodeSingularBoolField(value: &self.video) }()
+      case 6: try { try decoder.decodeSingularBoolField(value: &self.audio) }()
+      case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+      case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
       }
     }
@@ -1529,11 +1537,17 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     try { if let v = self._custom {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
     } }()
+    if self.video != false {
+      try visitor.visitSingularBoolField(value: self.video, fieldNumber: 5)
+    }
+    if self.audio != false {
+      try visitor.visitSingularBoolField(value: self.audio, fieldNumber: 6)
+    }
     if !self.createdAt.isEmpty {
-      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 5)
+      try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
     }
     if !self.updatedAt.isEmpty {
-      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 6)
+      try visitor.visitSingularStringField(value: self.updatedAt, fieldNumber: 8)
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1543,6 +1557,8 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     if lhs.role != rhs.role {return false}
     if lhs.online != rhs.online {return false}
     if lhs._custom != rhs._custom {return false}
+    if lhs.video != rhs.video {return false}
+    if lhs.audio != rhs.audio {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}

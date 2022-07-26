@@ -13,8 +13,10 @@ class ParticipantsMiddleware: EventMiddleware {
     
     func handle(event: Event) -> Event? {
         if let participantJoined = event as? Stream_Video_ParticipantJoined {
+            log.debug("Received participant joined event")
             room?.add(participant: participantJoined.participant)
         } else if let participantLeft = event as? Stream_Video_ParticipantLeft {
+            log.debug("Received participant left event")
             room?.remove(participant: participantLeft.participant)
         }
         

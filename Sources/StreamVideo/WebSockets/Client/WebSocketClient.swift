@@ -90,7 +90,7 @@ class WebSocketClient {
     func connect() {
         switch connectionState {
         // Calling connect in the following states has no effect
-        case .connecting, .authenticating, .connected(connectionId: _):
+        case .connecting, .authenticating, .connected(healthCheckInfo: _):
             return
         default: break
         }
@@ -161,7 +161,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         var payload = Stream_Video_AuthPayload()
         payload.token = token
         
-        var user = Stream_Video_UserRequest()
+        var user = Stream_Video_CreateUserRequest()
         user.id = userInfo.id
         user.name = userInfo.name ?? userInfo.id
         payload.user = user
@@ -177,12 +177,12 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.debug("Event decoded: \(event)")
             if let healthCheckEvent = event as? Stream_Video_Healthcheck {
                 if connectionState == .authenticating {
-                    connectionState = .connected(connectionId: healthCheckEvent.userID)
+                    connectionState = .connected(healthCheckInfo: healthCheckEvent)
                 }
                 eventNotificationCenter.process(healthCheckEvent, postNotification: false) { [weak self] in
                     self?.engineQueue.async { [weak self] in
                         self?.pingController.pongReceived()
-                        self?.connectionState = .connected(connectionId: healthCheckEvent.clientID)
+                        self?.connectionState = .connected(healthCheckInfo: healthCheckEvent)
                     }
                 }
             } else {
@@ -216,9 +216,9 @@ extension WebSocketClient: WebSocketEngineDelegate {
 // MARK: - Ping Controller Delegate
 
 extension WebSocketClient: WebSocketPingControllerDelegate {
-    func sendPing() {
+    func sendPing(healthCheckEvent: Stream_Video_Healthcheck) {
         engineQueue.async { [weak engine] in
-            engine?.sendPing()
+            engine?.sendPing(healthCheckEvent: healthCheckEvent)
         }
     }
     
