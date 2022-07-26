@@ -36,11 +36,11 @@ public class VideoRoom: ObservableObject {
     }
     
     func add(participant: Stream_Video_Participant) {
-        participants[participant.userID] = participant
+        participants[participant.user.id] = participant
     }
     
     func remove(participant: Stream_Video_Participant) {
-        participants[participant.userID] = nil
+        participants[participant.user.id] = nil
     }
     
     internal var remoteParticipants: [Sid : RemoteParticipant] {

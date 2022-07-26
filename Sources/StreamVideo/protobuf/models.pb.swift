@@ -494,7 +494,14 @@ struct Stream_Video_Participant {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var userID: String = String()
+  var user: Stream_Video_User {
+    get {return _user ?? Stream_Video_User()}
+    set {_user = newValue}
+  }
+  /// Returns true if `user` has been explicitly set.
+  var hasUser: Bool {return self._user != nil}
+  /// Clears the value of `user`. Subsequent reads from it will return its default value.
+  mutating func clearUser() {self._user = nil}
 
   var role: String = String()
 
@@ -523,6 +530,7 @@ struct Stream_Video_Participant {
 
   init() {}
 
+  fileprivate var _user: Stream_Video_User? = nil
   fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
 }
 
@@ -1491,7 +1499,7 @@ extension Stream_Video_Security.IsAllowed: SwiftProtobuf._ProtoNameProviding {
 extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".Participant"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .standard(proto: "user_id"),
+    1: .same(proto: "user"),
     2: .same(proto: "role"),
     3: .same(proto: "online"),
     4: .same(proto: "custom"),
@@ -1507,7 +1515,7 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._user) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.role) }()
       case 3: try { try decoder.decodeSingularBoolField(value: &self.online) }()
       case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
@@ -1525,9 +1533,9 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
     // allocates stack space for every if/case branch local when no optimizations
     // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
     // https://github.com/apple/swift-protobuf/issues/1182
-    if !self.userID.isEmpty {
-      try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
-    }
+    try { if let v = self._user {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
     if !self.role.isEmpty {
       try visitor.visitSingularStringField(value: self.role, fieldNumber: 2)
     }
@@ -1553,7 +1561,7 @@ extension Stream_Video_Participant: SwiftProtobuf.Message, SwiftProtobuf._Messag
   }
 
   static func ==(lhs: Stream_Video_Participant, rhs: Stream_Video_Participant) -> Bool {
-    if lhs.userID != rhs.userID {return false}
+    if lhs._user != rhs._user {return false}
     if lhs.role != rhs.role {return false}
     if lhs.online != rhs.online {return false}
     if lhs._custom != rhs._custom {return false}

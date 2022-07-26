@@ -150,7 +150,6 @@ open class CallViewModel: ObservableObject  {
                 self.room = room
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
-                toggleMicrophoneEnabled()                
                 loading = false
                 log.debug("Started call")
             } catch {
@@ -174,7 +173,6 @@ open class CallViewModel: ObservableObject  {
                 self.room = room
                 self.room?.addDelegate(self)
                 toggleCameraEnabled()
-                toggleMicrophoneEnabled()
                 loading = false
                 log.debug("Joined call")
             } catch {

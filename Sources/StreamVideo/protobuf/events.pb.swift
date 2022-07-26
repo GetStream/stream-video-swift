@@ -834,6 +834,7 @@ struct Stream_Video_ParticipantDeleted {
   fileprivate var _call: Stream_Video_Call? = nil
 }
 
+/// ParticipantJoined is fired when a user joins a call
 struct Stream_Video_ParticipantJoined {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
