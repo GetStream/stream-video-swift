@@ -13,6 +13,7 @@ class VideoService {
     func connect(
         url: String,
         token: String,
+        participants: [CallParticipant],
         options: VideoOptions
     ) async throws -> VideoRoom {
         let room = Room()
@@ -42,7 +43,9 @@ class VideoService {
                 roomOptions: roomOptions
             )
             .then { _ in
-                return continuation.resume(returning: VideoRoom.create(with: room))
+                let videoRoom = VideoRoom.create(with: room)
+                videoRoom.add(participants: participants)
+                return continuation.resume(returning: videoRoom)
             }
             .catch { error in
                 return continuation.resume(throwing: error)

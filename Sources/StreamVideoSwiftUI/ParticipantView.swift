@@ -42,27 +42,6 @@ struct ParticipantView: View {
                             .cornerRadius(8)
                             .padding()
                     }
-
-                    // Bottom user info bar
-                    HStack {
-                        Text("\(participant.name)")
-                            .lineLimit(1)
-                            .truncationMode(.tail)
-
-                        if participant.connectionQuality == .excellent {
-                            Image(systemName: "wifi")
-                                .foregroundColor(.green)
-                        } else if participant.connectionQuality == .good {
-                            Image(systemName: "wifi")
-                                .foregroundColor(Color.orange)
-                        } else if participant.connectionQuality == .poor {
-                            Image(systemName: "wifi")
-                                .foregroundColor(Color.red)
-                        }
-
-                    }.padding(5)
-                    .frame(minWidth: 0, maxWidth: .infinity)
-                    .background(Color.black.opacity(0.5))
                 }
             }
             .cornerRadius(8)

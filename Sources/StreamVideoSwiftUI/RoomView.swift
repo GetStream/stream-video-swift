@@ -17,27 +17,12 @@ public struct RoomView: View {
     }
     
     public var body: some View {
-        Group {
+        ZStack {
             VStack(spacing: 0) {
                 if let focusParticipant = viewModel.focusParticipant {
-                    ZStack(alignment: .bottomTrailing) {
-                        ParticipantView(viewModel: viewModel, participant: focusParticipant) { _ in
-                            viewModel.focusParticipant = nil
-                        }
-                        .overlay(RoundedRectangle(cornerRadius: 5)
-                                    .stroke(Color.red.opacity(0.7), lineWidth: 5.0))
-                        Text("SELECTED")
-                            .font(.system(size: 10))
-                            .fontWeight(.bold)
-                            .foregroundColor(Color.white)
-                            .padding(.horizontal, 5)
-                            .padding(.vertical, 2)
-                            .background(Color.red.opacity(0.7))
-                            .cornerRadius(8)
-                            .padding(.vertical, 35)
-                            .padding(.horizontal, 10)
+                    ParticipantView(viewModel: viewModel, participant: focusParticipant) { _ in
+                        viewModel.focusParticipant = nil
                     }
-
                 } else {
                     ParticipantLayout(viewModel.allParticipants.values, spacing: 5) { participant in
                         ParticipantView(viewModel: viewModel, participant: participant) { participant in
@@ -45,52 +30,38 @@ public struct RoomView: View {
                         }
                     }
                 }
-             
-                HStack {
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.toggleCameraEnabled()
-                    },
-                    label: {
-                        Image(systemName: viewModel.cameraTrackState.isPublished ? "video.slash.fill" : "video.fill")
-                            .applyCallButtonStyle(color: .gray)
-                    })
-                    .disabled(viewModel.cameraTrackState.isBusy)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.toggleMicrophoneEnabled()
-                    },
-                    label: {
-                        Image(systemName: viewModel.microphoneTrackState.isPublished ? "mic.slash.circle.fill" : "mic.circle.fill")
-                            .applyCallButtonStyle(color: .gray)
-                    })
-                    .disabled(viewModel.microphoneTrackState.isBusy)
-                    
-                    Spacer()
-                    
-                    Button(action: {
-                        viewModel.toggleCameraPosition()
-                    },
-                    label: {
-                        Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
-                            .applyCallButtonStyle(color: .gray)
-                    })
-                    
-                    Spacer()
-                    
-                    Button {
-                        viewModel.leaveCall()
-                    } label: {
-                        Image(systemName: "phone.circle.fill")
-                            .applyCallButtonStyle(color: .red)
+            }
+            .edgesIgnoringSafeArea(.all)
+                
+            TopView {
+                VStack {
+                    TrailingView {
+                        Button {
+                            viewModel.participantsShown.toggle()
+                        } label: {
+                            Image(systemName: "person.3.fill")
+                                .foregroundColor(.white)
+                                .padding()
+                                .background(Color.black.opacity(0.6))
+                                .clipShape(Circle())
+                        }
+                        .padding()
                     }
-                    .padding(.all, 8)
                     
-                    Spacer()
+                    if viewModel.participantsShown {
+                        TrailingView {
+                            CallParticipantsView(
+                                viewModel: viewModel,
+                                maxWidth: screenSize.width / 2
+                            )
+                        }
+                        .padding(.horizontal)
+                    }
                 }
+            }
+
+            BottomView {
+                CallControlsView(viewModel: viewModel)
             }
         }
         .frame(
@@ -100,4 +71,9 @@ public struct RoomView: View {
             maxHeight: .infinity
         )
     }
+    
+    private var screenSize: CGSize {
+        UIScreen.main.bounds.size
+    }
+    
 }

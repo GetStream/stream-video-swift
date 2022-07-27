@@ -102,12 +102,12 @@ public class StreamVideo {
             participantIds: participantIds
         )
         
-        let edges = try await joinCall(
+        let joinCallResponse = try await joinCall(
             callId: createCallResponse.call.id,
             type: createCallResponse.call.type
         )
         
-        let latencyByEdge = await measureLatencies(for: edges)
+        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
         
         let edgeServer = try await selectEdgeServer(
             callId: createCallResponse.call.id,
@@ -126,6 +126,7 @@ public class StreamVideo {
         let room = try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
+            participants: joinCallResponse.callParticipants(),
             options: videoOptions
         )
         
@@ -139,12 +140,12 @@ public class StreamVideo {
         callId: String,
         videoOptions: VideoOptions
     ) async throws -> VideoRoom {
-        let edges = try await joinCall(
+        let joinCallResponse = try await joinCall(
             callId: callId,
             type: callType.name
         )
         
-        let latencyByEdge = await measureLatencies(for: edges)
+        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
         
         let edgeServer = try await selectEdgeServer(
             callId: callId,
@@ -163,6 +164,7 @@ public class StreamVideo {
         let room = try await videoService.connect(
             url: edgeServer.url,
             token: edgeServer.token,
+            participants: joinCallResponse.callParticipants(),
             options: videoOptions
         )
         
@@ -237,13 +239,12 @@ public class StreamVideo {
         }
     }
     
-    private func joinCall(callId: String, type: String) async throws -> [Stream_Video_Edge] {
+    private func joinCall(callId: String, type: String) async throws -> Stream_Video_JoinCallResponse {
         var joinCallRequest = Stream_Video_JoinCallRequest()
         joinCallRequest.id = callId
         joinCallRequest.type = type
         let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
-        let edges = joinCallResponse.edges
-        return edges
+        return joinCallResponse
     }
     
     private func selectEdgeServer(

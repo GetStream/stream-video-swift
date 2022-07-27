@@ -20,6 +20,10 @@ open class CallViewModel: ObservableObject  {
         didSet {
             self.connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
             self.remoteParticipants = roomParticipants
+            self.room?.$participants.sink(receiveValue: { [weak self] participants in
+                self?.callParticipants = participants
+            })
+            .store(in: &cancellables)
         }
     }
     @Published public var focusParticipant: RoomParticipant?
@@ -38,14 +42,30 @@ open class CallViewModel: ObservableObject  {
     public var latestError: Error?
     
     @Published public var loading = false
+                
+    //TODO: LiveKit
+    @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:]
+    
+    @Published public var participantsShown = false
+    
+    @Published public var callParticipants = [String: CallParticipant]()
     
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""
-            
-    @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:]
+    
+    private var cancellables = Set<AnyCancellable>()
+    
+    public var onlineParticipants: [CallParticipant] {
+        callParticipants.filter { $0.value.isOnline }.map { $0.value }
+    }
+    
+    public var offlineParticipants: [CallParticipant] {
+        callParticipants.filter { !$0.value.isOnline }.map { $0.value }
+    }
     
     public init() {}
 
+    //TODO: LiveKit
     public var allParticipants: OrderedDictionary<String, RoomParticipant> {
         var result = remoteParticipants
         if let localParticipant = room?.localParticipant {
@@ -58,6 +78,7 @@ open class CallViewModel: ObservableObject  {
         return result
     }
     
+    //TODO: LiveKit
     private var roomParticipants: OrderedDictionary<String, RoomParticipant> {
         guard let room = room else {
             return [:]
