@@ -24,7 +24,7 @@ extension Stream_Video_Participant {
             id: self.user.id,
             role: self.role,
             name: self.user.name.isEmpty ? self.user.id : self.user.name,
-            profileImageURL: URL(string: self.user.profileImageURL),
+            profileImageURL: URL(string: self.user.imageURL),
             isOnline: self.online,
             hasVideo: self.video,
             hasAudio: self.audio

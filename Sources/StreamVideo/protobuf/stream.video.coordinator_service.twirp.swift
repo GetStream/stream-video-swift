@@ -117,6 +117,22 @@ class Stream_Video_CallCoordinatorService {
         return try await execute(request: exportUserRequest, path: "ExportUser")
 	}
     
+	func storeCallStats(storeCallStatsRequest: Stream_Video_StoreCallStatsRequest) async throws -> Stream_Video_StoreCallStatsResponse {
+        return try await execute(request: storeCallStatsRequest, path: "StoreCallStats")
+	}
+    
+	func getCallStats(getCallStatsRequest: Stream_Video_GetCallStatsRequest) async throws -> Stream_Video_GetCallStatsResponse {
+        return try await execute(request: getCallStatsRequest, path: "GetCallStats")
+	}
+    
+	func reviewCall(reviewCallRequest: Stream_Video_ReviewCallRequest) async throws -> Stream_Video_ReviewCallResponse {
+        return try await execute(request: reviewCallRequest, path: "ReviewCall")
+	}
+    
+	func reportIssue(reportIssueRequest: Stream_Video_ReportIssueRequest) async throws -> Stream_Video_ReportIssueResponse {
+        return try await execute(request: reportIssueRequest, path: "ReportIssue")
+	}
+    
     func update(userToken: String) {
         self.token = userToken
     }

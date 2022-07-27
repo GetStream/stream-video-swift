@@ -210,7 +210,7 @@ struct Stream_Video_User {
 
   var name: String = String()
 
-  var profileImageURL: String = String()
+  var imageURL: String = String()
 
   /// user creation date as RFC3339 string
   var createdAt: String = String()
@@ -921,7 +921,7 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     3: .same(proto: "role"),
     4: .same(proto: "custom"),
     5: .same(proto: "name"),
-    6: .standard(proto: "profile_image_url"),
+    6: .standard(proto: "image_url"),
     7: .standard(proto: "created_at"),
     8: .standard(proto: "updated_at"),
   ]
@@ -937,7 +937,7 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
       case 3: try { try decoder.decodeSingularStringField(value: &self.role) }()
       case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
       case 5: try { try decoder.decodeSingularStringField(value: &self.name) }()
-      case 6: try { try decoder.decodeSingularStringField(value: &self.profileImageURL) }()
+      case 6: try { try decoder.decodeSingularStringField(value: &self.imageURL) }()
       case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
       case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
       default: break
@@ -965,8 +965,8 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if !self.name.isEmpty {
       try visitor.visitSingularStringField(value: self.name, fieldNumber: 5)
     }
-    if !self.profileImageURL.isEmpty {
-      try visitor.visitSingularStringField(value: self.profileImageURL, fieldNumber: 6)
+    if !self.imageURL.isEmpty {
+      try visitor.visitSingularStringField(value: self.imageURL, fieldNumber: 6)
     }
     if !self.createdAt.isEmpty {
       try visitor.visitSingularStringField(value: self.createdAt, fieldNumber: 7)
@@ -983,7 +983,7 @@ extension Stream_Video_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplem
     if lhs.role != rhs.role {return false}
     if lhs._custom != rhs._custom {return false}
     if lhs.name != rhs.name {return false}
-    if lhs.profileImageURL != rhs.profileImageURL {return false}
+    if lhs.imageURL != rhs.imageURL {return false}
     if lhs.createdAt != rhs.createdAt {return false}
     if lhs.updatedAt != rhs.updatedAt {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
