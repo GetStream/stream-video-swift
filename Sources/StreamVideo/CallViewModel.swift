@@ -20,7 +20,7 @@ open class CallViewModel: ObservableObject  {
         didSet {
             self.connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
             self.remoteParticipants = roomParticipants
-            self.room?.$participants.sink(receiveValue: { [weak self] participants in
+            self.room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
                 self?.callParticipants = participants
             })
             .store(in: &cancellables)
@@ -102,7 +102,14 @@ open class CallViewModel: ObservableObject  {
         }
 
         localParticipant.setCamera(enabled: !cameraTrackState.isPublished).then(on: .sdk) { publication in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                defer {
+                    DispatchQueue.main.async {
+                        let event: Stream_Video_UserEventType = self.cameraTrackState.isPublished ? .videoStarted : .videoStopped
+                        self.streamVideo.sendEvent(type: event)
+                    }
+                }
                 guard let publication = publication else {
                     self.cameraTrackState = .notPublished()
                     return
@@ -131,7 +138,14 @@ open class CallViewModel: ObservableObject  {
         }
 
         localParticipant.setMicrophone(enabled: !microphoneTrackState.isPublished).then(on: .sdk) { publication in
-            DispatchQueue.main.async {
+            DispatchQueue.main.async { [weak self] in
+                guard let self = self else { return }
+                defer {
+                    DispatchQueue.main.async {
+                        let event: Stream_Video_UserEventType = self.microphoneTrackState.isPublished ? .audioUnmuted : .audioMutedUnspecified
+                        self.streamVideo.sendEvent(type: event)
+                    }
+                }
                 guard let publication = publication else {
                     self.microphoneTrackState = .notPublished()
                     return

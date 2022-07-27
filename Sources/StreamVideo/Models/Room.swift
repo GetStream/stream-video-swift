@@ -55,6 +55,21 @@ public class VideoRoom: ObservableObject {
         participants[participant.id] = nil
     }
     
+    func handleParticipantEvent(_ eventType: CallEventType, for participantId: String) {
+        guard var participant = participants[participantId] else { return }
+        switch eventType {
+        case .videoStarted:
+            participant.hasVideo = true
+        case .videoStopped:
+            participant.hasVideo = false
+        case .audioStarted:
+            participant.hasAudio = true
+        case .audioStopped:
+            participant.hasAudio = false
+        }
+        participants[participantId] = participant
+    }
+    
     internal var remoteParticipants: [Sid : RemoteParticipant] {
         self.room.remoteParticipants
     }
@@ -72,4 +87,11 @@ typealias VideoRoomDelegate = RoomDelegate
 
 public struct VideoOptions {
     //TODO:
+}
+
+enum CallEventType {
+    case videoStarted
+    case videoStopped
+    case audioStarted
+    case audioStopped
 }

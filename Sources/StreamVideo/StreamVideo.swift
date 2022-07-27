@@ -32,11 +32,18 @@ public class StreamVideo {
     
     private let callsMiddleware = CallsMiddleware()
     private var participantsMiddleware = ParticipantsMiddleware()
+    private var callEventsMiddleware = CallEventsMiddleware()
+    
+    private var currentCallInfo = [String: String]()
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
-        let middlewares: [EventMiddleware] = [callsMiddleware, participantsMiddleware]
+        let middlewares: [EventMiddleware] = [
+            callsMiddleware,
+            participantsMiddleware,
+            callEventsMiddleware
+        ]
         center.add(middlewares: middlewares)
         return center
     }()
@@ -131,6 +138,7 @@ public class StreamVideo {
         )
         
         participantsMiddleware.room = room
+        callEventsMiddleware.room = room
         
         return room
     }
@@ -169,6 +177,7 @@ public class StreamVideo {
         )
         
         participantsMiddleware.room = room
+        callEventsMiddleware.room = room
         
         return room
     }
@@ -191,6 +200,17 @@ public class StreamVideo {
             }
         }
         return incomingCalls
+    }
+    
+    func sendEvent(type: Stream_Video_UserEventType) {
+        Task {
+            var eventRequest = Stream_Video_SendEventRequest()
+            eventRequest.callID = currentCallInfo[WebSocketConstants.callId] ?? ""
+            eventRequest.callType = currentCallInfo[WebSocketConstants.callType] ?? ""
+            eventRequest.userID = userInfo.id
+            eventRequest.eventType = type
+            _  = try? await callCoordinatorService.sendEvent(sendEventRequest: eventRequest)
+        }
     }
     
     private func connectWebSocketClient() {
@@ -270,10 +290,11 @@ public class StreamVideo {
     }
     
     private func updateCallInfo(callId: String, callType: String) {
-        webSocketClient?.set(callInfo: [
+        currentCallInfo = [
             WebSocketConstants.callId: callId,
             WebSocketConstants.callType: callType
-        ])
+        ]
+        webSocketClient?.set(callInfo: currentCallInfo)
     }
     
     private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {

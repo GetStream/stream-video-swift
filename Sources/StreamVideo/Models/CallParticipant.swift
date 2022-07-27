@@ -12,9 +12,9 @@ public struct CallParticipant: Identifiable {
     public let role: String
     public let name: String
     public let profileImageURL: URL?
-    public let isOnline: Bool
-    public let hasVideo: Bool
-    public let hasAudio: Bool
+    public var isOnline: Bool
+    public var hasVideo: Bool
+    public var hasAudio: Bool
 }
 
 extension Stream_Video_Participant {
