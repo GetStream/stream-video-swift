@@ -59,11 +59,17 @@ open class CallViewModel: ObservableObject  {
     private var currentEventsTask: Task<Void, Never>?
     
     public var onlineParticipants: [CallParticipant] {
-        callParticipants.filter { $0.value.isOnline }.map { $0.value }
+        callParticipants
+            .filter { $0.value.isOnline }
+            .map { $0.value }
+            .sorted(by: { $0.name < $1.name })
     }
     
     public var offlineParticipants: [CallParticipant] {
-        callParticipants.filter { !$0.value.isOnline }.map { $0.value }
+        callParticipants
+            .filter { !$0.value.isOnline }
+            .map { $0.value }
+            .sorted(by: { $0.name < $1.name })
     }
     
     public init() {}
