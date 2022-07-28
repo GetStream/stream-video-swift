@@ -924,20 +924,20 @@ struct Stream_Video_StoreCallStatsRequest {
 
   var callID: String = String()
 
-  var custom: SwiftProtobuf.Google_Protobuf_Struct {
-    get {return _custom ?? SwiftProtobuf.Google_Protobuf_Struct()}
-    set {_custom = newValue}
+  var data: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _data ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_data = newValue}
   }
-  /// Returns true if `custom` has been explicitly set.
-  var hasCustom: Bool {return self._custom != nil}
-  /// Clears the value of `custom`. Subsequent reads from it will return its default value.
-  mutating func clearCustom() {self._custom = nil}
+  /// Returns true if `data` has been explicitly set.
+  var hasData: Bool {return self._data != nil}
+  /// Clears the value of `data`. Subsequent reads from it will return its default value.
+  mutating func clearData() {self._data = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct? = nil
+  fileprivate var _data: SwiftProtobuf.Google_Protobuf_Struct? = nil
 }
 
 struct Stream_Video_CallStatEvent {
@@ -1063,6 +1063,20 @@ struct Stream_Video_GetCallStatsRequest {
   init() {}
 }
 
+struct Stream_Video_CallStats {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var callTimeline: [Stream_Video_CallStatEvent] = []
+
+  var participantTimelines: [Stream_Video_ParticipantCallStatEvent] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 struct Stream_Video_GetCallStatsResponse {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -1077,15 +1091,21 @@ struct Stream_Video_GetCallStatsResponse {
   /// Clears the value of `call`. Subsequent reads from it will return its default value.
   mutating func clearCall() {self._call = nil}
 
-  var callTimeline: [Stream_Video_CallStatEvent] = []
-
-  var participantTimelines: [Stream_Video_ParticipantCallStatEvent] = []
+  var callStats: Stream_Video_CallStats {
+    get {return _callStats ?? Stream_Video_CallStats()}
+    set {_callStats = newValue}
+  }
+  /// Returns true if `callStats` has been explicitly set.
+  var hasCallStats: Bool {return self._callStats != nil}
+  /// Clears the value of `callStats`. Subsequent reads from it will return its default value.
+  mutating func clearCallStats() {self._callStats = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
   fileprivate var _call: Stream_Video_Call? = nil
+  fileprivate var _callStats: Stream_Video_CallStats? = nil
 }
 
 struct Stream_Video_StoreCallStatsResponse {
@@ -1264,6 +1284,7 @@ extension Stream_Video_ReviewCallResponse: @unchecked Sendable {}
 extension Stream_Video_ReportIssueResponse: @unchecked Sendable {}
 extension Stream_Video_ParticipantCallStatEvent: @unchecked Sendable {}
 extension Stream_Video_GetCallStatsRequest: @unchecked Sendable {}
+extension Stream_Video_CallStats: @unchecked Sendable {}
 extension Stream_Video_GetCallStatsResponse: @unchecked Sendable {}
 extension Stream_Video_StoreCallStatsResponse: @unchecked Sendable {}
 extension Stream_Video_StartRecordingResponse: @unchecked Sendable {}
@@ -2881,7 +2902,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "call_type"),
     2: .standard(proto: "call_id"),
-    3: .same(proto: "custom"),
+    3: .same(proto: "data"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2892,7 +2913,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
-      case 3: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._data) }()
       default: break
       }
     }
@@ -2909,7 +2930,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
     if !self.callID.isEmpty {
       try visitor.visitSingularStringField(value: self.callID, fieldNumber: 2)
     }
-    try { if let v = self._custom {
+    try { if let v = self._data {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     } }()
     try unknownFields.traverse(visitor: &visitor)
@@ -2918,7 +2939,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
   static func ==(lhs: Stream_Video_StoreCallStatsRequest, rhs: Stream_Video_StoreCallStatsRequest) -> Bool {
     if lhs.callType != rhs.callType {return false}
     if lhs.callID != rhs.callID {return false}
-    if lhs._custom != rhs._custom {return false}
+    if lhs._data != rhs._data {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -3190,12 +3211,49 @@ extension Stream_Video_GetCallStatsRequest: SwiftProtobuf.Message, SwiftProtobuf
   }
 }
 
+extension Stream_Video_CallStats: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CallStats"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "call_timeline"),
+    2: .standard(proto: "participant_timelines"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.callTimeline) }()
+      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.participantTimelines) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.callTimeline.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.callTimeline, fieldNumber: 1)
+    }
+    if !self.participantTimelines.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.participantTimelines, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_CallStats, rhs: Stream_Video_CallStats) -> Bool {
+    if lhs.callTimeline != rhs.callTimeline {return false}
+    if lhs.participantTimelines != rhs.participantTimelines {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
 extension Stream_Video_GetCallStatsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".GetCallStatsResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "call"),
-    2: .standard(proto: "call_timeline"),
-    3: .standard(proto: "participant_timelines"),
+    2: .standard(proto: "call_stats"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -3205,8 +3263,7 @@ extension Stream_Video_GetCallStatsResponse: SwiftProtobuf.Message, SwiftProtobu
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
-      case 2: try { try decoder.decodeRepeatedMessageField(value: &self.callTimeline) }()
-      case 3: try { try decoder.decodeRepeatedMessageField(value: &self.participantTimelines) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._callStats) }()
       default: break
       }
     }
@@ -3220,19 +3277,15 @@ extension Stream_Video_GetCallStatsResponse: SwiftProtobuf.Message, SwiftProtobu
     try { if let v = self._call {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     } }()
-    if !self.callTimeline.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.callTimeline, fieldNumber: 2)
-    }
-    if !self.participantTimelines.isEmpty {
-      try visitor.visitRepeatedMessageField(value: self.participantTimelines, fieldNumber: 3)
-    }
+    try { if let v = self._callStats {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_GetCallStatsResponse, rhs: Stream_Video_GetCallStatsResponse) -> Bool {
     if lhs._call != rhs._call {return false}
-    if lhs.callTimeline != rhs.callTimeline {return false}
-    if lhs.participantTimelines != rhs.participantTimelines {return false}
+    if lhs._callStats != rhs._callStats {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
