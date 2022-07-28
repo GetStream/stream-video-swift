@@ -60,7 +60,15 @@ public struct RoomView: View {
                 }
             }
 
-            BottomView {
+            VStack {
+                Spacer()
+                if let event = viewModel.participantEvent {
+                    Text("\(event.user) \(event.action.display) the call.")
+                        .padding(8)
+                        .foregroundColor(.white)
+                        .modifier(ShadowViewModifier())
+                        .padding()
+                }
                 CallControlsView(viewModel: viewModel)
             }
         }

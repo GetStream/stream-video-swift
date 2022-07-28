@@ -19,6 +19,8 @@ public class VideoRoom: ObservableObject {
         }
     }
     
+    var onParticipantEvent: ((ParticipantEvent) -> ())?
+    
     static func create(with room: Room) -> VideoRoom {
         return VideoRoom(room: room)
     }
@@ -70,6 +72,15 @@ public class VideoRoom: ObservableObject {
         participants[participantId] = participant
     }
     
+    public func participantEvents() -> AsyncStream<ParticipantEvent> {
+        let events = AsyncStream(ParticipantEvent.self) { [weak self] continuation in
+            self?.onParticipantEvent = { event in
+                continuation.yield(event)
+            }
+        }
+        return events
+    }
+    
     internal var remoteParticipants: [Sid : RemoteParticipant] {
         self.room.remoteParticipants
     }
@@ -94,4 +105,25 @@ enum CallEventType {
     case videoStopped
     case audioStarted
     case audioStopped
+}
+
+public struct ParticipantEvent {
+    public let id: String
+    public let action: ParticipantAction
+    public let user: String
+    public let imageURL: URL?
+}
+
+public enum ParticipantAction {
+    case join
+    case leave
+    
+    public var display: String {
+        switch self {
+        case .leave:
+            return "left"
+        case .join:
+            return "joined"
+        }
+    }
 }

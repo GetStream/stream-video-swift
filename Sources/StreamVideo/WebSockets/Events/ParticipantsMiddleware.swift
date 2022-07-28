@@ -16,10 +16,12 @@ class ParticipantsMiddleware: EventMiddleware {
             let participant = participantJoined.participant.toCallParticipant()
             log.debug("Received participant joined event with id \(participant.id)")
             room?.add(participant: participant)
+            notifyRoom(with: participant, action: .join)
         } else if let participantLeft = event as? Stream_Video_ParticipantLeft {
             let participant = participantLeft.participant.toCallParticipant()
             log.debug("Received participant left event with id \(participant.id)")
             room?.remove(participant: participant)
+            notifyRoom(with: participant, action: .leave)
         } else if let participantUpdated = event as? Stream_Video_ParticipantUpdated {
             let participant = participantUpdated.participant.toCallParticipant()
             log.debug("Received participant updated event with id \(participant.id)")
@@ -31,6 +33,16 @@ class ParticipantsMiddleware: EventMiddleware {
         }
         
         return event
+    }
+    
+    private func notifyRoom(with participant: CallParticipant, action: ParticipantAction) {
+        let event = ParticipantEvent(
+            id: participant.id,
+            action: action,
+            user: participant.name,
+            imageURL: participant.profileImageURL
+        )
+        room?.onParticipantEvent?(event)
     }
     
 }

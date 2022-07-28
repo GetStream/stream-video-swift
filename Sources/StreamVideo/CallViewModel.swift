@@ -50,10 +50,13 @@ open class CallViewModel: ObservableObject  {
     
     @Published public var callParticipants = [String: CallParticipant]()
     
+    @Published public var participantEvent: ParticipantEvent?
+    
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""
     
     private var cancellables = Set<AnyCancellable>()
+    private var currentEventsTask: Task<Void, Never>?
     
     public var onlineParticipants: [CallParticipant] {
         callParticipants.filter { $0.value.isOnline }.map { $0.value }
@@ -184,6 +187,7 @@ open class CallViewModel: ObservableObject  {
                 )
                 self.room = room
                 self.room?.addDelegate(self)
+                listenForParticipantEvents()
                 toggleCameraEnabled()
                 loading = false
                 log.debug("Started call")
@@ -207,6 +211,7 @@ open class CallViewModel: ObservableObject  {
                 )
                 self.room = room
                 self.room?.addDelegate(self)
+                listenForParticipantEvents()
                 toggleCameraEnabled()
                 loading = false
                 log.debug("Joined call")
@@ -220,6 +225,21 @@ open class CallViewModel: ObservableObject  {
     public func leaveCall() {
         self.streamVideo.leaveCall()
         self.room?.disconnect()
+        currentEventsTask?.cancel()
+    }
+    
+    private func listenForParticipantEvents() {
+        guard let room = room else {
+            return
+        }
+        currentEventsTask = Task {
+            for await event in room.participantEvents() {
+                self.participantEvent = event
+                // The event is shown for 2 seconds.
+                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                self.participantEvent = nil
+            }
+        }
     }
     
 }
