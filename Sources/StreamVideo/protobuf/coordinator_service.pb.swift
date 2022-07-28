@@ -920,24 +920,27 @@ struct Stream_Video_StoreCallStatsRequest {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// The call type
   var callType: String = String()
 
+  /// The call id
   var callID: String = String()
 
-  var data: SwiftProtobuf.Google_Protobuf_Struct {
-    get {return _data ?? SwiftProtobuf.Google_Protobuf_Struct()}
-    set {_data = newValue}
+  /// A WebRTC Stats object, as specified by https://www.w3.org/TR/webrtc-stats/#dfn-stats-object
+  var stats: SwiftProtobuf.Google_Protobuf_Struct {
+    get {return _stats ?? SwiftProtobuf.Google_Protobuf_Struct()}
+    set {_stats = newValue}
   }
-  /// Returns true if `data` has been explicitly set.
-  var hasData: Bool {return self._data != nil}
-  /// Clears the value of `data`. Subsequent reads from it will return its default value.
-  mutating func clearData() {self._data = nil}
+  /// Returns true if `stats` has been explicitly set.
+  var hasStats: Bool {return self._stats != nil}
+  /// Clears the value of `stats`. Subsequent reads from it will return its default value.
+  mutating func clearStats() {self._stats = nil}
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 
-  fileprivate var _data: SwiftProtobuf.Google_Protobuf_Struct? = nil
+  fileprivate var _stats: SwiftProtobuf.Google_Protobuf_Struct? = nil
 }
 
 struct Stream_Video_CallStatEvent {
@@ -2902,7 +2905,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "call_type"),
     2: .standard(proto: "call_id"),
-    3: .same(proto: "data"),
+    3: .same(proto: "stats"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2913,7 +2916,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
-      case 3: try { try decoder.decodeSingularMessageField(value: &self._data) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._stats) }()
       default: break
       }
     }
@@ -2930,7 +2933,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
     if !self.callID.isEmpty {
       try visitor.visitSingularStringField(value: self.callID, fieldNumber: 2)
     }
-    try { if let v = self._data {
+    try { if let v = self._stats {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     } }()
     try unknownFields.traverse(visitor: &visitor)
@@ -2939,7 +2942,7 @@ extension Stream_Video_StoreCallStatsRequest: SwiftProtobuf.Message, SwiftProtob
   static func ==(lhs: Stream_Video_StoreCallStatsRequest, rhs: Stream_Video_StoreCallStatsRequest) -> Bool {
     if lhs.callType != rhs.callType {return false}
     if lhs.callID != rhs.callID {return false}
-    if lhs._data != rhs._data {return false}
+    if lhs._stats != rhs._stats {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
