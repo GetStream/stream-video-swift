@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftProtobuf
 
 public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
 public typealias TokenUpdater = (Token) -> ()
@@ -200,6 +201,26 @@ public class StreamVideo {
             }
         }
         return incomingCalls
+    }
+    
+    public func reportCallStats(stats: [String: Any]) {
+        Task {
+            var statsRequest = Stream_Video_StoreCallStatsRequest()
+            statsRequest.callID = currentCallInfo[WebSocketConstants.callId] ?? ""
+            statsRequest.callType = currentCallInfo[WebSocketConstants.callType] ?? ""
+            var statsData = SwiftProtobuf.Google_Protobuf_Struct()
+            let fields: [String: Google_Protobuf_Value] = [
+                StatsConstants.bytesSent: .init(integerLiteral: stats[StatsConstants.bytesSent] as? Int64 ?? 0),
+                StatsConstants.bytesReceived: .init(integerLiteral: stats[StatsConstants.bytesReceived] as? Int64 ?? 0),
+                StatsConstants.codecName: .init(stringValue: stats[StatsConstants.codecName] as? String ?? ""),
+                StatsConstants.bpsSent: .init(integerLiteral: stats[StatsConstants.bpsSent] as? Int64 ?? 0),
+                StatsConstants.bpsReceived: .init(integerLiteral: stats[StatsConstants.bpsReceived] as? Int64 ?? 0)
+            ]
+            statsData.fields = fields
+            log.debug("sending stats data")
+            _ = try? await callCoordinatorService.storeCallStats(storeCallStatsRequest: statsRequest)
+        }
+
     }
     
     func sendEvent(type: Stream_Video_UserEventType) {

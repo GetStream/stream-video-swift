@@ -926,7 +926,7 @@ struct Stream_Video_StoreCallStatsRequest {
   /// The call id
   var callID: String = String()
 
-  /// A WebRTC Stats object, as specified by https://www.w3.org/TR/webrtc-stats/#dfn-stats-object
+  /// A WebRTC Stats report, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
   var stats: SwiftProtobuf.Google_Protobuf_Struct {
     get {return _stats ?? SwiftProtobuf.Google_Protobuf_Struct()}
     set {_stats = newValue}
