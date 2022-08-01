@@ -49,5 +49,8 @@ struct LoginView: View {
         }) {
             AddUserView()
         }
+        .onAppear() {
+            viewModel.voipPushService.registerForVoIPPushes()
+        }
     }
 }

@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
+		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		84093811288A90390089A35B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* HomeView.swift */; };
 		84093813288AA8090089A35B /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093812288AA8090089A35B /* IncomingCallView.swift */; };
 		841947962886D6A30007B36E /* StreamVideoConnectionRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */; };
@@ -183,6 +185,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
+		8403C0AE2897D9940092BD43 /* VoipPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipPushService.swift; sourceTree = "<group>"; };
+		8403C0B02897E7E70092BD43 /* DemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoApp.entitlements; sourceTree = "<group>"; };
 		84093810288A90390089A35B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		84093812288AA8090089A35B /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
 		841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoConnectionRecovery.swift; sourceTree = "<group>"; };
@@ -405,6 +410,7 @@
 		842D8BD42865B37800801910 /* DemoApp */ = {
 			isa = PBXGroup;
 			children = (
+				8403C0B02897E7E70092BD43 /* DemoApp.entitlements */,
 				842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */,
 				84ED240C286C9515002A3186 /* CallView.swift */,
 				8456E6C5287EB55F004E180E /* AppState.swift */,
@@ -413,6 +419,8 @@
 				8456E6C1287EB405004E180E /* LoginView.swift */,
 				8456E6C3287EB43A004E180E /* LoginViewModel.swift */,
 				84201792288AB699004964B3 /* AddUserView.swift */,
+				8403C0AC2897CF4D0092BD43 /* CallKitService.swift */,
+				8403C0AE2897D9940092BD43 /* VoipPushService.swift */,
 				84C2996928757F820034B735 /* DemoApp-Info.plist */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
 				842D8BD72865B37800801910 /* Preview Content */,
@@ -944,11 +952,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
+				8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				84093813288AA8090089A35B /* IncomingCallView.swift in Sources */,
 				84093811288A90390089A35B /* HomeView.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
+				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
 			);
@@ -1237,6 +1247,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DemoApp/DemoApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"DemoApp/Preview Content\"";
@@ -1246,6 +1257,7 @@
 				INFOPLIST_FILE = "DemoApp/DemoApp-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access needed for a video call.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access needed for establishing a call.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
@@ -1272,6 +1284,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = DemoApp/DemoApp.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"DemoApp/Preview Content\"";
@@ -1281,6 +1294,7 @@
 				INFOPLIST_FILE = "DemoApp/DemoApp-Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "Camera access needed for a video call.";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
 				INFOPLIST_KEY_NSMicrophoneUsageDescription = "Microphone access needed for establishing a call.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
