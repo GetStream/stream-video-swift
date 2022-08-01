@@ -1,3 +1,7 @@
+//
+// Copyright © 2022 Stream.io Inc. All rights reserved.
+//
+
 import SwiftUI
 import StreamVideo
 

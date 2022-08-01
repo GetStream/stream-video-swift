@@ -1,8 +1,5 @@
 //
-//  WebSocketConstants.swift
-//  StreamVideo
-//
-//  Created by Martin Mitrevski on 26.7.22.
+// Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
 import Foundation

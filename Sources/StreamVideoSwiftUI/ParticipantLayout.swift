@@ -1,8 +1,5 @@
 //
-//  ParticipantLayout.swift
-//  StreamVideoSwiftUI
-//
-//  Created by Martin Mitrevski on 30.6.22.
+// Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI

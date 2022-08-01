@@ -1,8 +1,5 @@
 //
-//  AppState.swift
-//  DemoApp
-//
-//  Created by Martin Mitrevski on 13.7.22.
+// Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI

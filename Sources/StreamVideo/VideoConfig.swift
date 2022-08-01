@@ -1,8 +1,5 @@
 //
-//  VideoConfig.swift
-//  StreamVideo
-//
-//  Created by Martin Mitrevski on 22.7.22.
+// Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
 import Foundation

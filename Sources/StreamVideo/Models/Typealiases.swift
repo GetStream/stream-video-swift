@@ -1,8 +1,5 @@
 //
-//  Typealiases.swift
-//  StreamVideoSwiftUI
-//
-//  Created by Martin Mitrevski on 8.7.22.
+// Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
 import LiveKit
