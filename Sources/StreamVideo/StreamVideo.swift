@@ -60,9 +60,7 @@ public class StreamVideo {
     private let apiKey: APIKey
     private let videoService = VideoService()
     private let latencyService: LatencyService
-    
-    public internal(set) var connectionStatus: ConnectionStatus = .initialized
-    
+        
     public init(
         apiKey: String,
         user: UserInfo,
@@ -301,8 +299,6 @@ public class StreamVideo {
             userInfo: userInfo,
             token: token.rawValue
         )
-
-        webSocketClient.connectionStateDelegate = self
         
         return webSocketClient
     }

@@ -11,12 +11,10 @@
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		84093811288A90390089A35B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* HomeView.swift */; };
 		84093813288AA8090089A35B /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093812288AA8090089A35B /* IncomingCallView.swift */; };
-		841947962886D6A30007B36E /* StreamVideoConnectionRecovery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947992886EBD20007B36E /* UserConnectionProvider.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84204C89288815E800C5F20F /* Atlantis in Frameworks */ = {isa = PBXBuildFile; productRef = 84204C88288815E800C5F20F /* Atlantis */; };
-		84274F4428840C9700CF8794 /* DataGzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F4328840C9700CF8794 /* DataGzip.swift */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
 		842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */; };
@@ -47,8 +45,6 @@
 		84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1932883652000526C98 /* EventMiddleware.swift */; };
 		84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */; };
 		84A7E198288366D000526C98 /* EventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E197288366D000526C98 /* EventDecoder.swift */; };
-		84A7E1A22883E29B00526C98 /* CodableExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A12883E29B00526C98 /* CodableExtensions.swift */; };
-		84A7E1A42883E2F400526C98 /* DBDate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A32883E2F400526C98 /* DBDate.swift */; };
 		84A7E1A82883E46200526C98 /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A72883E46200526C98 /* Timers.swift */; };
 		84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A92883E4AD00526C98 /* APIKey.swift */; };
 		84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */; };
@@ -190,11 +186,9 @@
 		8403C0B02897E7E70092BD43 /* DemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoApp.entitlements; sourceTree = "<group>"; };
 		84093810288A90390089A35B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		84093812288AA8090089A35B /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
-		841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoConnectionRecovery.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		841947992886EBD20007B36E /* UserConnectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserConnectionProvider.swift; sourceTree = "<group>"; };
 		84201792288AB699004964B3 /* AddUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUserView.swift; sourceTree = "<group>"; };
-		84274F4328840C9700CF8794 /* DataGzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataGzip.swift; sourceTree = "<group>"; };
 		84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionRecoveryHandler.swift; sourceTree = "<group>"; };
 		84274F472884251600CF8794 /* InternetConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternetConnection.swift; sourceTree = "<group>"; };
 		842D8BC32865B31B00801910 /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -226,8 +220,6 @@
 		84A7E1932883652000526C98 /* EventMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventMiddleware.swift; sourceTree = "<group>"; };
 		84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskScheduler.swift; sourceTree = "<group>"; };
 		84A7E197288366D000526C98 /* EventDecoder.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventDecoder.swift; sourceTree = "<group>"; };
-		84A7E1A12883E29B00526C98 /* CodableExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodableExtensions.swift; sourceTree = "<group>"; };
-		84A7E1A32883E2F400526C98 /* DBDate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DBDate.swift; sourceTree = "<group>"; };
 		84A7E1A72883E46200526C98 /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		84A7E1A92883E4AD00526C98 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
 		84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPHeader.swift; sourceTree = "<group>"; };
@@ -527,10 +519,7 @@
 				84AF64D4287C79320012A503 /* RawJSON.swift */,
 				8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */,
 				84A7E183288362DF00526C98 /* Atomic.swift */,
-				84A7E1A12883E29B00526C98 /* CodableExtensions.swift */,
-				84A7E1A32883E2F400526C98 /* DBDate.swift */,
 				84A7E1A72883E46200526C98 /* Timers.swift */,
-				84274F4328840C9700CF8794 /* DataGzip.swift */,
 				841947972886D9CD0007B36E /* BundleExtensions.swift */,
 				841947992886EBD20007B36E /* UserConnectionProvider.swift */,
 			);
@@ -590,7 +579,6 @@
 			children = (
 				84F737EF287C13AC00A363F4 /* StreamVideo.h */,
 				84C2996D2876E42D0034B735 /* StreamVideo.swift */,
-				841947952886D6A30007B36E /* StreamVideoConnectionRecovery.swift */,
 				8478EB12288A054B00525538 /* VideoConfig.swift */,
 				84ED240E286C9530002A3186 /* CallViewModel.swift */,
 				8456E6D9287EC46D004E180E /* Models */,
@@ -969,11 +957,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				84AF64D5287C79320012A503 /* RawJSON.swift in Sources */,
-				84A7E1A42883E2F400526C98 /* DBDate.swift in Sources */,
 				84F73858287C1A3400A363F4 /* VideoConnectionStatus.swift in Sources */,
 				84B04BE728941EA6003A8DCD /* StatsConstants.swift in Sources */,
 				8478EB13288A054B00525538 /* VideoConfig.swift in Sources */,
-				84274F4428840C9700CF8794 /* DataGzip.swift in Sources */,
 				84F73857287C1A3400A363F4 /* RoomParticipant.swift in Sources */,
 				84AF64CD287C545E0012A503 /* models.pb.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
@@ -1016,9 +1002,7 @@
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
-				84A7E1A22883E29B00526C98 /* CodableExtensions.swift in Sources */,
 				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
-				841947962886D6A30007B36E /* StreamVideoConnectionRecovery.swift in Sources */,
 				84EBAA90288BCEAA00BE3176 /* IncomingCall.swift in Sources */,
 				84AF64CF287C545E0012A503 /* events.pb.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
