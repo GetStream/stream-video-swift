@@ -20,6 +20,7 @@
 		842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */; };
 		842D8BDB2865B37800801910 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD62865B37800801910 /* Assets.xcassets */; };
 		842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD82865B37800801910 /* Preview Assets.xcassets */; };
+		8434C5222899572F0001490A /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -195,6 +196,7 @@
 		842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamVideoSwiftUIApp.swift; sourceTree = "<group>"; };
 		842D8BD62865B37800801910 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		842D8BD82865B37800801910 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8434C5212899572F0001490A /* CallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallService.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -411,6 +413,7 @@
 				8456E6C1287EB405004E180E /* LoginView.swift */,
 				8456E6C3287EB43A004E180E /* LoginViewModel.swift */,
 				84201792288AB699004964B3 /* AddUserView.swift */,
+				8434C5212899572F0001490A /* CallService.swift */,
 				8403C0AC2897CF4D0092BD43 /* CallKitService.swift */,
 				8403C0AE2897D9940092BD43 /* VoipPushService.swift */,
 				84C2996928757F820034B735 /* DemoApp-Info.plist */,
@@ -949,6 +952,7 @@
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
+				8434C5222899572F0001490A /* CallService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

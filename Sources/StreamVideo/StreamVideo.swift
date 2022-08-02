@@ -34,6 +34,8 @@ public class StreamVideo {
     
     private var currentCallInfo = [String: String]()
     
+    internal var currentRoom: VideoRoom?
+    
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
@@ -147,6 +149,7 @@ public class StreamVideo {
         
         participantsMiddleware.room = room
         callEventsMiddleware.room = room
+        currentRoom = room
         
         return room
     }

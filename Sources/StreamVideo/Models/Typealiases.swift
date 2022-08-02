@@ -12,4 +12,8 @@ public typealias StreamRemoteTrackPublication = RemoteTrackPublication
 
 public struct CallType {
     var name: String
+    
+    public init(name: String) {
+        self.name = name
+    }
 }

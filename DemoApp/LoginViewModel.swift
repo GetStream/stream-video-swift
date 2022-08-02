@@ -12,14 +12,6 @@ class LoginViewModel: ObservableObject {
     
     @Published var userCredentials = mockUsers
     
-    let callService = CallKitService()
-    lazy var voipPushService = VoipPushService { [weak self] payload, type, completion in
-        guard let self = self else { return }
-        self.callService.reportIncomingCall { _ in
-            completion()
-        }
-    }
-    
     func login(user: UserCredentials, completion: (UserCredentials) -> ()) {
         AppState.shared.userState = .loggedIn
         // Perform login

@@ -70,6 +70,7 @@ struct HomeView: View {
                     self.incomingCallInfo = incomingCall
                 }
             }
+            CallService.shared.registerForIncomingCalls()
         }
         .fullScreenCover(item: $incomingCallInfo) { callInfo in
             IncomingCallView(viewModel: viewModel, callInfo: callInfo)

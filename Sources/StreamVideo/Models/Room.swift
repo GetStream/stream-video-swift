@@ -95,6 +95,7 @@ typealias VideoRoomDelegate = RoomDelegate
 
 public struct VideoOptions {
     //TODO:
+    public init() {}
 }
 
 enum CallEventType {

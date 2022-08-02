@@ -69,7 +69,20 @@ open class CallViewModel: ObservableObject  {
             .sorted(by: { $0.name < $1.name })
     }
     
-    public init() {}
+    public init() {
+        NotificationCenter.default.addObserver(
+              self,
+              selector: #selector(checkForOngoingCall),
+              name: UIApplication.willEnterForegroundNotification,
+              object: nil
+        )
+    }
+    
+    @objc private func checkForOngoingCall() {
+        if room == nil && streamVideo.currentRoom != nil {
+            self.room = streamVideo.currentRoom
+        }
+    }
 
     //TODO: LiveKit
     public var allParticipants: OrderedDictionary<String, RoomParticipant> {

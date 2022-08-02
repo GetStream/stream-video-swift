@@ -4,8 +4,14 @@
 
 import Foundation
 import CallKit
+import StreamVideo
 
 class CallKitService: NSObject, CXProviderDelegate {
+    
+    @Injected(\.streamVideo) var streamVideo
+        
+    //TODO: load this from the notification
+    var currentCallId = "123"
     
     func reportIncomingCall(completion: @escaping (Error?) -> Void) {
         let configuration = CXProviderConfiguration()
@@ -28,6 +34,17 @@ class CallKitService: NSObject, CXProviderDelegate {
     }
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+        if !currentCallId.isEmpty {
+            Task {
+                _ = try? await streamVideo.joinCall(
+                    callType: .init(name: "video"),
+                    callId: currentCallId,
+                    videoOptions: VideoOptions()
+                )
+            }
+
+        }
+        
         action.fulfill()
     }
     
