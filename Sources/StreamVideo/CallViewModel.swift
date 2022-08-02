@@ -177,17 +177,35 @@ open class CallViewModel: ObservableObject  {
     }
 
     public func startCall(callId: String, participantIds: [String]) {
+        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
+    }
+    
+    public func joinCall(callId: String) {
+        enterCall(callId: callId, participantIds: [], isStarted: true)
+    }
+    
+    private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {
         Task {
             do {
                 loading = true
                 log.debug("Starting call")
                 let callType = CallType(name: "video")
-                let room = try await streamVideo.startCall(
-                    callType: callType,
-                    callId: callId,
-                    videoOptions: VideoOptions(),
-                    participantIds: participantIds
-                )
+                let options = VideoOptions()
+                let room: VideoRoom
+                if isStarted {
+                    room = try await streamVideo.joinCall(
+                        callType: callType,
+                        callId: callId,
+                        videoOptions: options
+                    )
+                } else {
+                    room = try await streamVideo.startCall(
+                        callType: callType,
+                        callId: callId,
+                        videoOptions: options,
+                        participantIds: participantIds
+                    )
+                }
                 self.room = room
                 self.room?.addDelegate(self)
                 listenForParticipantEvents()
@@ -196,30 +214,6 @@ open class CallViewModel: ObservableObject  {
                 log.debug("Started call")
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
-                loading = false
-            }
-        }
-    }
-    
-    public func joinCall(callId: String) {
-        Task {
-            do {
-                loading = true
-                log.debug("Joining call")
-                let callType = CallType(name: "video")
-                let room = try await streamVideo.joinCall(
-                    callType: callType,
-                    callId: callId,
-                    videoOptions: VideoOptions()
-                )
-                self.room = room
-                self.room?.addDelegate(self)
-                listenForParticipantEvents()
-                toggleCameraEnabled()
-                loading = false
-                log.debug("Joined call")
-            } catch {
-                log.error("Error joining a call \(error.localizedDescription)")
                 loading = false
             }
         }

@@ -107,38 +107,11 @@ public class StreamVideo {
             participantIds: participantIds
         )
         
-        let joinCallResponse = try await joinCall(
+        return try await joinCall(
+            callType: callType,
             callId: createCallResponse.call.id,
-            type: createCallResponse.call.type
+            videoOptions: videoOptions
         )
-        
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
-        
-        let edgeServer = try await selectEdgeServer(
-            callId: createCallResponse.call.id,
-            latencyByEdge: latencyByEdge
-        )
-        
-        if !videoConfig.persitingSocketConnection {
-            connectWebSocketClient()
-        }
-        
-        updateCallInfo(
-            callId: createCallResponse.call.id,
-            callType: createCallResponse.call.type
-        )
-                        
-        let room = try await videoService.connect(
-            url: edgeServer.url,
-            token: edgeServer.token,
-            participants: joinCallResponse.callParticipants(),
-            options: videoOptions
-        )
-        
-        participantsMiddleware.room = room
-        callEventsMiddleware.room = room
-        
-        return room
     }
     
     public func joinCall(
