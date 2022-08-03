@@ -10,7 +10,7 @@ import Atlantis
 @main
 struct StreamVideoSwiftUIApp: App {
     
-    @State var streamVideo: StreamVideo?
+    @State var streamVideoUI: StreamVideoUI?
     
     @ObservedObject var appState = AppState.shared
         
@@ -25,7 +25,7 @@ struct StreamVideoSwiftUIApp: App {
                 CallView()
             } else {
                 LoginView() { user in
-                    streamVideo = StreamVideo(
+                    let streamVideo = StreamVideo(
                         apiKey: "1234",
                         user: user.userInfo,
                         token: user.token,
@@ -34,6 +34,7 @@ struct StreamVideoSwiftUIApp: App {
                             result(.success(user.token))
                         }
                     )
+                    streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
                 }
             }
         }

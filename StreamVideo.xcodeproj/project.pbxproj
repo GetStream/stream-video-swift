@@ -21,6 +21,13 @@
 		842D8BDB2865B37800801910 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD62865B37800801910 /* Assets.xcassets */; };
 		842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD82865B37800801910 /* Preview Assets.xcassets */; };
 		8434C5222899572F0001490A /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
+		8434C525289AA2E20001490A /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C524289AA2E20001490A /* Fonts.swift */; };
+		8434C527289AA2F00001490A /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C526289AA2F00001490A /* Images.swift */; };
+		8434C529289AA2FA0001490A /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C528289AA2FA0001490A /* Colors.swift */; };
+		8434C52B289AA3150001490A /* Appearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52A289AA3150001490A /* Appearance.swift */; };
+		8434C52D289AA41D0001490A /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52C289AA41D0001490A /* UIImageExtensions.swift */; };
+		8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52E289AA77B0001490A /* BundleExtensions.swift */; };
+		8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C530289AA8770001490A /* StreamVideoUI.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -197,6 +204,13 @@
 		842D8BD62865B37800801910 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		842D8BD82865B37800801910 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		8434C5212899572F0001490A /* CallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallService.swift; sourceTree = "<group>"; };
+		8434C524289AA2E20001490A /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
+		8434C526289AA2F00001490A /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
+		8434C528289AA2FA0001490A /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
+		8434C52A289AA3150001490A /* Appearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Appearance.swift; sourceTree = "<group>"; };
+		8434C52C289AA41D0001490A /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
+		8434C52E289AA77B0001490A /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
+		8434C530289AA8770001490A /* StreamVideoUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUI.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -431,6 +445,19 @@
 			path = "Preview Content";
 			sourceTree = "<group>";
 		};
+		8434C523289AA2B60001490A /* RoomView */ = {
+			isa = PBXGroup;
+			children = (
+				84ED2412286CA414002A3186 /* RoomView.swift */,
+				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
+				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
+				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
+				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
+				84C2997E287865560034B735 /* StreamVideoView.swift */,
+			);
+			path = RoomView;
+			sourceTree = "<group>";
+		};
 		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
@@ -551,6 +578,8 @@
 			children = (
 				84EBAA92288C137E00BE3176 /* Modifiers.swift */,
 				84F3B0E3289174F60088751D /* ContainerHelpers.swift */,
+				8434C52C289AA41D0001490A /* UIImageExtensions.swift */,
+				8434C52E289AA77B0001490A /* BundleExtensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -607,13 +636,13 @@
 		84F73808287C141000A363F4 /* StreamVideoSwiftUI */ = {
 			isa = PBXGroup;
 			children = (
+				8434C530289AA8770001490A /* StreamVideoUI.swift */,
+				8434C52A289AA3150001490A /* Appearance.swift */,
+				8434C528289AA2FA0001490A /* Colors.swift */,
+				8434C524289AA2E20001490A /* Fonts.swift */,
+				8434C526289AA2F00001490A /* Images.swift */,
+				8434C523289AA2B60001490A /* RoomView */,
 				84EBAA91288C135700BE3176 /* Utils */,
-				84ED2412286CA414002A3186 /* RoomView.swift */,
-				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
-				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
-				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
-				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
-				84C2997E287865560034B735 /* StreamVideoView.swift */,
 				84F73809287C141000A363F4 /* StreamVideoSwiftUI.h */,
 			);
 			path = StreamVideoSwiftUI;
@@ -1034,12 +1063,19 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F73840287C193300A363F4 /* RoomView.swift in Sources */,
+				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
+				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
 				84F7383F287C193300A363F4 /* StreamVideoView.swift in Sources */,
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
 				84F73841287C193300A363F4 /* ParticipantView.swift in Sources */,
+				8434C52D289AA41D0001490A /* UIImageExtensions.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
+				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsView.swift in Sources */,
+				8434C52B289AA3150001490A /* Appearance.swift in Sources */,
 				84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */,
+				8434C527289AA2F00001490A /* Images.swift in Sources */,
+				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

@@ -9,6 +9,9 @@ public struct CallControlsView: View {
     
     @ObservedObject var viewModel: CallViewModel
     
+    @Injected(\.images) var images
+    @Injected(\.colors) var colors
+    
     public var body: some View {
         HStack {
             Spacer()
@@ -17,7 +20,7 @@ public struct CallControlsView: View {
                 viewModel.toggleCameraEnabled()
             },
             label: {
-                Image(systemName: viewModel.cameraTrackState.isPublished ? "video.slash.fill" : "video.fill")
+                (viewModel.cameraTrackState.isPublished ? images.videoTurnOff : images.videoTurnOn)
                     .applyCallButtonStyle(color: .black, backgroundType: .none)
             })
             .disabled(viewModel.cameraTrackState.isBusy)
@@ -28,7 +31,7 @@ public struct CallControlsView: View {
                 viewModel.toggleMicrophoneEnabled()
             },
             label: {
-                Image(systemName: viewModel.microphoneTrackState.isPublished ? "mic.slash.circle.fill" : "mic.circle.fill")
+                (viewModel.microphoneTrackState.isPublished ? images.micTurnOff : images.micTurnOn)
                     .applyCallButtonStyle(color: .black)
             })
             .disabled(viewModel.microphoneTrackState.isBusy)
@@ -39,7 +42,7 @@ public struct CallControlsView: View {
                 viewModel.toggleCameraPosition()
             },
             label: {
-                Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+                images.toggleCamera
                     .applyCallButtonStyle(color: .black, backgroundType: .rectangle)
             })
             
@@ -48,8 +51,8 @@ public struct CallControlsView: View {
             Button {
                 viewModel.leaveCall()
             } label: {
-                Image(systemName: "phone.circle.fill")
-                    .applyCallButtonStyle(color: Color(.systemRed))
+                images.hangup
+                    .applyCallButtonStyle(color: colors.hangUpIconColor)
             }
             .padding(.all, 8)
             
