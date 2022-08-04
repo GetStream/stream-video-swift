@@ -2,8 +2,8 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 struct CallParticipantsView: View {
     
@@ -18,12 +18,12 @@ struct CallParticipantsView: View {
             LazyVStack(spacing: 16) {
                 CallParticipantsSection(
                     participants: viewModel.onlineParticipants,
-                    sectionTitle: "On the call"
+                    sectionTitle: L10n.Call.Participants.online
                 )
                 
                 CallParticipantsSection(
                     participants: viewModel.offlineParticipants,
-                    sectionTitle: "Offline"
+                    sectionTitle: L10n.Call.Participants.offline
                 )
             }
             .padding()
@@ -55,7 +55,6 @@ struct CallParticipantsSection: View {
         }
         .foregroundColor(.white)
     }
-    
 }
 
 struct CallParticipantView: View {
@@ -72,5 +71,4 @@ struct CallParticipantView: View {
             }
         }
     }
-    
 }

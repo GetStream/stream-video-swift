@@ -28,6 +28,10 @@
 		8434C52D289AA41D0001490A /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52C289AA41D0001490A /* UIImageExtensions.swift */; };
 		8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52E289AA77B0001490A /* BundleExtensions.swift */; };
 		8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C530289AA8770001490A /* StreamVideoUI.swift */; };
+		8434C539289BBBBA0001490A /* L10n_template.stencil in Resources */ = {isa = PBXBuildFile; fileRef = 8434C538289BBBBA0001490A /* L10n_template.stencil */; };
+		8434C53B289BBF020001490A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8434C53D289BBF020001490A /* Localizable.strings */; };
+		8434C53E289BBF120001490A /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 8434C540289BBF120001490A /* Localizable.stringsdict */; };
+		8434C542289BC0B00001490A /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C541289BC0B00001490A /* L10n.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -211,6 +215,10 @@
 		8434C52C289AA41D0001490A /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
 		8434C52E289AA77B0001490A /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		8434C530289AA8770001490A /* StreamVideoUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUI.swift; sourceTree = "<group>"; };
+		8434C538289BBBBA0001490A /* L10n_template.stencil */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = L10n_template.stencil; sourceTree = "<group>"; };
+		8434C53C289BBF020001490A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
+		8434C53F289BBF120001490A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
+		8434C541289BC0B00001490A /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -458,6 +466,24 @@
 			path = RoomView;
 			sourceTree = "<group>";
 		};
+		8434C532289BB8BE0001490A /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				8434C53D289BBF020001490A /* Localizable.strings */,
+				8434C540289BBF120001490A /* Localizable.stringsdict */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		8434C537289BBB390001490A /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				8434C541289BC0B00001490A /* L10n.swift */,
+				8434C538289BBBBA0001490A /* L10n_template.stencil */,
+			);
+			path = Generated;
+			sourceTree = "<group>";
+		};
 		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
@@ -643,6 +669,8 @@
 				8434C526289AA2F00001490A /* Images.swift */,
 				8434C523289AA2B60001490A /* RoomView */,
 				84EBAA91288C135700BE3176 /* Utils */,
+				8434C532289BB8BE0001490A /* Resources */,
+				8434C537289BBB390001490A /* Generated */,
 				84F73809287C141000A363F4 /* StreamVideoSwiftUI.h */,
 			);
 			path = StreamVideoSwiftUI;
@@ -778,6 +806,7 @@
 			buildConfigurationList = 84F7381C287C141000A363F4 /* Build configuration list for PBXNativeTarget "StreamVideoSwiftUI" */;
 			buildPhases = (
 				84F73802287C141000A363F4 /* Headers */,
+				8434C53A289BBDF30001490A /* SwiftGen */,
 				84F73803287C141000A363F4 /* Sources */,
 				84F73804287C141000A363F4 /* Frameworks */,
 				84F73805287C141000A363F4 /* Resources */,
@@ -940,6 +969,9 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8434C539289BBBBA0001490A /* L10n_template.stencil in Resources */,
+				8434C53B289BBF020001490A /* Localizable.strings in Resources */,
+				8434C53E289BBF120001490A /* Localizable.stringsdict in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -965,6 +997,27 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		8434C53A289BBDF30001490A /* SwiftGen */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = SwiftGen;
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "if which mint >/dev/null && mint which swiftgen; then\n  xcrun --sdk macosx mint run swiftgen config run --config Sources/StreamVideoSwiftUI/.swiftgen.yml\nelse\n  echo \"Warning: Bootstrap not run, please run ./Scripts/bootstrap.sh\"\nfi\n";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		842D8BBF2865B31B00801910 /* Sources */ = {
@@ -1062,6 +1115,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				84F73840287C193300A363F4 /* RoomView.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
@@ -1147,6 +1201,25 @@
 			targetProxy = 84F7384F287C198500A363F4 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
+
+/* Begin PBXVariantGroup section */
+		8434C53D289BBF020001490A /* Localizable.strings */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8434C53C289BBF020001490A /* en */,
+			);
+			name = Localizable.strings;
+			sourceTree = "<group>";
+		};
+		8434C540289BBF120001490A /* Localizable.stringsdict */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8434C53F289BBF120001490A /* en */,
+			);
+			name = Localizable.stringsdict;
+			sourceTree = "<group>";
+		};
+/* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
 		842D8BCF2865B31D00801910 /* Debug */ = {

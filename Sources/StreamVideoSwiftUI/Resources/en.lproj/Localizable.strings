@@ -1,0 +1,7 @@
+//
+// Copyright © 2020 Stream.io Inc. All rights reserved.
+//
+
+"call.participants.title" = "Participants";
+"call.participants.online" = "On the call";
+"call.participants.offline" = "Offline";
