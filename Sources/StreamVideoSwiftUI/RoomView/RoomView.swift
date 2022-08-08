@@ -2,14 +2,19 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
-public struct RoomView: View {
+public struct RoomView<Factory: ViewFactory>: View {
     
-    @ObservedObject var viewModel: CallViewModel
+    @ObservedObject private var viewModel: CallViewModel
+    private var viewFactory: Factory
     
-    public init(viewModel: CallViewModel) {
+    public init(
+        viewFactory: Factory,
+        viewModel: CallViewModel
+    ) {
+        self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
     
@@ -66,7 +71,8 @@ public struct RoomView: View {
                         .modifier(ShadowViewModifier())
                         .padding()
                 }
-                CallControlsView(viewModel: viewModel)
+                
+                viewFactory.makeCallControlsView(viewModel: viewModel)
             }
         }
         .frame(
@@ -80,5 +86,12 @@ public struct RoomView: View {
     private var screenSize: CGSize {
         UIScreen.main.bounds.size
     }
-    
+}
+
+extension RoomView where Factory == DefaultViewFactory {
+    public init(
+        viewModel: CallViewModel
+    ) {
+        self.init(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
+    }
 }

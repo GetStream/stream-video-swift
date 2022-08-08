@@ -43,6 +43,7 @@
 		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
+		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		84A7E17428814D7400526C98 /* LatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17328814D7400526C98 /* LatencyService.swift */; };
 		84A7E1792881922400526C98 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
 		84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17C2883629700526C98 /* WebSocketClient.swift */; };
@@ -230,6 +231,7 @@
 		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
+		8498796728A15F0300D06F31 /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		84A7E17328814D7400526C98 /* LatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatencyService.swift; sourceTree = "<group>"; };
 		84A7E1782881922400526C98 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		84A7E17C2883629700526C98 /* WebSocketClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocketClient.swift; sourceTree = "<group>"; };
@@ -667,6 +669,7 @@
 				8434C528289AA2FA0001490A /* Colors.swift */,
 				8434C524289AA2E20001490A /* Fonts.swift */,
 				8434C526289AA2F00001490A /* Images.swift */,
+				8498796728A15F0300D06F31 /* ViewFactory.swift */,
 				8434C523289AA2B60001490A /* RoomView */,
 				84EBAA91288C135700BE3176 /* Utils */,
 				8434C532289BB8BE0001490A /* Resources */,
@@ -1131,6 +1134,7 @@
 				8434C527289AA2F00001490A /* Images.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
+				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
