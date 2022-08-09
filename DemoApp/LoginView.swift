@@ -45,7 +45,7 @@ struct LoginView: View {
             viewModel.loading ? ProgressView() : nil
         )
         .sheet(isPresented: $addUserShown, onDismiss: {
-            viewModel.userCredentials = mockUsers
+            viewModel.userCredentials = UserCredentials.builtInUsers
         }) {
             AddUserView()
         }

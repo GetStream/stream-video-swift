@@ -15,7 +15,7 @@ struct HomeView: View {
     @State private var callAction = CallAction.startCall
     
     var participants: [UserCredentials] {
-        var participants = mockUsers
+        var participants = UserCredentials.builtInUsers
         participants.removeAll { userCredentials in
             userCredentials.id == streamVideo.userInfo.id
         }

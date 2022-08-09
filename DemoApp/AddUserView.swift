@@ -40,7 +40,7 @@ struct AddUserView: View {
                 )
                 if let token = try? Token(rawValue: token) {
                     let user = UserCredentials(userInfo: userInfo, token: token)
-                    mockUsers.append(user)
+                    UserCredentials.builtInUsers.append(user)
                     presentationMode.wrappedValue.dismiss()
                 }
             } label: {
