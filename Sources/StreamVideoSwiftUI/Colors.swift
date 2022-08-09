@@ -9,7 +9,7 @@ import UIKit
 public struct Colors {
     
     public init() { /* Public init. */ }
-    
+ 
+    public var tintColor = Color.accentColor
     public var hangUpIconColor = Color(.systemRed)
-    
 }

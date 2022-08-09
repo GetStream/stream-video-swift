@@ -175,6 +175,18 @@ public class StreamVideo {
         return incomingCalls
     }
     
+    // TODO: extract this somewhere
+    public func loadParticipants(for call: IncomingCall) async throws -> [CallParticipant] {
+        var getCallRequest = Stream_Video_GetCallRequest()
+        getCallRequest.id = call.id
+        getCallRequest.type = call.type
+        let callResponse = try await callCoordinatorService.getCall(getCallRequest: getCallRequest)
+        let participants = callResponse.callState.participants
+            .map { $0.toCallParticipant() }
+            .filter { $0.id != userInfo.id }
+        return participants
+    }
+    
     func sendEvent(type: Stream_Video_UserEventType) {
         Task {
             var eventRequest = Stream_Video_SendEventRequest()

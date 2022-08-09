@@ -4,6 +4,7 @@
 
 import SwiftUI
 import StreamVideo
+import StreamVideoSwiftUI
 
 struct HomeView: View {
     @ObservedObject var viewModel: CallViewModel
@@ -73,7 +74,13 @@ struct HomeView: View {
             CallService.shared.registerForIncomingCalls()
         }
         .fullScreenCover(item: $incomingCallInfo) { callInfo in
-            IncomingCallView(viewModel: viewModel, callInfo: callInfo)
+            IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
+                //TODO: wait before dismissing the screen
+                viewModel.joinCall(callId: callId)
+                incomingCallInfo = nil
+            }, onCallRejected: { callId in
+                incomingCallInfo = nil
+            })
         }
     }
     

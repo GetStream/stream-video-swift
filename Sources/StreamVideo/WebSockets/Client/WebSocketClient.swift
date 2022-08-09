@@ -178,6 +178,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         var user = Stream_Video_CreateUserRequest()
         user.id = userInfo.id
         user.name = userInfo.name ?? userInfo.id
+        user.imageURL = userInfo.imageURL?.absoluteString ?? ""
         payload.user = user
         
         engine?.send(message: payload)
