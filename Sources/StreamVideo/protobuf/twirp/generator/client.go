@@ -123,13 +123,15 @@ class {{.ClassName}} {
 	private let httpClient: HTTPClient
 	var hostname: String
 	var token: String
+	var apiKey: String
 
 	let pathPrefix: String = "/{{.Package}}.{{.Name}}/"
 
-	init(httpClient: HTTPClient, hostname: String, token: String) {
+	init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
         self.httpClient = httpClient
 		self.hostname = hostname
 		self.token = token
+        self.apiKey = apiKey
 	}
     {{range .Methods}}
 	func {{.Name}}({{.InputArg}}: {{.InputType}}) async throws -> {{.OutputType}} {
@@ -150,13 +152,13 @@ class {{.ClassName}} {
     }
     
     private func makeRequest(for path: String) throws -> URLRequest {
-    	let url = hostname + pathPrefix + path
+    	let url = hostname + pathPrefix + path + "?api_key=\(apiKey)"
         guard let url = URL(string: url) else {
             throw NSError(domain: "stream", code: 123)
         }
         var request = URLRequest(url: url)
         request.setValue("application/protobuf", forHTTPHeaderField: "Content-Type")
-        request.setValue(token, forHTTPHeaderField: "authorization")
+        request.setValue("Bearer \(token)", forHTTPHeaderField: "authorization")
         request.httpMethod = "POST"
         return request
     }        

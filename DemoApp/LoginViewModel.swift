@@ -36,7 +36,7 @@ var mockUsers = [
             imageURL: nil,
             extraData: [:]
         ),
-        token: try! Token(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWxpY2UifQ.WZkPaUZb84fLkQoEEFw078Xd1RzwR42XjvBISgM2BAk")
+        token: try! Token(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYWxpY2UifQ.p0_t4y5AU8T5Ib6qEvcKG6r2wduwt0n0SW6cD867SY8")
     ),
     UserCredentials(
         userInfo: UserInfo(
@@ -45,7 +45,7 @@ var mockUsers = [
             imageURL: nil,
             extraData: [:]
         ),
-        token: try! Token(rawValue:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYm9iIn0.6fqa74FESB2DMUcsIiArBDJR2ckkdSvWiSb7qRLVU6U")
+        token: try! Token(rawValue:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYm9iIn0.YZtLYNIPbxjvpzvWX4Vz3xXerTSbjcl4F3kFkC5sY3s")
     ),
     UserCredentials(
         userInfo: UserInfo(
@@ -54,6 +54,6 @@ var mockUsers = [
             imageURL: nil,
             extraData: [:]
         ),
-        token: try! Token(rawValue:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHJ1ZHkifQ.yhwq7Dv7znpFiIZrAb9bOYiEXM_PHtgqoq5pgFeOL78")
+        token: try! Token(rawValue:"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHJ1ZHkifQ.dcoph9LxfiGBkTCJjIyf7ENtGQInSsB-rt8-98Ll2UY")
     )
 ]

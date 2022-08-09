@@ -2,10 +2,10 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import Combine
-import StreamVideo
 import LiveKit
+import StreamVideo
+import SwiftUI
 
 struct StreamVideoView: View {
     
@@ -31,16 +31,8 @@ struct StreamVideoView: View {
         )
         .onReceive(timer) { _ in
             if let trackStats = trackStats {
-                let stats: [String: Any] = [
-                    StatsConstants.bytesSent: trackStats.bytesSent,
-                    StatsConstants.bytesReceived: trackStats.bytesReceived,
-                    StatsConstants.codecName: trackStats.codecName ?? "",
-                    StatsConstants.bpsSent: trackStats.bpsSent,
-                    StatsConstants.bpsReceived: trackStats.bpsReceived
-                ]
-                streamVideo.reportCallStats(stats: stats)
+                log.debug("Reported call stats \(trackStats)")
             }
-
         }
     }
 }

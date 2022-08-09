@@ -26,7 +26,7 @@ struct StreamVideoSwiftUIApp: App {
             } else {
                 LoginView() { user in
                     let streamVideo = StreamVideo(
-                        apiKey: "1234",
+                        apiKey: "key1",
                         user: user.userInfo,
                         token: user.token,
                         videoConfig: VideoConfig(),

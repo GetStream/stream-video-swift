@@ -65,6 +65,7 @@ class WebSocketClient {
     
     private var token: String
     private var userInfo: UserInfo
+    private let apiKey: String
     
     internal var callInfo = [String: String]() {
         didSet {
@@ -78,6 +79,7 @@ class WebSocketClient {
         eventNotificationCenter: EventNotificationCenter,
         environment: Environment = .init(),
         connectURL: URL,
+        apiKey: String,
         userInfo: UserInfo,
         token: String
     ) {
@@ -88,6 +90,7 @@ class WebSocketClient {
         self.eventNotificationCenter = eventNotificationCenter
         self.userInfo = userInfo
         self.token = token
+        self.apiKey = apiKey
     }
     
     /// Connects the web connect.
@@ -129,7 +132,6 @@ class WebSocketClient {
     func set(callInfo: [String: String]) {
         self.callInfo = callInfo
     }
-    
 }
 
 protocol ConnectionStateDelegate: AnyObject {
@@ -152,7 +154,7 @@ extension WebSocketClient {
         var createPingController: CreatePingController = WebSocketPingController.init
         
         var createEngine: CreateEngine = {
-            return URLSessionWebSocketEngine(request: $0, sessionConfiguration: $1, callbackQueue: $2)
+            URLSessionWebSocketEngine(request: $0, sessionConfiguration: $1, callbackQueue: $2)
         }
         
         var eventBatcherBuilder: (
@@ -171,6 +173,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         
         var payload = Stream_Video_AuthPayload()
         payload.token = token
+        payload.apiKey = apiKey
         
         var user = Stream_Video_CreateUserRequest()
         user.id = userInfo.id

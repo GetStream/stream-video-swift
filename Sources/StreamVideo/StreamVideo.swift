@@ -6,7 +6,7 @@ import Foundation
 import SwiftProtobuf
 
 public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
-public typealias TokenUpdater = (Token) -> ()
+public typealias TokenUpdater = (Token) -> Void
 
 public class StreamVideo {
     
@@ -17,6 +17,7 @@ public class StreamVideo {
             callCoordinatorService.update(userToken: token.rawValue)
         }
     }
+
     private let tokenProvider: TokenProvider
     private let videoConfig: VideoConfig
     
@@ -71,21 +72,22 @@ public class StreamVideo {
         tokenProvider: @escaping TokenProvider
     ) {
         self.apiKey = APIKey(apiKey)
-        self.userInfo = user
+        userInfo = user
         self.token = token
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
-        self.httpClient = URLSessionClient(
+        httpClient = URLSessionClient(
             urlSession: Self.makeURLSession(),
             tokenProvider: tokenProvider
         )
-        self.callCoordinatorService = Stream_Video_CallCoordinatorService(
+        callCoordinatorService = Stream_Video_CallCoordinatorService(
             httpClient: httpClient,
+            apiKey: apiKey,
             hostname: hostname,
             token: token.rawValue
         )
-        self.latencyService = LatencyService(httpClient: httpClient)
-        self.httpClient.setTokenUpdater { [weak self] token in
+        latencyService = LatencyService(httpClient: httpClient)
+        httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
@@ -154,11 +156,10 @@ public class StreamVideo {
         return room
     }
 
-    
     public func leaveCall() {
         webSocketClient?.set(callInfo: [:])
         if videoConfig.persitingSocketConnection {
-           return
+            return
         }
         webSocketClient?.disconnect {
             log.debug("Web socket connection closed")
@@ -174,26 +175,6 @@ public class StreamVideo {
         return incomingCalls
     }
     
-    public func reportCallStats(stats: [String: Any]) {
-        Task {
-            var statsRequest = Stream_Video_StoreCallStatsRequest()
-            statsRequest.callID = currentCallInfo[WebSocketConstants.callId] ?? ""
-            statsRequest.callType = currentCallInfo[WebSocketConstants.callType] ?? ""
-            var statsData = SwiftProtobuf.Google_Protobuf_Struct()
-            let fields: [String: Google_Protobuf_Value] = [
-                StatsConstants.bytesSent: .init(integerLiteral: stats[StatsConstants.bytesSent] as? Int64 ?? 0),
-                StatsConstants.bytesReceived: .init(integerLiteral: stats[StatsConstants.bytesReceived] as? Int64 ?? 0),
-                StatsConstants.codecName: .init(stringValue: stats[StatsConstants.codecName] as? String ?? ""),
-                StatsConstants.bpsSent: .init(integerLiteral: stats[StatsConstants.bpsSent] as? Int64 ?? 0),
-                StatsConstants.bpsReceived: .init(integerLiteral: stats[StatsConstants.bpsReceived] as? Int64 ?? 0)
-            ]
-            statsData.fields = fields
-            log.debug("sending stats data")
-            _ = try? await callCoordinatorService.storeCallStats(storeCallStatsRequest: statsRequest)
-        }
-
-    }
-    
     func sendEvent(type: Stream_Video_UserEventType) {
         Task {
             var eventRequest = Stream_Video_SendEventRequest()
@@ -201,7 +182,7 @@ public class StreamVideo {
             eventRequest.callType = currentCallInfo[WebSocketConstants.callType] ?? ""
             eventRequest.userID = userInfo.id
             eventRequest.eventType = type
-            _  = try? await callCoordinatorService.sendEvent(sendEventRequest: eventRequest)
+            _ = try? await callCoordinatorService.sendEvent(sendEventRequest: eventRequest)
         }
     }
     
@@ -228,7 +209,7 @@ public class StreamVideo {
     private func measureLatencies(
         for edges: [Stream_Video_Edge]
     ) async -> [String: Stream_Video_Latency] {
-        return await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
+        await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
             var result: [String: Stream_Video_Latency] = [:]
             for edge in edges {
                 group.addTask {
@@ -299,6 +280,7 @@ public class StreamVideo {
             eventDecoder: EventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
             connectURL: url,
+            apiKey: self.apiKey.apiKeyString,
             userInfo: userInfo,
             token: token.rawValue
         )
@@ -345,7 +327,6 @@ public class StreamVideo {
             #endif
         }
     }
-    
 }
 
 /// Returns the current value for the `StreamVideo` instance.
