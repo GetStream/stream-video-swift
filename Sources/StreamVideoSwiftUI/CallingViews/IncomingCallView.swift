@@ -34,20 +34,19 @@ public struct IncomingCallView: View {
             Spacer()
             
             if viewModel.callParticipants.count > 1 {
-                GroupIncomingCallView(
-                    participants: viewModel.callParticipants,
-                    incomingCall: viewModel.callInfo
+                CallingGroupView(
+                    participants: viewModel.callParticipants
                 )
             } else {
-                DirectIncomingCallView(
+                CallingParticipantView(
                     participant: viewModel.callParticipants.first,
-                    incomingCall: viewModel.callInfo
+                    caller: viewModel.callInfo.callerId
                 )
             }
             
-            IncomingCallParticipantsView(
+            CallingParticipantsView(
                 participants: viewModel.callParticipants,
-                callInfo: viewModel.callInfo
+                caller: viewModel.callInfo.callerId
             )
             .padding()
             

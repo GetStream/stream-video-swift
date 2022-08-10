@@ -5,12 +5,12 @@
 import StreamVideo
 import SwiftUI
 
-struct IncomingCallParticipantsView: View {
+struct CallingParticipantsView: View {
     
     @Injected(\.fonts) var fonts
     
     var participants: [CallParticipant]
-    var callInfo: IncomingCall
+    var caller: String
     
     var body: some View {
         Text(text)
@@ -22,7 +22,7 @@ struct IncomingCallParticipantsView: View {
     
     private var text: String {
         if participants.isEmpty {
-            return callInfo.callerId
+            return caller
         } else if participants.count == 1 {
             return participants[0].name
         } else {

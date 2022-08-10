@@ -6,10 +6,9 @@ import NukeUI
 import StreamVideo
 import SwiftUI
 
-struct GroupIncomingCallView: View {
+struct CallingGroupView: View {
         
     var participants: [CallParticipant]
-    var incomingCall: IncomingCall
     
     var body: some View {
         VStack {
