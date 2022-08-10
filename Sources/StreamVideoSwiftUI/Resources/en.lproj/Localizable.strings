@@ -5,3 +5,5 @@
 "call.participants.title" = "Participants";
 "call.participants.online" = "On the call";
 "call.participants.offline" = "Offline";
+
+"call.incoming.title" = "Incoming call...";

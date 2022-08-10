@@ -14,14 +14,14 @@ extension Image {
     
     func applyCallButtonStyle(
         color: Color,
-        backgroundType: BackgroundType = .circle
+        backgroundType: BackgroundType = .circle,
+        size: CGFloat = 55
     ) -> some View {
-        self
-            .resizable()
+        resizable()
             .foregroundColor(color)
             .aspectRatio(contentMode: .fit)
-            .frame(width: 55)
-            .frame(maxHeight: 55)
+            .frame(width: size)
+            .frame(maxHeight: size)
             .background(background(for: backgroundType))
     }
     
@@ -35,7 +35,6 @@ extension Image {
             Color.white.mask(Rectangle().padding(12))
         }
     }
-    
 }
 
 /// Modifier for adding shadow and corner radius to a view.

@@ -8,6 +8,10 @@ import SwiftUI
 
 public struct IncomingCallView: View {
     
+    @Injected(\.fonts) var fonts
+    @Injected(\.colors) var colors
+    @Injected(\.images) var images
+    
     @StateObject var viewModel: IncomingViewModel
             
     var onCallAccepted: (String) -> Void
@@ -26,7 +30,7 @@ public struct IncomingCallView: View {
     }
     
     public var body: some View {
-        VStack {
+        VStack(spacing: 16) {
             Spacer()
             
             if viewModel.callParticipants.count > 1 {
@@ -41,36 +45,51 @@ public struct IncomingCallView: View {
                 )
             }
             
-            // TODO: include participant names.
-            Text("Incoming video call")
-                .padding()
-                .foregroundColor(.white)
+            IncomingCallParticipantsView(
+                participants: viewModel.callParticipants,
+                callInfo: viewModel.callInfo
+            )
+            .padding()
             
+            Text(L10n.Call.Incoming.title)
+                .font(fonts.title2)
+                .fontWeight(.semibold)
+                .foregroundColor(colors.lightGray)
+
             Spacer()
                         
             HStack {
+                Spacing()
+                
                 Button {
                     onCallRejected(viewModel.callInfo.id)
                 } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 60)
-                        .foregroundColor(.red)
+                    images.hangup
+                        .applyCallButtonStyle(
+                            color: Color.red,
+                            backgroundType: .circle,
+                            size: 80
+                        )
                 }
                 .padding(.all, 8)
+                
+                Spacing(size: 3)
 
                 Button {
                     onCallAccepted(viewModel.callInfo.id)
                 } label: {
-                    Image(systemName: "phone.circle.fill")
-                        .resizable()
-                        .aspectRatio(contentMode: .fit)
-                        .frame(width: 60)
-                        .foregroundColor(.green)
+                    images.acceptCall
+                        .applyCallButtonStyle(
+                            color: Color.green,
+                            backgroundType: .circle,
+                            size: 80
+                        )
                 }
                 .padding(.all, 8)
+                
+                Spacing()
             }
+            .padding()
         }
         .background(
             Image("incomingCallBackground")

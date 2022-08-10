@@ -48,6 +48,8 @@
 		8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */; };
 		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
+		8458872328A3A9E2002A81BF /* IncomingCallParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872228A3A9E2002A81BF /* IncomingCallParticipantsView.swift */; };
+		8458872728A3F34D002A81BF /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872628A3F34D002A81BF /* HelperViews.swift */; };
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		84A7E17428814D7400526C98 /* LatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17328814D7400526C98 /* LatencyService.swift */; };
@@ -240,6 +242,8 @@
 		8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrefixLogFormatter.swift; sourceTree = "<group>"; };
 		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
+		8458872228A3A9E2002A81BF /* IncomingCallParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallParticipantsView.swift; sourceTree = "<group>"; };
+		8458872628A3F34D002A81BF /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
 		8498796728A15F0300D06F31 /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		84A7E17328814D7400526C98 /* LatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatencyService.swift; sourceTree = "<group>"; };
@@ -416,6 +420,7 @@
 				842C7EB728A2916700C2AB7F /* IncomingCallViewModel.swift */,
 				842C7EB928A2A85C00C2AB7F /* GroupIncomingCallView.swift */,
 				842C7EBB28A2A86700C2AB7F /* DirectIncomingCallView.swift */,
+				8458872228A3A9E2002A81BF /* IncomingCallParticipantsView.swift */,
 			);
 			path = IncomingCalls;
 			sourceTree = "<group>";
@@ -630,6 +635,7 @@
 				84F3B0E3289174F60088751D /* ContainerHelpers.swift */,
 				8434C52C289AA41D0001490A /* UIImageExtensions.swift */,
 				8434C52E289AA77B0001490A /* BundleExtensions.swift */,
+				8458872628A3F34D002A81BF /* HelperViews.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1164,7 +1170,9 @@
 				8434C527289AA2F00001490A /* Images.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
+				8458872328A3A9E2002A81BF /* IncomingCallParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* GroupIncomingCallView.swift in Sources */,
+				8458872728A3F34D002A81BF /* HelperViews.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* DirectIncomingCallView.swift in Sources */,
 				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
 			);

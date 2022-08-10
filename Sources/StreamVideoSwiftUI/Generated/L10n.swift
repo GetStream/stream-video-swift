@@ -8,6 +8,10 @@ import Foundation
 internal enum L10n {
 
   internal enum Call {
+    internal enum Incoming {
+      /// Incoming call...
+      internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }
+    }
     internal enum Participants {
       /// Plural format key: "%#@participants@"
       internal static func count(_ p1: Int) -> String {

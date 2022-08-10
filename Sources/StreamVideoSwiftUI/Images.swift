@@ -4,8 +4,8 @@
 
 import Foundation
 import StreamVideo
-import UIKit
 import SwiftUI
+import UIKit
 
 /// Provides access to the images used in the SDK.
 public class Images {
@@ -17,5 +17,6 @@ public class Images {
     public var micTurnOn = Image(systemName: "mic.circle.fill")
     public var micTurnOff = Image(systemName: "mic.slash.circle.fill")
     public var toggleCamera = Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
-    public var hangup = Image(systemName: "phone.circle.fill")
+    public var hangup = Image(systemName: "phone.down.circle.fill")
+    public var acceptCall = Image(systemName: "phone.circle.fill")
 }

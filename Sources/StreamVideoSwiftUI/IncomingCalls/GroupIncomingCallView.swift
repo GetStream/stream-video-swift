@@ -13,7 +13,7 @@ struct GroupIncomingCallView: View {
     
     var body: some View {
         VStack {
-            HStack {
+            HStack(spacing: 16) {
                 Spacer()
                 if participants.count > 3 {
                     IncomingCallParticipantView(participant: participants[0])
@@ -45,6 +45,7 @@ struct IncomingCallParticipantView: View {
             }
         }
         .frame(width: 80, height: 80)
+        .modifier(ShadowModifier())
     }
 }
 
@@ -64,5 +65,6 @@ struct CircledTitleView: View {
                 .font(fonts.title)
         }
         .frame(width: 80, height: 80)
+        .modifier(ShadowModifier())
     }
 }
