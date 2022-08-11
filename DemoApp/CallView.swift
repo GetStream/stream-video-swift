@@ -16,7 +16,9 @@ struct CallView: View {
         
     var body: some View {
         ZStack {
-            if viewModel.shouldShowRoomView {
+            if viewModel.calling {
+                OutgoingCallView(viewModel: viewModel)
+            } else if viewModel.shouldShowRoomView {
                 RoomView(viewModel: viewModel)
             } else {
                 HomeView(viewModel: viewModel)

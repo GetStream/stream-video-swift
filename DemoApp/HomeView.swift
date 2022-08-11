@@ -62,9 +62,6 @@ struct HomeView: View {
 
             Spacer()
         }
-        .overlay(
-            viewModel.loading ? ProgressView().offset(y: 32) : nil
-        )
         .onAppear() {
             Task {
                 for await incomingCall in streamVideo.incomingCalls() {
@@ -85,7 +82,7 @@ struct HomeView: View {
     }
     
     private var makeCallEnabled: Bool {
-        viewModel.loading || callId.isEmpty || participants.isEmpty
+        callId.isEmpty || participants.isEmpty
     }
     
     var startCallView: some View {

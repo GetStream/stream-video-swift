@@ -7,3 +7,4 @@
 "call.participants.offline" = "Offline";
 
 "call.incoming.title" = "Incoming call...";
+"call.outgoing.title" = "Calling...";

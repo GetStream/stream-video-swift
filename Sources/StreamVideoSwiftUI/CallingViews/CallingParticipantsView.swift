@@ -10,7 +10,7 @@ struct CallingParticipantsView: View {
     @Injected(\.fonts) var fonts
     
     var participants: [CallParticipant]
-    var caller: String
+    var caller: String = ""
     
     var body: some View {
         Text(text)

@@ -8,14 +8,14 @@ import SwiftUI
 struct CallingParticipantView: View {
     
     var participant: CallParticipant?
-    var caller: String
+    var caller: String = ""
     
     var body: some View {
         ZStack {
             if let participant = participant {
                 IncomingCallParticipantView(participant: participant)
             } else {
-                CircledTitleView(title: String(caller.uppercased().first!))
+                CircledTitleView(title: caller.isEmpty ? "" : String(caller.uppercased().first!))
             }
         }
     }

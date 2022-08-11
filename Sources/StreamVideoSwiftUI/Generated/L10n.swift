@@ -12,6 +12,10 @@ internal enum L10n {
       /// Incoming call...
       internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }
     }
+    internal enum Outgoing {
+      /// Calling...
+      internal static var title: String { L10n.tr("Localizable", "call.outgoing.title") }
+    }
     internal enum Participants {
       /// Plural format key: "%#@participants@"
       internal static func count(_ p1: Int) -> String {

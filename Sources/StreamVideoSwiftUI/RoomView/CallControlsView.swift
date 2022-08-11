@@ -2,8 +2,8 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 public struct CallControlsView: View {
     
@@ -13,53 +13,82 @@ public struct CallControlsView: View {
     @Injected(\.colors) var colors
     
     public var body: some View {
-        HStack {
-            Spacer()
-            
-            Button(action: {
-                viewModel.toggleCameraEnabled()
-            },
-            label: {
-                (viewModel.cameraTrackState.isPublished ? images.videoTurnOff : images.videoTurnOn)
-                    .applyCallButtonStyle(color: .black, backgroundType: .none)
-            })
-            .disabled(viewModel.cameraTrackState.isBusy)
-            
-            Spacer()
-            
-            Button(action: {
-                viewModel.toggleMicrophoneEnabled()
-            },
-            label: {
-                (viewModel.microphoneTrackState.isPublished ? images.micTurnOff : images.micTurnOn)
-                    .applyCallButtonStyle(color: .black)
-            })
-            .disabled(viewModel.microphoneTrackState.isBusy)
-            
-            Spacer()
-            
-            Button(action: {
-                viewModel.toggleCameraPosition()
-            },
-            label: {
-                images.toggleCamera
-                    .applyCallButtonStyle(color: .black, backgroundType: .rectangle)
-            })
-            
-            Spacer()
+        CallControlsContainer(
+            callSettings: viewModel.callSettings,
+            onToggleCamera: viewModel.toggleCameraEnabled,
+            onToggleMicrophone: viewModel.toggleMicrophoneEnabled,
+            onToggleCameraPosition: viewModel.toggleCameraPosition,
+            onHangUp: viewModel.leaveCall
+        )
+    }
+}
+
+struct CallControlsContainer: View {
+    
+    @ObservedObject var callSettings: CallSettings
+    
+    @Injected(\.images) var images
+    @Injected(\.colors) var colors
+    
+    var onToggleCamera: @MainActor() -> Void
+    var onToggleMicrophone: @MainActor() -> Void
+    var onToggleCameraPosition: @MainActor() -> Void
+    var onHangUp: @MainActor() -> Void
+    
+    public var body: some View {
+        VStack(spacing: 16) {
+            HStack {
+                Spacer()
+                
+                Button(
+                    action: {
+                        onToggleMicrophone()
+                    },
+                    label: {
+                        CallIconView(
+                            icon: (callSettings.audioOn ? images.micTurnOff : images.micTurnOn)
+                        )
+                    }
+                )
+                                                
+                Spacer()
+                                
+                Button(
+                    action: {
+                        onToggleCameraPosition()
+                    },
+                    label: {
+                        CallIconView(icon: images.toggleCamera)
+                    }
+                )
+
+                Spacer()
+                                
+                Button(
+                    action: {
+                        onToggleCamera()
+                    },
+                    label: {
+                        CallIconView(
+                            icon: (callSettings.videoOn ? images.videoTurnOff : images.videoTurnOn),
+                            iconStyle: .transparent
+                        )
+                    }
+                )
+                
+                Spacer()
+            }
             
             Button {
-                viewModel.leaveCall()
+                onHangUp()
             } label: {
                 images.hangup
-                    .applyCallButtonStyle(color: colors.hangUpIconColor)
+                    .applyCallButtonStyle(
+                        color: colors.hangUpIconColor,
+                        size: 80
+                    )
             }
-            .padding(.all, 8)
-            
-            Spacer()
+            .padding(.all)
         }
-        .background(
-            Color.black.opacity(0.3).edgesIgnoringSafeArea(.all)
-        )
     }
 }

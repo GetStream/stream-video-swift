@@ -2,46 +2,59 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import Combine
 import LiveKit
-import Promises
 import OrderedCollections
+import Promises
+import SwiftUI
 
 @MainActor
-open class CallViewModel: ObservableObject  {
+open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     
     @Published public var room: VideoRoom? {
         didSet {
-            self.connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
-            self.remoteParticipants = roomParticipants
-            self.room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
+            connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
+            remoteParticipants = roomParticipants
+            room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
                 self?.callParticipants = participants
             })
-            .store(in: &cancellables)
+                .store(in: &cancellables)
         }
     }
+
     @Published public var focusParticipant: RoomParticipant?
     @Published public var connectionStatus: VideoConnectionStatus = .disconnected(reason: nil) {
         didSet {
-            self.shouldShowRoomView = connectionStatus == .connected || connectionStatus == .reconnecting
+            shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting) && !remoteParticipants
+                .isEmpty
         }
     }
+
     @Published public var cameraTrackState: StreamTrackPublishState = .notPublished()
     @Published public var microphoneTrackState: StreamTrackPublishState = .notPublished()
 
-    
-    public var shouldShowRoomView: Bool = false
+    public var shouldShowRoomView: Bool = false {
+        didSet {
+            if shouldShowRoomView {
+                calling = false
+            }
+        }
+    }
     
     @Published public var shouldShowError: Bool = false
     public var latestError: Error?
     
-    @Published public var loading = false
+    @Published public var calling = false
                 
-    //TODO: LiveKit
-    @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:]
+    // TODO: LiveKit
+    @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:] {
+        didSet {
+            shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting) && !remoteParticipants
+                .isEmpty
+        }
+    }
     
     @Published public var participantsShown = false
     
@@ -49,42 +62,51 @@ open class CallViewModel: ObservableObject  {
     
     @Published public var participantEvent: ParticipantEvent?
     
+    @Published public var callSettings = CallSettings()
+    
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""
     
     private var cancellables = Set<AnyCancellable>()
     private var currentEventsTask: Task<Void, Never>?
     
+    public var participants: [CallParticipant] {
+        callParticipants
+            .filter { $0.value.id != streamVideo.userInfo.id }
+            .map(\.value)
+            .sorted(by: { $0.name < $1.name })
+    }
+    
     public var onlineParticipants: [CallParticipant] {
         callParticipants
             .filter { $0.value.isOnline }
-            .map { $0.value }
+            .map(\.value)
             .sorted(by: { $0.name < $1.name })
     }
     
     public var offlineParticipants: [CallParticipant] {
         callParticipants
             .filter { !$0.value.isOnline }
-            .map { $0.value }
+            .map(\.value)
             .sorted(by: { $0.name < $1.name })
     }
     
     public init() {
         NotificationCenter.default.addObserver(
-              self,
-              selector: #selector(checkForOngoingCall),
-              name: UIApplication.willEnterForegroundNotification,
-              object: nil
+            self,
+            selector: #selector(checkForOngoingCall),
+            name: UIApplication.willEnterForegroundNotification,
+            object: nil
         )
     }
     
     @objc private func checkForOngoingCall() {
         if room == nil && streamVideo.currentRoom != nil {
-            self.room = streamVideo.currentRoom
+            room = streamVideo.currentRoom
         }
     }
 
-    //TODO: LiveKit
+    // TODO: LiveKit
     public var allParticipants: OrderedDictionary<String, RoomParticipant> {
         var result = remoteParticipants
         if let localParticipant = room?.localParticipant {
@@ -97,7 +119,7 @@ open class CallViewModel: ObservableObject  {
         return result
     }
     
-    //TODO: LiveKit
+    // TODO: LiveKit
     private var roomParticipants: OrderedDictionary<String, RoomParticipant> {
         guard let room = room else {
             return [:]
@@ -125,6 +147,11 @@ open class CallViewModel: ObservableObject  {
                 guard let self = self else { return }
                 defer {
                     DispatchQueue.main.async {
+                        self.callSettings = CallSettings(
+                            audioOn: self.microphoneTrackState.isPublished,
+                            videoOn: self.cameraTrackState.isPublished,
+                            speakerOn: self.callSettings.speakerOn
+                        )
                         let event: Stream_Video_UserEventType = self.cameraTrackState.isPublished ? .videoStarted : .videoStopped
                         self.streamVideo.sendEvent(type: event)
                     }
@@ -161,7 +188,13 @@ open class CallViewModel: ObservableObject  {
                 guard let self = self else { return }
                 defer {
                     DispatchQueue.main.async {
-                        let event: Stream_Video_UserEventType = self.microphoneTrackState.isPublished ? .audioUnmuted : .audioMutedUnspecified
+                        self.callSettings = CallSettings(
+                            audioOn: self.microphoneTrackState.isPublished,
+                            videoOn: self.cameraTrackState.isPublished,
+                            speakerOn: self.callSettings.speakerOn
+                        )
+                        let event: Stream_Video_UserEventType = self.microphoneTrackState
+                            .isPublished ? .audioUnmuted : .audioMutedUnspecified
                         self.streamVideo.sendEvent(type: event)
                     }
                 }
@@ -180,7 +213,7 @@ open class CallViewModel: ObservableObject  {
     }
     
     public func toggleCameraPosition() {
-        guard case .published(let publication) = self.cameraTrackState,
+        guard case let .published(publication) = cameraTrackState,
               let track = publication.track as? LocalVideoTrack,
               let cameraCapturer = track.capturer as? CameraCapturer else {
             return
@@ -190,6 +223,7 @@ open class CallViewModel: ObservableObject  {
     }
 
     public func startCall(callId: String, participantIds: [String]) {
+        calling = true
         enterCall(callId: callId, participantIds: participantIds, isStarted: false)
     }
     
@@ -200,7 +234,6 @@ open class CallViewModel: ObservableObject  {
     private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {
         Task {
             do {
-                loading = true
                 log.debug("Starting call")
                 let callType = CallType(name: "video")
                 let options = VideoOptions()
@@ -223,18 +256,18 @@ open class CallViewModel: ObservableObject  {
                 self.room?.addDelegate(self)
                 listenForParticipantEvents()
                 toggleCameraEnabled()
-                loading = false
                 log.debug("Started call")
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
-                loading = false
+                calling = false
             }
         }
     }
     
     public func leaveCall() {
-        self.streamVideo.leaveCall()
-        self.room?.disconnect()
+        calling = false
+        streamVideo.leaveCall()
+        room?.disconnect()
         currentEventsTask?.cancel()
     }
     
@@ -251,7 +284,6 @@ open class CallViewModel: ObservableObject  {
             }
         }
     }
-    
 }
 
 extension CallViewModel: VideoRoomDelegate {

@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import StreamVideo
 import SwiftUI
 
 enum BackgroundType {
@@ -15,7 +16,7 @@ extension Image {
     func applyCallButtonStyle(
         color: Color,
         backgroundType: BackgroundType = .circle,
-        size: CGFloat = 55
+        size: CGFloat = 64
     ) -> some View {
         resizable()
             .foregroundColor(color)
@@ -23,6 +24,7 @@ extension Image {
             .frame(width: size)
             .frame(maxHeight: size)
             .background(background(for: backgroundType))
+            .modifier(ShadowModifier())
     }
     
     @ViewBuilder
@@ -34,6 +36,15 @@ extension Image {
         } else {
             Color.white.mask(Rectangle().padding(12))
         }
+    }
+}
+
+extension Text {
+    
+    func applyCallingStyle() -> some View {
+        font(InjectedValues[\.fonts].title2)
+            .fontWeight(.semibold)
+            .foregroundColor(InjectedValues[\.colors].lightGray)
     }
 }
 

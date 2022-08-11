@@ -51,9 +51,7 @@ public struct IncomingCallView: View {
             .padding()
             
             Text(L10n.Call.Incoming.title)
-                .font(fonts.title2)
-                .fontWeight(.semibold)
-                .foregroundColor(colors.lightGray)
+                .applyCallingStyle()
 
             Spacer()
                         
