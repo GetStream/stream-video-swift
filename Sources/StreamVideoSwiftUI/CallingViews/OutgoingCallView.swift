@@ -20,36 +20,44 @@ public struct OutgoingCallView: View {
     }
     
     public var body: some View {
-        VStack(spacing: 16) {
-            Spacer()
-            
-            if viewModel.participants.count > 1 {
-                CallingGroupView(
-                    participants: viewModel.participants
-                )
+        ZStack {
+            if viewModel.callSettings.videoOn,
+               let localParticipant = viewModel.room?.localParticipant,
+               let roomParticipant = RoomParticipant(participant: localParticipant) {
+                ParticipantView(viewModel: viewModel, participant: roomParticipant) { _ in }
+                    .edgesIgnoringSafeArea(.all)
             } else {
-                CallingParticipantView(
-                    participant: viewModel.participants.first
-                )
+                Image("incomingCallBackground")
+                    .resizable()
+                    .aspectRatio(contentMode: .fill)
+                    .edgesIgnoringSafeArea(.all)
             }
             
-            CallingParticipantsView(
-                participants: viewModel.participants
-            )
-            .padding()
-            
-            Text(L10n.Call.Outgoing.title)
-                .applyCallingStyle()
+            VStack(spacing: 16) {
+                Spacer()
+                
+                if viewModel.participants.count > 1 {
+                    CallingGroupView(
+                        participants: viewModel.participants
+                    )
+                } else {
+                    CallingParticipantView(
+                        participant: viewModel.participants.first
+                    )
+                }
+                
+                CallingParticipantsView(
+                    participants: viewModel.participants
+                )
+                .padding()
+                
+                Text(L10n.Call.Outgoing.title)
+                    .applyCallingStyle()
 
-            Spacer()
-                   
-            CallControlsView(viewModel: viewModel)
+                Spacer()
+                       
+                CallControlsView(viewModel: viewModel)
+            }
         }
-        .background(
-            Image("incomingCallBackground")
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .edgesIgnoringSafeArea(.all)
-        )
     }
 }

@@ -133,6 +133,15 @@ open class CallViewModel: ObservableObject {
         guard let localParticipant = room?.localParticipant else {
             return
         }
+        
+        // TODO: connect this properly.
+        withAnimation {
+            self.callSettings = CallSettings(
+                audioOn: self.microphoneTrackState.isPublished,
+                videoOn: !self.callSettings.videoOn,
+                speakerOn: self.callSettings.speakerOn
+            )
+        }
 
         guard !cameraTrackState.isBusy else {
             return
@@ -147,11 +156,6 @@ open class CallViewModel: ObservableObject {
                 guard let self = self else { return }
                 defer {
                     DispatchQueue.main.async {
-                        self.callSettings = CallSettings(
-                            audioOn: self.microphoneTrackState.isPublished,
-                            videoOn: self.cameraTrackState.isPublished,
-                            speakerOn: self.callSettings.speakerOn
-                        )
                         let event: Stream_Video_UserEventType = self.cameraTrackState.isPublished ? .videoStarted : .videoStopped
                         self.streamVideo.sendEvent(type: event)
                     }
@@ -255,7 +259,6 @@ open class CallViewModel: ObservableObject {
                 self.room = room
                 self.room?.addDelegate(self)
                 listenForParticipantEvents()
-                toggleCameraEnabled()
                 log.debug("Started call")
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")

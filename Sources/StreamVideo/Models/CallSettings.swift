@@ -11,7 +11,7 @@ public class CallSettings: ObservableObject {
     
     public init(
         audioOn: Bool = true,
-        videoOn: Bool = true,
+        videoOn: Bool = false,
         speakerOn: Bool = true
     ) {
         self.audioOn = audioOn

@@ -2,9 +2,9 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
-import LiveKit
 import AVFoundation
+import LiveKit
+import SwiftUI
 
 public class VideoRoom: ObservableObject {
         
@@ -16,10 +16,10 @@ public class VideoRoom: ObservableObject {
         }
     }
     
-    var onParticipantEvent: ((ParticipantEvent) -> ())?
+    var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     static func create(with room: Room) -> VideoRoom {
-        return VideoRoom(room: room)
+        VideoRoom(room: room)
     }
     
     private init(room: Room) {
@@ -27,11 +27,11 @@ public class VideoRoom: ObservableObject {
     }
     
     func addDelegate(_ delegate: VideoRoomDelegate) {
-        self.room.add(delegate: delegate)
+        room.add(delegate: delegate)
     }
     
     func disconnect() {
-        self.room.disconnect()
+        room.disconnect()
     }
     
     func add(participants: [CallParticipant]) {
@@ -43,7 +43,7 @@ public class VideoRoom: ObservableObject {
     }
     
     func clearParticipants() {
-        self.participants = [:]
+        participants = [:]
     }
     
     func add(participant: CallParticipant) {
@@ -78,23 +78,23 @@ public class VideoRoom: ObservableObject {
         return events
     }
     
-    internal var remoteParticipants: [Sid : RemoteParticipant] {
-        self.room.remoteParticipants
+    public var localParticipant: LocalParticipant? {
+        room.localParticipant
     }
     
-    internal var localParticipant: LocalParticipant? {
-        self.room.localParticipant
+    internal var remoteParticipants: [Sid: RemoteParticipant] {
+        room.remoteParticipants
     }
     
     internal var connectionStatus: VideoConnectionStatus {
-        self.room.connectionState.mapped
+        room.connectionState.mapped
     }
 }
 
 typealias VideoRoomDelegate = RoomDelegate
 
 public struct VideoOptions {
-    //TODO:
+    // TODO:
     public init() {}
 }
 

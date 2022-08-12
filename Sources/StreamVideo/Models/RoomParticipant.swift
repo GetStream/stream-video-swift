@@ -9,23 +9,23 @@ public class RoomParticipant {
     private let participant: Participant
     
     var id: String {
-        self.participant.sid
+        participant.sid
     }
     
     public var name: String {
-        self.participant.name
+        participant.name
     }
     
-    init(participant: Participant) {
+    public init(participant: Participant) {
         self.participant = participant
     }
     
     public var connectionQuality: VideoConnectionQuality {
-        self.participant.connectionQuality
+        participant.connectionQuality
     }
     
     public var isSpeaking: Bool {
-        self.participant.isSpeaking
+        participant.isSpeaking
     }
     
     public var firstCameraPublication: VideoTrackPublication? {
@@ -51,7 +51,6 @@ public class RoomParticipant {
               let track = pub.track else { return nil }
         return track as? VideoTrack
     }
-    
 }
 
 extension RoomParticipant {
