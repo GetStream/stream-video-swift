@@ -27,6 +27,8 @@ internal enum L10n {
       internal static var muteme: String { L10n.tr("Localizable", "call.participants.muteme") }
       /// Participants
       internal static var title: String { L10n.tr("Localizable", "call.participants.title") }
+      /// Unmute me
+      internal static var unmuteme: String { L10n.tr("Localizable", "call.participants.unmuteme") }
     }
   }
 }

@@ -5,6 +5,7 @@
 "call.participants.title" = "Participants";
 "call.participants.invite" = "Invite";
 "call.participants.muteme" = "Mute me";
+"call.participants.unmuteme" = "Unmute me";
 
 "call.incoming.title" = "Incoming call...";
 "call.outgoing.title" = "Calling...";

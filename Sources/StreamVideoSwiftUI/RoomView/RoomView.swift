@@ -70,9 +70,7 @@ public struct RoomView<Factory: ViewFactory>: View {
                         CallParticipantsView(
                             viewModel: viewModel,
                             maxHeight: reader.size.height - 16
-                        ) {
-                            viewModel.participantsShown = false
-                        }
+                        )
                         .padding()
                         
                         Spacer()

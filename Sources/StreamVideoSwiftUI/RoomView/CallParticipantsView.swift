@@ -11,14 +11,22 @@ struct CallParticipantsView: View {
     @ObservedObject var viewModel: CallViewModel
 
     var maxHeight: CGFloat
-    var onCloseTapped: () -> Void
         
     var body: some View {
         CallParticipantsViewContainer(
             onlineParticipants: viewModel.onlineParticipants,
             offlineParticipants: viewModel.offlineParticipants,
+            callSettings: viewModel.callSettings,
             maxHeight: maxHeight,
-            onCloseTapped: onCloseTapped
+            inviteTapped: {
+                // TODO: implement this.
+            },
+            muteTapped: {
+                viewModel.toggleMicrophoneEnabled()
+            },
+            closeTapped: {
+                viewModel.participantsShown = false
+            }
         )
     }
 }
@@ -30,8 +38,11 @@ struct CallParticipantsViewContainer: View {
         
     var onlineParticipants: [CallParticipant]
     var offlineParticipants: [CallParticipant]
+    var callSettings: CallSettings
     var maxHeight: CGFloat
-    var onCloseTapped: () -> Void
+    var inviteTapped: () -> Void
+    var muteTapped: () -> Void
+    var closeTapped: () -> Void
     
     @State private var listHeight: CGFloat = 0
         
@@ -63,12 +74,13 @@ struct CallParticipantsViewContainer: View {
                 }
                 
                 HStack(spacing: 16) {
-                    ParticipantsButton(title: L10n.Call.Participants.invite) {}
+                    ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
                     
                     ParticipantsButton(
-                        title: L10n.Call.Participants.muteme,
-                        primaryStyle: false
-                    ) {}
+                        title: callSettings.audioOn ? L10n.Call.Participants.unmuteme : L10n.Call.Participants.muteme,
+                        primaryStyle: false,
+                        onTapped: muteTapped
+                    )
                 }
                 .padding()
             }
@@ -77,7 +89,7 @@ struct CallParticipantsViewContainer: View {
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     Button {
-                        onCloseTapped()
+                        closeTapped()
                     } label: {
                         images.xmark
                             .foregroundColor(colors.tintColor)
