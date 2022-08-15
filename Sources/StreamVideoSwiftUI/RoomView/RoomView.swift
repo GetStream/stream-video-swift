@@ -7,6 +7,8 @@ import SwiftUI
 
 public struct RoomView<Factory: ViewFactory>: View {
     
+    @Injected(\.images) var images
+    
     @ObservedObject private var viewModel: CallViewModel
     private var viewFactory: Factory
     
@@ -41,23 +43,10 @@ public struct RoomView<Factory: ViewFactory>: View {
                         Button {
                             viewModel.participantsShown.toggle()
                         } label: {
-                            Image(systemName: "person.3.fill")
+                            images.participants
                                 .foregroundColor(.white)
-                                .padding()
-                                .background(Color.black.opacity(0.6))
-                                .clipShape(Circle())
                         }
                         .padding()
-                    }
-                    
-                    if viewModel.participantsShown {
-                        TrailingView {
-                            CallParticipantsView(
-                                viewModel: viewModel,
-                                maxWidth: screenSize.width / 2
-                            )
-                        }
-                        .padding(.horizontal)
                     }
                 }
             }
@@ -73,6 +62,22 @@ public struct RoomView<Factory: ViewFactory>: View {
                 }
                 
                 viewFactory.makeCallControlsView(viewModel: viewModel)
+            }
+            
+            if viewModel.participantsShown {
+                GeometryReader { reader in
+                    VStack {
+                        CallParticipantsView(
+                            viewModel: viewModel,
+                            maxHeight: reader.size.height - 16
+                        ) {
+                            viewModel.participantsShown = false
+                        }
+                        .padding()
+                        
+                        Spacer()
+                    }
+                }
             }
         }
         .frame(

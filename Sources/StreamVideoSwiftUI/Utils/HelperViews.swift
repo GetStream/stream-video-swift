@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import StreamVideo
 import SwiftUI
 
 struct Spacing: View {
@@ -54,4 +55,27 @@ extension CallIconStyle {
         foregroundColor: .white,
         opacity: 0.4
     )
+}
+
+/// View used for the online indicator.
+public struct OnlineIndicatorView: View {
+    @Injected(\.colors) private var colors
+    
+    var indicatorSize: CGFloat
+    
+    public var body: some View {
+        ZStack {
+            Circle()
+                .fill(colors.textInverted)
+                .frame(width: indicatorSize, height: indicatorSize)
+            
+            Circle()
+                .fill(colors.onlineIndicatorColor)
+                .frame(width: innerCircleSize, height: innerCircleSize)
+        }
+    }
+    
+    private var innerCircleSize: CGFloat {
+        2 * indicatorSize / 3
+    }
 }

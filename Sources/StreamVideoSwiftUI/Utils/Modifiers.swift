@@ -55,7 +55,7 @@ struct ShadowViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(Color.black.opacity(0.5))
+            .background(Color.white)
             .cornerRadius(cornerRadius)
             .modifier(ShadowModifier())
             .overlay(

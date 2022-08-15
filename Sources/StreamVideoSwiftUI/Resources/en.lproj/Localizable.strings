@@ -3,8 +3,8 @@
 //
 
 "call.participants.title" = "Participants";
-"call.participants.online" = "On the call";
-"call.participants.offline" = "Offline";
+"call.participants.invite" = "Invite";
+"call.participants.muteme" = "Mute me";
 
 "call.incoming.title" = "Incoming call...";
 "call.outgoing.title" = "Calling...";

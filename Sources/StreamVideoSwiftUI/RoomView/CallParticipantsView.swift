@@ -2,73 +2,180 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import NukeUI
 import StreamVideo
 import SwiftUI
 
 struct CallParticipantsView: View {
     
     @ObservedObject var viewModel: CallViewModel
-    
-    @State private var contentSize: CGSize = .zero
-    
-    var maxWidth: CGFloat?
-    
+
+    var maxHeight: CGFloat
+    var onCloseTapped: () -> Void
+        
     var body: some View {
-        ScrollView {
-            LazyVStack(spacing: 16) {
-                CallParticipantsSection(
-                    participants: viewModel.onlineParticipants,
-                    sectionTitle: L10n.Call.Participants.online
-                )
-                
-                CallParticipantsSection(
-                    participants: viewModel.offlineParticipants,
-                    sectionTitle: L10n.Call.Participants.offline
-                )
-            }
-            .padding()
-            .overlay(
-                GeometryReader { geo in
-                    Color.clear.onAppear {
-                        contentSize = geo.size
-                    }
-                }
-            )
-        }
-        .modifier(ShadowViewModifier())
-        .frame(maxWidth: maxWidth, maxHeight: contentSize.height)
+        CallParticipantsViewContainer(
+            onlineParticipants: viewModel.onlineParticipants,
+            offlineParticipants: viewModel.offlineParticipants,
+            maxHeight: maxHeight,
+            onCloseTapped: onCloseTapped
+        )
     }
 }
 
-struct CallParticipantsSection: View {
+struct CallParticipantsViewContainer: View {
     
-    var participants: [CallParticipant]
-    var sectionTitle: String
+    @Injected(\.colors) var colors
+    @Injected(\.images) var images
+        
+    var onlineParticipants: [CallParticipant]
+    var offlineParticipants: [CallParticipant]
+    var maxHeight: CGFloat
+    var onCloseTapped: () -> Void
+    
+    @State private var listHeight: CGFloat = 0
+        
+    var body: some View {
+        NavigationView {
+            VStack {
+                ScrollView {
+                    LazyVStack {
+                        ForEach(onlineParticipants) { participant in
+                            CallParticipantView(participant: participant)
+                        }
+                        
+                        ForEach(offlineParticipants) { participant in
+                            CallParticipantView(participant: participant)
+                        }
+                    }
+                    .padding()
+                    .overlay(
+                        GeometryReader { geo in
+                            Color.clear.preference(key: HeightPreferenceKey.self, value: geo.size.height)
+                        }
+                    )
+                    .onPreferenceChange(HeightPreferenceKey.self) { value in
+                        if let value = value {
+                            listHeight = value
+                        }
+                    }
+                    .frame(maxWidth: .infinity, maxHeight: listHeight)
+                }
+                
+                HStack(spacing: 16) {
+                    ParticipantsButton(title: L10n.Call.Participants.invite) {}
+                    
+                    ParticipantsButton(
+                        title: L10n.Call.Participants.muteme,
+                        primaryStyle: false
+                    ) {}
+                }
+                .padding()
+            }
+            .navigationTitle("\(L10n.Call.Participants.title) (\(onlineParticipants.count + offlineParticipants.count))")
+            .navigationBarTitleDisplayMode(.inline)
+            .toolbar(content: {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        onCloseTapped()
+                    } label: {
+                        images.xmark
+                            .foregroundColor(colors.tintColor)
+                    }
+                }
+            })
+        }
+        .frame(height: popupHeight)
+        .modifier(ShadowViewModifier())
+    }
+    
+    private var popupHeight: CGFloat {
+        // TODO: update this.
+        let height = 44 + listHeight + 80
+        if height > maxHeight {
+            return maxHeight
+        } else {
+            return height
+        }
+    }
+}
+
+struct HeightPreferenceKey: PreferenceKey {
+    static var defaultValue: CGFloat? = nil
+    
+    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
+        value = value ?? nextValue()
+    }
+}
+
+struct ParticipantsButton: View {
+    
+    @Injected(\.colors) private var colors
+    @Injected(\.fonts) private var fonts
+    
+    private let cornerRadius: CGFloat = 24
+    
+    var title: String
+    var primaryStyle: Bool = true
+    var onTapped: () -> Void
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Text(sectionTitle)
-                .font(.title2)
-            ForEach(participants) { participant in
-                CallParticipantView(participant: participant)
-            }
+        Button {
+            onTapped()
+        } label: {
+            Text(title)
+                .font(fonts.headline)
+                .bold()
+                .padding(.vertical, 12)
+                .frame(maxWidth: .infinity)
+                .foregroundColor(
+                    primaryStyle ? colors.textInverted : colors.secondaryButton
+                )
+                .background(primaryStyle ? colors.tintColor : Color.clear)
+                .overlay(
+                    RoundedRectangle(cornerRadius: cornerRadius)
+                        .stroke(primaryStyle ? colors.tintColor : colors.secondaryButton, lineWidth: 1)
+                )
+                .cornerRadius(cornerRadius)
         }
-        .foregroundColor(.white)
     }
 }
 
 struct CallParticipantView: View {
     
+    @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
+    @Injected(\.images) var images
+    
+    private let imageSize: CGFloat = 48
+    
     var participant: CallParticipant
     
     var body: some View {
-        HStack {
-            Text(participant.name)
-            Spacer()
-            if participant.isOnline {
-                Image(systemName: participant.hasAudio ? "mic" : "mic.slash")
-                Image(systemName: participant.hasVideo ? "video" : "video.slash")
+        VStack(spacing: 4) {
+            HStack {
+                LazyImage(source: participant.profileImageURL)
+                    .frame(width: imageSize, height: imageSize)
+                    .clipShape(Circle())
+                    .overlay(
+                        participant.isOnline ?
+                            TopRightView {
+                                OnlineIndicatorView(indicatorSize: imageSize * 0.3)
+                            }
+                            .offset(x: 3, y: -1)
+                            : nil
+                    )
+                Text(participant.name)
+                    .font(fonts.bodyBold)
+                Spacer()
+                if participant.isOnline {
+                    (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+                        .foregroundColor(participant.hasAudio ? colors.text : colors.accentRed)
+                    (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
+                        .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
+                }
             }
+            Divider()
         }
     }
 }

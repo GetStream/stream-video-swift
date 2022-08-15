@@ -19,7 +19,6 @@ public class StreamVideo {
     }
 
     private let tokenProvider: TokenProvider
-    private let videoConfig: VideoConfig
     
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991"
@@ -36,6 +35,7 @@ public class StreamVideo {
     private var currentCallInfo = [String: String]()
     
     internal var currentRoom: VideoRoom?
+    internal let videoConfig: VideoConfig
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {

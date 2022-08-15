@@ -19,4 +19,6 @@ public class Images {
     public var toggleCamera = Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
     public var hangup = Image(systemName: "phone.down.circle.fill")
     public var acceptCall = Image(systemName: "phone.circle.fill")
+    public var participants = Image(systemName: "person.2.fill")
+    public var xmark = Image(systemName: "xmark")
 }

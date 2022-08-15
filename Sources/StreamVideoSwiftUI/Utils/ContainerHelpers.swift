@@ -26,7 +26,25 @@ struct TopView<Content: View>: View {
             Spacer()
         }
     }
+}
+
+/// View container that allows injecting another view in its top right corner.
+public struct TopRightView<Content: View>: View {
+    var content: () -> Content
     
+    public init(content: @escaping () -> Content) {
+        self.content = content
+    }
+        
+    public var body: some View {
+        HStack {
+            Spacer()
+            VStack {
+                content()
+                Spacer()
+            }
+        }
+    }
 }
 
 struct BottomView<Content: View>: View {
@@ -39,5 +57,4 @@ struct BottomView<Content: View>: View {
             content()
         }
     }
-    
 }

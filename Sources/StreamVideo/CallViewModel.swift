@@ -27,8 +27,7 @@ open class CallViewModel: ObservableObject {
     @Published public var focusParticipant: RoomParticipant?
     @Published public var connectionStatus: VideoConnectionStatus = .disconnected(reason: nil) {
         didSet {
-            shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting) && !remoteParticipants
-                .isEmpty
+            checkRoomDisplay()
         }
     }
 
@@ -51,8 +50,7 @@ open class CallViewModel: ObservableObject {
     // TODO: LiveKit
     @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:] {
         didSet {
-            shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting) && !remoteParticipants
-                .isEmpty
+            checkRoomDisplay()
         }
     }
     
@@ -286,6 +284,11 @@ open class CallViewModel: ObservableObject {
                 self.participantEvent = nil
             }
         }
+    }
+    
+    private func checkRoomDisplay() {
+        shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting)
+            && (!remoteParticipants.isEmpty || streamVideo.videoConfig.joinVideoCallInstantly)
     }
 }
 

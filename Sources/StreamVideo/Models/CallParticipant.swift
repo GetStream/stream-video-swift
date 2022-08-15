@@ -12,22 +12,39 @@ public struct CallParticipant: Identifiable {
     public var isOnline: Bool
     public var hasVideo: Bool
     public var hasAudio: Bool
+    
+    public init(
+        id: String,
+        role: String,
+        name: String,
+        profileImageURL: URL?,
+        isOnline: Bool,
+        hasVideo: Bool,
+        hasAudio: Bool
+    ) {
+        self.id = id
+        self.role = role
+        self.name = name
+        self.profileImageURL = profileImageURL
+        self.isOnline = isOnline
+        self.hasVideo = hasVideo
+        self.hasAudio = hasAudio
+    }
 }
 
 extension Stream_Video_Participant {
     
     func toCallParticipant() -> CallParticipant {
         CallParticipant(
-            id: self.user.id,
-            role: self.role,
-            name: self.user.name.isEmpty ? self.user.id : self.user.name,
-            profileImageURL: URL(string: self.user.imageURL),
-            isOnline: self.online,
-            hasVideo: self.video,
-            hasAudio: self.audio
+            id: user.id,
+            role: role,
+            name: user.name.isEmpty ? user.id : user.name,
+            profileImageURL: URL(string: user.imageURL),
+            isOnline: online,
+            hasVideo: video,
+            hasAudio: audio
         )
     }
-    
 }
 
 extension Stream_Video_JoinCallResponse {
@@ -35,5 +52,4 @@ extension Stream_Video_JoinCallResponse {
     func callParticipants() -> [CallParticipant] {
         callState.participants.map { $0.toCallParticipant() }
     }
-    
 }

@@ -21,10 +21,10 @@ internal enum L10n {
       internal static func count(_ p1: Int) -> String {
         return L10n.tr("Localizable", "call.participants.count", p1)
       }
-      /// Offline
-      internal static var offline: String { L10n.tr("Localizable", "call.participants.offline") }
-      /// On the call
-      internal static var online: String { L10n.tr("Localizable", "call.participants.online") }
+      /// Invite
+      internal static var invite: String { L10n.tr("Localizable", "call.participants.invite") }
+      /// Mute me
+      internal static var muteme: String { L10n.tr("Localizable", "call.participants.muteme") }
       /// Participants
       internal static var title: String { L10n.tr("Localizable", "call.participants.title") }
     }

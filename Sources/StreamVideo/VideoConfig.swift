@@ -6,8 +6,13 @@ import Foundation
 
 public struct VideoConfig {
     var persitingSocketConnection: Bool
+    var joinVideoCallInstantly: Bool
     
-    public init(persitingSocketConnection: Bool = true) {
+    public init(
+        persitingSocketConnection: Bool = true,
+        joinVideoCallInstantly: Bool = false
+    ) {
         self.persitingSocketConnection = persitingSocketConnection
+        self.joinVideoCallInstantly = joinVideoCallInstantly
     }
 }
