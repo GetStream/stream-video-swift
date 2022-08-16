@@ -56,6 +56,8 @@ open class CallViewModel: ObservableObject {
     
     @Published public var participantsShown = false
     
+    @Published public var inviteParticipantsShown = false
+    
     @Published public var callParticipants = [String: CallParticipant]()
     
     @Published public var participantEvent: ParticipantEvent?

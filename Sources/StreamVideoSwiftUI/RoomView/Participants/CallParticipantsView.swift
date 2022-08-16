@@ -18,8 +18,9 @@ struct CallParticipantsView: View {
             offlineParticipants: viewModel.offlineParticipants,
             callSettings: viewModel.callSettings,
             maxHeight: maxHeight,
+            inviteParticipantsShown: $viewModel.inviteParticipantsShown,
             inviteTapped: {
-                // TODO: implement this.
+                viewModel.inviteParticipantsShown = true
             },
             muteTapped: {
                 viewModel.toggleMicrophoneEnabled()
@@ -40,6 +41,7 @@ struct CallParticipantsViewContainer: View {
     var offlineParticipants: [CallParticipant]
     var callSettings: CallSettings
     var maxHeight: CGFloat
+    @Binding var inviteParticipantsShown: Bool
     var inviteTapped: () -> Void
     var muteTapped: () -> Void
     var closeTapped: () -> Void
@@ -83,6 +85,15 @@ struct CallParticipantsViewContainer: View {
                     )
                 }
                 .padding()
+                
+                NavigationLink(isActive: $inviteParticipantsShown) {
+                    InviteParticipantsView(
+                        inviteParticipantsShown: $inviteParticipantsShown,
+                        currentParticipants: (onlineParticipants + offlineParticipants)
+                    )
+                } label: {
+                    EmptyView()
+                }
             }
             .navigationTitle("\(L10n.Call.Participants.title) (\(onlineParticipants.count + offlineParticipants.count))")
             .navigationBarTitleDisplayMode(.inline)
@@ -97,7 +108,7 @@ struct CallParticipantsViewContainer: View {
                 }
             })
         }
-        .frame(height: popupHeight)
+        .frame(height: inviteParticipantsShown ? maxHeight : popupHeight)
         .modifier(ShadowViewModifier())
     }
     

@@ -6,6 +6,10 @@
 "call.participants.invite" = "Invite";
 "call.participants.muteme" = "Mute me";
 "call.participants.unmuteme" = "Unmute me";
+"call.participants.add" = "Add participants";
+"call.participants.search" = "Search...";
+"call.participants.cancel-search" = "Cancel";
+"call.participants.on-platform" = "On the platform";
 
 "call.incoming.title" = "Incoming call...";
 "call.outgoing.title" = "Calling...";

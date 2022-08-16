@@ -19,6 +19,9 @@ public struct Colors {
     public var textInverted = Color(.streamWhite)
     public var onlineIndicatorColor = Color(.streamAccentGreen)
     public var whiteSmoke = Color(.streamWhiteSmoke)
+    public var background: UIColor = .streamWhiteSnow
+    public var background1: UIColor = .streamWhiteSmoke
+    public var textLowEmphasis: UIColor = .streamGrayDisabledText
 }
 
 // Those colors are default defined stream constants, which are fallback values if you don't implement your color theme.

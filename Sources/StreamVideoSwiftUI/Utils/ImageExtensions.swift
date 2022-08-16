@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import SwiftUI
 import UIKit
 
 extension UIImage {
@@ -17,4 +18,12 @@ extension UIImage {
         }
         return circleImage
     }()
+}
+
+extension Image {
+    public func customizable() -> some View {
+        renderingMode(.template)
+            .resizable()
+            .scaledToFit()
+    }
 }

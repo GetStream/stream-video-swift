@@ -31,7 +31,7 @@
 		8434C527289AA2F00001490A /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C526289AA2F00001490A /* Images.swift */; };
 		8434C529289AA2FA0001490A /* Colors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C528289AA2FA0001490A /* Colors.swift */; };
 		8434C52B289AA3150001490A /* Appearance.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52A289AA3150001490A /* Appearance.swift */; };
-		8434C52D289AA41D0001490A /* UIImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52C289AA41D0001490A /* UIImageExtensions.swift */; };
+		8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52C289AA41D0001490A /* ImageExtensions.swift */; };
 		8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C52E289AA77B0001490A /* BundleExtensions.swift */; };
 		8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C530289AA8770001490A /* StreamVideoUI.swift */; };
 		8434C539289BBBBA0001490A /* L10n_template.stencil in Resources */ = {isa = PBXBuildFile; fileRef = 8434C538289BBBBA0001490A /* L10n_template.stencil */; };
@@ -53,6 +53,11 @@
 		8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872928A3F935002A81BF /* OutgoingCallView.swift */; };
 		8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872D28A4EC1F002A81BF /* CallSettings.swift */; };
 		846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8528AA696900147F6E /* ColorExtensions.swift */; };
+		846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */; };
+		846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */; };
+		846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8C28AAEBBC00147F6E /* SearchBar.swift */; };
+		846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */; };
+		846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */; };
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		84A7E17428814D7400526C98 /* LatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17328814D7400526C98 /* LatencyService.swift */; };
@@ -228,7 +233,7 @@
 		8434C526289AA2F00001490A /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
 		8434C528289AA2FA0001490A /* Colors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Colors.swift; sourceTree = "<group>"; };
 		8434C52A289AA3150001490A /* Appearance.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Appearance.swift; sourceTree = "<group>"; };
-		8434C52C289AA41D0001490A /* UIImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIImageExtensions.swift; sourceTree = "<group>"; };
+		8434C52C289AA41D0001490A /* ImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExtensions.swift; sourceTree = "<group>"; };
 		8434C52E289AA77B0001490A /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		8434C530289AA8770001490A /* StreamVideoUI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUI.swift; sourceTree = "<group>"; };
 		8434C538289BBBBA0001490A /* L10n_template.stencil */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = L10n_template.stencil; sourceTree = "<group>"; };
@@ -250,6 +255,11 @@
 		8458872928A3F935002A81BF /* OutgoingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView.swift; sourceTree = "<group>"; };
 		8458872D28A4EC1F002A81BF /* CallSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettings.swift; sourceTree = "<group>"; };
 		846FBE8528AA696900147F6E /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
+		846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsView.swift; sourceTree = "<group>"; };
+		846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsViewModel.swift; sourceTree = "<group>"; };
+		846FBE8C28AAEBBC00147F6E /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
+		846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardReadable.swift; sourceTree = "<group>"; };
+		846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedParticipantView.swift; sourceTree = "<group>"; };
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
 		8498796728A15F0300D06F31 /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		84A7E17328814D7400526C98 /* LatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatencyService.swift; sourceTree = "<group>"; };
@@ -478,11 +488,11 @@
 		8434C523289AA2B60001490A /* RoomView */ = {
 			isa = PBXGroup;
 			children = (
+				846FBE8728AAD81E00147F6E /* Participants */,
 				84ED2412286CA414002A3186 /* RoomView.swift */,
 				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
 				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
-				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
 				84C2997E287865560034B735 /* StreamVideoView.swift */,
 			);
 			path = RoomView;
@@ -575,6 +585,17 @@
 			path = CallingViews;
 			sourceTree = "<group>";
 		};
+		846FBE8728AAD81E00147F6E /* Participants */ = {
+			isa = PBXGroup;
+			children = (
+				84F3B0E128916FF20088751D /* CallParticipantsView.swift */,
+				846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */,
+				846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */,
+				846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */,
+			);
+			path = Participants;
+			sourceTree = "<group>";
+		};
 		84A7E16C287F1FE800526C98 /* Latency */ = {
 			isa = PBXGroup;
 			children = (
@@ -641,10 +662,12 @@
 			children = (
 				84EBAA92288C137E00BE3176 /* Modifiers.swift */,
 				84F3B0E3289174F60088751D /* ContainerHelpers.swift */,
-				8434C52C289AA41D0001490A /* UIImageExtensions.swift */,
+				8434C52C289AA41D0001490A /* ImageExtensions.swift */,
 				8434C52E289AA77B0001490A /* BundleExtensions.swift */,
 				8458872628A3F34D002A81BF /* HelperViews.swift */,
 				846FBE8528AA696900147F6E /* ColorExtensions.swift */,
+				846FBE8C28AAEBBC00147F6E /* SearchBar.swift */,
+				846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1172,20 +1195,25 @@
 				84F7383F287C193300A363F4 /* StreamVideoView.swift in Sources */,
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
 				84F73841287C193300A363F4 /* ParticipantView.swift in Sources */,
-				8434C52D289AA41D0001490A /* UIImageExtensions.swift in Sources */,
+				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
+				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsView.swift in Sources */,
 				8434C52B289AA3150001490A /* Appearance.swift in Sources */,
 				84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */,
 				8434C527289AA2F00001490A /* Images.swift in Sources */,
+				846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
+				846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */,
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CallingGroupView.swift in Sources */,
 				8458872728A3F34D002A81BF /* HelperViews.swift in Sources */,
+				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,
+				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
 				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
