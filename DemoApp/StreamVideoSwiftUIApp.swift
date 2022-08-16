@@ -29,7 +29,7 @@ struct StreamVideoSwiftUIApp: App {
                         apiKey: "key1",
                         user: user.userInfo,
                         token: user.token,
-                        videoConfig: VideoConfig(joinVideoCallInstantly: true),
+                        videoConfig: VideoConfig(joinVideoCallInstantly: false),
                         tokenProvider: { result in
                             result(.success(user.token))
                         }

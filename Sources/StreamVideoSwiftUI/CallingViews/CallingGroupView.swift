@@ -37,6 +37,7 @@ struct IncomingCallParticipantView: View {
         ZStack {
             if let imageURL = participant.profileImageURL {
                 LazyImage(source: imageURL)
+                    .clipShape(Circle())
             } else {
                 let name = participant.name.isEmpty ? "Unknown" : participant.name
                 let title = String(name.uppercased().first!)
