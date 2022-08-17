@@ -114,9 +114,6 @@ struct {{.Name}} {
 {{end -}}
 {{end -}}
 
-
-public typealias ProtoModel = SwiftProtobuf.Message & SwiftProtobuf._ProtoNameProviding
-
 {{range .Services}}
 
 class {{.ClassName}} {

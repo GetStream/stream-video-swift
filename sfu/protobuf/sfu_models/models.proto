@@ -1,0 +1,58 @@
+syntax = "proto3";
+
+package stream.video;
+
+option go_package = "github.com/GetStream/video-sfu/protobuf/sfu_models";
+
+enum PeerType {
+  PUBLISHER = 0;
+  SUBSCRIBER = 1;
+}
+
+enum ConnectionQuality {
+  BAD = 0;
+  POOR = 1;
+  GOOD = 2;
+}
+
+enum VideoQuality {
+  LOW = 0;
+  MID = 1;
+  HIGH = 2;
+}
+
+message StreamQuality {
+  VideoQuality video_quality = 1;
+  string user_id = 2;
+}
+
+message VideoDimension {
+  uint32 width = 1;
+  uint32 height = 2;
+}
+
+message VideoLayer {
+  // for tracks with a single layer, this should be HIGH
+  VideoQuality quality = 1;
+  VideoDimension video_dimension = 2;
+
+  // target bitrate, server will measure actual
+  uint32 bitrate = 4;
+  uint32 ssrc = 5;
+}
+
+message SimulcastCodecInfo {
+  string mime_type = 1;
+  string mid = 2;
+  string cid = 3;
+  repeated VideoLayer layers = 4;
+}
+
+message Codec1 {
+  string mime = 1;
+  string fmtp_line = 2;
+}
+
+message SimulcastCodec {
+
+}
