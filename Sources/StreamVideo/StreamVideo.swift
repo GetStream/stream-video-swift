@@ -198,6 +198,14 @@ public class StreamVideo {
         }
     }
     
+    internal static func makeURLSession() -> URLSession {
+        let config = URLSessionConfiguration.default
+        config.requestCachePolicy = .reloadIgnoringLocalCacheData
+        config.urlCache = nil
+        let urlSession = URLSession(configuration: config)
+        return urlSession
+    }
+    
     private func connectWebSocketClient() {
         if let connectURL = URL(string: wsEndpoint) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
@@ -266,14 +274,6 @@ public class StreamVideo {
         return (url: url, token: token)
     }
     
-    private static func makeURLSession() -> URLSession {
-        let config = URLSessionConfiguration.default
-        config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        config.urlCache = nil
-        let urlSession = URLSession(configuration: config)
-        return urlSession
-    }
-    
     private func updateCallInfo(callId: String, callType: String) {
         currentCallInfo = [
             WebSocketConstants.callId: callId,
@@ -291,11 +291,23 @@ public class StreamVideo {
             sessionConfiguration: config,
             eventDecoder: EventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
-            connectURL: url,
-            apiKey: self.apiKey.apiKeyString,
-            userInfo: userInfo,
-            token: token.rawValue
+            connectURL: url
         )
+        
+        webSocketClient.onConnect = { [weak self] in
+            guard let self = self else { return }
+            var payload = Stream_Video_AuthPayload()
+            payload.token = self.token.rawValue
+            payload.apiKey = apiKey.apiKeyString
+            
+            var user = Stream_Video_CreateUserRequest()
+            user.id = self.userInfo.id
+            user.name = self.userInfo.name ?? self.userInfo.id
+            user.imageURL = self.userInfo.imageURL?.absoluteString ?? ""
+            payload.user = user
+            
+            webSocketClient.engine?.send(message: payload)
+        }
         
         return webSocketClient
     }

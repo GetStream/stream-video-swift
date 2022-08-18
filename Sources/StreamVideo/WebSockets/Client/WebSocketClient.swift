@@ -29,6 +29,8 @@ class WebSocketClient {
     weak var connectionStateDelegate: ConnectionStateDelegate?
     
     var connectURL: URL
+    
+    var requiresAuth: Bool
 
     /// The decoder used to decode incoming events
     private let eventDecoder: AnyEventDecoder
@@ -62,10 +64,8 @@ class WebSocketClient {
         engine.delegate = self
         return engine
     }
-    
-    private var token: String
-    private var userInfo: UserInfo
-    private let apiKey: String
+        
+    var onConnect: (() -> Void)?
     
     internal var callInfo = [String: String]() {
         didSet {
@@ -79,18 +79,14 @@ class WebSocketClient {
         eventNotificationCenter: EventNotificationCenter,
         environment: Environment = .init(),
         connectURL: URL,
-        apiKey: String,
-        userInfo: UserInfo,
-        token: String
+        requiresAuth: Bool = true
     ) {
         self.environment = environment
         self.sessionConfiguration = sessionConfiguration
         self.eventDecoder = eventDecoder
         self.connectURL = connectURL
         self.eventNotificationCenter = eventNotificationCenter
-        self.userInfo = userInfo
-        self.token = token
-        self.apiKey = apiKey
+        self.requiresAuth = requiresAuth
     }
     
     /// Connects the web connect.
@@ -169,19 +165,13 @@ extension WebSocketClient {
 
 extension WebSocketClient: WebSocketEngineDelegate {
     func webSocketDidConnect() {
-        connectionState = .authenticating
-        
-        var payload = Stream_Video_AuthPayload()
-        payload.token = token
-        payload.apiKey = apiKey
-        
-        var user = Stream_Video_CreateUserRequest()
-        user.id = userInfo.id
-        user.name = userInfo.name ?? userInfo.id
-        user.imageURL = userInfo.imageURL?.absoluteString ?? ""
-        payload.user = user
-        
-        engine?.send(message: payload)
+        if requiresAuth {
+            connectionState = .authenticating
+        } else {
+            // TODO: check this
+            connectionState = .connected(healthCheckInfo: Stream_Video_Healthcheck())
+        }
+        onConnect?()
     }
     
     func webSocketDidReceiveMessage(_ data: Data) {
