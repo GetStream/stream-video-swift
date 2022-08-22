@@ -19,7 +19,11 @@ struct CallView: View {
             if viewModel.calling {
                 OutgoingCallView(viewModel: viewModel)
             } else if viewModel.shouldShowRoomView {
-                RoomView(viewModel: viewModel)
+                if viewModel.participants.count > 1 {
+                    RemoteParticipantsView(participants: viewModel.participants)
+                } else {
+                    LocalVideoView()
+                }
             } else {
                 HomeView(viewModel: viewModel)
             }

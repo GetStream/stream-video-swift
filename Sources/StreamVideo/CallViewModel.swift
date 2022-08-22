@@ -7,6 +7,7 @@ import LiveKit
 import OrderedCollections
 import Promises
 import SwiftUI
+import WebRTC
 
 @MainActor
 open class CallViewModel: ObservableObject {
@@ -63,7 +64,7 @@ open class CallViewModel: ObservableObject {
     @Published public var participantEvent: ParticipantEvent?
     
     @Published public var callSettings = CallSettings()
-    
+        
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""
     
@@ -231,6 +232,13 @@ open class CallViewModel: ObservableObject {
     public func startCall(callId: String, participantIds: [String]) {
         calling = true
         enterCall(callId: callId, participantIds: participantIds, isStarted: false)
+        // NOTE: uncomment this to test SFU.
+//        Task {
+//            try await streamVideo.testSFU()
+//            calling = false
+//            //TODO: only temporarly.
+//            shouldShowRoomView = true
+//        }
     }
     
     public func joinCall(callId: String) {

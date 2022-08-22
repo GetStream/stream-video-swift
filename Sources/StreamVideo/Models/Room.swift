@@ -37,6 +37,8 @@ public class VideoRoom: ObservableObject {
     func add(participants: [CallParticipant]) {
         var result = [String: CallParticipant]()
         for participant in participants {
+            let track = self.participants[participant.id]?.track
+            participant.track = track
             result[participant.id] = participant
         }
         self.participants = result
@@ -47,7 +49,13 @@ public class VideoRoom: ObservableObject {
     }
     
     func add(participant: CallParticipant) {
+        let track = participants[participant.id]?.track
+        participant.track = track
         participants[participant.id] = participant
+    }
+    
+    func removeParticipant(with id: String) {
+        participants[id] = nil
     }
     
     func remove(participant: CallParticipant) {
@@ -55,7 +63,7 @@ public class VideoRoom: ObservableObject {
     }
     
     func handleParticipantEvent(_ eventType: CallEventType, for participantId: String) {
-        guard var participant = participants[participantId] else { return }
+        guard let participant = participants[participantId] else { return }
         switch eventType {
         case .videoStarted:
             participant.hasVideo = true

@@ -3,8 +3,9 @@
 //
 
 import Foundation
+import WebRTC
 
-public struct CallParticipant: Identifiable {
+public class CallParticipant: Identifiable {
     public let id: String
     public let role: String
     public let name: String
@@ -12,6 +13,7 @@ public struct CallParticipant: Identifiable {
     public var isOnline: Bool
     public var hasVideo: Bool
     public var hasAudio: Bool
+    public var track: RTCMediaStreamTrack?
     
     public init(
         id: String,

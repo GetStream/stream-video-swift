@@ -4,6 +4,7 @@
 
 import Foundation
 import SwiftProtobuf
+import WebRTC
 
 public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
 public typealias TokenUpdater = (Token) -> Void
@@ -27,6 +28,7 @@ public class StreamVideo {
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient?
+    private let webRTCClient: WebRTCClient
     
     private let callsMiddleware = CallsMiddleware()
     private var participantsMiddleware = ParticipantsMiddleware()
@@ -86,7 +88,69 @@ public class StreamVideo {
             hostname: hostname,
             token: token.rawValue
         )
+        // TODO: temp
+        let paramsSFU = ["user_id": userInfo.id, "call_id": "simple:123"]
+        var paramsString = ""
+        let encoder = JSONEncoder()
+        if let jsonData = try? encoder.encode(paramsSFU) {
+            if let jsonString = String(data: jsonData, encoding: .utf8) {
+                paramsString = Data(jsonString.utf8).base64EncodedString()
+            }
+        }
+        let tokenSFU = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.\(paramsString).SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
+            .replacingOccurrences(of: "=", with: "")
+        webRTCClient = WebRTCClient(
+            apiKey: apiKey,
+            hostname: "http://192.168.0.132:3031/twirp",
+            token: tokenSFU,
+            tokenProvider: tokenProvider
+        )
         latencyService = LatencyService(httpClient: httpClient)
+        
+        // TODO: extract all this logic in a new controller.
+        webRTCClient.onLocalVideoTrackUpdate = { [weak self] localVideoTrack in
+            guard let userId = self?.userInfo.id else { return }
+            if let participant = self?.currentRoom?.participants[userId] {
+                participant.track = localVideoTrack
+                self?.currentRoom?.participants[userId] = participant
+            } else {
+                // TODO: temporarly create the participant
+                let participant = CallParticipant(
+                    id: userId,
+                    role: "user",
+                    name: user.name ?? userId,
+                    profileImageURL: user.imageURL,
+                    isOnline: true,
+                    hasVideo: true,
+                    hasAudio: true
+                )
+                participant.track = localVideoTrack
+                self?.currentRoom?.participants[userId] = participant
+            }
+        }
+        webRTCClient.onRemoteStreamAdded = { [weak self] stream in
+            let trackId = stream?.videoTracks.first?.trackId ?? UUID().uuidString
+            var participant = self?.currentRoom?.participants[trackId]
+            if participant == nil {
+                participant = CallParticipant(
+                    id: trackId,
+                    role: "member",
+                    name: trackId,
+                    profileImageURL: nil,
+                    isOnline: true,
+                    hasVideo: true,
+                    hasAudio: true
+                )
+            }
+            if let participant = participant {
+                self?.currentRoom?.add(participant: participant)
+            }
+        }
+        webRTCClient.onRemoteStreamRemoved = { [weak self] stream in
+            let trackId = stream?.videoTracks.first?.trackId ?? UUID().uuidString
+            self?.currentRoom?.removeParticipant(with: trackId)
+        }
+        
         httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }
@@ -95,6 +159,16 @@ public class StreamVideo {
         if videoConfig.persitingSocketConnection {
             connectWebSocketClient()
         }
+    }
+    
+    // TODO: temp for testing
+    public func testSFU() async throws {
+        try await webRTCClient.connect(shouldPublish: true)
+    }
+    
+    // TODO: extract this
+    public func renderLocalVideo(renderer: RTCVideoRenderer) {
+        webRTCClient.startCapturingLocalVideo(renderer: renderer, cameraPosition: .front)
     }
 
     public func startCall(
