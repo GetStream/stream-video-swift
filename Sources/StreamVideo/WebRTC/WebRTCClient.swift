@@ -26,10 +26,10 @@ class WebRTCClient: NSObject {
     private(set) var subscriber: PeerConnection?
     
     private(set) var signalChannel: DataChannel?
-    private var timeoutTask: Task<Void, Error>?
     
     // TODO: fix this
     private var sessionID = UUID().uuidString
+    private let timeoutInterval: TimeInterval = 8
     
     // Video tracks.
     private var videoCapturer: RTCVideoCapturer?
@@ -91,27 +91,7 @@ class WebRTCClient: NSObject {
         
         signalChannel = try subscriber?.makeDataChannel(label: "signaling")
         signalChannel?.onEventReceived = { [weak self] event in
-            guard let self = self else { return }
-            Task {
-                // TODO: new participant events for leave / join
-                if let event = event as? Stream_Video_SubscriberOffer {
-                    do {
-                        log.debug("Handling subscriber offer")
-                        let offerSdp = event.sdp
-                        try await self.subscriber?.setRemoteDescription(offerSdp, type: .offer)
-                        let answer = try await self.subscriber?.createOffer()
-                        try await self.subscriber?.setLocalDescription(answer)
-                        var sendAnswerRequest = Stream_Video_SendAnswerRequest()
-                        sendAnswerRequest.sessionID = self.sessionID
-                        sendAnswerRequest.peerType = .subscriber
-                        sendAnswerRequest.sdp = answer?.sdp ?? ""
-                        log.debug("Sending answer for offer")
-                        _ = try await self.signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
-                    } catch {
-                        log.error("Error handling offer event \(error.localizedDescription)")
-                    }
-                }
-            }
+            self?.handle(event: event)
         }
         
         try await negotiate(peerConnection: subscriber, shouldJoin: true)
@@ -173,8 +153,6 @@ class WebRTCClient: NSObject {
             publisher?.addTrack(audioTrack, streamIds: [sessionID])
             publisher?.addTransceiver(videoTrack, streamIds: [sessionID])
         }
-        
-        // TODO: transciever
     }
     
     func configureAudioSession(
@@ -257,18 +235,53 @@ class WebRTCClient: NSObject {
     }
     
     private func listenForConnectionOpened() async throws {
+        var connected = false
+        var timeout = false
+        let control = DefaultTimer.schedule(timeInterval: timeoutInterval, queue: .sdk) {
+            timeout = true
+        }
         log.debug("Listening for subscriber data channel opening")
         signalChannel?.onStateChange = { [weak self] state in
             if state == .open {
+                control.cancel()
+                connected = true
                 log.debug("Subscriber data channel opened")
                 self?.signalChannel?.send(data: Data.sample)
-                self?.timeoutTask?.cancel()
             }
         }
-        // TODO: handle this properly
-        try await Task.sleep(nanoseconds: 5_000_000_000)
-        log.error("Received a timeout while waiting for data channel")
-//        throw ClientError.NetworkError()
+        
+        while (!connected && !timeout) {
+            try await Task.sleep(nanoseconds: 100_000)
+        }
+        
+        if timeout {
+            log.debug("Timeout while waiting for data channel opening")
+            throw ClientError.NetworkError()
+        }
+    }
+    
+    private func handle(event: Event) {
+        log.debug("Received an event \(event)")
+        // TODO: new participant events for leave / join
+        if let event = event as? Stream_Video_SubscriberOffer {
+            Task {
+                do {
+                    log.debug("Handling subscriber offer")
+                    let offerSdp = event.sdp
+                    try await self.subscriber?.setRemoteDescription(offerSdp, type: .offer)
+                    let answer = try await self.subscriber?.createOffer()
+                    try await self.subscriber?.setLocalDescription(answer)
+                    var sendAnswerRequest = Stream_Video_SendAnswerRequest()
+                    sendAnswerRequest.sessionID = self.sessionID
+                    sendAnswerRequest.peerType = .subscriber
+                    sendAnswerRequest.sdp = answer?.sdp ?? ""
+                    log.debug("Sending answer for offer")
+                    _ = try await self.signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
+                } catch {
+                    log.error("Error handling offer event \(error.localizedDescription)")
+                }
+            }
+        }
     }
     
     private func cleanUp() async {}

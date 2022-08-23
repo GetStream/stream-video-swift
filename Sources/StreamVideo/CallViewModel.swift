@@ -231,14 +231,14 @@ open class CallViewModel: ObservableObject {
 
     public func startCall(callId: String, participantIds: [String]) {
         calling = true
-        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
+//        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
         // NOTE: uncomment this to test SFU.
-//        Task {
-//            try await streamVideo.testSFU()
-//            calling = false
-//            //TODO: only temporarly.
-//            shouldShowRoomView = true
-//        }
+        Task {
+            try await streamVideo.testSFU()
+            calling = false
+            // TODO: only temporarly.
+            shouldShowRoomView = true
+        }
     }
     
     public func joinCall(callId: String) {
