@@ -358,7 +358,7 @@ class WebRTCClient: NSObject {
         guard let transceiver = publisher?.transceiver else { return }
         let enabledRids = event.videoSender.first?.layers
             .filter { $0.active }
-            .compactMap(\.name) ?? []
+            .map(\.name) ?? []
         log.debug("Enabled rids = \(enabledRids)")
         let params = transceiver.sender.parameters
         var updatedEncodings = [RTCRtpEncodingParameters]()
