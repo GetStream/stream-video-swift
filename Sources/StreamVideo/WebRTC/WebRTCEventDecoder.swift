@@ -7,7 +7,7 @@ import Foundation
 struct WebRTCEventDecoder: AnyEventDecoder {
     
     func decode(from data: Data) throws -> Event {
-        let response = try Stream_Video_SfuEvent(serializedData: data)
+        let response = try Stream_Video_Sfu_SfuEvent(serializedData: data)
         guard let payload = response.eventPayload else {
             throw ClientError.UnsupportedEventType()
         }
@@ -29,6 +29,12 @@ struct WebRTCEventDecoder: AnyEventDecoder {
         case let .muteStateChanged(value):
             return value
         case let .videoQualityChanged(value):
+            return value
+        case let .participantJoined(value):
+            return value
+        case let .participantLeft(value):
+            return value
+        case let .dominantSpeakerChanged(value):
             return value
         }
     }

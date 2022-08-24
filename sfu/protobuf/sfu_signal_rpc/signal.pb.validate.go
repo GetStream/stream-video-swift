@@ -751,22 +751,22 @@ var _ interface {
 	ErrorName() string
 } = VideoMuteChangedValidationError{}
 
-// Validate checks the field values on UpdateSubscriberQualityRequest with the
+// Validate checks the field values on UpdateSubscriptionsRequest with the
 // rules defined in the proto definition for this message. If any rules are
 // violated, the first error encountered is returned, or nil if there are no violations.
-func (m *UpdateSubscriberQualityRequest) Validate() error {
+func (m *UpdateSubscriptionsRequest) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UpdateSubscriberQualityRequest with
-// the rules defined in the proto definition for this message. If any rules
-// are violated, the result is a list of violation errors wrapped in
-// UpdateSubscriberQualityRequestMultiError, or nil if none found.
-func (m *UpdateSubscriberQualityRequest) ValidateAll() error {
+// ValidateAll checks the field values on UpdateSubscriptionsRequest with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateSubscriptionsRequestMultiError, or nil if none found.
+func (m *UpdateSubscriptionsRequest) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UpdateSubscriberQualityRequest) validate(all bool) error {
+func (m *UpdateSubscriptionsRequest) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -774,33 +774,33 @@ func (m *UpdateSubscriberQualityRequest) validate(all bool) error {
 	var errors []error
 
 	{
-		sorted_keys := make([]string, len(m.GetDimensionByStreamId()))
+		sorted_keys := make([]string, len(m.GetSubscriptions()))
 		i := 0
-		for key := range m.GetDimensionByStreamId() {
+		for key := range m.GetSubscriptions() {
 			sorted_keys[i] = key
 			i++
 		}
 		sort.Slice(sorted_keys, func(i, j int) bool { return sorted_keys[i] < sorted_keys[j] })
 		for _, key := range sorted_keys {
-			val := m.GetDimensionByStreamId()[key]
+			val := m.GetSubscriptions()[key]
 			_ = val
 
-			// no validation rules for DimensionByStreamId[key]
+			// no validation rules for Subscriptions[key]
 
 			if all {
 				switch v := interface{}(val).(type) {
 				case interface{ ValidateAll() error }:
 					if err := v.ValidateAll(); err != nil {
-						errors = append(errors, UpdateSubscriberQualityRequestValidationError{
-							field:  fmt.Sprintf("DimensionByStreamId[%v]", key),
+						errors = append(errors, UpdateSubscriptionsRequestValidationError{
+							field:  fmt.Sprintf("Subscriptions[%v]", key),
 							reason: "embedded message failed validation",
 							cause:  err,
 						})
 					}
 				case interface{ Validate() error }:
 					if err := v.Validate(); err != nil {
-						errors = append(errors, UpdateSubscriberQualityRequestValidationError{
-							field:  fmt.Sprintf("DimensionByStreamId[%v]", key),
+						errors = append(errors, UpdateSubscriptionsRequestValidationError{
+							field:  fmt.Sprintf("Subscriptions[%v]", key),
 							reason: "embedded message failed validation",
 							cause:  err,
 						})
@@ -808,8 +808,8 @@ func (m *UpdateSubscriberQualityRequest) validate(all bool) error {
 				}
 			} else if v, ok := interface{}(val).(interface{ Validate() error }); ok {
 				if err := v.Validate(); err != nil {
-					return UpdateSubscriberQualityRequestValidationError{
-						field:  fmt.Sprintf("DimensionByStreamId[%v]", key),
+					return UpdateSubscriptionsRequestValidationError{
+						field:  fmt.Sprintf("Subscriptions[%v]", key),
 						reason: "embedded message failed validation",
 						cause:  err,
 					}
@@ -819,24 +819,22 @@ func (m *UpdateSubscriberQualityRequest) validate(all bool) error {
 		}
 	}
 
-	// no validation rules for DefaultDimension
-
 	// no validation rules for SessionId
 
 	if len(errors) > 0 {
-		return UpdateSubscriberQualityRequestMultiError(errors)
+		return UpdateSubscriptionsRequestMultiError(errors)
 	}
 
 	return nil
 }
 
-// UpdateSubscriberQualityRequestMultiError is an error wrapping multiple
-// validation errors returned by UpdateSubscriberQualityRequest.ValidateAll()
-// if the designated constraints aren't met.
-type UpdateSubscriberQualityRequestMultiError []error
+// UpdateSubscriptionsRequestMultiError is an error wrapping multiple
+// validation errors returned by UpdateSubscriptionsRequest.ValidateAll() if
+// the designated constraints aren't met.
+type UpdateSubscriptionsRequestMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UpdateSubscriberQualityRequestMultiError) Error() string {
+func (m UpdateSubscriptionsRequestMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -845,12 +843,11 @@ func (m UpdateSubscriberQualityRequestMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UpdateSubscriberQualityRequestMultiError) AllErrors() []error { return m }
+func (m UpdateSubscriptionsRequestMultiError) AllErrors() []error { return m }
 
-// UpdateSubscriberQualityRequestValidationError is the validation error
-// returned by UpdateSubscriberQualityRequest.Validate if the designated
-// constraints aren't met.
-type UpdateSubscriberQualityRequestValidationError struct {
+// UpdateSubscriptionsRequestValidationError is the validation error returned
+// by UpdateSubscriptionsRequest.Validate if the designated constraints aren't met.
+type UpdateSubscriptionsRequestValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -858,24 +855,24 @@ type UpdateSubscriberQualityRequestValidationError struct {
 }
 
 // Field function returns field value.
-func (e UpdateSubscriberQualityRequestValidationError) Field() string { return e.field }
+func (e UpdateSubscriptionsRequestValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UpdateSubscriberQualityRequestValidationError) Reason() string { return e.reason }
+func (e UpdateSubscriptionsRequestValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UpdateSubscriberQualityRequestValidationError) Cause() error { return e.cause }
+func (e UpdateSubscriptionsRequestValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UpdateSubscriberQualityRequestValidationError) Key() bool { return e.key }
+func (e UpdateSubscriptionsRequestValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UpdateSubscriberQualityRequestValidationError) ErrorName() string {
-	return "UpdateSubscriberQualityRequestValidationError"
+func (e UpdateSubscriptionsRequestValidationError) ErrorName() string {
+	return "UpdateSubscriptionsRequestValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UpdateSubscriberQualityRequestValidationError) Error() string {
+func (e UpdateSubscriptionsRequestValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -887,14 +884,14 @@ func (e UpdateSubscriberQualityRequestValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUpdateSubscriberQualityRequest.%s: %s%s",
+		"invalid %sUpdateSubscriptionsRequest.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UpdateSubscriberQualityRequestValidationError{}
+var _ error = UpdateSubscriptionsRequestValidationError{}
 
 var _ interface {
 	Field() string
@@ -902,7 +899,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UpdateSubscriberQualityRequestValidationError{}
+} = UpdateSubscriptionsRequestValidationError{}
 
 // Validate checks the field values on SendAnswerRequest with the rules defined
 // in the proto definition for this message. If any rules are violated, the
@@ -1336,23 +1333,22 @@ var _ interface {
 	ErrorName() string
 } = IceCandidateResponseValidationError{}
 
-// Validate checks the field values on UpdateSubscriberScreenSizeResponse with
-// the rules defined in the proto definition for this message. If any rules
-// are violated, the first error encountered is returned, or nil if there are
-// no violations.
-func (m *UpdateSubscriberScreenSizeResponse) Validate() error {
+// Validate checks the field values on UpdateSubscriptionsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *UpdateSubscriptionsResponse) Validate() error {
 	return m.validate(false)
 }
 
-// ValidateAll checks the field values on UpdateSubscriberScreenSizeResponse
-// with the rules defined in the proto definition for this message. If any
-// rules are violated, the result is a list of violation errors wrapped in
-// UpdateSubscriberScreenSizeResponseMultiError, or nil if none found.
-func (m *UpdateSubscriberScreenSizeResponse) ValidateAll() error {
+// ValidateAll checks the field values on UpdateSubscriptionsResponse with the
+// rules defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// UpdateSubscriptionsResponseMultiError, or nil if none found.
+func (m *UpdateSubscriptionsResponse) ValidateAll() error {
 	return m.validate(true)
 }
 
-func (m *UpdateSubscriberScreenSizeResponse) validate(all bool) error {
+func (m *UpdateSubscriptionsResponse) validate(all bool) error {
 	if m == nil {
 		return nil
 	}
@@ -1360,20 +1356,19 @@ func (m *UpdateSubscriberScreenSizeResponse) validate(all bool) error {
 	var errors []error
 
 	if len(errors) > 0 {
-		return UpdateSubscriberScreenSizeResponseMultiError(errors)
+		return UpdateSubscriptionsResponseMultiError(errors)
 	}
 
 	return nil
 }
 
-// UpdateSubscriberScreenSizeResponseMultiError is an error wrapping multiple
-// validation errors returned by
-// UpdateSubscriberScreenSizeResponse.ValidateAll() if the designated
-// constraints aren't met.
-type UpdateSubscriberScreenSizeResponseMultiError []error
+// UpdateSubscriptionsResponseMultiError is an error wrapping multiple
+// validation errors returned by UpdateSubscriptionsResponse.ValidateAll() if
+// the designated constraints aren't met.
+type UpdateSubscriptionsResponseMultiError []error
 
 // Error returns a concatenation of all the error messages it wraps.
-func (m UpdateSubscriberScreenSizeResponseMultiError) Error() string {
+func (m UpdateSubscriptionsResponseMultiError) Error() string {
 	var msgs []string
 	for _, err := range m {
 		msgs = append(msgs, err.Error())
@@ -1382,12 +1377,12 @@ func (m UpdateSubscriberScreenSizeResponseMultiError) Error() string {
 }
 
 // AllErrors returns a list of validation violation errors.
-func (m UpdateSubscriberScreenSizeResponseMultiError) AllErrors() []error { return m }
+func (m UpdateSubscriptionsResponseMultiError) AllErrors() []error { return m }
 
-// UpdateSubscriberScreenSizeResponseValidationError is the validation error
-// returned by UpdateSubscriberScreenSizeResponse.Validate if the designated
-// constraints aren't met.
-type UpdateSubscriberScreenSizeResponseValidationError struct {
+// UpdateSubscriptionsResponseValidationError is the validation error returned
+// by UpdateSubscriptionsResponse.Validate if the designated constraints
+// aren't met.
+type UpdateSubscriptionsResponseValidationError struct {
 	field  string
 	reason string
 	cause  error
@@ -1395,24 +1390,24 @@ type UpdateSubscriberScreenSizeResponseValidationError struct {
 }
 
 // Field function returns field value.
-func (e UpdateSubscriberScreenSizeResponseValidationError) Field() string { return e.field }
+func (e UpdateSubscriptionsResponseValidationError) Field() string { return e.field }
 
 // Reason function returns reason value.
-func (e UpdateSubscriberScreenSizeResponseValidationError) Reason() string { return e.reason }
+func (e UpdateSubscriptionsResponseValidationError) Reason() string { return e.reason }
 
 // Cause function returns cause value.
-func (e UpdateSubscriberScreenSizeResponseValidationError) Cause() error { return e.cause }
+func (e UpdateSubscriptionsResponseValidationError) Cause() error { return e.cause }
 
 // Key function returns key value.
-func (e UpdateSubscriberScreenSizeResponseValidationError) Key() bool { return e.key }
+func (e UpdateSubscriptionsResponseValidationError) Key() bool { return e.key }
 
 // ErrorName returns error name.
-func (e UpdateSubscriberScreenSizeResponseValidationError) ErrorName() string {
-	return "UpdateSubscriberScreenSizeResponseValidationError"
+func (e UpdateSubscriptionsResponseValidationError) ErrorName() string {
+	return "UpdateSubscriptionsResponseValidationError"
 }
 
 // Error satisfies the builtin error interface
-func (e UpdateSubscriberScreenSizeResponseValidationError) Error() string {
+func (e UpdateSubscriptionsResponseValidationError) Error() string {
 	cause := ""
 	if e.cause != nil {
 		cause = fmt.Sprintf(" | caused by: %v", e.cause)
@@ -1424,14 +1419,14 @@ func (e UpdateSubscriberScreenSizeResponseValidationError) Error() string {
 	}
 
 	return fmt.Sprintf(
-		"invalid %sUpdateSubscriberScreenSizeResponse.%s: %s%s",
+		"invalid %sUpdateSubscriptionsResponse.%s: %s%s",
 		key,
 		e.field,
 		e.reason,
 		cause)
 }
 
-var _ error = UpdateSubscriberScreenSizeResponseValidationError{}
+var _ error = UpdateSubscriptionsResponseValidationError{}
 
 var _ interface {
 	Field() string
@@ -1439,7 +1434,7 @@ var _ interface {
 	Key() bool
 	Cause() error
 	ErrorName() string
-} = UpdateSubscriberScreenSizeResponseValidationError{}
+} = UpdateSubscriptionsResponseValidationError{}
 
 // Validate checks the field values on SetPublisherRequest with the rules
 // defined in the proto definition for this message. If any rules are
@@ -1779,6 +1774,35 @@ func (m *JoinResponse) validate(all bool) error {
 	var errors []error
 
 	// no validation rules for Sdp
+
+	if all {
+		switch v := interface{}(m.GetCallState()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, JoinResponseValidationError{
+					field:  "CallState",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, JoinResponseValidationError{
+					field:  "CallState",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCallState()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return JoinResponseValidationError{
+				field:  "CallState",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return JoinResponseMultiError(errors)

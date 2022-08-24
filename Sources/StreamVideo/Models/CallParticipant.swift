@@ -49,6 +49,21 @@ extension Stream_Video_Participant {
     }
 }
 
+extension Stream_Video_Sfu_Participant {
+    
+    func toCallParticipant() -> CallParticipant {
+        CallParticipant(
+            id: user.id,
+            role: role,
+            name: user.name.isEmpty ? user.id : user.name,
+            profileImageURL: URL(string: user.imageURL),
+            isOnline: online,
+            hasVideo: video,
+            hasAudio: audio
+        )
+    }
+}
+
 extension Stream_Video_JoinCallResponse {
     
     func callParticipants() -> [CallParticipant] {

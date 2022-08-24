@@ -22,7 +22,7 @@ actor PeerConnectionFactory {
         sessionId: String,
         configuration: RTCConfiguration,
         type: PeerConnectionType,
-        signalService: Stream_Video_SignalServer,
+        signalService: Stream_Video_Sfu_SignalServer,
         constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints
     ) throws -> PeerConnection {
         let pc = try makePeerConnection(

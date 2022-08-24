@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package stream.video;
+package stream.video.sfu;
 
 option go_package = "github.com/GetStream/video-sfu/protobuf/sfu_signal_rpc";
 
@@ -18,8 +18,9 @@ service SignalServer {
 
   rpc SendIceCandidate(IceCandidateRequest) returns (IceCandidateResponse);
 
-  // UpdateSubscriberScreenSize is used to notify the SFU about the video dimension the subscriber wants to receive
-  rpc UpdateSubscriberScreenSize(UpdateSubscriberQualityRequest) returns (UpdateSubscriberScreenSizeResponse);
+  // UpdateSubscribers is used to notify the SFU about the list of video subscriptions
+  // TODO: sync subscriptions based on this + update tracks using the dimension info sent by the user
+  rpc UpdateSubscriptions(UpdateSubscriptionsRequest) returns (UpdateSubscriptionsResponse);
 
   rpc UpdateMuteState(UpdateMuteStateRequest) returns (UpdateMuteStateResponse);
 
@@ -55,12 +56,10 @@ message VideoMuteChanged {
   bool muted = 2;
 }
 
-message UpdateSubscriberQualityRequest {
-  // maps stream ids to its size
-  map<string, VideoDimension> dimension_by_stream_id = 1;
-  // the default dimension for the stream not present in dimension_by_stream_id
-  VideoQuality default_dimension = 2;
-  string session_id = 4;
+message UpdateSubscriptionsRequest {
+  // maps stream user_ids to its size
+  map<string, VideoDimension> subscriptions = 1;
+  string session_id = 2;
 }
 
 message SendAnswerRequest {
@@ -87,7 +86,7 @@ message IceCandidateResponse{
 
 }
 
-message UpdateSubscriberScreenSizeResponse {}
+message UpdateSubscriptionsResponse {}
 
 message SetPublisherRequest {
   // sdp offer
@@ -111,6 +110,8 @@ message JoinRequest {
 
 message JoinResponse {
   string sdp = 1;
+  CallState call_state = 2;
+  // TODO: include full list of participants with track and audio info
 }
 
 message ConnectRequest {

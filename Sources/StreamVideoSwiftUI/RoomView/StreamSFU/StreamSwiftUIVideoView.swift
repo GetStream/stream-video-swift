@@ -24,6 +24,8 @@ public struct LocalVideoView: View {
 
 public struct RemoteParticipantsView: View {
     
+    @Injected(\.streamVideo) var streamVideo
+    
     private var participants: [CallParticipant]
     
     public init(participants: [CallParticipant]) {
@@ -35,7 +37,7 @@ public struct RemoteParticipantsView: View {
             // TODO: temp logic for testing.
             RTCMTLVideoViewSwiftUI(size: reader.size) { view in
                 for participant in participants {
-                    if let track = participant.track as? RTCVideoTrack {
+                    if let track = participant.track as? RTCVideoTrack, participant.id != streamVideo.userInfo.id {
                         track.add(view)
                         break
                     }

@@ -88,7 +88,7 @@ public class StreamVideo {
             hostname: hostname,
             token: token.rawValue
         )
-        // TODO: temp
+        // TODO: temp also add the user object.
         let paramsSFU = ["user_id": userInfo.id, "call_id": "simple:123"]
         var paramsString = ""
         let encoder = JSONEncoder()
@@ -100,6 +100,7 @@ public class StreamVideo {
         let tokenSFU = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.\(paramsString).SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
             .replacingOccurrences(of: "=", with: "")
         webRTCClient = WebRTCClient(
+            userInfo: user,
             apiKey: apiKey,
             hostname: "http://192.168.0.132:3031/twirp",
             token: tokenSFU,
@@ -151,6 +152,10 @@ public class StreamVideo {
             self?.currentRoom?.removeParticipant(with: trackId)
         }
         
+        webRTCClient.onParticipantsUpdated = { [weak self] participants in
+            self?.currentRoom?.participants = participants
+        }
+        
         httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }
@@ -164,6 +169,7 @@ public class StreamVideo {
     // TODO: temp for testing
     public func testSFU() async throws {
         try await webRTCClient.connect(shouldPublish: true)
+        currentRoom = VideoRoom.create()
     }
     
     // TODO: extract this

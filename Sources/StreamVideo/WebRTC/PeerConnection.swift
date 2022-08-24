@@ -6,7 +6,7 @@ import Foundation
 import SwiftProtobuf
 import WebRTC
 
-enum PeerConnectionType {
+enum PeerConnectionType: String {
     case subscriber
     case publisher
 }
@@ -15,10 +15,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-    private let signalService: Stream_Video_SignalServer
+    private let signalService: Stream_Video_Sfu_SignalServer
     private let sessionId: String
     private let type: PeerConnectionType
     
+    private(set) var transceiver: RTCRtpTransceiver?
+        
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
@@ -27,7 +29,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         sessionId: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        signalService: Stream_Video_SignalServer
+        signalService: Stream_Video_Sfu_SignalServer
     ) {
         self.sessionId = sessionId
         self.pc = pc
@@ -96,7 +98,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = .sendOnly
         transceiverInit.streamIds = streamIds
-        
+                
         let f = RTCRtpEncodingParameters()
         f.rid = "f"
         f.maxBitrateBps = 1_200_000
@@ -112,23 +114,24 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         q.maxBitrateBps = 125_000
         
         transceiverInit.sendEncodings = [f, h, q]
-        pc.addTransceiver(with: track, init: transceiverInit)
+        
+        transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added to peer connection")
+        log.debug("New stream added with track id = \(stream.videoTracks.first?.trackId ?? "n\\a") for \(type.rawValue)")
         onStreamAdded?(stream)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
-        log.debug("Stream removed from peer connection")
+        log.debug("Stream removed from peer connection \(type.rawValue)")
         onStreamRemoved?(stream)
     }
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-        log.debug("Negotiation needed for peer connection")
+        log.debug("Negotiation needed for peer connection \(type.rawValue)")
         onNegotiationNeeded?(self)
     }
     
@@ -137,9 +140,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        log.debug("Generated ice candidate \(candidate.sdp)")
+        log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
         Task {
-            var request = Stream_Video_IceCandidateRequest()
+            var request = Stream_Video_Sfu_IceCandidateRequest()
             request.publisher = type == .publisher
             request.candidate = candidate.sdp
             request.sdpMid = candidate.sdpMid ?? ""
@@ -152,6 +155,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
-        log.debug("Data channel opened for \(type)")
+        log.debug("Data channel opened for \(type.rawValue)")
     }
 }

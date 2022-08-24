@@ -35,6 +35,586 @@ var (
 	_ = sort.Sort
 )
 
+// Validate checks the field values on CallState with the rules defined in the
+// proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *CallState) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on CallState with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in CallStateMultiError, or nil
+// if none found.
+func (m *CallState) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *CallState) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	for idx, item := range m.GetParticipants() {
+		_, _ = idx, item
+
+		if all {
+			switch v := interface{}(item).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, CallStateValidationError{
+						field:  fmt.Sprintf("Participants[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, CallStateValidationError{
+						field:  fmt.Sprintf("Participants[%v]", idx),
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(item).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return CallStateValidationError{
+					field:  fmt.Sprintf("Participants[%v]", idx),
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	}
+
+	if len(errors) > 0 {
+		return CallStateMultiError(errors)
+	}
+
+	return nil
+}
+
+// CallStateMultiError is an error wrapping multiple validation errors returned
+// by CallState.ValidateAll() if the designated constraints aren't met.
+type CallStateMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CallStateMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CallStateMultiError) AllErrors() []error { return m }
+
+// CallStateValidationError is the validation error returned by
+// CallState.Validate if the designated constraints aren't met.
+type CallStateValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CallStateValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CallStateValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CallStateValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CallStateValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CallStateValidationError) ErrorName() string { return "CallStateValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CallStateValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCallState.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CallStateValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CallStateValidationError{}
+
+// Validate checks the field values on Call with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *Call) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Call with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in CallMultiError, or nil if none found.
+func (m *Call) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Call) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Type
+
+	// no validation rules for Id
+
+	// no validation rules for CreatedByUserId
+
+	// no validation rules for HostUserId
+
+	if all {
+		switch v := interface{}(m.GetCustom()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, CallValidationError{
+					field:  "Custom",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, CallValidationError{
+					field:  "Custom",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCustom()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return CallValidationError{
+				field:  "Custom",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for CreatedAt
+
+	// no validation rules for UpdatedAt
+
+	if len(errors) > 0 {
+		return CallMultiError(errors)
+	}
+
+	return nil
+}
+
+// CallMultiError is an error wrapping multiple validation errors returned by
+// Call.ValidateAll() if the designated constraints aren't met.
+type CallMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m CallMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m CallMultiError) AllErrors() []error { return m }
+
+// CallValidationError is the validation error returned by Call.Validate if the
+// designated constraints aren't met.
+type CallValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e CallValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e CallValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e CallValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e CallValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e CallValidationError) ErrorName() string { return "CallValidationError" }
+
+// Error satisfies the builtin error interface
+func (e CallValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sCall.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = CallValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = CallValidationError{}
+
+// Validate checks the field values on Participant with the rules defined in
+// the proto definition for this message. If any rules are violated, the first
+// error encountered is returned, or nil if there are no violations.
+func (m *Participant) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on Participant with the rules defined in
+// the proto definition for this message. If any rules are violated, the
+// result is a list of violation errors wrapped in ParticipantMultiError, or
+// nil if none found.
+func (m *Participant) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *Participant) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetUser()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ParticipantValidationError{
+					field:  "User",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ParticipantValidationError{
+					field:  "User",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetUser()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ParticipantValidationError{
+				field:  "User",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Role
+
+	// no validation rules for Online
+
+	if all {
+		switch v := interface{}(m.GetCustom()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ParticipantValidationError{
+					field:  "Custom",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ParticipantValidationError{
+					field:  "Custom",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCustom()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ParticipantValidationError{
+				field:  "Custom",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Video
+
+	// no validation rules for Audio
+
+	// no validation rules for CreatedAt
+
+	// no validation rules for UpdatedAt
+
+	if len(errors) > 0 {
+		return ParticipantMultiError(errors)
+	}
+
+	return nil
+}
+
+// ParticipantMultiError is an error wrapping multiple validation errors
+// returned by Participant.ValidateAll() if the designated constraints aren't met.
+type ParticipantMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ParticipantMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ParticipantMultiError) AllErrors() []error { return m }
+
+// ParticipantValidationError is the validation error returned by
+// Participant.Validate if the designated constraints aren't met.
+type ParticipantValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ParticipantValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ParticipantValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ParticipantValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ParticipantValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ParticipantValidationError) ErrorName() string { return "ParticipantValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ParticipantValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sParticipant.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ParticipantValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ParticipantValidationError{}
+
+// Validate checks the field values on User with the rules defined in the proto
+// definition for this message. If any rules are violated, the first error
+// encountered is returned, or nil if there are no violations.
+func (m *User) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on User with the rules defined in the
+// proto definition for this message. If any rules are violated, the result is
+// a list of violation errors wrapped in UserMultiError, or nil if none found.
+func (m *User) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *User) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for Id
+
+	// no validation rules for Role
+
+	if all {
+		switch v := interface{}(m.GetCustom()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, UserValidationError{
+					field:  "Custom",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, UserValidationError{
+					field:  "Custom",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCustom()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return UserValidationError{
+				field:  "Custom",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	// no validation rules for Name
+
+	// no validation rules for ImageUrl
+
+	// no validation rules for CreatedAt
+
+	// no validation rules for UpdatedAt
+
+	if len(errors) > 0 {
+		return UserMultiError(errors)
+	}
+
+	return nil
+}
+
+// UserMultiError is an error wrapping multiple validation errors returned by
+// User.ValidateAll() if the designated constraints aren't met.
+type UserMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m UserMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m UserMultiError) AllErrors() []error { return m }
+
+// UserValidationError is the validation error returned by User.Validate if the
+// designated constraints aren't met.
+type UserValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e UserValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e UserValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e UserValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e UserValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e UserValidationError) ErrorName() string { return "UserValidationError" }
+
+// Error satisfies the builtin error interface
+func (e UserValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sUser.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = UserValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = UserValidationError{}
+
 // Validate checks the field values on StreamQuality with the rules defined in
 // the proto definition for this message. If any rules are violated, the first
 // error encountered is returned, or nil if there are no violations.

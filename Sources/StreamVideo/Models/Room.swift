@@ -8,7 +8,7 @@ import SwiftUI
 
 public class VideoRoom: ObservableObject {
         
-    private let room: Room
+    private let room: Room?
     
     @Published var participants = [String: CallParticipant]() {
         didSet {
@@ -18,20 +18,20 @@ public class VideoRoom: ObservableObject {
     
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
-    static func create(with room: Room) -> VideoRoom {
+    static func create(with room: Room? = nil) -> VideoRoom {
         VideoRoom(room: room)
     }
     
-    private init(room: Room) {
+    private init(room: Room?) {
         self.room = room
     }
     
     func addDelegate(_ delegate: VideoRoomDelegate) {
-        room.add(delegate: delegate)
+        room?.add(delegate: delegate)
     }
     
     func disconnect() {
-        room.disconnect()
+        room?.disconnect()
     }
     
     func add(participants: [CallParticipant]) {
@@ -87,15 +87,15 @@ public class VideoRoom: ObservableObject {
     }
     
     public var localParticipant: LocalParticipant? {
-        room.localParticipant
+        room?.localParticipant
     }
     
     internal var remoteParticipants: [Sid: RemoteParticipant] {
-        room.remoteParticipants
+        room?.remoteParticipants ?? [:]
     }
     
     internal var connectionStatus: VideoConnectionStatus {
-        room.connectionState.mapped
+        room?.connectionState.mapped ?? VideoConnectionStatus.connected
     }
 }
 

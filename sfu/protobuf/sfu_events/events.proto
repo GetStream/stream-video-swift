@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package stream.video;
+package stream.video.sfu;
 
 import "sfu_models/models.proto";
 
@@ -17,7 +17,22 @@ message SfuEvent {
     LocalDeviceChange local_device_change = 7;
     MuteStateChanged mute_state_changed = 8;
     VideoQualityChanged video_quality_changed = 9;
+    ParticipantJoined participant_joined = 10;
+    ParticipantLeft participant_left = 11;
+    DominantSpeakerChanged dominant_speaker_changed = 12;
   }
+}
+
+// ParticipantJoined is fired when a user joins a call
+message ParticipantJoined {
+  Call call = 1;
+  Participant participant = 2;
+}
+
+// ParticipantJoined is fired when a user leaves a call
+message ParticipantLeft {
+  Call call = 1;
+  Participant participant = 2;
 }
 
 message MuteStateChanged{
@@ -53,6 +68,11 @@ message ConnectionQualityChanged {
   ConnectionQuality connection_quality = 2;
 }
 
+// DominantSpeakerChanged is sent by the SFU to notify when there is a new dominant speaker in the call
+message DominantSpeakerChanged {
+  string user_id = 1;
+}
+
 // AudioLevelChanged is sent by the SFU to notify about audio levels by user
 message AudioLevelChanged {
   repeated AudioLevel audio_levels = 1;
@@ -74,7 +94,7 @@ message AudioMediaRequest {
 
 message AudioSender {
   AudioMediaRequest mediaRequest = 1;
-  Codec1 codec = 2;
+  Codec codec = 2;
   repeated AudioLayerSetting layers = 3;
 }
 
@@ -98,11 +118,12 @@ message VideoLayerSetting {
     VERY_LOW = 3;
   }
   Priority priority = 5;
+  Codec codec = 6;
 }
 
 message VideoSender {
   VideoMediaRequest mediaRequest = 1;
-  Codec1 codec = 2;
+  Codec codec = 2;
   repeated VideoLayerSetting layers = 3;
 }
 

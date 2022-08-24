@@ -338,6 +338,99 @@ func (m *SfuEvent) validate(all bool) error {
 			}
 		}
 
+	case *SfuEvent_ParticipantJoined:
+
+		if all {
+			switch v := interface{}(m.GetParticipantJoined()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "ParticipantJoined",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "ParticipantJoined",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetParticipantJoined()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SfuEventValidationError{
+					field:  "ParticipantJoined",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *SfuEvent_ParticipantLeft:
+
+		if all {
+			switch v := interface{}(m.GetParticipantLeft()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "ParticipantLeft",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "ParticipantLeft",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetParticipantLeft()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SfuEventValidationError{
+					field:  "ParticipantLeft",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
+	case *SfuEvent_DominantSpeakerChanged:
+
+		if all {
+			switch v := interface{}(m.GetDominantSpeakerChanged()).(type) {
+			case interface{ ValidateAll() error }:
+				if err := v.ValidateAll(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "DominantSpeakerChanged",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			case interface{ Validate() error }:
+				if err := v.Validate(); err != nil {
+					errors = append(errors, SfuEventValidationError{
+						field:  "DominantSpeakerChanged",
+						reason: "embedded message failed validation",
+						cause:  err,
+					})
+				}
+			}
+		} else if v, ok := interface{}(m.GetDominantSpeakerChanged()).(interface{ Validate() error }); ok {
+			if err := v.Validate(); err != nil {
+				return SfuEventValidationError{
+					field:  "DominantSpeakerChanged",
+					reason: "embedded message failed validation",
+					cause:  err,
+				}
+			}
+		}
+
 	}
 
 	if len(errors) > 0 {
@@ -416,6 +509,324 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = SfuEventValidationError{}
+
+// Validate checks the field values on ParticipantJoined with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *ParticipantJoined) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ParticipantJoined with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ParticipantJoinedMultiError, or nil if none found.
+func (m *ParticipantJoined) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ParticipantJoined) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetCall()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ParticipantJoinedValidationError{
+					field:  "Call",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ParticipantJoinedValidationError{
+					field:  "Call",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCall()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ParticipantJoinedValidationError{
+				field:  "Call",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetParticipant()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ParticipantJoinedValidationError{
+					field:  "Participant",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ParticipantJoinedValidationError{
+					field:  "Participant",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetParticipant()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ParticipantJoinedValidationError{
+				field:  "Participant",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ParticipantJoinedMultiError(errors)
+	}
+
+	return nil
+}
+
+// ParticipantJoinedMultiError is an error wrapping multiple validation errors
+// returned by ParticipantJoined.ValidateAll() if the designated constraints
+// aren't met.
+type ParticipantJoinedMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ParticipantJoinedMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ParticipantJoinedMultiError) AllErrors() []error { return m }
+
+// ParticipantJoinedValidationError is the validation error returned by
+// ParticipantJoined.Validate if the designated constraints aren't met.
+type ParticipantJoinedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ParticipantJoinedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ParticipantJoinedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ParticipantJoinedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ParticipantJoinedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ParticipantJoinedValidationError) ErrorName() string {
+	return "ParticipantJoinedValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e ParticipantJoinedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sParticipantJoined.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ParticipantJoinedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ParticipantJoinedValidationError{}
+
+// Validate checks the field values on ParticipantLeft with the rules defined
+// in the proto definition for this message. If any rules are violated, the
+// first error encountered is returned, or nil if there are no violations.
+func (m *ParticipantLeft) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on ParticipantLeft with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// ParticipantLeftMultiError, or nil if none found.
+func (m *ParticipantLeft) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *ParticipantLeft) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	if all {
+		switch v := interface{}(m.GetCall()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ParticipantLeftValidationError{
+					field:  "Call",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ParticipantLeftValidationError{
+					field:  "Call",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCall()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ParticipantLeftValidationError{
+				field:  "Call",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if all {
+		switch v := interface{}(m.GetParticipant()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, ParticipantLeftValidationError{
+					field:  "Participant",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, ParticipantLeftValidationError{
+					field:  "Participant",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetParticipant()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return ParticipantLeftValidationError{
+				field:  "Participant",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
+
+	if len(errors) > 0 {
+		return ParticipantLeftMultiError(errors)
+	}
+
+	return nil
+}
+
+// ParticipantLeftMultiError is an error wrapping multiple validation errors
+// returned by ParticipantLeft.ValidateAll() if the designated constraints
+// aren't met.
+type ParticipantLeftMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m ParticipantLeftMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m ParticipantLeftMultiError) AllErrors() []error { return m }
+
+// ParticipantLeftValidationError is the validation error returned by
+// ParticipantLeft.Validate if the designated constraints aren't met.
+type ParticipantLeftValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e ParticipantLeftValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e ParticipantLeftValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e ParticipantLeftValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e ParticipantLeftValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e ParticipantLeftValidationError) ErrorName() string { return "ParticipantLeftValidationError" }
+
+// Error satisfies the builtin error interface
+func (e ParticipantLeftValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sParticipantLeft.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = ParticipantLeftValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = ParticipantLeftValidationError{}
 
 // Validate checks the field values on MuteStateChanged with the rules defined
 // in the proto definition for this message. If any rules are violated, the
@@ -1074,6 +1485,110 @@ var _ interface {
 	Cause() error
 	ErrorName() string
 } = ConnectionQualityChangedValidationError{}
+
+// Validate checks the field values on DominantSpeakerChanged with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the first error encountered is returned, or nil if there are no violations.
+func (m *DominantSpeakerChanged) Validate() error {
+	return m.validate(false)
+}
+
+// ValidateAll checks the field values on DominantSpeakerChanged with the rules
+// defined in the proto definition for this message. If any rules are
+// violated, the result is a list of violation errors wrapped in
+// DominantSpeakerChangedMultiError, or nil if none found.
+func (m *DominantSpeakerChanged) ValidateAll() error {
+	return m.validate(true)
+}
+
+func (m *DominantSpeakerChanged) validate(all bool) error {
+	if m == nil {
+		return nil
+	}
+
+	var errors []error
+
+	// no validation rules for UserId
+
+	if len(errors) > 0 {
+		return DominantSpeakerChangedMultiError(errors)
+	}
+
+	return nil
+}
+
+// DominantSpeakerChangedMultiError is an error wrapping multiple validation
+// errors returned by DominantSpeakerChanged.ValidateAll() if the designated
+// constraints aren't met.
+type DominantSpeakerChangedMultiError []error
+
+// Error returns a concatenation of all the error messages it wraps.
+func (m DominantSpeakerChangedMultiError) Error() string {
+	var msgs []string
+	for _, err := range m {
+		msgs = append(msgs, err.Error())
+	}
+	return strings.Join(msgs, "; ")
+}
+
+// AllErrors returns a list of validation violation errors.
+func (m DominantSpeakerChangedMultiError) AllErrors() []error { return m }
+
+// DominantSpeakerChangedValidationError is the validation error returned by
+// DominantSpeakerChanged.Validate if the designated constraints aren't met.
+type DominantSpeakerChangedValidationError struct {
+	field  string
+	reason string
+	cause  error
+	key    bool
+}
+
+// Field function returns field value.
+func (e DominantSpeakerChangedValidationError) Field() string { return e.field }
+
+// Reason function returns reason value.
+func (e DominantSpeakerChangedValidationError) Reason() string { return e.reason }
+
+// Cause function returns cause value.
+func (e DominantSpeakerChangedValidationError) Cause() error { return e.cause }
+
+// Key function returns key value.
+func (e DominantSpeakerChangedValidationError) Key() bool { return e.key }
+
+// ErrorName returns error name.
+func (e DominantSpeakerChangedValidationError) ErrorName() string {
+	return "DominantSpeakerChangedValidationError"
+}
+
+// Error satisfies the builtin error interface
+func (e DominantSpeakerChangedValidationError) Error() string {
+	cause := ""
+	if e.cause != nil {
+		cause = fmt.Sprintf(" | caused by: %v", e.cause)
+	}
+
+	key := ""
+	if e.key {
+		key = "key for "
+	}
+
+	return fmt.Sprintf(
+		"invalid %sDominantSpeakerChanged.%s: %s%s",
+		key,
+		e.field,
+		e.reason,
+		cause)
+}
+
+var _ error = DominantSpeakerChangedValidationError{}
+
+var _ interface {
+	Field() string
+	Reason() string
+	Key() bool
+	Cause() error
+	ErrorName() string
+} = DominantSpeakerChangedValidationError{}
 
 // Validate checks the field values on AudioLevelChanged with the rules defined
 // in the proto definition for this message. If any rules are violated, the
@@ -1850,6 +2365,35 @@ func (m *VideoLayerSetting) validate(all bool) error {
 	// no validation rules for ScaleResolutionDownBy
 
 	// no validation rules for Priority
+
+	if all {
+		switch v := interface{}(m.GetCodec()).(type) {
+		case interface{ ValidateAll() error }:
+			if err := v.ValidateAll(); err != nil {
+				errors = append(errors, VideoLayerSettingValidationError{
+					field:  "Codec",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		case interface{ Validate() error }:
+			if err := v.Validate(); err != nil {
+				errors = append(errors, VideoLayerSettingValidationError{
+					field:  "Codec",
+					reason: "embedded message failed validation",
+					cause:  err,
+				})
+			}
+		}
+	} else if v, ok := interface{}(m.GetCodec()).(interface{ Validate() error }); ok {
+		if err := v.Validate(); err != nil {
+			return VideoLayerSettingValidationError{
+				field:  "Codec",
+				reason: "embedded message failed validation",
+				cause:  err,
+			}
+		}
+	}
 
 	if len(errors) > 0 {
 		return VideoLayerSettingMultiError(errors)

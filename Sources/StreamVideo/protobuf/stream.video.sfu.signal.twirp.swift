@@ -6,13 +6,13 @@
 import Foundation
 import SwiftProtobuf
 
-class Stream_Video_SignalServer {
+class Stream_Video_Sfu_SignalServer {
     private let httpClient: HTTPClient
     var hostname: String
     var token: String
     var apiKey: String
 
-    let pathPrefix: String = "/stream.video.SignalServer/"
+    let pathPrefix: String = "/stream.video.sfu.SignalServer/"
 
     init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
         self.httpClient = httpClient
@@ -21,34 +21,36 @@ class Stream_Video_SignalServer {
         self.apiKey = apiKey
     }
     
-    func join(joinRequest: Stream_Video_JoinRequest) async throws -> Stream_Video_JoinResponse {
+    func join(joinRequest: Stream_Video_Sfu_JoinRequest) async throws -> Stream_Video_Sfu_JoinResponse {
         try await execute(request: joinRequest, path: "Join")
     }
     
-    func setPublisher(setPublisherRequest: Stream_Video_SetPublisherRequest) async throws -> Stream_Video_SetPublisherResponse {
+    func setPublisher(setPublisherRequest: Stream_Video_Sfu_SetPublisherRequest) async throws
+        -> Stream_Video_Sfu_SetPublisherResponse {
         try await execute(request: setPublisherRequest, path: "SetPublisher")
     }
     
-    func sendAnswer(sendAnswerRequest: Stream_Video_SendAnswerRequest) async throws -> Stream_Video_SendAnswerResponse {
+    func sendAnswer(sendAnswerRequest: Stream_Video_Sfu_SendAnswerRequest) async throws -> Stream_Video_Sfu_SendAnswerResponse {
         try await execute(request: sendAnswerRequest, path: "SendAnswer")
     }
     
-    func sendIceCandidate(iceCandidateRequest: Stream_Video_IceCandidateRequest) async throws -> Stream_Video_IceCandidateResponse {
+    func sendIceCandidate(iceCandidateRequest: Stream_Video_Sfu_IceCandidateRequest) async throws
+        -> Stream_Video_Sfu_IceCandidateResponse {
         try await execute(request: iceCandidateRequest, path: "SendIceCandidate")
     }
     
-    func updateSubscriberScreenSize(updateSubscriberQualityRequest: Stream_Video_UpdateSubscriberQualityRequest) async throws
-        -> Stream_Video_UpdateSubscriberScreenSizeResponse {
-        try await execute(request: updateSubscriberQualityRequest, path: "UpdateSubscriberScreenSize")
+    func updateSubscriptions(updateSubscriptionsRequest: Stream_Video_Sfu_UpdateSubscriptionsRequest) async throws
+        -> Stream_Video_Sfu_UpdateSubscriptionsResponse {
+        try await execute(request: updateSubscriptionsRequest, path: "UpdateSubscriptions")
     }
     
-    func updateMuteState(updateMuteStateRequest: Stream_Video_UpdateMuteStateRequest) async throws
-        -> Stream_Video_UpdateMuteStateResponse {
+    func updateMuteState(updateMuteStateRequest: Stream_Video_Sfu_UpdateMuteStateRequest) async throws
+        -> Stream_Video_Sfu_UpdateMuteStateResponse {
         try await execute(request: updateMuteStateRequest, path: "UpdateMuteState")
     }
     
-    func requestVideoQuality(updateVideoQualityRequest: Stream_Video_UpdateVideoQualityRequest) async throws
-        -> Stream_Video_UpdateVideoQualityResponse {
+    func requestVideoQuality(updateVideoQualityRequest: Stream_Video_Sfu_UpdateVideoQualityRequest) async throws
+        -> Stream_Video_Sfu_UpdateVideoQualityResponse {
         try await execute(request: updateVideoQualityRequest, path: "RequestVideoQuality")
     }
     

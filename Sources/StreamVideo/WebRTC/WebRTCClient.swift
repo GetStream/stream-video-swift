@@ -19,7 +19,7 @@ class WebRTCClient: NSObject {
     var state = State()
     
     let httpClient: HTTPClient
-    let signalService: Stream_Video_SignalServer
+    let signalService: Stream_Video_Sfu_SignalServer
     let peerConnectionFactory = PeerConnectionFactory()
     
     private(set) var publisher: PeerConnection?
@@ -40,23 +40,34 @@ class WebRTCClient: NSObject {
     }
 
     private var localAudioTrack: RTCAudioTrack?
+    private var userInfo: UserInfo
+    
+    private var callParticipants = [String: CallParticipant]() {
+        didSet {
+            updateParticipantsSubscriptions()
+            onParticipantsUpdated?(callParticipants)
+        }
+    }
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onRemoteStreamAdded: ((RTCMediaStream?) -> Void)?
     var onRemoteStreamRemoved: ((RTCMediaStream?) -> Void)?
+    var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     
     init(
+        userInfo: UserInfo,
         apiKey: String,
         hostname: String,
         token: String,
         tokenProvider: @escaping TokenProvider
     ) {
+        self.userInfo = userInfo
         httpClient = URLSessionClient(
             urlSession: StreamVideo.makeURLSession(),
             tokenProvider: tokenProvider
         )
         
-        signalService = Stream_Video_SignalServer(
+        signalService = Stream_Video_Sfu_SignalServer(
             httpClient: httpClient,
             apiKey: apiKey,
             hostname: hostname,
@@ -94,7 +105,10 @@ class WebRTCClient: NSObject {
             self?.handle(event: event)
         }
         
-        try await negotiate(peerConnection: subscriber, shouldJoin: true)
+        try await join(peerConnection: subscriber)
+        try await listenForConnectionOpened()
+        log.debug("Updating connection status to connected")
+        await state.update(connectionStatus: .connected)
         if shouldPublish {
             publisher = try await peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
@@ -104,9 +118,6 @@ class WebRTCClient: NSObject {
             )
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
         }
-        try await listenForConnectionOpened()
-        log.debug("Updating connection status to connected")
-        await state.update(connectionStatus: .connected)
         // TODO: pass call settings
         await setupUserMedia(callSettings: CallSettings(), shouldPublish: shouldPublish)
     }
@@ -176,27 +187,34 @@ class WebRTCClient: NSObject {
         { [weak self] peerConnection in
             guard let self = self else { return }
             Task {
-                try? await self.negotiate(peerConnection: peerConnection, shouldJoin: false)
+                try? await self.negotiate(peerConnection: peerConnection)
             }
         }
     }
     
-    private func negotiate(peerConnection: PeerConnection?, shouldJoin: Bool) async throws {
+    private func join(peerConnection: PeerConnection?) async throws {
+        log.debug("Creating peer connection offer")
+        let offer = try await peerConnection?.createOffer()
+        log.debug("Setting local description for peer connection")
+        try await peerConnection?.setLocalDescription(offer)
+        let joinResponse = try await executeJoinRequest(for: offer)
+        callParticipants = loadParticipants(from: joinResponse)
+        let sdp = joinResponse.sdp
+        log.debug("Setting remote description")
+        try await peerConnection?.setRemoteDescription(sdp, type: .answer)
+    }
+    
+    private func negotiate(peerConnection: PeerConnection?) async throws {
         log.debug("Creating peer connection offer")
         let offer = try await peerConnection?.createOffer()
         log.debug("Setting local description for peer connection")
         try await peerConnection?.setLocalDescription(offer)
         let sdp: String
-        if shouldJoin {
-            let joinResponse = try await executeJoinRequest(for: offer)
-            sdp = joinResponse.sdp
-        } else {
-            var request = Stream_Video_SetPublisherRequest()
-            request.sdp = offer?.sdp ?? ""
-            request.sessionID = sessionID
-            let response = try await signalService.setPublisher(setPublisherRequest: request)
-            sdp = response.sdp
-        }
+        var request = Stream_Video_Sfu_SetPublisherRequest()
+        request.sdp = offer?.sdp ?? ""
+        request.sessionID = sessionID
+        let response = try await signalService.setPublisher(setPublisherRequest: request)
+        sdp = response.sdp
         log.debug("Setting remote description")
         try await peerConnection?.setRemoteDescription(sdp, type: .answer)
     }
@@ -221,15 +239,22 @@ class WebRTCClient: NSObject {
         return videoTrack
     }
     
+    private func loadParticipants(from response: Stream_Video_Sfu_JoinResponse) -> [String: CallParticipant] {
+        let participants = response.callState.participants
+        var temp = [String: CallParticipant]()
+        for participant in participants {
+            temp[participant.user.id] = participant.toCallParticipant()
+        }
+        return temp
+    }
+    
     private func executeJoinRequest(
         for subscriberOffer: RTCSessionDescription?
-    ) async throws -> Stream_Video_JoinResponse {
+    ) async throws -> Stream_Video_Sfu_JoinResponse {
         log.debug("Executing join request")
-        var joinRequest = Stream_Video_JoinRequest()
+        var joinRequest = Stream_Video_Sfu_JoinRequest()
         joinRequest.subscriberSdpOffer = subscriberOffer?.sdp ?? ""
         joinRequest.sessionID = sessionID
-        // TODO: this will return call state (list of participants)
-        // TODO: Need to ask for track with updateSubscriptions
         let response = try await signalService.join(joinRequest: joinRequest)
         return response
     }
@@ -262,25 +287,99 @@ class WebRTCClient: NSObject {
     
     private func handle(event: Event) {
         log.debug("Received an event \(event)")
-        // TODO: new participant events for leave / join
-        if let event = event as? Stream_Video_SubscriberOffer {
-            Task {
-                do {
-                    log.debug("Handling subscriber offer")
-                    let offerSdp = event.sdp
-                    try await self.subscriber?.setRemoteDescription(offerSdp, type: .offer)
-                    let answer = try await self.subscriber?.createOffer()
-                    try await self.subscriber?.setLocalDescription(answer)
-                    var sendAnswerRequest = Stream_Video_SendAnswerRequest()
-                    sendAnswerRequest.sessionID = self.sessionID
-                    sendAnswerRequest.peerType = .subscriber
-                    sendAnswerRequest.sdp = answer?.sdp ?? ""
-                    log.debug("Sending answer for offer")
-                    _ = try await self.signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
-                } catch {
-                    log.error("Error handling offer event \(error.localizedDescription)")
+        if let event = event as? Stream_Video_Sfu_SubscriberOffer {
+            handleSubscriberEvent(event)
+        } else if let event = event as? Stream_Video_Sfu_ParticipantJoined {
+            handleParticipantJoined(event)
+        } else if let event = event as? Stream_Video_Sfu_ParticipantLeft {
+            handleParticipantLeft(event)
+        } else if let event = event as? Stream_Video_Sfu_ChangePublishQuality {
+            handleChangePublishQualityEvent(event)
+        }
+    }
+    
+    private func handleSubscriberEvent(_ event: Stream_Video_Sfu_SubscriberOffer) {
+        Task {
+            do {
+                log.debug("Handling subscriber offer")
+                let offerSdp = event.sdp
+                try await self.subscriber?.setRemoteDescription(offerSdp, type: .offer)
+                let answer = try await self.subscriber?.createOffer()
+                try await self.subscriber?.setLocalDescription(answer)
+                var sendAnswerRequest = Stream_Video_Sfu_SendAnswerRequest()
+                sendAnswerRequest.sessionID = self.sessionID
+                sendAnswerRequest.peerType = .subscriber
+                sendAnswerRequest.sdp = answer?.sdp ?? ""
+                log.debug("Sending answer for offer")
+                _ = try await self.signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
+            } catch {
+                log.error("Error handling offer event \(error.localizedDescription)")
+            }
+        }
+    }
+    
+    private func handleParticipantJoined(_ event: Stream_Video_Sfu_ParticipantJoined) {
+        let participant = event.participant.toCallParticipant()
+        callParticipants[participant.id] = participant
+    }
+    
+    private func handleParticipantLeft(_ event: Stream_Video_Sfu_ParticipantLeft) {
+        let participant = event.participant.toCallParticipant()
+        callParticipants.removeValue(forKey: participant.id)
+    }
+    
+    private func updateParticipantsSubscriptions() {
+        // TODO: implement updates of view sizes.
+        let screenWidth = UIScreen.main.bounds.width
+        let screenHeight = UIScreen.main.bounds.height
+        Task {
+            var request = Stream_Video_Sfu_UpdateSubscriptionsRequest()
+            var subscriptions = [String: Stream_Video_Sfu_VideoDimension]()
+            request.sessionID = sessionID
+            for (_, value) in callParticipants {
+                if value.id != userInfo.id {
+                    log.debug("updating subscription for user \(value.id)")
+                    var dimension = Stream_Video_Sfu_VideoDimension()
+                    dimension.height = UInt32(screenHeight) // TODO: only temp!
+                    dimension.width = UInt32(screenWidth) // TODO: only temp!
+                    subscriptions[value.id] = dimension
                 }
             }
+            request.subscriptions = subscriptions
+            _ = try? await signalService.updateSubscriptions(
+                updateSubscriptionsRequest: request
+            )
+        }
+    }
+    
+    private func handleChangePublishQualityEvent(
+        _ event: Stream_Video_Sfu_ChangePublishQuality
+    ) {
+        guard let transceiver = publisher?.transceiver else { return }
+        let enabledRids = event.videoSender.first?.layers
+            .filter { $0.active }
+            .compactMap(\.name) ?? []
+        log.debug("Enabled rids = \(enabledRids)")
+        let params = transceiver.sender.parameters
+        var updatedEncodings = [RTCRtpEncodingParameters]()
+        var changed = false
+        log.debug("Current publish quality \(params)")
+        for encoding in params.encodings {
+            let shouldEnable = enabledRids.contains(encoding.rid ?? UUID().uuidString)
+            if shouldEnable && encoding.isActive {
+                updatedEncodings.append(encoding)
+            } else if !shouldEnable && !encoding.isActive {
+                updatedEncodings.append(encoding)
+            } else {
+                changed = true
+                encoding.isActive = shouldEnable
+                updatedEncodings.append(encoding)
+            }
+        }
+        if changed {
+            log.debug("Updating publish quality with encodings \(updatedEncodings)")
+            params.encodings = updatedEncodings
+            publisher?.transceiver?.sender.parameters = params
         }
     }
     
