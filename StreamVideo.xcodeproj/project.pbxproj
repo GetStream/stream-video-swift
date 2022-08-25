@@ -1964,7 +1964,7 @@
 			repositoryURL = "https://github.com/webrtc-sdk/Specs.git";
 			requirement = {
 				kind = exactVersion;
-				version = 97.4692.5;
+				version = 104.5112.2;
 			};
 		};
 		84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
@@ -1972,7 +1972,7 @@
 			repositoryURL = "https://github.com/livekit/client-sdk-swift.git";
 			requirement = {
 				kind = exactVersion;
-				version = 1.0.1;
+				version = 1.0.4;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */

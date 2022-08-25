@@ -130,7 +130,7 @@ public class StreamVideo {
             }
         }
         webRTCClient.onRemoteStreamAdded = { [weak self] stream in
-            let trackId = stream?.videoTracks.first?.trackId ?? UUID().uuidString
+            let trackId = stream?.streamId.components(separatedBy: ":").first ?? UUID().uuidString
             var participant = self?.currentRoom?.participants[trackId]
             if participant == nil {
                 participant = CallParticipant(
@@ -143,12 +143,13 @@ public class StreamVideo {
                     hasAudio: true
                 )
             }
+            participant?.track = stream?.videoTracks.first
             if let participant = participant {
                 self?.currentRoom?.add(participant: participant)
             }
         }
         webRTCClient.onRemoteStreamRemoved = { [weak self] stream in
-            let trackId = stream?.videoTracks.first?.trackId ?? UUID().uuidString
+            let trackId = stream?.streamId.components(separatedBy: ":").first ?? UUID().uuidString
             self?.currentRoom?.removeParticipant(with: trackId)
         }
         
@@ -167,9 +168,10 @@ public class StreamVideo {
     }
     
     // TODO: temp for testing
-    public func testSFU() async throws {
+    public func testSFU() async throws -> VideoRoom? {
         try await webRTCClient.connect(shouldPublish: true)
         currentRoom = VideoRoom.create()
+        return currentRoom
     }
     
     // TODO: extract this

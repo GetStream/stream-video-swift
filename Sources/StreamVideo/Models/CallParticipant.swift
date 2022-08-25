@@ -13,7 +13,7 @@ public class CallParticipant: Identifiable {
     public var isOnline: Bool
     public var hasVideo: Bool
     public var hasAudio: Bool
-    public var track: RTCMediaStreamTrack?
+    public var track: RTCVideoTrack?
     
     public init(
         id: String,

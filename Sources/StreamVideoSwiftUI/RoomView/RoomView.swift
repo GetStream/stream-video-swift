@@ -28,11 +28,12 @@ public struct RoomView<Factory: ViewFactory>: View {
                         viewModel.focusParticipant = nil
                     }
                 } else {
-                    ParticipantLayout(viewModel.allParticipants.values, spacing: 5) { participant in
-                        ParticipantView(viewModel: viewModel, participant: participant) { participant in
-                            viewModel.focusParticipant = participant
-                        }
-                    }
+                    // TODO: enable this.
+//                    ParticipantLayout(viewModel.allParticipants.values, spacing: 5) { participant in
+//                        ParticipantView(viewModel: viewModel, participant: participant) { participant in
+//                            viewModel.focusParticipant = participant
+//                        }
+//                    }
                 }
             }
             .edgesIgnoringSafeArea(.all)

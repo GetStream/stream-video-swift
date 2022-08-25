@@ -4,7 +4,6 @@
 
 import Combine
 import LiveKit
-import OrderedCollections
 import Promises
 import SwiftUI
 import WebRTC
@@ -17,7 +16,6 @@ open class CallViewModel: ObservableObject {
     @Published public var room: VideoRoom? {
         didSet {
             connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
-            remoteParticipants = roomParticipants
             room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
                 self?.callParticipants = participants
             })
@@ -47,19 +45,21 @@ open class CallViewModel: ObservableObject {
     public var latestError: Error?
     
     @Published public var calling = false
-                
-    // TODO: LiveKit
-    @Published public var remoteParticipants: OrderedDictionary<String, RoomParticipant> = [:] {
-        didSet {
-            checkRoomDisplay()
-        }
-    }
-    
+                    
     @Published public var participantsShown = false
     
     @Published public var inviteParticipantsShown = false
     
-    @Published public var callParticipants = [String: CallParticipant]()
+    @Published public var callParticipants = [String: CallParticipant]() {
+        didSet {
+            log.debug("Call participants updated")
+            for (_, value) in callParticipants {
+                if value.track != nil {
+                    log.debug("Found a track for user \(value.name)")
+                }
+            }
+        }
+    }
     
     @Published public var participantEvent: ParticipantEvent?
     
@@ -107,29 +107,6 @@ open class CallViewModel: ObservableObject {
         }
     }
 
-    // TODO: LiveKit
-    public var allParticipants: OrderedDictionary<String, RoomParticipant> {
-        var result = remoteParticipants
-        if let localParticipant = room?.localParticipant {
-            result.updateValue(
-                RoomParticipant(participant: localParticipant),
-                forKey: localParticipant.sid,
-                insertingAt: 0
-            )
-        }
-        return result
-    }
-    
-    // TODO: LiveKit
-    private var roomParticipants: OrderedDictionary<String, RoomParticipant> {
-        guard let room = room else {
-            return [:]
-        }
-        return OrderedDictionary(uniqueKeysWithValues: room.remoteParticipants.map { (sid, participant) in
-            (sid, RoomParticipant(participant: participant))
-        })
-    }
-    
     public func toggleCameraEnabled() {
         guard let localParticipant = room?.localParticipant else {
             return
@@ -234,7 +211,7 @@ open class CallViewModel: ObservableObject {
 //        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
         // NOTE: uncomment this to test SFU.
         Task {
-            try await streamVideo.testSFU()
+            self.room = try await streamVideo.testSFU()
             calling = false
             // TODO: only temporarly.
             shouldShowRoomView = true
@@ -306,10 +283,11 @@ open class CallViewModel: ObservableObject {
     
     private func checkRoomDisplay() {
         shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting)
-            && (!remoteParticipants.isEmpty || streamVideo.videoConfig.joinVideoCallInstantly)
+            && (callParticipants.count > 1 || streamVideo.videoConfig.joinVideoCallInstantly)
     }
 }
 
+// TODO: LiveKit remove
 extension CallViewModel: VideoRoomDelegate {
     
     // MARK: - RoomDelegate
@@ -336,7 +314,6 @@ extension CallViewModel: VideoRoomDelegate {
         log.debug("Participant \(participant.name) left the room.")
         
         DispatchQueue.main.async {
-            self.remoteParticipants = self.roomParticipants
             if let focusParticipant = self.focusParticipant,
                focusParticipant.id == remoteParticipant.id {
                 self.focusParticipant = nil
@@ -346,7 +323,6 @@ extension CallViewModel: VideoRoomDelegate {
     
     nonisolated public func room(_ room: Room, participantDidJoin participant: RemoteParticipant) {
         DispatchQueue.main.async {
-            self.remoteParticipants = self.roomParticipants
             log.debug("Participant \(participant.name) joined the room.")
         }
     }

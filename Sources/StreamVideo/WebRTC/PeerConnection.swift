@@ -121,7 +121,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added with track id = \(stream.videoTracks.first?.trackId ?? "n\\a") for \(type.rawValue)")
+        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)")
         onStreamAdded?(stream)
     }
     

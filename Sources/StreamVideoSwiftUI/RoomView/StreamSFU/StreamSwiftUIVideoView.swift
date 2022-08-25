@@ -37,7 +37,8 @@ public struct RemoteParticipantsView: View {
             // TODO: temp logic for testing.
             RTCMTLVideoViewSwiftUI(size: reader.size) { view in
                 for participant in participants {
-                    if let track = participant.track as? RTCVideoTrack, participant.id != streamVideo.userInfo.id {
+                    if let track = participant.track, participant.id != streamVideo.userInfo.id {
+                        log.debug("adding track to a view \(view)")
                         track.add(view)
                         break
                     }
@@ -57,9 +58,12 @@ struct RTCMTLVideoViewSwiftUI: UIViewRepresentable {
 
     func makeUIView(context: Context) -> RTCMTLVideoView {
         let view = RTCMTLVideoView(frame: .init(origin: .zero, size: size))
+        view.videoContentMode = .scaleAspectFill
         handleRendering(view)
         return view
     }
     
-    func updateUIView(_ uiView: RTCMTLVideoView, context: Context) {}
+    func updateUIView(_ uiView: RTCMTLVideoView, context: Context) {
+        handleRendering(uiView)
+    }
 }
