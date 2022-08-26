@@ -304,7 +304,7 @@ class WebRTCClient: NSObject {
                 log.debug("Handling subscriber offer")
                 let offerSdp = event.sdp
                 try await self.subscriber?.setRemoteDescription(offerSdp, type: .offer)
-                let answer = try await self.subscriber?.createOffer()
+                let answer = try await self.subscriber?.createAnswer()
                 try await self.subscriber?.setLocalDescription(answer)
                 var sendAnswerRequest = Stream_Video_Sfu_SendAnswerRequest()
                 sendAnswerRequest.sessionID = self.sessionID

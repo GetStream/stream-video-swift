@@ -34,14 +34,15 @@ public struct RemoteParticipantsView: View {
     
     public var body: some View {
         GeometryReader { reader in
-            // TODO: temp logic for testing.
-            RTCMTLVideoViewSwiftUI(size: reader.size) { view in
-                for participant in participants {
-                    if let track = participant.track, participant.id != streamVideo.userInfo.id {
-                        log.debug("adding track to a view \(view)")
-                        track.add(view)
-                        break
+            VStack {
+                ForEach(participants) { participant in
+                    RTCMTLVideoViewSwiftUI(size: reader.size) { view in
+                        if let track = participant.track, participant.id != streamVideo.userInfo.id {
+                            log.debug("adding track to a view \(view)")
+                            track.add(view)
+                        }
                     }
+                    .background(Color.red)
                 }
             }
         }

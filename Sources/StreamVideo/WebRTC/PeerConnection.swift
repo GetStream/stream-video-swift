@@ -62,6 +62,20 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         }
     }
     
+    func createAnswer() async throws -> RTCSessionDescription {
+        try await withCheckedThrowingContinuation { continuation in
+            pc.answer(for: .defaultConstraints) { sdp, error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else if let sdp = sdp {
+                    continuation.resume(returning: sdp)
+                } else {
+                    continuation.resume(throwing: ClientError.Unknown())
+                }
+            }
+        }
+    }
+    
     func setLocalDescription(_ sdp: RTCSessionDescription?) async throws {
         guard let sdp = sdp else {
             throw ClientError.Unexpected() // TODO: add appropriate errors
