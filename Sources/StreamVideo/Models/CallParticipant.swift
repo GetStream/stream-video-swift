@@ -14,6 +14,7 @@ public class CallParticipant: Identifiable {
     public var hasVideo: Bool
     public var hasAudio: Bool
     public var track: RTCVideoTrack?
+    public var trackSize: CGSize = .zero
     
     public init(
         id: String,

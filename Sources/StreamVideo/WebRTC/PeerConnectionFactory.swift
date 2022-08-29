@@ -9,7 +9,11 @@ actor PeerConnectionFactory {
     
     private let factory: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
-        let encoderFactory = RTCDefaultVideoEncoderFactory()
+        let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
+        let encoderFactory = RTCVideoEncoderFactorySimulcast(
+            primary: defaultEncoderFactory,
+            fallback: defaultEncoderFactory
+        )
         let decoderFactory = RTCDefaultVideoDecoderFactory()
         let factory = RTCPeerConnectionFactory(
             encoderFactory: encoderFactory,

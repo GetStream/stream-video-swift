@@ -20,7 +20,9 @@ struct CallView: View {
                 OutgoingCallView(viewModel: viewModel)
             } else if viewModel.shouldShowRoomView {
                 if viewModel.participants.count > 0 {
-                    RemoteParticipantsView(participants: viewModel.participants)
+                    RemoteParticipantsView(
+                        viewFactory: DefaultViewFactory.shared, viewModel: viewModel
+                    )
                 } else {
                     LocalVideoView()
                 }

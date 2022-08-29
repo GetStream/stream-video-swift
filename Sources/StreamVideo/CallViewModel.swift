@@ -57,6 +57,9 @@ open class CallViewModel: ObservableObject {
                 if value.track != nil {
                     log.debug("Found a track for user \(value.name)")
                 }
+                if value.trackSize != .zero {
+                    log.debug("Changed frame for track \(value.trackSize)")
+                }
             }
         }
     }
@@ -108,102 +111,33 @@ open class CallViewModel: ObservableObject {
     }
 
     public func toggleCameraEnabled() {
-        guard let localParticipant = room?.localParticipant else {
-            return
-        }
-        
-        // TODO: connect this properly.
-        withAnimation {
-            self.callSettings = CallSettings(
-                audioOn: self.microphoneTrackState.isPublished,
-                videoOn: !self.callSettings.videoOn,
-                speakerOn: self.callSettings.speakerOn
+        Task {
+            let isEnabled = !callSettings.videoOn
+            try await streamVideo.changeVideoState(isEnabled: isEnabled)
+            callSettings = CallSettings(
+                audioOn: callSettings.audioOn,
+                videoOn: isEnabled,
+                speakerOn: callSettings.speakerOn
             )
-        }
-
-        guard !cameraTrackState.isBusy else {
-            return
-        }
-
-        DispatchQueue.main.async {
-            self.cameraTrackState = .busy(isPublishing: !self.cameraTrackState.isPublished)
-        }
-
-        localParticipant.setCamera(enabled: !cameraTrackState.isPublished).then(on: .sdk) { publication in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                defer {
-                    DispatchQueue.main.async {
-                        let event: Stream_Video_UserEventType = self.cameraTrackState.isPublished ? .videoStarted : .videoStopped
-                        self.streamVideo.sendEvent(type: event)
-                    }
-                }
-                guard let publication = publication else {
-                    self.cameraTrackState = .notPublished()
-                    return
-                }
-
-                self.cameraTrackState = .published(publication)
-            }
-        }.catch(on: .sdk) { error in
-            DispatchQueue.main.async {
-                self.cameraTrackState = .notPublished(error: error)
-            }
         }
     }
     
     public func toggleMicrophoneEnabled() {
-        guard let localParticipant = room?.localParticipant else {
-            return
-        }
-        
-        // TODO: connect this properly.
-        callSettings = CallSettings(
-            audioOn: microphoneTrackState.isPublished,
-            videoOn: callSettings.videoOn,
-            speakerOn: !callSettings.speakerOn
-        )
-
-        guard !microphoneTrackState.isBusy else {
-            return
-        }
-
-        DispatchQueue.main.async {
-            self.microphoneTrackState = .busy(isPublishing: !self.microphoneTrackState.isPublished)
-        }
-
-        localParticipant.setMicrophone(enabled: !microphoneTrackState.isPublished).then(on: .sdk) { publication in
-            DispatchQueue.main.async { [weak self] in
-                guard let self = self else { return }
-                defer {
-                    DispatchQueue.main.async {
-                        let event: Stream_Video_UserEventType = self.microphoneTrackState
-                            .isPublished ? .audioUnmuted : .audioMutedUnspecified
-                        self.streamVideo.sendEvent(type: event)
-                    }
-                }
-                guard let publication = publication else {
-                    self.microphoneTrackState = .notPublished()
-                    return
-                }
-
-                self.microphoneTrackState = .published(publication)
-            }
-        }.catch(on: .sdk) { error in
-            DispatchQueue.main.async {
-                self.microphoneTrackState = .notPublished(error: error)
-            }
+        Task {
+            let isEnabled = !callSettings.audioOn
+            try await streamVideo.changeAudioState(isEnabled: isEnabled)
+            callSettings = CallSettings(
+                audioOn: isEnabled,
+                videoOn: callSettings.videoOn,
+                speakerOn: callSettings.speakerOn
+            )
         }
     }
     
     public func toggleCameraPosition() {
-        guard case let .published(publication) = cameraTrackState,
-              let track = publication.track as? LocalVideoTrack,
-              let cameraCapturer = track.capturer as? CameraCapturer else {
-            return
-        }
-
-        cameraCapturer.switchCameraPosition()
+        let next = callSettings.cameraPosition.next()
+        streamVideo.changeCameraMode(position: next)
+        callSettings.cameraPosition = next
     }
 
     public func startCall(callId: String, participantIds: [String]) {

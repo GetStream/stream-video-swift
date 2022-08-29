@@ -8,6 +8,7 @@ public class CallSettings: ObservableObject {
     public var audioOn: Bool
     public var videoOn: Bool
     public var speakerOn: Bool
+    public var cameraPosition: CameraPosition = .front
     
     public init(
         audioOn: Bool = true,
@@ -17,5 +18,14 @@ public class CallSettings: ObservableObject {
         self.audioOn = audioOn
         self.videoOn = videoOn
         self.speakerOn = speakerOn
+    }
+}
+
+public enum CameraPosition {
+    case front
+    case back
+    
+    func next() -> CameraPosition {
+        self == .front ? .back : .front
     }
 }

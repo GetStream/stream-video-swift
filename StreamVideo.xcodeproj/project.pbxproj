@@ -50,6 +50,7 @@
 		8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */; };
 		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
+		8457CF9128BB835F00E8CF50 /* RemoteParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */; };
 		8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */; };
 		8458872728A3F34D002A81BF /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872628A3F34D002A81BF /* HelperViews.swift */; };
 		8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872928A3F935002A81BF /* OutgoingCallView.swift */; };
@@ -266,6 +267,7 @@
 		8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrefixLogFormatter.swift; sourceTree = "<group>"; };
 		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
+		8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteParticipantsView.swift; sourceTree = "<group>"; };
 		8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingParticipantsView.swift; sourceTree = "<group>"; };
 		8458872628A3F34D002A81BF /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
 		8458872928A3F935002A81BF /* OutgoingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView.swift; sourceTree = "<group>"; };
@@ -457,14 +459,6 @@
 			path = Client;
 			sourceTree = "<group>";
 		};
-		84231E4528B25017007985EF /* StreamSFU */ = {
-			isa = PBXGroup;
-			children = (
-				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
-			);
-			path = StreamSFU;
-			sourceTree = "<group>";
-		};
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
@@ -524,13 +518,14 @@
 		8434C523289AA2B60001490A /* RoomView */ = {
 			isa = PBXGroup;
 			children = (
-				84231E4528B25017007985EF /* StreamSFU */,
 				846FBE8728AAD81E00147F6E /* Participants */,
 				84ED2412286CA414002A3186 /* RoomView.swift */,
 				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
 				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
 				84C2997E287865560034B735 /* StreamVideoView.swift */,
+				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
+				8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */,
 			);
 			path = RoomView;
 			sourceTree = "<group>";
@@ -1272,6 +1267,7 @@
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
+				8457CF9128BB835F00E8CF50 /* RemoteParticipantsView.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsView.swift in Sources */,
 				8434C52B289AA3150001490A /* Appearance.swift in Sources */,
 				84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */,

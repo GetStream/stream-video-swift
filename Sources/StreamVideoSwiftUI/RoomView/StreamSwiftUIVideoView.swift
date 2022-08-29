@@ -17,34 +17,8 @@ public struct LocalVideoView: View {
             RTCMTLVideoViewSwiftUI(size: reader.size) { view in
                 streamVideo.renderLocalVideo(renderer: view)
             }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-public struct RemoteParticipantsView: View {
-    
-    @Injected(\.streamVideo) var streamVideo
-    
-    private var participants: [CallParticipant]
-    
-    public init(participants: [CallParticipant]) {
-        self.participants = participants
-    }
-    
-    public var body: some View {
-        GeometryReader { reader in
-            VStack {
-                ForEach(participants) { participant in
-                    RTCMTLVideoViewSwiftUI(size: reader.size) { view in
-                        if let track = participant.track, participant.id != streamVideo.userInfo.id {
-                            log.debug("adding track to a view \(view)")
-                            track.add(view)
-                        }
-                    }
-                    .background(Color.red)
-                }
-            }
+            .edgesIgnoringSafeArea(.all)
+            .background(Color(UIColor.systemBackground))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }

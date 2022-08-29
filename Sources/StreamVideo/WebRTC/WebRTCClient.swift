@@ -123,6 +123,11 @@ class WebRTCClient: NSObject {
     }
     
     func startCapturingLocalVideo(renderer: RTCVideoRenderer, cameraPosition: AVCaptureDevice.Position) {
+        setCameraPosition(cameraPosition)
+        localVideoTrack?.add(renderer)
+    }
+    
+    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
         guard let capturer = videoCapturer as? RTCCameraVideoCapturer else { return }
         
         guard
@@ -144,8 +149,10 @@ class WebRTCClient: NSObject {
             format: format,
             fps: Int(fps.maxFrameRate)
         )
-        
-        localVideoTrack?.add(renderer)
+    }
+    
+    func changeCameraMode(position: CameraPosition) {
+        setCameraPosition(position == .front ? .front : .back)
     }
     
     func setupUserMedia(callSettings: CallSettings, shouldPublish: Bool) async {
@@ -164,6 +171,26 @@ class WebRTCClient: NSObject {
             publisher?.addTrack(audioTrack, streamIds: [sessionID])
             publisher?.addTransceiver(videoTrack, streamIds: [sessionID])
         }
+    }
+    
+    func changeAudioState(isEnabled: Bool) async throws {
+        var request = Stream_Video_Sfu_UpdateMuteStateRequest()
+        var muteChanged = Stream_Video_Sfu_AudioMuteChanged()
+        muteChanged.muted = !isEnabled
+        request.audioMuteChanged = muteChanged
+        request.sessionID = sessionID
+        _ = try await signalService.updateMuteState(updateMuteStateRequest: request)
+        localAudioTrack?.isEnabled = isEnabled
+    }
+    
+    func changeVideoState(isEnabled: Bool) async throws {
+        var request = Stream_Video_Sfu_UpdateMuteStateRequest()
+        var muteChanged = Stream_Video_Sfu_VideoMuteChanged()
+        muteChanged.muted = !isEnabled
+        request.videoMuteChanged = muteChanged
+        request.sessionID = sessionID
+        _ = try await signalService.updateMuteState(updateMuteStateRequest: request)
+        localVideoTrack?.isEnabled = isEnabled
     }
     
     func configureAudioSession(

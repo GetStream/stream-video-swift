@@ -174,9 +174,24 @@ public class StreamVideo {
         return currentRoom
     }
     
-    // TODO: extract this
+    // TODO: extract this in controllers
     public func renderLocalVideo(renderer: RTCVideoRenderer) {
         webRTCClient.startCapturingLocalVideo(renderer: renderer, cameraPosition: .front)
+    }
+    
+    // TODO: extract this in controllers
+    public func changeAudioState(isEnabled: Bool) async throws {
+        try await webRTCClient.changeAudioState(isEnabled: isEnabled)
+    }
+    
+    // TODO: extract this in controllers
+    public func changeVideoState(isEnabled: Bool) async throws {
+        try await webRTCClient.changeVideoState(isEnabled: isEnabled)
+    }
+    
+    // TODO: extract this in controllers
+    public func changeCameraMode(position: CameraPosition) {
+        webRTCClient.changeCameraMode(position: position)
     }
 
     public func startCall(
