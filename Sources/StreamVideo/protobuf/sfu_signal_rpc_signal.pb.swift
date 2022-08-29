@@ -253,6 +253,10 @@ struct Stream_Video_Sfu_JoinRequest {
 
     var sessionID: String = String()
 
+    var senderCodecs: [Stream_Video_Sfu_Codec] = []
+
+    var receiverCodecs: [Stream_Video_Sfu_Codec] = []
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -1030,7 +1034,9 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
     static let protoMessageName: String = _protobuf_package + ".JoinRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "subscriber_sdp_offer"),
-        3: .standard(proto: "session_id")
+        3: .standard(proto: "session_id"),
+        4: .standard(proto: "sender_codecs"),
+        5: .standard(proto: "receiver_codecs")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1041,6 +1047,8 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.subscriberSdpOffer) }()
             case 3: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+            case 4: try { try decoder.decodeRepeatedMessageField(value: &self.senderCodecs) }()
+            case 5: try { try decoder.decodeRepeatedMessageField(value: &self.receiverCodecs) }()
             default: break
             }
         }
@@ -1053,12 +1061,20 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
         if !sessionID.isEmpty {
             try visitor.visitSingularStringField(value: sessionID, fieldNumber: 3)
         }
+        if !senderCodecs.isEmpty {
+            try visitor.visitRepeatedMessageField(value: senderCodecs, fieldNumber: 4)
+        }
+        if !receiverCodecs.isEmpty {
+            try visitor.visitRepeatedMessageField(value: receiverCodecs, fieldNumber: 5)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Sfu_JoinRequest, rhs: Stream_Video_Sfu_JoinRequest) -> Bool {
         if lhs.subscriberSdpOffer != rhs.subscriberSdpOffer { return false }
         if lhs.sessionID != rhs.sessionID { return false }
+        if lhs.senderCodecs != rhs.senderCodecs { return false }
+        if lhs.receiverCodecs != rhs.receiverCodecs { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

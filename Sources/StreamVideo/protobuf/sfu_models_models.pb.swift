@@ -363,6 +363,32 @@ struct Stream_Video_Sfu_Codec {
 
     var fmtpLine: String = String()
 
+    var clockRate: UInt32 = 0
+
+    var channels: Stream_Video_Sfu_channels {
+        get { _channels ?? Stream_Video_Sfu_channels() }
+        set { _channels = newValue }
+    }
+
+    /// Returns true if `channels` has been explicitly set.
+    var hasChannels: Bool { self._channels != nil }
+    /// Clears the value of `channels`. Subsequent reads from it will return its default value.
+    mutating func clearChannels() { _channels = nil }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    private var _channels: Stream_Video_Sfu_channels?
+}
+
+struct Stream_Video_Sfu_channels {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var channels: UInt32 = 0
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -391,6 +417,7 @@ extension Stream_Video_Sfu_VideoDimension: @unchecked Sendable {}
 extension Stream_Video_Sfu_VideoLayer: @unchecked Sendable {}
 extension Stream_Video_Sfu_SimulcastCodecInfo: @unchecked Sendable {}
 extension Stream_Video_Sfu_Codec: @unchecked Sendable {}
+extension Stream_Video_Sfu_channels: @unchecked Sendable {}
 extension Stream_Video_Sfu_SimulcastCodec: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
@@ -874,7 +901,9 @@ extension Stream_Video_Sfu_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageI
     static let protoMessageName: String = _protobuf_package + ".Codec"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "mime"),
-        2: .standard(proto: "fmtp_line")
+        2: .standard(proto: "fmtp_line"),
+        3: .standard(proto: "clock_rate"),
+        4: .same(proto: "channels")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -885,24 +914,71 @@ extension Stream_Video_Sfu_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageI
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.mime) }()
             case 2: try { try decoder.decodeSingularStringField(value: &self.fmtpLine) }()
+            case 3: try { try decoder.decodeSingularUInt32Field(value: &self.clockRate) }()
+            case 4: try { try decoder.decodeSingularMessageField(value: &self._channels) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
         if !mime.isEmpty {
             try visitor.visitSingularStringField(value: mime, fieldNumber: 1)
         }
         if !fmtpLine.isEmpty {
             try visitor.visitSingularStringField(value: fmtpLine, fieldNumber: 2)
         }
+        if clockRate != 0 {
+            try visitor.visitSingularUInt32Field(value: clockRate, fieldNumber: 3)
+        }
+        try { if let v = self._channels {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Sfu_Codec, rhs: Stream_Video_Sfu_Codec) -> Bool {
         if lhs.mime != rhs.mime { return false }
         if lhs.fmtpLine != rhs.fmtpLine { return false }
+        if lhs.clockRate != rhs.clockRate { return false }
+        if lhs._channels != rhs._channels { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_channels: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".channels"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "channels")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularUInt32Field(value: &self.channels) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if channels != 0 {
+            try visitor.visitSingularUInt32Field(value: channels, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_channels, rhs: Stream_Video_Sfu_channels) -> Bool {
+        if lhs.channels != rhs.channels { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
