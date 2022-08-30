@@ -6,9 +6,10 @@ import StreamVideo
 import SwiftUI
 import WebRTC
 
-public struct RemoteParticipantsView<Factory: ViewFactory>: View {
+public struct RoomView<Factory: ViewFactory>: View {
     
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.images) var images
     
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
@@ -46,7 +47,7 @@ public struct RemoteParticipantsView<Factory: ViewFactory>: View {
                 } else {
                     // TODO: define layout
                 }
-                
+
                 VStack {
                     Spacer()
                     if let event = viewModel.participantEvent {
@@ -61,11 +62,35 @@ public struct RemoteParticipantsView<Factory: ViewFactory>: View {
                 }
                 
                 TopRightView {
-                    LocalVideoView()
-                        .frame(width: reader.size.width / 4, height: reader.size.width / 2)
-                        .background(Color.red)
-                        .cornerRadius(16)
+                    VStack(alignment: .trailing, spacing: 16) {
+                        Button {
+                            viewModel.participantsShown.toggle()
+                        } label: {
+                            images.participants
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal)
+                        .padding(.horizontal, 2)
+                        
+                        LocalVideoView()
+                            .frame(width: reader.size.width / 4, height: reader.size.width / 2)
+                            .background(Color.red)
+                            .cornerRadius(16)
+                            .padding(.horizontal)
+                    }
+                }
+                
+                if viewModel.participantsShown {
+                    VStack {
+                        CallParticipantsView(
+                            viewModel: viewModel,
+                            maxHeight: reader.size.height - 16
+                        )
                         .padding()
+                        .padding(.vertical, 8)
+                        
+                        Spacer()
+                    }
                 }
             }
             .frame(width: reader.size.width)
@@ -149,6 +174,7 @@ struct Grid5ParticipantsView: View {
 struct VerticalParticipantsView: View {
     
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.images) var images
     
     var participants: [CallParticipant]
     var availableSize: CGSize
@@ -161,6 +187,16 @@ struct VerticalParticipantsView: View {
                     onViewUpdate(participant, view)
                 }
                 .edgesIgnoringSafeArea(.all)
+                .overlay(
+                    BottomRightView {
+                        (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+                            .foregroundColor(.white)
+                            .padding(.all, 4)
+                            .background(Color.black.opacity(0.5))
+                            .cornerRadius(8)
+                    }
+                    .padding()
+                )
             }
         }
     }

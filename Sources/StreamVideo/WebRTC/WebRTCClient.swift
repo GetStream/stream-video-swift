@@ -39,6 +39,7 @@ class WebRTCClient: NSObject {
 
     private var localAudioTrack: RTCAudioTrack?
     private var userInfo: UserInfo
+    private var callSettings = CallSettings()
     
     private var callParticipants = [String: CallParticipant]() {
         didSet {
@@ -74,7 +75,7 @@ class WebRTCClient: NSObject {
     }
     
     // TODO: connectOptions / roomOptions
-    func connect(shouldPublish: Bool) async throws {
+    func connect(callSettings: CallSettings) async throws {
         let connectionStatus = await state.connectionStatus
         if connectionStatus == .connected || connectionStatus == .connecting {
             log.debug("Skipping connection, already connected or connecting")
@@ -107,7 +108,7 @@ class WebRTCClient: NSObject {
         try await listenForConnectionOpened()
         log.debug("Updating connection status to connected")
         await state.update(connectionStatus: .connected)
-        if shouldPublish {
+        if callSettings.shouldPublish {
             publisher = try await peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
                 configuration: configuration, // TODO: move this in connect options
@@ -116,11 +117,11 @@ class WebRTCClient: NSObject {
             )
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
         }
-        // TODO: pass call settings
-        await setupUserMedia(callSettings: CallSettings(), shouldPublish: shouldPublish)
+        await setupUserMedia(callSettings: callSettings)
     }
     
     func cleanUp() async {
+        callSettings = CallSettings()
         publisher = nil
         subscriber = nil
         signalChannel = nil
@@ -164,7 +165,7 @@ class WebRTCClient: NSObject {
         setCameraPosition(position == .front ? .front : .back)
     }
     
-    func setupUserMedia(callSettings: CallSettings, shouldPublish: Bool) async {
+    func setupUserMedia(callSettings: CallSettings) async {
         configureAudioSession(isActive: callSettings.audioOn)
         
         // Audio
@@ -175,7 +176,7 @@ class WebRTCClient: NSObject {
         let videoTrack = await makeVideoTrack()
         localVideoTrack = videoTrack
         
-        if shouldPublish {
+        if callSettings.shouldPublish {
             log.debug("publishing local tracks")
             publisher?.addTrack(audioTrack, streamIds: [sessionID])
             publisher?.addTransceiver(videoTrack, streamIds: [sessionID])
@@ -333,6 +334,8 @@ class WebRTCClient: NSObject {
             handleChangePublishQualityEvent(event)
         } else if let event = event as? Stream_Video_Sfu_DominantSpeakerChanged {
             handleDominantSpeakerChanged(event)
+        } else if let event = event as? Stream_Video_Sfu_MuteStateChanged {
+            handleMuteStateChangedEvent(event)
         }
     }
     
@@ -427,6 +430,14 @@ class WebRTCClient: NSObject {
                 participant.layoutPriority = .normal
             }
         }
+    }
+    
+    private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_MuteStateChanged) {
+        let userId = event.userID
+        let participant = callParticipants[userId]
+        participant?.hasAudio = !event.audioMuted
+        participant?.hasVideo = !event.videoMuted
+        callParticipants[userId] = participant
     }
 }
 

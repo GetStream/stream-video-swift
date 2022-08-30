@@ -19,6 +19,10 @@ public class CallSettings: ObservableObject {
         self.videoOn = videoOn
         self.speakerOn = speakerOn
     }
+    
+    var shouldPublish: Bool {
+        audioOn || videoOn
+    }
 }
 
 public enum CameraPosition {

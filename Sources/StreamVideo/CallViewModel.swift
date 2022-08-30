@@ -77,20 +77,6 @@ open class CallViewModel: ObservableObject {
             .sorted(by: { $0.name < $1.name })
     }
     
-    public var onlineParticipants: [CallParticipant] {
-        callParticipants
-            .filter { $0.value.isOnline }
-            .map(\.value)
-            .sorted(by: { $0.name < $1.name })
-    }
-    
-    public var offlineParticipants: [CallParticipant] {
-        callParticipants
-            .filter { !$0.value.isOnline }
-            .map(\.value)
-            .sorted(by: { $0.name < $1.name })
-    }
-    
     public init() {
         NotificationCenter.default.addObserver(
             self,
@@ -141,7 +127,7 @@ open class CallViewModel: ObservableObject {
 //        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
         // NOTE: uncomment this to test SFU.
         Task {
-            self.room = try await streamVideo.testSFU()
+            self.room = try await streamVideo.testSFU(callSettings: callSettings)
             calling = false
             // TODO: only temporarly.
             shouldShowRoomView = true

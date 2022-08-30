@@ -47,6 +47,24 @@ public struct TopRightView<Content: View>: View {
     }
 }
 
+public struct BottomRightView<Content: View>: View {
+    var content: () -> Content
+    
+    public init(content: @escaping () -> Content) {
+        self.content = content
+    }
+        
+    public var body: some View {
+        HStack {
+            Spacer()
+            VStack {
+                Spacer()
+                content()
+            }
+        }
+    }
+}
+
 struct BottomView<Content: View>: View {
     
     var content: () -> Content

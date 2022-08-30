@@ -50,7 +50,7 @@
 		8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */; };
 		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
-		8457CF9128BB835F00E8CF50 /* RemoteParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */; };
+		8457CF9128BB835F00E8CF50 /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457CF9028BB835F00E8CF50 /* RoomView.swift */; };
 		8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */; };
 		8458872728A3F34D002A81BF /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872628A3F34D002A81BF /* HelperViews.swift */; };
 		8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872928A3F935002A81BF /* OutgoingCallView.swift */; };
@@ -261,7 +261,7 @@
 		8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrefixLogFormatter.swift; sourceTree = "<group>"; };
 		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
-		8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RemoteParticipantsView.swift; sourceTree = "<group>"; };
+		8457CF9028BB835F00E8CF50 /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomView.swift; sourceTree = "<group>"; };
 		8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingParticipantsView.swift; sourceTree = "<group>"; };
 		8458872628A3F34D002A81BF /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
 		8458872928A3F935002A81BF /* OutgoingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView.swift; sourceTree = "<group>"; };
@@ -509,7 +509,7 @@
 				846FBE8728AAD81E00147F6E /* Participants */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
 				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
-				8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */,
+				8457CF9028BB835F00E8CF50 /* RoomView.swift */,
 			);
 			path = RoomView;
 			sourceTree = "<group>";
@@ -1236,7 +1236,7 @@
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
-				8457CF9128BB835F00E8CF50 /* RemoteParticipantsView.swift in Sources */,
+				8457CF9128BB835F00E8CF50 /* RoomView.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsView.swift in Sources */,
 				8434C52B289AA3150001490A /* Appearance.swift in Sources */,
 				8434C527289AA2F00001490A /* Images.swift in Sources */,

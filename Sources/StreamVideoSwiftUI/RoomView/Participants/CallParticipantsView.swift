@@ -14,8 +14,7 @@ struct CallParticipantsView: View {
         
     var body: some View {
         CallParticipantsViewContainer(
-            onlineParticipants: viewModel.onlineParticipants,
-            offlineParticipants: viewModel.offlineParticipants,
+            participants: participants,
             callSettings: viewModel.callSettings,
             maxHeight: maxHeight,
             inviteParticipantsShown: $viewModel.inviteParticipantsShown,
@@ -30,6 +29,12 @@ struct CallParticipantsView: View {
             }
         )
     }
+    
+    private var participants: [CallParticipant] {
+        viewModel.callParticipants
+            .map(\.value)
+            .sorted(by: { $0.name < $1.name })
+    }
 }
 
 struct CallParticipantsViewContainer: View {
@@ -37,8 +42,7 @@ struct CallParticipantsViewContainer: View {
     @Injected(\.colors) var colors
     @Injected(\.images) var images
         
-    var onlineParticipants: [CallParticipant]
-    var offlineParticipants: [CallParticipant]
+    var participants: [CallParticipant]
     var callSettings: CallSettings
     var maxHeight: CGFloat
     @Binding var inviteParticipantsShown: Bool
@@ -53,12 +57,9 @@ struct CallParticipantsViewContainer: View {
             VStack {
                 ScrollView {
                     LazyVStack {
-                        ForEach(onlineParticipants) { participant in
+                        ForEach(participants) { participant in
                             CallParticipantView(participant: participant)
-                        }
-                        
-                        ForEach(offlineParticipants) { participant in
-                            CallParticipantView(participant: participant)
+                                .id(participant.renderingId)
                         }
                     }
                     .padding()
@@ -89,13 +90,13 @@ struct CallParticipantsViewContainer: View {
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
                         inviteParticipantsShown: $inviteParticipantsShown,
-                        currentParticipants: (onlineParticipants + offlineParticipants)
+                        currentParticipants: participants
                     )
                 } label: {
                     EmptyView()
                 }
             }
-            .navigationTitle("\(L10n.Call.Participants.title) (\(onlineParticipants.count + offlineParticipants.count))")
+            .navigationTitle("\(L10n.Call.Participants.title) (\(participants.count))")
             .navigationBarTitleDisplayMode(.inline)
             .toolbar(content: {
                 ToolbarItem(placement: .navigationBarTrailing) {
@@ -194,11 +195,19 @@ struct CallParticipantView: View {
                 if participant.isOnline {
                     (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
                         .foregroundColor(participant.hasAudio ? colors.text : colors.accentRed)
+
                     (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
                         .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
                 }
             }
             Divider()
         }
+    }
+}
+
+extension CallParticipant {
+    
+    var renderingId: String {
+        "\(id)-\(isOnline)-\(hasAudio)-\(hasVideo)"
     }
 }

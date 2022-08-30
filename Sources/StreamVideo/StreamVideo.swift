@@ -156,8 +156,8 @@ public class StreamVideo {
     }
     
     // TODO: temp for testing
-    public func testSFU() async throws -> Room? {
-        try await webRTCClient.connect(shouldPublish: true)
+    public func testSFU(callSettings: CallSettings) async throws -> Room? {
+        try await webRTCClient.connect(callSettings: callSettings)
         currentRoom = Room.create()
         return currentRoom
     }
