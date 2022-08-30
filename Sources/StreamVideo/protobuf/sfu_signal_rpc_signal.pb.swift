@@ -253,13 +253,23 @@ struct Stream_Video_Sfu_JoinRequest {
 
     var sessionID: String = String()
 
-    var senderCodecs: [Stream_Video_Sfu_Codec] = []
+    // TODO: we should know if this is going to be
+    /// - publishing and subscribing, or just subscribing for future routing
+    var codecSettings: Stream_Video_Sfu_CodecSettings {
+        get { _codecSettings ?? Stream_Video_Sfu_CodecSettings() }
+        set { _codecSettings = newValue }
+    }
 
-    var receiverCodecs: [Stream_Video_Sfu_Codec] = []
+    /// Returns true if `codecSettings` has been explicitly set.
+    var hasCodecSettings: Bool { self._codecSettings != nil }
+    /// Clears the value of `codecSettings`. Subsequent reads from it will return its default value.
+    mutating func clearCodecSettings() { _codecSettings = nil }
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    private var _codecSettings: Stream_Video_Sfu_CodecSettings?
 }
 
 struct Stream_Video_Sfu_JoinResponse {
@@ -1035,8 +1045,7 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "subscriber_sdp_offer"),
         3: .standard(proto: "session_id"),
-        4: .standard(proto: "sender_codecs"),
-        5: .standard(proto: "receiver_codecs")
+        4: .standard(proto: "codec_settings")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1047,34 +1056,33 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.subscriberSdpOffer) }()
             case 3: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-            case 4: try { try decoder.decodeRepeatedMessageField(value: &self.senderCodecs) }()
-            case 5: try { try decoder.decodeRepeatedMessageField(value: &self.receiverCodecs) }()
+            case 4: try { try decoder.decodeSingularMessageField(value: &self._codecSettings) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
         if !subscriberSdpOffer.isEmpty {
             try visitor.visitSingularStringField(value: subscriberSdpOffer, fieldNumber: 1)
         }
         if !sessionID.isEmpty {
             try visitor.visitSingularStringField(value: sessionID, fieldNumber: 3)
         }
-        if !senderCodecs.isEmpty {
-            try visitor.visitRepeatedMessageField(value: senderCodecs, fieldNumber: 4)
-        }
-        if !receiverCodecs.isEmpty {
-            try visitor.visitRepeatedMessageField(value: receiverCodecs, fieldNumber: 5)
-        }
+        try { if let v = self._codecSettings {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Sfu_JoinRequest, rhs: Stream_Video_Sfu_JoinRequest) -> Bool {
         if lhs.subscriberSdpOffer != rhs.subscriberSdpOffer { return false }
         if lhs.sessionID != rhs.sessionID { return false }
-        if lhs.senderCodecs != rhs.senderCodecs { return false }
-        if lhs.receiverCodecs != rhs.receiverCodecs { return false }
+        if lhs._codecSettings != rhs._codecSettings { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

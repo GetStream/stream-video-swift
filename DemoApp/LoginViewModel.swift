@@ -36,102 +36,41 @@ extension UserCredentials {
     
     static var builtInUsers: [UserCredentials] = [
         (
-            "luke_skywalker",
-            "Luke Skywalker",
+            "tommaso",
+            "Tommaso",
             "https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibHVrZV9za3l3YWxrZXIifQ.Ql0LVcZcu4BBi1YuAR_Tjz0aiWJWuzjL-QAPOFsp-d4"
+            "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOjQyLCJjYWxsX2lkIjoiY2FsbDoxMjMiLCJ1c2VyIjp7ImlkIjoidG9tbWFzbyIsImltYWdlX3VybCI6Imh0dHBzOi8vZ2V0c3RyZWFtLmlvL3N0YXRpYy83MTJiYjVjMGJkNWVkOGQzZmE2ZTU4NDJmNmNmYmVlZC9jNTlkZS90b21tYXNvLndlYnAifSwiZ3JhbnRzIjp7ImNhbl9qb2luX2NhbGwiOnRydWUsImNhbl9wdWJsaXNoX3ZpZGVvIjp0cnVlLCJjYW5fcHVibGlzaF9hdWRpbyI6dHJ1ZSwiY2FuX3NjcmVlbl9zaGFyZSI6dHJ1ZSwiY2FuX211dGVfdmlkZW8iOnRydWUsImNhbl9tdXRlX2F1ZGlvIjp0cnVlfSwiaXNzIjoiZGV2LW9ubHkucHVia2V5LmVjZHNhMjU2IiwiYXVkIjpbImxvY2FsaG9zdCJdfQ.5EFD_nsXygyQxztBSqoPg_muPHOk5xSEmnfbyHl63o8mZ5xLqT8DLFrimKVGupsh2y7h0wPu59lDk7wkfulEdg"
         ),
         (
-            "leia_organa",
-            "Leia Organa",
+            "marcelo",
+            "Marcelo",
             "https://vignette.wikia.nocookie.net/starwars/images/f/fc/Leia_Organa_TLJ.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGVpYV9vcmdhbmEifQ.4wZ4_pz5s20IOO1GF6fQ8tQcSdi8_uV5InF0PSREpZ0"
+            "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOjQyLCJjYWxsX2lkIjoiY2FsbDoxMjMiLCJ1c2VyIjp7ImlkIjoibWFyY2VsbyIsImltYWdlX3VybCI6Imh0dHBzOi8vZ2V0c3RyZWFtLmlvL3N0YXRpYy9hYWY1ZmIxN2RjZmQwYTNkZDg4NWY2MmJkMjFiMzI1YS84MDJkMi9tYXJjZWxvLXBpcmVzLndlYnAifSwiZ3JhbnRzIjp7ImNhbl9qb2luX2NhbGwiOnRydWUsImNhbl9wdWJsaXNoX3ZpZGVvIjp0cnVlLCJjYW5fcHVibGlzaF9hdWRpbyI6dHJ1ZSwiY2FuX3NjcmVlbl9zaGFyZSI6dHJ1ZSwiY2FuX211dGVfdmlkZW8iOnRydWUsImNhbl9tdXRlX2F1ZGlvIjp0cnVlfSwiaXNzIjoiZGV2LW9ubHkucHVia2V5LmVjZHNhMjU2IiwiYXVkIjpbImxvY2FsaG9zdCJdfQ.iS3xIPX_jAsjyiZbrNkcFkpbzF1ocQGmS6qFiYlfYWnez56bsNEJ0_YTkowdyZfdlB_9u36PGnreaqoBigbZpg"
         ),
         (
-            "han_solo",
-            "Han Solo",
+            "martin",
+            "Martin",
             "https://vignette.wikia.nocookie.net/starwars/images/e/e2/TFAHanSolo.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiaGFuX3NvbG8ifQ.r83FFE9oQoxLgjVoO6-Ky5A2opA0nLvTQqr4PzWCDf8"
+            "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOjQyLCJjYWxsX2lkIjoiY2FsbDoxMjMiLCJ1c2VyIjp7ImlkIjoibWFydGluIiwiaW1hZ2VfdXJsIjoiaHR0cHM6Ly9nZXRzdHJlYW0uaW8vc3RhdGljLzI3OTZhMzA1ZGQwNzY1MWZjY2ViNDcyMWE5NGY0NTA1LzgwMmQyL21hcnRpbi1taXRyZXZza2kud2VicCJ9LCJncmFudHMiOnsiY2FuX2pvaW5fY2FsbCI6dHJ1ZSwiY2FuX3B1Ymxpc2hfdmlkZW8iOnRydWUsImNhbl9wdWJsaXNoX2F1ZGlvIjp0cnVlLCJjYW5fc2NyZWVuX3NoYXJlIjp0cnVlLCJjYW5fbXV0ZV92aWRlbyI6dHJ1ZSwiY2FuX211dGVfYXVkaW8iOnRydWV9LCJpc3MiOiJkZXYtb25seS5wdWJrZXkuZWNkc2EyNTYiLCJhdWQiOlsibG9jYWxob3N0Il19.9mHCY3tF4qFYbNcWaHoF0Azs9-r7mNdgefxdw3B56m_27nqLZYgjcyVG9Tqv3LT_5L766FE6tPIZ_ZQ1-_ONwA"
         ),
         (
-            "lando_calrissian",
-            "Lando Calrissian",
+            "filip",
+            "Filip",
             "https://vignette.wikia.nocookie.net/starwars/images/8/8f/Lando_ROTJ.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibGFuZG9fY2Fscmlzc2lhbiJ9.lhD1e5H5sUNIgcEAj-9htv84Re7ebztoEy9E9gFs1SI"
+            "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOjQyLCJjYWxsX2lkIjoiY2FsbDoxMjMiLCJ1c2VyIjp7ImlkIjoiZmlsaXAiLCJpbWFnZV91cmwiOiJodHRwczovL2dldHN0cmVhbS5pby9zdGF0aWMvNzZjZGE0OTY2OWJlMzhiOTIzMDZjZmM5M2NhNzQyZjEvODAyZDIvZmlsaXAtYmFiaSVDNCU4Ny53ZWJwIn0sImdyYW50cyI6eyJjYW5fam9pbl9jYWxsIjp0cnVlLCJjYW5fcHVibGlzaF92aWRlbyI6dHJ1ZSwiY2FuX3B1Ymxpc2hfYXVkaW8iOnRydWUsImNhbl9zY3JlZW5fc2hhcmUiOnRydWUsImNhbl9tdXRlX3ZpZGVvIjp0cnVlLCJjYW5fbXV0ZV9hdWRpbyI6dHJ1ZX0sImlzcyI6ImRldi1vbmx5LnB1YmtleS5lY2RzYTI1NiIsImF1ZCI6WyJsb2NhbGhvc3QiXX0.XmvDAtIAjnWMETVun0Vffcrp9Tk7xujXZS8GawVdBY8R8yxec4asziTUKHJCkXq6GjeJtEVMtrzoJs9qP0xtDQ"
         ),
         (
-            "chewbacca",
-            "Chewbacca",
+            "thierry",
+            "Thierry",
             "https://vignette.wikia.nocookie.net/starwars/images/4/48/Chewbacca_TLJ.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY2hld2JhY2NhIn0.c4CX0gByW-ZmWApLhgFOfnyXDlZov2mFJkM6HqE-iSM"
+            "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOjQyLCJjYWxsX2lkIjoiY2FsbDoxMjMiLCJ1c2VyIjp7ImlkIjoidGhpZXJyeSIsImltYWdlX3VybCI6Imh0dHBzOi8vZ2V0c3RyZWFtLmlvL3N0YXRpYy8yMzdmNDVmMjg2OTA2OTZhZDhmZmY5MjcyNmY0NTEwNi9jNTlkZS90aGllcnJ5LndlYnAifSwiZ3JhbnRzIjp7ImNhbl9qb2luX2NhbGwiOnRydWUsImNhbl9wdWJsaXNoX3ZpZGVvIjp0cnVlLCJjYW5fcHVibGlzaF9hdWRpbyI6dHJ1ZSwiY2FuX3NjcmVlbl9zaGFyZSI6dHJ1ZSwiY2FuX211dGVfdmlkZW8iOnRydWUsImNhbl9tdXRlX2F1ZGlvIjp0cnVlfSwiaXNzIjoiZGV2LW9ubHkucHVia2V5LmVjZHNhMjU2IiwiYXVkIjpbImxvY2FsaG9zdCJdfQ.pmaz5REWBAWLSJsycIkKcpJlCPr9eyUCB4Pa3ij5Mt5yai39ZZC8zsweR_mKlP-yYo4Zb69zfodA3PWwRhEUCg"
         ),
         (
-            "c-3po",
-            "C-3PO",
+            "sam",
+            "Sam",
             "https://vignette.wikia.nocookie.net/starwars/images/3/3f/C-3PO_TLJ_Card_Trader_Award_Card.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYy0zcG8ifQ._Q2k7Fig-R79IntBmmkJAj_qkXIxltU7Rsnme8UranQ"
-        ),
-        (
-            "r2-d2",
-            "R2-D2",
-            "https://vignette.wikia.nocookie.net/starwars/images/e/eb/ArtooTFA2-Fathead.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicjItZDIifQ.bePaiFHh4lDR16pD-zXE4aQAUyUu96U3Re0g54sGSW4"
-        ),
-        (
-            "anakin_skywalker",
-            "Anakin Skywalker",
-            "https://vignette.wikia.nocookie.net/starwars/images/6/6f/Anakin_Skywalker_RotS.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiYW5ha2luX3NreXdhbGtlciJ9.TSRZ8iil6VnEwYqGfo3LQ-9H-vOTaBCPpMxGetQ37Pc"
-        ),
-        (
-            "obi-wan_kenobi",
-            "Obi-Wan Kenobi",
-            "https://vignette.wikia.nocookie.net/starwars/images/4/4e/ObiWanHS-SWE.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoib2JpLXdhbl9rZW5vYmkifQ.tLwVX0T5O4vuo09qoMH_YzfgBMEygMtQ54VFpGIdz2M"
-        ),
-        (
-            "padme_amidala",
-            "Padmé Amidala",
-            "https://vignette.wikia.nocookie.net/starwars/images/b/b2/Padmegreenscrshot.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicGFkbWVfYW1pZGFsYSJ9.yW7OOk0y6YmtPinO8EtJyfhwyEWjYKfyg2Zqa1JulD8"
-        ),
-        (
-            "qui-gon_jinn",
-            "Qui-Gon Jinn",
-            "https://vignette.wikia.nocookie.net/starwars/images/f/f6/Qui-Gon_Jinn_Headshot_TPM.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoicXVpLWdvbl9qaW5uIn0.bltxgWckVVN6XOdPizgJOozOVPxPhBj_f9bye7NALWk"
-        ),
-        (
-            "mace_windu",
-            "Mace Windu",
-            "https://vignette.wikia.nocookie.net/starwars/images/5/58/Mace_ROTS.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWFjZV93aW5kdSJ9.h1Z8Ooy7SIabphTbRmwM2nltSud1NEd9PDBsJ1b4oRg"
-        ),
-        (
-            "jar_jar_binks",
-            "Jar Jar Binks",
-            "https://vignette.wikia.nocookie.net/starwars/images/d/d2/Jar_Jar_aotc.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiamFyX2phcl9iaW5rcyJ9.XBwL4j5ijeIyF9C-Hk1RkYgVQVdRUBy0oKqXJinfrlI"
-        ),
-        (
-            "darth_maul",
-            "Darth Maul",
-            "https://vignette.wikia.nocookie.net/starwars/images/5/50/Darth_Maul_profile.png",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZGFydGhfbWF1bCJ9.hfhccZ2vGRaMwVkgxWOv4GhA5ayYR6Of4spP6VMFG4s"
-        ),
-        (
-            "count_dooku",
-            "Count Dooku",
-            "https://vignette.wikia.nocookie.net/starwars/images/b/b8/Dooku_Headshot.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiY291bnRfZG9va3UifQ.LFEQeMh26fSkEz83q2rNcIvS_GZKuarKyEvLzP1LDnY"
-        ),
-        (
-            "general_grievous",
-            "General Grievous",
-            "https://vignette.wikia.nocookie.net/starwars/images/d/de/Grievoushead.jpg",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiZ2VuZXJhbF9ncmlldm91cyJ9.bRZV0C7A-m4J-IORbpPc5cF2GMhzs3k9JfSVdivTtAw"
+            "eyJhbGciOiJFUzI1NiIsInR5cCI6IkpXVCJ9.eyJhcHBfaWQiOjQyLCJjYWxsX2lkIjoiY2FsbDoxMjMiLCJ1c2VyIjp7ImlkIjoic2FtIiwiaW1hZ2VfdXJsIjoiaHR0cHM6Ly9nZXRzdHJlYW0uaW8vc3RhdGljLzM3OWVkYTIyNjYzYmFlMTAxODkyYWQxZDM3Nzc4YzNkLzgwMmQyL3NhbXVlbC1qZWV2ZXMud2VicCJ9LCJncmFudHMiOnsiY2FuX2pvaW5fY2FsbCI6dHJ1ZSwiY2FuX3B1Ymxpc2hfdmlkZW8iOnRydWUsImNhbl9wdWJsaXNoX2F1ZGlvIjp0cnVlLCJjYW5fc2NyZWVuX3NoYXJlIjp0cnVlLCJjYW5fbXV0ZV92aWRlbyI6dHJ1ZSwiY2FuX211dGVfYXVkaW8iOnRydWV9LCJpc3MiOiJkZXYtb25seS5wdWJrZXkuZWNkc2EyNTYiLCJhdWQiOlsibG9jYWxob3N0Il19.Qxta03Hncph0yoYy3hMxUc3dEhUjxckoRXo8VT-IefY6Lm3d7UUQDwld1zcpTz73GezmPLYKqo0oWsHZFOMVow"
         )
-        
     ].map {
         UserCredentials(
             userInfo: UserInfo(
