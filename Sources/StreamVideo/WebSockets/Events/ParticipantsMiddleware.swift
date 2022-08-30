@@ -6,7 +6,7 @@ import Foundation
 
 class ParticipantsMiddleware: EventMiddleware {
     
-    var room: VideoRoom?
+    var room: Room?
     
     func handle(event: Event) -> Event? {
         if let participantJoined = event as? Stream_Video_ParticipantJoined {
@@ -41,5 +41,4 @@ class ParticipantsMiddleware: EventMiddleware {
         )
         room?.onParticipantEvent?(event)
     }
-    
 }

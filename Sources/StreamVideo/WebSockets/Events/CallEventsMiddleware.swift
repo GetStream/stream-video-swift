@@ -6,7 +6,7 @@ import Foundation
 
 class CallEventsMiddleware: EventMiddleware {
     
-    var room: VideoRoom?
+    var room: Room?
     
     func handle(event: Event) -> Event? {
         if let audioMuted = event as? Stream_Video_AudioMuted {
@@ -21,5 +21,4 @@ class CallEventsMiddleware: EventMiddleware {
         
         return event
     }
-    
 }

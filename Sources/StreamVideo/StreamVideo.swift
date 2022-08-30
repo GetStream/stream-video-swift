@@ -36,7 +36,7 @@ public class StreamVideo {
     
     private var currentCallInfo = [String: String]()
     
-    internal var currentRoom: VideoRoom?
+    internal var currentRoom: Room?
     internal let videoConfig: VideoConfig
     
     /// The notification center used to send and receive notifications about incoming events.
@@ -156,9 +156,9 @@ public class StreamVideo {
     }
     
     // TODO: temp for testing
-    public func testSFU() async throws -> VideoRoom? {
+    public func testSFU() async throws -> Room? {
         try await webRTCClient.connect(shouldPublish: true)
-        currentRoom = VideoRoom.create()
+        currentRoom = Room.create()
         return currentRoom
     }
     
@@ -187,7 +187,7 @@ public class StreamVideo {
         callId: String,
         videoOptions: VideoOptions,
         participantIds: [String]
-    ) async throws -> VideoRoom {
+    ) async throws -> Room {
         let createCallResponse = try await createCall(
             callType: callType.name,
             callId: callId,
@@ -205,7 +205,7 @@ public class StreamVideo {
         callType: CallType,
         callId: String,
         videoOptions: VideoOptions
-    ) async throws -> VideoRoom {
+    ) async throws -> Room {
         let joinCallResponse = try await joinCall(
             callId: callId,
             type: callType.name
@@ -228,7 +228,7 @@ public class StreamVideo {
         )
                        
         // TODO: revisit this when working on coordinator.
-        let room = VideoRoom.create()
+        let room = Room.create()
         participantsMiddleware.room = room
         callEventsMiddleware.room = room
         currentRoom = room

@@ -11,7 +11,7 @@ open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     
-    @Published public var room: VideoRoom? {
+    @Published public var room: Room? {
         didSet {
             // TODO: refine this.
             connectionStatus = room != nil ? .connected : .disconnected(reason: nil)
@@ -157,7 +157,7 @@ open class CallViewModel: ObservableObject {
                 log.debug("Starting call")
                 let callType = CallType(name: "video")
                 let options = VideoOptions()
-                let room: VideoRoom
+                let room: Room
                 if isStarted {
                     room = try await streamVideo.joinCall(
                         callType: callType,

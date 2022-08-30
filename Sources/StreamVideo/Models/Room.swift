@@ -5,7 +5,7 @@
 import AVFoundation
 import SwiftUI
 
-public class VideoRoom: ObservableObject {
+public class Room: ObservableObject {
             
     @Published var participants = [String: CallParticipant]() {
         didSet {
@@ -15,8 +15,8 @@ public class VideoRoom: ObservableObject {
     
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
-    static func create() -> VideoRoom {
-        VideoRoom()
+    static func create() -> Room {
+        Room()
     }
     
     private init() {}
