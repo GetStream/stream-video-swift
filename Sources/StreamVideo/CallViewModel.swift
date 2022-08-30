@@ -193,6 +193,7 @@ open class CallViewModel: ObservableObject {
     public func leaveCall() {
         calling = false
         streamVideo.leaveCall()
+        room = nil
         currentEventsTask?.cancel()
     }
     

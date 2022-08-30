@@ -238,6 +238,9 @@ public class StreamVideo {
 
     public func leaveCall() {
         webSocketClient?.set(callInfo: [:])
+        Task {
+            await webRTCClient.cleanUp()
+        }
         if videoConfig.persitingSocketConnection {
             return
         }

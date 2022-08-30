@@ -7,7 +7,6 @@ import WebRTC
 
 class WebRTCClient: NSObject {
     
-    // TODO: check if this state is really needed.
     actor State {
         var connectionStatus = VideoConnectionStatus.disconnected(reason: nil)
         
@@ -27,7 +26,6 @@ class WebRTCClient: NSObject {
     
     private(set) var signalChannel: DataChannel?
     
-    // TODO: fix this
     private var sessionID = UUID().uuidString
     private let timeoutInterval: TimeInterval = 8
     
@@ -77,12 +75,12 @@ class WebRTCClient: NSObject {
     
     // TODO: connectOptions / roomOptions
     func connect(shouldPublish: Bool) async throws {
-        await cleanUp()
         let connectionStatus = await state.connectionStatus
         if connectionStatus == .connected || connectionStatus == .connecting {
             log.debug("Skipping connection, already connected or connecting")
             return
         }
+        await cleanUp()
         log.debug("Connecting to SFU")
         await state.update(connectionStatus: .connecting)
         log.debug("Creating subscriber peer connection")
@@ -120,6 +118,17 @@ class WebRTCClient: NSObject {
         }
         // TODO: pass call settings
         await setupUserMedia(callSettings: CallSettings(), shouldPublish: shouldPublish)
+    }
+    
+    func cleanUp() async {
+        publisher = nil
+        subscriber = nil
+        signalChannel = nil
+        callParticipants = [:]
+        localAudioTrack = nil
+        localVideoTrack = nil
+        sessionID = UUID().uuidString
+        await state.update(connectionStatus: .disconnected(reason: .user))
     }
     
     func startCapturingLocalVideo(renderer: RTCVideoRenderer, cameraPosition: AVCaptureDevice.Position) {
@@ -232,7 +241,7 @@ class WebRTCClient: NSObject {
     }
     
     private func negotiate(peerConnection: PeerConnection?) async throws {
-        log.debug("Creating peer connection offer")
+        log.debug("Negotiating peer connection")
         let offer = try await peerConnection?.createOffer()
         log.debug("Setting local description for peer connection")
         try await peerConnection?.setLocalDescription(offer)
@@ -409,8 +418,6 @@ class WebRTCClient: NSObject {
             publisher?.transceiver?.sender.parameters = params
         }
     }
-    
-    private func cleanUp() async {}
 }
 
 extension RTCAudioSessionConfiguration {

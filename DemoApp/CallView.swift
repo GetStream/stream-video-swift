@@ -24,7 +24,14 @@ struct CallView: View {
                         viewFactory: DefaultViewFactory.shared, viewModel: viewModel
                     )
                 } else {
-                    LocalVideoView()
+                    ZStack {
+                        LocalVideoView()
+                        VStack {
+                            Spacer()
+                            CallControlsView(viewModel: viewModel)
+                        }
+                    }
+
                 }
             } else {
                 HomeView(viewModel: viewModel)

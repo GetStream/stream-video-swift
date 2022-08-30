@@ -12,6 +12,10 @@ public struct CallControlsView: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     
+    public init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+    }
+    
     public var body: some View {
         CallControlsContainer(
             callSettings: viewModel.callSettings,
