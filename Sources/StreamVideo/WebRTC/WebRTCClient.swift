@@ -416,7 +416,7 @@ class WebRTCClient: NSObject {
 extension RTCAudioSessionConfiguration {
     
     static let `default`: RTCAudioSessionConfiguration = {
-        let configuration = RTCAudioSessionConfiguration()
+        let configuration = RTCAudioSessionConfiguration.webRTC()
         configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
         configuration.category = AVAudioSession.Category.playAndRecord.rawValue
         return configuration
