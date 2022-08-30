@@ -73,6 +73,7 @@ open class CallViewModel: ObservableObject {
         callParticipants
             .filter { $0.value.id != streamVideo.userInfo.id }
             .map(\.value)
+            .sorted(by: { $0.layoutPriority.rawValue < $1.layoutPriority.rawValue })
             .sorted(by: { $0.name < $1.name })
     }
     

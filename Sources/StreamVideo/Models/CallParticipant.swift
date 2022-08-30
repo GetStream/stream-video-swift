@@ -15,6 +15,7 @@ public class CallParticipant: Identifiable {
     public var hasAudio: Bool
     public var track: RTCVideoTrack?
     public var trackSize: CGSize = .zero
+    public var layoutPriority = LayoutPriority.normal
     
     public init(
         id: String,
@@ -33,6 +34,12 @@ public class CallParticipant: Identifiable {
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
     }
+}
+
+public enum LayoutPriority: Int {
+    case high = 1
+    case normal = 5
+    case low = 10
 }
 
 extension Stream_Video_Participant {

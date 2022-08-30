@@ -331,6 +331,8 @@ class WebRTCClient: NSObject {
             handleParticipantLeft(event)
         } else if let event = event as? Stream_Video_Sfu_ChangePublishQuality {
             handleChangePublishQualityEvent(event)
+        } else if let event = event as? Stream_Video_Sfu_DominantSpeakerChanged {
+            handleDominantSpeakerChanged(event)
         }
     }
     
@@ -365,9 +367,6 @@ class WebRTCClient: NSObject {
     }
     
     private func updateParticipantsSubscriptions() {
-        // TODO: implement updates of view sizes.
-        let screenWidth = UIScreen.main.bounds.width
-        let screenHeight = UIScreen.main.bounds.height
         Task {
             var request = Stream_Video_Sfu_UpdateSubscriptionsRequest()
             var subscriptions = [String: Stream_Video_Sfu_VideoDimension]()
@@ -376,8 +375,8 @@ class WebRTCClient: NSObject {
                 if value.id != userInfo.id {
                     log.debug("updating subscription for user \(value.id)")
                     var dimension = Stream_Video_Sfu_VideoDimension()
-                    dimension.height = UInt32(screenHeight) // TODO: only temp!
-                    dimension.width = UInt32(screenWidth) // TODO: only temp!
+                    dimension.height = UInt32(value.trackSize.height)
+                    dimension.width = UInt32(value.trackSize.width)
                     subscriptions[value.id] = dimension
                 }
             }
@@ -416,6 +415,17 @@ class WebRTCClient: NSObject {
             log.debug("Updating publish quality with encodings \(updatedEncodings)")
             params.encodings = updatedEncodings
             publisher?.transceiver?.sender.parameters = params
+        }
+    }
+    
+    private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_DominantSpeakerChanged) {
+        let userId = event.userID
+        for (key, participant) in callParticipants {
+            if key == userId {
+                participant.layoutPriority = .high
+            } else {
+                participant.layoutPriority = .normal
+            }
         }
     }
 }
