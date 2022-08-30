@@ -3,8 +3,6 @@
 //
 
 import Combine
-import LiveKit
-import Promises
 import SwiftUI
 import WebRTC
 
@@ -15,7 +13,8 @@ open class CallViewModel: ObservableObject {
     
     @Published public var room: VideoRoom? {
         didSet {
-            connectionStatus = room?.connectionStatus ?? .disconnected(reason: nil)
+            // TODO: refine this.
+            connectionStatus = room != nil ? .connected : .disconnected(reason: nil)
             room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
                 self?.callParticipants = participants
             })
@@ -23,15 +22,11 @@ open class CallViewModel: ObservableObject {
         }
     }
 
-    @Published public var focusParticipant: RoomParticipant?
     @Published public var connectionStatus: VideoConnectionStatus = .disconnected(reason: nil) {
         didSet {
             checkRoomDisplay()
         }
     }
-
-    @Published public var cameraTrackState: StreamTrackPublishState = .notPublished()
-    @Published public var microphoneTrackState: StreamTrackPublishState = .notPublished()
 
     public var shouldShowRoomView: Bool = false {
         didSet {
@@ -178,12 +173,13 @@ open class CallViewModel: ObservableObject {
                     )
                 }
                 self.room = room
-                self.room?.addDelegate(self)
                 listenForParticipantEvents()
-                if callSettings.audioOn && !self.microphoneTrackState.isPublished {
+                // TODO: add a check if microphone is already on.
+                if callSettings.audioOn {
                     toggleMicrophoneEnabled()
                 }
-                if callSettings.videoOn && !self.cameraTrackState.isPublished {
+                // TODO: add a check if camera is already on.
+                if callSettings.videoOn {
                     toggleCameraEnabled()
                 }
                 log.debug("Started call")
@@ -197,7 +193,6 @@ open class CallViewModel: ObservableObject {
     public func leaveCall() {
         calling = false
         streamVideo.leaveCall()
-        room?.disconnect()
         currentEventsTask?.cancel()
     }
     
@@ -218,47 +213,6 @@ open class CallViewModel: ObservableObject {
     private func checkRoomDisplay() {
         shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting)
             && (callParticipants.count > 1 || streamVideo.videoConfig.joinVideoCallInstantly)
-    }
-}
-
-// TODO: LiveKit remove
-extension CallViewModel: VideoRoomDelegate {
-    
-    // MARK: - RoomDelegate
-
-    nonisolated public func room(_ room: Room, didUpdate connectionState: ConnectionState, oldValue: ConnectionState) {
-        DispatchQueue.main.async {
-            self.connectionStatus = connectionState.mapped
-            log.debug("Connection status changed to \(self.connectionStatus)")
-        }
-        
-        if case .disconnected = connectionState {
-            DispatchQueue.main.async {
-                // Reset state
-                self.focusParticipant = nil
-            }
-        }
-    }
-
-    nonisolated public func room(
-        _ room: Room,
-        participantDidLeave participant: RemoteParticipant
-    ) {
-        let remoteParticipant = RoomParticipant(participant: participant)
-        log.debug("Participant \(participant.name) left the room.")
-        
-        DispatchQueue.main.async {
-            if let focusParticipant = self.focusParticipant,
-               focusParticipant.id == remoteParticipant.id {
-                self.focusParticipant = nil
-            }
-        }
-    }
-    
-    nonisolated public func room(_ room: Room, participantDidJoin participant: RemoteParticipant) {
-        DispatchQueue.main.async {
-            log.debug("Participant \(participant.name) joined the room.")
-        }
     }
 }
 

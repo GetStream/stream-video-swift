@@ -98,6 +98,7 @@
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
 		84BBF62F28AFDED200387A02 /* DataChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62E28AFDED200387A02 /* DataChannel.swift */; };
+		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
 		84EBAA8E288BCB2700BE3176 /* CallsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBAA8D288BCB2700BE3176 /* CallsMiddleware.swift */; };
 		84EBAA90288BCEAA00BE3176 /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */; };
 		84EBAA95288C23DF00BE3176 /* ParticipantsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBAA94288C23DF00BE3176 /* ParticipantsMiddleware.swift */; };
@@ -121,24 +122,17 @@
 		84F73835287C146D00A363F4 /* StreamVideoUIKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F73834287C146D00A363F4 /* StreamVideoUIKitTests.swift */; };
 		84F73836287C146D00A363F4 /* StreamVideoUIKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F7382A287C146D00A363F4 /* StreamVideoUIKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240E286C9530002A3186 /* CallViewModel.swift */; };
-		84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2416286D86AE002A3186 /* ParticipantLayout.swift */; };
-		84F7383F287C193300A363F4 /* StreamVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997E287865560034B735 /* StreamVideoView.swift */; };
-		84F73840287C193300A363F4 /* RoomView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2412286CA414002A3186 /* RoomView.swift */; };
-		84F73841287C193300A363F4 /* ParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED2414286CABD1002A3186 /* ParticipantView.swift */; };
 		84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		84F73852287C19B500A363F4 /* LiveKit in Frameworks */ = {isa = PBXBuildFile; productRef = 84F73851287C19B500A363F4 /* LiveKit */; };
 		84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299722876E8C90034B735 /* InjectedValues.swift */; };
 		84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C299742876E8F80034B735 /* InjectedValuesExtensions.swift */; };
 		84F73855287C1A3400A363F4 /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997C28784BB30034B735 /* Utils.swift */; };
 		84F73856287C1A3400A363F4 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997828784B180034B735 /* Typealiases.swift */; };
-		84F73857287C1A3400A363F4 /* RoomParticipant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997628784AA40034B735 /* RoomParticipant.swift */; };
 		84F73858287C1A3400A363F4 /* VideoConnectionStatus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2997A28784B500034B735 /* VideoConnectionStatus.swift */; };
 		84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996D2876E42D0034B735 /* StreamVideo.swift */; };
 		84F7385A287C1A3400A363F4 /* Room.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996B2876D93D0034B735 /* Room.swift */; };
-		84F7385B287C1A3400A363F4 /* VideoService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C2996F2876E5DC0034B735 /* VideoService.swift */; };
 		84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C1228ACDF3A00181490 /* ProtoModel.swift */; };
 		84FC2C1828ACDFE500181490 /* sfu_signal_rpc_signal.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C1428ACDFE500181490 /* sfu_signal_rpc_signal.pb.swift */; };
 		84FC2C1928ACDFE500181490 /* sfu_models_models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C1528ACDFE500181490 /* sfu_models_models.pb.swift */; };
@@ -316,23 +310,17 @@
 		84C2996928757F820034B735 /* DemoApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DemoApp-Info.plist"; sourceTree = "<group>"; };
 		84C2996B2876D93D0034B735 /* Room.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Room.swift; sourceTree = "<group>"; };
 		84C2996D2876E42D0034B735 /* StreamVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo.swift; sourceTree = "<group>"; };
-		84C2996F2876E5DC0034B735 /* VideoService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoService.swift; sourceTree = "<group>"; };
 		84C299722876E8C90034B735 /* InjectedValues.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectedValues.swift; sourceTree = "<group>"; };
 		84C299742876E8F80034B735 /* InjectedValuesExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InjectedValuesExtensions.swift; sourceTree = "<group>"; };
-		84C2997628784AA40034B735 /* RoomParticipant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomParticipant.swift; sourceTree = "<group>"; };
 		84C2997828784B180034B735 /* Typealiases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Typealiases.swift; sourceTree = "<group>"; };
 		84C2997A28784B500034B735 /* VideoConnectionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConnectionStatus.swift; sourceTree = "<group>"; };
 		84C2997C28784BB30034B735 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
-		84C2997E287865560034B735 /* StreamVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoView.swift; sourceTree = "<group>"; };
 		84EBAA8D288BCB2700BE3176 /* CallsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsMiddleware.swift; sourceTree = "<group>"; };
 		84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		84EBAA92288C137E00BE3176 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
 		84EBAA94288C23DF00BE3176 /* ParticipantsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsMiddleware.swift; sourceTree = "<group>"; };
 		84ED240C286C9515002A3186 /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
 		84ED240E286C9530002A3186 /* CallViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewModel.swift; sourceTree = "<group>"; };
-		84ED2412286CA414002A3186 /* RoomView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RoomView.swift; sourceTree = "<group>"; };
-		84ED2414286CABD1002A3186 /* ParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantView.swift; sourceTree = "<group>"; };
-		84ED2416286D86AE002A3186 /* ParticipantLayout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantLayout.swift; sourceTree = "<group>"; };
 		84F3B0D9289083E70088751D /* WebSocketConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConstants.swift; sourceTree = "<group>"; };
 		84F3B0DD28913E0E0088751D /* CallControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView.swift; sourceTree = "<group>"; };
 		84F3B0DF289150B10088751D /* CallParticipant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant.swift; sourceTree = "<group>"; };
@@ -377,9 +365,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84F73852287C19B500A363F4 /* LiveKit in Frameworks */,
 				84204C89288815E800C5F20F /* Atlantis in Frameworks */,
 				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
+				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -519,11 +507,7 @@
 			isa = PBXGroup;
 			children = (
 				846FBE8728AAD81E00147F6E /* Participants */,
-				84ED2412286CA414002A3186 /* RoomView.swift */,
-				84ED2414286CABD1002A3186 /* ParticipantView.swift */,
-				84ED2416286D86AE002A3186 /* ParticipantLayout.swift */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
-				84C2997E287865560034B735 /* StreamVideoView.swift */,
 				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
 				8457CF9028BB835F00E8CF50 /* RemoteParticipantsView.swift */,
 			);
@@ -593,7 +577,6 @@
 				84AF64D1287C78E70012A503 /* UserInfo.swift */,
 				84AF64D6287C79610012A503 /* Token.swift */,
 				84C2996B2876D93D0034B735 /* Room.swift */,
-				84C2997628784AA40034B735 /* RoomParticipant.swift */,
 				84C2997828784B180034B735 /* Typealiases.swift */,
 				84C2997A28784B500034B735 /* VideoConnectionStatus.swift */,
 				84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */,
@@ -672,14 +655,6 @@
 			path = Utils;
 			sourceTree = "<group>";
 		};
-		84C2996A2876D8B50034B735 /* VideoService */ = {
-			isa = PBXGroup;
-			children = (
-				84C2996F2876E5DC0034B735 /* VideoService.swift */,
-			);
-			path = VideoService;
-			sourceTree = "<group>";
-		};
 		84C299712876E77E0034B735 /* DependencyInjection */ = {
 			isa = PBXGroup;
 			children = (
@@ -744,7 +719,6 @@
 				84AF64D3287C79220012A503 /* Utils */,
 				84A7E17A2883624500526C98 /* WebSockets */,
 				84A7E1772881921000526C98 /* HTTPClient */,
-				84C2996A2876D8B50034B735 /* VideoService */,
 				8456E6D8287EC436004E180E /* Errors */,
 				84ED240B286C9500002A3186 /* protobuf */,
 			);
@@ -892,9 +866,9 @@
 			);
 			name = StreamVideo;
 			packageProductDependencies = (
-				84F73851287C19B500A363F4 /* LiveKit */,
 				84AF64BB287C34320012A503 /* WebRTC */,
 				84204C88288815E800C5F20F /* Atlantis */,
+				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -1042,10 +1016,10 @@
 			);
 			mainGroup = 842D8BBA2865B31B00801910;
 			packageReferences = (
-				84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */,
 				84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */,
 				84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */,
 				842C7EAF28A2793B00C2AB7F /* XCRemoteSwiftPackageReference "NukeUI" */,
+				84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -1170,7 +1144,6 @@
 				84560F3228B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift in Sources */,
 				84B04BE728941EA6003A8DCD /* StatsConstants.swift in Sources */,
 				8478EB13288A054B00525538 /* VideoConfig.swift in Sources */,
-				84F73857287C1A3400A363F4 /* RoomParticipant.swift in Sources */,
 				84AF64CD287C545E0012A503 /* models.pb.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
 				84A7E198288366D000526C98 /* EventDecoder.swift in Sources */,
@@ -1234,7 +1207,6 @@
 				84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				84AF64D0287C545E0012A503 /* coordinator_service.pb.swift in Sources */,
-				84F7385B287C1A3400A363F4 /* VideoService.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1254,14 +1226,11 @@
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
 				84231E4728B2506B007985EF /* StreamSwiftUIVideoView.swift in Sources */,
-				84F73840287C193300A363F4 /* RoomView.swift in Sources */,
 				842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
-				84F7383F287C193300A363F4 /* StreamVideoView.swift in Sources */,
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
-				84F73841287C193300A363F4 /* ParticipantView.swift in Sources */,
 				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
@@ -1270,7 +1239,6 @@
 				8457CF9128BB835F00E8CF50 /* RemoteParticipantsView.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsView.swift in Sources */,
 				8434C52B289AA3150001490A /* Appearance.swift in Sources */,
-				84F7383E287C193300A363F4 /* ParticipantLayout.swift in Sources */,
 				8434C527289AA2F00001490A /* Images.swift in Sources */,
 				846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */,
 				8434C525289AA2E20001490A /* Fonts.swift in Sources */,
@@ -1377,6 +1345,7 @@
 		842D8BCF2865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1438,6 +1407,7 @@
 		842D8BD02865B31D00801910 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
@@ -1963,12 +1933,12 @@
 				version = 104.5112.2;
 			};
 		};
-		84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */ = {
+		84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/livekit/client-sdk-swift.git";
+			repositoryURL = "https://github.com/apple/swift-protobuf.git";
 			requirement = {
-				kind = exactVersion;
-				version = 1.0.4;
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.18.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
@@ -1994,10 +1964,10 @@
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
 			productName = WebRTC;
 		};
-		84F73851287C19B500A363F4 /* LiveKit */ = {
+		84BE8A5528BE314000B34D2F /* SwiftProtobuf */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 84F73F9E286C5011006A39C3 /* XCRemoteSwiftPackageReference "client-sdk-swift" */;
-			productName = LiveKit;
+			package = 84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */;
+			productName = SwiftProtobuf;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

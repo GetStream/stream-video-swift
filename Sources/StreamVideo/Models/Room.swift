@@ -3,13 +3,10 @@
 //
 
 import AVFoundation
-import LiveKit
 import SwiftUI
 
 public class VideoRoom: ObservableObject {
-        
-    private let room: Room?
-    
+            
     @Published var participants = [String: CallParticipant]() {
         didSet {
             log.debug("Participants changed: \(participants)")
@@ -18,21 +15,11 @@ public class VideoRoom: ObservableObject {
     
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
-    static func create(with room: Room? = nil) -> VideoRoom {
-        VideoRoom(room: room)
+    static func create() -> VideoRoom {
+        VideoRoom()
     }
     
-    private init(room: Room?) {
-        self.room = room
-    }
-    
-    func addDelegate(_ delegate: VideoRoomDelegate) {
-        room?.add(delegate: delegate)
-    }
-    
-    func disconnect() {
-        room?.disconnect()
-    }
+    private init() {}
     
     func add(participants: [CallParticipant]) {
         var result = [String: CallParticipant]()
@@ -85,21 +72,7 @@ public class VideoRoom: ObservableObject {
         }
         return events
     }
-    
-    public var localParticipant: LocalParticipant? {
-        room?.localParticipant
-    }
-    
-    internal var remoteParticipants: [Sid: RemoteParticipant] {
-        room?.remoteParticipants ?? [:]
-    }
-    
-    internal var connectionStatus: VideoConnectionStatus {
-        room?.connectionState.mapped ?? VideoConnectionStatus.connected
-    }
 }
-
-typealias VideoRoomDelegate = RoomDelegate
 
 public struct VideoOptions {
     // TODO:

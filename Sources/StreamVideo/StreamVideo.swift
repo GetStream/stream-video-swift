@@ -63,7 +63,6 @@ public class StreamVideo {
     var callCoordinatorService: Stream_Video_CallCoordinatorService
     
     private let apiKey: APIKey
-    private let videoService = VideoService()
     private let latencyService: LatencyService
         
     public init(
@@ -227,14 +226,9 @@ public class StreamVideo {
             callId: callId,
             callType: callType.name
         )
-                        
-        let room = try await videoService.connect(
-            url: edgeServer.url,
-            token: edgeServer.token,
-            participants: joinCallResponse.callParticipants(),
-            options: videoOptions
-        )
-        
+                       
+        // TODO: revisit this when working on coordinator.
+        let room = VideoRoom.create()
         participantsMiddleware.room = room
         callEventsMiddleware.room = room
         currentRoom = room

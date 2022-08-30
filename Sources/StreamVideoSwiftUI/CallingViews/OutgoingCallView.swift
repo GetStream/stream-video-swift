@@ -21,11 +21,8 @@ public struct OutgoingCallView: View {
     
     public var body: some View {
         ZStack {
-            if viewModel.callSettings.videoOn,
-               let localParticipant = viewModel.room?.localParticipant,
-               let roomParticipant = RoomParticipant(participant: localParticipant) {
-                ParticipantView(viewModel: viewModel, participant: roomParticipant) { _ in }
-                    .edgesIgnoringSafeArea(.all)
+            if viewModel.callSettings.videoOn {
+                LocalVideoView()
             } else {
                 Image("incomingCallBackground")
                     .resizable()
