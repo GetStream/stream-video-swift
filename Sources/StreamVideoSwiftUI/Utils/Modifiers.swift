@@ -48,6 +48,15 @@ extension Text {
     }
 }
 
+extension View {
+    
+    func adjustVideoFrame(to size: CGSize, ratio: CGFloat = 0.5) -> some View {
+        aspectRatio(ratio, contentMode: .fill)
+            .frame(width: size.width)
+            .clipped()
+    }
+}
+
 /// Modifier for adding shadow and corner radius to a view.
 struct ShadowViewModifier: ViewModifier {
     

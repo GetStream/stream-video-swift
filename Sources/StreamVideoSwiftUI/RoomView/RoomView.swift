@@ -30,16 +30,17 @@ public struct RoomView<Factory: ViewFactory>: View {
                         handleViewRendering(view, participant: participant)
                     }
                 } else if viewModel.participants.count == 4 {
-                    // TODO: Layout is broken here.
-                    Grid4ParticipantsView(
-                        participants: viewModel.participants,
+                    TwoColumnParticipantsView(
+                        leftColumnParticipants: [participants[0], participants[2]],
+                        rightColumnParticipants: [participants[1], participants[3]],
                         availableSize: reader.size
                     ) { participant, view in
                         handleViewRendering(view, participant: participant)
                     }
                 } else if viewModel.participants.count == 5 {
-                    Grid5ParticipantsView(
-                        participants: viewModel.participants,
+                    TwoColumnParticipantsView(
+                        leftColumnParticipants: [participants[0], participants[2]],
+                        rightColumnParticipants: [participants[1], participants[3], participants[4]],
                         availableSize: reader.size
                     ) { participant, view in
                         handleViewRendering(view, participant: participant)
@@ -98,6 +99,10 @@ public struct RoomView<Factory: ViewFactory>: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
+    private var participants: [CallParticipant] {
+        viewModel.participants
+    }
+    
     private func handleViewRendering(_ view: RTCMTLVideoView, participant: CallParticipant) {
         if let track = participant.track, participant.id != streamVideo.userInfo.id {
             log.debug("adding track to a view \(view)")
@@ -111,59 +116,33 @@ public struct RoomView<Factory: ViewFactory>: View {
     }
 }
 
-struct Grid4ParticipantsView: View {
+struct TwoColumnParticipantsView: View {
     
     @Injected(\.streamVideo) var streamVideo
     
-    var participants: [CallParticipant]
+    var leftColumnParticipants: [CallParticipant]
+    var rightColumnParticipants: [CallParticipant]
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, RTCMTLVideoView) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
             VerticalParticipantsView(
-                participants: [participants[0], participants[2]],
+                participants: leftColumnParticipants,
                 availableSize: size,
                 onViewUpdate: onViewUpdate
             )
-            .frame(width: size.width)
+            .adjustVideoFrame(to: size)
             
             VerticalParticipantsView(
-                participants: [participants[1], participants[3]],
+                participants: rightColumnParticipants,
                 availableSize: size,
                 onViewUpdate: onViewUpdate
             )
-            .frame(width: size.width)
+            .adjustVideoFrame(to: size)
         }
-    }
-    
-    private var size: CGSize {
-        CGSize(width: availableSize.width / 2, height: availableSize.height)
-    }
-}
-
-struct Grid5ParticipantsView: View {
-    
-    @Injected(\.streamVideo) var streamVideo
-    
-    var participants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, RTCMTLVideoView) -> Void
-    
-    var body: some View {
-        HStack(spacing: 0) {
-            VerticalParticipantsView(
-                participants: [participants[0], participants[2]],
-                availableSize: size,
-                onViewUpdate: onViewUpdate
-            )
-            
-            VerticalParticipantsView(
-                participants: [participants[1], participants[3], participants[4]],
-                availableSize: size,
-                onViewUpdate: onViewUpdate
-            )
-        }
+        .frame(maxWidth: availableSize.width, maxHeight: .infinity)
+        .edgesIgnoringSafeArea(.vertical)
     }
     
     private var size: CGSize {
