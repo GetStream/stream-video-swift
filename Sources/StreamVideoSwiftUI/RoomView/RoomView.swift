@@ -177,6 +177,7 @@ struct VerticalParticipantsView: View {
                     }
                     .padding()
                 )
+                .border(Color.green, width: participant.isDominantSpeaker ? 2 : 0)
             }
         }
     }

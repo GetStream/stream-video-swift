@@ -438,13 +438,24 @@ class WebRTCClient: NSObject {
     
     private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_DominantSpeakerChanged) {
         let userId = event.userID
+        var temp = [String: CallParticipant]()
         for (key, participant) in callParticipants {
             if key == userId {
                 participant.layoutPriority = .high
+                participant.isDominantSpeaker = true
+                log.debug("Participant \(participant.name) is the dominant speaker")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    guard let self = self else { return }
+                    participant.isDominantSpeaker = false
+                    self.callParticipants[userId] = participant
+                }
             } else {
                 participant.layoutPriority = .normal
+                participant.isDominantSpeaker = false
             }
+            temp[key] = participant
         }
+        callParticipants = temp
     }
     
     private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_MuteStateChanged) {

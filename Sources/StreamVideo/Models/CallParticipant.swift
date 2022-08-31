@@ -16,6 +16,7 @@ public class CallParticipant: Identifiable {
     public var track: RTCVideoTrack?
     public var trackSize: CGSize = .zero
     public var layoutPriority = LayoutPriority.normal
+    public var isDominantSpeaker = false
     
     public init(
         id: String,
