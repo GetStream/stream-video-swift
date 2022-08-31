@@ -55,6 +55,7 @@ struct CircledTitleView: View {
     @Injected(\.fonts) var fonts
     
     var title: String
+    var size: CGFloat = 80
     
     var body: some View {
         ZStack {
@@ -64,7 +65,7 @@ struct CircledTitleView: View {
                 .foregroundColor(.white)
                 .font(fonts.title)
         }
-        .frame(width: 80, height: 80)
+        .frame(width: size, height: size)
         .modifier(ShadowModifier())
     }
 }

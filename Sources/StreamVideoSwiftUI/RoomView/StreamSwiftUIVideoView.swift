@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import NukeUI
 import StreamVideo
 import SwiftUI
 import WebRTC
@@ -10,12 +11,36 @@ public struct LocalVideoView: View {
     
     @Injected(\.streamVideo) var streamVideo
     
-    public init() {}
+    private let callSettings: CallSettings
+    private var showBackground: Bool
+    
+    public init(
+        callSettings: CallSettings,
+        showBackground: Bool = true
+    ) {
+        self.callSettings = callSettings
+        self.showBackground = showBackground
+    }
             
     public var body: some View {
         GeometryReader { reader in
-            RTCMTLVideoViewSwiftUI(size: reader.size) { view in
-                streamVideo.renderLocalVideo(renderer: view)
+            ZStack {
+                if callSettings.videoOn {
+                    RTCMTLVideoViewSwiftUI(size: reader.size) { view in
+                        streamVideo.renderLocalVideo(renderer: view)
+                    }
+                } else if showBackground || streamVideo.userInfo.imageURL == nil {
+                    CallParticipantImageView(
+                        id: streamVideo.userInfo.id,
+                        name: streamVideo.userInfo.name ?? streamVideo.userInfo.id,
+                        imageURL: streamVideo.userInfo.imageURL
+                    )
+                    .frame(maxWidth: reader.size.width)
+                } else {
+                    LazyImage(source: streamVideo.userInfo.imageURL)
+                        .aspectRatio(contentMode: .fill)
+                        .frame(maxWidth: reader.size.width)
+                }
             }
             .edgesIgnoringSafeArea(.all)
             .background(Color(UIColor.systemBackground))

@@ -12,6 +12,8 @@ public struct RoomView<Factory: ViewFactory>: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     
+    private let padding: CGFloat = 16
+    
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
     
@@ -64,7 +66,7 @@ public struct RoomView<Factory: ViewFactory>: View {
                 }
                 
                 TopRightView {
-                    VStack(alignment: .trailing, spacing: 16) {
+                    VStack(alignment: .trailing, spacing: padding) {
                         Button {
                             viewModel.participantsShown.toggle()
                         } label: {
@@ -74,8 +76,8 @@ public struct RoomView<Factory: ViewFactory>: View {
                         .padding(.horizontal)
                         .padding(.horizontal, 2)
                         
-                        LocalVideoView()
-                            .frame(width: reader.size.width / 4, height: reader.size.width / 2)
+                        LocalVideoView(callSettings: viewModel.callSettings, showBackground: false)
+                            .frame(width: reader.size.width / 4 + padding, height: reader.size.width / 3 + padding)
                             .background(Color.red)
                             .cornerRadius(16)
                             .padding(.horizontal)
@@ -86,10 +88,10 @@ public struct RoomView<Factory: ViewFactory>: View {
                     VStack {
                         CallParticipantsView(
                             viewModel: viewModel,
-                            maxHeight: reader.size.height - 16
+                            maxHeight: reader.size.height - padding
                         )
                         .padding()
-                        .padding(.vertical, 8)
+                        .padding(.vertical, padding / 2)
                         
                         Spacer()
                     }
@@ -163,8 +165,19 @@ struct VerticalParticipantsView: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(participants) { participant in
-                RTCMTLVideoViewSwiftUI(size: availableSize) { view in
-                    onViewUpdate(participant, view)
+                ZStack {
+                    if participant.hasVideo && participant.track != nil {
+                        RTCMTLVideoViewSwiftUI(size: availableSize) { view in
+                            onViewUpdate(participant, view)
+                        }
+                    } else {
+                        CallParticipantImageView(
+                            id: participant.id,
+                            name: participant.name,
+                            imageURL: participant.profileImageURL
+                        )
+                        .frame(maxWidth: availableSize.width)
+                    }
                 }
                 .edgesIgnoringSafeArea(.all)
                 .overlay(

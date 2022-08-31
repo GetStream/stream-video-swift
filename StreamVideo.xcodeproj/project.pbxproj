@@ -99,6 +99,7 @@
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
 		84BBF62F28AFDED200387A02 /* DataChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62E28AFDED200387A02 /* DataChannel.swift */; };
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
+		84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */; };
 		84EBAA8E288BCB2700BE3176 /* CallsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBAA8D288BCB2700BE3176 /* CallsMiddleware.swift */; };
 		84EBAA90288BCEAA00BE3176 /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */; };
 		84EBAA95288C23DF00BE3176 /* ParticipantsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBAA94288C23DF00BE3176 /* ParticipantsMiddleware.swift */; };
@@ -315,6 +316,7 @@
 		84C2997828784B180034B735 /* CallType.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallType.swift; sourceTree = "<group>"; };
 		84C2997A28784B500034B735 /* VideoConnectionStatus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConnectionStatus.swift; sourceTree = "<group>"; };
 		84C2997C28784BB30034B735 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
+		84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantImageView.swift; sourceTree = "<group>"; };
 		84EBAA8D288BCB2700BE3176 /* CallsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsMiddleware.swift; sourceTree = "<group>"; };
 		84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		84EBAA92288C137E00BE3176 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
@@ -510,6 +512,7 @@
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
 				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
 				8457CF9028BB835F00E8CF50 /* RoomView.swift */,
+				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
 			);
 			path = RoomView;
 			sourceTree = "<group>";
@@ -1247,6 +1250,7 @@
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CallingGroupView.swift in Sources */,
 				8458872728A3F34D002A81BF /* HelperViews.swift in Sources */,
+				84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */,
 				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,
 				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
