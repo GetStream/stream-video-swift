@@ -8,6 +8,7 @@ class ParticipantsMiddleware: EventMiddleware {
     
     var room: Room?
     
+    // TODO: probably not needed anymore.
     func handle(event: Event) -> Event? {
         if let participantJoined = event as? Stream_Video_ParticipantJoined {
             let participant = participantJoined.participant.toCallParticipant()

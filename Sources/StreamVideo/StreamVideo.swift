@@ -145,6 +145,10 @@ public class StreamVideo {
             self?.currentRoom?.participants = participants
         }
         
+        webRTCClient.onParticipantEvent = { [weak self] event in
+            self?.currentRoom?.onParticipantEvent?(event)
+        }
+        
         httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }

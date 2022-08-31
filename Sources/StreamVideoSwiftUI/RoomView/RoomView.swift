@@ -10,6 +10,7 @@ public struct RoomView<Factory: ViewFactory>: View {
     
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
+    @Injected(\.colors) var colors
     
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
@@ -54,7 +55,7 @@ public struct RoomView<Factory: ViewFactory>: View {
                     if let event = viewModel.participantEvent {
                         Text("\(event.user) \(event.action.display) the call.")
                             .padding(8)
-                            .foregroundColor(.white)
+                            .foregroundColor(colors.text)
                             .modifier(ShadowViewModifier())
                             .padding()
                     }

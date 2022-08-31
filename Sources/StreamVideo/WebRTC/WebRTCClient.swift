@@ -52,6 +52,7 @@ class WebRTCClient: NSObject {
     var onRemoteStreamAdded: ((RTCMediaStream?) -> Void)?
     var onRemoteStreamRemoved: ((RTCMediaStream?) -> Void)?
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
+    var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     init(
         userInfo: UserInfo,
@@ -362,11 +363,25 @@ class WebRTCClient: NSObject {
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_ParticipantJoined) {
         let participant = event.participant.toCallParticipant()
         callParticipants[participant.id] = participant
+        let event = ParticipantEvent(
+            id: participant.id,
+            action: .join,
+            user: participant.name,
+            imageURL: participant.profileImageURL
+        )
+        onParticipantEvent?(event)
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_ParticipantLeft) {
         let participant = event.participant.toCallParticipant()
         callParticipants.removeValue(forKey: participant.id)
+        let event = ParticipantEvent(
+            id: participant.id,
+            action: .leave,
+            user: participant.name,
+            imageURL: participant.profileImageURL
+        )
+        onParticipantEvent?(event)
     }
     
     private func updateParticipantsSubscriptions() {

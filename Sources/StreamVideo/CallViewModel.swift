@@ -131,6 +131,7 @@ open class CallViewModel: ObservableObject {
             calling = false
             // TODO: only temporarly.
             shouldShowRoomView = true
+            listenForParticipantEvents()
         }
     }
     
