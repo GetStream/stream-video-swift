@@ -25,7 +25,9 @@ struct CallView: View {
                     )
                 } else {
                     ZStack {
-                        LocalVideoView(callSettings: viewModel.callSettings)
+                        LocalVideoView(callSettings: viewModel.callSettings) { view in
+                            viewModel.renderLocalVideo(renderer: view)
+                        }
                         VStack {
                             Spacer()
                             CallControlsView(viewModel: viewModel)

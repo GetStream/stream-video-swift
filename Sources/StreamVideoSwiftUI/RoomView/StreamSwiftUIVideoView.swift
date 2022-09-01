@@ -13,13 +13,16 @@ public struct LocalVideoView: View {
     
     private let callSettings: CallSettings
     private var showBackground: Bool
+    private var onLocalVideoUpdate: (RTCMTLVideoView) -> Void
     
     public init(
         callSettings: CallSettings,
-        showBackground: Bool = true
+        showBackground: Bool = true,
+        onLocalVideoUpdate: @escaping (RTCMTLVideoView) -> Void
     ) {
         self.callSettings = callSettings
         self.showBackground = showBackground
+        self.onLocalVideoUpdate = onLocalVideoUpdate
     }
             
     public var body: some View {
@@ -27,7 +30,7 @@ public struct LocalVideoView: View {
             ZStack {
                 if callSettings.videoOn {
                     RTCMTLVideoViewSwiftUI(size: reader.size) { view in
-                        streamVideo.renderLocalVideo(renderer: view)
+                        onLocalVideoUpdate(view)
                     }
                 } else if showBackground || streamVideo.userInfo.imageURL == nil {
                     CallParticipantImageView(

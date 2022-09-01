@@ -22,7 +22,9 @@ public struct OutgoingCallView: View {
     public var body: some View {
         ZStack {
             if viewModel.callSettings.videoOn {
-                LocalVideoView(callSettings: viewModel.callSettings)
+                LocalVideoView(callSettings: viewModel.callSettings) { view in
+                    viewModel.renderLocalVideo(renderer: view)
+                }
             } else {
                 Image("incomingCallBackground")
                     .resizable()

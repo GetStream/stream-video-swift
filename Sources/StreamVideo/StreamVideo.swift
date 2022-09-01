@@ -36,7 +36,6 @@ public class StreamVideo {
     
     private var currentCallInfo = [String: String]()
     
-    internal var currentRoom: Room?
     internal let videoConfig: VideoConfig
     
     /// The notification center used to send and receive notifications about incoming events.
@@ -64,6 +63,8 @@ public class StreamVideo {
     
     private let apiKey: APIKey
     private let latencyService: LatencyService
+    
+    private var currentCallController: CallController?
         
     public init(
         apiKey: String,
@@ -95,60 +96,7 @@ public class StreamVideo {
             tokenProvider: tokenProvider
         )
         latencyService = LatencyService(httpClient: httpClient)
-        
-        // TODO: extract all this logic in a new controller.
-        webRTCClient.onLocalVideoTrackUpdate = { [weak self] localVideoTrack in
-            guard let userId = self?.userInfo.id else { return }
-            if let participant = self?.currentRoom?.participants[userId] {
-                participant.track = localVideoTrack
-                self?.currentRoom?.participants[userId] = participant
-            } else {
-                // TODO: temporarly create the participant
-                let participant = CallParticipant(
-                    id: userId,
-                    role: "user",
-                    name: user.name ?? userId,
-                    profileImageURL: user.imageURL,
-                    isOnline: true,
-                    hasVideo: true,
-                    hasAudio: true
-                )
-                participant.track = localVideoTrack
-                self?.currentRoom?.participants[userId] = participant
-            }
-        }
-        webRTCClient.onRemoteStreamAdded = { [weak self] stream in
-            let trackId = stream?.streamId.components(separatedBy: ":").first ?? UUID().uuidString
-            var participant = self?.currentRoom?.participants[trackId]
-            if participant == nil {
-                participant = CallParticipant(
-                    id: trackId,
-                    role: "member",
-                    name: trackId,
-                    profileImageURL: nil,
-                    isOnline: true,
-                    hasVideo: true,
-                    hasAudio: true
-                )
-            }
-            participant?.track = stream?.videoTracks.first
-            if let participant = participant {
-                self?.currentRoom?.add(participant: participant)
-            }
-        }
-        webRTCClient.onRemoteStreamRemoved = { [weak self] stream in
-            let trackId = stream?.streamId.components(separatedBy: ":").first ?? UUID().uuidString
-            self?.currentRoom?.removeParticipant(with: trackId)
-        }
-        
-        webRTCClient.onParticipantsUpdated = { [weak self] participants in
-            self?.currentRoom?.participants = participants
-        }
-        
-        webRTCClient.onParticipantEvent = { [weak self] event in
-            self?.currentRoom?.onParticipantEvent?(event)
-        }
-        
+                
         httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }
@@ -159,31 +107,15 @@ public class StreamVideo {
         }
     }
     
-    // TODO: temp for testing
-    public func testSFU(callSettings: CallSettings) async throws -> Room? {
-        try await webRTCClient.connect(callSettings: callSettings)
-        currentRoom = Room.create()
-        return currentRoom
-    }
-    
-    // TODO: extract this in controllers
-    public func renderLocalVideo(renderer: RTCVideoRenderer) {
-        webRTCClient.startCapturingLocalVideo(renderer: renderer, cameraPosition: .front)
-    }
-    
-    // TODO: extract this in controllers
-    public func changeAudioState(isEnabled: Bool) async throws {
-        try await webRTCClient.changeAudioState(isEnabled: isEnabled)
-    }
-    
-    // TODO: extract this in controllers
-    public func changeVideoState(isEnabled: Bool) async throws {
-        try await webRTCClient.changeVideoState(isEnabled: isEnabled)
-    }
-    
-    // TODO: extract this in controllers
-    public func changeCameraMode(position: CameraPosition) {
-        webRTCClient.changeCameraMode(position: position)
+    public func makeCallController(callType: CallType, callId: String) -> CallController {
+        let controller = CallController(
+            webRTCClient: webRTCClient,
+            userInfo: userInfo,
+            callId: callId,
+            callType: callType
+        )
+        currentCallController = controller
+        return controller
     }
 
     public func startCall(
@@ -235,7 +167,7 @@ public class StreamVideo {
         let room = Room.create()
         participantsMiddleware.room = room
         callEventsMiddleware.room = room
-        currentRoom = room
+//        currentRoom = room
         
         return room
     }

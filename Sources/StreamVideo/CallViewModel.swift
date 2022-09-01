@@ -69,6 +69,8 @@ open class CallViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private var currentEventsTask: Task<Void, Never>?
     
+    private var callController: CallController?
+    
     public var participants: [CallParticipant] {
         callParticipants
             .filter { $0.value.id != streamVideo.userInfo.id }
@@ -87,15 +89,19 @@ open class CallViewModel: ObservableObject {
     }
     
     @objc private func checkForOngoingCall() {
-        if room == nil && streamVideo.currentRoom != nil {
-            room = streamVideo.currentRoom
+        if room == nil && callController?.room != nil {
+            room = callController?.room
         }
     }
 
     public func toggleCameraEnabled() {
+        // TODO: throw error
+        guard let callController = callController else {
+            return
+        }
         Task {
             let isEnabled = !callSettings.videoOn
-            try await streamVideo.changeVideoState(isEnabled: isEnabled)
+            try await callController.changeVideoState(isEnabled: isEnabled)
             callSettings = CallSettings(
                 audioOn: callSettings.audioOn,
                 videoOn: isEnabled,
@@ -105,9 +111,13 @@ open class CallViewModel: ObservableObject {
     }
     
     public func toggleMicrophoneEnabled() {
+        // TODO: throw error
+        guard let callController = callController else {
+            return
+        }
         Task {
             let isEnabled = !callSettings.audioOn
-            try await streamVideo.changeAudioState(isEnabled: isEnabled)
+            try await callController.changeAudioState(isEnabled: isEnabled)
             callSettings = CallSettings(
                 audioOn: isEnabled,
                 videoOn: callSettings.videoOn,
@@ -117,17 +127,22 @@ open class CallViewModel: ObservableObject {
     }
     
     public func toggleCameraPosition() {
+        // TODO: throw error
+        guard let callController = callController else {
+            return
+        }
         let next = callSettings.cameraPosition.next()
-        streamVideo.changeCameraMode(position: next)
+        callController.changeCameraMode(position: next)
         callSettings.cameraPosition = next
     }
 
     public func startCall(callId: String, participantIds: [String]) {
+        callController = streamVideo.makeCallController(callType: .init(name: "video"), callId: callId)
         calling = true
 //        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
         // NOTE: uncomment this to test SFU.
         Task {
-            self.room = try await streamVideo.testSFU(callSettings: callSettings)
+            self.room = try await callController?.testSFU(callSettings: callSettings)
             calling = false
             // TODO: only temporarly.
             shouldShowRoomView = true
@@ -137,6 +152,10 @@ open class CallViewModel: ObservableObject {
     
     public func joinCall(callId: String) {
         enterCall(callId: callId, participantIds: [], isStarted: true)
+    }
+    
+    public func renderLocalVideo(renderer: RTCVideoRenderer) {
+        callController?.renderLocalVideo(renderer: renderer)
     }
     
     private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {

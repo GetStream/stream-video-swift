@@ -76,11 +76,13 @@ public struct RoomView<Factory: ViewFactory>: View {
                         .padding(.horizontal)
                         .padding(.horizontal, 2)
                         
-                        LocalVideoView(callSettings: viewModel.callSettings, showBackground: false)
-                            .frame(width: reader.size.width / 4 + padding, height: reader.size.width / 3 + padding)
-                            .background(Color.red)
-                            .cornerRadius(16)
-                            .padding(.horizontal)
+                        LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
+                            viewModel.renderLocalVideo(renderer: view)
+                        }
+                        .frame(width: reader.size.width / 4 + padding, height: reader.size.width / 3 + padding)
+                        .background(Color.red)
+                        .cornerRadius(16)
+                        .padding(.horizontal)
                     }
                 }
                 
