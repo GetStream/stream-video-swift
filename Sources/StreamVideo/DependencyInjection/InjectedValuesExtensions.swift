@@ -17,13 +17,4 @@ extension InjectedValues {
             Self[StreamVideoProviderKey.self] = newValue
         }
     }
-    
-    var callCoordinatorService: Stream_Video_CallCoordinatorService {
-        get {
-            streamVideo.callCoordinatorService
-        }
-        set {
-            streamVideo.callCoordinatorService = newValue
-        }
-    }
 }

@@ -159,6 +159,10 @@ open class CallViewModel: ObservableObject {
     }
     
     private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {
+        guard let callController = callController else {
+            return
+        }
+
         Task {
             do {
                 log.debug("Starting call")
@@ -166,15 +170,16 @@ open class CallViewModel: ObservableObject {
                 let options = VideoOptions()
                 let room: Room
                 if isStarted {
-                    room = try await streamVideo.joinCall(
+                    room = try await callController.joinCall(
                         callType: callType,
                         callId: callId,
+                        callSettings: callSettings,
                         videoOptions: options
                     )
                 } else {
-                    room = try await streamVideo.startCall(
+                    room = try await callController.startCall(
                         callType: callType,
-                        callId: callId,
+                        callId: callId, callSettings: callSettings,
                         videoOptions: options,
                         participantIds: participantIds
                     )

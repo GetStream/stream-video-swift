@@ -15,7 +15,7 @@ public class StreamVideo {
     public var userInfo: UserInfo
     var token: Token {
         didSet {
-            callCoordinatorService.update(userToken: token.rawValue)
+            callCoordinatorController.update(token: token)
         }
     }
 
@@ -28,7 +28,6 @@ public class StreamVideo {
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient?
-    private let webRTCClient: WebRTCClient
     
     private let callsMiddleware = CallsMiddleware()
     private var participantsMiddleware = ParticipantsMiddleware()
@@ -58,13 +57,12 @@ public class StreamVideo {
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
-    
-    var callCoordinatorService: Stream_Video_CallCoordinatorService
-    
+        
     private let apiKey: APIKey
     private let latencyService: LatencyService
     
     private var currentCallController: CallController?
+    private let callCoordinatorController: CallCoordinatorController
         
     public init(
         apiKey: String,
@@ -82,19 +80,17 @@ public class StreamVideo {
             urlSession: Self.makeURLSession(),
             tokenProvider: tokenProvider
         )
-        callCoordinatorService = Stream_Video_CallCoordinatorService(
+        callCoordinatorController = CallCoordinatorController(
             httpClient: httpClient,
-            apiKey: apiKey,
-            hostname: hostname,
-            token: token.rawValue
-        )
-        webRTCClient = WebRTCClient(
             userInfo: user,
-            apiKey: apiKey,
-            hostname: "http://192.168.0.132:3031/twirp",
-            token: token.rawValue,
-            tokenProvider: tokenProvider
+            coordinatorInfo: CoordinatorInfo(
+                apiKey: apiKey,
+                hostname: hostname,
+                token: token.rawValue
+            ),
+            videoConfig: videoConfig
         )
+
         latencyService = LatencyService(httpClient: httpClient)
                 
         httpClient.setTokenUpdater { [weak self] token in
@@ -109,74 +105,21 @@ public class StreamVideo {
     
     public func makeCallController(callType: CallType, callId: String) -> CallController {
         let controller = CallController(
-            webRTCClient: webRTCClient,
+            callCoordinatorController: callCoordinatorController,
             userInfo: userInfo,
             callId: callId,
-            callType: callType
+            callType: callType,
+            token: token,
+            apiKey: apiKey.apiKeyString,
+            tokenProvider: tokenProvider
         )
         currentCallController = controller
         return controller
     }
 
-    public func startCall(
-        callType: CallType,
-        callId: String,
-        videoOptions: VideoOptions,
-        participantIds: [String]
-    ) async throws -> Room {
-        let createCallResponse = try await createCall(
-            callType: callType.name,
-            callId: callId,
-            participantIds: participantIds
-        )
-        
-        return try await joinCall(
-            callType: callType,
-            callId: createCallResponse.call.id,
-            videoOptions: videoOptions
-        )
-    }
-    
-    public func joinCall(
-        callType: CallType,
-        callId: String,
-        videoOptions: VideoOptions
-    ) async throws -> Room {
-        let joinCallResponse = try await joinCall(
-            callId: callId,
-            type: callType.name
-        )
-        
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
-        
-        let edgeServer = try await selectEdgeServer(
-            callId: callId,
-            latencyByEdge: latencyByEdge
-        )
-        
-        if !videoConfig.persitingSocketConnection {
-            connectWebSocketClient()
-        }
-        
-        updateCallInfo(
-            callId: callId,
-            callType: callType.name
-        )
-                       
-        // TODO: revisit this when working on coordinator.
-        let room = Room.create()
-        participantsMiddleware.room = room
-        callEventsMiddleware.room = room
-//        currentRoom = room
-        
-        return room
-    }
-
     public func leaveCall() {
         webSocketClient?.set(callInfo: [:])
-        Task {
-            await webRTCClient.cleanUp()
-        }
+        currentCallController?.cleanUp()
         if videoConfig.persitingSocketConnection {
             return
         }
@@ -194,29 +137,6 @@ public class StreamVideo {
         return incomingCalls
     }
     
-    // TODO: extract this somewhere
-    public func loadParticipants(for call: IncomingCall) async throws -> [CallParticipant] {
-        var getCallRequest = Stream_Video_GetCallRequest()
-        getCallRequest.id = call.id
-        getCallRequest.type = call.type
-        let callResponse = try await callCoordinatorService.getCall(getCallRequest: getCallRequest)
-        let participants = callResponse.callState.participants
-            .map { $0.toCallParticipant() }
-            .filter { $0.id != userInfo.id }
-        return participants
-    }
-    
-    func sendEvent(type: Stream_Video_UserEventType) {
-        Task {
-            var eventRequest = Stream_Video_SendEventRequest()
-            eventRequest.callID = currentCallInfo[WebSocketConstants.callId] ?? ""
-            eventRequest.callType = currentCallInfo[WebSocketConstants.callType] ?? ""
-            eventRequest.userID = userInfo.id
-            eventRequest.eventType = type
-            _ = try? await callCoordinatorService.sendEvent(sendEventRequest: eventRequest)
-        }
-    }
-    
     internal static func makeURLSession() -> URLSession {
         let config = URLSessionConfiguration.default
         config.requestCachePolicy = .reloadIgnoringLocalCacheData
@@ -230,67 +150,6 @@ public class StreamVideo {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         }
-    }
-    
-    private func createCall(
-        callType: String,
-        callId: String,
-        participantIds: [String]
-    ) async throws -> Stream_Video_CreateCallResponse {
-        var createCallRequest = Stream_Video_CreateCallRequest()
-        createCallRequest.id = callId
-        createCallRequest.type = callType
-        createCallRequest.participantIds = participantIds
-        let createCallResponse = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
-        return createCallResponse
-    }
-    
-    private func measureLatencies(
-        for edges: [Stream_Video_Edge]
-    ) async -> [String: Stream_Video_Latency] {
-        await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
-            var result: [String: Stream_Video_Latency] = [:]
-            for edge in edges {
-                group.addTask {
-                    var latency = Stream_Video_Latency()
-                    let value = await self.latencyService.measureLatency(for: edge, tries: 3)
-                    latency.measurementsSeconds = value
-                    return [edge.latencyURL: latency]
-                }
-            }
-            
-            for await latency in group {
-                for (key, value) in latency {
-                    result[key] = value
-                }
-            }
-            
-            log.debug("Reported latencies for edges: \(result)")
-            
-            return result
-        }
-    }
-    
-    private func joinCall(callId: String, type: String) async throws -> Stream_Video_JoinCallResponse {
-        var joinCallRequest = Stream_Video_JoinCallRequest()
-        joinCallRequest.id = callId
-        joinCallRequest.type = type
-        let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
-        return joinCallResponse
-    }
-    
-    private func selectEdgeServer(
-        callId: String,
-        latencyByEdge: [String: Stream_Video_Latency]
-    ) async throws -> (url: String, token: String) {
-        var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
-        selectEdgeRequest.callID = callId
-        selectEdgeRequest.latencyByEdge = latencyByEdge
-        let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
-        let url = "wss://\(response.edgeServer.url)"
-        let token = response.token
-        log.debug("Selected edge server \(url)")
-        return (url: url, token: token)
     }
     
     private func updateCallInfo(callId: String, callType: String) {

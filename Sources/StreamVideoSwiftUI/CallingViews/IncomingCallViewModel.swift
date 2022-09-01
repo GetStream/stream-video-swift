@@ -19,12 +19,13 @@ public class IncomingViewModel: ObservableObject {
     }
     
     private func loadCallParticipants() {
-        Task {
-            do {
-                callParticipants = try await streamVideo.loadParticipants(for: callInfo)
-            } catch {
-                log.error("Error loading call participants")
-            }
-        }
+        // TODO: fix this
+//        Task {
+//            do {
+//                callParticipants = try await streamVideo.loadParticipants(for: callInfo)
+//            } catch {
+//                log.error("Error loading call participants")
+//            }
+//        }
     }
 }
