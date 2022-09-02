@@ -7,7 +7,16 @@ import WebRTC
 
 public class CallController {
     
-    private var webRTCClient: WebRTCClient?
+    private var webRTCClient: WebRTCClient? {
+        didSet {
+            handleLocalTrackUpdate()
+            handleRemoteStreamAdded()
+            handleRemoteStreamRemoved()
+            handleParticipantsUpdated()
+            handleParticipantEvent()
+        }
+    }
+
     private(set) var room: Room?
     private let userInfo: UserInfo
     private let callId: String
@@ -33,11 +42,6 @@ public class CallController {
         self.token = token
         self.apiKey = apiKey
         self.tokenProvider = tokenProvider
-        handleLocalTrackUpdate()
-        handleRemoteStreamAdded()
-        handleRemoteStreamRemoved()
-        handleParticipantsUpdated()
-        handleParticipantEvent()
     }
     
     public func startCall(
@@ -56,7 +60,7 @@ public class CallController {
         
         webRTCClient = WebRTCClient(
             userInfo: userInfo,
-            apiKey: "TODO",
+            apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
             tokenProvider: tokenProvider
@@ -81,7 +85,7 @@ public class CallController {
         
         webRTCClient = WebRTCClient(
             userInfo: userInfo,
-            apiKey: "TODO",
+            apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
             tokenProvider: tokenProvider
