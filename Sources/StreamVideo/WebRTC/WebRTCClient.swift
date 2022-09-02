@@ -40,6 +40,7 @@ class WebRTCClient: NSObject {
     private var localAudioTrack: RTCAudioTrack?
     private var userInfo: UserInfo
     private var callSettings = CallSettings()
+    private let audioSession = AudioSession()
     
     private var callParticipants = [String: CallParticipant]() {
         didSet {
@@ -167,7 +168,7 @@ class WebRTCClient: NSObject {
     }
     
     func setupUserMedia(callSettings: CallSettings) async {
-        configureAudioSession(isActive: callSettings.audioOn)
+        await audioSession.configure(callSettings: callSettings)
         
         // Audio
         let audioTrack = await makeAudioTrack()
@@ -202,23 +203,6 @@ class WebRTCClient: NSObject {
         request.sessionID = sessionID
         _ = try await signalService.updateMuteState(updateMuteStateRequest: request)
         localVideoTrack?.isEnabled = isEnabled
-    }
-    
-    func configureAudioSession(
-        _ configuration: RTCAudioSessionConfiguration = .default,
-        isActive: Bool = false
-    ) {
-        let audioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
-        audioSession.lockForConfiguration()
-
-        defer { audioSession.unlockForConfiguration() }
-
-        do {
-            log.debug("Configuring audio session")
-            try audioSession.setConfiguration(configuration, active: isActive)
-        } catch {
-            log.error("Error occured while configuring audio session \(error)")
-        }
     }
     
     private func handleNegotiationNeeded() -> ((PeerConnection) -> Void) {
@@ -465,14 +449,4 @@ class WebRTCClient: NSObject {
         participant?.hasVideo = !event.videoMuted
         callParticipants[userId] = participant
     }
-}
-
-extension RTCAudioSessionConfiguration {
-    
-    static let `default`: RTCAudioSessionConfiguration = {
-        let configuration = RTCAudioSessionConfiguration.webRTC()
-        configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
-        configuration.category = AVAudioSession.Category.playAndRecord.rawValue
-        return configuration
-    }()
 }
