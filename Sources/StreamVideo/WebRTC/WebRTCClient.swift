@@ -179,8 +179,8 @@ class WebRTCClient: NSObject {
         
         if callSettings.shouldPublish {
             log.debug("publishing local tracks")
-            publisher?.addTrack(audioTrack, streamIds: [sessionID])
-            publisher?.addTransceiver(videoTrack, streamIds: [sessionID])
+            publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"])
+            publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"])
         }
     }
     
@@ -352,6 +352,7 @@ class WebRTCClient: NSObject {
             user: participant.name,
             imageURL: participant.profileImageURL
         )
+        log.debug("Participant \(participant.name) joined the call")
         onParticipantEvent?(event)
     }
     
@@ -364,6 +365,7 @@ class WebRTCClient: NSObject {
             user: participant.name,
             imageURL: participant.profileImageURL
         )
+        log.debug("Participant \(participant.name) left the call")
         onParticipantEvent?(event)
     }
     

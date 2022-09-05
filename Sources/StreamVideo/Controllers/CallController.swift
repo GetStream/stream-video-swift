@@ -173,7 +173,8 @@ public class CallController {
     
     private func handleRemoteStreamAdded() {
         webRTCClient?.onRemoteStreamAdded = { [weak self] stream in
-            let trackId = stream?.streamId.components(separatedBy: ":").first ?? UUID().uuidString
+            let idParts = stream?.streamId.components(separatedBy: ":")
+            let trackId = idParts?.first ?? UUID().uuidString
             var participant = self?.room?.participants[trackId]
             if participant == nil {
                 participant = CallParticipant(
@@ -186,7 +187,9 @@ public class CallController {
                     hasAudio: true
                 )
             }
-            participant?.track = stream?.videoTracks.first
+            if idParts?.last == "video" || stream?.videoTracks.first != nil {
+                participant?.track = stream?.videoTracks.first
+            }
             if let participant = participant {
                 self?.room?.add(participant: participant)
             }
