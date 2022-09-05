@@ -7,25 +7,15 @@ import WebRTC
 
 extension RTCConfiguration {
     
-    static var `default`: RTCConfiguration {
+    static func makeConfiguration(with hostname: String) -> RTCConfiguration {
         let configuration = RTCConfiguration()
-        let first = RTCIceServer(urlStrings: ["stun:openrelay.metered.ca:80"])
+        let first = RTCIceServer(urlStrings: ["stun:stun.l.google.com:19302"])
         let second = RTCIceServer(
-            urlStrings: ["turn:openrelay.metered.ca:80"],
-            username: "openrelayproject",
-            credential: "openrelayproject"
+            urlStrings: ["turn:\(hostname):3478"],
+            username: "video",
+            credential: "video"
         )
-        let third = RTCIceServer(
-            urlStrings: ["turn:openrelay.metered.ca:443"],
-            username: "openrelayproject",
-            credential: "openrelayproject"
-        )
-        let fourth = RTCIceServer(
-            urlStrings: ["turn:openrelay.metered.ca:443?transport=tcp"],
-            username: "openrelayproject",
-            credential: "openrelayproject"
-        )
-        configuration.iceServers = [first, second, third, fourth]
+        configuration.iceServers = [first, second]
         configuration.sdpSemantics = .unifiedPlan
         return configuration
     }

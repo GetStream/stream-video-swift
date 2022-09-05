@@ -41,6 +41,7 @@ class WebRTCClient: NSObject {
     private var userInfo: UserInfo
     private var callSettings = CallSettings()
     private let audioSession = AudioSession()
+    private var host: String
     
     private var callParticipants = [String: CallParticipant]() {
         didSet {
@@ -63,6 +64,7 @@ class WebRTCClient: NSObject {
         tokenProvider: @escaping TokenProvider
     ) {
         self.userInfo = userInfo
+        host = URL(string: hostname)?.host ?? hostname
         httpClient = URLSessionClient(
             urlSession: StreamVideo.makeURLSession(),
             tokenProvider: tokenProvider
@@ -87,7 +89,7 @@ class WebRTCClient: NSObject {
         log.debug("Connecting to SFU")
         await state.update(connectionStatus: .connecting)
         log.debug("Creating subscriber peer connection")
-        let configuration = RTCConfiguration.default
+        let configuration = RTCConfiguration.makeConfiguration(with: host)
         subscriber = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
             configuration: configuration, // TODO: move this in connect options
