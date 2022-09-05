@@ -40,6 +40,7 @@
 		8434C53B289BBF020001490A /* Localizable.strings in Resources */ = {isa = PBXBuildFile; fileRef = 8434C53D289BBF020001490A /* Localizable.strings */; };
 		8434C53E289BBF120001490A /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 8434C540289BBF120001490A /* Localizable.stringsdict */; };
 		8434C542289BC0B00001490A /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C541289BC0B00001490A /* L10n.swift */; };
+		843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CC28C647B600839D99 /* VideoCapturer.swift */; };
 		84560F3228B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
@@ -256,6 +257,7 @@
 		8434C53C289BBF020001490A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/Localizable.strings; sourceTree = "<group>"; };
 		8434C53F289BBF120001490A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		8434C541289BC0B00001490A /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
+		843697CC28C647B600839D99 /* VideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturer.swift; sourceTree = "<group>"; };
 		84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.sfu.signal.twirp.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -810,6 +812,7 @@
 				84FC2C1D28ACF2AE00181490 /* WebRTCClient.swift */,
 				84FC2C2128ACF2E000181490 /* PeerConnection.swift */,
 				84BBF62E28AFDED200387A02 /* DataChannel.swift */,
+				843697CC28C647B600839D99 /* VideoCapturer.swift */,
 				84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */,
 				84FC2C2528AD25EB00181490 /* WebRTCEventsMiddleware.swift */,
 				84FC2C2728AD350100181490 /* WebRTCEvents.swift */,
@@ -1233,6 +1236,7 @@
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
 				84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
+				843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */,
 				84AF64D0287C545E0012A503 /* coordinator_service.pb.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
 			);

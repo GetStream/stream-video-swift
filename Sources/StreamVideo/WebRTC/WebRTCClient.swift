@@ -30,7 +30,7 @@ class WebRTCClient: NSObject {
     private let timeoutInterval: TimeInterval = 15
     
     // Video tracks.
-    private var videoCapturer: RTCVideoCapturer?
+    private var videoCapturer: VideoCapturer?
     private var localVideoTrack: RTCVideoTrack? {
         didSet {
             onLocalVideoTrackUpdate?(localVideoTrack)
@@ -141,27 +141,8 @@ class WebRTCClient: NSObject {
     }
     
     private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
-        guard let capturer = videoCapturer as? RTCCameraVideoCapturer else { return }
-        
-        guard
-            let frontCamera = (RTCCameraVideoCapturer.captureDevices().first { $0.position == cameraPosition }),
-            // choose highest res
-            let format = (RTCCameraVideoCapturer.supportedFormats(for: frontCamera).sorted { (f1, f2) -> Bool in
-                let width1 = CMVideoFormatDescriptionGetDimensions(f1.formatDescription).width
-                let width2 = CMVideoFormatDescriptionGetDimensions(f2.formatDescription).width
-                return width1 < width2
-            }).last,
-        
-            // choose highest fps
-            let fps = (format.videoSupportedFrameRateRanges.sorted { $0.maxFrameRate < $1.maxFrameRate }.last) else {
-            return
-        }
-
-        capturer.startCapture(
-            with: frontCamera,
-            format: format,
-            fps: Int(fps.maxFrameRate)
-        )
+        guard let capturer = videoCapturer else { return }
+        capturer.setCameraPosition(cameraPosition)
     }
     
     func changeCameraMode(position: CameraPosition) {
@@ -251,13 +232,7 @@ class WebRTCClient: NSObject {
     
     private func makeVideoTrack(screenshare: Bool = false) async -> RTCVideoTrack {
         let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshare)
-        
-        #if targetEnvironment(simulator)
-        videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
-        #else
-        videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
-        #endif
-        
+        videoCapturer = VideoCapturer(videoSource: videoSource)
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }
