@@ -27,7 +27,7 @@ class WebRTCClient: NSObject {
     private(set) var signalChannel: DataChannel?
     
     private var sessionID = UUID().uuidString
-    private let timeoutInterval: TimeInterval = 8
+    private let timeoutInterval: TimeInterval = 15
     
     // Video tracks.
     private var videoCapturer: RTCVideoCapturer?
@@ -87,8 +87,7 @@ class WebRTCClient: NSObject {
         log.debug("Connecting to SFU")
         await state.update(connectionStatus: .connecting)
         log.debug("Creating subscriber peer connection")
-        let configuration = RTCConfiguration()
-        configuration.sdpSemantics = .unifiedPlan
+        let configuration = RTCConfiguration.default
         subscriber = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
             configuration: configuration, // TODO: move this in connect options
