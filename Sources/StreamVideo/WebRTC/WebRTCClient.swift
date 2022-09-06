@@ -109,7 +109,7 @@ class WebRTCClient: NSObject {
             self?.handle(event: event)
         }
         
-        try await join(peerConnection: subscriber)
+        let participants = try await join(peerConnection: subscriber)
         try await listenForConnectionOpened()
         log.debug("Updating connection status to connected")
         await state.update(connectionStatus: .connected)
@@ -123,6 +123,7 @@ class WebRTCClient: NSObject {
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
         }
         await setupUserMedia(callSettings: callSettings)
+        callParticipants = participants
     }
     
     func cleanUp() async {
@@ -198,16 +199,17 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func join(peerConnection: PeerConnection?) async throws {
+    private func join(peerConnection: PeerConnection?) async throws -> [String: CallParticipant] {
         log.debug("Creating peer connection offer")
         let offer = try await peerConnection?.createOffer()
         log.debug("Setting local description for peer connection")
         try await peerConnection?.setLocalDescription(offer)
         let joinResponse = try await executeJoinRequest(for: offer)
-        callParticipants = loadParticipants(from: joinResponse)
+        let participants = loadParticipants(from: joinResponse)
         let sdp = joinResponse.sdp
         log.debug("Setting remote description")
         try await peerConnection?.setRemoteDescription(sdp, type: .answer)
+        return participants
     }
     
     private func negotiate(peerConnection: PeerConnection?) async throws {
