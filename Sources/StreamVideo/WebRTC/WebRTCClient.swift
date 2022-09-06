@@ -254,9 +254,41 @@ class WebRTCClient: NSObject {
         for subscriberOffer: RTCSessionDescription?
     ) async throws -> Stream_Video_Sfu_JoinResponse {
         log.debug("Executing join request")
+                
+        var videoCodecs = Stream_Video_Sfu_VideoCodecs()
+        videoCodecs.encode = PeerConnectionFactory.supportedVideoCodecEncoding.map { $0.toSfuCodec() }
+        videoCodecs.decode = PeerConnectionFactory.supportedVideoCodecDecoding.map { $0.toSfuCodec() }
+        
+        var codecSettings = Stream_Video_Sfu_CodecSettings()
+        codecSettings.video = videoCodecs
+        
+        var full = Stream_Video_Sfu_VideoLayer()
+        full.bitrate = 1_000_000
+        full.rid = "f"
+        var fullDimension = Stream_Video_Sfu_VideoDimension()
+        fullDimension.height = 740
+        fullDimension.width = 1280
+        
+        var half = Stream_Video_Sfu_VideoLayer()
+        half.bitrate = 500_000
+        half.rid = "h"
+        var halfDimension = Stream_Video_Sfu_VideoDimension()
+        halfDimension.height = 480
+        halfDimension.width = 640
+        
+        var quarter = Stream_Video_Sfu_VideoLayer()
+        quarter.bitrate = 300_000
+        quarter.rid = "q"
+        var quarterDimension = Stream_Video_Sfu_VideoDimension()
+        quarterDimension.height = 360
+        quarterDimension.width = 480
+        
+        codecSettings.layers = [full, half, quarter]
+        
         var joinRequest = Stream_Video_Sfu_JoinRequest()
         joinRequest.subscriberSdpOffer = subscriberOffer?.sdp ?? ""
         joinRequest.sessionID = sessionID
+        joinRequest.codecSettings = codecSettings
         let response = try await signalService.join(joinRequest: joinRequest)
         return response
     }

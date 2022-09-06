@@ -115,7 +115,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
                 
         let f = RTCRtpEncodingParameters()
         f.rid = "f"
-        f.maxBitrateBps = 1_200_000
+        f.maxBitrateBps = 1_000_000
         
         let h = RTCRtpEncodingParameters()
         h.rid = "h"
@@ -125,7 +125,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         let q = RTCRtpEncodingParameters()
         q.rid = "q"
         q.scaleResolutionDownBy = 4.0
-        q.maxBitrateBps = 125_000
+        q.maxBitrateBps = 300_000
         
         transceiverInit.sendEncodings = [f, h, q]
         
@@ -170,5 +170,15 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
         log.debug("Data channel opened for \(type.rawValue)")
+    }
+}
+
+extension RTCVideoCodecInfo {
+    
+    func toSfuCodec() -> Stream_Video_Sfu_Codec {
+        var codec = Stream_Video_Sfu_Codec()
+        codec.mime = name
+        codec.hwAccelerated = name == "H264"
+        return codec
     }
 }

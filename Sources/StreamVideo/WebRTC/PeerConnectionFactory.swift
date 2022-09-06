@@ -7,6 +7,14 @@ import WebRTC
 
 actor PeerConnectionFactory {
     
+    static let supportedVideoCodecEncoding: [RTCVideoCodecInfo] = {
+        RTCDefaultVideoEncoderFactory().supportedCodecs()
+    }()
+    
+    static let supportedVideoCodecDecoding: [RTCVideoCodecInfo] = {
+        RTCDefaultVideoDecoderFactory().supportedCodecs()
+    }()
+    
     private let factory: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
         let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
