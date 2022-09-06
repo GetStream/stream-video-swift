@@ -65,7 +65,7 @@ public class CallController {
             token: edgeServer.token,
             tokenProvider: tokenProvider
         )
-        try await webRTCClient?.connect(callSettings: callSettings)
+        try await webRTCClient?.connect(callSettings: callSettings, videoOptions: videoOptions)
         let currentRoom = Room.create()
         room = currentRoom
         return currentRoom
@@ -90,7 +90,7 @@ public class CallController {
             token: edgeServer.token,
             tokenProvider: tokenProvider
         )
-        try await webRTCClient?.connect(callSettings: callSettings)
+        try await webRTCClient?.connect(callSettings: callSettings, videoOptions: videoOptions)
         let currentRoom = Room.create()
         room = currentRoom
         return currentRoom
@@ -106,7 +106,7 @@ public class CallController {
         )
     
         let webRTCClient = try currentWebRTCClient()
-        try await webRTCClient.connect(callSettings: callSettings)
+        try await webRTCClient.connect(callSettings: callSettings, videoOptions: VideoOptions())
         room = Room.create()
         return room
     }

@@ -40,6 +40,7 @@ class WebRTCClient: NSObject {
     private var localAudioTrack: RTCAudioTrack?
     private var userInfo: UserInfo
     private var callSettings = CallSettings()
+    private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private var host: String
     
@@ -79,13 +80,14 @@ class WebRTCClient: NSObject {
     }
     
     // TODO: connectOptions / roomOptions
-    func connect(callSettings: CallSettings) async throws {
+    func connect(callSettings: CallSettings, videoOptions: VideoOptions) async throws {
         let connectionStatus = await state.connectionStatus
         if connectionStatus == .connected || connectionStatus == .connecting {
             log.debug("Skipping connection, already connected or connecting")
             return
         }
         await cleanUp()
+        self.videoOptions = videoOptions
         log.debug("Connecting to SFU")
         await state.update(connectionStatus: .connecting)
         log.debug("Creating subscriber peer connection")
@@ -232,7 +234,7 @@ class WebRTCClient: NSObject {
     
     private func makeVideoTrack(screenshare: Bool = false) async -> RTCVideoTrack {
         let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshare)
-        videoCapturer = VideoCapturer(videoSource: videoSource)
+        videoCapturer = VideoCapturer(videoSource: videoSource, videoOptions: videoOptions)
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }
