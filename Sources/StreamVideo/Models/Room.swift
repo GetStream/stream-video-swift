@@ -74,23 +74,6 @@ public class Room: ObservableObject {
     }
 }
 
-public struct VideoOptions {
-    
-    public var preferredFormat: AVCaptureDevice.Format?
-    public var preferredDimensions: CMVideoDimensions
-    public var preferredFps: Int
-    
-    public init(
-        preferredFormat: AVCaptureDevice.Format? = nil,
-        preferredDimensions: CMVideoDimensions = .default,
-        preferredFps: Int = 30
-    ) {
-        self.preferredFormat = preferredFormat
-        self.preferredDimensions = preferredDimensions
-        self.preferredFps = preferredFps
-    }
-}
-
 enum CallEventType {
     case videoStarted
     case videoStopped

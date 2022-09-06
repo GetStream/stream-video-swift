@@ -96,7 +96,8 @@ class WebRTCClient: NSObject {
             sessionId: sessionID,
             configuration: configuration, // TODO: move this in connect options
             type: .subscriber,
-            signalService: signalService
+            signalService: signalService,
+            videoOptions: videoOptions
         )
         
         subscriber?.onStreamAdded = onRemoteStreamAdded
@@ -118,7 +119,8 @@ class WebRTCClient: NSObject {
                 sessionId: sessionID,
                 configuration: configuration, // TODO: move this in connect options
                 type: .publisher,
-                signalService: signalService
+                signalService: signalService,
+                videoOptions: videoOptions
             )
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
         }
@@ -262,28 +264,20 @@ class WebRTCClient: NSObject {
         var codecSettings = Stream_Video_Sfu_CodecSettings()
         codecSettings.video = videoCodecs
         
-        var full = Stream_Video_Sfu_VideoLayer()
-        full.bitrate = 1_000_000
-        full.rid = "f"
-        var fullDimension = Stream_Video_Sfu_VideoDimension()
-        fullDimension.height = 740
-        fullDimension.width = 1280
+        var layers = [Stream_Video_Sfu_VideoLayer]()
         
-        var half = Stream_Video_Sfu_VideoLayer()
-        half.bitrate = 500_000
-        half.rid = "h"
-        var halfDimension = Stream_Video_Sfu_VideoDimension()
-        halfDimension.height = 480
-        halfDimension.width = 640
+        for codec in videoOptions.supportedCodecs {
+            var layer = Stream_Video_Sfu_VideoLayer()
+            layer.bitrate = UInt32(codec.maxBitrate)
+            layer.rid = codec.quality
+            var dimension = Stream_Video_Sfu_VideoDimension()
+            dimension.height = UInt32(codec.dimensions.height)
+            dimension.width = UInt32(codec.dimensions.width)
+            layer.videoDimension = dimension
+            layers.append(layer)
+        }
         
-        var quarter = Stream_Video_Sfu_VideoLayer()
-        quarter.bitrate = 300_000
-        quarter.rid = "q"
-        var quarterDimension = Stream_Video_Sfu_VideoDimension()
-        quarterDimension.height = 360
-        quarterDimension.width = 480
-        
-        codecSettings.layers = [full, half, quarter]
+        codecSettings.layers = layers
         
         var joinRequest = Stream_Video_Sfu_JoinRequest()
         joinRequest.subscriberSdpOffer = subscriberOffer?.sdp ?? ""

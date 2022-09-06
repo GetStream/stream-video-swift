@@ -66,7 +66,9 @@ class VideoCapturer {
 
 extension CMVideoDimensions {
     
-    public static var `default` = CMVideoDimensions(width: 1280, height: 720)
+    public static var full = CMVideoDimensions(width: 1280, height: 720)
+    public static var half = CMVideoDimensions(width: 640, height: 480)
+    public static var quarter = CMVideoDimensions(width: 480, height: 360)
     
     var area: Int32 {
         width * height

@@ -18,6 +18,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     private let signalService: Stream_Video_Sfu_SignalServer
     private let sessionId: String
     private let type: PeerConnectionType
+    private let videoOptions: VideoOptions
     
     private(set) var transceiver: RTCRtpTransceiver?
         
@@ -29,12 +30,14 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         sessionId: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        signalService: Stream_Video_Sfu_SignalServer
+        signalService: Stream_Video_Sfu_SignalServer,
+        videoOptions: VideoOptions
     ) {
         self.sessionId = sessionId
         self.pc = pc
         self.signalService = signalService
         self.type = type
+        self.videoOptions = videoOptions
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
@@ -112,22 +115,20 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = .sendOnly
         transceiverInit.streamIds = streamIds
-                
-        let f = RTCRtpEncodingParameters()
-        f.rid = "f"
-        f.maxBitrateBps = 1_000_000
         
-        let h = RTCRtpEncodingParameters()
-        h.rid = "h"
-        h.scaleResolutionDownBy = 2.0
-        h.maxBitrateBps = 500_000
+        var encodingParams = [RTCRtpEncodingParameters]()
         
-        let q = RTCRtpEncodingParameters()
-        q.rid = "q"
-        q.scaleResolutionDownBy = 4.0
-        q.maxBitrateBps = 300_000
+        for codec in videoOptions.supportedCodecs {
+            let encodingParam = RTCRtpEncodingParameters()
+            encodingParam.rid = codec.quality
+            encodingParam.maxBitrateBps = (codec.maxBitrate) as NSNumber
+            if let scaleDownFactor = codec.scaleDownFactor {
+                encodingParam.scaleResolutionDownBy = (scaleDownFactor) as NSNumber
+            }
+            encodingParams.append(encodingParam)
+        }
         
-        transceiverInit.sendEncodings = [f, h, q]
+        transceiverInit.sendEncodings = encodingParams
         
         transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }

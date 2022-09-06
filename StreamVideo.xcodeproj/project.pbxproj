@@ -41,6 +41,7 @@
 		8434C53E289BBF120001490A /* Localizable.stringsdict in Resources */ = {isa = PBXBuildFile; fileRef = 8434C540289BBF120001490A /* Localizable.stringsdict */; };
 		8434C542289BC0B00001490A /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C541289BC0B00001490A /* L10n.swift */; };
 		843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CC28C647B600839D99 /* VideoCapturer.swift */; };
+		843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CE28C7898A00839D99 /* VideoOptions.swift */; };
 		84560F3228B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
@@ -258,6 +259,7 @@
 		8434C53F289BBF120001490A /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.stringsdict; name = en; path = en.lproj/Localizable.stringsdict; sourceTree = "<group>"; };
 		8434C541289BC0B00001490A /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		843697CC28C647B600839D99 /* VideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturer.swift; sourceTree = "<group>"; };
+		843697CE28C7898A00839D99 /* VideoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptions.swift; sourceTree = "<group>"; };
 		84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.sfu.signal.twirp.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -591,6 +593,7 @@
 				84AF64D6287C79610012A503 /* Token.swift */,
 				84C2996B2876D93D0034B735 /* Room.swift */,
 				84C2997828784B180034B735 /* CallType.swift */,
+				843697CE28C7898A00839D99 /* VideoOptions.swift */,
 				84C2997A28784B500034B735 /* VideoConnectionStatus.swift */,
 				84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */,
 				84F3B0DF289150B10088751D /* CallParticipant.swift */,
@@ -1176,6 +1179,7 @@
 				8456E6D1287EC343004E180E /* Logger.swift in Sources */,
 				84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */,
 				84F3B0E0289150B10088751D /* CallParticipant.swift in Sources */,
+				843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */,
 				84FC2C1828ACDFE500181490 /* sfu_signal_rpc_signal.pb.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				84AF64D2287C78E70012A503 /* UserInfo.swift in Sources */,
