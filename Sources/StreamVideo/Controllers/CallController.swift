@@ -133,8 +133,8 @@ public class CallController {
         try await callCoordinatorController.loadParticipants(for: call)
     }
     
-    public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
-        webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
+    public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
+        await webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
     func cleanUp() {
@@ -177,9 +177,7 @@ public class CallController {
     }
     
     private func handleRemoteStreamAdded() {
-        webRTCClient?.onRemoteStreamAdded = { [weak self] stream in
-            let idParts = stream?.streamId.components(separatedBy: ":")
-            let trackId = idParts?.first ?? UUID().uuidString
+        webRTCClient?.onRemoteTrackAdded = { [weak self] (track, trackId) in
             var participant = self?.room?.participants[trackId]
             if participant == nil {
                 participant = CallParticipant(
@@ -193,8 +191,8 @@ public class CallController {
                     showTrack: true
                 )
             }
-            if idParts?.last == "video" || stream?.videoTracks.first != nil {
-                participant?.track = stream?.videoTracks.first
+            if track != nil {
+                participant?.track = track
             }
             if let participant = participant {
                 self?.room?.add(participant: participant)

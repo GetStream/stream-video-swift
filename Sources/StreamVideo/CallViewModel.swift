@@ -159,7 +159,9 @@ open class CallViewModel: ObservableObject {
     }
     
     public func changeTrackVisbility(for participant: CallParticipant, isVisible: Bool) {
-        callController?.changeTrackVisibility(for: participant, isVisible: isVisible)
+        Task {
+            await callController?.changeTrackVisibility(for: participant, isVisible: isVisible)
+        }
     }
     
     private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {
