@@ -19,6 +19,9 @@ actor AudioSession {
         do {
             log.debug("Configuring audio session")
             try audioSession.setConfiguration(configuration, active: callSettings.audioOn)
+            if callSettings.speakerOn {
+                configuration.categoryOptions.insert(.defaultToSpeaker)
+            }
             try audioSession.overrideOutputAudioPort(callSettings.speakerOn ? .speaker : .none)
         } catch {
             log.error("Error occured while configuring audio session \(error)")
@@ -30,8 +33,10 @@ extension RTCAudioSessionConfiguration {
     
     static let `default`: RTCAudioSessionConfiguration = {
         let configuration = RTCAudioSessionConfiguration.webRTC()
+        var categoryOptions: AVAudioSession.CategoryOptions = [.allowBluetooth, .allowBluetoothA2DP]
         configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
         configuration.category = AVAudioSession.Category.playAndRecord.rawValue
+        configuration.categoryOptions = categoryOptions
         return configuration
     }()
 }
