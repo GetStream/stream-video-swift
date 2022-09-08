@@ -15,6 +15,7 @@ public class CallParticipant: Identifiable {
     public var hasAudio: Bool
     public var track: RTCVideoTrack?
     public var trackSize: CGSize = .zero
+    public var showTrack: Bool
     public var layoutPriority = LayoutPriority.normal
     public var isDominantSpeaker = false
     
@@ -25,7 +26,8 @@ public class CallParticipant: Identifiable {
         profileImageURL: URL?,
         isOnline: Bool,
         hasVideo: Bool,
-        hasAudio: Bool
+        hasAudio: Bool,
+        showTrack: Bool
     ) {
         self.id = id
         self.role = role
@@ -34,6 +36,11 @@ public class CallParticipant: Identifiable {
         self.isOnline = isOnline
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
+        self.showTrack = true
+    }
+    
+    public var shouldDisplayTrack: Bool {
+        hasVideo && track != nil && showTrack
     }
 }
 
@@ -53,14 +60,15 @@ extension Stream_Video_Participant {
             profileImageURL: URL(string: user.imageURL),
             isOnline: online,
             hasVideo: video,
-            hasAudio: audio
+            hasAudio: audio,
+            showTrack: true
         )
     }
 }
 
 extension Stream_Video_Sfu_Participant {
     
-    func toCallParticipant() -> CallParticipant {
+    func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
         CallParticipant(
             id: user.id,
             role: role,
@@ -68,7 +76,8 @@ extension Stream_Video_Sfu_Participant {
             profileImageURL: URL(string: user.imageURL),
             isOnline: online,
             hasVideo: video,
-            hasAudio: audio
+            hasAudio: audio,
+            showTrack: showTrack
         )
     }
 }

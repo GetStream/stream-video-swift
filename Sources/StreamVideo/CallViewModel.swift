@@ -158,6 +158,10 @@ open class CallViewModel: ObservableObject {
         callController?.renderLocalVideo(renderer: renderer)
     }
     
+    public func changeTrackVisbility(for participant: CallParticipant, isVisible: Bool) {
+        callController?.changeTrackVisibility(for: participant, isVisible: isVisible)
+    }
+    
     private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {
         guard let callController = callController else {
             return

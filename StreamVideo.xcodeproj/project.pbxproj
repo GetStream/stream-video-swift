@@ -42,6 +42,7 @@
 		8434C542289BC0B00001490A /* L10n.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C541289BC0B00001490A /* L10n.swift */; };
 		843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CC28C647B600839D99 /* VideoCapturer.swift */; };
 		843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CE28C7898A00839D99 /* VideoOptions.swift */; };
+		843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697D028C7A23300839D99 /* ParticipantsGridView.swift */; };
 		84560F3228B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
@@ -260,6 +261,7 @@
 		8434C541289BC0B00001490A /* L10n.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = L10n.swift; sourceTree = "<group>"; };
 		843697CC28C647B600839D99 /* VideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturer.swift; sourceTree = "<group>"; };
 		843697CE28C7898A00839D99 /* VideoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptions.swift; sourceTree = "<group>"; };
+		843697D028C7A23300839D99 /* ParticipantsGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridView.swift; sourceTree = "<group>"; };
 		84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stream.video.sfu.signal.twirp.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
@@ -525,6 +527,7 @@
 				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
 				8457CF9028BB835F00E8CF50 /* RoomView.swift */,
 				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
+				843697D028C7A23300839D99 /* ParticipantsGridView.swift */,
 			);
 			path = RoomView;
 			sourceTree = "<group>";
@@ -1268,6 +1271,7 @@
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
 				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
+				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,

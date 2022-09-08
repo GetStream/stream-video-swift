@@ -42,14 +42,18 @@ class WebRTCClient: NSObject {
     private var callSettings = CallSettings()
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
+    private let participantsThreshold = 4
     private var host: String
     
     private var callParticipants = [String: CallParticipant]() {
         didSet {
+            assignTracksToParticipants()
             updateParticipantsSubscriptions()
             onParticipantsUpdated?(callParticipants)
         }
     }
+    
+    private var tracks = [String: RTCVideoTrack]()
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onRemoteStreamAdded: ((RTCMediaStream?) -> Void)?
@@ -100,7 +104,12 @@ class WebRTCClient: NSObject {
             videoOptions: videoOptions
         )
         
-        subscriber?.onStreamAdded = onRemoteStreamAdded
+        subscriber?.onStreamAdded = { [weak self] stream in
+            let idParts = stream.streamId.components(separatedBy: ":")
+            let trackId = idParts.first ?? UUID().uuidString
+            self?.tracks[trackId] = stream.videoTracks.first
+            self?.onRemoteStreamAdded?(stream)
+        }
         subscriber?.onStreamRemoved = onRemoteStreamRemoved
         
         log.debug("Creating data channel")
@@ -192,6 +201,16 @@ class WebRTCClient: NSObject {
         localVideoTrack?.isEnabled = isEnabled
     }
     
+    func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
+        guard let participant = callParticipants[participant.id],
+              participant.showTrack != isVisible else {
+            return
+        }
+        log.debug("Setting track for \(participant.name) to \(isVisible)")
+        participant.showTrack = isVisible
+        callParticipants[participant.id] = participant
+    }
+    
     private func handleNegotiationNeeded() -> ((PeerConnection) -> Void) {
         { [weak self] peerConnection in
             guard let self = self else { return }
@@ -245,9 +264,11 @@ class WebRTCClient: NSObject {
     
     private func loadParticipants(from response: Stream_Video_Sfu_JoinResponse) -> [String: CallParticipant] {
         let participants = response.callState.participants
+        // For more than threshold participants, the activation of track is on view appearance.
+        let showTrack = participants.count < participantsThreshold
         var temp = [String: CallParticipant]()
         for participant in participants {
-            temp[participant.user.id] = participant.toCallParticipant()
+            temp[participant.user.id] = participant.toCallParticipant(showTrack: showTrack)
         }
         return temp
     }
@@ -351,7 +372,8 @@ class WebRTCClient: NSObject {
     }
     
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_ParticipantJoined) {
-        let participant = event.participant.toCallParticipant()
+        let showTrack = (callParticipants.count + 1) < participantsThreshold
+        let participant = event.participant.toCallParticipant(showTrack: showTrack)
         callParticipants[participant.id] = participant
         let event = ParticipantEvent(
             id: participant.id,
@@ -382,14 +404,15 @@ class WebRTCClient: NSObject {
             var subscriptions = [String: Stream_Video_Sfu_VideoDimension]()
             request.sessionID = sessionID
             for (_, value) in callParticipants {
-                if value.id != userInfo.id {
-                    log.debug("updating subscription for user \(value.id)")
+                if value.id != userInfo.id && value.showTrack {
+                    log.debug("updating subscription for user \(value.id) with size \(value.trackSize)")
                     var dimension = Stream_Video_Sfu_VideoDimension()
                     dimension.height = UInt32(value.trackSize.height)
                     dimension.width = UInt32(value.trackSize.width)
                     subscriptions[value.id] = dimension
                 }
             }
+            
             request.subscriptions = subscriptions
             _ = try? await signalService.updateSubscriptions(
                 updateSubscriptionsRequest: request
@@ -448,6 +471,16 @@ class WebRTCClient: NSObject {
             temp[key] = participant
         }
         callParticipants = temp
+    }
+    
+    private func assignTracksToParticipants() {
+        for (key, participant) in callParticipants {
+            let track = tracks[key]
+            if track != nil && participant.track == nil {
+                participant.track = track
+                callParticipants[key] = participant
+            }
+        }
     }
     
     private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_MuteStateChanged) {

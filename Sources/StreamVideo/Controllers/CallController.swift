@@ -133,6 +133,10 @@ public class CallController {
         try await callCoordinatorController.loadParticipants(for: call)
     }
     
+    public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
+        webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
+    }
+    
     func cleanUp() {
         Task {
             await webRTCClient?.cleanUp()
@@ -163,7 +167,8 @@ public class CallController {
                     profileImageURL: self?.userInfo.imageURL,
                     isOnline: true,
                     hasVideo: true,
-                    hasAudio: true
+                    hasAudio: true,
+                    showTrack: true
                 )
                 participant.track = localVideoTrack
                 self?.room?.participants[userId] = participant
@@ -184,7 +189,8 @@ public class CallController {
                     profileImageURL: nil,
                     isOnline: true,
                     hasVideo: true,
-                    hasAudio: true
+                    hasAudio: true,
+                    showTrack: true
                 )
             }
             if idParts?.last == "video" || stream?.videoTracks.first != nil {

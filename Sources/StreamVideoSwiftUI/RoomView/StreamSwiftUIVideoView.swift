@@ -29,7 +29,7 @@ public struct LocalVideoView: View {
         GeometryReader { reader in
             ZStack {
                 if callSettings.videoOn {
-                    RTCMTLVideoViewSwiftUI(size: reader.size) { view in
+                    StreamVideoViewSwiftUI(id: streamVideo.userInfo.id, size: reader.size) { view in
                         onLocalVideoUpdate(view)
                     }
                 } else if showBackground || streamVideo.userInfo.imageURL == nil {
@@ -52,21 +52,34 @@ public struct LocalVideoView: View {
     }
 }
 
-struct RTCMTLVideoViewSwiftUI: UIViewRepresentable {
+struct StreamVideoViewSwiftUI: UIViewRepresentable {
+        
+    typealias UIViewType = StreamMTLVideoView
     
-    typealias UIViewType = RTCMTLVideoView
-    
+    var id: String
     var size: CGSize
-    var handleRendering: (RTCMTLVideoView) -> Void
+    var handleRendering: (StreamMTLVideoView) -> Void
 
-    func makeUIView(context: Context) -> RTCMTLVideoView {
-        let view = RTCMTLVideoView(frame: .init(origin: .zero, size: size))
+    func makeUIView(context: Context) -> StreamMTLVideoView {
+        let view = StreamMTLVideoView(frame: .init(origin: .zero, size: size))
         view.videoContentMode = .scaleAspectFill
         handleRendering(view)
         return view
     }
     
-    func updateUIView(_ uiView: RTCMTLVideoView, context: Context) {
+    func updateUIView(_ uiView: StreamMTLVideoView, context: Context) {
         handleRendering(uiView)
+    }
+}
+
+class StreamMTLVideoView: RTCMTLVideoView {
+    
+    weak var track: RTCVideoTrack?
+    
+    func add(track: RTCVideoTrack) {
+        guard self.track == nil else { return }
+        log.debug("Adding track to the view")
+        self.track = track
+        track.add(self)
     }
 }

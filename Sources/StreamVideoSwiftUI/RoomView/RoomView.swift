@@ -49,7 +49,11 @@ public struct RoomView<Factory: ViewFactory>: View {
                         handleViewRendering(view, participant: participant)
                     }
                 } else {
-                    // TODO: define layout
+                    ParticipantsGridView(participants: viewModel.participants, availableSize: reader.size) { participant, view in
+                        handleViewRendering(view, participant: participant)
+                    } participantVisibilityChanged: { participant, isVisible in
+                        viewModel.changeTrackVisbility(for: participant, isVisible: isVisible)
+                    }
                 }
 
                 VStack {
@@ -108,10 +112,10 @@ public struct RoomView<Factory: ViewFactory>: View {
         viewModel.participants
     }
     
-    private func handleViewRendering(_ view: RTCMTLVideoView, participant: CallParticipant) {
+    private func handleViewRendering(_ view: StreamMTLVideoView, participant: CallParticipant) {
         if let track = participant.track, participant.id != streamVideo.userInfo.id {
             log.debug("adding track to a view \(view)")
-            track.add(view)
+            view.add(track: track)
             let prev = participant.trackSize
             if prev != view.bounds.size {
                 participant.trackSize = view.bounds.size
@@ -128,7 +132,7 @@ struct TwoColumnParticipantsView: View {
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, RTCMTLVideoView) -> Void
+    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -156,44 +160,56 @@ struct TwoColumnParticipantsView: View {
 }
 
 struct VerticalParticipantsView: View {
-    
-    @Injected(\.streamVideo) var streamVideo
-    @Injected(\.images) var images
-    
+        
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, RTCMTLVideoView) -> Void
+    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
             ForEach(participants) { participant in
-                ZStack {
-                    if participant.hasVideo && participant.track != nil {
-                        RTCMTLVideoViewSwiftUI(size: availableSize) { view in
-                            onViewUpdate(participant, view)
-                        }
-                    } else {
-                        CallParticipantImageView(
-                            id: participant.id,
-                            name: participant.name,
-                            imageURL: participant.profileImageURL
-                        )
-                        .frame(maxWidth: availableSize.width)
-                    }
-                }
-                .edgesIgnoringSafeArea(.all)
-                .overlay(
-                    BottomRightView {
-                        (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-                            .foregroundColor(.white)
-                            .padding(.all, 4)
-                            .background(Color.black.opacity(0.5))
-                            .cornerRadius(8)
-                    }
-                    .padding()
+                VideoCallParticipantView(
+                    participant: participant,
+                    availableSize: availableSize,
+                    onViewUpdate: onViewUpdate
                 )
-                .border(Color.green, width: participant.isDominantSpeaker ? 2 : 0)
             }
         }
+    }
+}
+
+struct VideoCallParticipantView: View {
+    
+    @Injected(\.images) var images
+    
+    let participant: CallParticipant
+    var availableSize: CGSize
+    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
+    
+    var body: some View {
+        StreamVideoViewSwiftUI(id: participant.id, size: availableSize) { view in
+            onViewUpdate(participant, view)
+        }
+        .overlay(
+            CallParticipantImageView(
+                id: participant.id,
+                name: participant.name,
+                imageURL: participant.profileImageURL
+            )
+            .frame(maxWidth: availableSize.width)
+            .opacity(participant.shouldDisplayTrack ? 0 : 1)
+        )
+        .edgesIgnoringSafeArea(.all)
+        .overlay(
+            BottomRightView {
+                (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+                    .foregroundColor(.white)
+                    .padding(.all, 4)
+                    .background(Color.black.opacity(0.5))
+                    .cornerRadius(8)
+            }
+            .padding()
+        )
+        .border(Color.green, width: participant.isDominantSpeaker ? 2 : 0)
     }
 }
