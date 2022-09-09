@@ -10,6 +10,8 @@ public class CallSettings: ObservableObject {
     public var speakerOn: Bool
     public var cameraPosition: CameraPosition = .front
     
+    private var useLocalhost = false
+    
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
@@ -22,6 +24,15 @@ public class CallSettings: ObservableObject {
     
     var shouldPublish: Bool {
         audioOn || videoOn
+    }
+    
+    // Just temporary solution.
+    var url: String {
+        if useLocalhost {
+            return "http://192.168.0.132:3031/twirp"
+        } else {
+            return "https://sfu2.fra1.gtstrm.com/rpc/twirp"
+        }
     }
 }
 

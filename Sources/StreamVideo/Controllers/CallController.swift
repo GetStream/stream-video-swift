@@ -22,7 +22,7 @@ public class CallController {
     private let callId: String
     private let callType: CallType
     private let callCoordinatorController: CallCoordinatorController
-    private let token: Token
+    private let token: String
     private let apiKey: String
     private let tokenProvider: TokenProvider
     
@@ -31,7 +31,7 @@ public class CallController {
         userInfo: UserInfo,
         callId: String,
         callType: CallType,
-        token: Token,
+        token: String,
         apiKey: String,
         tokenProvider: @escaping TokenProvider
     ) {
@@ -100,8 +100,8 @@ public class CallController {
         webRTCClient = WebRTCClient(
             userInfo: userInfo,
             apiKey: apiKey,
-            hostname: "http://192.168.0.132:3031/twirp",
-            token: token.rawValue,
+            hostname: callSettings.url,
+            token: token,
             tokenProvider: tokenProvider
         )
     

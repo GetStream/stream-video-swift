@@ -494,28 +494,29 @@ class WebRTCClient: NSObject {
     }
     
     private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_DominantSpeakerChanged) async {
-        let userId = event.userID
-        var temp = [String: CallParticipant]()
-        let callParticipants = await state.callParticipants
-        for (key, participant) in callParticipants {
-            if key == userId {
-                participant.layoutPriority = .high
-                participant.isDominantSpeaker = true
-                log.debug("Participant \(participant.name) is the dominant speaker")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                    guard let self = self else { return }
-                    participant.isDominantSpeaker = false
-                    Task {
-                        await self.state.update(callParticipant: participant)
-                    }
-                }
-            } else {
-                participant.layoutPriority = .normal
-                participant.isDominantSpeaker = false
-            }
-            temp[key] = participant
-        }
-        await state.update(callParticipants: temp)
+        // TODO: temp disabled
+//        let userId = event.userID
+//        var temp = [String: CallParticipant]()
+//        let callParticipants = await state.callParticipants
+//        for (key, participant) in callParticipants {
+//            if key == userId {
+//                participant.layoutPriority = .high
+//                participant.isDominantSpeaker = true
+//                log.debug("Participant \(participant.name) is the dominant speaker")
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+//                    guard let self = self else { return }
+//                    participant.isDominantSpeaker = false
+//                    Task {
+//                        await self.state.update(callParticipant: participant)
+//                    }
+//                }
+//            } else {
+//                participant.layoutPriority = .normal
+//                participant.isDominantSpeaker = false
+//            }
+//            temp[key] = participant
+//        }
+//        await state.update(callParticipants: temp)
     }
     
     private func assignTracksToParticipants() async {
