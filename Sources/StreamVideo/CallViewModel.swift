@@ -48,6 +48,12 @@ open class CallViewModel: ObservableObject {
     @Published public var callParticipants = [String: CallParticipant]() {
         didSet {
             log.debug("Call participants updated")
+            
+            localParticipant = callParticipants.first(where: { (key, _) in
+                key == streamVideo.userInfo.id
+            })
+                .map { $1 }
+            
             for (_, value) in callParticipants {
                 if value.track != nil {
                     log.debug("Found a track for user \(value.name)")
@@ -62,6 +68,8 @@ open class CallViewModel: ObservableObject {
     @Published public var participantEvent: ParticipantEvent?
     
     @Published public var callSettings = CallSettings()
+    
+    @Published public var localParticipant: CallParticipant?
         
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""

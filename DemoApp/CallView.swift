@@ -26,7 +26,11 @@ struct CallView: View {
                 } else {
                     ZStack {
                         LocalVideoView(callSettings: viewModel.callSettings) { view in
-                            viewModel.renderLocalVideo(renderer: view)
+                            if let track = viewModel.localParticipant?.track {
+                                view.add(track: track)
+                            } else {
+                                viewModel.renderLocalVideo(renderer: view)
+                            }
                         }
                         VStack {
                             Spacer()

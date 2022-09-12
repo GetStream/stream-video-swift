@@ -23,7 +23,11 @@ public struct OutgoingCallView: View {
         ZStack {
             if viewModel.callSettings.videoOn {
                 LocalVideoView(callSettings: viewModel.callSettings) { view in
-                    viewModel.renderLocalVideo(renderer: view)
+                    if let track = viewModel.localParticipant?.track {
+                        view.add(track: track)
+                    } else {
+                        viewModel.renderLocalVideo(renderer: view)
+                    }
                 }
             } else {
                 Image("incomingCallBackground")

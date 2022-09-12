@@ -13,12 +13,12 @@ public struct LocalVideoView: View {
     
     private let callSettings: CallSettings
     private var showBackground: Bool
-    private var onLocalVideoUpdate: (RTCMTLVideoView) -> Void
+    private var onLocalVideoUpdate: (StreamMTLVideoView) -> Void
     
     public init(
         callSettings: CallSettings,
         showBackground: Bool = true,
-        onLocalVideoUpdate: @escaping (RTCMTLVideoView) -> Void
+        onLocalVideoUpdate: @escaping (StreamMTLVideoView) -> Void
     ) {
         self.callSettings = callSettings
         self.showBackground = showBackground
@@ -72,11 +72,11 @@ struct StreamVideoViewSwiftUI: UIViewRepresentable {
     }
 }
 
-class StreamMTLVideoView: RTCMTLVideoView {
+public class StreamMTLVideoView: RTCMTLVideoView {
     
     weak var track: RTCVideoTrack?
     
-    func add(track: RTCVideoTrack) {
+    public func add(track: RTCVideoTrack) {
         guard self.track == nil else { return }
         log.debug("Adding track to the view")
         self.track = track

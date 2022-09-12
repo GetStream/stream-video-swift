@@ -81,12 +81,17 @@ public struct RoomView<Factory: ViewFactory>: View {
                         .padding(.horizontal, 2)
                         
                         LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
-                            viewModel.renderLocalVideo(renderer: view)
+                            if let track = viewModel.localParticipant?.track {
+                                view.add(track: track)
+                            } else {
+                                viewModel.renderLocalVideo(renderer: view)
+                            }
                         }
                         .frame(width: reader.size.width / 4 + padding, height: reader.size.width / 3 + padding)
                         .background(Color.red)
                         .cornerRadius(16)
                         .padding(.horizontal)
+                        .opacity(viewModel.localParticipant != nil ? 1 : 0)
                     }
                 }
                 

@@ -184,7 +184,6 @@ class WebRTCClient: NSObject {
     
     func startCapturingLocalVideo(renderer: RTCVideoRenderer, cameraPosition: AVCaptureDevice.Position) {
         setCameraPosition(cameraPosition)
-        localVideoTrack?.add(renderer)
     }
     
     private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
@@ -206,6 +205,7 @@ class WebRTCClient: NSObject {
         // Video
         let videoTrack = await makeVideoTrack()
         localVideoTrack = videoTrack
+        await state.add(track: localVideoTrack, id: userInfo.id)
         
         if callSettings.shouldPublish {
             log.debug("publishing local tracks")
@@ -494,29 +494,28 @@ class WebRTCClient: NSObject {
     }
     
     private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_DominantSpeakerChanged) async {
-        // TODO: temp disabled
-//        let userId = event.userID
-//        var temp = [String: CallParticipant]()
-//        let callParticipants = await state.callParticipants
-//        for (key, participant) in callParticipants {
-//            if key == userId {
-//                participant.layoutPriority = .high
-//                participant.isDominantSpeaker = true
-//                log.debug("Participant \(participant.name) is the dominant speaker")
-//                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-//                    guard let self = self else { return }
-//                    participant.isDominantSpeaker = false
-//                    Task {
-//                        await self.state.update(callParticipant: participant)
-//                    }
-//                }
-//            } else {
-//                participant.layoutPriority = .normal
-//                participant.isDominantSpeaker = false
-//            }
-//            temp[key] = participant
-//        }
-//        await state.update(callParticipants: temp)
+        let userId = event.userID
+        var temp = [String: CallParticipant]()
+        let callParticipants = await state.callParticipants
+        for (key, participant) in callParticipants {
+            if key == userId {
+                participant.layoutPriority = .high
+                participant.isDominantSpeaker = true
+                log.debug("Participant \(participant.name) is the dominant speaker")
+                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+                    guard let self = self else { return }
+                    participant.isDominantSpeaker = false
+                    Task {
+                        await self.state.update(callParticipant: participant)
+                    }
+                }
+            } else {
+                participant.layoutPriority = .normal
+                participant.isDominantSpeaker = false
+            }
+            temp[key] = participant
+        }
+        await state.update(callParticipants: temp)
     }
     
     private func assignTracksToParticipants() async {
