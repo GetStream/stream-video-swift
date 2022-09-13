@@ -27,7 +27,10 @@ struct ParticipantsGridView: View {
                         availableSize: size,
                         onViewUpdate: onViewUpdate
                     )
-                    .adjustVideoFrame(to: size, ratio: 0.3)
+                    .adjustVideoFrame(to: size.width, ratio: 0.3)
+                    .overlay(
+                        AudioIndicatorView(participant: participant)
+                    )
                     .onAppear {
                         log.debug("Participant \(participant.name) is visible")
                         participantVisibilityChanged(participant, true)
@@ -40,7 +43,7 @@ struct ParticipantsGridView: View {
             }
             .frame(maxWidth: availableSize.width, maxHeight: .infinity)
         }
-        .edgesIgnoringSafeArea(.vertical)
+        .edgesIgnoringSafeArea(.all)
     }
     
     private var size: CGSize {

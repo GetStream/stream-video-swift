@@ -50,9 +50,9 @@ extension Text {
 
 extension View {
     
-    func adjustVideoFrame(to size: CGSize, ratio: CGFloat = 0.5) -> some View {
+    func adjustVideoFrame(to width: CGFloat, ratio: CGFloat = 0.5) -> some View {
         aspectRatio(ratio, contentMode: .fill)
-            .frame(width: size.width)
+            .frame(width: width)
             .clipped()
     }
 }
