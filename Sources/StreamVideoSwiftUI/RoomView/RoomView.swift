@@ -84,7 +84,6 @@ public struct RoomView<Factory: ViewFactory>: View {
                     }
                 }
             }
-            // .frame(width: reader.size.width)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {

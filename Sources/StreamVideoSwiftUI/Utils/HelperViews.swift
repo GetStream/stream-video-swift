@@ -30,7 +30,7 @@ struct CallIconView: View {
             icon
                 .resizable()
                 .aspectRatio(contentMode: .fit)
-                .frame(maxHeight: 24)
+                .frame(maxWidth: 22, maxHeight: 20)
                 .foregroundColor(iconStyle.foregroundColor)
         }
         .frame(width: size, height: size)
