@@ -9,7 +9,7 @@ internal enum L10n {
 
   internal enum Call {
     internal enum Incoming {
-      /// Incoming call...
+      /// Incoming call
       internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }
     }
     internal enum Outgoing {

@@ -38,7 +38,7 @@ public struct IncomingCallView: View {
                     participants: viewModel.callParticipants
                 )
             } else {
-                CallingParticipantView(
+                AnimatingParticipantView(
                     participant: viewModel.callParticipants.first,
                     caller: viewModel.callInfo.callerId
                 )
@@ -50,8 +50,11 @@ public struct IncomingCallView: View {
             )
             .padding()
             
-            Text(L10n.Call.Incoming.title)
-                .applyCallingStyle()
+            HStack(alignment: .firstTextBaseline, spacing: 2) {
+                Text(L10n.Call.Incoming.title)
+                    .applyCallingStyle()
+                CallingIndicator()
+            }
 
             Spacer()
                         

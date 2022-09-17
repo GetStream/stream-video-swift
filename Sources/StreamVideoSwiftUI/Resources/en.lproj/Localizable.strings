@@ -11,5 +11,5 @@
 "call.participants.cancel-search" = "Cancel";
 "call.participants.on-platform" = "On the platform";
 
-"call.incoming.title" = "Incoming call...";
+"call.incoming.title" = "Incoming call";
 "call.outgoing.title" = "Calling";
