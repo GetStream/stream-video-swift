@@ -14,31 +14,40 @@ struct CallParticipantImageView: View {
     var name: String
     var imageURL: URL?
     
+    var body: some View {
+        ZStack {
+            CallParticipantBackground(imageURL: imageURL) {
+                Color(colors.callBackground)
+            }
+            CallParticipantImage(id: id, name: name, imageURL: imageURL)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
+struct CallParticipantImage: View {
+    
+    @Injected(\.colors) var colors
+    
     private let size: CGFloat = 138
+    
+    var id: String
+    var name: String
+    var imageURL: URL?
     
     var body: some View {
         ZStack {
             if let imageURL = imageURL {
                 LazyImage(source: imageURL)
-                    .aspectRatio(contentMode: .fill)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .blur(radius: 8)
-                    .clipped()
-                    
-                LazyImage(source: imageURL)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size, height: size)
                     .clipShape(Circle())
-                
             } else {
-                Color(colors.callBackground)
-                // TODO: make this safe
                 CircledTitleView(
                     title: name.isEmpty ? id : String(name.uppercased().first!),
                     size: size
                 )
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 }

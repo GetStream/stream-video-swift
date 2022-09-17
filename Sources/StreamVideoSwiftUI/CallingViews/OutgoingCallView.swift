@@ -21,21 +21,6 @@ public struct OutgoingCallView: View {
     
     public var body: some View {
         ZStack {
-            if viewModel.callSettings.videoOn {
-                LocalVideoView(callSettings: viewModel.callSettings) { view in
-                    if let track = viewModel.localParticipant?.track {
-                        view.add(track: track)
-                    } else {
-                        viewModel.renderLocalVideo(renderer: view)
-                    }
-                }
-            } else {
-                Image("incomingCallBackground")
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .edgesIgnoringSafeArea(.all)
-            }
-            
             VStack(spacing: 16) {
                 Spacer()
                 
@@ -44,7 +29,7 @@ public struct OutgoingCallView: View {
                         participants: viewModel.participants
                     )
                 } else {
-                    CallingParticipantView(
+                    AnimatingParticipantView(
                         participant: viewModel.participants.first
                     )
                 }
@@ -54,13 +39,50 @@ public struct OutgoingCallView: View {
                 )
                 .padding()
                 
-                Text(L10n.Call.Outgoing.title)
-                    .applyCallingStyle()
+                HStack(alignment: .firstTextBaseline, spacing: 2) {
+                    Text(L10n.Call.Outgoing.title)
+                        .applyCallingStyle()
+                    CallingIndicator()
+                }
 
                 Spacer()
                        
                 CallControlsView(viewModel: viewModel)
             }
         }
+        .background(
+            OutgoingCallBackground(viewModel: viewModel)
+        )
     }
+}
+
+struct OutgoingCallBackground: View {
+    
+    @ObservedObject var viewModel: CallViewModel
+    
+    var body: some View {
+        ZStack {
+            if viewModel.callSettings.videoOn && !isSimulator {
+                LocalVideoView(callSettings: viewModel.callSettings) { view in
+                    if let track = viewModel.localParticipant?.track {
+                        view.add(track: track)
+                    } else {
+                        viewModel.renderLocalVideo(renderer: view)
+                    }
+                }
+            } else if viewModel.participants.count == 1 {
+                CallingScreenBackground(imageURL: viewModel.participants.first?.profileImageURL)
+            } else {
+                FallbackBackground()
+            }
+        }
+    }
+}
+
+var isSimulator: Bool {
+    #if targetEnvironment(simulator)
+    return true
+    #else
+    return false
+    #endif
 }

@@ -13,7 +13,7 @@ internal enum L10n {
       internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }
     }
     internal enum Outgoing {
-      /// Calling...
+      /// Calling
       internal static var title: String { L10n.tr("Localizable", "call.outgoing.title") }
     }
     internal enum Participants {

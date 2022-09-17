@@ -23,6 +23,7 @@ public struct Colors {
     public var background1: UIColor = .streamWhiteSmoke
     public var textLowEmphasis: UIColor = .streamGrayDisabledText
     public var callBackground: UIColor = .streamDarkBackground
+    public var callPulsingColor = Color(.streamPulsingColor)
 }
 
 // Those colors are default defined stream constants, which are fallback values if you don't implement your color theme.
@@ -49,6 +50,7 @@ private extension UIColor {
     static let streamHighlight = mode(0xfbf4dd, 0x333024)
     static let streamDisabled = mode(0xb4b7bb, 0x4c525c)
     static let streamDarkBackground = mode(0x272a30, 0x272a30)
+    static let streamPulsingColor = mode(0x005fff, 0x005fff)
     
     // Currently we are not using the correct shadow color from figma's color palette. This is to avoid
     // an issue with snapshots inconsistency between Intel vs M1. We can't use shadows with transparency.
