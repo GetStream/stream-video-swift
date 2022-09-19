@@ -6,12 +6,12 @@
 import Foundation
 import SwiftProtobuf
 
-class Stream_Video_Sfu_SignalServer {
+class Stream_Video_Sfu_SignalServer: @unchecked Sendable {
     private let httpClient: HTTPClient
-    var hostname: String
+    let hostname: String
     var token: String
-    var apiKey: String
-
+    let apiKey: String
+    let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_SignalServer", qos: .userInitiated)
     let pathPrefix: String = "/stream.video.sfu.SignalServer/"
 
     init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
@@ -55,7 +55,9 @@ class Stream_Video_Sfu_SignalServer {
     }
     
     func update(userToken: String) {
-        token = userToken
+        syncQueue.async { [weak self] in
+            self?.token = userToken
+        }
     }
     
     private func execute<Request: ProtoModel, Response: ProtoModel>(request: Request, path: String) async throws -> Response {

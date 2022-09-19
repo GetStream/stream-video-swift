@@ -9,7 +9,6 @@ protocol HTTPClient {
     func execute(request: URLRequest) async throws -> Data
     
     func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater)
-    
 }
 
 class URLSessionClient: HTTPClient {
@@ -47,16 +46,16 @@ class URLSessionClient: HTTPClient {
     }
     
     func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater) {
-        self.onTokenUpdate = tokenUpdater
+        onTokenUpdate = tokenUpdater
     }
     
     private func refreshToken() async throws -> Token {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             tokenProvider { result in
                 switch result {
-                case .success(let token):
+                case let .success(token):
                     continuation.resume(returning: token)
-                case .failure(let error):
+                case let .failure(error):
                     continuation.resume(throwing: error)
                 }
             }
@@ -64,8 +63,8 @@ class URLSessionClient: HTTPClient {
     }
     
     private func execute(request: URLRequest, isRetry: Bool) async throws -> Data {
-        return try await withCheckedThrowingContinuation { continuation in
-            let task = urlSession.dataTask(with: request) {data, response, error in
+        try await withCheckedThrowingContinuation { continuation in
+            let task = urlSession.dataTask(with: request) { data, response, error in
                 if let error = error {
                     log.debug("Error executing request \(error.localizedDescription)")
                     continuation.resume(throwing: error)
@@ -78,7 +77,7 @@ class URLSessionClient: HTTPClient {
                         return
                     } else if response.statusCode >= 400 {
                         let requestURLString = request.url?.absoluteString ?? ""
-                        let errorResponse = self.errorResponse(from: data, response: response)
+                        let errorResponse = Self.errorResponse(from: data, response: response)
                         log.debug("Error executing request \(requestURLString) \(errorResponse)")
                         continuation.resume(throwing: ClientError.NetworkError(response.description))
                         return
@@ -102,7 +101,7 @@ class URLSessionClient: HTTPClient {
         return updated
     }
     
-    private func errorResponse(from data: Data?, response: HTTPURLResponse) -> Any {
+    private static func errorResponse(from data: Data?, response: HTTPURLResponse) -> Any {
         guard let data = data else {
             return response.description
         }
@@ -112,5 +111,4 @@ class URLSessionClient: HTTPClient {
             return response.description
         }
     }
-    
 }

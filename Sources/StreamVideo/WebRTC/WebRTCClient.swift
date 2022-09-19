@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+@preconcurrency import WebRTC
 
 class WebRTCClient: NSObject {
     
@@ -130,18 +130,7 @@ class WebRTCClient: NSObject {
         )
         
         subscriber?.onStreamAdded = { [weak self] stream in
-            guard let self = self else { return }
-            let idParts = stream.streamId.components(separatedBy: ":")
-            let trackId = idParts.first ?? UUID().uuidString
-            let track = stream.videoTracks.first
-            Task {
-                var videoTrack: RTCVideoTrack?
-                if idParts.last == "video" || stream.videoTracks.first != nil {
-                    videoTrack = track
-                }
-                await self.state.add(track: videoTrack, id: trackId)
-            }
-            self.onRemoteTrackAdded?(track, trackId)
+            self?.handleStreamAdded(stream)
         }
         subscriber?.onStreamRemoved = onRemoteStreamRemoved
         
@@ -184,11 +173,6 @@ class WebRTCClient: NSObject {
     
     func startCapturingLocalVideo(renderer: RTCVideoRenderer, cameraPosition: AVCaptureDevice.Position) {
         setCameraPosition(cameraPosition)
-    }
-    
-    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
-        guard let capturer = videoCapturer else { return }
-        capturer.setCameraPosition(cameraPosition)
     }
     
     func changeCameraMode(position: CameraPosition) {
@@ -245,6 +229,25 @@ class WebRTCClient: NSObject {
     }
     
     // MARK: - private
+    
+    private func handleStreamAdded(_ stream: RTCMediaStream) {
+        let idParts = stream.streamId.components(separatedBy: ":")
+        let trackId = idParts.first ?? UUID().uuidString
+        let track = stream.videoTracks.first
+        Task {
+            var videoTrack: RTCVideoTrack?
+            if idParts.last == "video" || stream.videoTracks.first != nil {
+                videoTrack = track
+            }
+            await self.state.add(track: videoTrack, id: trackId)
+        }
+        onRemoteTrackAdded?(track, trackId)
+    }
+    
+    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
+        guard let capturer = videoCapturer else { return }
+        capturer.setCameraPosition(cameraPosition)
+    }
     
     private func handleParticipantsUpdated() async {
         await assignTracksToParticipants()
@@ -505,16 +508,7 @@ class WebRTCClient: NSObject {
                     isDominantSpeaker: true
                 )
                 log.debug("Participant \(participant.name) is the dominant speaker")
-                DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-                    guard let self = self else { return }
-                    let updated = participant.withUpdated(
-                        layoutPriority: .normal,
-                        isDominantSpeaker: false
-                    )
-                    Task {
-                        await self.state.update(callParticipant: updated)
-                    }
-                }
+                resetDominantSpeaker(participant)
             } else {
                 updated = participant.withUpdated(
                     layoutPriority: .normal,
@@ -524,6 +518,19 @@ class WebRTCClient: NSObject {
             temp[key] = updated
         }
         await state.update(callParticipants: temp)
+    }
+    
+    private func resetDominantSpeaker(_ participant: CallParticipant) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
+            guard let self = self else { return }
+            let updated = participant.withUpdated(
+                layoutPriority: .normal,
+                isDominantSpeaker: false
+            )
+            Task {
+                await self.state.update(callParticipant: updated)
+            }
+        }
     }
     
     private func assignTracksToParticipants() async {
@@ -539,12 +546,13 @@ class WebRTCClient: NSObject {
     
     private func addOnParticipantsChangeHandler() {
         Task {
-            await state.addOnParticipantsHandler { [weak self] in
-                guard let self = self else { return }
-                Task {
-                    await self.handleParticipantsUpdated()
-                }
-            }
+            await state.addOnParticipantsHandler(onParticipantsHandler)
+        }
+    }
+    
+    private func onParticipantsHandler() {
+        Task {
+            await self.handleParticipantsUpdated()
         }
     }
     

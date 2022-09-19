@@ -116,12 +116,12 @@ struct {{.Name}} {
 
 {{range .Services}}
 
-class {{.ClassName}} {
+class {{.ClassName}}: @unchecked Sendable {
 	private let httpClient: HTTPClient
-	var hostname: String
+	let hostname: String
 	var token: String
-	var apiKey: String
-
+	let apiKey: String
+    let syncQueue = DispatchQueue(label: "{{.ClassName}}", qos: .userInitiated)
 	let pathPrefix: String = "/{{.Package}}.{{.Name}}/"
 
 	init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
@@ -136,7 +136,9 @@ class {{.ClassName}} {
 	}
     {{end}}
     func update(userToken: String) {
-        self.token = userToken
+        syncQueue.async { [weak self] in
+            self?.token = userToken
+        }
     }
     
     private func execute<Request: ProtoModel, Response: ProtoModel>(request: Request, path: String) async throws -> Response {

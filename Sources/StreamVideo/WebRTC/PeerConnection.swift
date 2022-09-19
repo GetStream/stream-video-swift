@@ -11,7 +11,7 @@ enum PeerConnectionType: String {
     case publisher
 }
 
-class PeerConnection: NSObject, RTCPeerConnectionDelegate {
+class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
@@ -19,7 +19,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
     private let sessionId: String
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
-    
+    private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
     private(set) var transceiver: RTCRtpTransceiver?
         
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
@@ -130,7 +130,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate {
         
         transceiverInit.sendEncodings = encodingParams
         
-        transceiver = pc.addTransceiver(with: track, init: transceiverInit)
+        syncQueue.async { [weak self] in
+            self?.transceiver = self?.pc.addTransceiver(with: track, init: transceiverInit)
+        }
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
