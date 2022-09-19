@@ -5,7 +5,7 @@
 import AVFoundation
 import SwiftUI
 
-public class Room: ObservableObject {
+public class Room: ObservableObject, @unchecked Sendable {
             
     @Published var participants = [String: CallParticipant]() {
         didSet {
@@ -15,6 +15,8 @@ public class Room: ObservableObject {
     
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
+    private let syncQueue = DispatchQueue(label: "RoomQueue", qos: .userInitiated)
+    
     static func create() -> Room {
         Room()
     }
@@ -22,47 +24,67 @@ public class Room: ObservableObject {
     private init() {}
     
     func add(participants: [CallParticipant]) {
-        var result = [String: CallParticipant]()
-        for participant in participants {
-            let track = self.participants[participant.id]?.track
-            let updated = participant.withUpdated(track: track)
-            result[participant.id] = updated
+        syncQueue.async { [weak self] in
+            guard let self = self else { return }
+            var result = [String: CallParticipant]()
+            for participant in participants {
+                let track = self.participants[participant.id]?.track
+                let updated = participant.withUpdated(track: track)
+                result[participant.id] = updated
+            }
+            self.participants = result
         }
-        self.participants = result
     }
     
     func clearParticipants() {
-        participants = [:]
+        syncQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.participants = [:]
+        }
     }
     
     func add(participant: CallParticipant) {
-        let track = participants[participant.id]?.track
-        let updated = participant.withUpdated(track: track)
-        participants[participant.id] = updated
+        syncQueue.async { [weak self] in
+            guard let self = self else { return }
+            let track = self.participants[participant.id]?.track
+            let updated = participant.withUpdated(track: track)
+            self.participants[participant.id] = updated
+        }
     }
     
     func removeParticipant(with id: String) {
-        participants[id] = nil
+        syncQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.participants[id] = nil
+        }
     }
     
     func remove(participant: CallParticipant) {
-        participants[participant.id] = nil
+        syncQueue.async { [weak self] in
+            guard let self = self else { return }
+            self.participants[participant.id] = nil
+        }
     }
     
     func handleParticipantEvent(_ eventType: CallEventType, for participantId: String) {
-        guard let participant = participants[participantId] else { return }
-        let updated: CallParticipant
-        switch eventType {
-        case .videoStarted:
-            updated = participant.withUpdated(video: true)
-        case .videoStopped:
-            updated = participant.withUpdated(video: false)
-        case .audioStarted:
-            updated = participant.withUpdated(audio: true)
-        case .audioStopped:
-            updated = participant.withUpdated(audio: false)
+        syncQueue.async { [weak self] in
+            guard let self = self,
+                  let participant = self.participants[participantId] else {
+                return
+            }
+            let updated: CallParticipant
+            switch eventType {
+            case .videoStarted:
+                updated = participant.withUpdated(video: true)
+            case .videoStopped:
+                updated = participant.withUpdated(video: false)
+            case .audioStarted:
+                updated = participant.withUpdated(audio: true)
+            case .audioStopped:
+                updated = participant.withUpdated(audio: false)
+            }
+            self.participants[participantId] = updated
         }
-        participants[participantId] = updated
     }
     
     public func participantEvents() -> AsyncStream<ParticipantEvent> {
