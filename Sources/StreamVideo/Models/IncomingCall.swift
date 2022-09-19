@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct IncomingCall: Identifiable {
+public struct IncomingCall: Identifiable, Sendable {
     public let id: String
     public let callerId: String
     public let type: String

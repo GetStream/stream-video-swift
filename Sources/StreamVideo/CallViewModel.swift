@@ -141,7 +141,7 @@ open class CallViewModel: ObservableObject {
         }
         let next = callSettings.cameraPosition.next()
         callController.changeCameraMode(position: next)
-        callSettings.cameraPosition = next
+        callSettings = callSettings.withUpdatedCameraPosition(next)
     }
 
     public func startCall(callId: String, participantIds: [String]) {

@@ -4,26 +4,37 @@
 
 import Combine
 
-public class CallSettings: ObservableObject {
-    public var audioOn: Bool
-    public var videoOn: Bool
-    public var speakerOn: Bool
-    public var cameraPosition: CameraPosition = .front
+public final class CallSettings: ObservableObject, Sendable {
+    public let audioOn: Bool
+    public let videoOn: Bool
+    public let speakerOn: Bool
+    public let cameraPosition: CameraPosition
     
-    private var useLocalhost = false
+    private let useLocalhost = false
     
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
-        speakerOn: Bool = true
+        speakerOn: Bool = true,
+        cameraPosition: CameraPosition = .front
     ) {
         self.audioOn = audioOn
         self.videoOn = videoOn
         self.speakerOn = speakerOn
+        self.cameraPosition = cameraPosition
     }
     
     var shouldPublish: Bool {
         audioOn || videoOn
+    }
+    
+    func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
+        CallSettings(
+            audioOn: audioOn,
+            videoOn: videoOn,
+            speakerOn: speakerOn,
+            cameraPosition: cameraPosition
+        )
     }
     
     // Just temporary solution.
@@ -36,7 +47,7 @@ public class CallSettings: ObservableObject {
     }
 }
 
-public enum CameraPosition {
+public enum CameraPosition: Sendable {
     case front
     case back
     

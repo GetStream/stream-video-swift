@@ -82,14 +82,14 @@ enum CallEventType {
     case audioStopped
 }
 
-public struct ParticipantEvent {
+public struct ParticipantEvent: Sendable {
     public let id: String
     public let action: ParticipantAction
     public let user: String
     public let imageURL: URL?
 }
 
-public enum ParticipantAction {
+public enum ParticipantAction: Sendable {
     case join
     case leave
     

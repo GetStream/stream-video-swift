@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import WebRTC
+@preconcurrency import WebRTC
 
-public struct VideoOptions {
+public struct VideoOptions: Sendable {
     
     public var preferredFormat: AVCaptureDevice.Format?
     public var preferredDimensions: CMVideoDimensions
@@ -25,7 +25,7 @@ public struct VideoOptions {
     }
 }
 
-public struct VideoCodec {
+public struct VideoCodec: Sendable {
     public let dimensions: CMVideoDimensions
     public let quality: String
     public let maxBitrate: Int
