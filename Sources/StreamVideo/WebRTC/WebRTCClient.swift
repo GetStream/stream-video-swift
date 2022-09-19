@@ -2,20 +2,17 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @preconcurrency import WebRTC
 
 class WebRTCClient: NSObject {
     
-    actor State {
-        var onParticipantsUpdated: (() -> Void)?
-        
+    actor State: ObservableObject {
+        private var cancellables = Set<AnyCancellable>()
+                
         var connectionStatus = VideoConnectionStatus.disconnected(reason: nil)
-        var callParticipants = [String: CallParticipant]() {
-            didSet {
-                onParticipantsUpdated?()
-            }
-        }
+        @Published var callParticipants = [String: CallParticipant]()
         var tracks = [String: RTCVideoTrack]()
         
         func update(connectionStatus: VideoConnectionStatus) {
@@ -42,12 +39,18 @@ class WebRTCClient: NSObject {
             self.tracks[id] = track
         }
         
-        func addOnParticipantsHandler(_ handler: @escaping () -> Void) {
-            self.onParticipantsUpdated = handler
+        func callParticipantsUpdates() -> AsyncStream<[Bool]> {
+            let updates = AsyncStream([Bool].self) { continuation in
+                $callParticipants.sink { _ in
+                    continuation.yield([true])
+                }
+                .store(in: &cancellables)
+            }
+            return updates
         }
     }
     
-    var state = State()
+    let state = State()
     
     let httpClient: HTTPClient
     let signalService: Stream_Video_Sfu_SignalServer
@@ -70,12 +73,12 @@ class WebRTCClient: NSObject {
     }
 
     private var localAudioTrack: RTCAudioTrack?
-    private var userInfo: UserInfo
+    private let userInfo: UserInfo
     private var callSettings = CallSettings()
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
-    private var host: String
+    private let host: String
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onRemoteTrackAdded: ((RTCVideoTrack?, String) -> Void)?
@@ -546,13 +549,10 @@ class WebRTCClient: NSObject {
     
     private func addOnParticipantsChangeHandler() {
         Task {
-            await state.addOnParticipantsHandler(onParticipantsHandler)
-        }
-    }
-    
-    private func onParticipantsHandler() {
-        Task {
-            await self.handleParticipantsUpdated()
+            for await _ in await state.callParticipantsUpdates() {
+                log.debug("received participant event")
+                await self.handleParticipantsUpdated()
+            }
         }
     }
     
