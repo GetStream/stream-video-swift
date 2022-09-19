@@ -104,8 +104,8 @@ public struct RoomView<Factory: ViewFactory>: View {
             view.add(track: track)
             let prev = participant.trackSize
             if prev != view.bounds.size {
-                participant.trackSize = view.bounds.size
-                viewModel.callParticipants[participant.id] = participant
+                let updated = participant.withUpdated(trackSize: view.bounds.size)
+                viewModel.callParticipants[participant.id] = updated
             }
         }
     }

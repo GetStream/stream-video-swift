@@ -156,8 +156,8 @@ public class CallController {
         webRTCClient?.onLocalVideoTrackUpdate = { [weak self] localVideoTrack in
             guard let userId = self?.userInfo.id else { return }
             if let participant = self?.room?.participants[userId] {
-                participant.track = localVideoTrack
-                self?.room?.participants[userId] = participant
+                let updated = participant.withUpdated(track: localVideoTrack)
+                self?.room?.participants[userId] = updated
             } else {
                 // TODO: temporarly create the participant
                 let participant = CallParticipant(
@@ -170,8 +170,8 @@ public class CallController {
                     hasAudio: true,
                     showTrack: true
                 )
-                participant.track = localVideoTrack
-                self?.room?.participants[userId] = participant
+                let updated = participant.withUpdated(track: localVideoTrack)
+                self?.room?.participants[userId] = updated
             }
         }
     }

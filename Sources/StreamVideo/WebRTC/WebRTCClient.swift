@@ -240,8 +240,8 @@ class WebRTCClient: NSObject {
             return
         }
         log.debug("Setting track for \(participant.name) to \(isVisible)")
-        participant.showTrack = isVisible
-        await state.update(callParticipant: participant)
+        let updated = participant.withUpdated(showTrack: isVisible)
+        await state.update(callParticipant: updated)
     }
     
     // MARK: - private
@@ -498,22 +498,30 @@ class WebRTCClient: NSObject {
         var temp = [String: CallParticipant]()
         let callParticipants = await state.callParticipants
         for (key, participant) in callParticipants {
+            let updated: CallParticipant
             if key == userId {
-                participant.layoutPriority = .high
-                participant.isDominantSpeaker = true
+                updated = participant.withUpdated(
+                    layoutPriority: .high,
+                    isDominantSpeaker: true
+                )
                 log.debug("Participant \(participant.name) is the dominant speaker")
                 DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
                     guard let self = self else { return }
-                    participant.isDominantSpeaker = false
+                    let updated = participant.withUpdated(
+                        layoutPriority: .normal,
+                        isDominantSpeaker: false
+                    )
                     Task {
-                        await self.state.update(callParticipant: participant)
+                        await self.state.update(callParticipant: updated)
                     }
                 }
             } else {
-                participant.layoutPriority = .normal
-                participant.isDominantSpeaker = false
+                updated = participant.withUpdated(
+                    layoutPriority: .normal,
+                    isDominantSpeaker: false
+                )
             }
-            temp[key] = participant
+            temp[key] = updated
         }
         await state.update(callParticipants: temp)
     }
@@ -523,8 +531,8 @@ class WebRTCClient: NSObject {
         for (key, participant) in callParticipants {
             let track = await state.tracks[key]
             if track != nil && participant.track == nil {
-                participant.track = track
-                await state.update(callParticipant: participant)
+                let updated = participant.withUpdated(track: track)
+                await state.update(callParticipant: updated)
             }
         }
     }
@@ -543,8 +551,8 @@ class WebRTCClient: NSObject {
     private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_MuteStateChanged) async {
         let userId = event.userID
         guard let participant = await state.callParticipants[userId] else { return }
-        participant.hasAudio = !event.audioMuted
-        participant.hasVideo = !event.videoMuted
-        await state.update(callParticipant: participant)
+        var updated = participant.withUpdated(audio: !event.audioMuted)
+        updated = updated.withUpdated(video: !event.videoMuted)
+        await state.update(callParticipant: updated)
     }
 }

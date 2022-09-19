@@ -25,8 +25,8 @@ public class Room: ObservableObject {
         var result = [String: CallParticipant]()
         for participant in participants {
             let track = self.participants[participant.id]?.track
-            participant.track = track
-            result[participant.id] = participant
+            let updated = participant.withUpdated(track: track)
+            result[participant.id] = updated
         }
         self.participants = result
     }
@@ -37,8 +37,8 @@ public class Room: ObservableObject {
     
     func add(participant: CallParticipant) {
         let track = participants[participant.id]?.track
-        participant.track = track
-        participants[participant.id] = participant
+        let updated = participant.withUpdated(track: track)
+        participants[participant.id] = updated
     }
     
     func removeParticipant(with id: String) {
@@ -51,17 +51,18 @@ public class Room: ObservableObject {
     
     func handleParticipantEvent(_ eventType: CallEventType, for participantId: String) {
         guard let participant = participants[participantId] else { return }
+        let updated: CallParticipant
         switch eventType {
         case .videoStarted:
-            participant.hasVideo = true
+            updated = participant.withUpdated(video: true)
         case .videoStopped:
-            participant.hasVideo = false
+            updated = participant.withUpdated(video: false)
         case .audioStarted:
-            participant.hasAudio = true
+            updated = participant.withUpdated(audio: true)
         case .audioStopped:
-            participant.hasAudio = false
+            updated = participant.withUpdated(audio: false)
         }
-        participants[participantId] = participant
+        participants[participantId] = updated
     }
     
     public func participantEvents() -> AsyncStream<ParticipantEvent> {

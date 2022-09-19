@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import WebRTC
+@preconcurrency import WebRTC
 
-public class CallParticipant: Identifiable {
+public struct CallParticipant: Identifiable, Sendable {
     public let id: String
     public let role: String
     public let name: String
@@ -14,10 +14,10 @@ public class CallParticipant: Identifiable {
     public var hasVideo: Bool
     public var hasAudio: Bool
     public var track: RTCVideoTrack?
-    public var trackSize: CGSize = .zero
+    public var trackSize: CGSize
     public var showTrack: Bool
-    public var layoutPriority = LayoutPriority.normal
-    public var isDominantSpeaker = false
+    public var layoutPriority: LayoutPriority
+    public var isDominantSpeaker: Bool
     
     public init(
         id: String,
@@ -27,7 +27,11 @@ public class CallParticipant: Identifiable {
         isOnline: Bool,
         hasVideo: Bool,
         hasAudio: Bool,
-        showTrack: Bool
+        showTrack: Bool,
+        track: RTCVideoTrack? = nil,
+        trackSize: CGSize = .zero,
+        layoutPriority: LayoutPriority = .normal,
+        isDominantSpeaker: Bool = false
     ) {
         self.id = id
         self.role = role
@@ -37,14 +41,122 @@ public class CallParticipant: Identifiable {
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
         self.showTrack = true
+        self.track = track
+        self.trackSize = trackSize
+        self.layoutPriority = layoutPriority
+        self.isDominantSpeaker = isDominantSpeaker
     }
     
     public var shouldDisplayTrack: Bool {
         hasVideo && track != nil && showTrack
     }
+    
+    public func withUpdated(trackSize: CGSize) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker
+        )
+    }
+    
+    func withUpdated(track: RTCVideoTrack?) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker
+        )
+    }
+    
+    func withUpdated(audio: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: audio,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker
+        )
+    }
+
+    func withUpdated(video: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            isOnline: isOnline,
+            hasVideo: video,
+            hasAudio: hasAudio,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker
+        )
+    }
+
+    func withUpdated(showTrack: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker
+        )
+    }
+
+    func withUpdated(
+        layoutPriority: LayoutPriority,
+        isDominantSpeaker: Bool
+    ) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            layoutPriority: layoutPriority
+        )
+    }
 }
 
-public enum LayoutPriority: Int {
+public enum LayoutPriority: Int, Sendable {
     case high = 1
     case normal = 5
     case low = 10
