@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct UserInfo: Identifiable, Equatable {
+public struct UserInfo: Identifiable, Equatable, Sendable {
     public let id: String
     public let name: String?
     public let imageURL: URL?

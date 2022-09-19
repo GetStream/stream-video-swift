@@ -4,7 +4,7 @@
 
 import Foundation
 
-class LatencyService {
+final class LatencyService: Sendable {
     
     private let httpClient: HTTPClient
     
@@ -28,5 +28,4 @@ class LatencyService {
         }
         return results
     }
-    
 }

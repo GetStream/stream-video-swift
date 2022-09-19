@@ -4,18 +4,22 @@
 
 import Foundation
 
-protocol HTTPClient {
+protocol HTTPClient: Sendable {
     
     func execute(request: URLRequest) async throws -> Data
     
     func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater)
 }
 
-class URLSessionClient: HTTPClient {
+final class URLSessionClient: HTTPClient, @unchecked Sendable {
     
     private let urlSession: URLSession
     private let tokenProvider: TokenProvider
-    var onTokenUpdate: TokenUpdater?
+    private let updateQueue: DispatchQueue = .init(
+        label: "io.getStream.video.URLSessionClient",
+        qos: .userInitiated
+    )
+    private(set) var onTokenUpdate: TokenUpdater?
     
     init(
         urlSession: URLSession,
@@ -46,7 +50,9 @@ class URLSessionClient: HTTPClient {
     }
     
     func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater) {
-        onTokenUpdate = tokenUpdater
+        updateQueue.async { [weak self] in
+            self?.onTokenUpdate = tokenUpdater
+        }
     }
     
     private func refreshToken() async throws -> Token {

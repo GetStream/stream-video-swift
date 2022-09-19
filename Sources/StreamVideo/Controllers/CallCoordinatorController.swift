@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-class CallCoordinatorController {
+final class CallCoordinatorController: Sendable {
     
     private let latencyService: LatencyService
     private let callCoordinatorService: Stream_Video_CallCoordinatorService

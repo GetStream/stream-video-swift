@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct VideoConfig {
+public struct VideoConfig: Sendable {
     let persitingSocketConnection: Bool
     let joinVideoCallInstantly: Bool
     
