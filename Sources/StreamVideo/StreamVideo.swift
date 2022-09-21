@@ -23,7 +23,7 @@ public class StreamVideo {
     
     // Change it to your local IP address.
     private let hostname = "http://192.168.0.132:26991/rpc"
-    private let wsEndpoint = "ws://192.168.0.132:8989"
+    private let wsEndpoint = "ws://192.168.0.132:8989/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
     
     private let httpClient: HTTPClient
     
