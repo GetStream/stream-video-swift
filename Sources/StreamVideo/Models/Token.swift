@@ -28,11 +28,15 @@ public struct Token: Decodable, Equatable, ExpressibleByStringLiteral {
     /// - Parameter rawValue: The token string in JWT format.
     /// - Throws: `ClientError.InvalidToken` will be thrown if token string is invalid.
     public init(rawValue: String) throws {
-        guard let user = rawValue.jwtPayload?["user"] as? [String: String], let userId = user["id"] else {
-            throw ClientError.InvalidToken("Provided token does not contain `user id`")
-        }
         let expiration = (rawValue.jwtPayload?["exp"] as? Int64).map {
             Date(timeIntervalSince1970: TimeInterval($0))
+        }
+        if let userId = rawValue.jwtPayload?["user_id"] as? String {
+            self.init(rawValue: rawValue, userId: userId, expiration: expiration)
+            return
+        }
+        guard let user = rawValue.jwtPayload?["user"] as? [String: String], let userId = user["id"] else {
+            throw ClientError.InvalidToken("Provided token does not contain `user id`")
         }
         self.init(rawValue: rawValue, userId: userId, expiration: expiration)
     }

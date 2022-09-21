@@ -145,21 +145,21 @@ open class CallViewModel: ObservableObject {
     }
 
     public func startCall(callId: String, participantIds: [String]) {
-        callController = streamVideo.makeCallController(callType: .init(name: "video"), callId: callId)
+        callController = streamVideo.makeCallController(callType: .default, callId: callId)
         calling = true
-//        enterCall(callId: callId, participantIds: participantIds, isStarted: false)
-        // NOTE: uncomment this to test SFU.
+        enterCall(callId: callId, participantIds: participantIds)
+    }
+    
+    // TODO: temp method
+    public func testSFU(callId: String, participantIds: [String], url: String, token: String) {
+        callController = streamVideo.makeCallController(callType: .default, callId: callId)
+        calling = true
         Task {
-            self.room = try await callController?.testSFU(callSettings: callSettings)
+            self.room = try await callController?.testSFU(callSettings: callSettings, url: url, token: token)
             calling = false
-            // TODO: only temporarly.
             shouldShowRoomView = true
             listenForParticipantEvents()
         }
-    }
-    
-    public func joinCall(callId: String) {
-        enterCall(callId: callId, participantIds: [], isStarted: true)
     }
     
     public func renderLocalVideo(renderer: RTCVideoRenderer) {
@@ -172,7 +172,7 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func enterCall(callId: String, participantIds: [String], isStarted: Bool) {
+    private func enterCall(callId: String, participantIds: [String]) {
         guard let callController = callController else {
             return
         }
@@ -180,24 +180,15 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 log.debug("Starting call")
-                let callType = CallType(name: "video")
+                let callType = CallType.default
                 let options = VideoOptions()
-                let room: Room
-                if isStarted {
-                    room = try await callController.joinCall(
-                        callType: callType,
-                        callId: callId,
-                        callSettings: callSettings,
-                        videoOptions: options
-                    )
-                } else {
-                    room = try await callController.startCall(
-                        callType: callType,
-                        callId: callId, callSettings: callSettings,
-                        videoOptions: options,
-                        participantIds: participantIds
-                    )
-                }
+                let room: Room = try await callController.joinCall(
+                    callType: callType,
+                    callId: callId,
+                    callSettings: callSettings,
+                    videoOptions: options,
+                    participantIds: participantIds
+                )
                 self.room = room
                 listenForParticipantEvents()
                 // TODO: add a check if microphone is already on.

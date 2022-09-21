@@ -12,18 +12,18 @@ final class LatencyService: Sendable {
         self.httpClient = httpClient
     }
     
-    func measureLatency(for edge: Stream_Video_Edge, tries: Int = 1) async -> [Float] {
-        guard let url = URL(string: edge.latencyURL) else { return [Float(Int.max)] }
-        var results = [Float]()
+    func measureLatency(for endpoint: Stream_Video_LatencyEndpoint, tries: Int = 1) async -> [Double] {
+        guard let url = URL(string: endpoint.url) else { return [Double(Int.max)] }
+        var results = [Double]()
         for _ in 0..<tries {
             let startDate = Date()
             let request = URLRequest(url: url)
             do {
                 _ = try await httpClient.execute(request: request)
-                let diff = Float(Date().timeIntervalSince(startDate))
+                let diff = Double(Date().timeIntervalSince(startDate))
                 results.append(diff)
             } catch {
-                results.append(Float(Int.max))
+                results.append(Double(Int.max))
             }
         }
         return results

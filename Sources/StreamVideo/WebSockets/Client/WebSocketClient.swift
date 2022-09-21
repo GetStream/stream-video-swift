@@ -165,6 +165,7 @@ extension WebSocketClient {
 
 extension WebSocketClient: WebSocketEngineDelegate {
     func webSocketDidConnect() {
+        log.debug("Web socket connection established")
         if requiresAuth {
             connectionState = .authenticating
         } else {

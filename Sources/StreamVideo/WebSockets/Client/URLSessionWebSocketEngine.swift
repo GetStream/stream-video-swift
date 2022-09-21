@@ -65,7 +65,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         send(message: healthCheckEvent)
     }
     
-    func send(message: Event) {
+    func send(message: SendableEvent) {
         do {
             let data = try message.serializedData()
             let message: URLSessionWebSocketTask.Message = .data(data)
@@ -88,7 +88,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             }
             
             switch result {
-            case .success(let message):
+            case let .success(message):
                 if case let .data(data) = message {
                     self.callbackQueue.async { [weak self] in
                         self?.delegate?.webSocketDidReceiveMessage(data)

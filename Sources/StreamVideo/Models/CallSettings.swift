@@ -9,9 +9,7 @@ public final class CallSettings: ObservableObject, Sendable {
     public let videoOn: Bool
     public let speakerOn: Bool
     public let cameraPosition: CameraPosition
-    
-    private let useLocalhost = false
-    
+        
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
@@ -35,15 +33,6 @@ public final class CallSettings: ObservableObject, Sendable {
             speakerOn: speakerOn,
             cameraPosition: cameraPosition
         )
-    }
-    
-    // Just temporary solution.
-    var url: String {
-        if useLocalhost {
-            return "http://192.168.0.132:3031/twirp"
-        } else {
-            return "https://sfu2.fra1.gtstrm.com/rpc/twirp"
-        }
     }
 }
 

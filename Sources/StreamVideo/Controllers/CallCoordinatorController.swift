@@ -29,86 +29,45 @@ final class CallCoordinatorController: Sendable {
         self.userInfo = userInfo
     }
     
-    func startCall(
+    func joinCall(
         callType: CallType,
         callId: String,
         videoOptions: VideoOptions,
         participantIds: [String]
     ) async throws -> EdgeServer {
-        let createCallResponse = try await createCall(
-            callType: callType.name,
+        let joinCallResponse = try await joinCall(
             callId: callId,
+            type: callType.name,
             participantIds: participantIds
         )
         
-        return try await joinCall(
-            callType: callType,
-            callId: createCallResponse.call.id,
-            videoOptions: videoOptions
-        )
-    }
-    
-    func joinCall(
-        callType: CallType,
-        callId: String,
-        videoOptions: VideoOptions
-    ) async throws -> EdgeServer {
-        let joinCallResponse = try await joinCall(
-            callId: callId,
-            type: callType.name
-        )
-        
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
+        let latencyByEdge = await measureLatencies(for: joinCallResponse.latencyClaim.endpoints)
         
         let edgeServer = try await selectEdgeServer(
-            callId: callId,
+            callId: joinCallResponse.call.call.callCid,
             latencyByEdge: latencyByEdge
         )
         
         return edgeServer
     }
-    
-    func loadParticipants(for call: IncomingCall) async throws -> [CallParticipant] {
-        var getCallRequest = Stream_Video_GetCallRequest()
-        getCallRequest.id = call.id
-        getCallRequest.type = call.type
-        let callResponse = try await callCoordinatorService.getCall(getCallRequest: getCallRequest)
-        let participants = callResponse.callState.participants
-            .map { $0.toCallParticipant() }
-            .filter { $0.id != userInfo.id }
-        return participants
-    }
-    
+
     func update(token: Token) {
         callCoordinatorService.update(userToken: token.rawValue)
     }
 
     // MARK: - private
-    
-    private func createCall(
-        callType: String,
-        callId: String,
-        participantIds: [String]
-    ) async throws -> Stream_Video_CreateCallResponse {
-        var createCallRequest = Stream_Video_CreateCallRequest()
-        createCallRequest.id = callId
-        createCallRequest.type = callType
-        createCallRequest.participantIds = participantIds
-        let createCallResponse = try await callCoordinatorService.createCall(createCallRequest: createCallRequest)
-        return createCallResponse
-    }
-    
+        
     private func measureLatencies(
-        for edges: [Stream_Video_Edge]
+        for endpoints: [Stream_Video_LatencyEndpoint]
     ) async -> [String: Stream_Video_Latency] {
         await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
             var result: [String: Stream_Video_Latency] = [:]
-            for edge in edges {
+            for endpoint in endpoints {
                 group.addTask {
                     var latency = Stream_Video_Latency()
-                    let value = await self.latencyService.measureLatency(for: edge, tries: 3)
+                    let value = await self.latencyService.measureLatency(for: endpoint, tries: 3)
                     latency.measurementsSeconds = value
-                    return [edge.latencyURL: latency]
+                    return [endpoint.id: latency]
                 }
             }
             
@@ -124,10 +83,23 @@ final class CallCoordinatorController: Sendable {
         }
     }
     
-    private func joinCall(callId: String, type: String) async throws -> Stream_Video_JoinCallResponse {
+    private func joinCall(
+        callId: String,
+        type: String,
+        participantIds: [String]
+    ) async throws -> Stream_Video_JoinCallResponse {
         var joinCallRequest = Stream_Video_JoinCallRequest()
         joinCallRequest.id = callId
         joinCallRequest.type = type
+        if !participantIds.isEmpty {
+            var input = Stream_Video_CreateCallInput()
+            var members = [String: Stream_Video_MemberInput]()
+            for participantId in participantIds {
+                members[participantId] = Stream_Video_MemberInput()
+            }
+            input.members = members
+            joinCallRequest.input = input
+        }
         let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
         return joinCallResponse
     }
@@ -137,11 +109,13 @@ final class CallCoordinatorController: Sendable {
         latencyByEdge: [String: Stream_Video_Latency]
     ) async throws -> EdgeServer {
         var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
-        selectEdgeRequest.callID = callId
-        selectEdgeRequest.latencyByEdge = latencyByEdge
-        let response = try await callCoordinatorService.selectEdgeServer(selectEdgeServerRequest: selectEdgeRequest)
-        let url = "wss://\(response.edgeServer.url)"
-        let token = response.token
+        selectEdgeRequest.callCid = callId
+        var measurements = Stream_Video_LatencyMeasurements()
+        measurements.measurements = latencyByEdge
+        selectEdgeRequest.measurements = measurements
+        let response = try await callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest: selectEdgeRequest)
+        let url = response.credentials.server.url
+        let token = response.credentials.token
         log.debug("Selected edge server \(url)")
         return EdgeServer(url: url, token: token)
     }

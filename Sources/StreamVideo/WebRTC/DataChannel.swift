@@ -26,11 +26,6 @@ class DataChannel: NSObject, RTCDataChannelDelegate {
         dataChannel.sendData(buffer)
     }
     
-    func send(event: Event) throws {
-        let data = try event.serializedData()
-        send(data: data)
-    }
-    
     func dataChannelDidChangeState(_ dataChannel: RTCDataChannel) {
         log.debug("Data channel state updated with \(dataChannel.readyState)")
         onStateChange?(dataChannel.readyState)

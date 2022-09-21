@@ -178,6 +178,22 @@ extension Stream_Video_Participant {
     }
 }
 
+extension Stream_Video_User {
+    
+    func toCallParticipant() -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name.isEmpty ? id : name,
+            profileImageURL: URL(string: imageURL),
+            isOnline: false,
+            hasVideo: false,
+            hasAudio: false,
+            showTrack: false
+        )
+    }
+}
+
 extension Stream_Video_Sfu_Participant {
     
     func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
@@ -197,6 +213,8 @@ extension Stream_Video_Sfu_Participant {
 extension Stream_Video_JoinCallResponse {
     
     func callParticipants() -> [CallParticipant] {
-        callState.participants.map { $0.toCallParticipant() }
+        call.users.map { (_, participant) in
+            participant.toCallParticipant()
+        }
     }
 }

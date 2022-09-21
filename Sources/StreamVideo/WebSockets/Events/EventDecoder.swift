@@ -8,55 +8,33 @@ import Foundation
 struct EventDecoder {
     func decode(from data: Data) throws -> Event {
         let response = try Stream_Video_WebsocketEvent(serializedData: data)
-        guard let payload = response.eventPayload else {
+        guard let payload = response.event else {
             throw ClientError.UnsupportedEventType()
         }
         switch payload {
-        case .healthCheck(let value):
+        case let .callStarted(value):
+            let call = response.calls.first?.value
+            return IncomingCallEvent(
+                proto: value,
+                createdBy: call?.createdByUserID ?? "",
+                type: call?.type ?? CallType.default.name,
+                users: response.users.map(\.value)
+            )
+        case let .callCreated(value):
             return value
-        case .callRinging(let value):
+        case let .callUpdated(value):
             return value
-        case .callCreated(let value):
+        case let .callEnded(value):
             return value
-        case .callUpdated(let value):
+        case let .callDeleted(value):
             return value
-        case .callEnded(let value):
+        case let .userUpdated(value):
             return value
-        case .callDeleted(let value):
+        case let .callMembersUpdated(value):
             return value
-        case .userUpdated(let value):
+        case let .callMembersDeleted(value):
             return value
-        case .participantInvited(let value):
-            return value
-        case .participantUpdated(let value):
-            return value
-        case .participantDeleted(let value):
-            return value
-        case .participantJoined(let value):
-            return value
-        case .participantLeft(let value):
-            return value
-        case .broadcastStarted(let value):
-            return value
-        case .broadcastEnded(let value):
-            return value
-        case .authPayload(let value):
-            return value
-        case .audioMuted(let value):
-            return value
-        case .audioUnmuted(let value):
-            return value
-        case .videoStarted(let value):
-            return value
-        case .videoStopped(let value):
-            return value
-        case .screenshareStarted(let value):
-            return value
-        case .screenshareStopped(let value):
-            return value
-        case .recordingStarted(let value):
-            return value
-        case .recordingStopped(let value):
+        case let .healthcheck(value):
             return value
         }
     }
@@ -75,7 +53,6 @@ extension ClientError {
         init<T>(missingValue: String, for type: T.Type, _ file: StaticString = #file, _ line: UInt = #line) {
             super.init("`\(missingValue)` field can't be `nil` for the `\(type)` event.", file, line)
         }
-        
     }
 }
 

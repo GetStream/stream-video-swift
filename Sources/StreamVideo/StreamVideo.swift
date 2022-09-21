@@ -22,7 +22,7 @@ public class StreamVideo {
     private let tokenProvider: TokenProvider
     
     // Change it to your local IP address.
-    private let hostname = "http://192.168.0.132:26991"
+    private let hostname = "http://192.168.0.132:26991/rpc"
     private let wsEndpoint = "ws://192.168.0.132:8989"
     
     private let httpClient: HTTPClient
@@ -30,8 +30,6 @@ public class StreamVideo {
     private var webSocketClient: WebSocketClient?
     
     private let callsMiddleware = CallsMiddleware()
-    private var participantsMiddleware = ParticipantsMiddleware()
-    private var callEventsMiddleware = CallEventsMiddleware()
     
     private var currentCallInfo = [String: String]()
     
@@ -41,9 +39,7 @@ public class StreamVideo {
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
         let middlewares: [EventMiddleware] = [
-            callsMiddleware,
-            participantsMiddleware,
-            callEventsMiddleware
+            callsMiddleware
         ]
         center.add(middlewares: middlewares)
         return center
@@ -109,11 +105,13 @@ public class StreamVideo {
             userInfo: userInfo,
             callId: callId,
             callType: callType,
-            token: generateToken(for: userInfo, callId: callId),
             apiKey: apiKey.apiKeyString,
             tokenProvider: tokenProvider
         )
         currentCallController = controller
+        if !videoConfig.persitingSocketConnection {
+            connectWebSocketClient()
+        }
         return controller
     }
 
@@ -179,12 +177,13 @@ public class StreamVideo {
             payload.apiKey = apiKey.apiKeyString
             
             var user = Stream_Video_CreateUserRequest()
-            user.id = self.userInfo.id
             user.name = self.userInfo.name ?? self.userInfo.id
             user.imageURL = self.userInfo.imageURL?.absoluteString ?? ""
             payload.user = user
             
-            webSocketClient.engine?.send(message: payload)
+            var event = Stream_Video_WebsocketClientEvent()
+            event.event = .authRequest(payload)
+            webSocketClient.engine?.send(message: event)
         }
         
         return webSocketClient
@@ -228,33 +227,6 @@ public class StreamVideo {
             return nil
             #endif
         }
-    }
-    
-    // TODO: only temporary!
-    private func generateToken(for userInfo: UserInfo, callId: String) -> String {
-        let paramsSFU: [String: RawJSON] = [
-            "app_id": .number(42), "call_id": .string(callId),
-            "user": .dictionary(["id": .string(userInfo.id), "image_url": .string(userInfo.imageURL?.absoluteString ?? "")]),
-            "grants": .dictionary([
-                "can_join_call": .bool(true),
-                "can_publish_video": .bool(true),
-                "can_publish_audio": .bool(true),
-                "can_screen_share": .bool(true),
-                "can_mute_video": .bool(true),
-                "can_mute_audio": .bool(true)
-            ]),
-            "iss": .string("dev-only.pubkey.ecdsa256"), "aud": .array([.string("localhost")])
-        ]
-        var paramsString = ""
-        let encoder = JSONEncoder()
-        if let jsonData = try? encoder.encode(paramsSFU) {
-            if let jsonString = String(data: jsonData, encoding: .utf8) {
-                paramsString = Data(jsonString.utf8).base64EncodedString()
-            }
-        }
-        let tokenSFU = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.\(paramsString).SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c"
-            .replacingOccurrences(of: "=", with: "")
-        return tokenSFU
     }
 }
 

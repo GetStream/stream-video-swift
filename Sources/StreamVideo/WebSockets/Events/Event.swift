@@ -5,7 +5,9 @@
 import Foundation
 
 /// An `Event` object representing an event in the chat system.
-public protocol Event: ProtoModel {}
+public protocol Event {}
+
+public protocol SendableEvent: Event, ProtoModel {}
 
 extension Event {
     var name: String {
@@ -13,27 +15,26 @@ extension Event {
     }
 }
 
-extension Stream_Video_WebsocketEvent: Event {}
-extension Stream_Video_Healthcheck: Event {}
-extension Stream_Video_CallRinging: Event {}
-extension Stream_Video_CallCreated: Event {}
-extension Stream_Video_CallUpdated: Event {}
-extension Stream_Video_CallEnded: Event {}
-extension Stream_Video_CallDeleted: Event {}
-extension Stream_Video_UserUpdated: Event {}
-extension Stream_Video_ParticipantInvited: Event {}
-extension Stream_Video_ParticipantUpdated: Event {}
-extension Stream_Video_ParticipantDeleted: Event {}
-extension Stream_Video_ParticipantJoined: Event {}
-extension Stream_Video_ParticipantLeft: Event {}
-extension Stream_Video_BroadcastStarted: Event {}
-extension Stream_Video_BroadcastEnded: Event {}
-extension Stream_Video_AuthPayload: Event {}
-extension Stream_Video_AudioMuted: Event {}
-extension Stream_Video_AudioUnmuted: Event {}
-extension Stream_Video_VideoStarted: Event {}
-extension Stream_Video_VideoStopped: Event {}
-extension Stream_Video_ScreenshareStarted: Event {}
-extension Stream_Video_ScreenshareStopped: Event {}
-extension Stream_Video_RecordingStarted: Event {}
-extension Stream_Video_RecordingStopped: Event {}
+extension Stream_Video_WebsocketClientEvent: SendableEvent {}
+extension Stream_Video_WebsocketEvent: SendableEvent {}
+extension Stream_Video_Healthcheck: SendableEvent {}
+extension Stream_Video_CallStarted: SendableEvent {}
+extension Stream_Video_CallCreated: SendableEvent {}
+extension Stream_Video_CallUpdated: SendableEvent {}
+extension Stream_Video_CallEnded: SendableEvent {}
+extension Stream_Video_CallDeleted: SendableEvent {}
+extension Stream_Video_UserUpdated: SendableEvent {}
+extension Stream_Video_BroadcastStarted: SendableEvent {}
+extension Stream_Video_BroadcastEnded: SendableEvent {}
+extension Stream_Video_AuthPayload: SendableEvent {}
+extension Stream_Video_RecordingStarted: SendableEvent {}
+extension Stream_Video_RecordingStopped: SendableEvent {}
+extension Stream_Video_CallMembersDeleted: SendableEvent {}
+extension Stream_Video_CallMembersUpdated: SendableEvent {}
+
+struct IncomingCallEvent: Event {
+    let proto: Stream_Video_CallStarted
+    let createdBy: String
+    let type: String
+    let users: [Stream_Video_User]
+}

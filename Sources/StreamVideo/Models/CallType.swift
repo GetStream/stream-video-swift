@@ -9,3 +9,8 @@ public struct CallType: Sendable {
         self.name = name
     }
 }
+
+extension CallType {
+    
+    public static let `default` = CallType(name: "my-call-type")
+}

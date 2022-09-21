@@ -48,7 +48,7 @@ struct HomeView: View {
                     .transition(.opacity)
             } else {
                 Button {
-                    viewModel.joinCall(callId: callId)
+                    viewModel.startCall(callId: callId, participantIds: [])
                 } label: {
                     Text("Join a call")
                         .padding()
@@ -73,7 +73,7 @@ struct HomeView: View {
         .fullScreenCover(item: $incomingCallInfo) { callInfo in
             IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
                 //TODO: wait before dismissing the screen
-                viewModel.joinCall(callId: callId)
+                viewModel.startCall(callId: callId, participantIds: [])
                 incomingCallInfo = nil
             }, onCallRejected: { callId in
                 incomingCallInfo = nil
@@ -127,7 +127,32 @@ struct HomeView: View {
             .background(makeCallEnabled ? Color.gray : Color.blue)
             .disabled(makeCallEnabled)
             .cornerRadius(16)
-
+            
+            Button {
+                viewModel.testSFU(
+                    callId: callId,
+                    participantIds: selectedParticipants,
+                    url: url,
+                    token: MockTokenGenerator.generateToken(for: streamVideo.userInfo, callId: callId)
+                )
+            } label: {
+                Text("Test SFU")
+                    .padding()
+            }
+            .foregroundColor(Color.white)
+            .background(makeCallEnabled ? Color.gray : Color.blue)
+            .disabled(makeCallEnabled)
+            .cornerRadius(16)
+        }
+    }
+    
+    var useLocalhost = false
+    // Just temporary solution.
+    var url: String {
+        if useLocalhost {
+            return "http://192.168.0.132:3031/twirp"
+        } else {
+            return "https://sfu2.fra1.gtstrm.com/rpc/twirp"
         }
     }
     

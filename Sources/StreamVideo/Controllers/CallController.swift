@@ -22,7 +22,6 @@ public class CallController {
     private let callId: String
     private let callType: CallType
     private let callCoordinatorController: CallCoordinatorController
-    private let token: String
     private let apiKey: String
     private let tokenProvider: TokenProvider
     
@@ -31,7 +30,6 @@ public class CallController {
         userInfo: UserInfo,
         callId: String,
         callType: CallType,
-        token: String,
         apiKey: String,
         tokenProvider: @escaping TokenProvider
     ) {
@@ -39,19 +37,18 @@ public class CallController {
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
-        self.token = token
         self.apiKey = apiKey
         self.tokenProvider = tokenProvider
     }
     
-    public func startCall(
+    public func joinCall(
         callType: CallType,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         participantIds: [String]
     ) async throws -> Room {
-        let edgeServer = try await callCoordinatorController.startCall(
+        let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
@@ -71,36 +68,11 @@ public class CallController {
         return currentRoom
     }
     
-    public func joinCall(
-        callType: CallType,
-        callId: String,
-        callSettings: CallSettings,
-        videoOptions: VideoOptions
-    ) async throws -> Room {
-        let edgeServer = try await callCoordinatorController.joinCall(
-            callType: callType,
-            callId: callId,
-            videoOptions: videoOptions
-        )
-        
+    public func testSFU(callSettings: CallSettings, url: String, token: String) async throws -> Room? {
         webRTCClient = WebRTCClient(
             userInfo: userInfo,
             apiKey: apiKey,
-            hostname: edgeServer.url,
-            token: edgeServer.token,
-            tokenProvider: tokenProvider
-        )
-        try await webRTCClient?.connect(callSettings: callSettings, videoOptions: videoOptions)
-        let currentRoom = Room.create()
-        room = currentRoom
-        return currentRoom
-    }
-    
-    public func testSFU(callSettings: CallSettings) async throws -> Room? {
-        webRTCClient = WebRTCClient(
-            userInfo: userInfo,
-            apiKey: apiKey,
-            hostname: callSettings.url,
+            hostname: url,
             token: token,
             tokenProvider: tokenProvider
         )
@@ -127,10 +99,6 @@ public class CallController {
     
     public func changeCameraMode(position: CameraPosition) {
         webRTCClient?.changeCameraMode(position: position)
-    }
-    
-    public func loadParticipants(for call: IncomingCall) async throws -> [CallParticipant] {
-        try await callCoordinatorController.loadParticipants(for: call)
     }
     
     public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {

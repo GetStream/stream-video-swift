@@ -9,12 +9,18 @@ class CallsMiddleware: EventMiddleware {
     var onCallCreated: ((IncomingCall) -> Void)?
     
     func handle(event: Event) -> Event? {
-        if let callCreated = event as? Stream_Video_CallCreated {
-            log.debug("Received call created \(callCreated)")
-            let id = callCreated.call.id
-            let userId = callCreated.call.createdByUserID
-            let type = callCreated.call.type
-            let incomingCall = IncomingCall(id: id, callerId: userId, type: type)
+        if let incomingCallEvent = event as? IncomingCallEvent {
+            log.debug("Received call created \(incomingCallEvent)")
+            let cId = incomingCallEvent.proto.callCid
+            let id = cId.components(separatedBy: ":").last ?? cId
+            let userId = incomingCallEvent.createdBy
+            let type = incomingCallEvent.type
+            let incomingCall = IncomingCall(
+                id: id,
+                callerId: userId,
+                type: type,
+                participants: incomingCallEvent.users.map { $0.toCallParticipant() }
+            )
             onCallCreated?(incomingCall)
         }
         

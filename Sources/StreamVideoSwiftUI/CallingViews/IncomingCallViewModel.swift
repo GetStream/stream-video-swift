@@ -11,21 +11,11 @@ public class IncomingViewModel: ObservableObject {
     
     public private(set) var callInfo: IncomingCall
     
-    @Published var callParticipants = [CallParticipant]()
+    var callParticipants: [CallParticipant] {
+        callInfo.participants
+    }
     
     public init(callInfo: IncomingCall) {
         self.callInfo = callInfo
-        loadCallParticipants()
-    }
-    
-    private func loadCallParticipants() {
-        // TODO: fix this
-//        Task {
-//            do {
-//                callParticipants = try await streamVideo.loadParticipants(for: callInfo)
-//            } catch {
-//                log.error("Error loading call participants")
-//            }
-//        }
     }
 }
