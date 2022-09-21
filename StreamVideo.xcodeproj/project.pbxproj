@@ -60,23 +60,23 @@
 		8458872728A3F34D002A81BF /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872628A3F34D002A81BF /* HelperViews.swift */; };
 		8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872928A3F935002A81BF /* OutgoingCallView.swift */; };
 		8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872D28A4EC1F002A81BF /* CallSettings.swift */; };
-		845C56F028DB4DB700D38FCC /* stat.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56D328DB4DB700D38FCC /* stat.pb.swift */; };
-		845C56F128DB4DB700D38FCC /* utils.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56D528DB4DB700D38FCC /* utils.pb.swift */; };
-		845C56F228DB4DB700D38FCC /* participant.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56D728DB4DB700D38FCC /* participant.pb.swift */; };
-		845C56F328DB4DB800D38FCC /* push.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56D928DB4DB700D38FCC /* push.pb.swift */; };
-		845C56F428DB4DB800D38FCC /* broadcast.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56DB28DB4DB700D38FCC /* broadcast.pb.swift */; };
-		845C56F528DB4DB800D38FCC /* call.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56DD28DB4DB700D38FCC /* call.pb.swift */; };
-		845C56F628DB4DB800D38FCC /* edge.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56DF28DB4DB700D38FCC /* edge.pb.swift */; };
-		845C56F728DB4DB800D38FCC /* event.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56E128DB4DB700D38FCC /* event.pb.swift */; };
-		845C56F828DB4DB800D38FCC /* user.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56E328DB4DB700D38FCC /* user.pb.swift */; };
-		845C56F928DB4DB800D38FCC /* member.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56E528DB4DB700D38FCC /* member.pb.swift */; };
-		845C56FA28DB4DB800D38FCC /* client_rpc.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56E728DB4DB700D38FCC /* client_rpc.pb.swift */; };
-		845C56FB28DB4DB800D38FCC /* envelopes.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56E828DB4DB700D38FCC /* envelopes.pb.swift */; };
-		845C56FC28DB4DB800D38FCC /* client_rpc.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56E928DB4DB700D38FCC /* client_rpc.twirp.swift */; };
-		845C56FD28DB4DB800D38FCC /* websocket.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56EA28DB4DB700D38FCC /* websocket.pb.swift */; };
-		845C56FE28DB4DB800D38FCC /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56ED28DB4DB700D38FCC /* models.pb.swift */; };
-		845C56FF28DB4DB800D38FCC /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C56EF28DB4DB700D38FCC /* events.pb.swift */; };
 		845C570128DB631800D38FCC /* MockTokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570028DB631800D38FCC /* MockTokenGenerator.swift */; };
+		845C572128DBAAA600D38FCC /* stat.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570428DBAAA600D38FCC /* stat.pb.swift */; };
+		845C572228DBAAA600D38FCC /* utils.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570628DBAAA600D38FCC /* utils.pb.swift */; };
+		845C572328DBAAA600D38FCC /* participant.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570828DBAAA600D38FCC /* participant.pb.swift */; };
+		845C572428DBAAA600D38FCC /* push.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570A28DBAAA600D38FCC /* push.pb.swift */; };
+		845C572528DBAAA600D38FCC /* broadcast.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570C28DBAAA600D38FCC /* broadcast.pb.swift */; };
+		845C572628DBAAA600D38FCC /* call.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C570E28DBAAA600D38FCC /* call.pb.swift */; };
+		845C572728DBAAA600D38FCC /* edge.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571028DBAAA600D38FCC /* edge.pb.swift */; };
+		845C572828DBAAA600D38FCC /* event.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571228DBAAA600D38FCC /* event.pb.swift */; };
+		845C572928DBAAA600D38FCC /* user.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571428DBAAA600D38FCC /* user.pb.swift */; };
+		845C572A28DBAAA600D38FCC /* member.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571628DBAAA600D38FCC /* member.pb.swift */; };
+		845C572B28DBAAA600D38FCC /* client_rpc.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571828DBAAA600D38FCC /* client_rpc.pb.swift */; };
+		845C572C28DBAAA600D38FCC /* envelopes.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571928DBAAA600D38FCC /* envelopes.pb.swift */; };
+		845C572D28DBAAA600D38FCC /* client_rpc.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571A28DBAAA600D38FCC /* client_rpc.twirp.swift */; };
+		845C572E28DBAAA600D38FCC /* websocket.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571B28DBAAA600D38FCC /* websocket.pb.swift */; };
+		845C572F28DBAAA600D38FCC /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571E28DBAAA600D38FCC /* models.pb.swift */; };
+		845C573028DBAAA600D38FCC /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C572028DBAAA600D38FCC /* events.pb.swift */; };
 		846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8528AA696900147F6E /* ColorExtensions.swift */; };
 		846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */; };
 		846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */; };
@@ -292,23 +292,23 @@
 		8458872628A3F34D002A81BF /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
 		8458872928A3F935002A81BF /* OutgoingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView.swift; sourceTree = "<group>"; };
 		8458872D28A4EC1F002A81BF /* CallSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettings.swift; sourceTree = "<group>"; };
-		845C56D328DB4DB700D38FCC /* stat.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stat.pb.swift; sourceTree = "<group>"; };
-		845C56D528DB4DB700D38FCC /* utils.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utils.pb.swift; sourceTree = "<group>"; };
-		845C56D728DB4DB700D38FCC /* participant.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = participant.pb.swift; sourceTree = "<group>"; };
-		845C56D928DB4DB700D38FCC /* push.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = push.pb.swift; sourceTree = "<group>"; };
-		845C56DB28DB4DB700D38FCC /* broadcast.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = broadcast.pb.swift; sourceTree = "<group>"; };
-		845C56DD28DB4DB700D38FCC /* call.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = call.pb.swift; sourceTree = "<group>"; };
-		845C56DF28DB4DB700D38FCC /* edge.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = edge.pb.swift; sourceTree = "<group>"; };
-		845C56E128DB4DB700D38FCC /* event.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = event.pb.swift; sourceTree = "<group>"; };
-		845C56E328DB4DB700D38FCC /* user.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = user.pb.swift; sourceTree = "<group>"; };
-		845C56E528DB4DB700D38FCC /* member.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = member.pb.swift; sourceTree = "<group>"; };
-		845C56E728DB4DB700D38FCC /* client_rpc.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = client_rpc.pb.swift; sourceTree = "<group>"; };
-		845C56E828DB4DB700D38FCC /* envelopes.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = envelopes.pb.swift; sourceTree = "<group>"; };
-		845C56E928DB4DB700D38FCC /* client_rpc.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = client_rpc.twirp.swift; sourceTree = "<group>"; };
-		845C56EA28DB4DB700D38FCC /* websocket.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = websocket.pb.swift; sourceTree = "<group>"; };
-		845C56ED28DB4DB700D38FCC /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
-		845C56EF28DB4DB700D38FCC /* events.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = events.pb.swift; sourceTree = "<group>"; };
 		845C570028DB631800D38FCC /* MockTokenGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockTokenGenerator.swift; sourceTree = "<group>"; };
+		845C570428DBAAA600D38FCC /* stat.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stat.pb.swift; sourceTree = "<group>"; };
+		845C570628DBAAA600D38FCC /* utils.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utils.pb.swift; sourceTree = "<group>"; };
+		845C570828DBAAA600D38FCC /* participant.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = participant.pb.swift; sourceTree = "<group>"; };
+		845C570A28DBAAA600D38FCC /* push.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = push.pb.swift; sourceTree = "<group>"; };
+		845C570C28DBAAA600D38FCC /* broadcast.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = broadcast.pb.swift; sourceTree = "<group>"; };
+		845C570E28DBAAA600D38FCC /* call.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = call.pb.swift; sourceTree = "<group>"; };
+		845C571028DBAAA600D38FCC /* edge.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = edge.pb.swift; sourceTree = "<group>"; };
+		845C571228DBAAA600D38FCC /* event.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = event.pb.swift; sourceTree = "<group>"; };
+		845C571428DBAAA600D38FCC /* user.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = user.pb.swift; sourceTree = "<group>"; };
+		845C571628DBAAA600D38FCC /* member.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = member.pb.swift; sourceTree = "<group>"; };
+		845C571828DBAAA600D38FCC /* client_rpc.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = client_rpc.pb.swift; sourceTree = "<group>"; };
+		845C571928DBAAA600D38FCC /* envelopes.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = envelopes.pb.swift; sourceTree = "<group>"; };
+		845C571A28DBAAA600D38FCC /* client_rpc.twirp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = client_rpc.twirp.swift; sourceTree = "<group>"; };
+		845C571B28DBAAA600D38FCC /* websocket.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = websocket.pb.swift; sourceTree = "<group>"; };
+		845C571E28DBAAA600D38FCC /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
+		845C572028DBAAA600D38FCC /* events.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = events.pb.swift; sourceTree = "<group>"; };
 		846FBE8528AA696900147F6E /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsView.swift; sourceTree = "<group>"; };
 		846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsViewModel.swift; sourceTree = "<group>"; };
@@ -647,138 +647,136 @@
 			path = CallingViews;
 			sourceTree = "<group>";
 		};
-		845C56D128DB4DB700D38FCC /* coordinator */ = {
+		845C570228DBAAA600D38FCC /* coordinator */ = {
 			isa = PBXGroup;
 			children = (
-				845C56D228DB4DB700D38FCC /* stat_v1 */,
-				845C56D428DB4DB700D38FCC /* utils_v1 */,
-				845C56D628DB4DB700D38FCC /* participant_v1 */,
-				845C56D828DB4DB700D38FCC /* push_v1 */,
-				845C56DA28DB4DB700D38FCC /* broadcast_v1 */,
-				845C56DC28DB4DB700D38FCC /* call_v1 */,
-				845C56DE28DB4DB700D38FCC /* edge_v1 */,
-				845C56E028DB4DB700D38FCC /* event_v1 */,
-				845C56E228DB4DB700D38FCC /* user_v1 */,
-				845C56E428DB4DB700D38FCC /* member_v1 */,
-				845C56E628DB4DB700D38FCC /* client_v1_rpc */,
+				845C570328DBAAA600D38FCC /* stat_v1 */,
+				845C570528DBAAA600D38FCC /* utils_v1 */,
+				845C570728DBAAA600D38FCC /* participant_v1 */,
+				845C570928DBAAA600D38FCC /* push_v1 */,
+				845C570B28DBAAA600D38FCC /* broadcast_v1 */,
+				845C570D28DBAAA600D38FCC /* call_v1 */,
+				845C570F28DBAAA600D38FCC /* edge_v1 */,
+				845C571128DBAAA600D38FCC /* event_v1 */,
+				845C571328DBAAA600D38FCC /* user_v1 */,
+				845C571528DBAAA600D38FCC /* member_v1 */,
+				845C571728DBAAA600D38FCC /* client_v1_rpc */,
 			);
-			name = coordinator;
-			path = "../../../../video-proto/protobuf/ios/video/coordinator";
+			path = coordinator;
 			sourceTree = "<group>";
 		};
-		845C56D228DB4DB700D38FCC /* stat_v1 */ = {
+		845C570328DBAAA600D38FCC /* stat_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56D328DB4DB700D38FCC /* stat.pb.swift */,
+				845C570428DBAAA600D38FCC /* stat.pb.swift */,
 			);
 			path = stat_v1;
 			sourceTree = "<group>";
 		};
-		845C56D428DB4DB700D38FCC /* utils_v1 */ = {
+		845C570528DBAAA600D38FCC /* utils_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56D528DB4DB700D38FCC /* utils.pb.swift */,
+				845C570628DBAAA600D38FCC /* utils.pb.swift */,
 			);
 			path = utils_v1;
 			sourceTree = "<group>";
 		};
-		845C56D628DB4DB700D38FCC /* participant_v1 */ = {
+		845C570728DBAAA600D38FCC /* participant_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56D728DB4DB700D38FCC /* participant.pb.swift */,
+				845C570828DBAAA600D38FCC /* participant.pb.swift */,
 			);
 			path = participant_v1;
 			sourceTree = "<group>";
 		};
-		845C56D828DB4DB700D38FCC /* push_v1 */ = {
+		845C570928DBAAA600D38FCC /* push_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56D928DB4DB700D38FCC /* push.pb.swift */,
+				845C570A28DBAAA600D38FCC /* push.pb.swift */,
 			);
 			path = push_v1;
 			sourceTree = "<group>";
 		};
-		845C56DA28DB4DB700D38FCC /* broadcast_v1 */ = {
+		845C570B28DBAAA600D38FCC /* broadcast_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56DB28DB4DB700D38FCC /* broadcast.pb.swift */,
+				845C570C28DBAAA600D38FCC /* broadcast.pb.swift */,
 			);
 			path = broadcast_v1;
 			sourceTree = "<group>";
 		};
-		845C56DC28DB4DB700D38FCC /* call_v1 */ = {
+		845C570D28DBAAA600D38FCC /* call_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56DD28DB4DB700D38FCC /* call.pb.swift */,
+				845C570E28DBAAA600D38FCC /* call.pb.swift */,
 			);
 			path = call_v1;
 			sourceTree = "<group>";
 		};
-		845C56DE28DB4DB700D38FCC /* edge_v1 */ = {
+		845C570F28DBAAA600D38FCC /* edge_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56DF28DB4DB700D38FCC /* edge.pb.swift */,
+				845C571028DBAAA600D38FCC /* edge.pb.swift */,
 			);
 			path = edge_v1;
 			sourceTree = "<group>";
 		};
-		845C56E028DB4DB700D38FCC /* event_v1 */ = {
+		845C571128DBAAA600D38FCC /* event_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56E128DB4DB700D38FCC /* event.pb.swift */,
+				845C571228DBAAA600D38FCC /* event.pb.swift */,
 			);
 			path = event_v1;
 			sourceTree = "<group>";
 		};
-		845C56E228DB4DB700D38FCC /* user_v1 */ = {
+		845C571328DBAAA600D38FCC /* user_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56E328DB4DB700D38FCC /* user.pb.swift */,
+				845C571428DBAAA600D38FCC /* user.pb.swift */,
 			);
 			path = user_v1;
 			sourceTree = "<group>";
 		};
-		845C56E428DB4DB700D38FCC /* member_v1 */ = {
+		845C571528DBAAA600D38FCC /* member_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56E528DB4DB700D38FCC /* member.pb.swift */,
+				845C571628DBAAA600D38FCC /* member.pb.swift */,
 			);
 			path = member_v1;
 			sourceTree = "<group>";
 		};
-		845C56E628DB4DB700D38FCC /* client_v1_rpc */ = {
+		845C571728DBAAA600D38FCC /* client_v1_rpc */ = {
 			isa = PBXGroup;
 			children = (
-				845C56E728DB4DB700D38FCC /* client_rpc.pb.swift */,
-				845C56E828DB4DB700D38FCC /* envelopes.pb.swift */,
-				845C56E928DB4DB700D38FCC /* client_rpc.twirp.swift */,
-				845C56EA28DB4DB700D38FCC /* websocket.pb.swift */,
+				845C571828DBAAA600D38FCC /* client_rpc.pb.swift */,
+				845C571928DBAAA600D38FCC /* envelopes.pb.swift */,
+				845C571A28DBAAA600D38FCC /* client_rpc.twirp.swift */,
+				845C571B28DBAAA600D38FCC /* websocket.pb.swift */,
 			);
 			path = client_v1_rpc;
 			sourceTree = "<group>";
 		};
-		845C56EB28DB4DB700D38FCC /* sfu */ = {
+		845C571C28DBAAA600D38FCC /* sfu */ = {
 			isa = PBXGroup;
 			children = (
-				845C56EC28DB4DB700D38FCC /* models_v1 */,
-				845C56EE28DB4DB700D38FCC /* event_v1 */,
+				845C571D28DBAAA600D38FCC /* models_v1 */,
+				845C571F28DBAAA600D38FCC /* event_v1 */,
 			);
-			name = sfu;
-			path = "../../../../video-proto/protobuf/ios/video/sfu";
+			path = sfu;
 			sourceTree = "<group>";
 		};
-		845C56EC28DB4DB700D38FCC /* models_v1 */ = {
+		845C571D28DBAAA600D38FCC /* models_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56ED28DB4DB700D38FCC /* models.pb.swift */,
+				845C571E28DBAAA600D38FCC /* models.pb.swift */,
 			);
 			path = models_v1;
 			sourceTree = "<group>";
 		};
-		845C56EE28DB4DB700D38FCC /* event_v1 */ = {
+		845C571F28DBAAA600D38FCC /* event_v1 */ = {
 			isa = PBXGroup;
 			children = (
-				845C56EF28DB4DB700D38FCC /* events.pb.swift */,
+				845C572028DBAAA600D38FCC /* events.pb.swift */,
 			);
 			path = event_v1;
 			sourceTree = "<group>";
@@ -874,8 +872,8 @@
 		84ED240B286C9500002A3186 /* protobuf */ = {
 			isa = PBXGroup;
 			children = (
-				845C56D128DB4DB700D38FCC /* coordinator */,
-				845C56EB28DB4DB700D38FCC /* sfu */,
+				845C570228DBAAA600D38FCC /* coordinator */,
+				845C571C28DBAAA600D38FCC /* sfu */,
 				84560F3128B4C8DE0086A7BB /* stream.video.sfu.signal.twirp.swift */,
 				84FC2C1628ACDFE500181490 /* sfu_events_events.pb.swift */,
 				84FC2C1528ACDFE500181490 /* sfu_models_models.pb.swift */,
@@ -1345,18 +1343,18 @@
 				84F3B0E0289150B10088751D /* CallParticipant.swift in Sources */,
 				843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */,
 				84FC2C1828ACDFE500181490 /* sfu_signal_rpc_signal.pb.swift in Sources */,
-				845C56F628DB4DB800D38FCC /* edge.pb.swift in Sources */,
+				845C572728DBAAA600D38FCC /* edge.pb.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				84AF64D2287C78E70012A503 /* UserInfo.swift in Sources */,
 				84274F482884251600CF8794 /* InternetConnection.swift in Sources */,
 				8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */,
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
-				845C56F128DB4DB700D38FCC /* utils.pb.swift in Sources */,
-				845C56F728DB4DB800D38FCC /* event.pb.swift in Sources */,
+				845C572228DBAAA600D38FCC /* utils.pb.swift in Sources */,
+				845C572828DBAAA600D38FCC /* event.pb.swift in Sources */,
 				84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */,
-				845C56F928DB4DB800D38FCC /* member.pb.swift in Sources */,
-				845C56F328DB4DB800D38FCC /* push.pb.swift in Sources */,
+				845C572A28DBAAA600D38FCC /* member.pb.swift in Sources */,
+				845C572428DBAAA600D38FCC /* push.pb.swift in Sources */,
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				84A7E17428814D7400526C98 /* LatencyService.swift in Sources */,
 				8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */,
@@ -1367,7 +1365,7 @@
 				84AF64D9287C79F60012A503 /* Errors.swift in Sources */,
 				84FC2C1928ACDFE500181490 /* sfu_models_models.pb.swift in Sources */,
 				8456E6D3287EC343004E180E /* BaseLogDestination.swift in Sources */,
-				845C56FD28DB4DB800D38FCC /* websocket.pb.swift in Sources */,
+				845C572E28DBAAA600D38FCC /* websocket.pb.swift in Sources */,
 				84EA5D4128C0ABCB004D3531 /* CallCoordinatorController.swift in Sources */,
 				84A7E18A2883638200526C98 /* URLSessionWebSocketEngine.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
@@ -1382,40 +1380,40 @@
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
 				84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
-				845C56FE28DB4DB800D38FCC /* models.pb.swift in Sources */,
+				845C572F28DBAAA600D38FCC /* models.pb.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84F7385A287C1A3400A363F4 /* Room.swift in Sources */,
 				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
-				845C56F828DB4DB800D38FCC /* user.pb.swift in Sources */,
+				845C572928DBAAA600D38FCC /* user.pb.swift in Sources */,
 				84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */,
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
-				845C56FF28DB4DB800D38FCC /* events.pb.swift in Sources */,
+				845C573028DBAAA600D38FCC /* events.pb.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
-				845C56F228DB4DB700D38FCC /* participant.pb.swift in Sources */,
+				845C572328DBAAA600D38FCC /* participant.pb.swift in Sources */,
 				84FC2C1E28ACF2AE00181490 /* WebRTCClient.swift in Sources */,
-				845C56F028DB4DB700D38FCC /* stat.pb.swift in Sources */,
-				845C56FC28DB4DB800D38FCC /* client_rpc.twirp.swift in Sources */,
+				845C572128DBAAA600D38FCC /* stat.pb.swift in Sources */,
+				845C572D28DBAAA600D38FCC /* client_rpc.twirp.swift in Sources */,
 				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */,
-				845C56FA28DB4DB800D38FCC /* client_rpc.pb.swift in Sources */,
+				845C572B28DBAAA600D38FCC /* client_rpc.pb.swift in Sources */,
 				84EBAA90288BCEAA00BE3176 /* IncomingCall.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
 				84A7E1892883638200526C98 /* WebSocketEngine.swift in Sources */,
 				84A7E1792881922400526C98 /* HTTPClient.swift in Sources */,
 				84FC2C2228ACF2E000181490 /* PeerConnection.swift in Sources */,
-				845C56F528DB4DB800D38FCC /* call.pb.swift in Sources */,
+				845C572628DBAAA600D38FCC /* call.pb.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
-				845C56FB28DB4DB800D38FCC /* envelopes.pb.swift in Sources */,
+				845C572C28DBAAA600D38FCC /* envelopes.pb.swift in Sources */,
 				84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */,
 				8475BA8C28D9A74B00BA4712 /* Typealiases.swift in Sources */,
 				84FC2C1328ACDF3A00181490 /* ProtoModel.swift in Sources */,
 				843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */,
-				845C56F428DB4DB800D38FCC /* broadcast.pb.swift in Sources */,
+				845C572528DBAAA600D38FCC /* broadcast.pb.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
