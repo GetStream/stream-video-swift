@@ -28,9 +28,9 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
     /// All calls mentioned in the event payload, indexed by Call.call_cid
     var calls: [String: Stream_Video_Coordinator_CallV1_Call] = [:]
 
-    /// All calls envelopes for calls mentioned in the event payload, indexed by Call.call_cid
-    /// The envelope may not contain some of the entities (like, members),
-    /// but the message is guaranteed to be present if there's a matching Call in calls map
+    /// All calls details for calls mentioned in the event payload, indexed by Call.call_cid
+    /// Call details cotnain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
+    /// members that were deleted.
     var callDetails: [String: Stream_Video_Coordinator_CallV1_CallDetails] = [:]
 
     var event: Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent.OneOf_Event?

@@ -15,70 +15,6 @@ private struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVer
     typealias Version = _2
 }
 
-/// *
-/// CallCreated is fired when a call is created
-struct Stream_Video_Coordinator_EventV1_CallCreated {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var callCid: String = String()
-
-    var callMemberUserIds: [String] = []
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-struct Stream_Video_Coordinator_EventV1_CallUpdated {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var callCid: String = String()
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-struct Stream_Video_Coordinator_EventV1_CallStarted {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var callCid: String = String()
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-struct Stream_Video_Coordinator_EventV1_CallEnded {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var callCid: String = String()
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-struct Stream_Video_Coordinator_EventV1_CallDeleted {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var callCid: String = String()
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
 struct Stream_Video_Coordinator_EventV1_RecordingStarted {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -146,8 +82,6 @@ struct Stream_Video_Coordinator_EventV1_CallMembersUpdated {
 
     var callCid: String = String()
 
-    var callMemberUserIds: [String] = []
-
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -160,7 +94,65 @@ struct Stream_Video_Coordinator_EventV1_CallMembersDeleted {
 
     var callCid: String = String()
 
-    var callMemberUserIds: [String] = []
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallCreated {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallUpdated {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallStarted {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallEnded {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallDeleted {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -168,11 +160,6 @@ struct Stream_Video_Coordinator_EventV1_CallMembersDeleted {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
-extension Stream_Video_Coordinator_EventV1_CallCreated: @unchecked Sendable {}
-extension Stream_Video_Coordinator_EventV1_CallUpdated: @unchecked Sendable {}
-extension Stream_Video_Coordinator_EventV1_CallStarted: @unchecked Sendable {}
-extension Stream_Video_Coordinator_EventV1_CallEnded: @unchecked Sendable {}
-extension Stream_Video_Coordinator_EventV1_CallDeleted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_RecordingStarted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_RecordingStopped: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_UserUpdated: @unchecked Sendable {}
@@ -180,182 +167,16 @@ extension Stream_Video_Coordinator_EventV1_BroadcastStarted: @unchecked Sendable
 extension Stream_Video_Coordinator_EventV1_BroadcastEnded: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallCreated: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallUpdated: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallStarted: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallEnded: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallDeleted: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 private let _protobuf_package = "stream.video.coordinator.event_v1"
-
-extension Stream_Video_Coordinator_EventV1_CallCreated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallCreated"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid"),
-        2: .standard(proto: "call_member_user_ids")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            case 2: try { try decoder.decodeRepeatedStringField(value: &self.callMemberUserIds) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callCid.isEmpty {
-            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        if !callMemberUserIds.isEmpty {
-            try visitor.visitRepeatedStringField(value: callMemberUserIds, fieldNumber: 2)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Coordinator_EventV1_CallCreated, rhs: Stream_Video_Coordinator_EventV1_CallCreated) -> Bool {
-        if lhs.callCid != rhs.callCid { return false }
-        if lhs.callMemberUserIds != rhs.callMemberUserIds { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_EventV1_CallUpdated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallUpdated"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callCid.isEmpty {
-            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Coordinator_EventV1_CallUpdated, rhs: Stream_Video_Coordinator_EventV1_CallUpdated) -> Bool {
-        if lhs.callCid != rhs.callCid { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_EventV1_CallStarted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallStarted"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callCid.isEmpty {
-            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Coordinator_EventV1_CallStarted, rhs: Stream_Video_Coordinator_EventV1_CallStarted) -> Bool {
-        if lhs.callCid != rhs.callCid { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_EventV1_CallEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallEnded"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callCid.isEmpty {
-            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Coordinator_EventV1_CallEnded, rhs: Stream_Video_Coordinator_EventV1_CallEnded) -> Bool {
-        if lhs.callCid != rhs.callCid { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_EventV1_CallDeleted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallDeleted"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callCid.isEmpty {
-            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Coordinator_EventV1_CallDeleted, rhs: Stream_Video_Coordinator_EventV1_CallDeleted) -> Bool {
-        if lhs.callCid != rhs.callCid { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
 
 extension Stream_Video_Coordinator_EventV1_RecordingStarted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
@@ -538,8 +359,7 @@ extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: SwiftProtobuf.Mes
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".CallMembersUpdated"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid"),
-        2: .standard(proto: "call_member_user_ids")
+        1: .standard(proto: "call_cid")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -549,7 +369,6 @@ extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: SwiftProtobuf.Mes
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            case 2: try { try decoder.decodeRepeatedStringField(value: &self.callMemberUserIds) }()
             default: break
             }
         }
@@ -558,9 +377,6 @@ extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: SwiftProtobuf.Mes
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
         if !callCid.isEmpty {
             try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        if !callMemberUserIds.isEmpty {
-            try visitor.visitRepeatedStringField(value: callMemberUserIds, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -570,7 +386,6 @@ extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: SwiftProtobuf.Mes
         rhs: Stream_Video_Coordinator_EventV1_CallMembersUpdated
     ) -> Bool {
         if lhs.callCid != rhs.callCid { return false }
-        if lhs.callMemberUserIds != rhs.callMemberUserIds { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -580,8 +395,7 @@ extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: SwiftProtobuf.Mes
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".CallMembersDeleted"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid"),
-        2: .standard(proto: "call_member_user_ids")
+        1: .standard(proto: "call_cid")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -591,7 +405,6 @@ extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: SwiftProtobuf.Mes
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            case 2: try { try decoder.decodeRepeatedStringField(value: &self.callMemberUserIds) }()
             default: break
             }
         }
@@ -601,9 +414,6 @@ extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: SwiftProtobuf.Mes
         if !callCid.isEmpty {
             try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
         }
-        if !callMemberUserIds.isEmpty {
-            try visitor.visitRepeatedStringField(value: callMemberUserIds, fieldNumber: 2)
-        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -612,7 +422,171 @@ extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: SwiftProtobuf.Mes
         rhs: Stream_Video_Coordinator_EventV1_CallMembersDeleted
     ) -> Bool {
         if lhs.callCid != rhs.callCid { return false }
-        if lhs.callMemberUserIds != rhs.callMemberUserIds { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallCreated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallCreated"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Coordinator_EventV1_CallCreated, rhs: Stream_Video_Coordinator_EventV1_CallCreated) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallUpdated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallUpdated"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Coordinator_EventV1_CallUpdated, rhs: Stream_Video_Coordinator_EventV1_CallUpdated) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallStarted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallStarted"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Coordinator_EventV1_CallStarted, rhs: Stream_Video_Coordinator_EventV1_CallStarted) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallEnded"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Coordinator_EventV1_CallEnded, rhs: Stream_Video_Coordinator_EventV1_CallEnded) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallDeleted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallDeleted"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Coordinator_EventV1_CallDeleted, rhs: Stream_Video_Coordinator_EventV1_CallDeleted) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
