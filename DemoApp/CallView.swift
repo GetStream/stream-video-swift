@@ -42,7 +42,7 @@ struct CallView: View {
                 IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
                     viewModel.joinCall(callId: callId)
                 }, onCallRejected: { callId in
-                    //TODO: reject call
+                    viewModel.callingState = .idle
                 })
             }
             else if viewModel.callingState == .idle {
