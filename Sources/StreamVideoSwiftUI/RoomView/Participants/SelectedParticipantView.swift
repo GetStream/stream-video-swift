@@ -21,7 +21,7 @@ struct SelectedParticipantView: View {
                 .frame(width: avatarSize, height: avatarSize)
                 .clipShape(Circle())
             
-            Text(user.name ?? user.id)
+            Text(user.name)
                 .lineLimit(1)
                 .font(fonts.footnote)
         }

@@ -4,7 +4,12 @@
 
 import Foundation
 
-public struct IncomingCall: Identifiable, Sendable {
+public struct IncomingCall: Identifiable, Sendable, Equatable {
+    
+    public static func == (lhs: IncomingCall, rhs: IncomingCall) -> Bool {
+        lhs.id == rhs.id
+    }
+    
     public let id: String
     public let callerId: String
     public let type: String

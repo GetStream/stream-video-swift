@@ -16,9 +16,9 @@ struct CallView: View {
         
     var body: some View {
         ZStack {
-            if viewModel.calling {
+            if viewModel.callingState == .outgoing {
                 OutgoingCallView(viewModel: viewModel)
-            } else if viewModel.shouldShowRoomView {
+            } else if viewModel.callingState == .inCall {
                 if viewModel.participants.count > 0 {
                     RoomView(
                         viewFactory: DefaultViewFactory.shared, viewModel: viewModel
@@ -37,9 +37,15 @@ struct CallView: View {
                             CallControlsView(viewModel: viewModel)
                         }
                     }
-
                 }
-            } else {
+            } else if case let .incoming(callInfo) = viewModel.callingState {
+                IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
+                    viewModel.joinCall(callId: callId)
+                }, onCallRejected: { callId in
+                    //TODO: reject call
+                })
+            }
+            else if viewModel.callingState == .idle {
                 HomeView(viewModel: viewModel)
             }
         }

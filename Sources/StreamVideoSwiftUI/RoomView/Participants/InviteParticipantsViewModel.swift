@@ -19,7 +19,7 @@ class InviteParticipantsViewModel: ObservableObject {
             return allUsers
         } else {
             return allUsers.filter { user in
-                let name = (user.name ?? user.id).lowercased()
+                let name = (user.name).lowercased()
                 return name.contains(searchText.lowercased())
             }
         }

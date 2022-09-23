@@ -120,7 +120,7 @@ struct VideoUserView: View {
                 .clipShape(Circle())
             
             VStack(alignment: .leading, spacing: 4) {
-                Text(user.name ?? user.id)
+                Text(user.name)
                     .lineLimit(1)
                     .font(fonts.bodyBold)
                 Text(onlineText)

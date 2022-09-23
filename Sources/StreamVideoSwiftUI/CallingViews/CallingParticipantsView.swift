@@ -9,7 +9,7 @@ struct CallingParticipantsView: View {
     
     @Injected(\.fonts) var fonts
     
-    var participants: [CallParticipant]
+    var participants: [UserInfo]
     var caller: String = ""
     
     var body: some View {

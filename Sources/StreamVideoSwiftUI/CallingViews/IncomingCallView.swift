@@ -35,17 +35,17 @@ public struct IncomingCallView: View {
             
             if viewModel.callParticipants.count > 1 {
                 CallingGroupView(
-                    participants: viewModel.callParticipants
+                    participants: viewModel.callParticipants.map { $0.toUserInfo() }
                 )
             } else {
                 AnimatingParticipantView(
-                    participant: viewModel.callParticipants.first,
+                    participant: viewModel.callParticipants.first?.toUserInfo(),
                     caller: viewModel.callInfo.callerId
                 )
             }
             
             CallingParticipantsView(
-                participants: viewModel.callParticipants,
+                participants: viewModel.callParticipants.map { $0.toUserInfo() },
                 caller: viewModel.callInfo.callerId
             )
             .padding()

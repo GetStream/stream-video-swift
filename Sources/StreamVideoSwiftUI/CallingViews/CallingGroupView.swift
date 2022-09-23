@@ -10,7 +10,7 @@ struct CallingGroupView: View {
     
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
     
-    var participants: [CallParticipant]
+    var participants: [UserInfo]
     @State var isCalling = false
     
     var body: some View {
@@ -96,12 +96,12 @@ struct CallingGroupView: View {
 
 struct IncomingCallParticipantView: View {
         
-    var participant: CallParticipant
+    var participant: UserInfo
     var size: CGFloat = .expandedAvatarSize
     
     var body: some View {
         ZStack {
-            if let imageURL = participant.profileImageURL {
+            if let imageURL = participant.imageURL {
                 LazyImage(source: imageURL)
                     .frame(width: size, height: size)
                     .clipShape(Circle())

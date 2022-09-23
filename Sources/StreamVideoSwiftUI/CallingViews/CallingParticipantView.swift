@@ -7,7 +7,7 @@ import SwiftUI
 
 struct CallingParticipantView: View {
     
-    var participant: CallParticipant?
+    var participant: UserInfo?
     var caller: String = ""
     
     var body: some View {
@@ -27,7 +27,7 @@ struct AnimatingParticipantView: View {
     
     @State var isCalling = false
     
-    var participant: CallParticipant?
+    var participant: UserInfo?
     var caller: String = ""
     
     var body: some View {

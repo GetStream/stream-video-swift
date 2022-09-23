@@ -15,15 +15,15 @@ struct HomeView: View {
     
     @State private var callAction = CallAction.startCall
     
-    var participants: [UserCredentials] {
-        var participants = UserCredentials.builtInUsers
-        participants.removeAll { userCredentials in
-            userCredentials.id == streamVideo.userInfo.id
+    var participants: [UserInfo] {
+        var participants = UserCredentials.builtInUsers.map { $0.userInfo }
+        participants.removeAll { userInfo in
+            userInfo.id == streamVideo.userInfo.id
         }
         return participants
     }
     
-    @State var selectedParticipants = [String]()
+    @State var selectedParticipants = [UserInfo]()
     
     @State var incomingCallInfo: IncomingCall?
     
@@ -48,7 +48,7 @@ struct HomeView: View {
                     .transition(.opacity)
             } else {
                 Button {
-                    viewModel.startCall(callId: callId, participantIds: [])
+                    viewModel.joinCall(callId: callId)
                 } label: {
                     Text("Join a call")
                         .padding()
@@ -63,21 +63,7 @@ struct HomeView: View {
             Spacer()
         }
         .onAppear() {
-            Task {
-                for await incomingCall in streamVideo.incomingCalls() {
-                    self.incomingCallInfo = incomingCall
-                }
-            }
             CallService.shared.registerForIncomingCalls()
-        }
-        .fullScreenCover(item: $incomingCallInfo) { callInfo in
-            IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
-                //TODO: wait before dismissing the screen
-                viewModel.startCall(callId: callId, participantIds: [])
-                incomingCallInfo = nil
-            }, onCallRejected: { callId in
-                incomingCallInfo = nil
-            })
         }
     }
     
@@ -96,18 +82,18 @@ struct HomeView: View {
             
             List(participants) { participant in
                 Button {
-                    if selectedParticipants.contains(participant.id) {
-                        selectedParticipants.removeAll { id in
-                            id == participant.id
+                    if selectedParticipants.contains(participant) {
+                        selectedParticipants.removeAll { user in
+                            user.id == participant.id
                         }
                     } else {
-                        selectedParticipants.append(participant.id)
+                        selectedParticipants.append(participant)
                     }
                 } label: {
                     HStack {
-                        Text(participant.userInfo.name ?? participant.userInfo.id)
+                        Text(participant.name)
                         Spacer()
-                        if selectedParticipants.contains(participant.id) {
+                        if selectedParticipants.contains(participant) {
                             Image(systemName: "checkmark")
                         }
                     }
@@ -118,7 +104,7 @@ struct HomeView: View {
             .listStyle(PlainListStyle())
                         
             Button {
-                viewModel.startCall(callId: callId, participantIds: selectedParticipants)
+                viewModel.startCall(callId: callId, participants: selectedParticipants)
             } label: {
                 Text("Start a call")
                     .padding()
@@ -131,7 +117,7 @@ struct HomeView: View {
             Button {
                 viewModel.testSFU(
                     callId: callId,
-                    participantIds: selectedParticipants,
+                    participantIds: selectedParticipants.map { $0.id },
                     url: url,
                     token: MockTokenGenerator.generateToken(for: streamVideo.userInfo, callId: callId)
                 )

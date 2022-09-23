@@ -6,7 +6,7 @@ import Foundation
 
 public struct UserInfo: Identifiable, Equatable, Sendable {
     public let id: String
-    public let name: String?
+    public let name: String
     public let imageURL: URL?
     public let extraData: [String: RawJSON]
 
@@ -17,7 +17,7 @@ public struct UserInfo: Identifiable, Equatable, Sendable {
         extraData: [String: RawJSON] = [:]
     ) {
         self.id = id
-        self.name = name
+        self.name = name ?? id
         self.imageURL = imageURL
         self.extraData = extraData
     }

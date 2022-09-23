@@ -13,42 +13,27 @@ open class CallViewModel: ObservableObject {
     
     @Published public var room: Room? {
         didSet {
-            // TODO: refine this.
-            connectionStatus = room != nil ? .connected : .disconnected(reason: nil)
-            room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
+            participantUpdates = room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
                 self?.callParticipants = participants
             })
-                .store(in: &cancellables)
         }
     }
-
-    @Published public var connectionStatus: VideoConnectionStatus = .disconnected(reason: nil) {
-        didSet {
-            checkRoomDisplay()
-        }
-    }
-
-    public var shouldShowRoomView: Bool = false {
-        didSet {
-            if shouldShowRoomView {
-                calling = false
-            }
-        }
-    }
+    
+    @Published public var callingState: CallingState = .idle
     
     @Published public var shouldShowError: Bool = false
     public var latestError: Error?
-    
-    @Published public var calling = false
-                    
+                        
     @Published public var participantsShown = false
     
     @Published public var inviteParticipantsShown = false
     
+    @Published public var outgoingCallMembers = [UserInfo]()
+    
     @Published public var callParticipants = [String: CallParticipant]() {
         didSet {
             log.debug("Call participants updated")
-            
+            updateCallStateIfNeeded()
             localParticipant = callParticipants.first(where: { (key, _) in
                 key == streamVideo.userInfo.id
             })
@@ -70,11 +55,11 @@ open class CallViewModel: ObservableObject {
     @Published public var callSettings = CallSettings()
     
     @Published public var localParticipant: CallParticipant?
-        
+            
     private var url: String = "wss://livekit.fucking-go-slices.com"
     private var token: String = ""
     
-    private var cancellables = Set<AnyCancellable>()
+    private var participantUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
     private var callController: CallController?
@@ -94,6 +79,7 @@ open class CallViewModel: ObservableObject {
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
+        subscribeToIncomingCalls()
     }
     
     @objc private func checkForOngoingCall() {
@@ -144,20 +130,25 @@ open class CallViewModel: ObservableObject {
         callSettings = callSettings.withUpdatedCameraPosition(next)
     }
 
-    public func startCall(callId: String, participantIds: [String]) {
+    public func startCall(callId: String, participants: [UserInfo]) {
+        outgoingCallMembers = participants
         callController = streamVideo.makeCallController(callType: .default, callId: callId)
-        calling = true
-        enterCall(callId: callId, participantIds: participantIds)
+        callingState = .outgoing
+        enterCall(callId: callId, participantIds: participants.map(\.id))
+    }
+    
+    public func joinCall(callId: String) {
+        callController = streamVideo.makeCallController(callType: .default, callId: callId)
+        enterCall(callId: callId, participantIds: participants.map(\.id))
     }
     
     // TODO: temp method
     public func testSFU(callId: String, participantIds: [String], url: String, token: String) {
         callController = streamVideo.makeCallController(callType: .default, callId: callId)
-        calling = true
+        callingState = .outgoing
         Task {
             self.room = try await callController?.testSFU(callSettings: callSettings, url: url, token: token)
-            calling = false
-            shouldShowRoomView = true
+            self.callingState = .inCall
             listenForParticipantEvents()
         }
     }
@@ -190,6 +181,7 @@ open class CallViewModel: ObservableObject {
                     participantIds: participantIds
                 )
                 self.room = room
+                self.updateCallStateIfNeeded()
                 listenForParticipantEvents()
                 // TODO: add a check if microphone is already on.
                 if callSettings.audioOn {
@@ -202,16 +194,42 @@ open class CallViewModel: ObservableObject {
                 log.debug("Started call")
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
-                calling = false
+                callingState = .idle
             }
         }
     }
     
     public func leaveCall() {
-        calling = false
-        streamVideo.leaveCall()
+        participantUpdates?.cancel()
+        participantUpdates = nil
         room = nil
+        callParticipants = [:]
+        outgoingCallMembers = []
+        streamVideo.leaveCall()
         currentEventsTask?.cancel()
+        callingState = .idle
+    }
+    
+    private func subscribeToIncomingCalls() {
+        Task {
+            for await incomingCall in streamVideo.incomingCalls() {
+                // TODO: implement holding a call.
+                if callingState == .idle {
+                    callingState = .incoming(incomingCall)
+                }
+            }
+        }
+    }
+    
+    private func updateCallStateIfNeeded() {
+        if streamVideo.videoConfig.joinVideoCallInstantly {
+            callingState = .inCall
+        } else {
+            let shouldGoInCall = callParticipants.count > 1
+            if shouldGoInCall {
+                callingState = .inCall
+            }
+        }
     }
     
     private func listenForParticipantEvents() {
@@ -227,11 +245,6 @@ open class CallViewModel: ObservableObject {
             }
         }
     }
-    
-    private func checkRoomDisplay() {
-        shouldShowRoomView = (connectionStatus == .connected || connectionStatus == .reconnecting)
-            && (callParticipants.count > 1 || streamVideo.videoConfig.joinVideoCallInstantly)
-    }
 }
 
 public struct User: Identifiable, Equatable {
@@ -240,4 +253,12 @@ public struct User: Identifiable, Equatable {
     public var id: String {
         name
     }
+}
+
+public enum CallingState: Equatable {
+    case idle
+    case incoming(IncomingCall)
+    case outgoing
+    case inCall
+    case reconnecting
 }

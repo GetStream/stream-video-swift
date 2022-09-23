@@ -162,6 +162,18 @@ public enum LayoutPriority: Int, Sendable {
     case low = 10
 }
 
+extension CallParticipant {
+    
+    public func toUserInfo() -> UserInfo {
+        UserInfo(
+            id: id,
+            name: name,
+            imageURL: profileImageURL,
+            extraData: [:]
+        )
+    }
+}
+
 extension Stream_Video_Participant {
     
     func toCallParticipant() -> CallParticipant {

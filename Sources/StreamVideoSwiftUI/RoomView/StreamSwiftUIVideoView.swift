@@ -35,7 +35,7 @@ public struct LocalVideoView: View {
                 } else if showBackground || streamVideo.userInfo.imageURL == nil {
                     CallParticipantImageView(
                         id: streamVideo.userInfo.id,
-                        name: streamVideo.userInfo.name ?? streamVideo.userInfo.id,
+                        name: streamVideo.userInfo.name,
                         imageURL: streamVideo.userInfo.imageURL
                     )
                     .frame(maxWidth: reader.size.width)

@@ -25,7 +25,7 @@ struct LoginView: View {
                 Button {
                     viewModel.login(user: user, completion: completion)
                 } label: {
-                    Text(user.userInfo.name ?? user.userInfo.id)
+                    Text(user.userInfo.name)
                 }
                 .padding(.all, 8)
             }

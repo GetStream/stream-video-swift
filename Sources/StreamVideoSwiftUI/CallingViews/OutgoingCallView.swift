@@ -24,18 +24,18 @@ public struct OutgoingCallView: View {
             VStack(spacing: 16) {
                 Spacer()
                 
-                if viewModel.participants.count > 1 {
+                if viewModel.outgoingCallMembers.count > 1 {
                     CallingGroupView(
-                        participants: viewModel.participants
+                        participants: viewModel.outgoingCallMembers
                     )
                 } else {
                     AnimatingParticipantView(
-                        participant: viewModel.participants.first
+                        participant: viewModel.outgoingCallMembers.first
                     )
                 }
                 
                 CallingParticipantsView(
-                    participants: viewModel.participants
+                    participants: viewModel.outgoingCallMembers
                 )
                 .padding()
                 
