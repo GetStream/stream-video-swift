@@ -21,26 +21,50 @@ struct StreamVideoSwiftUIApp: App {
     
     var body: some Scene {
         WindowGroup {
-            if appState.userState == .loggedIn {
-                CallView()
-            } else {
-                LoginView() { user in
-                    let streamVideo = StreamVideo(
-                        apiKey: "key1",
-                        user: user.userInfo,
-                        token: user.token,
-                        videoConfig: VideoConfig(
-                            persitingSocketConnection: true,
-                            joinVideoCallInstantly: false
-                        ),
-                        tokenProvider: { result in
-                            result(.success(user.token))
-                        }
-                    )
-                    streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+            ZStack {
+                if appState.userState == .loggedIn {
+                    CallView(callId: appState.deeplinkCallId)
+                } else {
+                    LoginView() { user in
+                        handleSelectedUser(user)
+                    }
                 }
             }
+            .onOpenURL { url in
+                handle(url: url)
+            }
         }
+    }
+    
+    private func handle(url: URL) {
+        let queryParams = url.queryParameters
+        let users = UserCredentials.builtInUsers
+        guard let userId = queryParams["user_id"],
+              let callId = queryParams["call_id"] else {
+            return
+        }
+        let user = users.filter { $0.id == userId }.first
+        if let user = user {
+            appState.deeplinkCallId = callId
+            appState.userState = .loggedIn
+            handleSelectedUser(user, callId: callId)
+        }
+    }
+    
+    private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
+        let streamVideo = StreamVideo(
+            apiKey: "key1",
+            user: user.userInfo,
+            token: user.token,
+            videoConfig: VideoConfig(
+                persitingSocketConnection: true,
+                joinVideoCallInstantly: false
+            ),
+            tokenProvider: { result in
+                result(.success(user.token))
+            }
+        )
+        streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
     }
     
 }

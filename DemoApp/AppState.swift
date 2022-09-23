@@ -7,6 +7,7 @@ import SwiftUI
 class AppState: ObservableObject {
     
     @Published var userState: UserState = .notLoggedIn
+    @Published var deeplinkCallId: String?
     
     static let shared = AppState()
     
