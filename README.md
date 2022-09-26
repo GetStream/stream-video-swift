@@ -18,9 +18,9 @@ The backend APIs consist of two parts:
 
 We use protobufs and twirp for communicating with these APIs. The Swift protobufs are generated and integrated in the Xcode project.
 
-For the coordinator API, the protobufs are located at our internal (video-proto)[https://github.com/GetStream/video-proto] repo. Follow the steps there if you want to generate newer version of these files. The generated files are part of the versioning control and all updates related to them should be pushed.
+For the coordinator API, the protobufs are located at our internal [video-proto](https://github.com/GetStream/video-proto) repo. Follow the steps there if you want to generate newer version of these files. The generated files are part of the versioning control and all updates related to them should be pushed.
 
-For the SFU API, at the moment, the Swift protobufs are in two parts (this is not ideal and will be addressed by the backend team). The first part, can be found in the same video-proto repo from above. The second part, needs still to be generated locally on this repo. In order to do this, you need to copy the latest files from the (SFU repo)[https://github.com/GetStream/video-sfu], in the protobuf folder. 
+For the SFU API, at the moment, the Swift protobufs are in two parts (this is not ideal and will be addressed by the backend team). The first part, can be found in the same video-proto repo from above. The second part, needs still to be generated locally on this repo. In order to do this, you need to copy the latest files from the [SFU repo](https://github.com/GetStream/video-sfu), in the protobuf folder. 
 
 After you copy these files, you need to run the local generate.sh script, which can be found at `Sources/StreamVideo/protobuf`. 
 
@@ -36,7 +36,7 @@ go build
 ```
 This will generate another executable, with the name `protoc-gen-swiftwirp` that you can use to create protobufs.
 
-In order to create Swift protobufs, you will need to first setup the Swift code generator plugin, as described here: https://github.com/apple/swift-protobuf.
+In order to create Swift protobufs, you will need to first setup the Swift code generator plugin, as described [here](https://github.com/apple/swift-protobuf).
 
 ### Sample app
 
