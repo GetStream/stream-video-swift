@@ -114,6 +114,10 @@ public class StreamVideo {
         }
         return controller
     }
+    
+    public func makeVoipNotificationsController() -> VoipNotificationsController {
+        callCoordinatorController.makeVoipNotificationsController()
+    }
 
     public func leaveCall() {
         postNotification(with: CallNotification.callEnded)

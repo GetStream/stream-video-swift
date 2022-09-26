@@ -13,7 +13,7 @@ struct HomeView: View {
     @Injected(\.streamVideo) var streamVideo
     
     private let imageSize: CGFloat = 32
-    
+        
     @State private var callId = ""
     
     @State private var callAction = CallAction.startCall
@@ -88,6 +88,10 @@ struct HomeView: View {
                 message: Text("Are you sure you want to sign out?"),
                 primaryButton: .destructive(Text("Sign out")) {
                     withAnimation {
+                        if let userToken = UnsecureUserRepository.shared.currentVoipPushToken() {
+                            let controller = streamVideo.makeVoipNotificationsController()
+                            controller.removeDevice(with: userToken)
+                        }
                         UnsecureUserRepository.shared.removeCurrentUser()
                         AppState.shared.userState = .notLoggedIn
                     }

@@ -54,6 +54,10 @@ final class CallCoordinatorController: Sendable {
     func update(token: Token) {
         callCoordinatorService.update(userToken: token.rawValue)
     }
+    
+    func makeVoipNotificationsController() -> VoipNotificationsController {
+        VoipNotificationsController(callCoordinatorService: callCoordinatorService)
+    }
 
     // MARK: - private
         
