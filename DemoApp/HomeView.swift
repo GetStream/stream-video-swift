@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import NukeUI
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
@@ -10,6 +11,8 @@ struct HomeView: View {
     @ObservedObject var viewModel: CallViewModel
     
     @Injected(\.streamVideo) var streamVideo
+    
+    private let imageSize: CGFloat = 32
     
     @State private var callId = ""
     
@@ -24,14 +27,28 @@ struct HomeView: View {
     }
     
     @State var selectedParticipants = [UserInfo]()
-    
     @State var incomingCallInfo: IncomingCall?
+    @State var logoutAlertShown = false
     
     var body: some View {
         VStack {
-            Text("Call details")
-                .font(.title)
-                .padding()
+            ZStack {
+                HStack {
+                    Button {
+                        logoutAlertShown = true
+                    } label: {
+                        LazyImage(source: streamVideo.userInfo.imageURL)
+                            .frame(width: imageSize, height: imageSize)
+                            .clipShape(Circle())
+                    }
+                    .padding()
+
+                    Spacer()
+                }
+                Text("Call details")
+                    .font(.title)
+                    .padding()
+            }
             
             Picker("Call action", selection: $callAction) {
                 Text(CallAction.startCall.rawValue).tag(CallAction.startCall)
@@ -65,6 +82,19 @@ struct HomeView: View {
         .onAppear() {
             CallService.shared.registerForIncomingCalls()
         }
+        .alert(isPresented: $logoutAlertShown) {
+            Alert(
+                title: Text("Sign out"),
+                message: Text("Are you sure you want to sign out?"),
+                primaryButton: .destructive(Text("Sign out")) {
+                    withAnimation {
+                        UnsecureUserRepository.shared.removeCurrentUser()
+                        AppState.shared.userState = .notLoggedIn
+                    }
+                },
+                secondaryButton: .cancel()
+            )
+        }
     }
     
     private var makeCallEnabled: Bool {
@@ -91,6 +121,9 @@ struct HomeView: View {
                     }
                 } label: {
                     HStack {
+                        LazyImage(source: participant.imageURL)
+                            .frame(width: imageSize, height: imageSize)
+                            .clipShape(Circle())
                         Text(participant.name)
                         Spacer()
                         if selectedParticipants.contains(participant) {

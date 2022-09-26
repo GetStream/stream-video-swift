@@ -10,6 +10,8 @@ struct CallView: View {
     
     @StateObject var viewModel: CallViewModel
     
+    @ObservedObject var appState = AppState.shared
+    
     init(callId: String? = nil) {
         _viewModel = StateObject(wrappedValue: CallViewModel())
         if let callId = callId, viewModel.callingState == .idle {
@@ -50,6 +52,12 @@ struct CallView: View {
             }
             else if viewModel.callingState == .idle {
                 HomeView(viewModel: viewModel)
+            }
+        }
+        .onReceive(appState.$activeCallController) { callController in
+            if let callController = callController {
+                viewModel.setCallController(callController)
+                appState.activeCallController = nil
             }
         }
     }

@@ -116,6 +116,7 @@ public class StreamVideo {
     }
 
     public func leaveCall() {
+        postNotification(with: CallNotification.callEnded)
         webSocketClient?.set(callInfo: [:])
         currentCallController?.cleanUp()
         if videoConfig.persitingSocketConnection {

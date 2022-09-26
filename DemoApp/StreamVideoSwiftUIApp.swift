@@ -10,11 +10,14 @@ import Atlantis
 @main
 struct StreamVideoSwiftUIApp: App {
     
+    private let userRepository: UserRepository = UnsecureUserRepository.shared
+    
     @State var streamVideoUI: StreamVideoUI?
     
     @ObservedObject var appState = AppState.shared
         
     init() {
+        checkLoggedInUser()
         Atlantis.start()
         LogConfig.level = .debug
     }
@@ -64,7 +67,16 @@ struct StreamVideoSwiftUIApp: App {
                 result(.success(user.token))
             }
         )
+        appState.streamVideo = streamVideo
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+    }
+    
+    private func checkLoggedInUser() {
+        if let user = userRepository.loadCurrentUser() {
+            appState.currentUser = user.userInfo
+            appState.userState = .loggedIn
+            handleSelectedUser(user)
+        }
     }
     
 }

@@ -13,6 +13,8 @@ class LoginViewModel: ObservableObject {
     @Published var userCredentials = UserCredentials.builtInUsers
     
     func login(user: UserCredentials, completion: (UserCredentials) -> ()) {
+        UnsecureUserRepository.shared.save(user: user)
+        AppState.shared.currentUser = user.userInfo
         AppState.shared.userState = .loggedIn
         // Perform login
         completion(user)
@@ -20,7 +22,7 @@ class LoginViewModel: ObservableObject {
     
 }
 
-struct UserCredentials: Identifiable {
+struct UserCredentials: Identifiable, Codable {
     var id: String {
         userInfo.id
     }

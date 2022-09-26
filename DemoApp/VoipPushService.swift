@@ -10,11 +10,14 @@ typealias VoipPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> ()
 
 class VoipPushService: NSObject, PKPushRegistryDelegate {
     
-    let voipRegistry = PKPushRegistry(queue: nil)
+    let voipQueue: DispatchQueue
+    let voipRegistry: PKPushRegistry
     
     var onReceiveIncomingPush: VoipPushHandler
     
     init(pushHandler: @escaping VoipPushHandler) {
+        self.voipQueue = DispatchQueue(label: "io.getstream.voip")
+        self.voipRegistry = PKPushRegistry(queue: voipQueue)        
         self.onReceiveIncomingPush = pushHandler
     }
     

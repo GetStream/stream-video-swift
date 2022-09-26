@@ -3,16 +3,29 @@
 //
 
 import Foundation
-import CallKit
-import StreamVideo
+@preconcurrency import CallKit
+@preconcurrency import StreamVideo
 
 class CallKitService: NSObject, CXProviderDelegate {
     
     @Injected(\.streamVideo) var streamVideo
         
     //TODO: load this from the notification
-    var currentCallId = "123"
+    var currentCallId = "callkit"
     
+    private var callKitId: UUID?
+    private let callController = CXCallController()
+    
+    override init() {
+        super.init()
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(endCurrentCall),
+            name: Notification.Name(CallNotification.callEnded),
+            object: nil
+        )
+    }
+        
     func reportIncomingCall(completion: @escaping (Error?) -> Void) {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = true
@@ -21,12 +34,32 @@ class CallKitService: NSObject, CXProviderDelegate {
         )
         provider.setDelegate(self, queue: nil)
         let update = CXCallUpdate()
+        let callId = UUID()
+        callKitId = callId
         update.remoteHandle = CXHandle(type: .generic, value: "You are receiving a call")
         provider.reportNewIncomingCall(
-            with: UUID(),
+            with: callId,
             update: update,
             completion: completion
         )
+    }
+    
+    @objc func endCurrentCall() {
+        guard let callKitId = callKitId else { return }
+        let endCallAction = CXEndCallAction(call: callKitId)
+        let transaction = CXTransaction(action: endCallAction)
+        requestTransaction(transaction)
+        self.callKitId = nil
+    }
+
+    private func requestTransaction(_ transaction: CXTransaction) {
+        callController.request(transaction) { error in
+            if let error = error {
+                log.error("Error while executing the transaction \(error.localizedDescription)")
+            } else {
+                log.debug("Transaction completed successfully")
+            }
+        }
     }
     
     func providerDidReset(_ provider: CXProvider) {
@@ -34,21 +67,48 @@ class CallKitService: NSObject, CXProviderDelegate {
     }
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-        if !currentCallId.isEmpty {
-//            Task {
-//                _ = try? await streamVideo.joinCall(
-//                    callType: .init(name: "video"),
-//                    callId: currentCallId,
-//                    videoOptions: VideoOptions()
-//                )
-//            }
-
+        guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
+            action.fail()
+            return
         }
-        
-        action.fulfill()
+        if !currentCallId.isEmpty {
+            if AppState.shared.streamVideo == nil {
+                let streamVideo = StreamVideo(
+                    apiKey: "key1",
+                    user: currentUser.userInfo,
+                    token: currentUser.token,
+                    videoConfig: VideoConfig(
+                        persitingSocketConnection: true,
+                        joinVideoCallInstantly: false
+                    ),
+                    tokenProvider: { result in
+                        result(.success(currentUser.token))
+                    }
+                )
+                AppState.shared.streamVideo = streamVideo
+            }
+            let callController = streamVideo.makeCallController(callType: .default, callId: currentCallId)
+            Task {
+                //TODO: change this to use the call creation flow.
+                _ = try? await callController.testSFU(
+                    callSettings: CallSettings(),
+                    url: "https://sfu2.fra1.gtstrm.com/rpc/twirp",
+                    token: MockTokenGenerator.generateToken(
+                        for: currentUser.userInfo,
+                        callId: currentCallId
+                    )
+                )
+                await MainActor.run {
+                    AppState.shared.activeCallController = callController
+                    action.fulfill()
+                }
+            }
+        }
     }
     
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+        callKitId = nil
+        streamVideo.leaveCall()
         action.fulfill()
     }
     

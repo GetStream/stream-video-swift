@@ -87,6 +87,12 @@ open class CallViewModel: ObservableObject {
             room = callController?.room
         }
     }
+    
+    public func setCallController(_ callController: CallController) {
+        self.callController = callController
+        room = callController.room
+        callingState = .inCall
+    }
 
     public func toggleCameraEnabled() {
         // TODO: throw error

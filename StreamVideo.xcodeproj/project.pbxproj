@@ -78,6 +78,7 @@
 		845C572F28DBAAA600D38FCC /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C571E28DBAAA600D38FCC /* models.pb.swift */; };
 		845C573028DBAAA600D38FCC /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C572028DBAAA600D38FCC /* events.pb.swift */; };
 		845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
+		8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* LocalStorage.swift */; };
 		846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8528AA696900147F6E /* ColorExtensions.swift */; };
 		846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */; };
 		846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */; };
@@ -311,6 +312,7 @@
 		845C571E28DBAAA600D38FCC /* models.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = models.pb.swift; sourceTree = "<group>"; };
 		845C572028DBAAA600D38FCC /* events.pb.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = events.pb.swift; sourceTree = "<group>"; };
 		845C573128DDC57A00D38FCC /* DemoAppUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAppUtils.swift; sourceTree = "<group>"; };
+		8468821228DFA448003BA9EE /* LocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStorage.swift; sourceTree = "<group>"; };
 		846FBE8528AA696900147F6E /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsView.swift; sourceTree = "<group>"; };
 		846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsViewModel.swift; sourceTree = "<group>"; };
@@ -531,6 +533,7 @@
 				8403C0AC2897CF4D0092BD43 /* CallKitService.swift */,
 				8403C0AE2897D9940092BD43 /* VoipPushService.swift */,
 				845C570028DB631800D38FCC /* MockTokenGenerator.swift */,
+				8468821228DFA448003BA9EE /* LocalStorage.swift */,
 				845C573128DDC57A00D38FCC /* DemoAppUtils.swift */,
 				84C2996928757F820034B735 /* DemoApp-Info.plist */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
@@ -1325,6 +1328,7 @@
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
+				8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */,
 				8434C5222899572F0001490A /* CallService.swift in Sources */,
 				845C570128DB631800D38FCC /* MockTokenGenerator.swift in Sources */,
 			);
