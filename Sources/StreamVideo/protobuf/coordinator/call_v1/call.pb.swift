@@ -181,23 +181,12 @@ struct Stream_Video_Coordinator_CallV1_CallOptions {
     /// Clears the value of `broadcasting`. Subsequent reads from it will return its default value.
     mutating func clearBroadcasting() { _broadcasting = nil }
 
-    var transcription: Stream_Video_Coordinator_CallV1_TranscriptionOptions {
-        get { _transcription ?? Stream_Video_Coordinator_CallV1_TranscriptionOptions() }
-        set { _transcription = newValue }
-    }
-
-    /// Returns true if `transcription` has been explicitly set.
-    var hasTranscription: Bool { self._transcription != nil }
-    /// Clears the value of `transcription`. Subsequent reads from it will return its default value.
-    mutating func clearTranscription() { _transcription = nil }
-
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
     fileprivate var _recording: Stream_Video_Coordinator_CallV1_RecordingOptions?
     fileprivate var _broadcasting: Stream_Video_Coordinator_CallV1_BroadcastingOptions?
-    fileprivate var _transcription: Stream_Video_Coordinator_CallV1_TranscriptionOptions?
 }
 
 /// Contains all options regarding to call recording
@@ -250,31 +239,6 @@ struct Stream_Video_Coordinator_CallV1_BroadcastingOptions {
     fileprivate var _enabled: Bool?
 }
 
-/// Contains all options regarding to call transcription
-struct Stream_Video_Coordinator_CallV1_TranscriptionOptions {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    /// Whether transcription feature is enabled
-    /// Default: false
-    var enabled: Bool {
-        get { _enabled ?? false }
-        set { _enabled = newValue }
-    }
-
-    /// Returns true if `enabled` has been explicitly set.
-    var hasEnabled: Bool { self._enabled != nil }
-    /// Clears the value of `enabled`. Subsequent reads from it will return its default value.
-    mutating func clearEnabled() { _enabled = nil }
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-
-    fileprivate var _enabled: Bool?
-}
-
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_CallV1_CallType: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_Call: @unchecked Sendable {}
@@ -282,7 +246,6 @@ extension Stream_Video_Coordinator_CallV1_CallDetails: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_CallOptions: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_RecordingOptions: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_BroadcastingOptions: @unchecked Sendable {}
-extension Stream_Video_Coordinator_CallV1_TranscriptionOptions: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -488,8 +451,7 @@ extension Stream_Video_Coordinator_CallV1_CallOptions: SwiftProtobuf.Message, Sw
     static let protoMessageName: String = _protobuf_package + ".CallOptions"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "recording"),
-        2: .same(proto: "broadcasting"),
-        3: .same(proto: "transcription")
+        2: .same(proto: "broadcasting")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -500,7 +462,6 @@ extension Stream_Video_Coordinator_CallV1_CallOptions: SwiftProtobuf.Message, Sw
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularMessageField(value: &self._recording) }()
             case 2: try { try decoder.decodeSingularMessageField(value: &self._broadcasting) }()
-            case 3: try { try decoder.decodeSingularMessageField(value: &self._transcription) }()
             default: break
             }
         }
@@ -517,16 +478,12 @@ extension Stream_Video_Coordinator_CallV1_CallOptions: SwiftProtobuf.Message, Sw
         try { if let v = self._broadcasting {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
         } }()
-        try { if let v = self._transcription {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Coordinator_CallV1_CallOptions, rhs: Stream_Video_Coordinator_CallV1_CallOptions) -> Bool {
         if lhs._recording != rhs._recording { return false }
         if lhs._broadcasting != rhs._broadcasting { return false }
-        if lhs._transcription != rhs._transcription { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -605,46 +562,6 @@ extension Stream_Video_Coordinator_CallV1_BroadcastingOptions: SwiftProtobuf.Mes
     static func == (
         lhs: Stream_Video_Coordinator_CallV1_BroadcastingOptions,
         rhs: Stream_Video_Coordinator_CallV1_BroadcastingOptions
-    ) -> Bool {
-        if lhs._enabled != rhs._enabled { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_CallV1_TranscriptionOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".TranscriptionOptions"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "enabled")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularBoolField(value: &self._enabled) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
-        try { if let v = self._enabled {
-            try visitor.visitSingularBoolField(value: v, fieldNumber: 1)
-        } }()
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (
-        lhs: Stream_Video_Coordinator_CallV1_TranscriptionOptions,
-        rhs: Stream_Video_Coordinator_CallV1_TranscriptionOptions
     ) -> Bool {
         if lhs._enabled != rhs._enabled { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }

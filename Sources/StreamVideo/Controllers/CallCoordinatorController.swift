@@ -41,7 +41,7 @@ final class CallCoordinatorController: Sendable {
             participantIds: participantIds
         )
         
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.latencyClaim.endpoints)
+        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
         
         let edgeServer = try await selectEdgeServer(
             callId: joinCallResponse.call.call.callCid,
@@ -62,7 +62,7 @@ final class CallCoordinatorController: Sendable {
     // MARK: - private
         
     private func measureLatencies(
-        for endpoints: [Stream_Video_LatencyEndpoint]
+        for endpoints: [Stream_Video_Edge]
     ) async -> [String: Stream_Video_Latency] {
         await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
             var result: [String: Stream_Video_Latency] = [:]
@@ -71,7 +71,7 @@ final class CallCoordinatorController: Sendable {
                     var latency = Stream_Video_Latency()
                     let value = await self.latencyService.measureLatency(for: endpoint, tries: 3)
                     latency.measurementsSeconds = value
-                    return [endpoint.id: latency]
+                    return [endpoint.name: latency]
                 }
             }
             

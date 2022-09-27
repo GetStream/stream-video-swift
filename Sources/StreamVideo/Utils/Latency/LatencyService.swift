@@ -12,8 +12,8 @@ final class LatencyService: Sendable {
         self.httpClient = httpClient
     }
     
-    func measureLatency(for endpoint: Stream_Video_LatencyEndpoint, tries: Int = 1) async -> [Double] {
-        guard let url = URL(string: endpoint.url) else { return [Double(Int.max)] }
+    func measureLatency(for endpoint: Stream_Video_Edge, tries: Int = 1) async -> [Double] {
+        guard let url = URL(string: endpoint.latencyURL) else { return [Double(Int.max)] }
         var results = [Double]()
         for _ in 0..<tries {
             let startDate = Date()
