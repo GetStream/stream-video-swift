@@ -9,9 +9,11 @@ class VideoCapturer {
     
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
+    private let videoSource: RTCVideoSource
     
     init(videoSource: RTCVideoSource, videoOptions: VideoOptions) {
         self.videoOptions = videoOptions
+        self.videoSource = videoSource
         #if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         #else
@@ -54,6 +56,15 @@ class VideoCapturer {
         if !fpsRange.contains(selectedFps) {
             log.warning("requested fps: \(videoOptions.preferredFps) not available: \(fpsRange) and will be clamped")
             selectedFps = selectedFps.clamped(to: fpsRange)
+        }
+        
+        if selectedFormat.dimensions.area != videoOptions.preferredDimensions.area {
+            log.debug("Adapting video source output format")
+            videoSource.adaptOutputFormat(
+                toWidth: selectedFormat.dimensions.width,
+                height: selectedFormat.dimensions.height,
+                fps: Int32(selectedFps)
+            )
         }
 
         videoCapturer.startCapture(

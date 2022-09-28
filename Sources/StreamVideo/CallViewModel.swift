@@ -38,15 +38,6 @@ open class CallViewModel: ObservableObject {
                 key == streamVideo.userInfo.id
             })
                 .map { $1 }
-            
-            for (_, value) in callParticipants {
-                if value.track != nil {
-                    log.debug("Found a track for user \(value.name)")
-                }
-                if value.trackSize != .zero {
-                    log.debug("Changed frame for track \(value.trackSize)")
-                }
-            }
         }
     }
     
@@ -56,9 +47,6 @@ open class CallViewModel: ObservableObject {
     
     @Published public var localParticipant: CallParticipant?
             
-    private var url: String = "wss://livekit.fucking-go-slices.com"
-    private var token: String = ""
-    
     private var participantUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
