@@ -32,6 +32,10 @@ public struct LocalVideoView: View {
                     StreamVideoViewSwiftUI(id: streamVideo.userInfo.id, size: reader.size) { view in
                         onLocalVideoUpdate(view)
                     }
+                    .rotation3DEffect(
+                        .degrees(callSettings.cameraPosition == .front ? 180 : 0),
+                        axis: (x: 0, y: 1, z: 0)
+                    )
                 } else if showBackground || streamVideo.userInfo.imageURL == nil {
                     CallParticipantImageView(
                         id: streamVideo.userInfo.id,
