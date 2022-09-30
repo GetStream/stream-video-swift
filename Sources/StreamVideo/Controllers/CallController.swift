@@ -10,8 +10,6 @@ public class CallController {
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleLocalTrackUpdate()
-            handleRemoteStreamAdded()
-            handleRemoteStreamRemoved()
             handleParticipantsUpdated()
             handleParticipantEvent()
         }
@@ -141,37 +139,6 @@ public class CallController {
                 let updated = participant.withUpdated(track: localVideoTrack)
                 self?.room?.participants[userId] = updated
             }
-        }
-    }
-    
-    private func handleRemoteStreamAdded() {
-        webRTCClient?.onRemoteTrackAdded = { [weak self] (track, trackId) in
-            var participant = self?.room?.participants[trackId]
-            if participant == nil {
-                participant = CallParticipant(
-                    id: trackId,
-                    role: "member",
-                    name: trackId,
-                    profileImageURL: nil,
-                    isOnline: true,
-                    hasVideo: true,
-                    hasAudio: true,
-                    showTrack: true
-                )
-            }
-            if track != nil {
-                participant?.track = track
-            }
-            if let participant = participant {
-                self?.room?.add(participant: participant)
-            }
-        }
-    }
-    
-    private func handleRemoteStreamRemoved() {
-        webRTCClient?.onRemoteStreamRemoved = { [weak self] stream in
-            let trackId = stream?.streamId.components(separatedBy: ":").first ?? UUID().uuidString
-            self?.room?.removeParticipant(with: trackId)
         }
     }
     

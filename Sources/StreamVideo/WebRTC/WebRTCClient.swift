@@ -27,8 +27,8 @@ class WebRTCClient: NSObject {
             self.callParticipants[callParticipant.id] = callParticipant
         }
         
-        func remove(callParticipant: CallParticipant) {
-            self.callParticipants.removeValue(forKey: callParticipant.id)
+        func removeCallParticipant(with id: String) {
+            self.callParticipants.removeValue(forKey: id)
         }
         
         func update(tracks: [String: RTCVideoTrack]) {
@@ -81,8 +81,6 @@ class WebRTCClient: NSObject {
     private let host: String
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
-    var onRemoteTrackAdded: ((RTCVideoTrack?, String) -> Void)?
-    var onRemoteStreamRemoved: ((RTCMediaStream?) -> Void)?
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
@@ -132,10 +130,8 @@ class WebRTCClient: NSObject {
             videoOptions: videoOptions
         )
         
-        subscriber?.onStreamAdded = { [weak self] stream in
-            self?.handleStreamAdded(stream)
-        }
-        subscriber?.onStreamRemoved = onRemoteStreamRemoved
+        subscriber?.onStreamAdded = handleStreamAdded
+        subscriber?.onStreamRemoved = handleStreamRemoved
         
         log.debug("Creating data channel")
         
@@ -243,8 +239,33 @@ class WebRTCClient: NSObject {
                 videoTrack = track
             }
             await self.state.add(track: videoTrack, id: trackId)
+            var participant = await state.callParticipants[trackId]
+            if participant == nil {
+                participant = CallParticipant(
+                    id: trackId,
+                    role: "member",
+                    name: trackId,
+                    profileImageURL: nil,
+                    isOnline: true,
+                    hasVideo: true,
+                    hasAudio: true,
+                    showTrack: true
+                )
+            }
+            if track != nil {
+                participant?.track = track
+            }
+            if let participant = participant {
+                await self.state.update(callParticipant: participant)
+            }
         }
-        onRemoteTrackAdded?(track, trackId)
+    }
+    
+    private func handleStreamRemoved(_ stream: RTCMediaStream) {
+        let trackId = stream.streamId.components(separatedBy: ":").first ?? UUID().uuidString
+        Task {
+            await state.removeCallParticipant(with: trackId)
+        }
     }
     
     private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
@@ -436,7 +457,7 @@ class WebRTCClient: NSObject {
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_ParticipantLeft) async {
         let participant = event.participant.toCallParticipant()
-        await state.remove(callParticipant: participant)
+        await state.removeCallParticipant(with: participant.id)
         let event = ParticipantEvent(
             id: participant.id,
             action: .leave,
