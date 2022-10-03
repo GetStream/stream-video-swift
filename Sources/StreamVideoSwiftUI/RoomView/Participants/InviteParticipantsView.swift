@@ -115,7 +115,7 @@ struct VideoUserView: View {
     
     var body: some View {
         HStack {
-            LazyImage(source: user.imageURL)
+            LazyImage(url: user.imageURL)
                 .frame(width: avatarSize, height: avatarSize)
                 .clipShape(Circle())
             

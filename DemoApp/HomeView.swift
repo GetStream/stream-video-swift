@@ -37,7 +37,7 @@ struct HomeView: View {
                     Button {
                         logoutAlertShown = true
                     } label: {
-                        LazyImage(source: streamVideo.userInfo.imageURL)
+                        LazyImage(url: streamVideo.userInfo.imageURL)
                             .frame(width: imageSize, height: imageSize)
                             .clipShape(Circle())
                     }
@@ -125,7 +125,7 @@ struct HomeView: View {
                     }
                 } label: {
                     HStack {
-                        LazyImage(source: participant.imageURL)
+                        LazyImage(url: participant.imageURL)
                             .frame(width: imageSize, height: imageSize)
                             .clipShape(Circle())
                         Text(participant.name)

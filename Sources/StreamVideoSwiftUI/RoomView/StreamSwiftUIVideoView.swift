@@ -44,7 +44,7 @@ public struct LocalVideoView: View {
                     )
                     .frame(maxWidth: reader.size.width)
                 } else {
-                    LazyImage(source: streamVideo.userInfo.imageURL)
+                    LazyImage(url: streamVideo.userInfo.imageURL)
                         .aspectRatio(contentMode: .fill)
                         .frame(maxWidth: reader.size.width)
                 }

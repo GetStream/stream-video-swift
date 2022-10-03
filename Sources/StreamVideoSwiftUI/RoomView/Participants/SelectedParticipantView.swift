@@ -17,7 +17,7 @@ struct SelectedParticipantView: View {
     
     var body: some View {
         VStack {
-            LazyImage(source: user.imageURL)
+            LazyImage(url: user.imageURL)
                 .frame(width: avatarSize, height: avatarSize)
                 .clipShape(Circle())
             

@@ -38,7 +38,7 @@ struct CallParticipantImage: View {
     var body: some View {
         ZStack {
             if let imageURL = imageURL {
-                LazyImage(source: imageURL)
+                LazyImage(url: imageURL)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size, height: size)
                     .clipShape(Circle())

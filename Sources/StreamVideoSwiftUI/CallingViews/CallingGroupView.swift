@@ -102,7 +102,7 @@ struct IncomingCallParticipantView: View {
     var body: some View {
         ZStack {
             if let imageURL = participant.imageURL {
-                LazyImage(source: imageURL)
+                LazyImage(url: imageURL)
                     .frame(width: size, height: size)
                     .clipShape(Circle())
             } else {

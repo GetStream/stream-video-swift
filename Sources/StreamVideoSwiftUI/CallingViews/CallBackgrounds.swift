@@ -35,7 +35,7 @@ struct CallParticipantBackground<Background: View>: View {
     var body: some View {
         ZStack {
             if let imageURL = imageURL {
-                LazyImage(source: imageURL)
+                LazyImage(url: imageURL)
                     .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .blur(radius: 8)

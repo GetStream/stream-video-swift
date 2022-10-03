@@ -178,7 +178,7 @@ struct CallParticipantView: View {
     var body: some View {
         VStack(spacing: 4) {
             HStack {
-                LazyImage(source: participant.profileImageURL)
+                LazyImage(url: participant.profileImageURL)
                     .frame(width: imageSize, height: imageSize)
                     .clipShape(Circle())
                     .overlay(
