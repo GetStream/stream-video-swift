@@ -12,5 +12,5 @@ public struct CallType: Sendable {
 
 extension CallType {
     
-    public static let `default` = CallType(name: "my-call-type")
+    public static let `default` = CallType(name: "default")
 }
