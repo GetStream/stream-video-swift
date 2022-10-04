@@ -17,7 +17,6 @@
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947992886EBD20007B36E /* UserConnectionProvider.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
-		84204C89288815E800C5F20F /* Atlantis in Frameworks */ = {isa = PBXBuildFile; productRef = 84204C88288815E800C5F20F /* Atlantis */; };
 		84231E4728B2506B007985EF /* StreamSwiftUIVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
@@ -417,7 +416,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				8403BFCE28EB09D100CBE341 /* NukeUI in Frameworks */,
-				84204C89288815E800C5F20F /* Atlantis in Frameworks */,
 				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
 				8403BFCC28EB09D100CBE341 /* Nuke in Frameworks */,
@@ -1072,7 +1070,6 @@
 			name = StreamVideo;
 			packageProductDependencies = (
 				84AF64BB287C34320012A503 /* WebRTC */,
-				84204C88288815E800C5F20F /* Atlantis */,
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
 				8403BFCB28EB09D100CBE341 /* Nuke */,
 				8403BFCD28EB09D100CBE341 /* NukeUI */,
@@ -1223,7 +1220,6 @@
 			mainGroup = 842D8BBA2865B31B00801910;
 			packageReferences = (
 				84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */,
-				84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */,
 				84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 				8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */,
 			);
@@ -2152,14 +2148,6 @@
 				version = 11.3.0;
 			};
 		};
-		84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/ProxymanApp/atlantis.git";
-			requirement = {
-				branch = main;
-				kind = branch;
-			};
-		};
 		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/webrtc-sdk/Specs.git";
@@ -2188,11 +2176,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = NukeUI;
-		};
-		84204C88288815E800C5F20F /* Atlantis */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 84204C87288815E800C5F20F /* XCRemoteSwiftPackageReference "atlantis" */;
-			productName = Atlantis;
 		};
 		84AF64BB287C34320012A503 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;

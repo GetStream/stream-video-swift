@@ -141,6 +141,7 @@ struct HomeView: View {
             .listStyle(PlainListStyle())
                         
             Button {
+                resignFirstResponder()
                 viewModel.startCall(callId: callId, participants: selectedParticipants)
             } label: {
                 Text("Start a call")

@@ -5,7 +5,6 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
-import Atlantis
 
 @main
 struct StreamVideoSwiftUIApp: App {
@@ -18,7 +17,6 @@ struct StreamVideoSwiftUIApp: App {
         
     init() {
         checkLoggedInUser()
-        Atlantis.start()
         LogConfig.level = .debug
     }
     
@@ -61,7 +59,7 @@ struct StreamVideoSwiftUIApp: App {
             token: user.token,
             videoConfig: VideoConfig(
                 persitingSocketConnection: true,
-                joinVideoCallInstantly: false
+                joinVideoCallInstantly: true
             ),
             tokenProvider: { result in
                 result(.success(user.token))

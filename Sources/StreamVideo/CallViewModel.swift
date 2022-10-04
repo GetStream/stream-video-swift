@@ -124,15 +124,15 @@ open class CallViewModel: ObservableObject {
         callSettings = callSettings.withUpdatedCameraPosition(next)
     }
 
-    public func startCall(callId: String, participants: [UserInfo]) {
+    public func startCall(callId: String, type: String? = nil, participants: [UserInfo]) {
         outgoingCallMembers = participants
-        callController = streamVideo.makeCallController(callType: .default, callId: callId)
+        callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
         callingState = .outgoing
         enterCall(callId: callId, participantIds: participants.map(\.id))
     }
     
-    public func joinCall(callId: String) {
-        callController = streamVideo.makeCallController(callType: .default, callId: callId)
+    public func joinCall(callId: String, type: String? = nil) {
+        callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
         enterCall(callId: callId, participantIds: participants.map(\.id))
     }
     
@@ -213,6 +213,14 @@ open class CallViewModel: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func callType(from: String?) -> CallType {
+        var type: CallType = .default
+        if let from = from {
+            type = CallType(name: from)
+        }
+        return type
     }
     
     private func updateCallStateIfNeeded() {
