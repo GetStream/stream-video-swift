@@ -67,3 +67,10 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
         VideoViewOverlay(rootView: content, viewFactory: viewFactory, viewModel: viewModel)
     }
 }
+
+extension CallModifier where Factory == DefaultViewFactory {
+    
+    public init(viewModel: CallViewModel) {
+        self.init(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
+    }
+}
