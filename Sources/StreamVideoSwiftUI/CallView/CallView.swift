@@ -6,7 +6,7 @@ import StreamVideo
 import SwiftUI
 import WebRTC
 
-public struct RoomView<Factory: ViewFactory>: View {
+public struct CallView<Factory: ViewFactory>: View {
     
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images

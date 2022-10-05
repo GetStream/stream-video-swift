@@ -6,14 +6,15 @@ import Combine
 import SwiftUI
 import WebRTC
 
+// View model that provides methods for views that present a call.
 @MainActor
 open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     
-    @Published public var room: Room? {
+    @Published public var call: Call? {
         didSet {
-            participantUpdates = room?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
+            participantUpdates = call?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
                 self?.callParticipants = participants
             })
         }
@@ -71,14 +72,14 @@ open class CallViewModel: ObservableObject {
     }
     
     @objc private func checkForOngoingCall() {
-        if room == nil && callController?.room != nil {
-            room = callController?.room
+        if call == nil && callController?.call != nil {
+            call = callController?.call
         }
     }
     
     public func setCallController(_ callController: CallController) {
         self.callController = callController
-        room = callController.room
+        call = callController.call
         callingState = .inCall
     }
 
@@ -141,7 +142,7 @@ open class CallViewModel: ObservableObject {
         callController = streamVideo.makeCallController(callType: .default, callId: callId)
         callingState = .outgoing
         Task {
-            self.room = try await callController?.testSFU(callSettings: callSettings, url: url, token: token)
+            self.call = try await callController?.testSFU(callSettings: callSettings, url: url, token: token)
             self.callingState = .inCall
             listenForParticipantEvents()
         }
@@ -167,14 +168,14 @@ open class CallViewModel: ObservableObject {
                 log.debug("Starting call")
                 let callType = CallType.default
                 let options = VideoOptions()
-                let room: Room = try await callController.joinCall(
+                let call: Call = try await callController.joinCall(
                     callType: callType,
                     callId: callId,
                     callSettings: callSettings,
                     videoOptions: options,
                     participantIds: participantIds
                 )
-                self.room = room
+                self.call = call
                 self.updateCallStateIfNeeded()
                 listenForParticipantEvents()
                 // TODO: add a check if microphone is already on.
@@ -196,7 +197,7 @@ open class CallViewModel: ObservableObject {
     public func leaveCall() {
         participantUpdates?.cancel()
         participantUpdates = nil
-        room = nil
+        call = nil
         callParticipants = [:]
         outgoingCallMembers = []
         streamVideo.leaveCall()
@@ -235,11 +236,11 @@ open class CallViewModel: ObservableObject {
     }
     
     private func listenForParticipantEvents() {
-        guard let room = room else {
+        guard let call = call else {
             return
         }
         currentEventsTask = Task {
-            for await event in room.participantEvents() {
+            for await event in call.participantEvents() {
                 self.participantEvent = event
                 // The event is shown for 2 seconds.
                 try? await Task.sleep(nanoseconds: 2_000_000_000)

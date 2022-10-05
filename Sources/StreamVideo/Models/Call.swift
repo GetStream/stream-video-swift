@@ -5,7 +5,7 @@
 import AVFoundation
 import SwiftUI
 
-public class Room: ObservableObject, @unchecked Sendable {
+public class Call: ObservableObject, @unchecked Sendable {
             
     @Published var participants = [String: CallParticipant]() {
         didSet {
@@ -15,10 +15,10 @@ public class Room: ObservableObject, @unchecked Sendable {
     
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
-    private let syncQueue = DispatchQueue(label: "RoomQueue", qos: .userInitiated)
+    private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
-    static func create() -> Room {
-        Room()
+    static func create() -> Call {
+        Call()
     }
     
     private init() {}

@@ -9,6 +9,8 @@ import WebRTC
 public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
 public typealias TokenUpdater = (Token) -> Void
 
+/// Main class for interacting with the `StreamVideo` SDK.
+/// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo {
     
     // Temporarly storing user in memory.
@@ -100,6 +102,11 @@ public class StreamVideo {
         }
     }
     
+    /// Creates a call controller, used for establishing and managing a call.
+    /// - Parameters:
+    ///    - callType: the type of the call.
+    ///    - callId: the id of the call.
+    /// - Returns: `CallController`
     public func makeCallController(callType: CallType, callId: String) -> CallController {
         let controller = CallController(
             callCoordinatorController: callCoordinatorController,
@@ -116,10 +123,13 @@ public class StreamVideo {
         return controller
     }
     
+    /// Creates a call controller used for voip notifications.
+    /// - Returns: `VoipNotificationsController`
     public func makeVoipNotificationsController() -> VoipNotificationsController {
         callCoordinatorController.makeVoipNotificationsController()
     }
 
+    /// Leaves the current call. It clears all call-related state.
     public func leaveCall() {
         postNotification(with: CallNotification.callEnded)
         webSocketClient?.set(callInfo: [:])
@@ -132,6 +142,8 @@ public class StreamVideo {
         }
     }
         
+    /// Async stream of all the incoming calls. Subscribe if you want to listen to these events.
+    /// - Returns: `AsyncStream` of `IncomingCall`s.
     public func incomingCalls() -> AsyncStream<IncomingCall> {
         let incomingCalls = AsyncStream(IncomingCall.self) { [weak self] continuation in
             self?.callsMiddleware.onCallCreated = { incomingCall in
@@ -213,7 +225,7 @@ public class StreamVideo {
         )
     }
     
-    var internetMonitor: InternetConnectionMonitor {
+    private var internetMonitor: InternetConnectionMonitor {
         if let monitor = monitor {
             return monitor
         } else {
@@ -221,7 +233,7 @@ public class StreamVideo {
         }
     }
     
-    var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
+    private var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
         if Bundle.main.isAppExtension {
             // No background task scheduler exists for app extensions.
             return nil

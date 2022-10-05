@@ -109,7 +109,7 @@ class WebRTCClient: NSObject {
         addOnParticipantsChangeHandler()
     }
     
-    // TODO: connectOptions / roomOptions
+    // TODO: connectOptions / callOptions
     func connect(callSettings: CallSettings, videoOptions: VideoOptions) async throws {
         let connectionStatus = await state.connectionStatus
         if connectionStatus == .connected || connectionStatus == .connecting {

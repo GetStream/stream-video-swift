@@ -24,7 +24,7 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
                 OutgoingCallView(viewModel: viewModel)
             } else if viewModel.callingState == .inCall {
                 if !viewModel.participants.isEmpty {
-                    RoomView(
+                    CallView(
                         viewFactory: DefaultViewFactory.shared, viewModel: viewModel
                     )
                 } else {

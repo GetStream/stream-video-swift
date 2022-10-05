@@ -15,7 +15,7 @@ public class CallController {
         }
     }
 
-    private(set) var room: Room?
+    private(set) var call: Call?
     private let userInfo: UserInfo
     private let callId: String
     private let callType: CallType
@@ -45,7 +45,7 @@ public class CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         participantIds: [String]
-    ) async throws -> Room {
+    ) async throws -> Call {
         let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
@@ -61,12 +61,12 @@ public class CallController {
             tokenProvider: tokenProvider
         )
         try await webRTCClient?.connect(callSettings: callSettings, videoOptions: videoOptions)
-        let currentRoom = Room.create()
-        room = currentRoom
-        return currentRoom
+        let currentCall = Call.create()
+        call = currentCall
+        return currentCall
     }
     
-    public func testSFU(callSettings: CallSettings, url: String, token: String) async throws -> Room? {
+    public func testSFU(callSettings: CallSettings, url: String, token: String) async throws -> Call? {
         webRTCClient = WebRTCClient(
             userInfo: userInfo,
             apiKey: apiKey,
@@ -77,8 +77,8 @@ public class CallController {
     
         let webRTCClient = try currentWebRTCClient()
         try await webRTCClient.connect(callSettings: callSettings, videoOptions: VideoOptions())
-        room = Room.create()
-        return room
+        call = Call.create()
+        return call
     }
     
     public func renderLocalVideo(renderer: RTCVideoRenderer) {
@@ -121,9 +121,9 @@ public class CallController {
     private func handleLocalTrackUpdate() {
         webRTCClient?.onLocalVideoTrackUpdate = { [weak self] localVideoTrack in
             guard let userId = self?.userInfo.id else { return }
-            if let participant = self?.room?.participants[userId] {
+            if let participant = self?.call?.participants[userId] {
                 let updated = participant.withUpdated(track: localVideoTrack)
-                self?.room?.participants[userId] = updated
+                self?.call?.participants[userId] = updated
             } else {
                 // TODO: temporarly create the participant
                 let participant = CallParticipant(
@@ -137,20 +137,20 @@ public class CallController {
                     showTrack: true
                 )
                 let updated = participant.withUpdated(track: localVideoTrack)
-                self?.room?.participants[userId] = updated
+                self?.call?.participants[userId] = updated
             }
         }
     }
     
     private func handleParticipantsUpdated() {
         webRTCClient?.onParticipantsUpdated = { [weak self] participants in
-            self?.room?.participants = participants
+            self?.call?.participants = participants
         }
     }
     
     private func handleParticipantEvent() {
         webRTCClient?.onParticipantEvent = { [weak self] event in
-            self?.room?.onParticipantEvent?(event)
+            self?.call?.onParticipantEvent?(event)
         }
     }
 }
