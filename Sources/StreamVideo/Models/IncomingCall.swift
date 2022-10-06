@@ -4,6 +4,7 @@
 
 import Foundation
 
+/// Represents an incoming call.
 public struct IncomingCall: Identifiable, Sendable, Equatable {
     
     public static func == (lhs: IncomingCall, rhs: IncomingCall) -> Bool {

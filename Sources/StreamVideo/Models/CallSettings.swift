@@ -4,10 +4,15 @@
 
 import Combine
 
+/// Represents the settings for a call.
 public final class CallSettings: ObservableObject, Sendable {
+    /// Whether the audio is on for the current user.
     public let audioOn: Bool
+    /// Whether the video is on for the current user.
     public let videoOn: Bool
+    /// Whether the sepaker is on for the current user.
     public let speakerOn: Bool
+    /// The camera position for the current user.
     public let cameraPosition: CameraPosition
         
     public init(
@@ -36,6 +41,7 @@ public final class CallSettings: ObservableObject, Sendable {
     }
 }
 
+/// The camera position.
 public enum CameraPosition: Sendable {
     case front
     case back

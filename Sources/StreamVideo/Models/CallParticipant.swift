@@ -5,6 +5,7 @@
 import Foundation
 @preconcurrency import WebRTC
 
+/// Represents a participant in the call.
 public struct CallParticipant: Identifiable, Sendable {
     public let id: String
     public let role: String
@@ -47,6 +48,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.isDominantSpeaker = isDominantSpeaker
     }
     
+    /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
         hasVideo && track != nil && showTrack
     }

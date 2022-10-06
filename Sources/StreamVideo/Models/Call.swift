@@ -5,9 +5,11 @@
 import AVFoundation
 import SwiftUI
 
+/// Represents a call that's in progress.
 public class Call: ObservableObject, @unchecked Sendable {
             
-    @Published var participants = [String: CallParticipant]() {
+    /// The current participants dictionary.
+    @Published public internal(set) var participants = [String: CallParticipant]() {
         didSet {
             log.debug("Participants changed: \(participants)")
         }
@@ -22,6 +24,18 @@ public class Call: ObservableObject, @unchecked Sendable {
     }
     
     private init() {}
+    
+    /// Async stream that publishes participant events.
+    public func participantEvents() -> AsyncStream<ParticipantEvent> {
+        let events = AsyncStream(ParticipantEvent.self) { [weak self] continuation in
+            self?.onParticipantEvent = { event in
+                continuation.yield(event)
+            }
+        }
+        return events
+    }
+    
+    // MARK: - internal
     
     func add(participants: [CallParticipant]) {
         syncQueue.async { [weak self] in
@@ -86,15 +100,6 @@ public class Call: ObservableObject, @unchecked Sendable {
             self.participants[participantId] = updated
         }
     }
-    
-    public func participantEvents() -> AsyncStream<ParticipantEvent> {
-        let events = AsyncStream(ParticipantEvent.self) { [weak self] continuation in
-            self?.onParticipantEvent = { event in
-                continuation.yield(event)
-            }
-        }
-        return events
-    }
 }
 
 enum CallEventType {
@@ -104,6 +109,7 @@ enum CallEventType {
     case audioStopped
 }
 
+/// Represents a participant event during a call.
 public struct ParticipantEvent: Sendable {
     public let id: String
     public let action: ParticipantAction
@@ -111,6 +117,7 @@ public struct ParticipantEvent: Sendable {
     public let imageURL: URL?
 }
 
+/// Represents a participant action (joining / leaving a call).
 public enum ParticipantAction: Sendable {
     case join
     case leave

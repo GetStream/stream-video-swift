@@ -63,19 +63,6 @@ public extension Token {
     static var anonymous: Self {
         .init(rawValue: "", userId: .anonymous, expiration: .distantFuture)
     }
-
-    /// The token which can be used during the development.
-    ///
-    /// Is used by `development(userId:)` token provider.
-    static func development(userId: String) -> Self {
-        let header = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" //  {"alg": "HS256", "typ": "JWT"}
-        let payload = #"{"user_id":"\#(userId)"}"#.data(using: .utf8)!.base64EncodedString()
-        let devSignature = "devtoken"
-
-        let jwt = [header, payload, devSignature].joined(separator: ".")
-            
-        return .init(rawValue: jwt, userId: userId, expiration: .distantFuture)
-    }
 }
 
 extension ClientError {

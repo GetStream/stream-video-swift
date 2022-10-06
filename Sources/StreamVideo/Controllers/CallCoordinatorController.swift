@@ -5,6 +5,7 @@
 import Foundation
 import WebRTC
 
+/// Handles communication with the Coordinator API for determining the best SFU for a call.
 final class CallCoordinatorController: Sendable {
     
     private let latencyService: LatencyService

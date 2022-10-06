@@ -11,12 +11,12 @@ class WebRTCClient: NSObject {
     actor State: ObservableObject {
         private var cancellables = Set<AnyCancellable>()
                 
-        var connectionStatus = VideoConnectionStatus.disconnected(reason: nil)
+        var connectionState = ConnectionState.disconnected(reason: nil)
         @Published var callParticipants = [String: CallParticipant]()
         var tracks = [String: RTCVideoTrack]()
         
-        func update(connectionStatus: VideoConnectionStatus) {
-            self.connectionStatus = connectionStatus
+        func update(connectionState: ConnectionState) {
+            self.connectionState = connectionState
         }
         
         func update(callParticipants: [String: CallParticipant]) {
@@ -111,7 +111,7 @@ class WebRTCClient: NSObject {
     
     // TODO: connectOptions / callOptions
     func connect(callSettings: CallSettings, videoOptions: VideoOptions) async throws {
-        let connectionStatus = await state.connectionStatus
+        let connectionStatus = await state.connectionState
         if connectionStatus == .connected || connectionStatus == .connecting {
             log.debug("Skipping connection, already connected or connecting")
             return
@@ -119,7 +119,7 @@ class WebRTCClient: NSObject {
         await cleanUp()
         self.videoOptions = videoOptions
         log.debug("Connecting to SFU")
-        await state.update(connectionStatus: .connecting)
+        await state.update(connectionState: .connecting)
         log.debug("Creating subscriber peer connection")
         let configuration = RTCConfiguration.makeConfiguration(with: host)
         subscriber = try await peerConnectionFactory.makePeerConnection(
@@ -143,7 +143,7 @@ class WebRTCClient: NSObject {
         let participants = try await join(peerConnection: subscriber)
         try await listenForConnectionOpened()
         log.debug("Updating connection status to connected")
-        await state.update(connectionStatus: .connected)
+        await state.update(connectionState: .connected)
         if callSettings.shouldPublish {
             publisher = try await peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
@@ -167,7 +167,7 @@ class WebRTCClient: NSObject {
         localVideoTrack = nil
         sessionID = UUID().uuidString
         await state.update(callParticipants: [:])
-        await state.update(connectionStatus: .disconnected(reason: .user))
+        await state.update(connectionState: .disconnected(reason: .user))
     }
     
     func startCapturingLocalVideo(renderer: RTCVideoRenderer, cameraPosition: AVCaptureDevice.Position) {

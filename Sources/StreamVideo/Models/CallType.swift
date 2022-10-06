@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+/// The type of a call.
 public struct CallType: Sendable {
     let name: String
     

@@ -5,6 +5,7 @@
 import Foundation
 import WebRTC
 
+/// Controller that handles device management for voip notifications.
 public final class VoipNotificationsController {
     
     private let callCoordinatorService: Stream_Video_CallCoordinatorService
@@ -13,6 +14,8 @@ public final class VoipNotificationsController {
         self.callCoordinatorService = callCoordinatorService
     }
     
+    /// Adds a device with the provided id.
+    /// - Parameter id: the id of the device.
     public func addDevice(with id: String) {
         Task {
             var createDeviceRequest = Stream_Video_CreateDeviceRequest()
@@ -28,6 +31,8 @@ public final class VoipNotificationsController {
         }
     }
     
+    /// Removes a device with the provided id.
+    /// - Parameter id: the id of the device.
     public func removeDevice(with id: String) {
         Task {
             var deleteDeviceRequest = Stream_Video_DeleteDeviceRequest()

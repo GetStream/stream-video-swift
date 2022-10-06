@@ -5,11 +5,16 @@
 import Foundation
 @preconcurrency import WebRTC
 
+/// Configuration for the video options for a call.
 public struct VideoOptions: Sendable {
     
+    /// The preferred video format.
     public var preferredFormat: AVCaptureDevice.Format?
+    /// The preferred video dimensions.
     public var preferredDimensions: CMVideoDimensions
+    /// The preferred frames per second.
     public var preferredFps: Int
+    /// The supported codecs.
     public var supportedCodecs: [VideoCodec]
     
     public init(
@@ -25,10 +30,15 @@ public struct VideoOptions: Sendable {
     }
 }
 
+/// Represents a video codec.
 public struct VideoCodec: Sendable {
+    /// The dimensions of the codec.
     public let dimensions: CMVideoDimensions
+    /// The codec quality.
     public let quality: String
+    /// The maximum bitrate.
     public let maxBitrate: Int
+    /// Factor that tells how much the resolution should be scalled down.
     public var scaleDownFactor: Int32?
 }
 

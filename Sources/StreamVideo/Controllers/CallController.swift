@@ -5,6 +5,7 @@
 import Foundation
 import WebRTC
 
+/// Class that handles a particular call.
 public class CallController {
     
     private var webRTCClient: WebRTCClient? {
@@ -39,6 +40,14 @@ public class CallController {
         self.tokenProvider = tokenProvider
     }
     
+    /// Joins a call with the provided information.
+    /// - Parameters:
+    ///  - callType: the type of the call
+    ///  - callId: the id of the call
+    ///  - callSettings: the current call settings
+    ///  - videoOptions: configuration options about the video
+    ///  - participantIds: array of the ids of the participants
+    /// - Returns: a newly created `Call`.
     public func joinCall(
         callType: CallType,
         callId: String,
@@ -81,29 +90,43 @@ public class CallController {
         return call
     }
     
+    /// Renders the local video in the provided renderer.
+    /// - Parameter renderer: Any view (both UIKit and SwiftUI) implementing the `RTCVideoRenderer` protocol.
     public func renderLocalVideo(renderer: RTCVideoRenderer) {
         webRTCClient?.startCapturingLocalVideo(renderer: renderer, cameraPosition: .front)
     }
     
+    /// Changes the audio state for the current user.
+    /// - Parameter isEnabled: whether audio should be enabled.
     public func changeAudioState(isEnabled: Bool) async throws {
         let webRTCClient = try currentWebRTCClient()
         try await webRTCClient.changeAudioState(isEnabled: isEnabled)
     }
     
+    /// Changes the video state for the current user.
+    /// - Parameter isEnabled: whether video should be enabled.
     public func changeVideoState(isEnabled: Bool) async throws {
         let webRTCClient = try currentWebRTCClient()
         try await webRTCClient.changeVideoState(isEnabled: isEnabled)
     }
     
+    /// Changes the camera position (front/back) for the current user.
+    /// - Parameter position: the new camera position.
     public func changeCameraMode(position: CameraPosition) {
         webRTCClient?.changeCameraMode(position: position)
     }
     
+    /// Changes the track visibility for a participant (not visible if they go off-screen).
+    /// - Parameters:
+    ///  - participant: the participant whose track visibility would be changed.
+    ///  - isVisible: whether the track should be visible.
     public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
         await webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
+    /// Cleans up the call controller.
     func cleanUp() {
+        call = nil
         Task {
             await webRTCClient?.cleanUp()
         }

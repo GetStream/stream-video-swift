@@ -2,7 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-public enum VideoConnectionStatus: Equatable, Sendable {
+public enum ConnectionState: Equatable, Sendable {
     case disconnected(reason: DisconnectionReason? = nil)
     case connecting
     case reconnecting

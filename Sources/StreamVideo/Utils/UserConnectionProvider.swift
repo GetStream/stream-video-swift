@@ -15,18 +15,10 @@ extension UserConnectionProvider {
         .static(.anonymous)
     }
 
-    /// The provider that can be used during the development. It's handy since doesn't require a token.
-    /// - Parameter userId: The user identifier.
-    /// - Returns: The new `TokenProvider` instance.
-    static func development(userId: String) -> Self {
-        .static(.development(userId: userId))
-    }
-
     /// The provider which can be used to provide a static token known on the client-side which doesn't expire.
     /// - Parameter token: The token to be returned by the token provider.
     /// - Returns: The new `TokenProvider` instance.
     static func `static`(_ token: Token) -> Self {
         .init { $0(.success(token)) }
     }
-
 }
