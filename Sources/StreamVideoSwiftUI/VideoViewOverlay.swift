@@ -21,7 +21,7 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
         ZStack {
             rootView
             if viewModel.callingState == .outgoing {
-                OutgoingCallView(viewModel: viewModel)
+                viewFactory.makeOutgoingCallView(viewModel: viewModel)
             } else if viewModel.callingState == .inCall {
                 if !viewModel.participants.isEmpty {
                     CallView(
@@ -43,11 +43,7 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
                     }
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
-                IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
-                    viewModel.joinCall(callId: callId)
-                }, onCallRejected: { _ in
-                    viewModel.callingState = .idle
-                })
+                viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
             }
         }
     }
