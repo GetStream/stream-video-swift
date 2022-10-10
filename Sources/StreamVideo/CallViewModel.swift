@@ -20,7 +20,11 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    @Published public var callingState: CallingState = .idle
+    @Published public var callingState: CallingState = .idle {
+        didSet {
+            handleRingingEvents()
+        }
+    }
     
     @Published public var shouldShowError: Bool = false
     public var latestError: Error?
@@ -53,12 +57,18 @@ open class CallViewModel: ObservableObject {
     
     private var callController: CallController?
     
+    private var ringingTimer: Foundation.Timer?
+    
     public var participants: [CallParticipant] {
         callParticipants
             .filter { $0.value.id != streamVideo.userInfo.id }
             .map(\.value)
             .sorted(by: { $0.layoutPriority.rawValue < $1.layoutPriority.rawValue })
             .sorted(by: { $0.name < $1.name })
+    }
+    
+    private var ringingSupported: Bool {
+        !streamVideo.videoConfig.joinVideoCallInstantly
     }
     
     public init() {
@@ -251,17 +261,36 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    private func handleRingingEvents() {
+        guard ringingSupported else { return }
+        if callingState == .outgoing {
+            ringingTimer = Foundation.Timer.scheduledTimer(
+                withTimeInterval: streamVideo.videoConfig.ringingTimeout,
+                repeats: false,
+                block: { [weak self] _ in
+                    guard let self = self else { return }
+                    log.debug("Detected ringing timeout, hanging up...")
+                    Task {
+                        await self.hangUp()
+                    }
+                }
+            )
+        } else {
+            ringingTimer?.invalidate()
+        }
+    }
+    
     private func subscribeToCallEvents() {
         Task {
             for await callEvent in streamVideo.callEvents() {
-                if case let .incoming(incomingCall) = callEvent {
+                if case let .incoming(incomingCall) = callEvent, ringingSupported {
                     // TODO: implement holding a call.
                     if callingState == .idle {
                         callingState = .incoming(incomingCall)
                     }
-                } else if case .rejected = callEvent {
+                } else if case .rejected = callEvent, ringingSupported {
                     leaveCall()
-                } else if case .canceled = callEvent {
+                } else if case .canceled = callEvent, ringingSupported {
                     leaveCall()
                 }
             }

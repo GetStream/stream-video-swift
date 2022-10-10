@@ -16,6 +16,14 @@ public protocol ViewFactory: AnyObject {
     
     associatedtype IncomingCallViewType: View = IncomingCallView
     func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> IncomingCallViewType
+    
+    associatedtype ParticipantsViewType: View = VideoParticipantsView
+    func makeVideoParticipantsView(
+        participants: [CallParticipant],
+        availableSize: CGSize,
+        onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) -> ParticipantsViewType
 }
 
 extension ViewFactory {
@@ -34,6 +42,20 @@ extension ViewFactory {
         }, onCallRejected: { _ in
             viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
         })
+    }
+    
+    public func makeVideoParticipantsView(
+        participants: [CallParticipant],
+        availableSize: CGSize,
+        onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) -> some View {
+        VideoParticipantsView(
+            participants: participants,
+            availableSize: availableSize,
+            onViewRendering: onViewRendering,
+            onChangeTrackVisibility: onChangeTrackVisibility
+        )
     }
 }
 

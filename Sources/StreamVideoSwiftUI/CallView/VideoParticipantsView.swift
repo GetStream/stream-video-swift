@@ -5,14 +5,14 @@
 import StreamVideo
 import SwiftUI
 
-struct VideoParticipantsView: View {
+public struct VideoParticipantsView: View {
     
     var participants: [CallParticipant]
     var availableSize: CGSize
     var onViewRendering: (StreamMTLVideoView, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
-    var body: some View {
+    public var body: some View {
         ZStack {
             if participants.count <= 3 {
                 VerticalParticipantsView(
