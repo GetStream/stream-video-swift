@@ -29,9 +29,13 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
     var calls: [String: Stream_Video_Coordinator_CallV1_Call] = [:]
 
     /// All calls details for calls mentioned in the event payload, indexed by Call.call_cid
-    /// Call details cotnain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
+    /// Call details contain contextual data. For example, for MembersDeleted event, call_details[cid].Members will contain a list of
     /// members that were deleted.
     var callDetails: [String: Stream_Video_Coordinator_CallV1_CallDetails] = [:]
+
+    /// The ID of the user sending the event, this field is populated only for events that are initiated by users
+    /// such as accepting, rejecting or canceling a call
+    var eventSenderID: String = String()
 
     var event: Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent.OneOf_Event?
 
@@ -43,6 +47,7 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
         set { event = .healthcheck(newValue) }
     }
 
+    /// Call events
     var callCreated: Stream_Video_Coordinator_EventV1_CallCreated {
         get {
             if case let .callCreated(v)? = event { return v }
@@ -83,14 +88,6 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
         set { event = .callMembersDeleted(newValue) }
     }
 
-    var callStarted: Stream_Video_Coordinator_EventV1_CallStarted {
-        get {
-            if case let .callStarted(v)? = event { return v }
-            return Stream_Video_Coordinator_EventV1_CallStarted()
-        }
-        set { event = .callStarted(newValue) }
-    }
-
     var callEnded: Stream_Video_Coordinator_EventV1_CallEnded {
         get {
             if case let .callEnded(v)? = event { return v }
@@ -99,6 +96,32 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
         set { event = .callEnded(newValue) }
     }
 
+    /// User initiated call events
+    var callAccepted: Stream_Video_Coordinator_EventV1_CallAccepted {
+        get {
+            if case let .callAccepted(v)? = event { return v }
+            return Stream_Video_Coordinator_EventV1_CallAccepted()
+        }
+        set { event = .callAccepted(newValue) }
+    }
+
+    var callRejected: Stream_Video_Coordinator_EventV1_CallRejected {
+        get {
+            if case let .callRejected(v)? = event { return v }
+            return Stream_Video_Coordinator_EventV1_CallRejected()
+        }
+        set { event = .callRejected(newValue) }
+    }
+
+    var callCancelled: Stream_Video_Coordinator_EventV1_CallCancelled {
+        get {
+            if case let .callCancelled(v)? = event { return v }
+            return Stream_Video_Coordinator_EventV1_CallCancelled()
+        }
+        set { event = .callCancelled(newValue) }
+    }
+
+    /// User events
     var userUpdated: Stream_Video_Coordinator_EventV1_UserUpdated {
         get {
             if case let .userUpdated(v)? = event { return v }
@@ -111,13 +134,18 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
 
     enum OneOf_Event: Equatable {
         case healthcheck(Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck)
+        /// Call events
         case callCreated(Stream_Video_Coordinator_EventV1_CallCreated)
         case callUpdated(Stream_Video_Coordinator_EventV1_CallUpdated)
         case callDeleted(Stream_Video_Coordinator_EventV1_CallDeleted)
         case callMembersUpdated(Stream_Video_Coordinator_EventV1_CallMembersUpdated)
         case callMembersDeleted(Stream_Video_Coordinator_EventV1_CallMembersDeleted)
-        case callStarted(Stream_Video_Coordinator_EventV1_CallStarted)
         case callEnded(Stream_Video_Coordinator_EventV1_CallEnded)
+        /// User initiated call events
+        case callAccepted(Stream_Video_Coordinator_EventV1_CallAccepted)
+        case callRejected(Stream_Video_Coordinator_EventV1_CallRejected)
+        case callCancelled(Stream_Video_Coordinator_EventV1_CallCancelled)
+        /// User events
         case userUpdated(Stream_Video_Coordinator_EventV1_UserUpdated)
 
         #if !swift(>=4.1)
@@ -155,12 +183,20 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
                           case let .callMembersDeleted(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
-            case (.callStarted, .callStarted): return {
-                    guard case let .callStarted(l) = lhs, case let .callStarted(r) = rhs else { preconditionFailure() }
-                    return l == r
-                }()
             case (.callEnded, .callEnded): return {
                     guard case let .callEnded(l) = lhs, case let .callEnded(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.callAccepted, .callAccepted): return {
+                    guard case let .callAccepted(l) = lhs, case let .callAccepted(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.callRejected, .callRejected): return {
+                    guard case let .callRejected(l) = lhs, case let .callRejected(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.callCancelled, .callCancelled): return {
+                    guard case let .callCancelled(l) = lhs, case let .callCancelled(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
             case (.userUpdated, .userUpdated): return {
@@ -277,7 +313,7 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketAuthRequest {
     fileprivate var _device: Stream_Video_Coordinator_PushV1_DeviceInput?
 }
 
-/// Healthckeck is sent back and forth between websocket client and server
+/// Healthcheck is sent back and forth between websocket client and server
 /// When server sends a healthcheck, it is wrapped into WebsocketEvent
 /// When client sends healthcheck, it should be wrapped into WebsocketClientEvent
 struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck {
@@ -322,15 +358,18 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
         1: .same(proto: "users"),
         2: .same(proto: "calls"),
         3: .standard(proto: "call_details"),
+        4: .standard(proto: "event_sender_id"),
         20: .same(proto: "healthcheck"),
         30: .standard(proto: "call_created"),
         31: .standard(proto: "call_updated"),
         32: .standard(proto: "call_deleted"),
         33: .standard(proto: "call_members_updated"),
         34: .standard(proto: "call_members_deleted"),
-        35: .standard(proto: "call_started"),
         36: .standard(proto: "call_ended"),
-        40: .standard(proto: "user_updated")
+        40: .standard(proto: "call_accepted"),
+        41: .standard(proto: "call_rejected"),
+        42: .standard(proto: "call_cancelled"),
+        50: .standard(proto: "user_updated")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -357,6 +396,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                     .self,
                     value: &self.callDetails
                 ) }()
+            case 4: try { try decoder.decodeSingularStringField(value: &self.eventSenderID) }()
             case 20: try {
                     var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck?
                     var hadOneofValue = false
@@ -435,19 +475,6 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                         self.event = .callMembersDeleted(v)
                     }
                 }()
-            case 35: try {
-                    var v: Stream_Video_Coordinator_EventV1_CallStarted?
-                    var hadOneofValue = false
-                    if let current = self.event {
-                        hadOneofValue = true
-                        if case let .callStarted(m) = current { v = m }
-                    }
-                    try decoder.decodeSingularMessageField(value: &v)
-                    if let v = v {
-                        if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.event = .callStarted(v)
-                    }
-                }()
             case 36: try {
                     var v: Stream_Video_Coordinator_EventV1_CallEnded?
                     var hadOneofValue = false
@@ -462,6 +489,45 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                     }
                 }()
             case 40: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallAccepted?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callAccepted(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callAccepted(v)
+                    }
+                }()
+            case 41: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallRejected?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callRejected(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callRejected(v)
+                    }
+                }()
+            case 42: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallCancelled?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callCancelled(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callCancelled(v)
+                    }
+                }()
+            case 50: try {
                     var v: Stream_Video_Coordinator_EventV1_UserUpdated?
                     var hadOneofValue = false
                     if let current = self.event {
@@ -511,6 +577,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                 fieldNumber: 3
             )
         }
+        if !eventSenderID.isEmpty {
+            try visitor.visitSingularStringField(value: eventSenderID, fieldNumber: 4)
+        }
         switch event {
         case .healthcheck?: try {
                 guard case let .healthcheck(v)? = self.event else { preconditionFailure() }
@@ -536,17 +605,25 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                 guard case let .callMembersDeleted(v)? = self.event else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 34)
             }()
-        case .callStarted?: try {
-                guard case let .callStarted(v)? = self.event else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 35)
-            }()
         case .callEnded?: try {
                 guard case let .callEnded(v)? = self.event else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 36)
             }()
+        case .callAccepted?: try {
+                guard case let .callAccepted(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 40)
+            }()
+        case .callRejected?: try {
+                guard case let .callRejected(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 41)
+            }()
+        case .callCancelled?: try {
+                guard case let .callCancelled(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 42)
+            }()
         case .userUpdated?: try {
                 guard case let .userUpdated(v)? = self.event else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 40)
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 50)
             }()
         case nil: break
         }
@@ -560,6 +637,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
         if lhs.users != rhs.users { return false }
         if lhs.calls != rhs.calls { return false }
         if lhs.callDetails != rhs.callDetails { return false }
+        if lhs.eventSenderID != rhs.eventSenderID { return false }
         if lhs.event != rhs.event { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true

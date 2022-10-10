@@ -29,10 +29,10 @@ extension ViewFactory {
     }
     
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
-        IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
-            viewModel.joinCall(callId: callId)
+        IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
+            viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
         }, onCallRejected: { _ in
-            viewModel.callingState = .idle
+            viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
         })
     }
 }

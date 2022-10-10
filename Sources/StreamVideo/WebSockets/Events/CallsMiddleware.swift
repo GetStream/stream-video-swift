@@ -6,7 +6,7 @@ import Foundation
 
 class CallsMiddleware: EventMiddleware {
     
-    var onCallCreated: ((IncomingCall) -> Void)?
+    var onCallEvent: ((CallEvent) -> Void)?
     
     func handle(event: Event) -> Event? {
         if let incomingCallEvent = event as? IncomingCallEvent {
@@ -21,7 +21,18 @@ class CallsMiddleware: EventMiddleware {
                 type: type,
                 participants: incomingCallEvent.users.map { $0.toCallParticipant() }
             )
-            onCallCreated?(incomingCall)
+            onCallEvent?(.incoming(incomingCall))
+        } else if let event = event as? CallEventInfo {
+            var callEvent: CallEvent
+            switch event.action {
+            case .accept:
+                callEvent = .accepted(event)
+            case .reject:
+                callEvent = .rejected(event)
+            case .cancel:
+                callEvent = .canceled(event)
+            }
+            onCallEvent?(callEvent)
         }
         
         return event
