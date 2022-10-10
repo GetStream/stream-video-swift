@@ -106,24 +106,14 @@ struct Stream_Video_Coordinator_EventV1_CallCreated {
 
     var callCid: String = String()
 
+    var ringing: Bool = false
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 }
 
 struct Stream_Video_Coordinator_EventV1_CallUpdated {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var callCid: String = String()
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-struct Stream_Video_Coordinator_EventV1_CallStarted {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -159,6 +149,36 @@ struct Stream_Video_Coordinator_EventV1_CallDeleted {
     init() {}
 }
 
+struct Stream_Video_Coordinator_EventV1_CallAccepted {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallRejected {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_EventV1_CallCancelled {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_EventV1_RecordingStarted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_RecordingStopped: @unchecked Sendable {}
@@ -169,9 +189,11 @@ extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: @unchecked Sendab
 extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallCreated: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallUpdated: @unchecked Sendable {}
-extension Stream_Video_Coordinator_EventV1_CallStarted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallEnded: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallDeleted: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallAccepted: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallRejected: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallCancelled: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -431,7 +453,8 @@ extension Stream_Video_Coordinator_EventV1_CallCreated: SwiftProtobuf.Message, S
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".CallCreated"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid")
+        1: .standard(proto: "call_cid"),
+        2: .same(proto: "ringing")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -441,6 +464,7 @@ extension Stream_Video_Coordinator_EventV1_CallCreated: SwiftProtobuf.Message, S
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            case 2: try { try decoder.decodeSingularBoolField(value: &self.ringing) }()
             default: break
             }
         }
@@ -450,11 +474,15 @@ extension Stream_Video_Coordinator_EventV1_CallCreated: SwiftProtobuf.Message, S
         if !callCid.isEmpty {
             try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
         }
+        if ringing != false {
+            try visitor.visitSingularBoolField(value: ringing, fieldNumber: 2)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Coordinator_EventV1_CallCreated, rhs: Stream_Video_Coordinator_EventV1_CallCreated) -> Bool {
         if lhs.callCid != rhs.callCid { return false }
+        if lhs.ringing != rhs.ringing { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -487,39 +515,6 @@ extension Stream_Video_Coordinator_EventV1_CallUpdated: SwiftProtobuf.Message, S
     }
 
     static func == (lhs: Stream_Video_Coordinator_EventV1_CallUpdated, rhs: Stream_Video_Coordinator_EventV1_CallUpdated) -> Bool {
-        if lhs.callCid != rhs.callCid { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_EventV1_CallStarted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallStarted"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_cid")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callCid.isEmpty {
-            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Coordinator_EventV1_CallStarted, rhs: Stream_Video_Coordinator_EventV1_CallStarted) -> Bool {
         if lhs.callCid != rhs.callCid { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
@@ -587,6 +582,72 @@ extension Stream_Video_Coordinator_EventV1_CallDeleted: SwiftProtobuf.Message, S
 
     static func == (lhs: Stream_Video_Coordinator_EventV1_CallDeleted, rhs: Stream_Video_Coordinator_EventV1_CallDeleted) -> Bool {
         if lhs.callCid != rhs.callCid { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallAccepted: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallAccepted"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_EventV1_CallAccepted,
+        rhs: Stream_Video_Coordinator_EventV1_CallAccepted
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallRejected: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallRejected"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_EventV1_CallRejected,
+        rhs: Stream_Video_Coordinator_EventV1_CallRejected
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallCancelled: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallCancelled"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_EventV1_CallCancelled,
+        rhs: Stream_Video_Coordinator_EventV1_CallCancelled
+    ) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

@@ -68,7 +68,7 @@ public struct CallControlsView: View {
             Spacer()
             
             Button {
-                viewModel.leaveCall()
+                viewModel.hangUp()
             } label: {
                 images.hangup
                     .applyCallButtonStyle(

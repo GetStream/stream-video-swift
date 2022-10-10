@@ -80,6 +80,11 @@ class Stream_Video_Coordinator_ClientV1Rpc_ClientRPC: @unchecked Sendable {
         try await execute(request: deleteCallMembersRequest, path: "DeleteCallMembers")
     }
     
+    func sendEvent(sendEventRequest: Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_SendEventResponse {
+        try await execute(request: sendEventRequest, path: "SendEvent")
+    }
+    
     func sendCustomEvent(sendCustomEventRequest: Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest) async throws
         -> Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventResponse {
         try await execute(request: sendCustomEventRequest, path: "SendCustomEvent")

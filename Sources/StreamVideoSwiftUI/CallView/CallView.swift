@@ -25,13 +25,13 @@ public struct CallView<Factory: ViewFactory>: View {
     public var body: some View {
         GeometryReader { reader in
             ZStack {
-                VideoParticipantsView(
+                viewFactory.makeVideoParticipantsView(
                     participants: viewModel.participants,
                     availableSize: reader.size,
                     onViewRendering: handleViewRendering(_:participant:),
                     onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)
                 )
-
+                
                 VStack {
                     Spacer()
                     if let event = viewModel.participantEvent {

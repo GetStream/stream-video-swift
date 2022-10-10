@@ -59,6 +59,18 @@ final class CallCoordinatorController: Sendable {
     func makeVoipNotificationsController() -> VoipNotificationsController {
         VoipNotificationsController(callCoordinatorService: callCoordinatorService)
     }
+    
+    func sendEvent(
+        type: Stream_Video_UserEventType,
+        callId: String,
+        callType: CallType
+    ) async throws {
+        var request = Stream_Video_SendEventRequest()
+        request.callType = callType.name
+        request.callID = callId
+        request.eventType = type
+        _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
+    }
 
     // MARK: - private
         
@@ -98,6 +110,7 @@ final class CallCoordinatorController: Sendable {
         joinCallRequest.type = type
         if !participantIds.isEmpty {
             var input = Stream_Video_CreateCallInput()
+            input.ring = !videoConfig.joinVideoCallInstantly
             var members = [String: Stream_Video_MemberInput]()
             for participantId in participantIds {
                 members[participantId] = Stream_Video_MemberInput()

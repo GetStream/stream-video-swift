@@ -20,7 +20,11 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    @Published public var callingState: CallingState = .idle
+    @Published public var callingState: CallingState = .idle {
+        didSet {
+            handleRingingEvents()
+        }
+    }
     
     @Published public var shouldShowError: Bool = false
     public var latestError: Error?
@@ -53,12 +57,18 @@ open class CallViewModel: ObservableObject {
     
     private var callController: CallController?
     
+    private var ringingTimer: Foundation.Timer?
+    
     public var participants: [CallParticipant] {
         callParticipants
             .filter { $0.value.id != streamVideo.userInfo.id }
             .map(\.value)
             .sorted(by: { $0.layoutPriority.rawValue < $1.layoutPriority.rawValue })
             .sorted(by: { $0.name < $1.name })
+    }
+    
+    private var ringingSupported: Bool {
+        !streamVideo.videoConfig.joinVideoCallInstantly
     }
     
     public init() {
@@ -68,7 +78,7 @@ open class CallViewModel: ObservableObject {
             name: UIApplication.willEnterForegroundNotification,
             object: nil
         )
-        subscribeToIncomingCalls()
+        subscribeToCallEvents()
     }
     
     public func setCallController(_ callController: CallController) {
@@ -142,6 +152,28 @@ open class CallViewModel: ObservableObject {
         enterCall(callId: callId, participantIds: participants.map(\.id))
     }
     
+    /// Accepts the call with the provided call id and type.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - callType: the type of the call.
+    public func acceptCall(callId: String, type: String) {
+        callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
+        Task {
+            try await streamVideo.acceptCall(callId: callId, callType: callType(from: type))
+            enterCall(callId: callId, participantIds: participants.map(\.id))
+        }
+    }
+    
+    /// Rejects the call with the provided call id and type.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - callType: the type of the call.
+    public func rejectCall(callId: String, type: String) {
+        Task {
+            try await streamVideo.rejectCall(callId: callId, callType: callType(from: type))
+        }
+    }
+    
     // TODO: temp method
     public func testSFU(callId: String, participantIds: [String], url: String, token: String) {
         callController = streamVideo.makeCallController(callType: .default, callId: callId)
@@ -169,8 +201,20 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    /// Hangs up from the active call.
+    public func hangUp() {
+        if let call = call {
+            Task {
+                try await streamVideo.cancelCall(callId: call.callId, callType: call.callType)
+            }
+        }
+        leaveCall()
+    }
+    
+    // MARK: - private
+    
     /// Leaves the current call.
-    public func leaveCall() {
+    private func leaveCall() {
         participantUpdates?.cancel()
         participantUpdates = nil
         call = nil
@@ -180,8 +224,6 @@ open class CallViewModel: ObservableObject {
         currentEventsTask?.cancel()
         callingState = .idle
     }
-    
-    // MARK: - private
     
     private func enterCall(callId: String, participantIds: [String]) {
         guard let callController = callController else {
@@ -219,12 +261,37 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func subscribeToIncomingCalls() {
+    private func handleRingingEvents() {
+        guard ringingSupported else { return }
+        if callingState == .outgoing {
+            ringingTimer = Foundation.Timer.scheduledTimer(
+                withTimeInterval: streamVideo.videoConfig.ringingTimeout,
+                repeats: false,
+                block: { [weak self] _ in
+                    guard let self = self else { return }
+                    log.debug("Detected ringing timeout, hanging up...")
+                    Task {
+                        await self.hangUp()
+                    }
+                }
+            )
+        } else {
+            ringingTimer?.invalidate()
+        }
+    }
+    
+    private func subscribeToCallEvents() {
         Task {
-            for await incomingCall in streamVideo.incomingCalls() {
-                // TODO: implement holding a call.
-                if callingState == .idle {
-                    callingState = .incoming(incomingCall)
+            for await callEvent in streamVideo.callEvents() {
+                if case let .incoming(incomingCall) = callEvent, ringingSupported {
+                    // TODO: implement holding a call.
+                    if callingState == .idle {
+                        callingState = .incoming(incomingCall)
+                    }
+                } else if case .rejected = callEvent, ringingSupported {
+                    leaveCall()
+                } else if case .canceled = callEvent, ringingSupported {
+                    leaveCall()
                 }
             }
         }

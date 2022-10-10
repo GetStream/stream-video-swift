@@ -11,17 +11,15 @@ struct EventDecoder {
         guard let payload = response.event else {
             throw ClientError.UnsupportedEventType()
         }
+        let call = response.calls.first?.value
         switch payload {
-        case let .callStarted(value):
-            let call = response.calls.first?.value
+        case let .callCreated(value):
             return IncomingCallEvent(
                 proto: value,
                 createdBy: call?.createdByUserID ?? "",
                 type: call?.type ?? CallType.default.name,
                 users: response.users.map(\.value)
             )
-        case let .callCreated(value):
-            return value
         case let .callUpdated(value):
             return value
         case let .callEnded(value):
@@ -36,6 +34,24 @@ struct EventDecoder {
             return value
         case let .healthcheck(value):
             return value
+        case .callAccepted:
+            return CallEventInfo(
+                callId: call?.callCid ?? "",
+                senderId: response.eventSenderID,
+                action: .accept
+            )
+        case .callRejected:
+            return CallEventInfo(
+                callId: call?.callCid ?? "",
+                senderId: response.eventSenderID,
+                action: .reject
+            )
+        case .callCancelled:
+            return CallEventInfo(
+                callId: call?.callCid ?? "",
+                senderId: response.eventSenderID,
+                action: .cancel
+            )
         }
     }
 }

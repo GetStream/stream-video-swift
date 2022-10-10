@@ -24,9 +24,9 @@ public class StreamVideo {
     private let tokenProvider: TokenProvider
     
     // Change it to your local IP address.
-    private let hostname = "https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc"
+    private let hostname = "http://192.168.100.73:26991/rpc"
     private let wsEndpoint =
-        "ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
+        "ws://192.168.100.73:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
     
     private let httpClient: HTTPClient
     
@@ -128,6 +128,42 @@ public class StreamVideo {
     public func makeVoipNotificationsController() -> VoipNotificationsController {
         callCoordinatorController.makeVoipNotificationsController()
     }
+    
+    /// Accepts the call with the provided call id and type.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - callType: the type of the call.
+    public func acceptCall(callId: String, callType: CallType) async throws {
+        try await callCoordinatorController.sendEvent(
+            type: .acceptedCall,
+            callId: callId,
+            callType: callType
+        )
+    }
+    
+    /// Rejects the call with the provided call id and type.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - callType: the type of the call.
+    public func rejectCall(callId: String, callType: CallType) async throws {
+        try await callCoordinatorController.sendEvent(
+            type: .rejectedCall,
+            callId: callId,
+            callType: callType
+        )
+    }
+    
+    /// Cancels the call with the provided call id and type.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - callType: the type of the call.
+    public func cancelCall(callId: String, callType: CallType) async throws {
+        try await callCoordinatorController.sendEvent(
+            type: .cancelledCall,
+            callId: callId,
+            callType: callType
+        )
+    }
 
     /// Leaves the current call. It clears all call-related state.
     public func leaveCall() {
@@ -142,15 +178,14 @@ public class StreamVideo {
         }
     }
         
-    /// Async stream of all the incoming calls. Subscribe if you want to listen to these events.
-    /// - Returns: `AsyncStream` of `IncomingCall`s.
-    public func incomingCalls() -> AsyncStream<IncomingCall> {
-        let incomingCalls = AsyncStream(IncomingCall.self) { [weak self] continuation in
-            self?.callsMiddleware.onCallCreated = { incomingCall in
-                continuation.yield(incomingCall)
+    /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
+    public func callEvents() -> AsyncStream<CallEvent> {
+        let callEvents = AsyncStream(CallEvent.self) { [weak self] continuation in
+            self?.callsMiddleware.onCallEvent = { callEvent in
+                continuation.yield(callEvent)
             }
         }
-        return incomingCalls
+        return callEvents
     }
     
     internal static func makeURLSession() -> URLSession {

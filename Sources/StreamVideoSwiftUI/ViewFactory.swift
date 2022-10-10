@@ -16,6 +16,14 @@ public protocol ViewFactory: AnyObject {
     
     associatedtype IncomingCallViewType: View = IncomingCallView
     func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> IncomingCallViewType
+    
+    associatedtype ParticipantsViewType: View = VideoParticipantsView
+    func makeVideoParticipantsView(
+        participants: [CallParticipant],
+        availableSize: CGSize,
+        onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) -> ParticipantsViewType
 }
 
 extension ViewFactory {
@@ -29,11 +37,25 @@ extension ViewFactory {
     }
     
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
-        IncomingCallView(callInfo: callInfo, onCallAccepted: { callId in
-            viewModel.joinCall(callId: callId)
+        IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
+            viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
         }, onCallRejected: { _ in
-            viewModel.callingState = .idle
+            viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
         })
+    }
+    
+    public func makeVideoParticipantsView(
+        participants: [CallParticipant],
+        availableSize: CGSize,
+        onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) -> some View {
+        VideoParticipantsView(
+            participants: participants,
+            availableSize: availableSize,
+            onViewRendering: onViewRendering,
+            onChangeTrackVisibility: onChangeTrackVisibility
+        )
     }
 }
 

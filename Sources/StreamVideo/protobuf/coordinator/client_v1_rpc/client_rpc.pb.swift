@@ -58,6 +58,53 @@ extension Stream_Video_Coordinator_ClientV1Rpc_MemberField: CaseIterable {
 
 #endif // swift(>=4.2)
 
+enum Stream_Video_Coordinator_ClientV1Rpc_UserEventType: SwiftProtobuf.Enum {
+    typealias RawValue = Int
+    case unspecified // = 0
+    case acceptedCall // = 1
+    case rejectedCall // = 2
+    case cancelledCall // = 3
+    case UNRECOGNIZED(Int)
+
+    init() {
+        self = .unspecified
+    }
+
+    init?(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .unspecified
+        case 1: self = .acceptedCall
+        case 2: self = .rejectedCall
+        case 3: self = .cancelledCall
+        default: self = .UNRECOGNIZED(rawValue)
+        }
+    }
+
+    var rawValue: Int {
+        switch self {
+        case .unspecified: return 0
+        case .acceptedCall: return 1
+        case .rejectedCall: return 2
+        case .cancelledCall: return 3
+        case let .UNRECOGNIZED(i): return i
+        }
+    }
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Coordinator_ClientV1Rpc_UserEventType: CaseIterable {
+    // The compiler won't synthesize support with the UNRECOGNIZED case.
+    static var allCases: [Stream_Video_Coordinator_ClientV1Rpc_UserEventType] = [
+        .unspecified,
+        .acceptedCall,
+        .rejectedCall,
+        .cancelledCall
+    ]
+}
+
+#endif // swift(>=4.2)
+
 struct Stream_Video_Coordinator_ClientV1Rpc_GetCallRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -176,11 +223,23 @@ struct Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput {
     /// Members to add to the created call
     var members: [String: Stream_Video_Coordinator_ClientV1Rpc_MemberInput] = [:]
 
+    /// Ringing option, used to signal to clients' UI
+    var ring: Bool {
+        get { _ring ?? false }
+        set { _ring = newValue }
+    }
+
+    /// Returns true if `ring` has been explicitly set.
+    var hasRing: Bool { self._ring != nil }
+    /// Clears the value of `ring`. Subsequent reads from it will return its default value.
+    mutating func clearRing() { _ring = nil }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
     fileprivate var _call: Stream_Video_Coordinator_ClientV1Rpc_CallInput?
+    fileprivate var _ring: Bool?
 }
 
 /// A request message for GetOrCreateCall endpoint
@@ -264,6 +323,7 @@ struct Stream_Video_Coordinator_ClientV1Rpc_JoinCallRequest {
     /// Call ID
     var id: String = String()
 
+    /// Call creation input, only used if the call does not exist
     var input: Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput {
         get { _input ?? Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput() }
         set { _input = newValue }
@@ -688,6 +748,35 @@ struct Stream_Video_Coordinator_ClientV1Rpc_QueryDevicesResponse {
     init() {}
 }
 
+struct Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// The call type
+    var callType: String = String()
+
+    /// The call id
+    var callID: String = String()
+
+    /// The event type
+    var eventType: Stream_Video_Coordinator_ClientV1Rpc_UserEventType = .unspecified
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_SendEventResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 struct Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -723,22 +812,12 @@ struct Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest {
     /// The call id
     var callID: String = String()
 
-    /// A WebRTC Stats report, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
-    var stats: SwiftProtobuf.Google_Protobuf_Struct {
-        get { _stats ?? SwiftProtobuf.Google_Protobuf_Struct() }
-        set { _stats = newValue }
-    }
-
-    /// Returns true if `stats` has been explicitly set.
-    var hasStats: Bool { self._stats != nil }
-    /// Clears the value of `stats`. Subsequent reads from it will return its default value.
-    mutating func clearStats() { _stats = nil }
+    /// A WebRTC Stats report encoded as a JSON string, as defined in https://www.w3.org/TR/webrtc/#dom-rtcstatsreport
+    var statsJson: Data = Data()
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
-
-    private var _stats: SwiftProtobuf.Google_Protobuf_Struct?
 }
 
 struct Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsResponse {
@@ -829,6 +908,7 @@ struct Stream_Video_Coordinator_ClientV1Rpc_ReviewCallResponse {
 
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_ClientV1Rpc_MemberField: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_UserEventType: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetCallRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetCallResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_MemberInput: @unchecked Sendable {}
@@ -858,6 +938,8 @@ extension Stream_Video_Coordinator_ClientV1Rpc_DeleteDeviceRequest: @unchecked S
 extension Stream_Video_Coordinator_ClientV1Rpc_DeleteDeviceResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryDevicesRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryDevicesResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_SendEventResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest: @unchecked Sendable {}
@@ -878,6 +960,15 @@ extension Stream_Video_Coordinator_ClientV1Rpc_MemberField: SwiftProtobuf._Proto
         0: .same(proto: "MEMBER_FIELD_UNSPECIFIED"),
         1: .same(proto: "MEMBER_FIELD_ROLE"),
         2: .same(proto: "MEMBER_FIELD_CUSTOM")
+    ]
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_UserEventType: SwiftProtobuf._ProtoNameProviding {
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        0: .same(proto: "USER_EVENT_TYPE_UNSPECIFIED"),
+        1: .same(proto: "USER_EVENT_TYPE_ACCEPTED_CALL"),
+        2: .same(proto: "USER_EVENT_TYPE_REJECTED_CALL"),
+        3: .same(proto: "USER_EVENT_TYPE_CANCELLED_CALL")
     ]
 }
 
@@ -1147,7 +1238,8 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
     static let protoMessageName: String = _protobuf_package + ".CreateCallInput"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "call"),
-        2: .same(proto: "members")
+        2: .same(proto: "members"),
+        4: .same(proto: "ring")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1162,6 +1254,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
                         ._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Coordinator_ClientV1Rpc_MemberInput>.self,
                     value: &self.members
                 ) }()
+            case 4: try { try decoder.decodeSingularBoolField(value: &self._ring) }()
             default: break
             }
         }
@@ -1183,6 +1276,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
                 fieldNumber: 2
             )
         }
+        try { if let v = self._ring {
+            try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
+        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -1192,6 +1288,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
     ) -> Bool {
         if lhs._call != rhs._call { return false }
         if lhs.members != rhs.members { return false }
+        if lhs._ring != rhs._ring { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -2212,6 +2309,76 @@ extension Stream_Video_Coordinator_ClientV1Rpc_QueryDevicesResponse: SwiftProtob
     }
 }
 
+extension Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".SendEventRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_type"),
+        2: .standard(proto: "call_id"),
+        3: .standard(proto: "event_type")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
+            case 3: try { try decoder.decodeSingularEnumField(value: &self.eventType) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callType.isEmpty {
+            try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
+        }
+        if !callID.isEmpty {
+            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        }
+        if eventType != .unspecified {
+            try visitor.visitSingularEnumField(value: eventType, fieldNumber: 3)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest
+    ) -> Bool {
+        if lhs.callType != rhs.callType { return false }
+        if lhs.callID != rhs.callID { return false }
+        if lhs.eventType != rhs.eventType { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_SendEventResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".SendEventResponse"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_SendEventResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_SendEventResponse
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
 extension Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest: SwiftProtobuf.Message,
     SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SendCustomEventRequest"
@@ -2282,7 +2449,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest: SwiftProt
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "call_type"),
         2: .standard(proto: "call_id"),
-        3: .same(proto: "stats")
+        3: .standard(proto: "stats_json")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2293,26 +2460,22 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest: SwiftProt
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
             case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
-            case 3: try { try decoder.decodeSingularMessageField(value: &self._stats) }()
+            case 3: try { try decoder.decodeSingularBytesField(value: &self.statsJson) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
         if !callType.isEmpty {
             try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
         }
         if !callID.isEmpty {
             try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
         }
-        try { if let v = self._stats {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-        } }()
+        if !statsJson.isEmpty {
+            try visitor.visitSingularBytesField(value: statsJson, fieldNumber: 3)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -2322,7 +2485,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest: SwiftProt
     ) -> Bool {
         if lhs.callType != rhs.callType { return false }
         if lhs.callID != rhs.callID { return false }
-        if lhs._stats != rhs._stats { return false }
+        if lhs.statsJson != rhs.statsJson { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

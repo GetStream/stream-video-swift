@@ -90,6 +90,7 @@
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A6CD6028D49A7700318EC3 /* CallBackgrounds.swift */; };
+		84A7379C28F0557F001A6769 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7379B28F0557F001A6769 /* CallEvents.swift */; };
 		84A7E17428814D7400526C98 /* LatencyService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17328814D7400526C98 /* LatencyService.swift */; };
 		84A7E1792881922400526C98 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
 		84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17C2883629700526C98 /* WebSocketClient.swift */; };
@@ -326,6 +327,7 @@
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
 		8498796728A15F0300D06F31 /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		84A6CD6028D49A7700318EC3 /* CallBackgrounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallBackgrounds.swift; sourceTree = "<group>"; };
+		84A7379B28F0557F001A6769 /* CallEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEvents.swift; sourceTree = "<group>"; };
 		84A7E17328814D7400526C98 /* LatencyService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LatencyService.swift; sourceTree = "<group>"; };
 		84A7E1782881922400526C98 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
 		84A7E17C2883629700526C98 /* WebSocketClient.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WebSocketClient.swift; sourceTree = "<group>"; };
@@ -474,6 +476,7 @@
 				84A7E1932883652000526C98 /* EventMiddleware.swift */,
 				84A7E18B288363AC00526C98 /* EventNotificationCenter.swift */,
 				84EBAA8D288BCB2700BE3176 /* CallsMiddleware.swift */,
+				84A7379B28F0557F001A6769 /* CallEvents.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -1404,6 +1407,7 @@
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
+				84A7379C28F0557F001A6769 /* CallEvents.swift in Sources */,
 				845C573028DBAAA600D38FCC /* events.pb.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
 				845C572328DBAAA600D38FCC /* participant.pb.swift in Sources */,

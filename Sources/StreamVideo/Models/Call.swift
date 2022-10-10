@@ -15,15 +15,21 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
     }
     
+    public let callId: String
+    public let callType: CallType
+    
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
-    static func create() -> Call {
-        Call()
+    static func create(callId: String, callType: CallType) -> Call {
+        Call(callId: callId, callType: callType)
     }
     
-    private init() {}
+    private init(callId: String, callType: CallType) {
+        self.callId = callId
+        self.callType = callType
+    }
     
     /// Async stream that publishes participant events.
     public func participantEvents() -> AsyncStream<ParticipantEvent> {
