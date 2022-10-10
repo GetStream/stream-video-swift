@@ -5,7 +5,7 @@
 import Foundation
 
 /// Represents a call event.
-public enum CallEvent {
+public enum CallEvent: Sendable {
     /// Incoming call.
     case incoming(IncomingCall)
     /// An outgoing call is accepted.
@@ -16,7 +16,7 @@ public enum CallEvent {
     case canceled(CallEventInfo)
 }
 
-enum CallEventAction {
+enum CallEventAction: Sendable {
     case accept
     case reject
     case cancel
@@ -30,7 +30,7 @@ struct IncomingCallEvent: Event {
 }
 
 /// Contains info about a call event.
-public struct CallEventInfo: Event {
+public struct CallEventInfo: Event, Sendable {
     let callId: String
     let senderId: String
     let action: CallEventAction

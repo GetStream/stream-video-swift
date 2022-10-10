@@ -24,26 +24,33 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
                 viewFactory.makeOutgoingCallView(viewModel: viewModel)
             } else if viewModel.callingState == .inCall {
                 if !viewModel.participants.isEmpty {
-                    CallView(
-                        viewFactory: DefaultViewFactory.shared, viewModel: viewModel
-                    )
+                    viewFactory.makeCallView(viewModel: viewModel)
                 } else {
-                    ZStack {
-                        LocalVideoView(callSettings: viewModel.callSettings) { view in
-                            if let track = viewModel.localParticipant?.track {
-                                view.add(track: track)
-                            } else {
-                                viewModel.renderLocalVideo(renderer: view)
-                            }
-                        }
-                        VStack {
-                            Spacer()
-                            CallControlsView(viewModel: viewModel)
-                        }
-                    }
+                    viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
                 viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+            }
+        }
+    }
+}
+
+public struct WaitingLocalUserView: View {
+    
+    @ObservedObject var viewModel: CallViewModel
+    
+    public var body: some View {
+        ZStack {
+            LocalVideoView(callSettings: viewModel.callSettings) { view in
+                if let track = viewModel.localParticipant?.track {
+                    view.add(track: track)
+                } else {
+                    viewModel.renderLocalVideo(renderer: view)
+                }
+            }
+            VStack {
+                Spacer()
+                CallControlsView(viewModel: viewModel)
             }
         }
     }

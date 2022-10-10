@@ -24,6 +24,12 @@ public protocol ViewFactory: AnyObject {
         onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
+    
+    associatedtype CallViewType: View = CallView<Self>
+    func makeCallView(viewModel: CallViewModel) -> CallViewType
+    
+    associatedtype WaitingLocalUserViewType: View = WaitingLocalUserView
+    func makeWaitingLocalUserView(viewModel: CallViewModel) -> WaitingLocalUserViewType
 }
 
 extension ViewFactory {
@@ -56,6 +62,14 @@ extension ViewFactory {
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
         )
+    }
+    
+    public func makeCallView(viewModel: CallViewModel) -> some View {
+        CallView(viewFactory: self, viewModel: viewModel)
+    }
+    
+    public func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
+        WaitingLocalUserView(viewModel: viewModel)
     }
 }
 
