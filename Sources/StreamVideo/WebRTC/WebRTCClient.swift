@@ -78,7 +78,6 @@ class WebRTCClient: NSObject {
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
-    private let host: String
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
@@ -92,7 +91,6 @@ class WebRTCClient: NSObject {
         tokenProvider: @escaping TokenProvider
     ) {
         self.userInfo = userInfo
-        host = URL(string: hostname)?.host ?? hostname
         httpClient = URLSessionClient(
             urlSession: StreamVideo.makeURLSession(),
             tokenProvider: tokenProvider
@@ -109,8 +107,11 @@ class WebRTCClient: NSObject {
         addOnParticipantsChangeHandler()
     }
     
-    // TODO: connectOptions / callOptions
-    func connect(callSettings: CallSettings, videoOptions: VideoOptions) async throws {
+    func connect(
+        callSettings: CallSettings,
+        videoOptions: VideoOptions,
+        connectOptions: ConnectOptions
+    ) async throws {
         let connectionStatus = await state.connectionState
         if connectionStatus == .connected || connectionStatus == .connecting {
             log.debug("Skipping connection, already connected or connecting")
@@ -121,10 +122,10 @@ class WebRTCClient: NSObject {
         log.debug("Connecting to SFU")
         await state.update(connectionState: .connecting)
         log.debug("Creating subscriber peer connection")
-        let configuration = RTCConfiguration.makeConfiguration(with: host)
+        let configuration = connectOptions.rtcConfiguration
         subscriber = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
-            configuration: configuration, // TODO: move this in connect options
+            configuration: configuration,
             type: .subscriber,
             signalService: signalService,
             videoOptions: videoOptions
@@ -147,7 +148,7 @@ class WebRTCClient: NSObject {
         if callSettings.shouldPublish {
             publisher = try await peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
-                configuration: configuration, // TODO: move this in connect options
+                configuration: configuration,
                 type: .publisher,
                 signalService: signalService,
                 videoOptions: videoOptions

@@ -123,6 +123,7 @@
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
 		84BBF62F28AFDED200387A02 /* DataChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62E28AFDED200387A02 /* DataChannel.swift */; };
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
+		84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C267C828F5980F00F0F673 /* ConnectOptions.swift */; };
 		84D419B828E7155100F574F9 /* VideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D419B728E7155100F574F9 /* VideoViewOverlay.swift */; };
 		84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E7CD3628D64609009F3542 /* CallingIndicator.swift */; };
 		84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */; };
@@ -355,6 +356,7 @@
 		84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
 		84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCMediaConstraints.swift; sourceTree = "<group>"; };
 		84BBF62E28AFDED200387A02 /* DataChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataChannel.swift; sourceTree = "<group>"; };
+		84C267C828F5980F00F0F673 /* ConnectOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectOptions.swift; sourceTree = "<group>"; };
 		84C2996928757F820034B735 /* DemoApp-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "DemoApp-Info.plist"; sourceTree = "<group>"; };
 		84C2996B2876D93D0034B735 /* Call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		84C2996D2876E42D0034B735 /* StreamVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo.swift; sourceTree = "<group>"; };
@@ -632,6 +634,7 @@
 				84C2996B2876D93D0034B735 /* Call.swift */,
 				84C2997828784B180034B735 /* CallType.swift */,
 				843697CE28C7898A00839D99 /* VideoOptions.swift */,
+				84C267C828F5980F00F0F673 /* ConnectOptions.swift */,
 				84C2997A28784B500034B735 /* ConnectionState.swift */,
 				84EBAA8F288BCEAA00BE3176 /* IncomingCall.swift */,
 				84F3B0DF289150B10088751D /* CallParticipant.swift */,
@@ -1415,6 +1418,7 @@
 				8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */,
 				84A7379C28F0557F001A6769 /* CallEvents.swift in Sources */,
 				8456E6D4287EC343004E180E /* LogDestination.swift in Sources */,
+				84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */,
 				84FC2C1E28ACF2AE00181490 /* WebRTCClient.swift in Sources */,
 				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
 				84A737D628F4716E001A6769 /* broadcast.pb.swift in Sources */,

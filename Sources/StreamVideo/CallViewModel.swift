@@ -175,11 +175,21 @@ open class CallViewModel: ObservableObject {
     }
     
     // TODO: temp method
-    public func testSFU(callId: String, participantIds: [String], url: String, token: String) {
+    public func testSFU(
+        callId: String,
+        participantIds: [String],
+        url: String,
+        token: String,
+        connectOptions: ConnectOptions
+    ) {
         callController = streamVideo.makeCallController(callType: .default, callId: callId)
         callingState = .outgoing
         Task {
-            self.call = try await callController?.testSFU(callSettings: callSettings, url: url, token: token)
+            self.call = try await callController?.testSFU(
+                callSettings: callSettings,
+                url: url, token: token,
+                connectOptions: connectOptions
+            )
             self.callingState = .inCall
             listenForParticipantEvents()
         }

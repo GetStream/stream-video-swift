@@ -157,7 +157,8 @@ struct HomeView: View {
                     callId: callId,
                     participantIds: selectedParticipants.map { $0.id },
                     url: url,
-                    token: MockTokenGenerator.generateToken(for: streamVideo.userInfo, callId: callId)
+                    token: MockTokenGenerator.generateToken(for: streamVideo.userInfo, callId: callId),
+                    connectOptions: .testSFU
                 )
             } label: {
                 Text("Test SFU")

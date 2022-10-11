@@ -96,7 +96,8 @@ class CallKitService: NSObject, CXProviderDelegate {
                     token: MockTokenGenerator.generateToken(
                         for: currentUser.userInfo,
                         callId: currentCallId
-                    )
+                    ),
+                    connectOptions: .testSFU
                 )
                 await MainActor.run {
                     AppState.shared.activeCallController = callController
@@ -112,4 +113,12 @@ class CallKitService: NSObject, CXProviderDelegate {
         action.fulfill()
     }
     
+}
+
+extension ConnectOptions {
+    
+    static let testSFU = ConnectOptions(iceServers: [
+        ICEServerConfig(urls: ["stun:stun.l.google.com:19302"]),
+        ICEServerConfig(urls: ["turn:sfu2.fra1.gtstrm.com:3478"], username: "video", password: "video")
+    ])
 }

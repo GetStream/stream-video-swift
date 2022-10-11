@@ -69,13 +69,26 @@ public class CallController {
             token: edgeServer.token,
             tokenProvider: tokenProvider
         )
-        try await webRTCClient?.connect(callSettings: callSettings, videoOptions: videoOptions)
+        
+        let connectOptions = ConnectOptions(
+            iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
+        )
+        try await webRTCClient?.connect(
+            callSettings: callSettings,
+            videoOptions: videoOptions,
+            connectOptions: connectOptions
+        )
         let currentCall = Call.create(callId: callId, callType: callType)
         call = currentCall
         return currentCall
     }
     
-    public func testSFU(callSettings: CallSettings, url: String, token: String) async throws -> Call? {
+    public func testSFU(
+        callSettings: CallSettings,
+        url: String,
+        token: String,
+        connectOptions: ConnectOptions
+    ) async throws -> Call? {
         webRTCClient = WebRTCClient(
             userInfo: userInfo,
             apiKey: apiKey,
@@ -85,7 +98,11 @@ public class CallController {
         )
     
         let webRTCClient = try currentWebRTCClient()
-        try await webRTCClient.connect(callSettings: callSettings, videoOptions: VideoOptions())
+        try await webRTCClient.connect(
+            callSettings: callSettings,
+            videoOptions: VideoOptions(),
+            connectOptions: connectOptions
+        )
         call = Call.create(callId: callId, callType: callType)
         return call
     }

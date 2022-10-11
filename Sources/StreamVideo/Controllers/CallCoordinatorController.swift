@@ -135,13 +135,18 @@ final class CallCoordinatorController: Sendable {
         let url = response.credentials.server.url
         let token = response.credentials.token
         log.debug("Selected edge server \(url)")
-        return EdgeServer(url: url, token: token)
+        return EdgeServer(
+            url: url,
+            token: token,
+            iceServers: response.credentials.iceServers
+        )
     }
 }
 
 struct EdgeServer {
     let url: String
     let token: String
+    let iceServers: [Stream_Video_ICEServer]
 }
 
 struct CoordinatorInfo {
