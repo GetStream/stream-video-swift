@@ -34,7 +34,7 @@ actor PeerConnectionFactory {
         sessionId: String,
         configuration: RTCConfiguration,
         type: PeerConnectionType,
-        signalService: Stream_Video_Sfu_SignalServer,
+        signalService: Stream_Video_Sfu_Signal_SignalServer,
         constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints,
         videoOptions: VideoOptions
     ) throws -> PeerConnection {

@@ -15,19 +15,19 @@ private struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVer
     typealias Version = _2
 }
 
-enum Stream_Video_Sfu_ModelsV1_PeerType: SwiftProtobuf.Enum {
+enum Stream_Video_Sfu_Models_PeerType: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case publisherUnspecified // = 0
+    case publisher // = 0
     case subscriber // = 1
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .publisherUnspecified
+        self = .publisher
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .publisherUnspecified
+        case 0: self = .publisher
         case 1: self = .subscriber
         default: self = .UNRECOGNIZED(rawValue)
         }
@@ -35,7 +35,7 @@ enum Stream_Video_Sfu_ModelsV1_PeerType: SwiftProtobuf.Enum {
 
     var rawValue: Int {
         switch self {
-        case .publisherUnspecified: return 0
+        case .publisher: return 0
         case .subscriber: return 1
         case let .UNRECOGNIZED(i): return i
         }
@@ -44,30 +44,30 @@ enum Stream_Video_Sfu_ModelsV1_PeerType: SwiftProtobuf.Enum {
 
 #if swift(>=4.2)
 
-extension Stream_Video_Sfu_ModelsV1_PeerType: CaseIterable {
+extension Stream_Video_Sfu_Models_PeerType: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static var allCases: [Stream_Video_Sfu_ModelsV1_PeerType] = [
-        .publisherUnspecified,
+    static var allCases: [Stream_Video_Sfu_Models_PeerType] = [
+        .publisher,
         .subscriber
     ]
 }
 
 #endif // swift(>=4.2)
 
-enum Stream_Video_Sfu_ModelsV1_ConnectionQuality: SwiftProtobuf.Enum {
+enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case badUnspecified // = 0
+    case bad // = 0
     case poor // = 1
     case good // = 2
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .badUnspecified
+        self = .bad
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .badUnspecified
+        case 0: self = .bad
         case 1: self = .poor
         case 2: self = .good
         default: self = .UNRECOGNIZED(rawValue)
@@ -76,7 +76,7 @@ enum Stream_Video_Sfu_ModelsV1_ConnectionQuality: SwiftProtobuf.Enum {
 
     var rawValue: Int {
         switch self {
-        case .badUnspecified: return 0
+        case .bad: return 0
         case .poor: return 1
         case .good: return 2
         case let .UNRECOGNIZED(i): return i
@@ -86,10 +86,10 @@ enum Stream_Video_Sfu_ModelsV1_ConnectionQuality: SwiftProtobuf.Enum {
 
 #if swift(>=4.2)
 
-extension Stream_Video_Sfu_ModelsV1_ConnectionQuality: CaseIterable {
+extension Stream_Video_Sfu_Models_ConnectionQuality: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static var allCases: [Stream_Video_Sfu_ModelsV1_ConnectionQuality] = [
-        .badUnspecified,
+    static var allCases: [Stream_Video_Sfu_Models_ConnectionQuality] = [
+        .bad,
         .poor,
         .good
     ]
@@ -97,20 +97,20 @@ extension Stream_Video_Sfu_ModelsV1_ConnectionQuality: CaseIterable {
 
 #endif // swift(>=4.2)
 
-enum Stream_Video_Sfu_ModelsV1_VideoQuality: SwiftProtobuf.Enum {
+enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case lowUnspecified // = 0
+    case low // = 0
     case mid // = 1
     case high // = 2
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .lowUnspecified
+        self = .low
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .lowUnspecified
+        case 0: self = .low
         case 1: self = .mid
         case 2: self = .high
         default: self = .UNRECOGNIZED(rawValue)
@@ -119,7 +119,7 @@ enum Stream_Video_Sfu_ModelsV1_VideoQuality: SwiftProtobuf.Enum {
 
     var rawValue: Int {
         switch self {
-        case .lowUnspecified: return 0
+        case .low: return 0
         case .mid: return 1
         case .high: return 2
         case let .UNRECOGNIZED(i): return i
@@ -129,10 +129,10 @@ enum Stream_Video_Sfu_ModelsV1_VideoQuality: SwiftProtobuf.Enum {
 
 #if swift(>=4.2)
 
-extension Stream_Video_Sfu_ModelsV1_VideoQuality: CaseIterable {
+extension Stream_Video_Sfu_Models_VideoQuality: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static var allCases: [Stream_Video_Sfu_ModelsV1_VideoQuality] = [
-        .lowUnspecified,
+    static var allCases: [Stream_Video_Sfu_Models_VideoQuality] = [
+        .low,
         .mid,
         .high
     ]
@@ -140,27 +140,45 @@ extension Stream_Video_Sfu_ModelsV1_VideoQuality: CaseIterable {
 
 #endif // swift(>=4.2)
 
-struct Stream_Video_Sfu_ModelsV1_CallState {
+struct Stream_Video_Sfu_Models_CallState {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var participants: [Stream_Video_Sfu_ModelsV1_Participant] = []
+    var participants: [Stream_Video_Sfu_Models_Participant] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_Call {
+struct Stream_Video_Sfu_Models_Call {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    /// Unique call ID as identified by Coordinator
+    /// the call type
+    var type: String = String()
+
+    /// the call id
     var id: String = String()
 
-    /// A timestamp of the call start. The timestamp is set when first participant connects
+    /// the id of the user that created this call
+    var createdByUserID: String = String()
+
+    /// the id of the current host for this call
+    var hostUserID: String = String()
+
+    var custom: SwiftProtobuf.Google_Protobuf_Struct {
+        get { _custom ?? SwiftProtobuf.Google_Protobuf_Struct() }
+        set { _custom = newValue }
+    }
+
+    /// Returns true if `custom` has been explicitly set.
+    var hasCustom: Bool { self._custom != nil }
+    /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+    mutating func clearCustom() { _custom = nil }
+
     var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
         get { _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
         set { _createdAt = newValue }
@@ -171,50 +189,140 @@ struct Stream_Video_Sfu_ModelsV1_Call {
     /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
     mutating func clearCreatedAt() { _createdAt = nil }
 
+    var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _updatedAt = newValue }
+    }
+
+    /// Returns true if `updatedAt` has been explicitly set.
+    var hasUpdatedAt: Bool { self._updatedAt != nil }
+    /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
+    mutating func clearUpdatedAt() { _updatedAt = nil }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    private var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+    fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct?
+    fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+    fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
 
 /// those who are online in the call
-struct Stream_Video_Sfu_ModelsV1_Participant {
+struct Stream_Video_Sfu_Models_Participant {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var userID: String = String()
-
-    var sessionID: String = String()
-
-    var video: Bool = false
-
-    var audio: Bool = false
-
-    var connectedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
-        get { _connectedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
-        set { _connectedAt = newValue }
+    var user: Stream_Video_Sfu_Models_User {
+        get { _storage._user ?? Stream_Video_Sfu_Models_User() }
+        set { _uniqueStorage()._user = newValue }
     }
 
-    /// Returns true if `connectedAt` has been explicitly set.
-    var hasConnectedAt: Bool { self._connectedAt != nil }
-    /// Clears the value of `connectedAt`. Subsequent reads from it will return its default value.
-    mutating func clearConnectedAt() { _connectedAt = nil }
+    /// Returns true if `user` has been explicitly set.
+    var hasUser: Bool { _storage._user != nil }
+    /// Clears the value of `user`. Subsequent reads from it will return its default value.
+    mutating func clearUser() { _uniqueStorage()._user = nil }
+
+    var role: String {
+        get { _storage._role }
+        set { _uniqueStorage()._role = newValue }
+    }
+
+    var online: Bool {
+        get { _storage._online }
+        set { _uniqueStorage()._online = newValue }
+    }
+
+    var custom: SwiftProtobuf.Google_Protobuf_Struct {
+        get { _storage._custom ?? SwiftProtobuf.Google_Protobuf_Struct() }
+        set { _uniqueStorage()._custom = newValue }
+    }
+
+    /// Returns true if `custom` has been explicitly set.
+    var hasCustom: Bool { _storage._custom != nil }
+    /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+    mutating func clearCustom() { _uniqueStorage()._custom = nil }
+
+    var video: Bool {
+        get { _storage._video }
+        set { _uniqueStorage()._video = newValue }
+    }
+
+    var audio: Bool {
+        get { _storage._audio }
+        set { _uniqueStorage()._audio = newValue }
+    }
+
+    var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _storage._createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _uniqueStorage()._createdAt = newValue }
+    }
+
+    /// Returns true if `createdAt` has been explicitly set.
+    var hasCreatedAt: Bool { _storage._createdAt != nil }
+    /// Clears the value of `createdAt`. Subsequent reads from it will return its default value.
+    mutating func clearCreatedAt() { _uniqueStorage()._createdAt = nil }
+
+    var updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _storage._updatedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _uniqueStorage()._updatedAt = newValue }
+    }
+
+    /// Returns true if `updatedAt` has been explicitly set.
+    var hasUpdatedAt: Bool { _storage._updatedAt != nil }
+    /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
+    mutating func clearUpdatedAt() { _uniqueStorage()._updatedAt = nil }
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    private var _connectedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+    private var _storage = _StorageClass.defaultInstance
 }
 
-struct Stream_Video_Sfu_ModelsV1_StreamQuality {
+struct Stream_Video_Sfu_Models_User {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var videoQuality: Stream_Video_Sfu_ModelsV1_VideoQuality = .lowUnspecified
+    var id: String = String()
+
+    var teams: [String] = []
+
+    var role: String = String()
+
+    var custom: SwiftProtobuf.Google_Protobuf_Struct {
+        get { _custom ?? SwiftProtobuf.Google_Protobuf_Struct() }
+        set { _custom = newValue }
+    }
+
+    /// Returns true if `custom` has been explicitly set.
+    var hasCustom: Bool { self._custom != nil }
+    /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+    mutating func clearCustom() { _custom = nil }
+
+    var name: String = String()
+
+    var imageURL: String = String()
+
+    var createdAt: String = String()
+
+    var updatedAt: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct?
+}
+
+struct Stream_Video_Sfu_Models_StreamQuality {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var videoQuality: Stream_Video_Sfu_Models_VideoQuality = .low
 
     var userID: String = String()
 
@@ -223,7 +331,7 @@ struct Stream_Video_Sfu_ModelsV1_StreamQuality {
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_VideoDimension {
+struct Stream_Video_Sfu_Models_VideoDimension {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -237,7 +345,7 @@ struct Stream_Video_Sfu_ModelsV1_VideoDimension {
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_VideoLayer {
+struct Stream_Video_Sfu_Models_VideoLayer {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -245,8 +353,8 @@ struct Stream_Video_Sfu_ModelsV1_VideoLayer {
     /// for tracks with a single layer, this should be HIGH
     var rid: String = String()
 
-    var videoDimension: Stream_Video_Sfu_ModelsV1_VideoDimension {
-        get { _videoDimension ?? Stream_Video_Sfu_ModelsV1_VideoDimension() }
+    var videoDimension: Stream_Video_Sfu_Models_VideoDimension {
+        get { _videoDimension ?? Stream_Video_Sfu_Models_VideoDimension() }
         set { _videoDimension = newValue }
     }
 
@@ -262,10 +370,10 @@ struct Stream_Video_Sfu_ModelsV1_VideoLayer {
 
     init() {}
 
-    private var _videoDimension: Stream_Video_Sfu_ModelsV1_VideoDimension?
+    private var _videoDimension: Stream_Video_Sfu_Models_VideoDimension?
 }
 
-struct Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo {
+struct Stream_Video_Sfu_Models_SimulcastCodecInfo {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -276,14 +384,14 @@ struct Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo {
 
     var cid: String = String()
 
-    var layers: [Stream_Video_Sfu_ModelsV1_VideoLayer] = []
+    var layers: [Stream_Video_Sfu_Models_VideoLayer] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_Codec {
+struct Stream_Video_Sfu_Models_Codec {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -301,41 +409,41 @@ struct Stream_Video_Sfu_ModelsV1_Codec {
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_AudioCodecs {
+struct Stream_Video_Sfu_Models_AudioCodecs {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var encodes: [Stream_Video_Sfu_ModelsV1_Codec] = []
+    var encode: [Stream_Video_Sfu_Models_Codec] = []
 
-    var decodes: [Stream_Video_Sfu_ModelsV1_Codec] = []
+    var decode: [Stream_Video_Sfu_Models_Codec] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_VideoCodecs {
+struct Stream_Video_Sfu_Models_VideoCodecs {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var encodes: [Stream_Video_Sfu_ModelsV1_Codec] = []
+    var encode: [Stream_Video_Sfu_Models_Codec] = []
 
-    var decodes: [Stream_Video_Sfu_ModelsV1_Codec] = []
+    var decode: [Stream_Video_Sfu_Models_Codec] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 }
 
-struct Stream_Video_Sfu_ModelsV1_CodecSettings {
+struct Stream_Video_Sfu_Models_CodecSettings {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var audio: Stream_Video_Sfu_ModelsV1_AudioCodecs {
-        get { _audio ?? Stream_Video_Sfu_ModelsV1_AudioCodecs() }
+    var audio: Stream_Video_Sfu_Models_AudioCodecs {
+        get { _audio ?? Stream_Video_Sfu_Models_AudioCodecs() }
         set { _audio = newValue }
     }
 
@@ -344,8 +452,8 @@ struct Stream_Video_Sfu_ModelsV1_CodecSettings {
     /// Clears the value of `audio`. Subsequent reads from it will return its default value.
     mutating func clearAudio() { _audio = nil }
 
-    var video: Stream_Video_Sfu_ModelsV1_VideoCodecs {
-        get { _video ?? Stream_Video_Sfu_ModelsV1_VideoCodecs() }
+    var video: Stream_Video_Sfu_Models_VideoCodecs {
+        get { _video ?? Stream_Video_Sfu_Models_VideoCodecs() }
         set { _video = newValue }
     }
 
@@ -354,61 +462,62 @@ struct Stream_Video_Sfu_ModelsV1_CodecSettings {
     /// Clears the value of `video`. Subsequent reads from it will return its default value.
     mutating func clearVideo() { _video = nil }
 
-    var layers: [Stream_Video_Sfu_ModelsV1_VideoLayer] = []
+    var layers: [Stream_Video_Sfu_Models_VideoLayer] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    private var _audio: Stream_Video_Sfu_ModelsV1_AudioCodecs?
-    private var _video: Stream_Video_Sfu_ModelsV1_VideoCodecs?
+    fileprivate var _audio: Stream_Video_Sfu_Models_AudioCodecs?
+    fileprivate var _video: Stream_Video_Sfu_Models_VideoCodecs?
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
-extension Stream_Video_Sfu_ModelsV1_PeerType: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_ConnectionQuality: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_VideoQuality: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_CallState: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_Call: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_Participant: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_StreamQuality: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_VideoDimension: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_VideoLayer: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_Codec: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_AudioCodecs: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_VideoCodecs: @unchecked Sendable {}
-extension Stream_Video_Sfu_ModelsV1_CodecSettings: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_VideoQuality: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_User: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_VideoDimension: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_VideoLayer: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_SimulcastCodecInfo: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_AudioCodecs: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_VideoCodecs: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_CodecSettings: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-private let _protobuf_package = "stream.video.sfu.models_v1"
+private let _protobuf_package = "stream.video.sfu.models"
 
-extension Stream_Video_Sfu_ModelsV1_PeerType: SwiftProtobuf._ProtoNameProviding {
+extension Stream_Video_Sfu_Models_PeerType: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "PEER_TYPE_PUBLISHER_UNSPECIFIED"),
-        1: .same(proto: "PEER_TYPE_SUBSCRIBER")
+        0: .same(proto: "PUBLISHER"),
+        1: .same(proto: "SUBSCRIBER")
     ]
 }
 
-extension Stream_Video_Sfu_ModelsV1_ConnectionQuality: SwiftProtobuf._ProtoNameProviding {
+extension Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "CONNECTION_QUALITY_BAD_UNSPECIFIED"),
-        1: .same(proto: "CONNECTION_QUALITY_POOR"),
-        2: .same(proto: "CONNECTION_QUALITY_GOOD")
+        0: .same(proto: "BAD"),
+        1: .same(proto: "POOR"),
+        2: .same(proto: "GOOD")
     ]
 }
 
-extension Stream_Video_Sfu_ModelsV1_VideoQuality: SwiftProtobuf._ProtoNameProviding {
+extension Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "VIDEO_QUALITY_LOW_UNSPECIFIED"),
-        1: .same(proto: "VIDEO_QUALITY_MID"),
-        2: .same(proto: "VIDEO_QUALITY_HIGH")
+        0: .same(proto: "LOW"),
+        1: .same(proto: "MID"),
+        2: .same(proto: "HIGH")
     ]
 }
 
-extension Stream_Video_Sfu_ModelsV1_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".CallState"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -434,19 +543,224 @@ extension Stream_Video_Sfu_ModelsV1_CallState: SwiftProtobuf.Message, SwiftProto
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_CallState, rhs: Stream_Video_Sfu_ModelsV1_CallState) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_CallState, rhs: Stream_Video_Sfu_Models_CallState) -> Bool {
         if lhs.participants != rhs.participants { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_Call: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".Call"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "type"),
+        2: .same(proto: "id"),
+        3: .standard(proto: "created_by_user_id"),
+        4: .standard(proto: "host_user_id"),
+        5: .same(proto: "custom"),
+        6: .standard(proto: "created_at"),
+        7: .standard(proto: "updated_at")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.id) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
+            case 4: try { try decoder.decodeSingularStringField(value: &self.hostUserID) }()
+            case 5: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+            case 6: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
+            case 7: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !type.isEmpty {
+            try visitor.visitSingularStringField(value: type, fieldNumber: 1)
+        }
+        if !id.isEmpty {
+            try visitor.visitSingularStringField(value: id, fieldNumber: 2)
+        }
+        if !createdByUserID.isEmpty {
+            try visitor.visitSingularStringField(value: createdByUserID, fieldNumber: 3)
+        }
+        if !hostUserID.isEmpty {
+            try visitor.visitSingularStringField(value: hostUserID, fieldNumber: 4)
+        }
+        try { if let v = self._custom {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+        } }()
+        try { if let v = self._createdAt {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
+        } }()
+        try { if let v = self._updatedAt {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+        } }()
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_Models_Call, rhs: Stream_Video_Sfu_Models_Call) -> Bool {
+        if lhs.type != rhs.type { return false }
+        if lhs.id != rhs.id { return false }
+        if lhs.createdByUserID != rhs.createdByUserID { return false }
+        if lhs.hostUserID != rhs.hostUserID { return false }
+        if lhs._custom != rhs._custom { return false }
+        if lhs._createdAt != rhs._createdAt { return false }
+        if lhs._updatedAt != rhs._updatedAt { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".Participant"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "user"),
+        2: .same(proto: "role"),
+        3: .same(proto: "online"),
+        4: .same(proto: "custom"),
+        5: .same(proto: "video"),
+        6: .same(proto: "audio"),
+        7: .standard(proto: "created_at"),
+        8: .standard(proto: "updated_at")
+    ]
+
+    fileprivate class _StorageClass {
+        var _user: Stream_Video_Sfu_Models_User?
+        var _role: String = String()
+        var _online: Bool = false
+        var _custom: SwiftProtobuf.Google_Protobuf_Struct?
+        var _video: Bool = false
+        var _audio: Bool = false
+        var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+        var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+
+        static let defaultInstance = _StorageClass()
+
+        private init() {}
+
+        init(copying source: _StorageClass) {
+            _user = source._user
+            _role = source._role
+            _online = source._online
+            _custom = source._custom
+            _video = source._video
+            _audio = source._audio
+            _createdAt = source._createdAt
+            _updatedAt = source._updatedAt
+        }
+    }
+
+    fileprivate mutating func _uniqueStorage() -> _StorageClass {
+        if !isKnownUniquelyReferenced(&_storage) {
+            _storage = _StorageClass(copying: _storage)
+        }
+        return _storage
+    }
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        _ = _uniqueStorage()
+        try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+            while let fieldNumber = try decoder.nextFieldNumber() {
+                // The use of inline closures is to circumvent an issue where the compiler
+                // allocates stack space for every case branch when no optimizations are
+                // enabled. https://github.com/apple/swift-protobuf/issues/1034
+                switch fieldNumber {
+                case 1: try { try decoder.decodeSingularMessageField(value: &_storage._user) }()
+                case 2: try { try decoder.decodeSingularStringField(value: &_storage._role) }()
+                case 3: try { try decoder.decodeSingularBoolField(value: &_storage._online) }()
+                case 4: try { try decoder.decodeSingularMessageField(value: &_storage._custom) }()
+                case 5: try { try decoder.decodeSingularBoolField(value: &_storage._video) }()
+                case 6: try { try decoder.decodeSingularBoolField(value: &_storage._audio) }()
+                case 7: try { try decoder.decodeSingularMessageField(value: &_storage._createdAt) }()
+                case 8: try { try decoder.decodeSingularMessageField(value: &_storage._updatedAt) }()
+                default: break
+                }
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every if/case branch local when no optimizations
+            // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+            // https://github.com/apple/swift-protobuf/issues/1182
+            try { if let v = _storage._user {
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+            } }()
+            if !_storage._role.isEmpty {
+                try visitor.visitSingularStringField(value: _storage._role, fieldNumber: 2)
+            }
+            if _storage._online != false {
+                try visitor.visitSingularBoolField(value: _storage._online, fieldNumber: 3)
+            }
+            try { if let v = _storage._custom {
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+            } }()
+            if _storage._video != false {
+                try visitor.visitSingularBoolField(value: _storage._video, fieldNumber: 5)
+            }
+            if _storage._audio != false {
+                try visitor.visitSingularBoolField(value: _storage._audio, fieldNumber: 6)
+            }
+            try { if let v = _storage._createdAt {
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+            } }()
+            try { if let v = _storage._updatedAt {
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
+            } }()
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_Models_Participant, rhs: Stream_Video_Sfu_Models_Participant) -> Bool {
+        if lhs._storage !== rhs._storage {
+            let storagesAreEqual: Bool =
+                withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
+                    let _storage = _args.0
+                    let rhs_storage = _args.1
+                    if _storage._user != rhs_storage._user { return false }
+                    if _storage._role != rhs_storage._role { return false }
+                    if _storage._online != rhs_storage._online { return false }
+                    if _storage._custom != rhs_storage._custom { return false }
+                    if _storage._video != rhs_storage._video { return false }
+                    if _storage._audio != rhs_storage._audio { return false }
+                    if _storage._createdAt != rhs_storage._createdAt { return false }
+                    if _storage._updatedAt != rhs_storage._updatedAt { return false }
+                    return true
+                }
+            if !storagesAreEqual { return false }
+        }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Models_User: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".User"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "id"),
-        2: .standard(proto: "created_at")
+        2: .same(proto: "teams"),
+        3: .same(proto: "role"),
+        4: .same(proto: "custom"),
+        5: .same(proto: "name"),
+        6: .standard(proto: "image_url"),
+        7: .standard(proto: "created_at"),
+        8: .standard(proto: "updated_at")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -456,7 +770,13 @@ extension Stream_Video_Sfu_ModelsV1_Call: SwiftProtobuf.Message, SwiftProtobuf._
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
-            case 2: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
+            case 2: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self.role) }()
+            case 4: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+            case 5: try { try decoder.decodeSingularStringField(value: &self.name) }()
+            case 6: try { try decoder.decodeSingularStringField(value: &self.imageURL) }()
+            case 7: try { try decoder.decodeSingularStringField(value: &self.createdAt) }()
+            case 8: try { try decoder.decodeSingularStringField(value: &self.updatedAt) }()
             default: break
             }
         }
@@ -470,82 +790,45 @@ extension Stream_Video_Sfu_ModelsV1_Call: SwiftProtobuf.Message, SwiftProtobuf._
         if !id.isEmpty {
             try visitor.visitSingularStringField(value: id, fieldNumber: 1)
         }
-        try { if let v = self._createdAt {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+        if !teams.isEmpty {
+            try visitor.visitRepeatedStringField(value: teams, fieldNumber: 2)
+        }
+        if !role.isEmpty {
+            try visitor.visitSingularStringField(value: role, fieldNumber: 3)
+        }
+        try { if let v = self._custom {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
         } }()
+        if !name.isEmpty {
+            try visitor.visitSingularStringField(value: name, fieldNumber: 5)
+        }
+        if !imageURL.isEmpty {
+            try visitor.visitSingularStringField(value: imageURL, fieldNumber: 6)
+        }
+        if !createdAt.isEmpty {
+            try visitor.visitSingularStringField(value: createdAt, fieldNumber: 7)
+        }
+        if !updatedAt.isEmpty {
+            try visitor.visitSingularStringField(value: updatedAt, fieldNumber: 8)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_Call, rhs: Stream_Video_Sfu_ModelsV1_Call) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_User, rhs: Stream_Video_Sfu_Models_User) -> Bool {
         if lhs.id != rhs.id { return false }
-        if lhs._createdAt != rhs._createdAt { return false }
+        if lhs.teams != rhs.teams { return false }
+        if lhs.role != rhs.role { return false }
+        if lhs._custom != rhs._custom { return false }
+        if lhs.name != rhs.name { return false }
+        if lhs.imageURL != rhs.imageURL { return false }
+        if lhs.createdAt != rhs.createdAt { return false }
+        if lhs.updatedAt != rhs.updatedAt { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_Participant: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".Participant"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "user_id"),
-        2: .standard(proto: "session_id"),
-        3: .same(proto: "video"),
-        4: .same(proto: "audio"),
-        5: .standard(proto: "connected_at")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
-            case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-            case 3: try { try decoder.decodeSingularBoolField(value: &self.video) }()
-            case 4: try { try decoder.decodeSingularBoolField(value: &self.audio) }()
-            case 5: try { try decoder.decodeSingularMessageField(value: &self._connectedAt) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
-        if !userID.isEmpty {
-            try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
-        }
-        if !sessionID.isEmpty {
-            try visitor.visitSingularStringField(value: sessionID, fieldNumber: 2)
-        }
-        if video != false {
-            try visitor.visitSingularBoolField(value: video, fieldNumber: 3)
-        }
-        if audio != false {
-            try visitor.visitSingularBoolField(value: audio, fieldNumber: 4)
-        }
-        try { if let v = self._connectedAt {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
-        } }()
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_Participant, rhs: Stream_Video_Sfu_ModelsV1_Participant) -> Bool {
-        if lhs.userID != rhs.userID { return false }
-        if lhs.sessionID != rhs.sessionID { return false }
-        if lhs.video != rhs.video { return false }
-        if lhs.audio != rhs.audio { return false }
-        if lhs._connectedAt != rhs._connectedAt { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Sfu_ModelsV1_StreamQuality: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_StreamQuality: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".StreamQuality"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -567,7 +850,7 @@ extension Stream_Video_Sfu_ModelsV1_StreamQuality: SwiftProtobuf.Message, SwiftP
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if videoQuality != .lowUnspecified {
+        if videoQuality != .low {
             try visitor.visitSingularEnumField(value: videoQuality, fieldNumber: 1)
         }
         if !userID.isEmpty {
@@ -576,7 +859,7 @@ extension Stream_Video_Sfu_ModelsV1_StreamQuality: SwiftProtobuf.Message, SwiftP
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_StreamQuality, rhs: Stream_Video_Sfu_ModelsV1_StreamQuality) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_StreamQuality, rhs: Stream_Video_Sfu_Models_StreamQuality) -> Bool {
         if lhs.videoQuality != rhs.videoQuality { return false }
         if lhs.userID != rhs.userID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -584,7 +867,7 @@ extension Stream_Video_Sfu_ModelsV1_StreamQuality: SwiftProtobuf.Message, SwiftP
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_VideoDimension: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_VideoDimension: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoDimension"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -615,7 +898,7 @@ extension Stream_Video_Sfu_ModelsV1_VideoDimension: SwiftProtobuf.Message, Swift
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_VideoDimension, rhs: Stream_Video_Sfu_ModelsV1_VideoDimension) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_VideoDimension, rhs: Stream_Video_Sfu_Models_VideoDimension) -> Bool {
         if lhs.width != rhs.width { return false }
         if lhs.height != rhs.height { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -623,7 +906,7 @@ extension Stream_Video_Sfu_ModelsV1_VideoDimension: SwiftProtobuf.Message, Swift
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_VideoLayer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoLayer"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -663,7 +946,7 @@ extension Stream_Video_Sfu_ModelsV1_VideoLayer: SwiftProtobuf.Message, SwiftProt
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_VideoLayer, rhs: Stream_Video_Sfu_ModelsV1_VideoLayer) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_VideoLayer, rhs: Stream_Video_Sfu_Models_VideoLayer) -> Bool {
         if lhs.rid != rhs.rid { return false }
         if lhs._videoDimension != rhs._videoDimension { return false }
         if lhs.bitrate != rhs.bitrate { return false }
@@ -672,7 +955,7 @@ extension Stream_Video_Sfu_ModelsV1_VideoLayer: SwiftProtobuf.Message, SwiftProt
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_SimulcastCodecInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SimulcastCodecInfo"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -713,7 +996,7 @@ extension Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo: SwiftProtobuf.Message, S
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo, rhs: Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_SimulcastCodecInfo, rhs: Stream_Video_Sfu_Models_SimulcastCodecInfo) -> Bool {
         if lhs.mimeType != rhs.mimeType { return false }
         if lhs.mid != rhs.mid { return false }
         if lhs.cid != rhs.cid { return false }
@@ -723,7 +1006,7 @@ extension Stream_Video_Sfu_ModelsV1_SimulcastCodecInfo: SwiftProtobuf.Message, S
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_Codec: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".Codec"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -764,7 +1047,7 @@ extension Stream_Video_Sfu_ModelsV1_Codec: SwiftProtobuf.Message, SwiftProtobuf.
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_Codec, rhs: Stream_Video_Sfu_ModelsV1_Codec) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_Codec, rhs: Stream_Video_Sfu_Models_Codec) -> Bool {
         if lhs.mime != rhs.mime { return false }
         if lhs.fmtpLine != rhs.fmtpLine { return false }
         if lhs.clockRate != rhs.clockRate { return false }
@@ -774,12 +1057,12 @@ extension Stream_Video_Sfu_ModelsV1_Codec: SwiftProtobuf.Message, SwiftProtobuf.
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_AudioCodecs: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_AudioCodecs: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioCodecs"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "encodes"),
-        2: .same(proto: "decodes")
+        1: .same(proto: "encode"),
+        2: .same(proto: "decode")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -788,37 +1071,37 @@ extension Stream_Video_Sfu_ModelsV1_AudioCodecs: SwiftProtobuf.Message, SwiftPro
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encodes) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decodes) }()
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encode) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decode) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !encodes.isEmpty {
-            try visitor.visitRepeatedMessageField(value: encodes, fieldNumber: 1)
+        if !encode.isEmpty {
+            try visitor.visitRepeatedMessageField(value: encode, fieldNumber: 1)
         }
-        if !decodes.isEmpty {
-            try visitor.visitRepeatedMessageField(value: decodes, fieldNumber: 2)
+        if !decode.isEmpty {
+            try visitor.visitRepeatedMessageField(value: decode, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_AudioCodecs, rhs: Stream_Video_Sfu_ModelsV1_AudioCodecs) -> Bool {
-        if lhs.encodes != rhs.encodes { return false }
-        if lhs.decodes != rhs.decodes { return false }
+    static func == (lhs: Stream_Video_Sfu_Models_AudioCodecs, rhs: Stream_Video_Sfu_Models_AudioCodecs) -> Bool {
+        if lhs.encode != rhs.encode { return false }
+        if lhs.decode != rhs.decode { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_VideoCodecs: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_VideoCodecs: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoCodecs"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "encodes"),
-        2: .same(proto: "decodes")
+        1: .same(proto: "encode"),
+        2: .same(proto: "decode")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -827,32 +1110,32 @@ extension Stream_Video_Sfu_ModelsV1_VideoCodecs: SwiftProtobuf.Message, SwiftPro
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encodes) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decodes) }()
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encode) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decode) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !encodes.isEmpty {
-            try visitor.visitRepeatedMessageField(value: encodes, fieldNumber: 1)
+        if !encode.isEmpty {
+            try visitor.visitRepeatedMessageField(value: encode, fieldNumber: 1)
         }
-        if !decodes.isEmpty {
-            try visitor.visitRepeatedMessageField(value: decodes, fieldNumber: 2)
+        if !decode.isEmpty {
+            try visitor.visitRepeatedMessageField(value: decode, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_VideoCodecs, rhs: Stream_Video_Sfu_ModelsV1_VideoCodecs) -> Bool {
-        if lhs.encodes != rhs.encodes { return false }
-        if lhs.decodes != rhs.decodes { return false }
+    static func == (lhs: Stream_Video_Sfu_Models_VideoCodecs, rhs: Stream_Video_Sfu_Models_VideoCodecs) -> Bool {
+        if lhs.encode != rhs.encode { return false }
+        if lhs.decode != rhs.decode { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_ModelsV1_CodecSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Models_CodecSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".CodecSettings"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -892,7 +1175,7 @@ extension Stream_Video_Sfu_ModelsV1_CodecSettings: SwiftProtobuf.Message, SwiftP
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ModelsV1_CodecSettings, rhs: Stream_Video_Sfu_ModelsV1_CodecSettings) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Models_CodecSettings, rhs: Stream_Video_Sfu_Models_CodecSettings) -> Bool {
         if lhs._audio != rhs._audio { return false }
         if lhs._video != rhs._video { return false }
         if lhs.layers != rhs.layers { return false }

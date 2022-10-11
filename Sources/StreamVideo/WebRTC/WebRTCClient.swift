@@ -53,7 +53,7 @@ class WebRTCClient: NSObject {
     let state = State()
     
     let httpClient: HTTPClient
-    let signalService: Stream_Video_Sfu_SignalServer
+    let signalService: Stream_Video_Sfu_Signal_SignalServer
     let peerConnectionFactory = PeerConnectionFactory()
     
     private(set) var publisher: PeerConnection?
@@ -98,7 +98,7 @@ class WebRTCClient: NSObject {
             tokenProvider: tokenProvider
         )
         
-        signalService = Stream_Video_Sfu_SignalServer(
+        signalService = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,
             apiKey: apiKey,
             hostname: hostname,
@@ -198,8 +198,8 @@ class WebRTCClient: NSObject {
     }
     
     func changeAudioState(isEnabled: Bool) async throws {
-        var request = Stream_Video_Sfu_UpdateMuteStateRequest()
-        var muteChanged = Stream_Video_Sfu_AudioMuteChanged()
+        var request = Stream_Video_Sfu_Signal_UpdateMuteStateRequest()
+        var muteChanged = Stream_Video_Sfu_Signal_AudioMuteChanged()
         muteChanged.muted = !isEnabled
         request.audioMuteChanged = muteChanged
         request.sessionID = sessionID
@@ -208,8 +208,8 @@ class WebRTCClient: NSObject {
     }
     
     func changeVideoState(isEnabled: Bool) async throws {
-        var request = Stream_Video_Sfu_UpdateMuteStateRequest()
-        var muteChanged = Stream_Video_Sfu_VideoMuteChanged()
+        var request = Stream_Video_Sfu_Signal_UpdateMuteStateRequest()
+        var muteChanged = Stream_Video_Sfu_Signal_VideoMuteChanged()
         muteChanged.muted = !isEnabled
         request.videoMuteChanged = muteChanged
         request.sessionID = sessionID
@@ -308,7 +308,7 @@ class WebRTCClient: NSObject {
         log.debug("Setting local description for peer connection")
         try await peerConnection?.setLocalDescription(offer)
         let sdp: String
-        var request = Stream_Video_Sfu_SetPublisherRequest()
+        var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
         request.sdp = offer?.sdp ?? ""
         request.sessionID = sessionID
         let response = try await signalService.setPublisher(setPublisherRequest: request)
@@ -331,7 +331,7 @@ class WebRTCClient: NSObject {
         return videoTrack
     }
     
-    private func loadParticipants(from response: Stream_Video_Sfu_JoinResponse) -> [String: CallParticipant] {
+    private func loadParticipants(from response: Stream_Video_Sfu_Signal_JoinResponse) -> [String: CallParticipant] {
         let participants = response.callState.participants
         // For more than threshold participants, the activation of track is on view appearance.
         let showTrack = participants.count < participantsThreshold
@@ -344,23 +344,23 @@ class WebRTCClient: NSObject {
     
     private func executeJoinRequest(
         for subscriberOffer: RTCSessionDescription?
-    ) async throws -> Stream_Video_Sfu_JoinResponse {
+    ) async throws -> Stream_Video_Sfu_Signal_JoinResponse {
         log.debug("Executing join request")
                 
-        var videoCodecs = Stream_Video_Sfu_VideoCodecs()
+        var videoCodecs = Stream_Video_Sfu_Models_VideoCodecs()
         videoCodecs.encode = PeerConnectionFactory.supportedVideoCodecEncoding.map { $0.toSfuCodec() }
         videoCodecs.decode = PeerConnectionFactory.supportedVideoCodecDecoding.map { $0.toSfuCodec() }
         
-        var codecSettings = Stream_Video_Sfu_CodecSettings()
+        var codecSettings = Stream_Video_Sfu_Models_CodecSettings()
         codecSettings.video = videoCodecs
         
-        var layers = [Stream_Video_Sfu_VideoLayer]()
+        var layers = [Stream_Video_Sfu_Models_VideoLayer]()
         
         for codec in videoOptions.supportedCodecs {
-            var layer = Stream_Video_Sfu_VideoLayer()
+            var layer = Stream_Video_Sfu_Models_VideoLayer()
             layer.bitrate = UInt32(codec.maxBitrate)
             layer.rid = codec.quality
-            var dimension = Stream_Video_Sfu_VideoDimension()
+            var dimension = Stream_Video_Sfu_Models_VideoDimension()
             dimension.height = UInt32(codec.dimensions.height)
             dimension.width = UInt32(codec.dimensions.width)
             layer.videoDimension = dimension
@@ -369,7 +369,7 @@ class WebRTCClient: NSObject {
         
         codecSettings.layers = layers
         
-        var joinRequest = Stream_Video_Sfu_JoinRequest()
+        var joinRequest = Stream_Video_Sfu_Signal_JoinRequest()
         joinRequest.subscriberSdpOffer = subscriberOffer?.sdp ?? ""
         joinRequest.sessionID = sessionID
         joinRequest.codecSettings = codecSettings
@@ -406,30 +406,30 @@ class WebRTCClient: NSObject {
     private func handle(event: Event) {
         log.debug("Received an event \(event)")
         Task {
-            if let event = event as? Stream_Video_Sfu_SubscriberOffer {
+            if let event = event as? Stream_Video_Sfu_Event_SubscriberOffer {
                 await handleSubscriberEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_ParticipantJoined {
+            } else if let event = event as? Stream_Video_Sfu_Event_ParticipantJoined {
                 await handleParticipantJoined(event)
-            } else if let event = event as? Stream_Video_Sfu_ParticipantLeft {
+            } else if let event = event as? Stream_Video_Sfu_Event_ParticipantLeft {
                 await handleParticipantLeft(event)
-            } else if let event = event as? Stream_Video_Sfu_ChangePublishQuality {
+            } else if let event = event as? Stream_Video_Sfu_Event_ChangePublishQuality {
                 handleChangePublishQualityEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_DominantSpeakerChanged {
+            } else if let event = event as? Stream_Video_Sfu_Event_DominantSpeakerChanged {
                 await handleDominantSpeakerChanged(event)
-            } else if let event = event as? Stream_Video_Sfu_MuteStateChanged {
+            } else if let event = event as? Stream_Video_Sfu_Event_MuteStateChanged {
                 await handleMuteStateChangedEvent(event)
             }
         }
     }
     
-    private func handleSubscriberEvent(_ event: Stream_Video_Sfu_SubscriberOffer) async {
+    private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {
         do {
             log.debug("Handling subscriber offer")
             let offerSdp = event.sdp
             try await subscriber?.setRemoteDescription(offerSdp, type: .offer)
             let answer = try await subscriber?.createAnswer()
             try await subscriber?.setLocalDescription(answer)
-            var sendAnswerRequest = Stream_Video_Sfu_SendAnswerRequest()
+            var sendAnswerRequest = Stream_Video_Sfu_Signal_SendAnswerRequest()
             sendAnswerRequest.sessionID = sessionID
             sendAnswerRequest.peerType = .subscriber
             sendAnswerRequest.sdp = answer?.sdp ?? ""
@@ -440,7 +440,7 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func handleParticipantJoined(_ event: Stream_Video_Sfu_ParticipantJoined) async {
+    private func handleParticipantJoined(_ event: Stream_Video_Sfu_Event_ParticipantJoined) async {
         let callParticipants = await state.callParticipants
         let showTrack = (callParticipants.count + 1) < participantsThreshold
         let participant = event.participant.toCallParticipant(showTrack: showTrack)
@@ -455,7 +455,7 @@ class WebRTCClient: NSObject {
         onParticipantEvent?(event)
     }
     
-    private func handleParticipantLeft(_ event: Stream_Video_Sfu_ParticipantLeft) async {
+    private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
         let participant = event.participant.toCallParticipant()
         await state.removeCallParticipant(with: participant.id)
         let event = ParticipantEvent(
@@ -469,14 +469,14 @@ class WebRTCClient: NSObject {
     }
     
     private func updateParticipantsSubscriptions() async {
-        var request = Stream_Video_Sfu_UpdateSubscriptionsRequest()
-        var subscriptions = [String: Stream_Video_Sfu_VideoDimension]()
+        var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
+        var subscriptions = [String: Stream_Video_Sfu_Models_VideoDimension]()
         request.sessionID = sessionID
         let callParticipants = await state.callParticipants
         for (_, value) in callParticipants {
             if value.id != userInfo.id && value.showTrack {
                 log.debug("updating subscription for user \(value.id) with size \(value.trackSize)")
-                var dimension = Stream_Video_Sfu_VideoDimension()
+                var dimension = Stream_Video_Sfu_Models_VideoDimension()
                 dimension.height = UInt32(value.trackSize.height)
                 dimension.width = UInt32(value.trackSize.width)
                 subscriptions[value.id] = dimension
@@ -490,7 +490,7 @@ class WebRTCClient: NSObject {
     }
     
     private func handleChangePublishQualityEvent(
-        _ event: Stream_Video_Sfu_ChangePublishQuality
+        _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
         guard let transceiver = publisher?.transceiver else { return }
         let enabledRids = event.videoSender.first?.layers
@@ -520,7 +520,7 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_DominantSpeakerChanged) async {
+    private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_Event_DominantSpeakerChanged) async {
         let userId = event.userID
         var temp = [String: CallParticipant]()
         let callParticipants = await state.callParticipants
@@ -577,7 +577,7 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_MuteStateChanged) async {
+    private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_Event_MuteStateChanged) async {
         let userId = event.userID
         guard let participant = await state.callParticipants[userId] else { return }
         var updated = participant.withUpdated(audio: !event.audioMuted)

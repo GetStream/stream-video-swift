@@ -15,129 +15,129 @@ private struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVer
     typealias Version = _2
 }
 
-struct Stream_Video_Sfu_EventV1_Event {
+struct Stream_Video_Sfu_Event_SfuEvent {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var eventPayload: Stream_Video_Sfu_EventV1_Event.OneOf_EventPayload?
+    var eventPayload: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload?
 
-    var subscriberOffer: Stream_Video_Sfu_EventV1_SubscriberOffer {
+    var subscriberOffer: Stream_Video_Sfu_Event_SubscriberOffer {
         get {
             if case let .subscriberOffer(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_SubscriberOffer()
+            return Stream_Video_Sfu_Event_SubscriberOffer()
         }
         set { eventPayload = .subscriberOffer(newValue) }
     }
 
-    var connectionQualityChanged: Stream_Video_Sfu_EventV1_ConnectionQualityChanged {
+    var connectionQualityChanged: Stream_Video_Sfu_Event_ConnectionQualityChanged {
         get {
             if case let .connectionQualityChanged(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_ConnectionQualityChanged()
+            return Stream_Video_Sfu_Event_ConnectionQualityChanged()
         }
         set { eventPayload = .connectionQualityChanged(newValue) }
     }
 
-    var audioLevelChanged: Stream_Video_Sfu_EventV1_AudioLevelChanged {
+    var audioLevelChanged: Stream_Video_Sfu_Event_AudioLevelChanged {
         get {
             if case let .audioLevelChanged(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_AudioLevelChanged()
+            return Stream_Video_Sfu_Event_AudioLevelChanged()
         }
         set { eventPayload = .audioLevelChanged(newValue) }
     }
 
-    var subscriberCandidate: Stream_Video_Sfu_EventV1_ICECandidateTrickle {
+    var subscriberCandidate: Stream_Video_Sfu_Event_ICECandidateTrickle {
         get {
             if case let .subscriberCandidate(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_ICECandidateTrickle()
+            return Stream_Video_Sfu_Event_ICECandidateTrickle()
         }
         set { eventPayload = .subscriberCandidate(newValue) }
     }
 
-    var publisherCandidate: Stream_Video_Sfu_EventV1_ICECandidateTrickle {
+    var publisherCandidate: Stream_Video_Sfu_Event_ICECandidateTrickle {
         get {
             if case let .publisherCandidate(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_ICECandidateTrickle()
+            return Stream_Video_Sfu_Event_ICECandidateTrickle()
         }
         set { eventPayload = .publisherCandidate(newValue) }
     }
 
-    var changePublishQuality: Stream_Video_Sfu_EventV1_ChangePublishQuality {
+    var changePublishQuality: Stream_Video_Sfu_Event_ChangePublishQuality {
         get {
             if case let .changePublishQuality(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_ChangePublishQuality()
+            return Stream_Video_Sfu_Event_ChangePublishQuality()
         }
         set { eventPayload = .changePublishQuality(newValue) }
     }
 
-    var muteStateChanged: Stream_Video_Sfu_EventV1_MuteStateChanged {
+    var localDeviceChange: Stream_Video_Sfu_Event_LocalDeviceChange {
+        get {
+            if case let .localDeviceChange(v)? = eventPayload { return v }
+            return Stream_Video_Sfu_Event_LocalDeviceChange()
+        }
+        set { eventPayload = .localDeviceChange(newValue) }
+    }
+
+    var muteStateChanged: Stream_Video_Sfu_Event_MuteStateChanged {
         get {
             if case let .muteStateChanged(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_MuteStateChanged()
+            return Stream_Video_Sfu_Event_MuteStateChanged()
         }
         set { eventPayload = .muteStateChanged(newValue) }
     }
 
-    var videoQualityChanged: Stream_Video_Sfu_EventV1_VideoQualityChanged {
+    var videoQualityChanged: Stream_Video_Sfu_Event_VideoQualityChanged {
         get {
             if case let .videoQualityChanged(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_VideoQualityChanged()
+            return Stream_Video_Sfu_Event_VideoQualityChanged()
         }
         set { eventPayload = .videoQualityChanged(newValue) }
     }
 
-    var participantConnected: Stream_Video_Sfu_EventV1_ParticipantConnected {
+    var participantJoined: Stream_Video_Sfu_Event_ParticipantJoined {
         get {
-            if case let .participantConnected(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_ParticipantConnected()
+            if case let .participantJoined(v)? = eventPayload { return v }
+            return Stream_Video_Sfu_Event_ParticipantJoined()
         }
-        set { eventPayload = .participantConnected(newValue) }
+        set { eventPayload = .participantJoined(newValue) }
     }
 
-    var participantDisconnected: Stream_Video_Sfu_EventV1_ParticipantDisconnected {
+    var participantLeft: Stream_Video_Sfu_Event_ParticipantLeft {
         get {
-            if case let .participantDisconnected(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_ParticipantDisconnected()
+            if case let .participantLeft(v)? = eventPayload { return v }
+            return Stream_Video_Sfu_Event_ParticipantLeft()
         }
-        set { eventPayload = .participantDisconnected(newValue) }
+        set { eventPayload = .participantLeft(newValue) }
     }
 
-    var dominantSpeakerChanged: Stream_Video_Sfu_EventV1_DominantSpeakerChanged {
+    var dominantSpeakerChanged: Stream_Video_Sfu_Event_DominantSpeakerChanged {
         get {
             if case let .dominantSpeakerChanged(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_DominantSpeakerChanged()
+            return Stream_Video_Sfu_Event_DominantSpeakerChanged()
         }
         set { eventPayload = .dominantSpeakerChanged(newValue) }
-    }
-
-    var localDeviceChange: Stream_Video_Sfu_EventV1_LocalDeviceChanged {
-        get {
-            if case let .localDeviceChange(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_EventV1_LocalDeviceChanged()
-        }
-        set { eventPayload = .localDeviceChange(newValue) }
     }
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_EventPayload: Equatable {
-        case subscriberOffer(Stream_Video_Sfu_EventV1_SubscriberOffer)
-        case connectionQualityChanged(Stream_Video_Sfu_EventV1_ConnectionQualityChanged)
-        case audioLevelChanged(Stream_Video_Sfu_EventV1_AudioLevelChanged)
-        case subscriberCandidate(Stream_Video_Sfu_EventV1_ICECandidateTrickle)
-        case publisherCandidate(Stream_Video_Sfu_EventV1_ICECandidateTrickle)
-        case changePublishQuality(Stream_Video_Sfu_EventV1_ChangePublishQuality)
-        case muteStateChanged(Stream_Video_Sfu_EventV1_MuteStateChanged)
-        case videoQualityChanged(Stream_Video_Sfu_EventV1_VideoQualityChanged)
-        case participantConnected(Stream_Video_Sfu_EventV1_ParticipantConnected)
-        case participantDisconnected(Stream_Video_Sfu_EventV1_ParticipantDisconnected)
-        case dominantSpeakerChanged(Stream_Video_Sfu_EventV1_DominantSpeakerChanged)
-        case localDeviceChange(Stream_Video_Sfu_EventV1_LocalDeviceChanged)
+        case subscriberOffer(Stream_Video_Sfu_Event_SubscriberOffer)
+        case connectionQualityChanged(Stream_Video_Sfu_Event_ConnectionQualityChanged)
+        case audioLevelChanged(Stream_Video_Sfu_Event_AudioLevelChanged)
+        case subscriberCandidate(Stream_Video_Sfu_Event_ICECandidateTrickle)
+        case publisherCandidate(Stream_Video_Sfu_Event_ICECandidateTrickle)
+        case changePublishQuality(Stream_Video_Sfu_Event_ChangePublishQuality)
+        case localDeviceChange(Stream_Video_Sfu_Event_LocalDeviceChange)
+        case muteStateChanged(Stream_Video_Sfu_Event_MuteStateChanged)
+        case videoQualityChanged(Stream_Video_Sfu_Event_VideoQualityChanged)
+        case participantJoined(Stream_Video_Sfu_Event_ParticipantJoined)
+        case participantLeft(Stream_Video_Sfu_Event_ParticipantLeft)
+        case dominantSpeakerChanged(Stream_Video_Sfu_Event_DominantSpeakerChanged)
 
         #if !swift(>=4.1)
         static func == (
-            lhs: Stream_Video_Sfu_EventV1_Event.OneOf_EventPayload,
-            rhs: Stream_Video_Sfu_EventV1_Event.OneOf_EventPayload
+            lhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload,
+            rhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload
         ) -> Bool {
             // The use of inline closures is to circumvent an issue where the compiler
             // allocates stack space for every case branch when no optimizations are
@@ -171,6 +171,10 @@ struct Stream_Video_Sfu_EventV1_Event {
                           case let .changePublishQuality(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
+            case (.localDeviceChange, .localDeviceChange): return {
+                    guard case let .localDeviceChange(l) = lhs, case let .localDeviceChange(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
             case (.muteStateChanged, .muteStateChanged): return {
                     guard case let .muteStateChanged(l) = lhs, case let .muteStateChanged(r) = rhs else { preconditionFailure() }
                     return l == r
@@ -180,23 +184,17 @@ struct Stream_Video_Sfu_EventV1_Event {
                           case let .videoQualityChanged(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
-            case (.participantConnected, .participantConnected): return {
-                    guard case let .participantConnected(l) = lhs,
-                          case let .participantConnected(r) = rhs else { preconditionFailure() }
+            case (.participantJoined, .participantJoined): return {
+                    guard case let .participantJoined(l) = lhs, case let .participantJoined(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
-            case (.participantDisconnected, .participantDisconnected): return {
-                    guard case let .participantDisconnected(l) = lhs,
-                          case let .participantDisconnected(r) = rhs else { preconditionFailure() }
+            case (.participantLeft, .participantLeft): return {
+                    guard case let .participantLeft(l) = lhs, case let .participantLeft(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
             case (.dominantSpeakerChanged, .dominantSpeakerChanged): return {
                     guard case let .dominantSpeakerChanged(l) = lhs,
                           case let .dominantSpeakerChanged(r) = rhs else { preconditionFailure() }
-                    return l == r
-                }()
-            case (.localDeviceChange, .localDeviceChange): return {
-                    guard case let .localDeviceChange(l) = lhs, case let .localDeviceChange(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
             default: return false
@@ -208,14 +206,14 @@ struct Stream_Video_Sfu_EventV1_Event {
     init() {}
 }
 
-/// ParticipantConnected is fired when a user joins a call
-struct Stream_Video_Sfu_EventV1_ParticipantConnected {
+/// ParticipantJoined is fired when a user joins a call
+struct Stream_Video_Sfu_Event_ParticipantJoined {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var call: Stream_Video_Sfu_ModelsV1_Call {
-        get { _call ?? Stream_Video_Sfu_ModelsV1_Call() }
+    var call: Stream_Video_Sfu_Models_Call {
+        get { _call ?? Stream_Video_Sfu_Models_Call() }
         set { _call = newValue }
     }
 
@@ -224,8 +222,8 @@ struct Stream_Video_Sfu_EventV1_ParticipantConnected {
     /// Clears the value of `call`. Subsequent reads from it will return its default value.
     mutating func clearCall() { _call = nil }
 
-    var participant: Stream_Video_Sfu_ModelsV1_Participant {
-        get { _participant ?? Stream_Video_Sfu_ModelsV1_Participant() }
+    var participant: Stream_Video_Sfu_Models_Participant {
+        get { _participant ?? Stream_Video_Sfu_Models_Participant() }
         set { _participant = newValue }
     }
 
@@ -238,18 +236,18 @@ struct Stream_Video_Sfu_EventV1_ParticipantConnected {
 
     init() {}
 
-    fileprivate var _call: Stream_Video_Sfu_ModelsV1_Call?
-    fileprivate var _participant: Stream_Video_Sfu_ModelsV1_Participant?
+    fileprivate var _call: Stream_Video_Sfu_Models_Call?
+    fileprivate var _participant: Stream_Video_Sfu_Models_Participant?
 }
 
-/// ParticipantDisconnected is fired when a user leaves a call
-struct Stream_Video_Sfu_EventV1_ParticipantDisconnected {
+/// ParticipantJoined is fired when a user leaves a call
+struct Stream_Video_Sfu_Event_ParticipantLeft {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var call: Stream_Video_Sfu_ModelsV1_Call {
-        get { _call ?? Stream_Video_Sfu_ModelsV1_Call() }
+    var call: Stream_Video_Sfu_Models_Call {
+        get { _call ?? Stream_Video_Sfu_Models_Call() }
         set { _call = newValue }
     }
 
@@ -258,8 +256,8 @@ struct Stream_Video_Sfu_EventV1_ParticipantDisconnected {
     /// Clears the value of `call`. Subsequent reads from it will return its default value.
     mutating func clearCall() { _call = nil }
 
-    var participant: Stream_Video_Sfu_ModelsV1_Participant {
-        get { _participant ?? Stream_Video_Sfu_ModelsV1_Participant() }
+    var participant: Stream_Video_Sfu_Models_Participant {
+        get { _participant ?? Stream_Video_Sfu_Models_Participant() }
         set { _participant = newValue }
     }
 
@@ -272,24 +270,16 @@ struct Stream_Video_Sfu_EventV1_ParticipantDisconnected {
 
     init() {}
 
-    fileprivate var _call: Stream_Video_Sfu_ModelsV1_Call?
-    fileprivate var _participant: Stream_Video_Sfu_ModelsV1_Participant?
+    fileprivate var _call: Stream_Video_Sfu_Models_Call?
+    fileprivate var _participant: Stream_Video_Sfu_Models_Participant?
 }
 
-struct Stream_Video_Sfu_EventV1_MuteStateChanged {
+struct Stream_Video_Sfu_Event_MuteStateChanged {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var participant: Stream_Video_Sfu_ModelsV1_Participant {
-        get { _participant ?? Stream_Video_Sfu_ModelsV1_Participant() }
-        set { _participant = newValue }
-    }
-
-    /// Returns true if `participant` has been explicitly set.
-    var hasParticipant: Bool { self._participant != nil }
-    /// Clears the value of `participant`. Subsequent reads from it will return its default value.
-    mutating func clearParticipant() { _participant = nil }
+    var userID: String = String()
 
     var audioMuted: Bool = false
 
@@ -298,17 +288,14 @@ struct Stream_Video_Sfu_EventV1_MuteStateChanged {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
-
-    fileprivate var _participant: Stream_Video_Sfu_ModelsV1_Participant?
 }
 
-// TODO: batch these messages
-struct Stream_Video_Sfu_EventV1_VideoQualityChanged {
+struct Stream_Video_Sfu_Event_VideoQualityChanged {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var streamQualities: [Stream_Video_Sfu_ModelsV1_StreamQuality] = []
+    var streamQualities: [Stream_Video_Sfu_Models_StreamQuality] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -317,7 +304,7 @@ struct Stream_Video_Sfu_EventV1_VideoQualityChanged {
 
 /// SubscriberOffer is sent when the SFU adds tracks to a subscription
 /// this usually happens when a user joins a call and starts sending video
-struct Stream_Video_Sfu_EventV1_SubscriberOffer {
+struct Stream_Video_Sfu_Event_SubscriberOffer {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -329,7 +316,7 @@ struct Stream_Video_Sfu_EventV1_SubscriberOffer {
     init() {}
 }
 
-struct Stream_Video_Sfu_EventV1_LocalDeviceChanged {
+struct Stream_Video_Sfu_Event_LocalDeviceChange {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -342,7 +329,7 @@ struct Stream_Video_Sfu_EventV1_LocalDeviceChanged {
 }
 
 /// ICECandidateTrickle is about the ICE nonsense stuff
-struct Stream_Video_Sfu_EventV1_ICECandidateTrickle {
+struct Stream_Video_Sfu_Event_ICECandidateTrickle {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -356,14 +343,14 @@ struct Stream_Video_Sfu_EventV1_ICECandidateTrickle {
 
 /// ConnectionQuality is sent to inform about connection quality changes
 /// eg. thierry's connection is not good -> render a red icon Zoom style
-struct Stream_Video_Sfu_EventV1_ConnectionQualityChanged {
+struct Stream_Video_Sfu_Event_ConnectionQualityChanged {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
     var userID: String = String()
 
-    var connectionQuality: Stream_Video_Sfu_ModelsV1_ConnectionQuality = .badUnspecified
+    var connectionQuality: Stream_Video_Sfu_Models_ConnectionQuality = .bad
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -371,7 +358,7 @@ struct Stream_Video_Sfu_EventV1_ConnectionQualityChanged {
 }
 
 /// DominantSpeakerChanged is sent by the SFU to notify when there is a new dominant speaker in the call
-struct Stream_Video_Sfu_EventV1_DominantSpeakerChanged {
+struct Stream_Video_Sfu_Event_DominantSpeakerChanged {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -384,19 +371,19 @@ struct Stream_Video_Sfu_EventV1_DominantSpeakerChanged {
 }
 
 /// AudioLevelChanged is sent by the SFU to notify about audio levels by user
-struct Stream_Video_Sfu_EventV1_AudioLevelChanged {
+struct Stream_Video_Sfu_Event_AudioLevelChanged {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var audioLevels: [Stream_Video_Sfu_EventV1_AudioLevel] = []
+    var audioLevels: [Stream_Video_Sfu_Event_AudioLevel] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 }
 
-struct Stream_Video_Sfu_EventV1_AudioLevel {
+struct Stream_Video_Sfu_Event_AudioLevel {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -411,7 +398,7 @@ struct Stream_Video_Sfu_EventV1_AudioLevel {
     init() {}
 }
 
-struct Stream_Video_Sfu_EventV1_AudioLayerSetting {
+struct Stream_Video_Sfu_Event_AudioLayerSetting {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -421,7 +408,7 @@ struct Stream_Video_Sfu_EventV1_AudioLayerSetting {
     init() {}
 }
 
-struct Stream_Video_Sfu_EventV1_AudioMediaRequest {
+struct Stream_Video_Sfu_Event_AudioMediaRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -433,13 +420,13 @@ struct Stream_Video_Sfu_EventV1_AudioMediaRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_EventV1_AudioSender {
+struct Stream_Video_Sfu_Event_AudioSender {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var mediaRequest: Stream_Video_Sfu_EventV1_AudioMediaRequest {
-        get { _mediaRequest ?? Stream_Video_Sfu_EventV1_AudioMediaRequest() }
+    var mediaRequest: Stream_Video_Sfu_Event_AudioMediaRequest {
+        get { _mediaRequest ?? Stream_Video_Sfu_Event_AudioMediaRequest() }
         set { _mediaRequest = newValue }
     }
 
@@ -448,8 +435,8 @@ struct Stream_Video_Sfu_EventV1_AudioSender {
     /// Clears the value of `mediaRequest`. Subsequent reads from it will return its default value.
     mutating func clearMediaRequest() { _mediaRequest = nil }
 
-    var codec: Stream_Video_Sfu_ModelsV1_Codec {
-        get { _codec ?? Stream_Video_Sfu_ModelsV1_Codec() }
+    var codec: Stream_Video_Sfu_Models_Codec {
+        get { _codec ?? Stream_Video_Sfu_Models_Codec() }
         set { _codec = newValue }
     }
 
@@ -458,17 +445,17 @@ struct Stream_Video_Sfu_EventV1_AudioSender {
     /// Clears the value of `codec`. Subsequent reads from it will return its default value.
     mutating func clearCodec() { _codec = nil }
 
-    var layers: [Stream_Video_Sfu_EventV1_AudioLayerSetting] = []
+    var layers: [Stream_Video_Sfu_Event_AudioLayerSetting] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _mediaRequest: Stream_Video_Sfu_EventV1_AudioMediaRequest?
-    fileprivate var _codec: Stream_Video_Sfu_ModelsV1_Codec?
+    fileprivate var _mediaRequest: Stream_Video_Sfu_Event_AudioMediaRequest?
+    fileprivate var _codec: Stream_Video_Sfu_Models_Codec?
 }
 
-struct Stream_Video_Sfu_EventV1_VideoMediaRequest {
+struct Stream_Video_Sfu_Event_VideoMediaRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -484,7 +471,7 @@ struct Stream_Video_Sfu_EventV1_VideoMediaRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_EventV1_VideoLayerSetting {
+struct Stream_Video_Sfu_Event_VideoLayerSetting {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -497,10 +484,10 @@ struct Stream_Video_Sfu_EventV1_VideoLayerSetting {
 
     var scaleResolutionDownBy: Float = 0
 
-    var priority: Stream_Video_Sfu_EventV1_VideoLayerSetting.Priority = .highUnspecified
+    var priority: Stream_Video_Sfu_Event_VideoLayerSetting.Priority = .high
 
-    var codec: Stream_Video_Sfu_ModelsV1_Codec {
-        get { _codec ?? Stream_Video_Sfu_ModelsV1_Codec() }
+    var codec: Stream_Video_Sfu_Models_Codec {
+        get { _codec ?? Stream_Video_Sfu_Models_Codec() }
         set { _codec = newValue }
     }
 
@@ -513,19 +500,19 @@ struct Stream_Video_Sfu_EventV1_VideoLayerSetting {
 
     enum Priority: SwiftProtobuf.Enum {
         typealias RawValue = Int
-        case highUnspecified // = 0
+        case high // = 0
         case low // = 1
         case medium // = 2
         case veryLow // = 3
         case UNRECOGNIZED(Int)
 
         init() {
-            self = .highUnspecified
+            self = .high
         }
 
         init?(rawValue: Int) {
             switch rawValue {
-            case 0: self = .highUnspecified
+            case 0: self = .high
             case 1: self = .low
             case 2: self = .medium
             case 3: self = .veryLow
@@ -535,7 +522,7 @@ struct Stream_Video_Sfu_EventV1_VideoLayerSetting {
 
         var rawValue: Int {
             switch self {
-            case .highUnspecified: return 0
+            case .high: return 0
             case .low: return 1
             case .medium: return 2
             case .veryLow: return 3
@@ -546,15 +533,15 @@ struct Stream_Video_Sfu_EventV1_VideoLayerSetting {
 
     init() {}
 
-    fileprivate var _codec: Stream_Video_Sfu_ModelsV1_Codec?
+    fileprivate var _codec: Stream_Video_Sfu_Models_Codec?
 }
 
 #if swift(>=4.2)
 
-extension Stream_Video_Sfu_EventV1_VideoLayerSetting.Priority: CaseIterable {
+extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
-    static var allCases: [Stream_Video_Sfu_EventV1_VideoLayerSetting.Priority] = [
-        .highUnspecified,
+    static var allCases: [Stream_Video_Sfu_Event_VideoLayerSetting.Priority] = [
+        .high,
         .low,
         .medium,
         .veryLow
@@ -563,13 +550,13 @@ extension Stream_Video_Sfu_EventV1_VideoLayerSetting.Priority: CaseIterable {
 
 #endif // swift(>=4.2)
 
-struct Stream_Video_Sfu_EventV1_VideoSender {
+struct Stream_Video_Sfu_Event_VideoSender {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var mediaRequest: Stream_Video_Sfu_EventV1_VideoMediaRequest {
-        get { _mediaRequest ?? Stream_Video_Sfu_EventV1_VideoMediaRequest() }
+    var mediaRequest: Stream_Video_Sfu_Event_VideoMediaRequest {
+        get { _mediaRequest ?? Stream_Video_Sfu_Event_VideoMediaRequest() }
         set { _mediaRequest = newValue }
     }
 
@@ -578,8 +565,8 @@ struct Stream_Video_Sfu_EventV1_VideoSender {
     /// Clears the value of `mediaRequest`. Subsequent reads from it will return its default value.
     mutating func clearMediaRequest() { _mediaRequest = nil }
 
-    var codec: Stream_Video_Sfu_ModelsV1_Codec {
-        get { _codec ?? Stream_Video_Sfu_ModelsV1_Codec() }
+    var codec: Stream_Video_Sfu_Models_Codec {
+        get { _codec ?? Stream_Video_Sfu_Models_Codec() }
         set { _codec = newValue }
     }
 
@@ -588,25 +575,25 @@ struct Stream_Video_Sfu_EventV1_VideoSender {
     /// Clears the value of `codec`. Subsequent reads from it will return its default value.
     mutating func clearCodec() { _codec = nil }
 
-    var layers: [Stream_Video_Sfu_EventV1_VideoLayerSetting] = []
+    var layers: [Stream_Video_Sfu_Event_VideoLayerSetting] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _mediaRequest: Stream_Video_Sfu_EventV1_VideoMediaRequest?
-    fileprivate var _codec: Stream_Video_Sfu_ModelsV1_Codec?
+    fileprivate var _mediaRequest: Stream_Video_Sfu_Event_VideoMediaRequest?
+    fileprivate var _codec: Stream_Video_Sfu_Models_Codec?
 }
 
 /// sent to users when they need to change the quality of their video
-struct Stream_Video_Sfu_EventV1_ChangePublishQuality {
+struct Stream_Video_Sfu_Event_ChangePublishQuality {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var audioSenders: [Stream_Video_Sfu_EventV1_AudioSender] = []
+    var audioSender: [Stream_Video_Sfu_Event_AudioSender] = []
 
-    var videoSenders: [Stream_Video_Sfu_EventV1_VideoSender] = []
+    var videoSender: [Stream_Video_Sfu_Event_VideoSender] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -614,36 +601,36 @@ struct Stream_Video_Sfu_EventV1_ChangePublishQuality {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
-extension Stream_Video_Sfu_EventV1_Event: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_Event.OneOf_EventPayload: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_ParticipantConnected: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_ParticipantDisconnected: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_MuteStateChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_VideoQualityChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_SubscriberOffer: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_LocalDeviceChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_ICECandidateTrickle: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_ConnectionQualityChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_DominantSpeakerChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_AudioLevelChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_AudioLevel: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_AudioLayerSetting: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_AudioMediaRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_AudioSender: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_VideoMediaRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_VideoLayerSetting: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_VideoLayerSetting.Priority: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_VideoSender: @unchecked Sendable {}
-extension Stream_Video_Sfu_EventV1_ChangePublishQuality: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ParticipantJoined: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ParticipantLeft: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_MuteStateChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_VideoQualityChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_SubscriberOffer: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_LocalDeviceChange: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ICECandidateTrickle: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ConnectionQualityChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_DominantSpeakerChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_AudioLevelChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_AudioLevel: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_AudioLayerSetting: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_AudioMediaRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_AudioSender: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_VideoMediaRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_VideoLayerSetting: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_VideoSender: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ChangePublishQuality: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-private let _protobuf_package = "stream.video.sfu.event_v1"
+private let _protobuf_package = "stream.video.sfu.event"
 
-extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".Event"
+    static let protoMessageName: String = _protobuf_package + ".SfuEvent"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "subscriber_offer"),
         2: .standard(proto: "connection_quality_changed"),
@@ -651,12 +638,12 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
         4: .standard(proto: "subscriber_candidate"),
         5: .standard(proto: "publisher_candidate"),
         6: .standard(proto: "change_publish_quality"),
-        7: .standard(proto: "mute_state_changed"),
-        8: .standard(proto: "video_quality_changed"),
-        9: .standard(proto: "participant_connected"),
-        10: .standard(proto: "participant_disconnected"),
-        11: .standard(proto: "dominant_speaker_changed"),
-        12: .standard(proto: "local_device_change")
+        7: .standard(proto: "local_device_change"),
+        8: .standard(proto: "mute_state_changed"),
+        9: .standard(proto: "video_quality_changed"),
+        10: .standard(proto: "participant_joined"),
+        11: .standard(proto: "participant_left"),
+        12: .standard(proto: "dominant_speaker_changed")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -666,7 +653,7 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try {
-                    var v: Stream_Video_Sfu_EventV1_SubscriberOffer?
+                    var v: Stream_Video_Sfu_Event_SubscriberOffer?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -679,7 +666,7 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 2: try {
-                    var v: Stream_Video_Sfu_EventV1_ConnectionQualityChanged?
+                    var v: Stream_Video_Sfu_Event_ConnectionQualityChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -692,7 +679,7 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 3: try {
-                    var v: Stream_Video_Sfu_EventV1_AudioLevelChanged?
+                    var v: Stream_Video_Sfu_Event_AudioLevelChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -705,7 +692,7 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 4: try {
-                    var v: Stream_Video_Sfu_EventV1_ICECandidateTrickle?
+                    var v: Stream_Video_Sfu_Event_ICECandidateTrickle?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -718,7 +705,7 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 5: try {
-                    var v: Stream_Video_Sfu_EventV1_ICECandidateTrickle?
+                    var v: Stream_Video_Sfu_Event_ICECandidateTrickle?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -731,7 +718,7 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 6: try {
-                    var v: Stream_Video_Sfu_EventV1_ChangePublishQuality?
+                    var v: Stream_Video_Sfu_Event_ChangePublishQuality?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -744,7 +731,20 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 7: try {
-                    var v: Stream_Video_Sfu_EventV1_MuteStateChanged?
+                    var v: Stream_Video_Sfu_Event_LocalDeviceChange?
+                    var hadOneofValue = false
+                    if let current = self.eventPayload {
+                        hadOneofValue = true
+                        if case let .localDeviceChange(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.eventPayload = .localDeviceChange(v)
+                    }
+                }()
+            case 8: try {
+                    var v: Stream_Video_Sfu_Event_MuteStateChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -756,8 +756,8 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                         self.eventPayload = .muteStateChanged(v)
                     }
                 }()
-            case 8: try {
-                    var v: Stream_Video_Sfu_EventV1_VideoQualityChanged?
+            case 9: try {
+                    var v: Stream_Video_Sfu_Event_VideoQualityChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -769,34 +769,34 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                         self.eventPayload = .videoQualityChanged(v)
                     }
                 }()
-            case 9: try {
-                    var v: Stream_Video_Sfu_EventV1_ParticipantConnected?
-                    var hadOneofValue = false
-                    if let current = self.eventPayload {
-                        hadOneofValue = true
-                        if case let .participantConnected(m) = current { v = m }
-                    }
-                    try decoder.decodeSingularMessageField(value: &v)
-                    if let v = v {
-                        if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.eventPayload = .participantConnected(v)
-                    }
-                }()
             case 10: try {
-                    var v: Stream_Video_Sfu_EventV1_ParticipantDisconnected?
+                    var v: Stream_Video_Sfu_Event_ParticipantJoined?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
-                        if case let .participantDisconnected(m) = current { v = m }
+                        if case let .participantJoined(m) = current { v = m }
                     }
                     try decoder.decodeSingularMessageField(value: &v)
                     if let v = v {
                         if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.eventPayload = .participantDisconnected(v)
+                        self.eventPayload = .participantJoined(v)
                     }
                 }()
             case 11: try {
-                    var v: Stream_Video_Sfu_EventV1_DominantSpeakerChanged?
+                    var v: Stream_Video_Sfu_Event_ParticipantLeft?
+                    var hadOneofValue = false
+                    if let current = self.eventPayload {
+                        hadOneofValue = true
+                        if case let .participantLeft(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.eventPayload = .participantLeft(v)
+                    }
+                }()
+            case 12: try {
+                    var v: Stream_Video_Sfu_Event_DominantSpeakerChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -806,19 +806,6 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                     if let v = v {
                         if hadOneofValue { try decoder.handleConflictingOneOf() }
                         self.eventPayload = .dominantSpeakerChanged(v)
-                    }
-                }()
-            case 12: try {
-                    var v: Stream_Video_Sfu_EventV1_LocalDeviceChanged?
-                    var hadOneofValue = false
-                    if let current = self.eventPayload {
-                        hadOneofValue = true
-                        if case let .localDeviceChange(m) = current { v = m }
-                    }
-                    try decoder.decodeSingularMessageField(value: &v)
-                    if let v = v {
-                        if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.eventPayload = .localDeviceChange(v)
                     }
                 }()
             default: break
@@ -856,28 +843,28 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
                 guard case let .changePublishQuality(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
             }()
+        case .localDeviceChange?: try {
+                guard case let .localDeviceChange(v)? = self.eventPayload else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+            }()
         case .muteStateChanged?: try {
                 guard case let .muteStateChanged(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 7)
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
             }()
         case .videoQualityChanged?: try {
                 guard case let .videoQualityChanged(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
-            }()
-        case .participantConnected?: try {
-                guard case let .participantConnected(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 9)
             }()
-        case .participantDisconnected?: try {
-                guard case let .participantDisconnected(v)? = self.eventPayload else { preconditionFailure() }
+        case .participantJoined?: try {
+                guard case let .participantJoined(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 10)
+            }()
+        case .participantLeft?: try {
+                guard case let .participantLeft(v)? = self.eventPayload else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
             }()
         case .dominantSpeakerChanged?: try {
                 guard case let .dominantSpeakerChanged(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 11)
-            }()
-        case .localDeviceChange?: try {
-                guard case let .localDeviceChange(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
             }()
         case nil: break
@@ -885,16 +872,16 @@ extension Stream_Video_Sfu_EventV1_Event: SwiftProtobuf.Message, SwiftProtobuf._
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_Event, rhs: Stream_Video_Sfu_EventV1_Event) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_SfuEvent, rhs: Stream_Video_Sfu_Event_SfuEvent) -> Bool {
         if lhs.eventPayload != rhs.eventPayload { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_ParticipantConnected: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_ParticipantJoined: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".ParticipantConnected"
+    static let protoMessageName: String = _protobuf_package + ".ParticipantJoined"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "call"),
         2: .same(proto: "participant")
@@ -927,10 +914,7 @@ extension Stream_Video_Sfu_EventV1_ParticipantConnected: SwiftProtobuf.Message, 
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (
-        lhs: Stream_Video_Sfu_EventV1_ParticipantConnected,
-        rhs: Stream_Video_Sfu_EventV1_ParticipantConnected
-    ) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_ParticipantJoined, rhs: Stream_Video_Sfu_Event_ParticipantJoined) -> Bool {
         if lhs._call != rhs._call { return false }
         if lhs._participant != rhs._participant { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -938,9 +922,9 @@ extension Stream_Video_Sfu_EventV1_ParticipantConnected: SwiftProtobuf.Message, 
     }
 }
 
-extension Stream_Video_Sfu_EventV1_ParticipantDisconnected: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_ParticipantLeft: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".ParticipantDisconnected"
+    static let protoMessageName: String = _protobuf_package + ".ParticipantLeft"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "call"),
         2: .same(proto: "participant")
@@ -973,10 +957,7 @@ extension Stream_Video_Sfu_EventV1_ParticipantDisconnected: SwiftProtobuf.Messag
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (
-        lhs: Stream_Video_Sfu_EventV1_ParticipantDisconnected,
-        rhs: Stream_Video_Sfu_EventV1_ParticipantDisconnected
-    ) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_ParticipantLeft, rhs: Stream_Video_Sfu_Event_ParticipantLeft) -> Bool {
         if lhs._call != rhs._call { return false }
         if lhs._participant != rhs._participant { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -984,11 +965,11 @@ extension Stream_Video_Sfu_EventV1_ParticipantDisconnected: SwiftProtobuf.Messag
     }
 }
 
-extension Stream_Video_Sfu_EventV1_MuteStateChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_MuteStateChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".MuteStateChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "participant"),
+        1: .standard(proto: "user_id"),
         2: .standard(proto: "audio_muted"),
         3: .standard(proto: "video_muted")
     ]
@@ -999,7 +980,7 @@ extension Stream_Video_Sfu_EventV1_MuteStateChanged: SwiftProtobuf.Message, Swif
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularMessageField(value: &self._participant) }()
+            case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
             case 2: try { try decoder.decodeSingularBoolField(value: &self.audioMuted) }()
             case 3: try { try decoder.decodeSingularBoolField(value: &self.videoMuted) }()
             default: break
@@ -1008,13 +989,9 @@ extension Stream_Video_Sfu_EventV1_MuteStateChanged: SwiftProtobuf.Message, Swif
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
-        try { if let v = self._participant {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
-        } }()
+        if !userID.isEmpty {
+            try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
+        }
         if audioMuted != false {
             try visitor.visitSingularBoolField(value: audioMuted, fieldNumber: 2)
         }
@@ -1024,8 +1001,8 @@ extension Stream_Video_Sfu_EventV1_MuteStateChanged: SwiftProtobuf.Message, Swif
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_MuteStateChanged, rhs: Stream_Video_Sfu_EventV1_MuteStateChanged) -> Bool {
-        if lhs._participant != rhs._participant { return false }
+    static func == (lhs: Stream_Video_Sfu_Event_MuteStateChanged, rhs: Stream_Video_Sfu_Event_MuteStateChanged) -> Bool {
+        if lhs.userID != rhs.userID { return false }
         if lhs.audioMuted != rhs.audioMuted { return false }
         if lhs.videoMuted != rhs.videoMuted { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1033,7 +1010,7 @@ extension Stream_Video_Sfu_EventV1_MuteStateChanged: SwiftProtobuf.Message, Swif
     }
 }
 
-extension Stream_Video_Sfu_EventV1_VideoQualityChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_VideoQualityChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoQualityChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1059,14 +1036,14 @@ extension Stream_Video_Sfu_EventV1_VideoQualityChanged: SwiftProtobuf.Message, S
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_VideoQualityChanged, rhs: Stream_Video_Sfu_EventV1_VideoQualityChanged) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_VideoQualityChanged, rhs: Stream_Video_Sfu_Event_VideoQualityChanged) -> Bool {
         if lhs.streamQualities != rhs.streamQualities { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_SubscriberOffer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_SubscriberOffer: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SubscriberOffer"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1092,16 +1069,16 @@ extension Stream_Video_Sfu_EventV1_SubscriberOffer: SwiftProtobuf.Message, Swift
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_SubscriberOffer, rhs: Stream_Video_Sfu_EventV1_SubscriberOffer) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_SubscriberOffer, rhs: Stream_Video_Sfu_Event_SubscriberOffer) -> Bool {
         if lhs.sdp != rhs.sdp { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_LocalDeviceChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_LocalDeviceChange: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".LocalDeviceChanged"
+    static let protoMessageName: String = _protobuf_package + ".LocalDeviceChange"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "type")
     ]
@@ -1125,14 +1102,14 @@ extension Stream_Video_Sfu_EventV1_LocalDeviceChanged: SwiftProtobuf.Message, Sw
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_LocalDeviceChanged, rhs: Stream_Video_Sfu_EventV1_LocalDeviceChanged) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_LocalDeviceChange, rhs: Stream_Video_Sfu_Event_LocalDeviceChange) -> Bool {
         if lhs.type != rhs.type { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_ICECandidateTrickle: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_ICECandidateTrickle: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ICECandidateTrickle"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1158,14 +1135,14 @@ extension Stream_Video_Sfu_EventV1_ICECandidateTrickle: SwiftProtobuf.Message, S
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_ICECandidateTrickle, rhs: Stream_Video_Sfu_EventV1_ICECandidateTrickle) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_ICECandidateTrickle, rhs: Stream_Video_Sfu_Event_ICECandidateTrickle) -> Bool {
         if lhs.candidate != rhs.candidate { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_ConnectionQualityChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_ConnectionQualityChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ConnectionQualityChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1190,15 +1167,15 @@ extension Stream_Video_Sfu_EventV1_ConnectionQualityChanged: SwiftProtobuf.Messa
         if !userID.isEmpty {
             try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
         }
-        if connectionQuality != .badUnspecified {
+        if connectionQuality != .bad {
             try visitor.visitSingularEnumField(value: connectionQuality, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (
-        lhs: Stream_Video_Sfu_EventV1_ConnectionQualityChanged,
-        rhs: Stream_Video_Sfu_EventV1_ConnectionQualityChanged
+        lhs: Stream_Video_Sfu_Event_ConnectionQualityChanged,
+        rhs: Stream_Video_Sfu_Event_ConnectionQualityChanged
     ) -> Bool {
         if lhs.userID != rhs.userID { return false }
         if lhs.connectionQuality != rhs.connectionQuality { return false }
@@ -1207,7 +1184,7 @@ extension Stream_Video_Sfu_EventV1_ConnectionQualityChanged: SwiftProtobuf.Messa
     }
 }
 
-extension Stream_Video_Sfu_EventV1_DominantSpeakerChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_DominantSpeakerChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".DominantSpeakerChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1234,8 +1211,8 @@ extension Stream_Video_Sfu_EventV1_DominantSpeakerChanged: SwiftProtobuf.Message
     }
 
     static func == (
-        lhs: Stream_Video_Sfu_EventV1_DominantSpeakerChanged,
-        rhs: Stream_Video_Sfu_EventV1_DominantSpeakerChanged
+        lhs: Stream_Video_Sfu_Event_DominantSpeakerChanged,
+        rhs: Stream_Video_Sfu_Event_DominantSpeakerChanged
     ) -> Bool {
         if lhs.userID != rhs.userID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1243,7 +1220,7 @@ extension Stream_Video_Sfu_EventV1_DominantSpeakerChanged: SwiftProtobuf.Message
     }
 }
 
-extension Stream_Video_Sfu_EventV1_AudioLevelChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_AudioLevelChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioLevelChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1269,14 +1246,14 @@ extension Stream_Video_Sfu_EventV1_AudioLevelChanged: SwiftProtobuf.Message, Swi
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_AudioLevelChanged, rhs: Stream_Video_Sfu_EventV1_AudioLevelChanged) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_AudioLevelChanged, rhs: Stream_Video_Sfu_Event_AudioLevelChanged) -> Bool {
         if lhs.audioLevels != rhs.audioLevels { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_AudioLevel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_AudioLevel: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioLevel"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1307,7 +1284,7 @@ extension Stream_Video_Sfu_EventV1_AudioLevel: SwiftProtobuf.Message, SwiftProto
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_AudioLevel, rhs: Stream_Video_Sfu_EventV1_AudioLevel) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_AudioLevel, rhs: Stream_Video_Sfu_Event_AudioLevel) -> Bool {
         if lhs.userID != rhs.userID { return false }
         if lhs.level != rhs.level { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1315,7 +1292,7 @@ extension Stream_Video_Sfu_EventV1_AudioLevel: SwiftProtobuf.Message, SwiftProto
     }
 }
 
-extension Stream_Video_Sfu_EventV1_AudioLayerSetting: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_AudioLayerSetting: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioLayerSetting"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
@@ -1328,17 +1305,17 @@ extension Stream_Video_Sfu_EventV1_AudioLayerSetting: SwiftProtobuf.Message, Swi
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_AudioLayerSetting, rhs: Stream_Video_Sfu_EventV1_AudioLayerSetting) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_AudioLayerSetting, rhs: Stream_Video_Sfu_Event_AudioLayerSetting) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_AudioMediaRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_AudioMediaRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioMediaRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "channel_count")
+        1: .same(proto: "channelCount")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1360,18 +1337,18 @@ extension Stream_Video_Sfu_EventV1_AudioMediaRequest: SwiftProtobuf.Message, Swi
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_AudioMediaRequest, rhs: Stream_Video_Sfu_EventV1_AudioMediaRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_AudioMediaRequest, rhs: Stream_Video_Sfu_Event_AudioMediaRequest) -> Bool {
         if lhs.channelCount != rhs.channelCount { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_EventV1_AudioSender: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioSender"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "media_request"),
+        1: .same(proto: "mediaRequest"),
         2: .same(proto: "codec"),
         3: .same(proto: "layers")
     ]
@@ -1407,7 +1384,7 @@ extension Stream_Video_Sfu_EventV1_AudioSender: SwiftProtobuf.Message, SwiftProt
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_AudioSender, rhs: Stream_Video_Sfu_EventV1_AudioSender) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_AudioSender, rhs: Stream_Video_Sfu_Event_AudioSender) -> Bool {
         if lhs._mediaRequest != rhs._mediaRequest { return false }
         if lhs._codec != rhs._codec { return false }
         if lhs.layers != rhs.layers { return false }
@@ -1416,13 +1393,13 @@ extension Stream_Video_Sfu_EventV1_AudioSender: SwiftProtobuf.Message, SwiftProt
     }
 }
 
-extension Stream_Video_Sfu_EventV1_VideoMediaRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_VideoMediaRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoMediaRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "ideal_height"),
-        2: .standard(proto: "ideal_width"),
-        3: .standard(proto: "ideal_frame_rate")
+        1: .same(proto: "idealHeight"),
+        2: .same(proto: "idealWidth"),
+        3: .same(proto: "idealFrameRate")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1452,7 +1429,7 @@ extension Stream_Video_Sfu_EventV1_VideoMediaRequest: SwiftProtobuf.Message, Swi
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_VideoMediaRequest, rhs: Stream_Video_Sfu_EventV1_VideoMediaRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_VideoMediaRequest, rhs: Stream_Video_Sfu_Event_VideoMediaRequest) -> Bool {
         if lhs.idealHeight != rhs.idealHeight { return false }
         if lhs.idealWidth != rhs.idealWidth { return false }
         if lhs.idealFrameRate != rhs.idealFrameRate { return false }
@@ -1461,14 +1438,14 @@ extension Stream_Video_Sfu_EventV1_VideoMediaRequest: SwiftProtobuf.Message, Swi
     }
 }
 
-extension Stream_Video_Sfu_EventV1_VideoLayerSetting: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoLayerSetting"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "name"),
         2: .same(proto: "active"),
-        3: .standard(proto: "max_bitrate"),
-        4: .standard(proto: "scale_resolution_down_by"),
+        3: .same(proto: "maxBitrate"),
+        4: .same(proto: "scaleResolutionDownBy"),
         5: .same(proto: "priority"),
         6: .same(proto: "codec")
     ]
@@ -1507,7 +1484,7 @@ extension Stream_Video_Sfu_EventV1_VideoLayerSetting: SwiftProtobuf.Message, Swi
         if scaleResolutionDownBy != 0 {
             try visitor.visitSingularFloatField(value: scaleResolutionDownBy, fieldNumber: 4)
         }
-        if priority != .highUnspecified {
+        if priority != .high {
             try visitor.visitSingularEnumField(value: priority, fieldNumber: 5)
         }
         try { if let v = self._codec {
@@ -1516,7 +1493,7 @@ extension Stream_Video_Sfu_EventV1_VideoLayerSetting: SwiftProtobuf.Message, Swi
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_VideoLayerSetting, rhs: Stream_Video_Sfu_EventV1_VideoLayerSetting) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_VideoLayerSetting, rhs: Stream_Video_Sfu_Event_VideoLayerSetting) -> Bool {
         if lhs.name != rhs.name { return false }
         if lhs.active != rhs.active { return false }
         if lhs.maxBitrate != rhs.maxBitrate { return false }
@@ -1528,20 +1505,20 @@ extension Stream_Video_Sfu_EventV1_VideoLayerSetting: SwiftProtobuf.Message, Swi
     }
 }
 
-extension Stream_Video_Sfu_EventV1_VideoLayerSetting.Priority: SwiftProtobuf._ProtoNameProviding {
+extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "PRIORITY_HIGH_UNSPECIFIED"),
-        1: .same(proto: "PRIORITY_LOW"),
-        2: .same(proto: "PRIORITY_MEDIUM"),
-        3: .same(proto: "PRIORITY_VERY_LOW")
+        0: .same(proto: "HIGH"),
+        1: .same(proto: "LOW"),
+        2: .same(proto: "MEDIUM"),
+        3: .same(proto: "VERY_LOW")
     ]
 }
 
-extension Stream_Video_Sfu_EventV1_VideoSender: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoSender"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "media_request"),
+        1: .same(proto: "mediaRequest"),
         2: .same(proto: "codec"),
         3: .same(proto: "layers")
     ]
@@ -1577,7 +1554,7 @@ extension Stream_Video_Sfu_EventV1_VideoSender: SwiftProtobuf.Message, SwiftProt
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_EventV1_VideoSender, rhs: Stream_Video_Sfu_EventV1_VideoSender) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_VideoSender, rhs: Stream_Video_Sfu_Event_VideoSender) -> Bool {
         if lhs._mediaRequest != rhs._mediaRequest { return false }
         if lhs._codec != rhs._codec { return false }
         if lhs.layers != rhs.layers { return false }
@@ -1586,12 +1563,12 @@ extension Stream_Video_Sfu_EventV1_VideoSender: SwiftProtobuf.Message, SwiftProt
     }
 }
 
-extension Stream_Video_Sfu_EventV1_ChangePublishQuality: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Event_ChangePublishQuality: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ChangePublishQuality"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "audio_senders"),
-        2: .standard(proto: "video_senders")
+        1: .standard(proto: "audio_sender"),
+        2: .standard(proto: "video_sender")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1600,29 +1577,26 @@ extension Stream_Video_Sfu_EventV1_ChangePublishQuality: SwiftProtobuf.Message, 
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.audioSenders) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.videoSenders) }()
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.audioSender) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.videoSender) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !audioSenders.isEmpty {
-            try visitor.visitRepeatedMessageField(value: audioSenders, fieldNumber: 1)
+        if !audioSender.isEmpty {
+            try visitor.visitRepeatedMessageField(value: audioSender, fieldNumber: 1)
         }
-        if !videoSenders.isEmpty {
-            try visitor.visitRepeatedMessageField(value: videoSenders, fieldNumber: 2)
+        if !videoSender.isEmpty {
+            try visitor.visitRepeatedMessageField(value: videoSender, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (
-        lhs: Stream_Video_Sfu_EventV1_ChangePublishQuality,
-        rhs: Stream_Video_Sfu_EventV1_ChangePublishQuality
-    ) -> Bool {
-        if lhs.audioSenders != rhs.audioSenders { return false }
-        if lhs.videoSenders != rhs.videoSenders { return false }
+    static func == (lhs: Stream_Video_Sfu_Event_ChangePublishQuality, rhs: Stream_Video_Sfu_Event_ChangePublishQuality) -> Bool {
+        if lhs.audioSender != rhs.audioSender { return false }
+        if lhs.videoSender != rhs.videoSender { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

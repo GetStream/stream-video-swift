@@ -174,7 +174,7 @@ struct HomeView: View {
     // Just temporary solution.
     var url: String {
         if useLocalhost {
-            return "http://192.168.100.73:3031/twirp"
+            return "http://192.168.0.132:3031/twirp"
         } else {
             return "https://sfu2.fra1.gtstrm.com/rpc/twirp"
         }

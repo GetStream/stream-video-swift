@@ -15,7 +15,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-    private let signalService: Stream_Video_Sfu_SignalServer
+    private let signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
@@ -30,7 +30,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         sessionId: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        signalService: Stream_Video_Sfu_SignalServer,
+        signalService: Stream_Video_Sfu_Signal_SignalServer,
         videoOptions: VideoOptions
     ) {
         self.sessionId = sessionId
@@ -159,7 +159,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
         Task {
-            var request = Stream_Video_Sfu_IceCandidateRequest()
+            var request = Stream_Video_Sfu_Signal_IceCandidateRequest()
             request.publisher = type == .publisher
             request.candidate = candidate.sdp
             request.sdpMid = candidate.sdpMid ?? ""
@@ -178,8 +178,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
 extension RTCVideoCodecInfo {
     
-    func toSfuCodec() -> Stream_Video_Sfu_Codec {
-        var codec = Stream_Video_Sfu_Codec()
+    func toSfuCodec() -> Stream_Video_Sfu_Models_Codec {
+        var codec = Stream_Video_Sfu_Models_Codec()
         codec.mime = name
         codec.hwAccelerated = name == "H264"
         return codec

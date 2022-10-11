@@ -208,7 +208,7 @@ extension Stream_Video_User {
     }
 }
 
-extension Stream_Video_Sfu_Participant {
+extension Stream_Video_Sfu_Models_Participant {
     
     func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
         CallParticipant(

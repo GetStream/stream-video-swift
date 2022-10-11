@@ -15,12 +15,12 @@ private struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVer
     typealias Version = _2
 }
 
-struct Stream_Video_Sfu_UpdateVideoQualityRequest {
+struct Stream_Video_Sfu_Signal_UpdateVideoQualityRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var streamQualities: [Stream_Video_Sfu_StreamQuality] = []
+    var streamQualities: [Stream_Video_Sfu_Models_StreamQuality] = []
 
     var sessionID: String = String()
 
@@ -29,7 +29,7 @@ struct Stream_Video_Sfu_UpdateVideoQualityRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_UpdateVideoQualityResponse {
+struct Stream_Video_Sfu_Signal_UpdateVideoQualityResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -39,27 +39,27 @@ struct Stream_Video_Sfu_UpdateVideoQualityResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_UpdateMuteStateRequest {
+struct Stream_Video_Sfu_Signal_UpdateMuteStateRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
     var sessionID: String = String()
 
-    var mute: Stream_Video_Sfu_UpdateMuteStateRequest.OneOf_Mute?
+    var mute: Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute?
 
-    var audioMuteChanged: Stream_Video_Sfu_AudioMuteChanged {
+    var audioMuteChanged: Stream_Video_Sfu_Signal_AudioMuteChanged {
         get {
             if case let .audioMuteChanged(v)? = mute { return v }
-            return Stream_Video_Sfu_AudioMuteChanged()
+            return Stream_Video_Sfu_Signal_AudioMuteChanged()
         }
         set { mute = .audioMuteChanged(newValue) }
     }
 
-    var videoMuteChanged: Stream_Video_Sfu_VideoMuteChanged {
+    var videoMuteChanged: Stream_Video_Sfu_Signal_VideoMuteChanged {
         get {
             if case let .videoMuteChanged(v)? = mute { return v }
-            return Stream_Video_Sfu_VideoMuteChanged()
+            return Stream_Video_Sfu_Signal_VideoMuteChanged()
         }
         set { mute = .videoMuteChanged(newValue) }
     }
@@ -67,13 +67,13 @@ struct Stream_Video_Sfu_UpdateMuteStateRequest {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_Mute: Equatable {
-        case audioMuteChanged(Stream_Video_Sfu_AudioMuteChanged)
-        case videoMuteChanged(Stream_Video_Sfu_VideoMuteChanged)
+        case audioMuteChanged(Stream_Video_Sfu_Signal_AudioMuteChanged)
+        case videoMuteChanged(Stream_Video_Sfu_Signal_VideoMuteChanged)
 
         #if !swift(>=4.1)
         static func == (
-            lhs: Stream_Video_Sfu_UpdateMuteStateRequest.OneOf_Mute,
-            rhs: Stream_Video_Sfu_UpdateMuteStateRequest.OneOf_Mute
+            lhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute,
+            rhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute
         ) -> Bool {
             // The use of inline closures is to circumvent an issue where the compiler
             // allocates stack space for every case branch when no optimizations are
@@ -96,7 +96,7 @@ struct Stream_Video_Sfu_UpdateMuteStateRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_UpdateMuteStateResponse {
+struct Stream_Video_Sfu_Signal_UpdateMuteStateResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -106,19 +106,7 @@ struct Stream_Video_Sfu_UpdateMuteStateResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_AudioMuteChanged {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var muted: Bool = false
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-struct Stream_Video_Sfu_VideoMuteChanged {
+struct Stream_Video_Sfu_Signal_AudioMuteChanged {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -130,13 +118,25 @@ struct Stream_Video_Sfu_VideoMuteChanged {
     init() {}
 }
 
-struct Stream_Video_Sfu_UpdateSubscriptionsRequest {
+struct Stream_Video_Sfu_Signal_VideoMuteChanged {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var muted: Bool = false
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
     /// maps stream user_ids to its size
-    var subscriptions: [String: Stream_Video_Sfu_VideoDimension] = [:]
+    var subscriptions: [String: Stream_Video_Sfu_Models_VideoDimension] = [:]
 
     var sessionID: String = String()
 
@@ -145,12 +145,12 @@ struct Stream_Video_Sfu_UpdateSubscriptionsRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_SendAnswerRequest {
+struct Stream_Video_Sfu_Signal_SendAnswerRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var peerType: Stream_Video_Sfu_PeerType = .publisher
+    var peerType: Stream_Video_Sfu_Models_PeerType = .publisher
 
     var sdp: String = String()
 
@@ -161,7 +161,7 @@ struct Stream_Video_Sfu_SendAnswerRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_SendAnswerResponse {
+struct Stream_Video_Sfu_Signal_SendAnswerResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -171,7 +171,7 @@ struct Stream_Video_Sfu_SendAnswerResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_IceCandidateRequest {
+struct Stream_Video_Sfu_Signal_IceCandidateRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -181,20 +181,48 @@ struct Stream_Video_Sfu_IceCandidateRequest {
 
     var candidate: String = String()
 
-    var sdpMid: String = String()
+    var sdpMid: String {
+        get { _sdpMid ?? String() }
+        set { _sdpMid = newValue }
+    }
 
-    var sdpMlineIndex: UInt32 = 0
+    /// Returns true if `sdpMid` has been explicitly set.
+    var hasSdpMid: Bool { self._sdpMid != nil }
+    /// Clears the value of `sdpMid`. Subsequent reads from it will return its default value.
+    mutating func clearSdpMid() { _sdpMid = nil }
 
-    var usernameFragment: String = String()
+    var sdpMlineIndex: UInt32 {
+        get { _sdpMlineIndex ?? 0 }
+        set { _sdpMlineIndex = newValue }
+    }
+
+    /// Returns true if `sdpMlineIndex` has been explicitly set.
+    var hasSdpMlineIndex: Bool { self._sdpMlineIndex != nil }
+    /// Clears the value of `sdpMlineIndex`. Subsequent reads from it will return its default value.
+    mutating func clearSdpMlineIndex() { _sdpMlineIndex = nil }
+
+    var usernameFragment: String {
+        get { _usernameFragment ?? String() }
+        set { _usernameFragment = newValue }
+    }
+
+    /// Returns true if `usernameFragment` has been explicitly set.
+    var hasUsernameFragment: Bool { self._usernameFragment != nil }
+    /// Clears the value of `usernameFragment`. Subsequent reads from it will return its default value.
+    mutating func clearUsernameFragment() { _usernameFragment = nil }
 
     var sessionID: String = String()
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    private var _sdpMid: String?
+    private var _sdpMlineIndex: UInt32?
+    private var _usernameFragment: String?
 }
 
-struct Stream_Video_Sfu_IceCandidateResponse {
+struct Stream_Video_Sfu_Signal_IceCandidateResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -204,7 +232,7 @@ struct Stream_Video_Sfu_IceCandidateResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_UpdateSubscriptionsResponse {
+struct Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -214,7 +242,7 @@ struct Stream_Video_Sfu_UpdateSubscriptionsResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_SetPublisherRequest {
+struct Stream_Video_Sfu_Signal_SetPublisherRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -229,7 +257,7 @@ struct Stream_Video_Sfu_SetPublisherRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_SetPublisherResponse {
+struct Stream_Video_Sfu_Signal_SetPublisherResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -244,7 +272,7 @@ struct Stream_Video_Sfu_SetPublisherResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_JoinRequest {
+struct Stream_Video_Sfu_Signal_JoinRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -255,8 +283,8 @@ struct Stream_Video_Sfu_JoinRequest {
 
     // TODO: we should know if this is going to be
     /// - publishing and subscribing, or just subscribing for future routing
-    var codecSettings: Stream_Video_Sfu_CodecSettings {
-        get { _codecSettings ?? Stream_Video_Sfu_CodecSettings() }
+    var codecSettings: Stream_Video_Sfu_Models_CodecSettings {
+        get { _codecSettings ?? Stream_Video_Sfu_Models_CodecSettings() }
         set { _codecSettings = newValue }
     }
 
@@ -269,10 +297,10 @@ struct Stream_Video_Sfu_JoinRequest {
 
     init() {}
 
-    private var _codecSettings: Stream_Video_Sfu_CodecSettings?
+    private var _codecSettings: Stream_Video_Sfu_Models_CodecSettings?
 }
 
-struct Stream_Video_Sfu_JoinResponse {
+struct Stream_Video_Sfu_Signal_JoinResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -280,8 +308,8 @@ struct Stream_Video_Sfu_JoinResponse {
     var sdp: String = String()
 
     // TODO: include full list of participants with track and audio info
-    var callState: Stream_Video_Sfu_CallState {
-        get { _callState ?? Stream_Video_Sfu_CallState() }
+    var callState: Stream_Video_Sfu_Models_CallState {
+        get { _callState ?? Stream_Video_Sfu_Models_CallState() }
         set { _callState = newValue }
     }
 
@@ -294,10 +322,10 @@ struct Stream_Video_Sfu_JoinResponse {
 
     init() {}
 
-    private var _callState: Stream_Video_Sfu_CallState?
+    private var _callState: Stream_Video_Sfu_Models_CallState?
 }
 
-struct Stream_Video_Sfu_ConnectRequest {
+struct Stream_Video_Sfu_Signal_ConnectRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -313,7 +341,7 @@ struct Stream_Video_Sfu_ConnectRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_ConnectResponse {
+struct Stream_Video_Sfu_Signal_ConnectResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -327,25 +355,25 @@ struct Stream_Video_Sfu_ConnectResponse {
 }
 
 /// Signaling related payload, all these messages will be exchanged using signaling channel
-struct Stream_Video_Sfu_SignalRequest {
+struct Stream_Video_Sfu_Signal_SignalRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var eventPayload: Stream_Video_Sfu_SignalRequest.OneOf_EventPayload?
+    var eventPayload: Stream_Video_Sfu_Signal_SignalRequest.OneOf_EventPayload?
 
-    var subscribe: Stream_Video_Sfu_SubscribeRequest {
+    var subscribe: Stream_Video_Sfu_Signal_SubscribeRequest {
         get {
             if case let .subscribe(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_SubscribeRequest()
+            return Stream_Video_Sfu_Signal_SubscribeRequest()
         }
         set { eventPayload = .subscribe(newValue) }
     }
 
-    var publish: Stream_Video_Sfu_PublishRequest {
+    var publish: Stream_Video_Sfu_Signal_PublishRequest {
         get {
             if case let .publish(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_PublishRequest()
+            return Stream_Video_Sfu_Signal_PublishRequest()
         }
         set { eventPayload = .publish(newValue) }
     }
@@ -353,13 +381,13 @@ struct Stream_Video_Sfu_SignalRequest {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_EventPayload: Equatable {
-        case subscribe(Stream_Video_Sfu_SubscribeRequest)
-        case publish(Stream_Video_Sfu_PublishRequest)
+        case subscribe(Stream_Video_Sfu_Signal_SubscribeRequest)
+        case publish(Stream_Video_Sfu_Signal_PublishRequest)
 
         #if !swift(>=4.1)
         static func == (
-            lhs: Stream_Video_Sfu_SignalRequest.OneOf_EventPayload,
-            rhs: Stream_Video_Sfu_SignalRequest.OneOf_EventPayload
+            lhs: Stream_Video_Sfu_Signal_SignalRequest.OneOf_EventPayload,
+            rhs: Stream_Video_Sfu_Signal_SignalRequest.OneOf_EventPayload
         ) -> Bool {
             // The use of inline closures is to circumvent an issue where the compiler
             // allocates stack space for every case branch when no optimizations are
@@ -382,25 +410,25 @@ struct Stream_Video_Sfu_SignalRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_SignalEvent {
+struct Stream_Video_Sfu_Signal_SignalEvent {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var eventPayload: Stream_Video_Sfu_SignalEvent.OneOf_EventPayload?
+    var eventPayload: Stream_Video_Sfu_Signal_SignalEvent.OneOf_EventPayload?
 
-    var subscribe: Stream_Video_Sfu_SubscribeResponse {
+    var subscribe: Stream_Video_Sfu_Signal_SubscribeResponse {
         get {
             if case let .subscribe(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_SubscribeResponse()
+            return Stream_Video_Sfu_Signal_SubscribeResponse()
         }
         set { eventPayload = .subscribe(newValue) }
     }
 
-    var publish: Stream_Video_Sfu_PublishResponse {
+    var publish: Stream_Video_Sfu_Signal_PublishResponse {
         get {
             if case let .publish(v)? = eventPayload { return v }
-            return Stream_Video_Sfu_PublishResponse()
+            return Stream_Video_Sfu_Signal_PublishResponse()
         }
         set { eventPayload = .publish(newValue) }
     }
@@ -408,13 +436,13 @@ struct Stream_Video_Sfu_SignalEvent {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_EventPayload: Equatable {
-        case subscribe(Stream_Video_Sfu_SubscribeResponse)
-        case publish(Stream_Video_Sfu_PublishResponse)
+        case subscribe(Stream_Video_Sfu_Signal_SubscribeResponse)
+        case publish(Stream_Video_Sfu_Signal_PublishResponse)
 
         #if !swift(>=4.1)
         static func == (
-            lhs: Stream_Video_Sfu_SignalEvent.OneOf_EventPayload,
-            rhs: Stream_Video_Sfu_SignalEvent.OneOf_EventPayload
+            lhs: Stream_Video_Sfu_Signal_SignalEvent.OneOf_EventPayload,
+            rhs: Stream_Video_Sfu_Signal_SignalEvent.OneOf_EventPayload
         ) -> Bool {
             // The use of inline closures is to circumvent an issue where the compiler
             // allocates stack space for every case branch when no optimizations are
@@ -438,7 +466,7 @@ struct Stream_Video_Sfu_SignalEvent {
 }
 
 /// SubscribeRequest
-struct Stream_Video_Sfu_SubscribeRequest {
+struct Stream_Video_Sfu_Signal_SubscribeRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -456,7 +484,7 @@ struct Stream_Video_Sfu_SubscribeRequest {
 }
 
 /// SubscribeResponse
-struct Stream_Video_Sfu_SubscribeResponse {
+struct Stream_Video_Sfu_Signal_SubscribeResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -469,7 +497,7 @@ struct Stream_Video_Sfu_SubscribeResponse {
     init() {}
 }
 
-struct Stream_Video_Sfu_PublishRequest {
+struct Stream_Video_Sfu_Signal_PublishRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -483,7 +511,7 @@ struct Stream_Video_Sfu_PublishRequest {
     init() {}
 }
 
-struct Stream_Video_Sfu_PublishResponse {
+struct Stream_Video_Sfu_Signal_PublishResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -496,40 +524,40 @@ struct Stream_Video_Sfu_PublishResponse {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
-extension Stream_Video_Sfu_UpdateVideoQualityRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_UpdateVideoQualityResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_UpdateMuteStateRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_UpdateMuteStateRequest.OneOf_Mute: @unchecked Sendable {}
-extension Stream_Video_Sfu_UpdateMuteStateResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_AudioMuteChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_VideoMuteChanged: @unchecked Sendable {}
-extension Stream_Video_Sfu_UpdateSubscriptionsRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_SendAnswerRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_SendAnswerResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_IceCandidateRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_IceCandidateResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_UpdateSubscriptionsResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_SetPublisherRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_SetPublisherResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_JoinRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_JoinResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_ConnectRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_ConnectResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_SignalRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_SignalRequest.OneOf_EventPayload: @unchecked Sendable {}
-extension Stream_Video_Sfu_SignalEvent: @unchecked Sendable {}
-extension Stream_Video_Sfu_SignalEvent.OneOf_EventPayload: @unchecked Sendable {}
-extension Stream_Video_Sfu_SubscribeRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_SubscribeResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_PublishRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_PublishResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateVideoQualityRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateVideoQualityResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateMuteStateResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_AudioMuteChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_VideoMuteChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SendAnswerRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SendAnswerResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_IceCandidateRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_IceCandidateResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SetPublisherRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SetPublisherResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_JoinRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_JoinResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_ConnectRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_ConnectResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SignalRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SignalRequest.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SignalEvent: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SignalEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SubscribeRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_SubscribeResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_PublishRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_PublishResponse: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
-private let _protobuf_package = "stream.video.sfu"
+private let _protobuf_package = "stream.video.sfu.signal"
 
-extension Stream_Video_Sfu_UpdateVideoQualityRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateVideoQualityRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UpdateVideoQualityRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -560,7 +588,10 @@ extension Stream_Video_Sfu_UpdateVideoQualityRequest: SwiftProtobuf.Message, Swi
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_UpdateVideoQualityRequest, rhs: Stream_Video_Sfu_UpdateVideoQualityRequest) -> Bool {
+    static func == (
+        lhs: Stream_Video_Sfu_Signal_UpdateVideoQualityRequest,
+        rhs: Stream_Video_Sfu_Signal_UpdateVideoQualityRequest
+    ) -> Bool {
         if lhs.streamQualities != rhs.streamQualities { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -568,7 +599,7 @@ extension Stream_Video_Sfu_UpdateVideoQualityRequest: SwiftProtobuf.Message, Swi
     }
 }
 
-extension Stream_Video_Sfu_UpdateVideoQualityResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateVideoQualityResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UpdateVideoQualityResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
@@ -581,13 +612,16 @@ extension Stream_Video_Sfu_UpdateVideoQualityResponse: SwiftProtobuf.Message, Sw
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_UpdateVideoQualityResponse, rhs: Stream_Video_Sfu_UpdateVideoQualityResponse) -> Bool {
+    static func == (
+        lhs: Stream_Video_Sfu_Signal_UpdateVideoQualityResponse,
+        rhs: Stream_Video_Sfu_Signal_UpdateVideoQualityResponse
+    ) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UpdateMuteStateRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -604,7 +638,7 @@ extension Stream_Video_Sfu_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftP
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
             case 2: try {
-                    var v: Stream_Video_Sfu_AudioMuteChanged?
+                    var v: Stream_Video_Sfu_Signal_AudioMuteChanged?
                     var hadOneofValue = false
                     if let current = self.mute {
                         hadOneofValue = true
@@ -617,7 +651,7 @@ extension Stream_Video_Sfu_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftP
                     }
                 }()
             case 3: try {
-                    var v: Stream_Video_Sfu_VideoMuteChanged?
+                    var v: Stream_Video_Sfu_Signal_VideoMuteChanged?
                     var hadOneofValue = false
                     if let current = self.mute {
                         hadOneofValue = true
@@ -656,7 +690,10 @@ extension Stream_Video_Sfu_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftP
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_UpdateMuteStateRequest, rhs: Stream_Video_Sfu_UpdateMuteStateRequest) -> Bool {
+    static func == (
+        lhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest,
+        rhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest
+    ) -> Bool {
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.mute != rhs.mute { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -664,7 +701,7 @@ extension Stream_Video_Sfu_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftP
     }
 }
 
-extension Stream_Video_Sfu_UpdateMuteStateResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateMuteStateResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UpdateMuteStateResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
@@ -677,13 +714,16 @@ extension Stream_Video_Sfu_UpdateMuteStateResponse: SwiftProtobuf.Message, Swift
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_UpdateMuteStateResponse, rhs: Stream_Video_Sfu_UpdateMuteStateResponse) -> Bool {
+    static func == (
+        lhs: Stream_Video_Sfu_Signal_UpdateMuteStateResponse,
+        rhs: Stream_Video_Sfu_Signal_UpdateMuteStateResponse
+    ) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_AudioMuteChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_AudioMuteChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioMuteChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -709,14 +749,14 @@ extension Stream_Video_Sfu_AudioMuteChanged: SwiftProtobuf.Message, SwiftProtobu
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_AudioMuteChanged, rhs: Stream_Video_Sfu_AudioMuteChanged) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_AudioMuteChanged, rhs: Stream_Video_Sfu_Signal_AudioMuteChanged) -> Bool {
         if lhs.muted != rhs.muted { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_VideoMuteChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_VideoMuteChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoMuteChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -742,14 +782,14 @@ extension Stream_Video_Sfu_VideoMuteChanged: SwiftProtobuf.Message, SwiftProtobu
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_VideoMuteChanged, rhs: Stream_Video_Sfu_VideoMuteChanged) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_VideoMuteChanged, rhs: Stream_Video_Sfu_Signal_VideoMuteChanged) -> Bool {
         if lhs.muted != rhs.muted { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_UpdateSubscriptionsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UpdateSubscriptionsRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -764,8 +804,10 @@ extension Stream_Video_Sfu_UpdateSubscriptionsRequest: SwiftProtobuf.Message, Sw
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeMapField(
-                    fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Sfu_VideoDimension>
-                        .self,
+                    fieldType: SwiftProtobuf._ProtobufMessageMap<
+                        SwiftProtobuf.ProtobufString,
+                        Stream_Video_Sfu_Models_VideoDimension
+                    >.self,
                     value: &self.subscriptions
                 ) }()
             case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
@@ -777,7 +819,8 @@ extension Stream_Video_Sfu_UpdateSubscriptionsRequest: SwiftProtobuf.Message, Sw
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
         if !subscriptions.isEmpty {
             try visitor.visitMapField(
-                fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Sfu_VideoDimension>.self,
+                fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Sfu_Models_VideoDimension>
+                    .self,
                 value: subscriptions,
                 fieldNumber: 1
             )
@@ -788,7 +831,10 @@ extension Stream_Video_Sfu_UpdateSubscriptionsRequest: SwiftProtobuf.Message, Sw
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_UpdateSubscriptionsRequest, rhs: Stream_Video_Sfu_UpdateSubscriptionsRequest) -> Bool {
+    static func == (
+        lhs: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest,
+        rhs: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest
+    ) -> Bool {
         if lhs.subscriptions != rhs.subscriptions { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -796,7 +842,7 @@ extension Stream_Video_Sfu_UpdateSubscriptionsRequest: SwiftProtobuf.Message, Sw
     }
 }
 
-extension Stream_Video_Sfu_SendAnswerRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SendAnswerRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SendAnswerRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -832,7 +878,7 @@ extension Stream_Video_Sfu_SendAnswerRequest: SwiftProtobuf.Message, SwiftProtob
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SendAnswerRequest, rhs: Stream_Video_Sfu_SendAnswerRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SendAnswerRequest, rhs: Stream_Video_Sfu_Signal_SendAnswerRequest) -> Bool {
         if lhs.peerType != rhs.peerType { return false }
         if lhs.sdp != rhs.sdp { return false }
         if lhs.sessionID != rhs.sessionID { return false }
@@ -841,7 +887,7 @@ extension Stream_Video_Sfu_SendAnswerRequest: SwiftProtobuf.Message, SwiftProtob
     }
 }
 
-extension Stream_Video_Sfu_SendAnswerResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SendAnswerResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SendAnswerResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
@@ -854,13 +900,13 @@ extension Stream_Video_Sfu_SendAnswerResponse: SwiftProtobuf.Message, SwiftProto
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SendAnswerResponse, rhs: Stream_Video_Sfu_SendAnswerResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SendAnswerResponse, rhs: Stream_Video_Sfu_Signal_SendAnswerResponse) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_IceCandidateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_IceCandidateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".IceCandidateRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -880,9 +926,9 @@ extension Stream_Video_Sfu_IceCandidateRequest: SwiftProtobuf.Message, SwiftProt
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularBoolField(value: &self.publisher) }()
             case 2: try { try decoder.decodeSingularStringField(value: &self.candidate) }()
-            case 3: try { try decoder.decodeSingularStringField(value: &self.sdpMid) }()
-            case 4: try { try decoder.decodeSingularUInt32Field(value: &self.sdpMlineIndex) }()
-            case 5: try { try decoder.decodeSingularStringField(value: &self.usernameFragment) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self._sdpMid) }()
+            case 4: try { try decoder.decodeSingularUInt32Field(value: &self._sdpMlineIndex) }()
+            case 5: try { try decoder.decodeSingularStringField(value: &self._usernameFragment) }()
             case 7: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
             default: break
             }
@@ -890,40 +936,44 @@ extension Stream_Video_Sfu_IceCandidateRequest: SwiftProtobuf.Message, SwiftProt
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
         if publisher != false {
             try visitor.visitSingularBoolField(value: publisher, fieldNumber: 1)
         }
         if !candidate.isEmpty {
             try visitor.visitSingularStringField(value: candidate, fieldNumber: 2)
         }
-        if !sdpMid.isEmpty {
-            try visitor.visitSingularStringField(value: sdpMid, fieldNumber: 3)
-        }
-        if sdpMlineIndex != 0 {
-            try visitor.visitSingularUInt32Field(value: sdpMlineIndex, fieldNumber: 4)
-        }
-        if !usernameFragment.isEmpty {
-            try visitor.visitSingularStringField(value: usernameFragment, fieldNumber: 5)
-        }
+        try { if let v = self._sdpMid {
+            try visitor.visitSingularStringField(value: v, fieldNumber: 3)
+        } }()
+        try { if let v = self._sdpMlineIndex {
+            try visitor.visitSingularUInt32Field(value: v, fieldNumber: 4)
+        } }()
+        try { if let v = self._usernameFragment {
+            try visitor.visitSingularStringField(value: v, fieldNumber: 5)
+        } }()
         if !sessionID.isEmpty {
             try visitor.visitSingularStringField(value: sessionID, fieldNumber: 7)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_IceCandidateRequest, rhs: Stream_Video_Sfu_IceCandidateRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_IceCandidateRequest, rhs: Stream_Video_Sfu_Signal_IceCandidateRequest) -> Bool {
         if lhs.publisher != rhs.publisher { return false }
         if lhs.candidate != rhs.candidate { return false }
-        if lhs.sdpMid != rhs.sdpMid { return false }
-        if lhs.sdpMlineIndex != rhs.sdpMlineIndex { return false }
-        if lhs.usernameFragment != rhs.usernameFragment { return false }
+        if lhs._sdpMid != rhs._sdpMid { return false }
+        if lhs._sdpMlineIndex != rhs._sdpMlineIndex { return false }
+        if lhs._usernameFragment != rhs._usernameFragment { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_IceCandidateResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_IceCandidateResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".IceCandidateResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
@@ -936,13 +986,13 @@ extension Stream_Video_Sfu_IceCandidateResponse: SwiftProtobuf.Message, SwiftPro
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_IceCandidateResponse, rhs: Stream_Video_Sfu_IceCandidateResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_IceCandidateResponse, rhs: Stream_Video_Sfu_Signal_IceCandidateResponse) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_UpdateSubscriptionsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UpdateSubscriptionsResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
@@ -955,13 +1005,16 @@ extension Stream_Video_Sfu_UpdateSubscriptionsResponse: SwiftProtobuf.Message, S
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_UpdateSubscriptionsResponse, rhs: Stream_Video_Sfu_UpdateSubscriptionsResponse) -> Bool {
+    static func == (
+        lhs: Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse,
+        rhs: Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse
+    ) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_SetPublisherRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SetPublisherRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SetPublisherRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -992,7 +1045,7 @@ extension Stream_Video_Sfu_SetPublisherRequest: SwiftProtobuf.Message, SwiftProt
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SetPublisherRequest, rhs: Stream_Video_Sfu_SetPublisherRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SetPublisherRequest, rhs: Stream_Video_Sfu_Signal_SetPublisherRequest) -> Bool {
         if lhs.sdp != rhs.sdp { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1000,7 +1053,7 @@ extension Stream_Video_Sfu_SetPublisherRequest: SwiftProtobuf.Message, SwiftProt
     }
 }
 
-extension Stream_Video_Sfu_SetPublisherResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SetPublisherResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SetPublisherResponse"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1031,7 +1084,7 @@ extension Stream_Video_Sfu_SetPublisherResponse: SwiftProtobuf.Message, SwiftPro
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SetPublisherResponse, rhs: Stream_Video_Sfu_SetPublisherResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SetPublisherResponse, rhs: Stream_Video_Sfu_Signal_SetPublisherResponse) -> Bool {
         if lhs.sdp != rhs.sdp { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1039,7 +1092,7 @@ extension Stream_Video_Sfu_SetPublisherResponse: SwiftProtobuf.Message, SwiftPro
     }
 }
 
-extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".JoinRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1079,7 +1132,7 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_JoinRequest, rhs: Stream_Video_Sfu_JoinRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_JoinRequest, rhs: Stream_Video_Sfu_Signal_JoinRequest) -> Bool {
         if lhs.subscriberSdpOffer != rhs.subscriberSdpOffer { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs._codecSettings != rhs._codecSettings { return false }
@@ -1088,7 +1141,7 @@ extension Stream_Video_Sfu_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._Me
     }
 }
 
-extension Stream_Video_Sfu_JoinResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_JoinResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".JoinResponse"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1123,7 +1176,7 @@ extension Stream_Video_Sfu_JoinResponse: SwiftProtobuf.Message, SwiftProtobuf._M
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_JoinResponse, rhs: Stream_Video_Sfu_JoinResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_JoinResponse, rhs: Stream_Video_Sfu_Signal_JoinResponse) -> Bool {
         if lhs.sdp != rhs.sdp { return false }
         if lhs._callState != rhs._callState { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1131,7 +1184,7 @@ extension Stream_Video_Sfu_JoinResponse: SwiftProtobuf.Message, SwiftProtobuf._M
     }
 }
 
-extension Stream_Video_Sfu_ConnectRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_ConnectRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ConnectRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1162,7 +1215,7 @@ extension Stream_Video_Sfu_ConnectRequest: SwiftProtobuf.Message, SwiftProtobuf.
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ConnectRequest, rhs: Stream_Video_Sfu_ConnectRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_ConnectRequest, rhs: Stream_Video_Sfu_Signal_ConnectRequest) -> Bool {
         if lhs.sdpOffer != rhs.sdpOffer { return false }
         if lhs.token != rhs.token { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1170,7 +1223,7 @@ extension Stream_Video_Sfu_ConnectRequest: SwiftProtobuf.Message, SwiftProtobuf.
     }
 }
 
-extension Stream_Video_Sfu_ConnectResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_ConnectResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ConnectResponse"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1196,14 +1249,14 @@ extension Stream_Video_Sfu_ConnectResponse: SwiftProtobuf.Message, SwiftProtobuf
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_ConnectResponse, rhs: Stream_Video_Sfu_ConnectResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_ConnectResponse, rhs: Stream_Video_Sfu_Signal_ConnectResponse) -> Bool {
         if lhs.sdpAnswer != rhs.sdpAnswer { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_SignalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SignalRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SignalRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1218,7 +1271,7 @@ extension Stream_Video_Sfu_SignalRequest: SwiftProtobuf.Message, SwiftProtobuf._
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try {
-                    var v: Stream_Video_Sfu_SubscribeRequest?
+                    var v: Stream_Video_Sfu_Signal_SubscribeRequest?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -1231,7 +1284,7 @@ extension Stream_Video_Sfu_SignalRequest: SwiftProtobuf.Message, SwiftProtobuf._
                     }
                 }()
             case 2: try {
-                    var v: Stream_Video_Sfu_PublishRequest?
+                    var v: Stream_Video_Sfu_Signal_PublishRequest?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -1267,14 +1320,14 @@ extension Stream_Video_Sfu_SignalRequest: SwiftProtobuf.Message, SwiftProtobuf._
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SignalRequest, rhs: Stream_Video_Sfu_SignalRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SignalRequest, rhs: Stream_Video_Sfu_Signal_SignalRequest) -> Bool {
         if lhs.eventPayload != rhs.eventPayload { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_SignalEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SignalEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SignalEvent"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1289,7 +1342,7 @@ extension Stream_Video_Sfu_SignalEvent: SwiftProtobuf.Message, SwiftProtobuf._Me
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try {
-                    var v: Stream_Video_Sfu_SubscribeResponse?
+                    var v: Stream_Video_Sfu_Signal_SubscribeResponse?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -1302,7 +1355,7 @@ extension Stream_Video_Sfu_SignalEvent: SwiftProtobuf.Message, SwiftProtobuf._Me
                     }
                 }()
             case 2: try {
-                    var v: Stream_Video_Sfu_PublishResponse?
+                    var v: Stream_Video_Sfu_Signal_PublishResponse?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
                         hadOneofValue = true
@@ -1338,14 +1391,14 @@ extension Stream_Video_Sfu_SignalEvent: SwiftProtobuf.Message, SwiftProtobuf._Me
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SignalEvent, rhs: Stream_Video_Sfu_SignalEvent) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SignalEvent, rhs: Stream_Video_Sfu_Signal_SignalEvent) -> Bool {
         if lhs.eventPayload != rhs.eventPayload { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_SubscribeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SubscribeRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SubscribeRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1381,7 +1434,7 @@ extension Stream_Video_Sfu_SubscribeRequest: SwiftProtobuf.Message, SwiftProtobu
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SubscribeRequest, rhs: Stream_Video_Sfu_SubscribeRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SubscribeRequest, rhs: Stream_Video_Sfu_Signal_SubscribeRequest) -> Bool {
         if lhs.token != rhs.token { return false }
         if lhs.sdpOffer != rhs.sdpOffer { return false }
         if lhs.quality != rhs.quality { return false }
@@ -1390,7 +1443,7 @@ extension Stream_Video_Sfu_SubscribeRequest: SwiftProtobuf.Message, SwiftProtobu
     }
 }
 
-extension Stream_Video_Sfu_SubscribeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_SubscribeResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SubscribeResponse"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1416,14 +1469,14 @@ extension Stream_Video_Sfu_SubscribeResponse: SwiftProtobuf.Message, SwiftProtob
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_SubscribeResponse, rhs: Stream_Video_Sfu_SubscribeResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_SubscribeResponse, rhs: Stream_Video_Sfu_Signal_SubscribeResponse) -> Bool {
         if lhs.quality != rhs.quality { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_PublishRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_PublishRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".PublishRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1454,7 +1507,7 @@ extension Stream_Video_Sfu_PublishRequest: SwiftProtobuf.Message, SwiftProtobuf.
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_PublishRequest, rhs: Stream_Video_Sfu_PublishRequest) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_PublishRequest, rhs: Stream_Video_Sfu_Signal_PublishRequest) -> Bool {
         if lhs.token != rhs.token { return false }
         if lhs.sdpOffer != rhs.sdpOffer { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -1462,7 +1515,7 @@ extension Stream_Video_Sfu_PublishRequest: SwiftProtobuf.Message, SwiftProtobuf.
     }
 }
 
-extension Stream_Video_Sfu_PublishResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_PublishResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".PublishResponse"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
@@ -1488,7 +1541,7 @@ extension Stream_Video_Sfu_PublishResponse: SwiftProtobuf.Message, SwiftProtobuf
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_PublishResponse, rhs: Stream_Video_Sfu_PublishResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_PublishResponse, rhs: Stream_Video_Sfu_Signal_PublishResponse) -> Bool {
         if lhs.sdpAnswer != rhs.sdpAnswer { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
