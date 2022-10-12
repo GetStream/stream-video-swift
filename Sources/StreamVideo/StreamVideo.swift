@@ -30,7 +30,11 @@ public class StreamVideo {
     
     private let httpClient: HTTPClient
     
-    private var webSocketClient: WebSocketClient?
+    private var webSocketClient: WebSocketClient? {
+        didSet {
+            setupConnectionRecoveryHandler()
+        }
+    }
     
     private let callsMiddleware = CallsMiddleware()
     
