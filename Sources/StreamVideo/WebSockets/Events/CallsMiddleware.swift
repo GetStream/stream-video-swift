@@ -11,7 +11,7 @@ class CallsMiddleware: EventMiddleware {
     func handle(event: Event) -> Event? {
         if let incomingCallEvent = event as? IncomingCallEvent {
             log.debug("Received call created \(incomingCallEvent)")
-            let cId = incomingCallEvent.proto.callCid
+            let cId = incomingCallEvent.proto.call.callCid
             let id = cId.components(separatedBy: ":").last ?? cId
             let userId = incomingCallEvent.createdBy
             let type = incomingCallEvent.type

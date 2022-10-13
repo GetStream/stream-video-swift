@@ -66,8 +66,7 @@ final class CallCoordinatorController: Sendable {
         callType: CallType
     ) async throws {
         var request = Stream_Video_SendEventRequest()
-        request.callType = callType.name
-        request.callID = callId
+        request.callCid = "\(callType.name):\(callId)"
         request.eventType = type
         _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
     }

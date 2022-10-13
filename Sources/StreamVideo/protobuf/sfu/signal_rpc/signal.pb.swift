@@ -150,7 +150,7 @@ struct Stream_Video_Sfu_Signal_SendAnswerRequest {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var peerType: Stream_Video_Sfu_Models_PeerType = .publisher
+    var peerType: Stream_Video_Sfu_Models_PeerType = .publisherUnspecified
 
     var sdp: String = String()
 
@@ -866,7 +866,7 @@ extension Stream_Video_Sfu_Signal_SendAnswerRequest: SwiftProtobuf.Message, Swif
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if peerType != .publisher {
+        if peerType != .publisherUnspecified {
             try visitor.visitSingularEnumField(value: peerType, fieldNumber: 1)
         }
         if !sdp.isEmpty {
@@ -912,9 +912,9 @@ extension Stream_Video_Sfu_Signal_IceCandidateRequest: SwiftProtobuf.Message, Sw
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "publisher"),
         2: .same(proto: "candidate"),
-        3: .same(proto: "sdpMid"),
-        4: .same(proto: "sdpMLineIndex"),
-        5: .same(proto: "usernameFragment"),
+        3: .standard(proto: "sdp_mid"),
+        4: .standard(proto: "sdp_mline_index"),
+        5: .standard(proto: "username_fragment"),
         7: .standard(proto: "session_id")
     ]
 

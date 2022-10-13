@@ -17,17 +17,17 @@ private struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVer
 
 enum Stream_Video_Sfu_Models_PeerType: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case publisher // = 0
+    case publisherUnspecified // = 0
     case subscriber // = 1
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .publisher
+        self = .publisherUnspecified
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .publisher
+        case 0: self = .publisherUnspecified
         case 1: self = .subscriber
         default: self = .UNRECOGNIZED(rawValue)
         }
@@ -35,7 +35,7 @@ enum Stream_Video_Sfu_Models_PeerType: SwiftProtobuf.Enum {
 
     var rawValue: Int {
         switch self {
-        case .publisher: return 0
+        case .publisherUnspecified: return 0
         case .subscriber: return 1
         case let .UNRECOGNIZED(i): return i
         }
@@ -47,7 +47,7 @@ enum Stream_Video_Sfu_Models_PeerType: SwiftProtobuf.Enum {
 extension Stream_Video_Sfu_Models_PeerType: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Models_PeerType] = [
-        .publisher,
+        .publisherUnspecified,
         .subscriber
     ]
 }
@@ -56,18 +56,18 @@ extension Stream_Video_Sfu_Models_PeerType: CaseIterable {
 
 enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case bad // = 0
+    case badUnspecified // = 0
     case poor // = 1
     case good // = 2
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .bad
+        self = .badUnspecified
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .bad
+        case 0: self = .badUnspecified
         case 1: self = .poor
         case 2: self = .good
         default: self = .UNRECOGNIZED(rawValue)
@@ -76,7 +76,7 @@ enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
 
     var rawValue: Int {
         switch self {
-        case .bad: return 0
+        case .badUnspecified: return 0
         case .poor: return 1
         case .good: return 2
         case let .UNRECOGNIZED(i): return i
@@ -89,7 +89,7 @@ enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
 extension Stream_Video_Sfu_Models_ConnectionQuality: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Models_ConnectionQuality] = [
-        .bad,
+        .badUnspecified,
         .poor,
         .good
     ]
@@ -99,18 +99,18 @@ extension Stream_Video_Sfu_Models_ConnectionQuality: CaseIterable {
 
 enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case low // = 0
+    case lowUnspecified // = 0
     case mid // = 1
     case high // = 2
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .low
+        self = .lowUnspecified
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .low
+        case 0: self = .lowUnspecified
         case 1: self = .mid
         case 2: self = .high
         default: self = .UNRECOGNIZED(rawValue)
@@ -119,7 +119,7 @@ enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
 
     var rawValue: Int {
         switch self {
-        case .low: return 0
+        case .lowUnspecified: return 0
         case .mid: return 1
         case .high: return 2
         case let .UNRECOGNIZED(i): return i
@@ -132,7 +132,7 @@ enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
 extension Stream_Video_Sfu_Models_VideoQuality: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Models_VideoQuality] = [
-        .low,
+        .lowUnspecified,
         .mid,
         .high
     ]
@@ -322,7 +322,7 @@ struct Stream_Video_Sfu_Models_StreamQuality {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var videoQuality: Stream_Video_Sfu_Models_VideoQuality = .low
+    var videoQuality: Stream_Video_Sfu_Models_VideoQuality = .lowUnspecified
 
     var userID: String = String()
 
@@ -414,9 +414,9 @@ struct Stream_Video_Sfu_Models_AudioCodecs {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var encode: [Stream_Video_Sfu_Models_Codec] = []
+    var encodes: [Stream_Video_Sfu_Models_Codec] = []
 
-    var decode: [Stream_Video_Sfu_Models_Codec] = []
+    var decodes: [Stream_Video_Sfu_Models_Codec] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -428,9 +428,9 @@ struct Stream_Video_Sfu_Models_VideoCodecs {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var encode: [Stream_Video_Sfu_Models_Codec] = []
+    var encodes: [Stream_Video_Sfu_Models_Codec] = []
 
-    var decode: [Stream_Video_Sfu_Models_Codec] = []
+    var decodes: [Stream_Video_Sfu_Models_Codec] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -496,24 +496,24 @@ private let _protobuf_package = "stream.video.sfu.models"
 
 extension Stream_Video_Sfu_Models_PeerType: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "PUBLISHER"),
-        1: .same(proto: "SUBSCRIBER")
+        0: .same(proto: "PEER_TYPE_PUBLISHER_UNSPECIFIED"),
+        1: .same(proto: "PEER_TYPE_SUBSCRIBER")
     ]
 }
 
 extension Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "BAD"),
-        1: .same(proto: "POOR"),
-        2: .same(proto: "GOOD")
+        0: .same(proto: "CONNECTION_QUALITY_BAD_UNSPECIFIED"),
+        1: .same(proto: "CONNECTION_QUALITY_POOR"),
+        2: .same(proto: "CONNECTION_QUALITY_GOOD")
     ]
 }
 
 extension Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "LOW"),
-        1: .same(proto: "MID"),
-        2: .same(proto: "HIGH")
+        0: .same(proto: "VIDEO_QUALITY_LOW_UNSPECIFIED"),
+        1: .same(proto: "VIDEO_QUALITY_MID"),
+        2: .same(proto: "VIDEO_QUALITY_HIGH")
     ]
 }
 
@@ -850,7 +850,7 @@ extension Stream_Video_Sfu_Models_StreamQuality: SwiftProtobuf.Message, SwiftPro
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if videoQuality != .low {
+        if videoQuality != .lowUnspecified {
             try visitor.visitSingularEnumField(value: videoQuality, fieldNumber: 1)
         }
         if !userID.isEmpty {
@@ -1061,8 +1061,8 @@ extension Stream_Video_Sfu_Models_AudioCodecs: SwiftProtobuf.Message, SwiftProto
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioCodecs"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "encode"),
-        2: .same(proto: "decode")
+        1: .same(proto: "encodes"),
+        2: .same(proto: "decodes")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1071,26 +1071,26 @@ extension Stream_Video_Sfu_Models_AudioCodecs: SwiftProtobuf.Message, SwiftProto
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encode) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decode) }()
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encodes) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decodes) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !encode.isEmpty {
-            try visitor.visitRepeatedMessageField(value: encode, fieldNumber: 1)
+        if !encodes.isEmpty {
+            try visitor.visitRepeatedMessageField(value: encodes, fieldNumber: 1)
         }
-        if !decode.isEmpty {
-            try visitor.visitRepeatedMessageField(value: decode, fieldNumber: 2)
+        if !decodes.isEmpty {
+            try visitor.visitRepeatedMessageField(value: decodes, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Sfu_Models_AudioCodecs, rhs: Stream_Video_Sfu_Models_AudioCodecs) -> Bool {
-        if lhs.encode != rhs.encode { return false }
-        if lhs.decode != rhs.decode { return false }
+        if lhs.encodes != rhs.encodes { return false }
+        if lhs.decodes != rhs.decodes { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -1100,8 +1100,8 @@ extension Stream_Video_Sfu_Models_VideoCodecs: SwiftProtobuf.Message, SwiftProto
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoCodecs"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "encode"),
-        2: .same(proto: "decode")
+        1: .same(proto: "encodes"),
+        2: .same(proto: "decodes")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1110,26 +1110,26 @@ extension Stream_Video_Sfu_Models_VideoCodecs: SwiftProtobuf.Message, SwiftProto
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encode) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decode) }()
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.encodes) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.decodes) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !encode.isEmpty {
-            try visitor.visitRepeatedMessageField(value: encode, fieldNumber: 1)
+        if !encodes.isEmpty {
+            try visitor.visitRepeatedMessageField(value: encodes, fieldNumber: 1)
         }
-        if !decode.isEmpty {
-            try visitor.visitRepeatedMessageField(value: decode, fieldNumber: 2)
+        if !decodes.isEmpty {
+            try visitor.visitRepeatedMessageField(value: decodes, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Sfu_Models_VideoCodecs, rhs: Stream_Video_Sfu_Models_VideoCodecs) -> Bool {
-        if lhs.encode != rhs.encode { return false }
-        if lhs.decode != rhs.decode { return false }
+        if lhs.encodes != rhs.encodes { return false }
+        if lhs.decodes != rhs.decodes { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

@@ -350,7 +350,7 @@ struct Stream_Video_Sfu_Event_ConnectionQualityChanged {
 
     var userID: String = String()
 
-    var connectionQuality: Stream_Video_Sfu_Models_ConnectionQuality = .bad
+    var connectionQuality: Stream_Video_Sfu_Models_ConnectionQuality = .badUnspecified
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -484,7 +484,7 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 
     var scaleResolutionDownBy: Float = 0
 
-    var priority: Stream_Video_Sfu_Event_VideoLayerSetting.Priority = .high
+    var priority: Stream_Video_Sfu_Event_VideoLayerSetting.Priority = .highUnspecified
 
     var codec: Stream_Video_Sfu_Models_Codec {
         get { _codec ?? Stream_Video_Sfu_Models_Codec() }
@@ -500,19 +500,19 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 
     enum Priority: SwiftProtobuf.Enum {
         typealias RawValue = Int
-        case high // = 0
+        case highUnspecified // = 0
         case low // = 1
         case medium // = 2
         case veryLow // = 3
         case UNRECOGNIZED(Int)
 
         init() {
-            self = .high
+            self = .highUnspecified
         }
 
         init?(rawValue: Int) {
             switch rawValue {
-            case 0: self = .high
+            case 0: self = .highUnspecified
             case 1: self = .low
             case 2: self = .medium
             case 3: self = .veryLow
@@ -522,7 +522,7 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 
         var rawValue: Int {
             switch self {
-            case .high: return 0
+            case .highUnspecified: return 0
             case .low: return 1
             case .medium: return 2
             case .veryLow: return 3
@@ -541,7 +541,7 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
 extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Event_VideoLayerSetting.Priority] = [
-        .high,
+        .highUnspecified,
         .low,
         .medium,
         .veryLow
@@ -591,9 +591,9 @@ struct Stream_Video_Sfu_Event_ChangePublishQuality {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var audioSender: [Stream_Video_Sfu_Event_AudioSender] = []
+    var audioSenders: [Stream_Video_Sfu_Event_AudioSender] = []
 
-    var videoSender: [Stream_Video_Sfu_Event_VideoSender] = []
+    var videoSenders: [Stream_Video_Sfu_Event_VideoSender] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1167,7 +1167,7 @@ extension Stream_Video_Sfu_Event_ConnectionQualityChanged: SwiftProtobuf.Message
         if !userID.isEmpty {
             try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
         }
-        if connectionQuality != .bad {
+        if connectionQuality != .badUnspecified {
             try visitor.visitSingularEnumField(value: connectionQuality, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
@@ -1315,7 +1315,7 @@ extension Stream_Video_Sfu_Event_AudioMediaRequest: SwiftProtobuf.Message, Swift
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioMediaRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "channelCount")
+        1: .standard(proto: "channel_count")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1348,7 +1348,7 @@ extension Stream_Video_Sfu_Event_AudioSender: SwiftProtobuf.Message, SwiftProtob
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".AudioSender"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "mediaRequest"),
+        1: .standard(proto: "media_request"),
         2: .same(proto: "codec"),
         3: .same(proto: "layers")
     ]
@@ -1397,9 +1397,9 @@ extension Stream_Video_Sfu_Event_VideoMediaRequest: SwiftProtobuf.Message, Swift
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoMediaRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "idealHeight"),
-        2: .same(proto: "idealWidth"),
-        3: .same(proto: "idealFrameRate")
+        1: .standard(proto: "ideal_height"),
+        2: .standard(proto: "ideal_width"),
+        3: .standard(proto: "ideal_frame_rate")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1444,8 +1444,8 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "name"),
         2: .same(proto: "active"),
-        3: .same(proto: "maxBitrate"),
-        4: .same(proto: "scaleResolutionDownBy"),
+        3: .standard(proto: "max_bitrate"),
+        4: .standard(proto: "scale_resolution_down_by"),
         5: .same(proto: "priority"),
         6: .same(proto: "codec")
     ]
@@ -1484,7 +1484,7 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
         if scaleResolutionDownBy != 0 {
             try visitor.visitSingularFloatField(value: scaleResolutionDownBy, fieldNumber: 4)
         }
-        if priority != .high {
+        if priority != .highUnspecified {
             try visitor.visitSingularEnumField(value: priority, fieldNumber: 5)
         }
         try { if let v = self._codec {
@@ -1507,10 +1507,10 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
 
 extension Stream_Video_Sfu_Event_VideoLayerSetting.Priority: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "HIGH"),
-        1: .same(proto: "LOW"),
-        2: .same(proto: "MEDIUM"),
-        3: .same(proto: "VERY_LOW")
+        0: .same(proto: "PRIORITY_HIGH_UNSPECIFIED"),
+        1: .same(proto: "PRIORITY_LOW"),
+        2: .same(proto: "PRIORITY_MEDIUM"),
+        3: .same(proto: "PRIORITY_VERY_LOW")
     ]
 }
 
@@ -1518,7 +1518,7 @@ extension Stream_Video_Sfu_Event_VideoSender: SwiftProtobuf.Message, SwiftProtob
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".VideoSender"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "mediaRequest"),
+        1: .standard(proto: "media_request"),
         2: .same(proto: "codec"),
         3: .same(proto: "layers")
     ]
@@ -1567,8 +1567,8 @@ extension Stream_Video_Sfu_Event_ChangePublishQuality: SwiftProtobuf.Message, Sw
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ChangePublishQuality"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "audio_sender"),
-        2: .standard(proto: "video_sender")
+        1: .standard(proto: "audio_senders"),
+        2: .standard(proto: "video_senders")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1577,26 +1577,26 @@ extension Stream_Video_Sfu_Event_ChangePublishQuality: SwiftProtobuf.Message, Sw
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.audioSender) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.videoSender) }()
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.audioSenders) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.videoSenders) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !audioSender.isEmpty {
-            try visitor.visitRepeatedMessageField(value: audioSender, fieldNumber: 1)
+        if !audioSenders.isEmpty {
+            try visitor.visitRepeatedMessageField(value: audioSenders, fieldNumber: 1)
         }
-        if !videoSender.isEmpty {
-            try visitor.visitRepeatedMessageField(value: videoSender, fieldNumber: 2)
+        if !videoSenders.isEmpty {
+            try visitor.visitRepeatedMessageField(value: videoSenders, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Sfu_Event_ChangePublishQuality, rhs: Stream_Video_Sfu_Event_ChangePublishQuality) -> Bool {
-        if lhs.audioSender != rhs.audioSender { return false }
-        if lhs.videoSender != rhs.videoSender { return false }
+        if lhs.audioSenders != rhs.audioSenders { return false }
+        if lhs.videoSenders != rhs.videoSenders { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

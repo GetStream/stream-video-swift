@@ -753,13 +753,10 @@ struct Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    /// The call type
-    var callType: String = String()
+    /// The call cid
+    var callCid: String = String()
 
-    /// The call id
-    var callID: String = String()
-
-    /// The event type
+    /// The type of event
     var eventType: Stream_Video_Coordinator_ClientV1Rpc_UserEventType = .unspecified
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -782,9 +779,14 @@ struct Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
+    /// The call cid
+    var callCid: String = String()
+
+    /// The type of event
     var type: String = String()
 
-    var data: Data = Data()
+    /// The data of the event
+    var dataJson: Data = Data()
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -2313,9 +2315,8 @@ extension Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest: SwiftProtobuf.M
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SendEventRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "call_type"),
-        2: .standard(proto: "call_id"),
-        3: .standard(proto: "event_type")
+        1: .standard(proto: "call_cid"),
+        2: .standard(proto: "event_type")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2324,23 +2325,19 @@ extension Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest: SwiftProtobuf.M
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
-            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
-            case 3: try { try decoder.decodeSingularEnumField(value: &self.eventType) }()
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            case 2: try { try decoder.decodeSingularEnumField(value: &self.eventType) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !callType.isEmpty {
-            try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
-        }
-        if !callID.isEmpty {
-            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
         }
         if eventType != .unspecified {
-            try visitor.visitSingularEnumField(value: eventType, fieldNumber: 3)
+            try visitor.visitSingularEnumField(value: eventType, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -2349,8 +2346,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest: SwiftProtobuf.M
         lhs: Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest,
         rhs: Stream_Video_Coordinator_ClientV1Rpc_SendEventRequest
     ) -> Bool {
-        if lhs.callType != rhs.callType { return false }
-        if lhs.callID != rhs.callID { return false }
+        if lhs.callCid != rhs.callCid { return false }
         if lhs.eventType != rhs.eventType { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
@@ -2383,8 +2379,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest: SwiftProt
     SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".SendCustomEventRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "type"),
-        2: .same(proto: "data")
+        1: .standard(proto: "call_cid"),
+        2: .same(proto: "type"),
+        3: .standard(proto: "data_json")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2393,19 +2390,23 @@ extension Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest: SwiftProt
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.type) }()
-            case 2: try { try decoder.decodeSingularBytesField(value: &self.data) }()
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.type) }()
+            case 3: try { try decoder.decodeSingularBytesField(value: &self.dataJson) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !type.isEmpty {
-            try visitor.visitSingularStringField(value: type, fieldNumber: 1)
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
         }
-        if !data.isEmpty {
-            try visitor.visitSingularBytesField(value: data, fieldNumber: 2)
+        if !type.isEmpty {
+            try visitor.visitSingularStringField(value: type, fieldNumber: 2)
+        }
+        if !dataJson.isEmpty {
+            try visitor.visitSingularBytesField(value: dataJson, fieldNumber: 3)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -2414,8 +2415,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest: SwiftProt
         lhs: Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest,
         rhs: Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest
     ) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
         if lhs.type != rhs.type { return false }
-        if lhs.data != rhs.data { return false }
+        if lhs.dataJson != rhs.dataJson { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

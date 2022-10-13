@@ -349,8 +349,8 @@ class WebRTCClient: NSObject {
         log.debug("Executing join request")
                 
         var videoCodecs = Stream_Video_Sfu_Models_VideoCodecs()
-        videoCodecs.encode = PeerConnectionFactory.supportedVideoCodecEncoding.map { $0.toSfuCodec() }
-        videoCodecs.decode = PeerConnectionFactory.supportedVideoCodecDecoding.map { $0.toSfuCodec() }
+        videoCodecs.encodes = PeerConnectionFactory.supportedVideoCodecEncoding.map { $0.toSfuCodec() }
+        videoCodecs.decodes = PeerConnectionFactory.supportedVideoCodecDecoding.map { $0.toSfuCodec() }
         
         var codecSettings = Stream_Video_Sfu_Models_CodecSettings()
         codecSettings.video = videoCodecs
@@ -494,7 +494,7 @@ class WebRTCClient: NSObject {
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
         guard let transceiver = publisher?.transceiver else { return }
-        let enabledRids = event.videoSender.first?.layers
+        let enabledRids = event.videoSenders.first?.layers
             .filter { $0.active }
             .map(\.name) ?? []
         log.debug("Enabled rids = \(enabledRids)")
