@@ -23,4 +23,22 @@ public class Images {
     public var xmark = Image(systemName: "xmark")
     public var searchIcon = Image(systemName: "magnifyingglass")
     public var searchCloseIcon = Image(systemName: "multiply.circle")
+    public var incomingCallBackground = Image(uiImage: loadImageSafely(with: "incomingCallBackground"))
+    
+    /// A private internal function that will safely load an image from the bundle or return a circle image as backup
+    /// - Parameter imageName: The required image name to load from the bundle
+    /// - Returns: A UIImage that is either the correct image from the bundle or backup circular image
+    private static func loadImageSafely(with imageName: String) -> UIImage {
+        if let image = UIImage(named: imageName, in: .streamVideoUI, with: nil) {
+            return image
+        } else {
+            log.error(
+                """
+                \(imageName) image has failed to load from the bundle please make sure it's included in your assets folder.
+                A default 'red' circle image has been added.
+                """
+            )
+            return UIImage.circleImage
+        }
+    }
 }

@@ -92,7 +92,7 @@ public struct IncomingCallView: View {
             .padding()
         }
         .background(
-            Image("incomingCallBackground")
+            images.incomingCallBackground
                 .resizable()
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)

@@ -19,8 +19,10 @@ struct CallingScreenBackground: View {
 
 struct FallbackBackground: View {
     
+    @Injected(\.images) var images
+    
     var body: some View {
-        Image("incomingCallBackground")
+        images.incomingCallBackground
             .resizable()
             .aspectRatio(contentMode: .fill)
             .edgesIgnoringSafeArea(.all)
