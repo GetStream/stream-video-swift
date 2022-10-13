@@ -51,10 +51,10 @@ public struct CallView<Factory: ViewFactory>: View {
                             viewModel.participantsShown.toggle()
                         } label: {
                             images.participants
+                                .padding(.horizontal)
+                                .padding(.horizontal, 2)
                                 .foregroundColor(.white)
                         }
-                        .padding(.horizontal)
-                        .padding(.horizontal, 2)
                         
                         LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
                             if let track = viewModel.localParticipant?.track {
@@ -72,16 +72,10 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
                 
                 if viewModel.participantsShown {
-                    VStack {
-                        CallParticipantsView(
-                            viewModel: viewModel,
-                            maxHeight: reader.size.height - padding
-                        )
-                        .padding()
-                        .padding(.vertical, padding / 2)
-                        
-                        Spacer()
-                    }
+                    viewFactory.makeCallParticipantsListView(
+                        viewModel: viewModel,
+                        availableSize: reader.size
+                    )
                 }
             }
         }
@@ -107,6 +101,27 @@ public struct CallView<Factory: ViewFactory>: View {
                 let updated = participant.withUpdated(trackSize: view.bounds.size)
                 viewModel.callParticipants[participant.id] = updated
             }
+        }
+    }
+}
+
+public struct CallParticipantsListView: View {
+    
+    private let padding: CGFloat = 16
+    
+    @ObservedObject var viewModel: CallViewModel
+    var availableSize: CGSize
+    
+    public var body: some View {
+        VStack {
+            CallParticipantsView(
+                viewModel: viewModel,
+                maxHeight: availableSize.height - padding
+            )
+            .padding()
+            .padding(.vertical, padding / 2)
+            
+            Spacer()
         }
     }
 }

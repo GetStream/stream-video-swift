@@ -9,15 +9,31 @@ import SwiftUI
 public protocol ViewFactory: AnyObject {
     
     associatedtype CallControlsViewType: View = CallControlsView
+    /// Creates the call controls view.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the call controls slot.
     func makeCallControlsView(viewModel: CallViewModel) -> CallControlsViewType
     
     associatedtype OutgoingCallViewType: View = OutgoingCallView
+    /// Creates the outgoing call view.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the outgoing call slot.
     func makeOutgoingCallView(viewModel: CallViewModel) -> OutgoingCallViewType
     
     associatedtype IncomingCallViewType: View = IncomingCallView
+    /// Creates the incoming call view.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the incoming call slot.
     func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> IncomingCallViewType
     
     associatedtype ParticipantsViewType: View = VideoParticipantsView
+    /// Creates the video participants view, shown during a call.
+    /// - Parameters:
+    ///  - participants: the participants in the call.
+    ///  - availableSize: the size available for rendering.
+    ///  - onViewRendering: called when the video view is rendered.
+    ///  - onChangeTrackVisibility: called when a track changes its visibility.
+    /// - Returns: view shown in the video participants slot.
     func makeVideoParticipantsView(
         participants: [CallParticipant],
         availableSize: CGSize,
@@ -26,10 +42,27 @@ public protocol ViewFactory: AnyObject {
     ) -> ParticipantsViewType
     
     associatedtype CallViewType: View = CallView<Self>
+    /// Creates the call view, shown when a call is in progress.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
     
     associatedtype WaitingLocalUserViewType: View = WaitingLocalUserView
+    /// Creates the view shown while the user waits for participants to join.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the local user waiting slot.
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> WaitingLocalUserViewType
+    
+    associatedtype CallParticipantsListViewType: View = CallParticipantsListView
+    /// Creates the view that display the list of participants.
+    /// - Parameters:
+    ///  - viewModel: The view model used for the call.
+    ///  - availableSize: The size available to display the view.
+    /// - Returns: view shown in the participants list slot.
+    func makeCallParticipantsListView(
+        viewModel: CallViewModel,
+        availableSize: CGSize
+    ) -> CallParticipantsListViewType
 }
 
 extension ViewFactory {
@@ -70,6 +103,13 @@ extension ViewFactory {
     
     public func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         WaitingLocalUserView(viewModel: viewModel)
+    }
+    
+    public func makeCallParticipantsListView(
+        viewModel: CallViewModel,
+        availableSize: CGSize
+    ) -> some View {
+        CallParticipantsListView(viewModel: viewModel, availableSize: availableSize)
     }
 }
 
