@@ -7,10 +7,11 @@ import Foundation
 
 /// Represents a participant in the call.
 public struct CallParticipant: Identifiable, Sendable {
-    public let id: String
+    public var id: String
     public let role: String
     public let name: String
     public let profileImageURL: URL?
+    public let trackLookupPrefix: String?
     public var isOnline: Bool
     public var hasVideo: Bool
     public var hasAudio: Bool
@@ -25,6 +26,7 @@ public struct CallParticipant: Identifiable, Sendable {
         role: String,
         name: String,
         profileImageURL: URL?,
+        trackLookupPrefix: String?,
         isOnline: Bool,
         hasVideo: Bool,
         hasAudio: Bool,
@@ -38,6 +40,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.role = role
         self.name = name
         self.profileImageURL = profileImageURL
+        self.trackLookupPrefix = trackLookupPrefix
         self.isOnline = isOnline
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
@@ -59,6 +62,7 @@ public struct CallParticipant: Identifiable, Sendable {
             role: role,
             name: name,
             profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
@@ -76,6 +80,7 @@ public struct CallParticipant: Identifiable, Sendable {
             role: role,
             name: name,
             profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
@@ -93,6 +98,7 @@ public struct CallParticipant: Identifiable, Sendable {
             role: role,
             name: name,
             profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: audio,
@@ -110,6 +116,7 @@ public struct CallParticipant: Identifiable, Sendable {
             role: role,
             name: name,
             profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: isOnline,
             hasVideo: video,
             hasAudio: hasAudio,
@@ -127,6 +134,7 @@ public struct CallParticipant: Identifiable, Sendable {
             role: role,
             name: name,
             profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
@@ -147,6 +155,7 @@ public struct CallParticipant: Identifiable, Sendable {
             role: role,
             name: name,
             profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
@@ -184,6 +193,7 @@ extension Stream_Video_Participant {
             role: role,
             name: user.name.isEmpty ? user.id : user.name,
             profileImageURL: URL(string: user.imageURL),
+            trackLookupPrefix: nil,
             isOnline: online,
             hasVideo: video,
             hasAudio: audio,
@@ -200,6 +210,7 @@ extension Stream_Video_User {
             role: role,
             name: name.isEmpty ? id : name,
             profileImageURL: URL(string: imageURL),
+            trackLookupPrefix: nil,
             isOnline: false,
             hasVideo: false,
             hasAudio: false,
@@ -216,6 +227,7 @@ extension Stream_Video_Sfu_Models_Participant {
             role: role,
             name: user.name.isEmpty ? user.id : user.name,
             profileImageURL: URL(string: user.imageURL),
+            trackLookupPrefix: trackLookupPrefix,
             isOnline: online,
             hasVideo: video,
             hasAudio: audio,

@@ -44,6 +44,8 @@
 		843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CC28C647B600839D99 /* VideoCapturer.swift */; };
 		843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CE28C7898A00839D99 /* VideoOptions.swift */; };
 		843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697D028C7A23300839D99 /* ParticipantsGridView.swift */; };
+		8440861C2901457C0027849C /* Atlantis in Frameworks */ = {isa = PBXBuildFile; productRef = 8440861B2901457C0027849C /* Atlantis */; };
+		8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8440861D2901A16F0027849C /* SfuMiddleware.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -280,6 +282,7 @@
 		843697CC28C647B600839D99 /* VideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturer.swift; sourceTree = "<group>"; };
 		843697CE28C7898A00839D99 /* VideoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptions.swift; sourceTree = "<group>"; };
 		843697D028C7A23300839D99 /* ParticipantsGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridView.swift; sourceTree = "<group>"; };
+		8440861D2901A16F0027849C /* SfuMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SfuMiddleware.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -405,6 +408,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				8440861C2901457C0027849C /* Atlantis in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
@@ -1005,6 +1009,7 @@
 				84EA5D4228C1E944004D3531 /* AudioSession.swift */,
 				84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */,
 				8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */,
+				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -1057,6 +1062,7 @@
 			name = DemoApp;
 			packageProductDependencies = (
 				84AF64BD287C34450012A503 /* WebRTC */,
+				8440861B2901457C0027849C /* Atlantis */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* DemoApp.app */;
@@ -1230,6 +1236,7 @@
 				84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */,
 				84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 				8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */,
+				8440861A2901457C0027849C /* XCRemoteSwiftPackageReference "atlantis" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -1405,6 +1412,7 @@
 				84AF64D7287C79610012A503 /* Token.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
 				84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */,
+				8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84A737D728F4716E001A6769 /* call.pb.swift in Sources */,
@@ -2157,6 +2165,14 @@
 				version = 11.3.0;
 			};
 		};
+		8440861A2901457C0027849C /* XCRemoteSwiftPackageReference "atlantis" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ProxymanApp/atlantis.git";
+			requirement = {
+				branch = main;
+				kind = branch;
+			};
+		};
 		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/webrtc-sdk/Specs.git";
@@ -2185,6 +2201,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = NukeUI;
+		};
+		8440861B2901457C0027849C /* Atlantis */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8440861A2901457C0027849C /* XCRemoteSwiftPackageReference "atlantis" */;
+			productName = Atlantis;
 		};
 		84AF64BB287C34320012A503 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;

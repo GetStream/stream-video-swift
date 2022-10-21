@@ -34,3 +34,4 @@ extension Stream_Video_RecordingStopped: SendableEvent {}
 extension Stream_Video_CallMembersDeleted: SendableEvent {}
 extension Stream_Video_CallMembersUpdated: SendableEvent {}
 extension Stream_Video_CallCustom: SendableEvent {}
+extension Stream_Video_Healthcheck: HealthCheckEvent {}

@@ -89,7 +89,7 @@ enum WebSocketConnectionState: Equatable {
     case authenticating
     
     /// The web socket was connected.
-    case connected(healthCheckInfo: Stream_Video_Healthcheck)
+    case connected(healthCheckInfo: HealthCheckInfo)
     
     /// The web socket is disconnecting. `source` contains more info about the source of the event.
     case disconnecting(source: DisconnectionSource)

@@ -43,14 +43,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.pc.delegate = self
     }
     
-    func makeDataChannel(label: String) throws -> DataChannel {
-        let configuration = RTCDataChannelConfiguration()
-        guard let dataChannel = pc.dataChannel(forLabel: label, configuration: configuration) else {
-            throw ClientError.NetworkError()
-        }
-        return DataChannel(dataChannel: dataChannel, eventDecoder: eventDecoder)
-    }
-    
     func createOffer() async throws -> RTCSessionDescription {
         try await withCheckedThrowingContinuation { continuation in
             pc.offer(for: .defaultConstraints) { sdp, error in
@@ -135,6 +127,18 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
     
+    func add(iceCandidate: RTCIceCandidate) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            pc.add(iceCandidate) { error in
+                if let error = error {
+                    continuation.resume(throwing: error)
+                } else {
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+    
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
@@ -159,13 +163,15 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
         Task {
-            var request = Stream_Video_Sfu_Signal_IceCandidateRequest()
-            request.publisher = type == .publisher
-            request.candidate = candidate.sdp
-            request.sdpMid = candidate.sdpMid ?? ""
-            request.sdpMlineIndex = UInt32(candidate.sdpMLineIndex)
-            request.sessionID = sessionId
-            _ = try await signalService.sendIceCandidate(iceCandidateRequest: request)
+            let encoder = JSONEncoder()
+            let iceCandidate = candidate.toIceCandidate()
+            let json = try encoder.encode(iceCandidate)
+            let jsonString = String(data: json, encoding: .utf8) ?? ""
+            var iceTrickle = Stream_Video_Sfu_Models_ICETrickle()
+            iceTrickle.iceCandidate = jsonString
+            iceTrickle.sessionID = sessionId
+            iceTrickle.peerType = type == .publisher ? .publisherUnspecified : .subscriber
+            _ = try await signalService.iceTrickle(iCETrickle: iceTrickle)
         }
     }
     
@@ -173,6 +179,19 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
         log.debug("Data channel opened for \(type.rawValue)")
+    }
+}
+
+struct ICECandidate: Codable {
+    let candidate: String
+    let sdpMid: String?
+    let sdpMLineIndex: Int32
+}
+
+extension RTCIceCandidate {
+    
+    func toIceCandidate() -> ICECandidate {
+        ICECandidate(candidate: sdp, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex)
     }
 }
 

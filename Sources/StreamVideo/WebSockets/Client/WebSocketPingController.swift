@@ -11,11 +11,18 @@ protocol WebSocketPingControllerDelegate: AnyObject {
     var callInfo: [String: String] { get set }
     
     /// `WebSocketPingController` will call this function periodically to keep a connection alive.
-    func sendPing(healthCheckEvent: Stream_Video_Healthcheck)
+    func sendPing(healthCheckEvent: SendableEvent)
     
     /// `WebSocketPingController` will call this function to force disconnect `WebSocketClient`.
     func disconnectOnNoPongReceived()
 }
+
+struct HealthCheckInfo: Equatable {
+    var coordinatorHealthCheck: Stream_Video_Healthcheck? = nil
+    var sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse? = nil
+}
+
+protocol HealthCheckEvent: Event, Equatable {}
 
 /// The controller manages ping and pong timers. It sends ping periodically to keep a web socket connection alive.
 /// After ping is sent, a pong waiting timer is started, and if pong does not come, a forced disconnect is called.
@@ -34,8 +41,8 @@ class WebSocketPingController {
     /// The pong timeout timer.
     private var pongTimeoutTimer: TimerControl?
     
-    private var healthCheckInfo = Stream_Video_Healthcheck()
-    
+    private let webSocketClientType: WebSocketClientType
+        
     /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
     weak var delegate: WebSocketPingControllerDelegate?
     
@@ -53,17 +60,18 @@ class WebSocketPingController {
     /// - Parameters:
     ///   - timerType: a timer type.
     ///   - timerQueue: a timer dispatch queue.
-    init(timerType: Timer.Type, timerQueue: DispatchQueue) {
+    init(
+        timerType: Timer.Type,
+        timerQueue: DispatchQueue,
+        webSocketClientType: WebSocketClientType
+    ) {
         self.timerType = timerType
         self.timerQueue = timerQueue
+        self.webSocketClientType = webSocketClientType
     }
     
     /// `WebSocketClient` should call this when the connection state did change.
     func connectionStateDidChange(_ connectionState: WebSocketConnectionState) {
-        if case let .connected(healthCheckInfo) = connectionState {
-            self.healthCheckInfo = healthCheckInfo
-        }
-        
         guard delegate != nil else { return }
         
         cancelPongTimeoutTimer()
@@ -83,10 +91,18 @@ class WebSocketPingController {
         schedulePongTimeoutTimer()
 
         log.info("WebSocket Ping")
-        var healthCheckEvent = healthCheckInfo
-        healthCheckEvent.callID = callInfo[WebSocketConstants.callId] ?? ""
-        healthCheckEvent.callType = callInfo[WebSocketConstants.callType] ?? ""
-        delegate?.sendPing(healthCheckEvent: healthCheckEvent)
+        if webSocketClientType == .coordinator {
+            var healthCheckEvent = Stream_Video_Healthcheck()
+            healthCheckEvent.callID = callInfo[WebSocketConstants.callId] ?? ""
+            healthCheckEvent.callType = callInfo[WebSocketConstants.callType] ?? ""
+            delegate?.sendPing(healthCheckEvent: healthCheckEvent)
+        } else {
+            var sfuRequest = Stream_Video_Sfu_Event_SfuRequest()
+            var healthCheckEvent = Stream_Video_Sfu_Event_HealthCheckRequest()
+            healthCheckEvent.sessionID = callInfo[WebSocketConstants.sessionId] ?? ""
+            sfuRequest.healthCheckRequest = healthCheckEvent
+            delegate?.sendPing(healthCheckEvent: sfuRequest)
+        }
     }
     
     func pongReceived() {

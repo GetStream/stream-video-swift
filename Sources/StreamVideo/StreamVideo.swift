@@ -224,6 +224,7 @@ public class StreamVideo {
             sessionConfiguration: config,
             eventDecoder: EventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
+            webSocketClientType: .coordinator,
             connectURL: url
         )
         

@@ -171,6 +171,7 @@ public class CallController {
                     role: "user",
                     name: self?.userInfo.name ?? userId,
                     profileImageURL: self?.userInfo.imageURL,
+                    trackLookupPrefix: userId,
                     isOnline: true,
                     hasVideo: true,
                     hasAudio: true,

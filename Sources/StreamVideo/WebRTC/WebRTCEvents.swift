@@ -22,3 +22,10 @@ extension Stream_Video_Sfu_Event_ChangePublishQuality: Event {}
 extension Stream_Video_Sfu_Event_ParticipantJoined: Event {}
 extension Stream_Video_Sfu_Event_ParticipantLeft: Event {}
 extension Stream_Video_Sfu_Event_DominantSpeakerChanged: Event {}
+extension Stream_Video_Sfu_Models_ICETrickle: Event {}
+extension Stream_Video_Sfu_Event_PublisherAnswer: Event {}
+extension Stream_Video_Sfu_Event_JoinResponse: Event {}
+extension Stream_Video_Sfu_Event_HealthCheckResponse: Event {}
+extension Stream_Video_Sfu_Event_SfuRequest: SendableEvent {}
+extension Stream_Video_Sfu_Event_HealthCheckRequest: SendableEvent {}
+extension Stream_Video_Sfu_Event_HealthCheckResponse: HealthCheckEvent {}
