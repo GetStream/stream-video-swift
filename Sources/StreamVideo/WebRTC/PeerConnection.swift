@@ -21,6 +21,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
     private(set) var transceiver: RTCRtpTransceiver?
+    private var pendingIceCandidates = [RTCIceCandidate]()
         
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
@@ -89,10 +90,21 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func setRemoteDescription(_ sdp: String, type: RTCSdpType) async throws {
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
         return try await withCheckedThrowingContinuation { continuation in
-            pc.setRemoteDescription(sessionDescription) { error in
+            pc.setRemoteDescription(sessionDescription) { [weak self] error in
+                guard let self = self else { return }
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
+                    for candidate in self.pendingIceCandidates {
+                        self.pc.add(candidate) { error in
+                            if let error = error {
+                                log.debug("Error adding ice candidate \(error.localizedDescription)")
+                            } else {
+                                log.debug("Added ice candidate successfully")
+                            }
+                        }
+                    }
+                    self.pendingIceCandidates = []
                     continuation.resume(returning: ())
                 }
             }
@@ -127,14 +139,17 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
     
-    func add(iceCandidate: RTCIceCandidate) async throws {
-        try await withCheckedThrowingContinuation { continuation in
-            pc.add(iceCandidate) { error in
-                if let error = error {
-                    continuation.resume(throwing: error)
-                } else {
-                    continuation.resume(returning: ())
-                }
+    func add(iceCandidate: RTCIceCandidate) {
+        guard pc.remoteDescription != nil else {
+            log.debug("remote description not set, adding pending ice candidate")
+            pendingIceCandidates.append(iceCandidate)
+            return
+        }
+        pc.add(iceCandidate) { error in
+            if let error = error {
+                log.debug("Error adding ice candidate \(error.localizedDescription)")
+            } else {
+                log.debug("Added ice candidate successfully")
             }
         }
     }

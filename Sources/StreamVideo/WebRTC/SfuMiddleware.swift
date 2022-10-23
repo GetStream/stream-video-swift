@@ -37,8 +37,8 @@ class SfuMiddleware: EventMiddleware {
         self.subscriber = subscriber
     }
     
-    func update(pubisher: PeerConnection?) {
-        publisher = subscriber
+    func update(publisher: PeerConnection?) {
+        self.publisher = publisher
     }
     
     func handle(event: Event) -> Event? {
@@ -184,17 +184,11 @@ class SfuMiddleware: EventMiddleware {
             sdpMid: nil
         )
         if peerType == .subscriber, let subscriber = self.subscriber {
-            // TODO: check for remote description
             log.debug("Adding ice candidate for the subscriber")
-            Task {
-                try await subscriber.add(iceCandidate: iceCandidate)
-            }
+            subscriber.add(iceCandidate: iceCandidate)
         } else if peerType == .publisherUnspecified, let publisher = self.publisher {
-            // TODO: check for remote description
             log.debug("Adding ice candidate for the publisher")
-            Task {
-                try await publisher.add(iceCandidate: iceCandidate)
-            }
+            publisher.add(iceCandidate: iceCandidate)
         }
     }
     

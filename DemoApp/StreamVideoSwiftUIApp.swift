@@ -5,7 +5,6 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
-import Atlantis
 
 @main
 struct StreamVideoSwiftUIApp: App {
@@ -18,7 +17,6 @@ struct StreamVideoSwiftUIApp: App {
         
     init() {
         checkLoggedInUser()
-        Atlantis.start()
         LogConfig.level = .debug
     }
     
