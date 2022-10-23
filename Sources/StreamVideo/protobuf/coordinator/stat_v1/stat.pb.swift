@@ -58,6 +58,135 @@ extension Stream_Video_Coordinator_StatV1_MediaType: CaseIterable {
 
 #endif // swift(>=4.2)
 
+enum Stream_Video_Coordinator_StatV1_MediaStateChange: SwiftProtobuf.Enum {
+    typealias RawValue = Int
+    case unspecified // = 0
+    case started // = 1
+    case ended // = 2
+    case UNRECOGNIZED(Int)
+
+    init() {
+        self = .unspecified
+    }
+
+    init?(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .unspecified
+        case 1: self = .started
+        case 2: self = .ended
+        default: self = .UNRECOGNIZED(rawValue)
+        }
+    }
+
+    var rawValue: Int {
+        switch self {
+        case .unspecified: return 0
+        case .started: return 1
+        case .ended: return 2
+        case let .UNRECOGNIZED(i): return i
+        }
+    }
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Coordinator_StatV1_MediaStateChange: CaseIterable {
+    // The compiler won't synthesize support with the UNRECOGNIZED case.
+    static var allCases: [Stream_Video_Coordinator_StatV1_MediaStateChange] = [
+        .unspecified,
+        .started,
+        .ended
+    ]
+}
+
+#endif // swift(>=4.2)
+
+enum Stream_Video_Coordinator_StatV1_MediaDirection: SwiftProtobuf.Enum {
+    typealias RawValue = Int
+    case unspecified // = 0
+    case send // = 1
+    case receive // = 2
+    case UNRECOGNIZED(Int)
+
+    init() {
+        self = .unspecified
+    }
+
+    init?(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .unspecified
+        case 1: self = .send
+        case 2: self = .receive
+        default: self = .UNRECOGNIZED(rawValue)
+        }
+    }
+
+    var rawValue: Int {
+        switch self {
+        case .unspecified: return 0
+        case .send: return 1
+        case .receive: return 2
+        case let .UNRECOGNIZED(i): return i
+        }
+    }
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Coordinator_StatV1_MediaDirection: CaseIterable {
+    // The compiler won't synthesize support with the UNRECOGNIZED case.
+    static var allCases: [Stream_Video_Coordinator_StatV1_MediaDirection] = [
+        .unspecified,
+        .send,
+        .receive
+    ]
+}
+
+#endif // swift(>=4.2)
+
+enum Stream_Video_Coordinator_StatV1_MediaStateChangeReason: SwiftProtobuf.Enum {
+    typealias RawValue = Int
+    case unspecified // = 0
+    case mute // = 1
+    case connection // = 2
+    case UNRECOGNIZED(Int)
+
+    init() {
+        self = .unspecified
+    }
+
+    init?(rawValue: Int) {
+        switch rawValue {
+        case 0: self = .unspecified
+        case 1: self = .mute
+        case 2: self = .connection
+        default: self = .UNRECOGNIZED(rawValue)
+        }
+    }
+
+    var rawValue: Int {
+        switch self {
+        case .unspecified: return 0
+        case .mute: return 1
+        case .connection: return 2
+        case let .UNRECOGNIZED(i): return i
+        }
+    }
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Coordinator_StatV1_MediaStateChangeReason: CaseIterable {
+    // The compiler won't synthesize support with the UNRECOGNIZED case.
+    static var allCases: [Stream_Video_Coordinator_StatV1_MediaStateChangeReason] = [
+        .unspecified,
+        .mute,
+        .connection
+    ]
+}
+
+#endif // swift(>=4.2)
+
 /// ParticipantConnected is fired when a user joins a call
 struct Stream_Video_Coordinator_StatV1_ParticipantConnected {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -74,21 +203,6 @@ struct Stream_Video_Coordinator_StatV1_ParticipantDisconnected {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-}
-
-/// MuteStateChanged is fired when a user mutes/unmutes their audio/video
-struct Stream_Video_Coordinator_StatV1_MuteStateChanged {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var mediaType: Stream_Video_Coordinator_StatV1_MediaType = .unspecified
-
-    var muted: Bool = false
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -121,6 +235,25 @@ struct Stream_Video_Coordinator_StatV1_Freeze {
     init() {}
 
     fileprivate var _duration: SwiftProtobuf.Google_Protobuf_Duration?
+}
+
+/// A participant started/ended sending/receiving audio/video for a given reason
+struct Stream_Video_Coordinator_StatV1_MediaStateChanged {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var mediaType: Stream_Video_Coordinator_StatV1_MediaType = .unspecified
+
+    var change: Stream_Video_Coordinator_StatV1_MediaStateChange = .unspecified
+
+    var direction: Stream_Video_Coordinator_StatV1_MediaDirection = .unspecified
+
+    var reason: Stream_Video_Coordinator_StatV1_MediaStateChangeReason = .unspecified
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
 }
 
 /// A stat event from the perspective of a particular participant
@@ -158,12 +291,12 @@ struct Stream_Video_Coordinator_StatV1_TelemetryEvent {
         set { event = .participantDisconnected(newValue) }
     }
 
-    var muteStateChanged: Stream_Video_Coordinator_StatV1_MuteStateChanged {
+    var mediaStateChanged: Stream_Video_Coordinator_StatV1_MediaStateChanged {
         get {
-            if case let .muteStateChanged(v)? = event { return v }
-            return Stream_Video_Coordinator_StatV1_MuteStateChanged()
+            if case let .mediaStateChanged(v)? = event { return v }
+            return Stream_Video_Coordinator_StatV1_MediaStateChanged()
         }
-        set { event = .muteStateChanged(newValue) }
+        set { event = .mediaStateChanged(newValue) }
     }
 
     var freeze: Stream_Video_Coordinator_StatV1_Freeze {
@@ -179,7 +312,7 @@ struct Stream_Video_Coordinator_StatV1_TelemetryEvent {
     enum OneOf_Event: Equatable {
         case participantConnected(Stream_Video_Coordinator_StatV1_ParticipantConnected)
         case participantDisconnected(Stream_Video_Coordinator_StatV1_ParticipantDisconnected)
-        case muteStateChanged(Stream_Video_Coordinator_StatV1_MuteStateChanged)
+        case mediaStateChanged(Stream_Video_Coordinator_StatV1_MediaStateChanged)
         case freeze(Stream_Video_Coordinator_StatV1_Freeze)
 
         #if !swift(>=4.1)
@@ -201,8 +334,8 @@ struct Stream_Video_Coordinator_StatV1_TelemetryEvent {
                           case let .participantDisconnected(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
-            case (.muteStateChanged, .muteStateChanged): return {
-                    guard case let .muteStateChanged(l) = lhs, case let .muteStateChanged(r) = rhs else { preconditionFailure() }
+            case (.mediaStateChanged, .mediaStateChanged): return {
+                    guard case let .mediaStateChanged(l) = lhs, case let .mediaStateChanged(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
             case (.freeze, .freeze): return {
@@ -239,10 +372,13 @@ struct Stream_Video_Coordinator_StatV1_CallParticipantTimeline {
 
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_StatV1_MediaType: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_MediaStateChange: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_MediaDirection: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_MediaStateChangeReason: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_ParticipantConnected: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_ParticipantDisconnected: @unchecked Sendable {}
-extension Stream_Video_Coordinator_StatV1_MuteStateChanged: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_Freeze: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_MediaStateChanged: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_TelemetryEvent: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_TelemetryEvent.OneOf_Event: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: @unchecked Sendable {}
@@ -257,6 +393,30 @@ extension Stream_Video_Coordinator_StatV1_MediaType: SwiftProtobuf._ProtoNamePro
         0: .same(proto: "MEDIA_TYPE_UNSPECIFIED"),
         1: .same(proto: "MEDIA_TYPE_AUDIO"),
         2: .same(proto: "MEDIA_TYPE_VIDEO")
+    ]
+}
+
+extension Stream_Video_Coordinator_StatV1_MediaStateChange: SwiftProtobuf._ProtoNameProviding {
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        0: .same(proto: "MEDIA_STATE_CHANGE_UNSPECIFIED"),
+        1: .same(proto: "MEDIA_STATE_CHANGE_STARTED"),
+        2: .same(proto: "MEDIA_STATE_CHANGE_ENDED")
+    ]
+}
+
+extension Stream_Video_Coordinator_StatV1_MediaDirection: SwiftProtobuf._ProtoNameProviding {
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        0: .same(proto: "MEDIA_DIRECTION_UNSPECIFIED"),
+        1: .same(proto: "MEDIA_DIRECTION_SEND"),
+        2: .same(proto: "MEDIA_DIRECTION_RECEIVE")
+    ]
+}
+
+extension Stream_Video_Coordinator_StatV1_MediaStateChangeReason: SwiftProtobuf._ProtoNameProviding {
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        0: .same(proto: "MEDIA_STATE_CHANGE_REASON_UNSPECIFIED"),
+        1: .same(proto: "MEDIA_STATE_CHANGE_REASON_MUTE"),
+        2: .same(proto: "MEDIA_STATE_CHANGE_REASON_CONNECTION")
     ]
 }
 
@@ -299,48 +459,6 @@ extension Stream_Video_Coordinator_StatV1_ParticipantDisconnected: SwiftProtobuf
         lhs: Stream_Video_Coordinator_StatV1_ParticipantDisconnected,
         rhs: Stream_Video_Coordinator_StatV1_ParticipantDisconnected
     ) -> Bool {
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Coordinator_StatV1_MuteStateChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".MuteStateChanged"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "media_type"),
-        2: .same(proto: "muted")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularEnumField(value: &self.mediaType) }()
-            case 2: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if mediaType != .unspecified {
-            try visitor.visitSingularEnumField(value: mediaType, fieldNumber: 1)
-        }
-        if muted != false {
-            try visitor.visitSingularBoolField(value: muted, fieldNumber: 2)
-        }
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (
-        lhs: Stream_Video_Coordinator_StatV1_MuteStateChanged,
-        rhs: Stream_Video_Coordinator_StatV1_MuteStateChanged
-    ) -> Bool {
-        if lhs.mediaType != rhs.mediaType { return false }
-        if lhs.muted != rhs.muted { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -395,6 +513,60 @@ extension Stream_Video_Coordinator_StatV1_Freeze: SwiftProtobuf.Message, SwiftPr
     }
 }
 
+extension Stream_Video_Coordinator_StatV1_MediaStateChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".MediaStateChanged"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "media_type"),
+        2: .same(proto: "change"),
+        3: .same(proto: "direction"),
+        4: .same(proto: "reason")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularEnumField(value: &self.mediaType) }()
+            case 2: try { try decoder.decodeSingularEnumField(value: &self.change) }()
+            case 3: try { try decoder.decodeSingularEnumField(value: &self.direction) }()
+            case 4: try { try decoder.decodeSingularEnumField(value: &self.reason) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if mediaType != .unspecified {
+            try visitor.visitSingularEnumField(value: mediaType, fieldNumber: 1)
+        }
+        if change != .unspecified {
+            try visitor.visitSingularEnumField(value: change, fieldNumber: 2)
+        }
+        if direction != .unspecified {
+            try visitor.visitSingularEnumField(value: direction, fieldNumber: 3)
+        }
+        if reason != .unspecified {
+            try visitor.visitSingularEnumField(value: reason, fieldNumber: 4)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_StatV1_MediaStateChanged,
+        rhs: Stream_Video_Coordinator_StatV1_MediaStateChanged
+    ) -> Bool {
+        if lhs.mediaType != rhs.mediaType { return false }
+        if lhs.change != rhs.change { return false }
+        if lhs.direction != rhs.direction { return false }
+        if lhs.reason != rhs.reason { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
 extension Stream_Video_Coordinator_StatV1_TelemetryEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".TelemetryEvent"
@@ -402,7 +574,7 @@ extension Stream_Video_Coordinator_StatV1_TelemetryEvent: SwiftProtobuf.Message,
         1: .same(proto: "timestamp"),
         2: .standard(proto: "participant_connected"),
         3: .standard(proto: "participant_disconnected"),
-        4: .standard(proto: "mute_state_changed"),
+        4: .standard(proto: "media_state_changed"),
         5: .same(proto: "freeze")
     ]
 
@@ -440,16 +612,16 @@ extension Stream_Video_Coordinator_StatV1_TelemetryEvent: SwiftProtobuf.Message,
                     }
                 }()
             case 4: try {
-                    var v: Stream_Video_Coordinator_StatV1_MuteStateChanged?
+                    var v: Stream_Video_Coordinator_StatV1_MediaStateChanged?
                     var hadOneofValue = false
                     if let current = self.event {
                         hadOneofValue = true
-                        if case let .muteStateChanged(m) = current { v = m }
+                        if case let .mediaStateChanged(m) = current { v = m }
                     }
                     try decoder.decodeSingularMessageField(value: &v)
                     if let v = v {
                         if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.event = .muteStateChanged(v)
+                        self.event = .mediaStateChanged(v)
                     }
                 }()
             case 5: try {
@@ -487,8 +659,8 @@ extension Stream_Video_Coordinator_StatV1_TelemetryEvent: SwiftProtobuf.Message,
                 guard case let .participantDisconnected(v)? = self.event else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
             }()
-        case .muteStateChanged?: try {
-                guard case let .muteStateChanged(v)? = self.event else { preconditionFailure() }
+        case .mediaStateChanged?: try {
+                guard case let .mediaStateChanged(v)? = self.event else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
             }()
         case .freeze?: try {

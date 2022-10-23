@@ -14,7 +14,7 @@ struct EventDecoder {
         switch payload {
         case let .callCreated(value):
             return IncomingCallEvent(
-                proto: value,
+                callCid: value.call.callCid,
                 createdBy: value.call.createdByUserID,
                 type: value.call.type,
                 users: response.users.map(\.value)
@@ -53,6 +53,13 @@ struct EventDecoder {
             )
         case let .callCustom(value):
             return value
+        case let .callMembersCreated(value):
+            return IncomingCallEvent(
+                callCid: value.call.callCid,
+                createdBy: value.call.createdByUserID,
+                type: value.call.type,
+                users: response.users.map(\.value)
+            )
         }
     }
 }

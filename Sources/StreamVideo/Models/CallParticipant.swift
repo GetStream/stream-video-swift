@@ -11,7 +11,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public let role: String
     public let name: String
     public let profileImageURL: URL?
-    public let trackLookupPrefix: String?
+    public var trackLookupPrefix: String?
     public var isOnline: Bool
     public var hasVideo: Bool
     public var hasAudio: Bool

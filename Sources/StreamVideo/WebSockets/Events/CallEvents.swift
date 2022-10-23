@@ -23,7 +23,7 @@ enum CallEventAction: Sendable {
 }
 
 struct IncomingCallEvent: Event {
-    let proto: Stream_Video_CallCreated
+    let callCid: String
     let createdBy: String
     let type: String
     let users: [Stream_Video_User]

@@ -261,14 +261,14 @@ class WebRTCClient: NSObject {
         let track = stream.videoTracks.first
         Task {
             var videoTrack: RTCVideoTrack?
-            if idParts.last == "video" || stream.videoTracks.first != nil {
+            if idParts.last == "video" && track != nil {
                 videoTrack = track
                 await self.state.add(track: videoTrack, id: trackId)
             }
             let participants = await state.callParticipants
             var participant: CallParticipant?
             for (_, callParticipant) in participants {
-                if callParticipant.trackLookupPrefix == trackId {
+                if callParticipant.trackLookupPrefix == trackId || callParticipant.id == trackId {
                     participant = callParticipant
                     break
                 }

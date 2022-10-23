@@ -67,6 +67,7 @@ struct StreamVideoViewSwiftUI: UIViewRepresentable {
     func makeUIView(context: Context) -> StreamMTLVideoView {
         let view = StreamMTLVideoView(frame: .init(origin: .zero, size: size))
         view.videoContentMode = .scaleAspectFill
+        view.backgroundColor = UIColor.black
         handleRendering(view)
         return view
     }
@@ -81,7 +82,7 @@ public class StreamMTLVideoView: RTCMTLVideoView {
     weak var track: RTCVideoTrack?
     
     public func add(track: RTCVideoTrack) {
-        guard self.track == nil else { return }
+//        guard self.track == nil else { return }
         log.debug("Adding track to the view")
         self.track = track
         track.add(self)

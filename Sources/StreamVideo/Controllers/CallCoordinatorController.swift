@@ -110,9 +110,11 @@ final class CallCoordinatorController: Sendable {
         if !participantIds.isEmpty {
             var input = Stream_Video_CreateCallInput()
             input.ring = !videoConfig.joinVideoCallInstantly
-            var members = [String: Stream_Video_MemberInput]()
+            var members = [Stream_Video_MemberInput]()
             for participantId in participantIds {
-                members[participantId] = Stream_Video_MemberInput()
+                var memberInput = Stream_Video_MemberInput()
+                memberInput.userID = participantId
+                members.append(memberInput)
             }
             input.members = members
             joinCallRequest.input = input

@@ -70,9 +70,9 @@ class Stream_Video_Coordinator_ClientV1Rpc_ClientRPC: @unchecked Sendable {
         try await execute(request: queryDevicesRequest, path: "QueryDevices")
     }
     
-    func updateCallMembers(updateCallMembersRequest: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallMembersRequest) async throws
-        -> Stream_Video_Coordinator_ClientV1Rpc_UpdateCallMembersResponse {
-        try await execute(request: updateCallMembersRequest, path: "UpdateCallMembers")
+    func upsertCallMembers(upsertCallMembersRequest: Stream_Video_Coordinator_ClientV1Rpc_UpsertCallMembersRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_UpsertCallMembersResponse {
+        try await execute(request: upsertCallMembersRequest, path: "UpsertCallMembers")
     }
     
     func deleteCallMembers(deleteCallMembersRequest: Stream_Video_Coordinator_ClientV1Rpc_DeleteCallMembersRequest) async throws
@@ -93,6 +93,13 @@ class Stream_Video_Coordinator_ClientV1Rpc_ClientRPC: @unchecked Sendable {
     func reportCallStats(reportCallStatsRequest: Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest) async throws
         -> Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsResponse {
         try await execute(request: reportCallStatsRequest, path: "ReportCallStats")
+    }
+    
+    func reportCallStatEvent(
+        reportCallStatEventRequest: Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest
+    ) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventResponse {
+        try await execute(request: reportCallStatEventRequest, path: "ReportCallStatEvent")
     }
     
     func reviewCall(reviewCallRequest: Stream_Video_Coordinator_ClientV1Rpc_ReviewCallRequest) async throws
