@@ -111,27 +111,6 @@ class SfuMiddleware: EventMiddleware {
         onParticipantEvent?(event)
     }
     
-    private func updateParticipantsSubscriptions() async {
-        var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
-        var subscriptions = [String: Stream_Video_Sfu_Models_VideoDimension]()
-        request.sessionID = sessionID
-        let callParticipants = await state.callParticipants
-        for (_, value) in callParticipants {
-            if value.id != userInfo.id && value.showTrack {
-                log.debug("updating subscription for user \(value.id) with size \(value.trackSize)")
-                var dimension = Stream_Video_Sfu_Models_VideoDimension()
-                dimension.height = UInt32(value.trackSize.height)
-                dimension.width = UInt32(value.trackSize.width)
-                subscriptions[value.id] = dimension
-            }
-        }
-        
-        request.subscriptions = subscriptions
-        _ = try? await signalService.updateSubscriptions(
-            updateSubscriptionsRequest: request
-        )
-    }
-    
     private func handleChangePublishQualityEvent(
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {

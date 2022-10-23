@@ -39,10 +39,6 @@ open class CallViewModel: ObservableObject {
         didSet {
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
-            localParticipant = callParticipants.first(where: { (key, _) in
-                key == streamVideo.userInfo.id
-            })
-                .map { $1 }
         }
     }
     
@@ -50,7 +46,12 @@ open class CallViewModel: ObservableObject {
     
     @Published public var callSettings = CallSettings()
     
-    @Published public var localParticipant: CallParticipant?
+    public var localParticipant: CallParticipant? {
+        callParticipants.first(where: { (key, _) in
+            key == streamVideo.userInfo.id
+        })
+            .map { $1 }
+    }
             
     private var participantUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?

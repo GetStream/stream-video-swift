@@ -82,7 +82,8 @@ public class StreamMTLVideoView: RTCMTLVideoView {
     weak var track: RTCVideoTrack?
     
     public func add(track: RTCVideoTrack) {
-//        guard self.track == nil else { return }
+        guard track.trackId != self.track?.trackId else { return }
+        self.track?.remove(self)
         log.debug("Adding track to the view")
         self.track = track
         track.add(self)
