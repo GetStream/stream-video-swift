@@ -64,7 +64,7 @@ public class StreamVideo {
     private let apiKey: APIKey
     private let latencyService: LatencyService
     
-    private var currentCallController: CallController?
+    public private(set) var currentCallController: CallController?
     private let callCoordinatorController: CallCoordinatorController
         
     public init(

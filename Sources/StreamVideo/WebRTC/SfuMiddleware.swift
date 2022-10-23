@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import WebRTC
+import WebRTC
 
 class SfuMiddleware: EventMiddleware {
     private let participantsThreshold = 4

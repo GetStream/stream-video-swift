@@ -59,14 +59,15 @@ struct StreamVideoSwiftUIApp: App {
             token: user.token,
             videoConfig: VideoConfig(
                 persitingSocketConnection: true,
-                joinVideoCallInstantly: true
+                joinVideoCallInstantly: false
             ),
             tokenProvider: { result in
                 result(.success(user.token))
             }
         )
         appState.streamVideo = streamVideo
-        streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+        let utils = Utils(userListProvider: MockUserListProvider())
+        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
     }
     
     private func checkLoggedInUser() {
