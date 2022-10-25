@@ -121,7 +121,7 @@ class WebRTCClient: NSObject {
         self.userInfo = userInfo
         self.token = token
         httpClient = URLSessionClient(
-            urlSession: StreamVideo.makeURLSession(),
+            urlSession: StreamVideo.Environment.makeURLSession(),
             tokenProvider: tokenProvider
         )
         

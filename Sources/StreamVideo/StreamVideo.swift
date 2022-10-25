@@ -56,7 +56,6 @@ public class StreamVideo {
     private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
     private(set) var userConnectionProvider: UserConnectionProvider?
     private(set) var timerType: Timer.Type = DefaultTimer.self
-    private var monitor: InternetConnectionMonitor?
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
@@ -66,35 +65,48 @@ public class StreamVideo {
     
     public private(set) var currentCallController: CallController?
     private let callCoordinatorController: CallCoordinatorController
-        
-    public init(
+    private let environment: Environment
+    
+    public convenience init(
         apiKey: String,
         user: UserInfo,
         token: Token,
         videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping TokenProvider
     ) {
+        self.init(
+            apiKey: apiKey,
+            user: user,
+            token: token,
+            videoConfig: videoConfig,
+            tokenProvider: tokenProvider,
+            environment: Environment()
+        )
+    }
+        
+    init(
+        apiKey: String,
+        user: UserInfo,
+        token: Token,
+        videoConfig: VideoConfig = VideoConfig(),
+        tokenProvider: @escaping TokenProvider,
+        environment: Environment
+    ) {
         self.apiKey = APIKey(apiKey)
         userInfo = user
         self.token = token
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
-        httpClient = URLSessionClient(
-            urlSession: Self.makeURLSession(),
-            tokenProvider: tokenProvider
+        self.environment = environment
+        httpClient = environment.httpClientBuilder(tokenProvider)
+        callCoordinatorController = environment.callCoordinatorControllerBuilder(
+            httpClient,
+            user,
+            apiKey,
+            hostname,
+            token, videoConfig
         )
-        callCoordinatorController = CallCoordinatorController(
-            httpClient: httpClient,
-            userInfo: user,
-            coordinatorInfo: CoordinatorInfo(
-                apiKey: apiKey,
-                hostname: hostname,
-                token: token.rawValue
-            ),
-            videoConfig: videoConfig
-        )
-
-        latencyService = LatencyService(httpClient: httpClient)
+        latencyService = environment.latencyServiceBuilder(httpClient)
                 
         httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
@@ -192,14 +204,6 @@ public class StreamVideo {
         return callEvents
     }
     
-    internal static func makeURLSession() -> URLSession {
-        let config = URLSessionConfiguration.default
-        config.requestCachePolicy = .reloadIgnoringLocalCacheData
-        config.urlCache = nil
-        let urlSession = URLSession(configuration: config)
-        return urlSession
-    }
-    
     private func connectWebSocketClient() {
         if let connectURL = URL(string: wsEndpoint) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
@@ -253,38 +257,10 @@ public class StreamVideo {
         }
 
         connectionRecoveryHandler = nil
-                
-        connectionRecoveryHandler = DefaultConnectionRecoveryHandler(
-            webSocketClient: webSocketClient,
-            eventNotificationCenter: eventNotificationCenter,
-            backgroundTaskScheduler: backgroundTaskSchedulerBuilder(),
-            internetConnection: InternetConnection(monitor: internetMonitor),
-            reconnectionStrategy: DefaultRetryStrategy(),
-            reconnectionTimerType: DefaultTimer.self,
-            keepConnectionAliveInBackground: true
+        connectionRecoveryHandler = environment.connectionRecoveryHandlerBuilder(
+            webSocketClient,
+            eventNotificationCenter
         )
-    }
-    
-    private var internetMonitor: InternetConnectionMonitor {
-        if let monitor = monitor {
-            return monitor
-        } else {
-            return InternetConnection.Monitor()
-        }
-    }
-    
-    private var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
-        if Bundle.main.isAppExtension {
-            // No background task scheduler exists for app extensions.
-            return nil
-        } else {
-            #if os(iOS)
-            return IOSBackgroundTaskScheduler()
-            #else
-            // No need for background schedulers on macOS, app continues running when inactive.
-            return nil
-            #endif
-        }
     }
 }
 

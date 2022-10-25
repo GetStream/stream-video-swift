@@ -9,6 +9,29 @@ public class StreamVideoUI {
     var appearance: Appearance
     var utils: Utils
     
+    public convenience init(
+        apiKey: String,
+        user: UserInfo,
+        token: Token,
+        videoConfig: VideoConfig = VideoConfig(),
+        tokenProvider: @escaping TokenProvider,
+        appearance: Appearance = Appearance(),
+        utils: Utils = Utils()
+    ) {
+        let streamVideo = StreamVideo(
+            apiKey: apiKey,
+            user: user,
+            token: token,
+            videoConfig: videoConfig,
+            tokenProvider: tokenProvider
+        )
+        self.init(
+            streamVideo: streamVideo,
+            appearance: appearance,
+            utils: utils
+        )
+    }
+    
     public init(
         streamVideo: StreamVideo,
         appearance: Appearance = Appearance(),
