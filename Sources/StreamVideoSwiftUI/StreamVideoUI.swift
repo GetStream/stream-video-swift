@@ -7,16 +7,19 @@ import StreamVideo
 public class StreamVideoUI {
     var streamVideo: StreamVideo
     var appearance: Appearance
+    var utils: Utils
     
     public init(
         streamVideo: StreamVideo,
-        appearance: Appearance = Appearance()
+        appearance: Appearance = Appearance(),
+        utils: Utils = Utils()
     ) {
         self.streamVideo = streamVideo
         self.appearance = appearance
+        self.utils = utils
         AppearanceKey.currentValue = appearance
+        UtilsKey.currentValue = utils
     }
-    
 }
 
 extension InjectedValues {
@@ -50,5 +53,4 @@ extension InjectedValues {
             appearance.fonts = newValue
         }
     }
-    
 }

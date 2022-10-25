@@ -66,6 +66,14 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
         set { _uniqueStorage()._event = .callDeleted(newValue) }
     }
 
+    var callMembersCreated: Stream_Video_Coordinator_EventV1_CallMembersCreated {
+        get {
+            if case let .callMembersCreated(v)? = _storage._event { return v }
+            return Stream_Video_Coordinator_EventV1_CallMembersCreated()
+        }
+        set { _uniqueStorage()._event = .callMembersCreated(newValue) }
+    }
+
     var callMembersUpdated: Stream_Video_Coordinator_EventV1_CallMembersUpdated {
         get {
             if case let .callMembersUpdated(v)? = _storage._event { return v }
@@ -141,6 +149,7 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
         case callCreated(Stream_Video_Coordinator_EventV1_CallCreated)
         case callUpdated(Stream_Video_Coordinator_EventV1_CallUpdated)
         case callDeleted(Stream_Video_Coordinator_EventV1_CallDeleted)
+        case callMembersCreated(Stream_Video_Coordinator_EventV1_CallMembersCreated)
         case callMembersUpdated(Stream_Video_Coordinator_EventV1_CallMembersUpdated)
         case callMembersDeleted(Stream_Video_Coordinator_EventV1_CallMembersDeleted)
         case callEnded(Stream_Video_Coordinator_EventV1_CallEnded)
@@ -176,6 +185,11 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
                 }()
             case (.callDeleted, .callDeleted): return {
                     guard case let .callDeleted(l) = lhs, case let .callDeleted(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.callMembersCreated, .callMembersCreated): return {
+                    guard case let .callMembersCreated(l) = lhs,
+                          case let .callMembersCreated(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
             case (.callMembersUpdated, .callMembersUpdated): return {
@@ -371,8 +385,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
         30: .standard(proto: "call_created"),
         31: .standard(proto: "call_updated"),
         32: .standard(proto: "call_deleted"),
-        33: .standard(proto: "call_members_updated"),
-        34: .standard(proto: "call_members_deleted"),
+        33: .standard(proto: "call_members_created"),
+        34: .standard(proto: "call_members_updated"),
+        35: .standard(proto: "call_members_deleted"),
         36: .standard(proto: "call_ended"),
         40: .standard(proto: "call_accepted"),
         41: .standard(proto: "call_rejected"),
@@ -470,6 +485,19 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                         }
                     }()
                 case 33: try {
+                        var v: Stream_Video_Coordinator_EventV1_CallMembersCreated?
+                        var hadOneofValue = false
+                        if let current = _storage._event {
+                            hadOneofValue = true
+                            if case let .callMembersCreated(m) = current { v = m }
+                        }
+                        try decoder.decodeSingularMessageField(value: &v)
+                        if let v = v {
+                            if hadOneofValue { try decoder.handleConflictingOneOf() }
+                            _storage._event = .callMembersCreated(v)
+                        }
+                    }()
+                case 34: try {
                         var v: Stream_Video_Coordinator_EventV1_CallMembersUpdated?
                         var hadOneofValue = false
                         if let current = _storage._event {
@@ -482,7 +510,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                             _storage._event = .callMembersUpdated(v)
                         }
                     }()
-                case 34: try {
+                case 35: try {
                         var v: Stream_Video_Coordinator_EventV1_CallMembersDeleted?
                         var hadOneofValue = false
                         if let current = _storage._event {
@@ -610,13 +638,17 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                     guard case let .callDeleted(v)? = _storage._event else { preconditionFailure() }
                     try visitor.visitSingularMessageField(value: v, fieldNumber: 32)
                 }()
+            case .callMembersCreated?: try {
+                    guard case let .callMembersCreated(v)? = _storage._event else { preconditionFailure() }
+                    try visitor.visitSingularMessageField(value: v, fieldNumber: 33)
+                }()
             case .callMembersUpdated?: try {
                     guard case let .callMembersUpdated(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 33)
+                    try visitor.visitSingularMessageField(value: v, fieldNumber: 34)
                 }()
             case .callMembersDeleted?: try {
                     guard case let .callMembersDeleted(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 34)
+                    try visitor.visitSingularMessageField(value: v, fieldNumber: 35)
                 }()
             case .callEnded?: try {
                     guard case let .callEnded(v)? = _storage._event else { preconditionFailure() }

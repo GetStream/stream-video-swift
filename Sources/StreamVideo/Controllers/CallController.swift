@@ -141,6 +141,11 @@ public class CallController {
         await webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
+    public func addMembersToCall(ids: [String]) async throws {
+        let callCid = "\(callType.name):\(callId)"
+        try await callCoordinatorController.addMembersToCall(with: callCid, memberIds: ids)
+    }
+    
     /// Cleans up the call controller.
     func cleanUp() {
         call = nil
@@ -171,6 +176,7 @@ public class CallController {
                     role: "user",
                     name: self?.userInfo.name ?? userId,
                     profileImageURL: self?.userInfo.imageURL,
+                    trackLookupPrefix: userId,
                     isOnline: true,
                     hasVideo: true,
                     hasAudio: true,

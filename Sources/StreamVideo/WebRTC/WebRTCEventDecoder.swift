@@ -18,10 +18,6 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .audioLevelChanged(value):
             return value
-        case let .subscriberCandidate(value):
-            return value
-        case let .publisherCandidate(value):
-            return value
         case let .changePublishQuality(value):
             return value
         case let .localDeviceChange(value):
@@ -35,6 +31,14 @@ struct WebRTCEventDecoder: AnyEventDecoder {
         case let .participantLeft(value):
             return value
         case let .dominantSpeakerChanged(value):
+            return value
+        case let .publisherAnswer(value):
+            return value
+        case let .iceTrickle(value):
+            return value
+        case let .joinResponse(value):
+            return value
+        case let .healthCheckResponse(value):
             return value
         }
     }

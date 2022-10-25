@@ -53,6 +53,9 @@ struct InviteParticipantsView: View {
                         isSelected: viewModel.isSelected(user: user)
                     )
                 }
+                .onAppear {
+                    viewModel.onUserAppear(user: user)
+                }
             }
             .listStyle(.plain)
         }
@@ -71,10 +74,13 @@ struct InviteParticipantsView: View {
             }
             
             ToolbarItem(placement: .navigationBarTrailing) {
-                Button {} label: {
+                Button {
+                    viewModel.inviteUsersTapped()
+                } label: {
                     Text(L10n.Call.Participants.invite)
                         .bold()
                 }
+                .disabled(viewModel.selectedUsers.isEmpty)
             }
         })
         .navigationBarBackButtonHidden(true)

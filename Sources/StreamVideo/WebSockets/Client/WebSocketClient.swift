@@ -47,8 +47,14 @@ class WebSocketClient {
     /// An object containing external dependencies of `WebSocketClient`
     private let environment: Environment
     
+    private let webSocketClientType: WebSocketClientType
+    
     private(set) lazy var pingController: WebSocketPingController = {
-        let pingController = environment.createPingController(environment.timerType, engineQueue)
+        let pingController = environment.createPingController(
+            environment.timerType,
+            engineQueue,
+            webSocketClientType
+        )
         pingController.delegate = self
         return pingController
     }()
@@ -77,12 +83,14 @@ class WebSocketClient {
         sessionConfiguration: URLSessionConfiguration,
         eventDecoder: AnyEventDecoder,
         eventNotificationCenter: EventNotificationCenter,
+        webSocketClientType: WebSocketClientType,
         environment: Environment = .init(),
         connectURL: URL,
         requiresAuth: Bool = true
     ) {
         self.environment = environment
         self.sessionConfiguration = sessionConfiguration
+        self.webSocketClientType = webSocketClientType
         self.eventDecoder = eventDecoder
         self.connectURL = connectURL
         self.eventNotificationCenter = eventNotificationCenter
@@ -137,7 +145,11 @@ protocol ConnectionStateDelegate: AnyObject {
 extension WebSocketClient {
     /// An object encapsulating all dependencies of `WebSocketClient`.
     struct Environment {
-        typealias CreatePingController = (_ timerType: Timer.Type, _ timerQueue: DispatchQueue) -> WebSocketPingController
+        typealias CreatePingController = (
+            _ timerType: Timer.Type,
+            _ timerQueue: DispatchQueue,
+            _ webSocketClientType: WebSocketClientType
+        ) -> WebSocketPingController
         
         typealias CreateEngine = (
             _ request: URLRequest,
@@ -169,8 +181,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         if requiresAuth {
             connectionState = .authenticating
         } else {
-            // TODO: check this
-            connectionState = .connected(healthCheckInfo: Stream_Video_Healthcheck())
+            connectionState = .connected(healthCheckInfo: HealthCheckInfo())
         }
         onConnect?()
     }
@@ -181,16 +192,8 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.debug("Event received")
             let event = try eventDecoder.decode(from: messageData)
             log.debug("Event decoded: \(event)")
-            if let healthCheckEvent = event as? Stream_Video_Healthcheck {
-                if connectionState == .authenticating {
-                    connectionState = .connected(healthCheckInfo: healthCheckEvent)
-                }
-                eventNotificationCenter.process(healthCheckEvent, postNotification: false) { [weak self] in
-                    self?.engineQueue.async { [weak self] in
-                        self?.pingController.pongReceived()
-                        self?.connectionState = .connected(healthCheckInfo: healthCheckEvent)
-                    }
-                }
+            if let healthCheckEvent = event as? (any HealthCheckEvent) {
+                handle(healthCheckEvent: healthCheckEvent)
             } else {
                 eventsBatcher.append(event)
             }
@@ -217,22 +220,47 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.error("Web socket can not be disconnected when in \(connectionState) state.")
         }
     }
+    
+    private func handle<Event: HealthCheckEvent>(healthCheckEvent: Event) {
+        log.debug("Handling healthcheck event")
+        var healthCheckInfo = HealthCheckInfo()
+        if let healthCheckEvent = healthCheckEvent as? Stream_Video_Healthcheck {
+            healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
+        } else if let healthCheckEvent = healthCheckEvent as? Stream_Video_Sfu_Event_HealthCheckResponse {
+            healthCheckInfo = HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
+        }
+        if connectionState == .authenticating {
+            connectionState = .connected(healthCheckInfo: healthCheckInfo)
+        }
+        eventNotificationCenter.process(healthCheckEvent, postNotification: false) { [weak self] in
+            self?.engineQueue.async { [weak self] in
+                self?.pingController.pongReceived()
+                self?.connectionState = .connected(healthCheckInfo: healthCheckInfo)
+            }
+        }
+    }
 }
 
 // MARK: - Ping Controller Delegate
 
 extension WebSocketClient: WebSocketPingControllerDelegate {
-    func sendPing(healthCheckEvent: Stream_Video_Healthcheck) {
+    func sendPing(healthCheckEvent: SendableEvent) {
         engineQueue.async { [weak engine] in
-            engine?.sendPing(healthCheckEvent: healthCheckEvent)
+            engine?.send(message: healthCheckEvent)
         }
     }
     
     func disconnectOnNoPongReceived() {
+        log.debug("disconnecting from \(connectURL)")
         disconnect(source: .noPongReceived) {
             log.debug("Websocket is disconnected because of no pong received", subsystems: .webSocket)
         }
     }
+}
+
+enum WebSocketClientType {
+    case coordinator
+    case sfu
 }
 
 // MARK: - Notifications

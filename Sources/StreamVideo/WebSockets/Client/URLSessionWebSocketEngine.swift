@@ -61,10 +61,6 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         urlSessionDelegateHandler = nil
     }
     
-    func sendPing(healthCheckEvent: Stream_Video_Healthcheck) {
-        send(message: healthCheckEvent)
-    }
-    
     func send(message: SendableEvent) {
         do {
             let data = try message.serializedData()

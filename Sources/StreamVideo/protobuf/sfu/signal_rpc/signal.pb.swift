@@ -222,7 +222,7 @@ struct Stream_Video_Sfu_Signal_IceCandidateRequest {
     private var _usernameFragment: String?
 }
 
-struct Stream_Video_Sfu_Signal_IceCandidateResponse {
+struct Stream_Video_Sfu_Signal_ICETrickleResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -270,59 +270,6 @@ struct Stream_Video_Sfu_Signal_SetPublisherResponse {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
-}
-
-struct Stream_Video_Sfu_Signal_JoinRequest {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var subscriberSdpOffer: String = String()
-
-    var sessionID: String = String()
-
-    // TODO: we should know if this is going to be
-    /// - publishing and subscribing, or just subscribing for future routing
-    var codecSettings: Stream_Video_Sfu_Models_CodecSettings {
-        get { _codecSettings ?? Stream_Video_Sfu_Models_CodecSettings() }
-        set { _codecSettings = newValue }
-    }
-
-    /// Returns true if `codecSettings` has been explicitly set.
-    var hasCodecSettings: Bool { self._codecSettings != nil }
-    /// Clears the value of `codecSettings`. Subsequent reads from it will return its default value.
-    mutating func clearCodecSettings() { _codecSettings = nil }
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-
-    private var _codecSettings: Stream_Video_Sfu_Models_CodecSettings?
-}
-
-struct Stream_Video_Sfu_Signal_JoinResponse {
-    // SwiftProtobuf.Message conformance is added in an extension below. See the
-    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
-    // methods supported on all messages.
-
-    var sdp: String = String()
-
-    // TODO: include full list of participants with track and audio info
-    var callState: Stream_Video_Sfu_Models_CallState {
-        get { _callState ?? Stream_Video_Sfu_Models_CallState() }
-        set { _callState = newValue }
-    }
-
-    /// Returns true if `callState` has been explicitly set.
-    var hasCallState: Bool { self._callState != nil }
-    /// Clears the value of `callState`. Subsequent reads from it will return its default value.
-    mutating func clearCallState() { _callState = nil }
-
-    var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    init() {}
-
-    private var _callState: Stream_Video_Sfu_Models_CallState?
 }
 
 struct Stream_Video_Sfu_Signal_ConnectRequest {
@@ -535,12 +482,10 @@ extension Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest: @unchecked Sendabl
 extension Stream_Video_Sfu_Signal_SendAnswerRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SendAnswerResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_IceCandidateRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_Signal_IceCandidateResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_ICETrickleResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SetPublisherRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SetPublisherResponse: @unchecked Sendable {}
-extension Stream_Video_Sfu_Signal_JoinRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_Signal_JoinResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_ConnectRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_ConnectResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_SignalRequest: @unchecked Sendable {}
@@ -973,9 +918,9 @@ extension Stream_Video_Sfu_Signal_IceCandidateRequest: SwiftProtobuf.Message, Sw
     }
 }
 
-extension Stream_Video_Sfu_Signal_IceCandidateResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_ICETrickleResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".IceCandidateResponse"
+    static let protoMessageName: String = _protobuf_package + ".ICETrickleResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -986,7 +931,7 @@ extension Stream_Video_Sfu_Signal_IceCandidateResponse: SwiftProtobuf.Message, S
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Sfu_Signal_IceCandidateResponse, rhs: Stream_Video_Sfu_Signal_IceCandidateResponse) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Signal_ICETrickleResponse, rhs: Stream_Video_Sfu_Signal_ICETrickleResponse) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -1087,98 +1032,6 @@ extension Stream_Video_Sfu_Signal_SetPublisherResponse: SwiftProtobuf.Message, S
     static func == (lhs: Stream_Video_Sfu_Signal_SetPublisherResponse, rhs: Stream_Video_Sfu_Signal_SetPublisherResponse) -> Bool {
         if lhs.sdp != rhs.sdp { return false }
         if lhs.sessionID != rhs.sessionID { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Sfu_Signal_JoinRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".JoinRequest"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "subscriber_sdp_offer"),
-        3: .standard(proto: "session_id"),
-        4: .standard(proto: "codec_settings")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.subscriberSdpOffer) }()
-            case 3: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-            case 4: try { try decoder.decodeSingularMessageField(value: &self._codecSettings) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
-        if !subscriberSdpOffer.isEmpty {
-            try visitor.visitSingularStringField(value: subscriberSdpOffer, fieldNumber: 1)
-        }
-        if !sessionID.isEmpty {
-            try visitor.visitSingularStringField(value: sessionID, fieldNumber: 3)
-        }
-        try { if let v = self._codecSettings {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
-        } }()
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Sfu_Signal_JoinRequest, rhs: Stream_Video_Sfu_Signal_JoinRequest) -> Bool {
-        if lhs.subscriberSdpOffer != rhs.subscriberSdpOffer { return false }
-        if lhs.sessionID != rhs.sessionID { return false }
-        if lhs._codecSettings != rhs._codecSettings { return false }
-        if lhs.unknownFields != rhs.unknownFields { return false }
-        return true
-    }
-}
-
-extension Stream_Video_Sfu_Signal_JoinResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
-    SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".JoinResponse"
-    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "sdp"),
-        2: .standard(proto: "call_state")
-    ]
-
-    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        while let fieldNumber = try decoder.nextFieldNumber() {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.sdp) }()
-            case 2: try { try decoder.decodeSingularMessageField(value: &self._callState) }()
-            default: break
-            }
-        }
-    }
-
-    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
-        if !sdp.isEmpty {
-            try visitor.visitSingularStringField(value: sdp, fieldNumber: 1)
-        }
-        try { if let v = self._callState {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-        } }()
-        try unknownFields.traverse(visitor: &visitor)
-    }
-
-    static func == (lhs: Stream_Video_Sfu_Signal_JoinResponse, rhs: Stream_Video_Sfu_Signal_JoinResponse) -> Bool {
-        if lhs.sdp != rhs.sdp { return false }
-        if lhs._callState != rhs._callState { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

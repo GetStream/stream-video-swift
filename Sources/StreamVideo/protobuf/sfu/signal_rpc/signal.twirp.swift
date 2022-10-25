@@ -20,10 +20,6 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         self.apiKey = apiKey
     }
     
-    func join(joinRequest: Stream_Video_Sfu_Signal_JoinRequest) async throws -> Stream_Video_Sfu_Signal_JoinResponse {
-        try await execute(request: joinRequest, path: "Join")
-    }
-    
     func setPublisher(setPublisherRequest: Stream_Video_Sfu_Signal_SetPublisherRequest) async throws
         -> Stream_Video_Sfu_Signal_SetPublisherResponse {
         try await execute(request: setPublisherRequest, path: "SetPublisher")
@@ -34,9 +30,8 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         try await execute(request: sendAnswerRequest, path: "SendAnswer")
     }
     
-    func sendIceCandidate(iceCandidateRequest: Stream_Video_Sfu_Signal_IceCandidateRequest) async throws
-        -> Stream_Video_Sfu_Signal_IceCandidateResponse {
-        try await execute(request: iceCandidateRequest, path: "SendIceCandidate")
+    func iceTrickle(iCETrickle: Stream_Video_Sfu_Models_ICETrickle) async throws -> Stream_Video_Sfu_Signal_ICETrickleResponse {
+        try await execute(request: iCETrickle, path: "IceTrickle")
     }
     
     func updateSubscriptions(updateSubscriptionsRequest: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest) async throws

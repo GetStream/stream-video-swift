@@ -13,6 +13,8 @@
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
 		84093811288A90390089A35B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* HomeView.swift */; };
+		840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840A5A5529054F69006A1E4B /* UserListProvider.swift */; };
+		840A5A5829054F98006A1E4B /* MockUserListProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840A5A5729054F98006A1E4B /* MockUserListProvider.swift */; };
 		8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947992886EBD20007B36E /* UserConnectionProvider.swift */; };
@@ -44,6 +46,7 @@
 		843697CD28C647B600839D99 /* VideoCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CC28C647B600839D99 /* VideoCapturer.swift */; };
 		843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CE28C7898A00839D99 /* VideoOptions.swift */; };
 		843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697D028C7A23300839D99 /* ParticipantsGridView.swift */; };
+		8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8440861D2901A16F0027849C /* SfuMiddleware.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -126,6 +129,7 @@
 		84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C267C828F5980F00F0F673 /* ConnectOptions.swift */; };
 		84D419B828E7155100F574F9 /* VideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D419B728E7155100F574F9 /* VideoViewOverlay.swift */; };
 		84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E7CD3628D64609009F3542 /* CallingIndicator.swift */; };
+		84E86D4F2905E731004BA44C /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E86D4E2905E731004BA44C /* Utils.swift */; };
 		84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */; };
 		84EA5D3F28C09AAC004D3531 /* CallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3E28C09AAB004D3531 /* CallController.swift */; };
 		84EA5D4128C0ABCB004D3531 /* CallCoordinatorController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D4028C0ABCB004D3531 /* CallCoordinatorController.swift */; };
@@ -249,6 +253,8 @@
 		8403C0B02897E7E70092BD43 /* DemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoApp.entitlements; sourceTree = "<group>"; };
 		840425B528D0A96F0084C637 /* VideoParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoParticipantsView.swift; sourceTree = "<group>"; };
 		84093810288A90390089A35B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		840A5A5529054F69006A1E4B /* UserListProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserListProvider.swift; sourceTree = "<group>"; };
+		840A5A5729054F98006A1E4B /* MockUserListProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockUserListProvider.swift; sourceTree = "<group>"; };
 		8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCConfiguration.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		841947992886EBD20007B36E /* UserConnectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserConnectionProvider.swift; sourceTree = "<group>"; };
@@ -280,6 +286,7 @@
 		843697CC28C647B600839D99 /* VideoCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturer.swift; sourceTree = "<group>"; };
 		843697CE28C7898A00839D99 /* VideoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptions.swift; sourceTree = "<group>"; };
 		843697D028C7A23300839D99 /* ParticipantsGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridView.swift; sourceTree = "<group>"; };
+		8440861D2901A16F0027849C /* SfuMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SfuMiddleware.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -367,6 +374,7 @@
 		84C2997C28784BB30034B735 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		84D419B728E7155100F574F9 /* VideoViewOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoViewOverlay.swift; sourceTree = "<group>"; };
 		84E7CD3628D64609009F3542 /* CallingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingIndicator.swift; sourceTree = "<group>"; };
+		84E86D4E2905E731004BA44C /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantImageView.swift; sourceTree = "<group>"; };
 		84EA5D3E28C09AAB004D3531 /* CallController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallController.swift; sourceTree = "<group>"; };
 		84EA5D4028C0ABCB004D3531 /* CallCoordinatorController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCoordinatorController.swift; sourceTree = "<group>"; };
@@ -539,6 +547,7 @@
 				8403C0AE2897D9940092BD43 /* VoipPushService.swift */,
 				845C570028DB631800D38FCC /* MockTokenGenerator.swift */,
 				8468821228DFA448003BA9EE /* LocalStorage.swift */,
+				840A5A5729054F98006A1E4B /* MockUserListProvider.swift */,
 				845C573128DDC57A00D38FCC /* DemoAppUtils.swift */,
 				84C2996928757F820034B735 /* DemoApp-Info.plist */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
@@ -666,6 +675,7 @@
 				846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */,
 				846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */,
 				846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */,
+				840A5A5529054F69006A1E4B /* UserListProvider.swift */,
 			);
 			path = Participants;
 			sourceTree = "<group>";
@@ -949,6 +959,7 @@
 				8434C528289AA2FA0001490A /* Colors.swift */,
 				8434C524289AA2E20001490A /* Fonts.swift */,
 				8434C526289AA2F00001490A /* Images.swift */,
+				84E86D4E2905E731004BA44C /* Utils.swift */,
 				8498796728A15F0300D06F31 /* ViewFactory.swift */,
 				84D419B728E7155100F574F9 /* VideoViewOverlay.swift */,
 				8458872828A3F920002A81BF /* CallingViews */,
@@ -1005,6 +1016,7 @@
 				84EA5D4228C1E944004D3531 /* AudioSession.swift */,
 				84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */,
 				8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */,
+				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -1339,6 +1351,7 @@
 				84093811288A90390089A35B /* HomeView.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
+				840A5A5829054F98006A1E4B /* MockUserListProvider.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
@@ -1405,6 +1418,7 @@
 				84AF64D7287C79610012A503 /* Token.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
 				84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */,
+				8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */,
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84A737D728F4716E001A6769 /* call.pb.swift in Sources */,
@@ -1464,9 +1478,11 @@
 				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
+				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* VideoViewOverlay.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
+				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				84F3B0E228916FF20088751D /* CallParticipantsView.swift in Sources */,

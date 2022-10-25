@@ -20,7 +20,7 @@ public struct VideoOptions: Sendable {
     public init(
         supportedCodecs: [VideoCodec] = VideoCodec.defaultCodecs,
         preferredFormat: AVCaptureDevice.Format? = nil,
-        preferredDimensions: CMVideoDimensions = .quarter,
+        preferredDimensions: CMVideoDimensions = .full,
         preferredFps: Int = 30
     ) {
         self.preferredFormat = preferredFormat

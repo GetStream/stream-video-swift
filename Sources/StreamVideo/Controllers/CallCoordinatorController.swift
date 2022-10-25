@@ -70,6 +70,19 @@ final class CallCoordinatorController: Sendable {
         request.eventType = type
         _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
     }
+    
+    func addMembersToCall(with cid: String, memberIds: [String]) async throws {
+        var request = Stream_Video_UpsertCallMembersRequest()
+        request.callCid = cid
+        request.members = memberIds.map { id in
+            var memberInput = Stream_Video_MemberInput()
+            memberInput.userID = id
+            memberInput.role = "member"
+            return memberInput
+        }
+        request.ring = !videoConfig.joinVideoCallInstantly
+        _ = try await callCoordinatorService.upsertCallMembers(upsertCallMembersRequest: request)
+    }
 
     // MARK: - private
         
@@ -110,9 +123,12 @@ final class CallCoordinatorController: Sendable {
         if !participantIds.isEmpty {
             var input = Stream_Video_CreateCallInput()
             input.ring = !videoConfig.joinVideoCallInstantly
-            var members = [String: Stream_Video_MemberInput]()
+            var members = [Stream_Video_MemberInput]()
             for participantId in participantIds {
-                members[participantId] = Stream_Video_MemberInput()
+                var memberInput = Stream_Video_MemberInput()
+                memberInput.userID = participantId
+                memberInput.role = "member"
+                members.append(memberInput)
             }
             input.members = members
             joinCallRequest.input = input

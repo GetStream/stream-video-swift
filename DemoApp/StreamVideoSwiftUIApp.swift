@@ -66,7 +66,8 @@ struct StreamVideoSwiftUIApp: App {
             }
         )
         appState.streamVideo = streamVideo
-        streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+        let utils = Utils(userListProvider: MockUserListProvider())
+        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
     }
     
     private func checkLoggedInUser() {

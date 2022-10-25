@@ -159,6 +159,41 @@ struct Stream_Video_Coordinator_EventV1_BroadcastEnded {
     fileprivate var _callDetails: Stream_Video_Coordinator_CallV1_CallDetails?
 }
 
+struct Stream_Video_Coordinator_EventV1_CallMembersCreated {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var call: Stream_Video_Coordinator_CallV1_Call {
+        get { _call ?? Stream_Video_Coordinator_CallV1_Call() }
+        set { _call = newValue }
+    }
+
+    /// Returns true if `call` has been explicitly set.
+    var hasCall: Bool { self._call != nil }
+    /// Clears the value of `call`. Subsequent reads from it will return its default value.
+    mutating func clearCall() { _call = nil }
+
+    var callDetails: Stream_Video_Coordinator_CallV1_CallDetails {
+        get { _callDetails ?? Stream_Video_Coordinator_CallV1_CallDetails() }
+        set { _callDetails = newValue }
+    }
+
+    /// Returns true if `callDetails` has been explicitly set.
+    var hasCallDetails: Bool { self._callDetails != nil }
+    /// Clears the value of `callDetails`. Subsequent reads from it will return its default value.
+    mutating func clearCallDetails() { _callDetails = nil }
+
+    var ringing: Bool = false
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _call: Stream_Video_Coordinator_CallV1_Call?
+    fileprivate var _callDetails: Stream_Video_Coordinator_CallV1_CallDetails?
+}
+
 struct Stream_Video_Coordinator_EventV1_CallMembersUpdated {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -384,7 +419,6 @@ struct Stream_Video_Coordinator_EventV1_CallAccepted {
     /// Clears the value of `callDetails`. Subsequent reads from it will return its default value.
     mutating func clearCallDetails() { _callDetails = nil }
 
-    /// The ID of the user sending the event
     var senderUserID: String = String()
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -521,6 +555,7 @@ extension Stream_Video_Coordinator_EventV1_RecordingStopped: @unchecked Sendable
 extension Stream_Video_Coordinator_EventV1_UserUpdated: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_BroadcastStarted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_BroadcastEnded: @unchecked Sendable {}
+extension Stream_Video_Coordinator_EventV1_CallMembersCreated: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallMembersUpdated: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallMembersDeleted: @unchecked Sendable {}
 extension Stream_Video_Coordinator_EventV1_CallCreated: @unchecked Sendable {}
@@ -749,6 +784,58 @@ extension Stream_Video_Coordinator_EventV1_BroadcastEnded: SwiftProtobuf.Message
     ) -> Bool {
         if lhs._call != rhs._call { return false }
         if lhs._callDetails != rhs._callDetails { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_EventV1_CallMembersCreated: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallMembersCreated"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "call"),
+        2: .standard(proto: "call_details"),
+        3: .same(proto: "ringing")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
+            case 2: try { try decoder.decodeSingularMessageField(value: &self._callDetails) }()
+            case 3: try { try decoder.decodeSingularBoolField(value: &self.ringing) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        try { if let v = self._call {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+        } }()
+        try { if let v = self._callDetails {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+        } }()
+        if ringing != false {
+            try visitor.visitSingularBoolField(value: ringing, fieldNumber: 3)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_EventV1_CallMembersCreated,
+        rhs: Stream_Video_Coordinator_EventV1_CallMembersCreated
+    ) -> Bool {
+        if lhs._call != rhs._call { return false }
+        if lhs._callDetails != rhs._callDetails { return false }
+        if lhs.ringing != rhs.ringing { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

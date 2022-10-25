@@ -274,6 +274,16 @@ struct Stream_Video_Sfu_Models_Participant {
     /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
     mutating func clearUpdatedAt() { _uniqueStorage()._updatedAt = nil }
 
+    var sessionID: String {
+        get { _storage._sessionID }
+        set { _uniqueStorage()._sessionID = newValue }
+    }
+
+    var trackLookupPrefix: String {
+        get { _storage._trackLookupPrefix }
+        set { _uniqueStorage()._trackLookupPrefix = newValue }
+    }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -472,6 +482,22 @@ struct Stream_Video_Sfu_Models_CodecSettings {
     fileprivate var _video: Stream_Video_Sfu_Models_VideoCodecs?
 }
 
+struct Stream_Video_Sfu_Models_ICETrickle {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var peerType: Stream_Video_Sfu_Models_PeerType = .publisherUnspecified
+
+    var iceCandidate: String = String()
+
+    var sessionID: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
@@ -488,6 +514,7 @@ extension Stream_Video_Sfu_Models_Codec: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_AudioCodecs: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoCodecs: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CodecSettings: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -634,7 +661,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         5: .same(proto: "video"),
         6: .same(proto: "audio"),
         7: .standard(proto: "created_at"),
-        8: .standard(proto: "updated_at")
+        8: .standard(proto: "updated_at"),
+        9: .standard(proto: "session_id"),
+        10: .standard(proto: "track_lookup_prefix")
     ]
 
     fileprivate class _StorageClass {
@@ -646,6 +675,8 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         var _audio: Bool = false
         var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
         var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+        var _sessionID: String = String()
+        var _trackLookupPrefix: String = String()
 
         static let defaultInstance = _StorageClass()
 
@@ -660,6 +691,8 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
             _audio = source._audio
             _createdAt = source._createdAt
             _updatedAt = source._updatedAt
+            _sessionID = source._sessionID
+            _trackLookupPrefix = source._trackLookupPrefix
         }
     }
 
@@ -686,6 +719,8 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
                 case 6: try { try decoder.decodeSingularBoolField(value: &_storage._audio) }()
                 case 7: try { try decoder.decodeSingularMessageField(value: &_storage._createdAt) }()
                 case 8: try { try decoder.decodeSingularMessageField(value: &_storage._updatedAt) }()
+                case 9: try { try decoder.decodeSingularStringField(value: &_storage._sessionID) }()
+                case 10: try { try decoder.decodeSingularStringField(value: &_storage._trackLookupPrefix) }()
                 default: break
                 }
             }
@@ -722,6 +757,12 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
             try { if let v = _storage._updatedAt {
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
             } }()
+            if !_storage._sessionID.isEmpty {
+                try visitor.visitSingularStringField(value: _storage._sessionID, fieldNumber: 9)
+            }
+            if !_storage._trackLookupPrefix.isEmpty {
+                try visitor.visitSingularStringField(value: _storage._trackLookupPrefix, fieldNumber: 10)
+            }
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -740,6 +781,8 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
                     if _storage._audio != rhs_storage._audio { return false }
                     if _storage._createdAt != rhs_storage._createdAt { return false }
                     if _storage._updatedAt != rhs_storage._updatedAt { return false }
+                    if _storage._sessionID != rhs_storage._sessionID { return false }
+                    if _storage._trackLookupPrefix != rhs_storage._trackLookupPrefix { return false }
                     return true
                 }
             if !storagesAreEqual { return false }
@@ -1179,6 +1222,51 @@ extension Stream_Video_Sfu_Models_CodecSettings: SwiftProtobuf.Message, SwiftPro
         if lhs._audio != rhs._audio { return false }
         if lhs._video != rhs._video { return false }
         if lhs.layers != rhs.layers { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Models_ICETrickle: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".ICETrickle"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "peer_type"),
+        2: .standard(proto: "ice_candidate"),
+        3: .standard(proto: "session_id")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularEnumField(value: &self.peerType) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.iceCandidate) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if peerType != .publisherUnspecified {
+            try visitor.visitSingularEnumField(value: peerType, fieldNumber: 1)
+        }
+        if !iceCandidate.isEmpty {
+            try visitor.visitSingularStringField(value: iceCandidate, fieldNumber: 2)
+        }
+        if !sessionID.isEmpty {
+            try visitor.visitSingularStringField(value: sessionID, fieldNumber: 3)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_Models_ICETrickle, rhs: Stream_Video_Sfu_Models_ICETrickle) -> Bool {
+        if lhs.peerType != rhs.peerType { return false }
+        if lhs.iceCandidate != rhs.iceCandidate { return false }
+        if lhs.sessionID != rhs.sessionID { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
