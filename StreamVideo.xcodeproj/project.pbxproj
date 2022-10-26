@@ -85,6 +85,26 @@
 		8493223D29082F0F0013C029 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
 		84932240290830390013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493223F290830390013C029 /* SnapshotTesting */; };
 		84932243290830F80013C029 /* ViewFrameUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932242290830F80013C029 /* ViewFrameUtils.swift */; };
+		8493224F2908378A0013C029 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493224E2908378A0013C029 /* AppDelegate.swift */; };
+		849322512908378A0013C029 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322502908378A0013C029 /* SceneDelegate.swift */; };
+		849322582908378B0013C029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 849322572908378B0013C029 /* Assets.xcassets */; };
+		8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 849322592908378B0013C029 /* LaunchScreen.storyboard */; };
+		849322612908385C0013C029 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322602908385C0013C029 /* HomeViewController.swift */; };
+		84932268290919CD0013C029 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
+		8493226A290919F10013C029 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932269290919F10013C029 /* LoginViewController.swift */; };
+		8493226D290923350013C029 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
+		8493226E2909235C0013C029 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
+		8493226F2909238F0013C029 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
+		84932270290923960013C029 /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* LocalStorage.swift */; };
+		84932274290929290013C029 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932273290929290013C029 /* UIView+Extensions.swift */; };
+		84932276290929630013C029 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932275290929630013C029 /* Animation.swift */; };
+		84932278290929EF0013C029 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */; };
+		8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932279290938440013C029 /* CallViewController_Tests.swift */; };
+		8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */; };
+		8493227C290939590013C029 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493226229083BF20013C029 /* CallViewController.swift */; };
+		8493227D29093A1A0013C029 /* MockHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* MockHTTPClient.swift */; };
+		8493227E29093A420013C029 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
+		8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493227F29093A9E0013C029 /* SnapshotTesting */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A6CD6028D49A7700318EC3 /* CallBackgrounds.swift */; };
 		84A7379C28F0557F001A6769 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7379B28F0557F001A6769 /* CallEvents.swift */; };
@@ -161,7 +181,6 @@
 		84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		84F7381B287C141000A363F4 /* StreamVideoSwiftUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; };
-		84F73835287C146D00A363F4 /* StreamVideoUIKitTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F73834287C146D00A363F4 /* StreamVideoUIKitTests.swift */; };
 		84F73836287C146D00A363F4 /* StreamVideoUIKit.h in Headers */ = {isa = PBXBuildFile; fileRef = 84F7382A287C146D00A363F4 /* StreamVideoUIKit.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240E286C9530002A3186 /* CallViewModel.swift */; };
 		84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
@@ -189,6 +208,20 @@
 			proxyType = 1;
 			remoteGlobalIDString = 84F737EC287C13AC00A363F4;
 			remoteInfo = StreamVideo;
+		};
+		8493226429083DBD0013C029 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F73827287C146D00A363F4;
+			remoteInfo = StreamVideoUIKit;
+		};
+		8493226629083DCB0013C029 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 842D8BBB2865B31B00801910 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 84F73806287C141000A363F4;
+			remoteInfo = StreamVideoSwiftUI;
 		};
 		84F737F6287C13AD00A363F4 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
@@ -326,6 +359,20 @@
 		84932242290830F80013C029 /* ViewFrameUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFrameUtils.swift; sourceTree = "<group>"; };
 		84932244290831B70013C029 /* StreamVideoSwiftUI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideoSwiftUI.xctestplan; sourceTree = "<group>"; };
 		84932245290831DB0013C029 /* StreamVideo.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideo.xctestplan; sourceTree = "<group>"; };
+		8493224C290837890013C029 /* DemoAppUIKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAppUIKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		8493224E2908378A0013C029 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
+		849322502908378A0013C029 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
+		849322572908378B0013C029 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		8493225A2908378B0013C029 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
+		8493225C2908378B0013C029 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		849322602908385C0013C029 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
+		8493226229083BF20013C029 /* CallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
+		84932269290919F10013C029 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
+		84932273290929290013C029 /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
+		84932275290929630013C029 /* Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
+		84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
+		84932279290938440013C029 /* CallViewController_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController_Tests.swift; sourceTree = "<group>"; };
+		8493228129093B270013C029 /* StreamVideoUIKit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideoUIKit.xctestplan; sourceTree = "<group>"; };
 		8498796728A15F0300D06F31 /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		84A6CD6028D49A7700318EC3 /* CallBackgrounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallBackgrounds.swift; sourceTree = "<group>"; };
 		84A7379B28F0557F001A6769 /* CallEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEvents.swift; sourceTree = "<group>"; };
@@ -410,7 +457,6 @@
 		84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = StreamVideoUIKit.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		84F7382A287C146D00A363F4 /* StreamVideoUIKit.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = StreamVideoUIKit.h; sourceTree = "<group>"; };
 		84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = StreamVideoUIKitTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
-		84F73834287C146D00A363F4 /* StreamVideoUIKitTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUIKitTests.swift; sourceTree = "<group>"; };
 		84FC2C1228ACDF3A00181490 /* ProtoModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProtoModel.swift; sourceTree = "<group>"; };
 		84FC2C1D28ACF2AE00181490 /* WebRTCClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCClient.swift; sourceTree = "<group>"; };
 		84FC2C2128ACF2E000181490 /* PeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnection.swift; sourceTree = "<group>"; };
@@ -426,6 +472,13 @@
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84932249290837890013C029 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -478,6 +531,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */,
+				8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -523,6 +577,7 @@
 				84F73814287C141000A363F4 /* StreamVideoSwiftUITests */,
 				84F73833287C146D00A363F4 /* StreamVideoUIKitTests */,
 				842D8BD42865B37800801910 /* DemoApp */,
+				8493224D2908378A0013C029 /* DemoAppUIKit */,
 				842D8BC42865B31B00801910 /* Products */,
 				84F73842287C195600A363F4 /* Frameworks */,
 			);
@@ -538,6 +593,7 @@
 				84F7380E287C141000A363F4 /* StreamVideoSwiftUITests.xctest */,
 				84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */,
 				84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */,
+				8493224C290837890013C029 /* DemoAppUIKit.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -712,6 +768,30 @@
 			isa = PBXGroup;
 			children = (
 				84932242290830F80013C029 /* ViewFrameUtils.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
+		8493224D2908378A0013C029 /* DemoAppUIKit */ = {
+			isa = PBXGroup;
+			children = (
+				8493224E2908378A0013C029 /* AppDelegate.swift */,
+				849322502908378A0013C029 /* SceneDelegate.swift */,
+				84932269290919F10013C029 /* LoginViewController.swift */,
+				849322602908385C0013C029 /* HomeViewController.swift */,
+				849322572908378B0013C029 /* Assets.xcassets */,
+				849322592908378B0013C029 /* LaunchScreen.storyboard */,
+				8493225C2908378B0013C029 /* Info.plist */,
+			);
+			path = DemoAppUIKit;
+			sourceTree = "<group>";
+		};
+		84932272290929120013C029 /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				84932275290929630013C029 /* Animation.swift */,
+				84932273290929290013C029 /* UIView+Extensions.swift */,
+				84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1027,6 +1107,8 @@
 			isa = PBXGroup;
 			children = (
 				84F7382A287C146D00A363F4 /* StreamVideoUIKit.h */,
+				84932272290929120013C029 /* Utils */,
+				8493226229083BF20013C029 /* CallViewController.swift */,
 			);
 			path = StreamVideoUIKit;
 			sourceTree = "<group>";
@@ -1034,7 +1116,8 @@
 		84F73833287C146D00A363F4 /* StreamVideoUIKitTests */ = {
 			isa = PBXGroup;
 			children = (
-				84F73834287C146D00A363F4 /* StreamVideoUIKitTests.swift */,
+				8493228129093B270013C029 /* StreamVideoUIKit.xctestplan */,
+				84932279290938440013C029 /* CallViewController_Tests.swift */,
 			);
 			path = StreamVideoUIKitTests;
 			sourceTree = "<group>";
@@ -1115,6 +1198,24 @@
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* DemoApp.app */;
+			productType = "com.apple.product-type.application";
+		};
+		8493224B290837890013C029 /* DemoAppUIKit */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 8493225D2908378B0013C029 /* Build configuration list for PBXNativeTarget "DemoAppUIKit" */;
+			buildPhases = (
+				84932248290837890013C029 /* Sources */,
+				84932249290837890013C029 /* Frameworks */,
+				8493224A290837890013C029 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				8493226529083DBD0013C029 /* PBXTargetDependency */,
+			);
+			name = DemoAppUIKit;
+			productName = DemoAppUIKit;
+			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
 			productType = "com.apple.product-type.application";
 		};
 		84F737EC287C13AC00A363F4 /* StreamVideo */ = {
@@ -1214,6 +1315,7 @@
 			buildRules = (
 			);
 			dependencies = (
+				8493226729083DCB0013C029 /* PBXTargetDependency */,
 				84F7384B287C196B00A363F4 /* PBXTargetDependency */,
 			);
 			name = StreamVideoUIKit;
@@ -1235,6 +1337,9 @@
 				84F73832287C146D00A363F4 /* PBXTargetDependency */,
 			);
 			name = StreamVideoUIKitTests;
+			packageProductDependencies = (
+				8493227F29093A9E0013C029 /* SnapshotTesting */,
+			);
 			productName = StreamVideoUIKitTests;
 			productReference = 84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -1246,11 +1351,14 @@
 			isa = PBXProject;
 			attributes = {
 				BuildIndependentTargetsInParallel = 1;
-				LastSwiftUpdateCheck = 1330;
+				LastSwiftUpdateCheck = 1410;
 				LastUpgradeCheck = 1330;
 				TargetAttributes = {
 					842D8BC22865B31B00801910 = {
 						CreatedOnToolsVersion = 13.3.1;
+					};
+					8493224B290837890013C029 = {
+						CreatedOnToolsVersion = 14.1;
 					};
 					84F737EC287C13AC00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
@@ -1268,6 +1376,7 @@
 					};
 					84F73827287C146D00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
+						LastSwiftMigration = 1410;
 					};
 					84F7382E287C146D00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
@@ -1300,6 +1409,7 @@
 				84F73827287C146D00A363F4 /* StreamVideoUIKit */,
 				84F7382E287C146D00A363F4 /* StreamVideoUIKitTests */,
 				842D8BC22865B31B00801910 /* DemoApp */,
+				8493224B290837890013C029 /* DemoAppUIKit */,
 			);
 		};
 /* End PBXProject section */
@@ -1312,6 +1422,15 @@
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		8493224A290837890013C029 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */,
+				849322582908378B0013C029 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1404,6 +1523,22 @@
 				8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */,
 				8434C5222899572F0001490A /* CallService.swift in Sources */,
 				845C570128DB631800D38FCC /* MockTokenGenerator.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		84932248290837890013C029 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
+				84932270290923960013C029 /* LocalStorage.swift in Sources */,
+				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
+				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
+				8493226F2909238F0013C029 /* AppState.swift in Sources */,
+				84932268290919CD0013C029 /* LoginView.swift in Sources */,
+				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
+				8493226D290923350013C029 /* LoginViewModel.swift in Sources */,
+				8493226E2909235C0013C029 /* AddUserView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1572,6 +1707,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84932276290929630013C029 /* Animation.swift in Sources */,
+				84932278290929EF0013C029 /* NSLayoutConstraint+Extensions.swift in Sources */,
+				8493227C290939590013C029 /* CallViewController.swift in Sources */,
+				84932274290929290013C029 /* UIView+Extensions.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1579,7 +1718,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84F73835287C146D00A363F4 /* StreamVideoUIKitTests.swift in Sources */,
+				8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */,
+				8493227E29093A420013C029 /* MockStreamVideo.swift in Sources */,
+				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
+				8493227D29093A1A0013C029 /* MockHTTPClient.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1590,6 +1732,16 @@
 			isa = PBXTargetDependency;
 			target = 84F737EC287C13AC00A363F4 /* StreamVideo */;
 			targetProxy = 84932246290832B90013C029 /* PBXContainerItemProxy */;
+		};
+		8493226529083DBD0013C029 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F73827287C146D00A363F4 /* StreamVideoUIKit */;
+			targetProxy = 8493226429083DBD0013C029 /* PBXContainerItemProxy */;
+		};
+		8493226729083DCB0013C029 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 84F73806287C141000A363F4 /* StreamVideoSwiftUI */;
+			targetProxy = 8493226629083DCB0013C029 /* PBXContainerItemProxy */;
 		};
 		84F737F7287C13AD00A363F4 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
@@ -1638,6 +1790,14 @@
 				8434C53F289BBF120001490A /* en */,
 			);
 			name = Localizable.stringsdict;
+			sourceTree = "<group>";
+		};
+		849322592908378B0013C029 /* LaunchScreen.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				8493225A2908378B0013C029 /* Base */,
+			);
+			name = LaunchScreen.storyboard;
 			sourceTree = "<group>";
 		};
 /* End PBXVariantGroup section */
@@ -1833,6 +1993,66 @@
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = VideoDemoAppStore;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		8493225E2908378B0013C029 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoAppUIKit/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.DemoAppUIKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		8493225F2908378B0013C029 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = DemoAppUIKit/Info.plist;
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.DemoAppUIKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -2043,6 +2263,7 @@
 		84F73838287C146D00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -2053,7 +2274,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2064,6 +2285,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2074,6 +2296,7 @@
 		84F73839287C146D00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -2084,7 +2307,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2105,6 +2328,7 @@
 		84F7383B287C146D00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -2122,6 +2346,7 @@
 		84F7383C287C146D00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
@@ -2153,6 +2378,15 @@
 			buildConfigurations = (
 				842D8BD22865B31D00801910 /* Debug */,
 				842D8BD32865B31D00801910 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		8493225D2908378B0013C029 /* Build configuration list for PBXNativeTarget "DemoAppUIKit" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				8493225E2908378B0013C029 /* Debug */,
+				8493225F2908378B0013C029 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
@@ -2260,6 +2494,11 @@
 			productName = NukeUI;
 		};
 		8493223F290830390013C029 /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		8493227F29093A9E0013C029 /* SnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;

@@ -1,0 +1,24 @@
+{
+  "configurations" : [
+    {
+      "id" : "F2D3052C-FAF5-4FD0-AA04-FF2FC8BE93E0",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "codeCoverage" : false
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:StreamVideo.xcodeproj",
+        "identifier" : "84F7382E287C146D00A363F4",
+        "name" : "StreamVideoUIKitTests"
+      }
+    }
+  ],
+  "version" : 1
+}

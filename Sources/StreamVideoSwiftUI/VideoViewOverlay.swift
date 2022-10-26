@@ -20,6 +20,23 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             rootView
+            VideoView(viewFactory: viewFactory, viewModel: viewModel)
+        }
+    }
+}
+
+public struct VideoView<Factory: ViewFactory>: View {
+    
+    var viewFactory: Factory
+    @StateObject var viewModel: CallViewModel
+    
+    public init(viewFactory: Factory, viewModel: CallViewModel) {
+        self.viewFactory = viewFactory
+        _viewModel = StateObject(wrappedValue: viewModel)
+    }
+    
+    public var body: some View {
+        ZStack {
             if viewModel.callingState == .outgoing {
                 viewFactory.makeOutgoingCallView(viewModel: viewModel)
             } else if viewModel.callingState == .inCall {
