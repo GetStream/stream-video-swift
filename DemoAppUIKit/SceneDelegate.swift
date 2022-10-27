@@ -37,7 +37,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             token: user.token,
             videoConfig: VideoConfig(
                 persitingSocketConnection: true,
-                joinVideoCallInstantly: false
+                joinVideoCallInstantly: true
             ),
             tokenProvider: { result in
                 result(.success(user.token))

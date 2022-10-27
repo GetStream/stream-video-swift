@@ -11,7 +11,7 @@ public struct VideoConfig: Sendable {
     
     public init(
         persitingSocketConnection: Bool = true,
-        joinVideoCallInstantly: Bool = false,
+        joinVideoCallInstantly: Bool = true,
         ringingTimeout: TimeInterval = 15
     ) {
         self.persitingSocketConnection = persitingSocketConnection

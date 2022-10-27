@@ -79,7 +79,7 @@ class CallKitService: NSObject, CXProviderDelegate {
                     token: currentUser.token,
                     videoConfig: VideoConfig(
                         persitingSocketConnection: true,
-                        joinVideoCallInstantly: false
+                        joinVideoCallInstantly: true
                     ),
                     tokenProvider: { result in
                         result(.success(currentUser.token))

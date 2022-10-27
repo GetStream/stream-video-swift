@@ -40,6 +40,8 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .healthCheckResponse(value):
             return value
+        case let .callEnded(value):
+            return value
         }
     }
 }
