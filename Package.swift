@@ -18,6 +18,10 @@ let package = Package(
         .library(
             name: "StreamVideoSwiftUI",
             targets: ["StreamVideoSwiftUI"]
+        ),
+        .library(
+            name: "StreamVideoUIKit",
+            targets: ["StreamVideoUIKit"]
         )
     ],
     dependencies: [
@@ -33,6 +37,11 @@ let package = Package(
         .target(
             name: "StreamVideoSwiftUI",
             dependencies: ["StreamVideo", "Nuke", .product(name: "NukeUI", package: "Nuke")],
+            resources: [.process("Resources")]
+        ),
+        .target(
+            name: "StreamVideoUIKit",
+            dependencies: ["StreamVideo", "StreamVideoSwiftUI", "Nuke", .product(name: "NukeUI", package: "Nuke")],
             resources: [.process("Resources")]
         )
     ]
