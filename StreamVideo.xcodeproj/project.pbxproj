@@ -73,7 +73,14 @@
 		846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */; };
 		846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */; };
 		8475BA8C28D9A74B00BA4712 /* Typealiases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8475BA8B28D9A74B00BA4712 /* Typealiases.swift */; };
+		84767502290A824B0015DC53 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84767501290A824B0015DC53 /* WebRTC */; };
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
+		848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
+		848A8059290A808A00F3079B /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		848A805B290A808C00F3079B /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
+		848A805C290A808C00F3079B /* StreamVideoSwiftUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
+		848A805D290A808E00F3079B /* StreamVideoUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; };
+		848A805E290A808E00F3079B /* StreamVideoUIKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		8492B871290801DC00006649 /* CallViewModel_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B870290801DC00006649 /* CallViewModel_Tests.swift */; };
 		8492B8732908024800006649 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
 		8492B875290808AE00006649 /* StreamVideoEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B874290808AE00006649 /* StreamVideoEnvironment.swift */; };
@@ -268,6 +275,19 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		848A805A290A808A00F3079B /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				848A805C290A808C00F3079B /* StreamVideoSwiftUI.framework in Embed Frameworks */,
+				848A8059290A808A00F3079B /* StreamVideo.framework in Embed Frameworks */,
+				848A805E290A808E00F3079B /* StreamVideoUIKit.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		84F7381F287C141000A363F4 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -479,6 +499,10 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
+				84767502290A824B0015DC53 /* WebRTC in Frameworks */,
+				848A805B290A808C00F3079B /* StreamVideoSwiftUI.framework in Frameworks */,
+				848A805D290A808E00F3079B /* StreamVideoUIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1207,6 +1231,7 @@
 				84932248290837890013C029 /* Sources */,
 				84932249290837890013C029 /* Frameworks */,
 				8493224A290837890013C029 /* Resources */,
+				848A805A290A808A00F3079B /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -1214,6 +1239,9 @@
 				8493226529083DBD0013C029 /* PBXTargetDependency */,
 			);
 			name = DemoAppUIKit;
+			packageProductDependencies = (
+				84767501290A824B0015DC53 /* WebRTC */,
+			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
 			productType = "com.apple.product-type.application";
@@ -2492,6 +2520,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = NukeUI;
+		};
+		84767501290A824B0015DC53 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
+			productName = WebRTC;
 		};
 		8493223F290830390013C029 /* SnapshotTesting */ = {
 			isa = XCSwiftPackageProductDependency;

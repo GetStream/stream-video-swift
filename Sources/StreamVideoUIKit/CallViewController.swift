@@ -10,12 +10,14 @@ import UIKit
 
 open class CallViewController: UIViewController {
     
-    let viewModel: CallViewModel = CallViewModel()
+    var viewModel: CallViewModel!
     
     private var cancellables = Set<AnyCancellable>()
     
-    public static func make() -> CallViewController {
-        CallViewController()
+    public static func make(with viewModel: CallViewModel? = nil) -> CallViewController {
+        let controller = CallViewController()
+        controller.viewModel = viewModel ?? CallViewModel()
+        return controller
     }
         
     override open func viewDidLoad() {
