@@ -2,23 +2,26 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 /// An object containing visual configuration for the whole application.
 public class Appearance {
     public var colors: Colors
     public var images: Images
     public var fonts: Fonts
+    public var sounds: Sounds
     
     public init(
         colors: Colors = Colors(),
         images: Images = Images(),
-        fonts: Fonts = Fonts()
+        fonts: Fonts = Fonts(),
+        sounds: Sounds = Sounds()
     ) {
         self.colors = colors
         self.images = images
         self.fonts = fonts
+        self.sounds = sounds
     }
     
     /// Provider for custom localization which is dependent on App Bundle.

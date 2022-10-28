@@ -12,6 +12,7 @@ public struct OutgoingCallView: View {
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
     @Injected(\.images) var images
+    @Injected(\.utils) var utils
     
     @ObservedObject var viewModel: CallViewModel
     
@@ -53,6 +54,14 @@ public struct OutgoingCallView: View {
         .background(
             OutgoingCallBackground(viewModel: viewModel)
         )
+        .onAppear {
+            if streamVideo.videoConfig.playSounds {
+                utils.callSoundsPlayer.playOutgoingCallSound()
+            }
+        }
+        .onDisappear {
+            utils.callSoundsPlayer.stopOngoingSound()
+        }
     }
 }
 

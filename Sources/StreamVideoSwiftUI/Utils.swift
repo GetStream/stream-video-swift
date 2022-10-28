@@ -7,6 +7,7 @@ import StreamVideo
 
 public class Utils {
     public var userListProvider: UserListProvider
+    public var callSoundsPlayer = CallSoundsPlayer()
 
     public init(userListProvider: UserListProvider = StreamUserListProvider()) {
         self.userListProvider = userListProvider

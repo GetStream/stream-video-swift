@@ -8,9 +8,11 @@ import SwiftUI
 
 public struct IncomingCallView: View {
     
+    @Injected(\.streamVideo) var streamVideo
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
+    @Injected(\.utils) var utils
     
     @StateObject var viewModel: IncomingViewModel
             
@@ -97,5 +99,13 @@ public struct IncomingCallView: View {
                 .aspectRatio(contentMode: .fill)
                 .edgesIgnoringSafeArea(.all)
         )
+        .onAppear {
+            if streamVideo.videoConfig.playSounds {
+                utils.callSoundsPlayer.playIncomingCallSound()
+            }
+        }
+        .onDisappear {
+            utils.callSoundsPlayer.stopOngoingSound()
+        }
     }
 }

@@ -15,6 +15,8 @@ public class StreamVideo {
     
     // Temporarly storing user in memory.
     public var userInfo: UserInfo
+    public let videoConfig: VideoConfig
+    
     var token: Token {
         didSet {
             callCoordinatorController.update(token: token)
@@ -39,8 +41,6 @@ public class StreamVideo {
     private let callsMiddleware = CallsMiddleware()
     
     private var currentCallInfo = [String: String]()
-    
-    internal let videoConfig: VideoConfig
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {

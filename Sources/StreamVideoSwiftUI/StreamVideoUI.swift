@@ -76,4 +76,14 @@ extension InjectedValues {
             appearance.fonts = newValue
         }
     }
+    
+    /// Provides access to the `Sounds` instance.
+    public var sounds: Sounds {
+        get {
+            appearance.sounds
+        }
+        set {
+            appearance.sounds = newValue
+        }
+    }
 }
