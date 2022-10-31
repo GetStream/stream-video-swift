@@ -35,6 +35,14 @@ class WebRTCClient: NSObject {
             self.tracks[id] = track
         }
         
+        func removeTrack(id: String) {
+            self.tracks[id] = nil
+        }
+        
+        func update(tracks: [String: RTCVideoTrack]) {
+            self.tracks = tracks
+        }
+        
         func callParticipantsUpdates() -> AsyncStream<[Bool]> {
             let updates = AsyncStream([Bool].self) { continuation in
                 $callParticipants.sink { _ in
@@ -80,7 +88,6 @@ class WebRTCClient: NSObject {
 
     private var localAudioTrack: RTCAudioTrack?
     private let userInfo: UserInfo
-    private var callSettings = CallSettings()
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
@@ -184,7 +191,8 @@ class WebRTCClient: NSObject {
     }
     
     func cleanUp() async {
-        callSettings = CallSettings()
+        videoCapturer?.stopCameraCapture()
+        videoCapturer = nil
         publisher = nil
         subscriber = nil
         signalChannel?.disconnect {}
@@ -193,6 +201,7 @@ class WebRTCClient: NSObject {
         localVideoTrack = nil
         sessionID = UUID().uuidString
         await state.update(callParticipants: [:])
+        await state.update(tracks: [:])
         await state.update(connectionState: .disconnected(reason: .user))
     }
     

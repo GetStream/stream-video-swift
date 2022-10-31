@@ -101,6 +101,7 @@ class SfuMiddleware: EventMiddleware {
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
         let participant = event.participant.toCallParticipant()
         await state.removeCallParticipant(with: participant.id)
+        await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
         let event = ParticipantEvent(
             id: participant.id,
             action: .leave,

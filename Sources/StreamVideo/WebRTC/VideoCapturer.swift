@@ -73,6 +73,10 @@ class VideoCapturer {
             fps: selectedFps
         )
     }
+    
+    func stopCameraCapture() {
+        (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+    }
 }
 
 extension CMVideoDimensions {

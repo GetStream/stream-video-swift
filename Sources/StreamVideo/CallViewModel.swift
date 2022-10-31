@@ -94,13 +94,17 @@ open class CallViewModel: ObservableObject {
             return
         }
         Task {
-            let isEnabled = !callSettings.videoOn
-            try await callController.changeVideoState(isEnabled: isEnabled)
-            callSettings = CallSettings(
-                audioOn: callSettings.audioOn,
-                videoOn: isEnabled,
-                speakerOn: callSettings.speakerOn
-            )
+            do {
+                let isEnabled = !callSettings.videoOn
+                try await callController.changeVideoState(isEnabled: isEnabled)
+                callSettings = CallSettings(
+                    audioOn: callSettings.audioOn,
+                    videoOn: isEnabled,
+                    speakerOn: callSettings.speakerOn
+                )
+            } catch {
+                log.error("Error toggling camera")
+            }
         }
     }
     
@@ -111,13 +115,17 @@ open class CallViewModel: ObservableObject {
             return
         }
         Task {
-            let isEnabled = !callSettings.audioOn
-            try await callController.changeAudioState(isEnabled: isEnabled)
-            callSettings = CallSettings(
-                audioOn: isEnabled,
-                videoOn: callSettings.videoOn,
-                speakerOn: callSettings.speakerOn
-            )
+            do {
+                let isEnabled = !callSettings.audioOn
+                try await callController.changeAudioState(isEnabled: isEnabled)
+                callSettings = CallSettings(
+                    audioOn: isEnabled,
+                    videoOn: callSettings.videoOn,
+                    speakerOn: callSettings.speakerOn
+                )
+            } catch {
+                log.error("Error toggling microphone")
+            }
         }
     }
     
@@ -175,27 +183,6 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    // TODO: temp method
-    public func testSFU(
-        callId: String,
-        participantIds: [String],
-        url: String,
-        token: String,
-        connectOptions: ConnectOptions
-    ) {
-        callController = streamVideo.makeCallController(callType: .default, callId: callId)
-        callingState = .outgoing
-        Task {
-            self.call = try await callController?.testSFU(
-                callSettings: callSettings,
-                url: url, token: token,
-                connectOptions: connectOptions
-            )
-            self.callingState = .inCall
-            listenForParticipantEvents()
-        }
-    }
-    
     /// Renders the local video in the provided renderer.
     /// - Parameter renderer: Any view (both UIKit and SwiftUI) implementing the `RTCVideoRenderer` protocol.
     public func renderLocalVideo(renderer: RTCVideoRenderer) {
@@ -226,6 +213,7 @@ open class CallViewModel: ObservableObject {
     
     /// Leaves the current call.
     private func leaveCall() {
+        log.debug("Leaving call")
         participantUpdates?.cancel()
         participantUpdates = nil
         call = nil

@@ -120,7 +120,7 @@ struct VerticalParticipantsView: View {
 struct VideoCallParticipantView: View {
     
     @Injected(\.images) var images
-    
+        
     let participant: CallParticipant
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
@@ -129,6 +129,7 @@ struct VideoCallParticipantView: View {
         StreamVideoViewSwiftUI(id: participant.id, size: availableSize) { view in
             onViewUpdate(participant, view)
         }
+        .opacity(participant.shouldDisplayTrack ? 1 : 0)
         .edgesIgnoringSafeArea(.all)
         .overlay(
             CallParticipantImageView(

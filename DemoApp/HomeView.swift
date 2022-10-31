@@ -151,23 +151,6 @@ struct HomeView: View {
             .background(makeCallEnabled ? Color.gray : Color.blue)
             .disabled(makeCallEnabled)
             .cornerRadius(16)
-            
-            Button {
-                viewModel.testSFU(
-                    callId: callId,
-                    participantIds: selectedParticipants.map { $0.id },
-                    url: url,
-                    token: MockTokenGenerator.generateToken(for: streamVideo.userInfo, callId: callId),
-                    connectOptions: .testSFU
-                )
-            } label: {
-                Text("Test SFU")
-                    .padding()
-            }
-            .foregroundColor(Color.white)
-            .background(makeCallEnabled ? Color.gray : Color.blue)
-            .disabled(makeCallEnabled)
-            .cornerRadius(16)
         }
     }
     

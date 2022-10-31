@@ -44,7 +44,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.isOnline = isOnline
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
-        self.showTrack = true
+        self.showTrack = showTrack
         self.track = track
         self.trackSize = trackSize
         self.layoutPriority = layoutPriority

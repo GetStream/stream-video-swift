@@ -87,23 +87,23 @@ class CallKitService: NSObject, CXProviderDelegate {
                 )
                 AppState.shared.streamVideo = streamVideo
             }
-            let callController = streamVideo.makeCallController(callType: .default, callId: currentCallId)
-            Task {
+//            let callController = streamVideo.makeCallController(callType: .default, callId: currentCallId)
+//            Task {
                 //TODO: change this to use the call creation flow.
-                _ = try? await callController.testSFU(
-                    callSettings: CallSettings(),
-                    url: "https://sfu2.fra1.gtstrm.com/rpc/twirp",
-                    token: MockTokenGenerator.generateToken(
-                        for: currentUser.userInfo,
-                        callId: currentCallId
-                    ),
-                    connectOptions: .testSFU
-                )
-                await MainActor.run {
-                    AppState.shared.activeCallController = callController
-                    action.fulfill()
-                }
-            }
+//                _ = try? await callController.testSFU(
+//                    callSettings: CallSettings(),
+//                    url: "https://sfu2.fra1.gtstrm.com/rpc/twirp",
+//                    token: MockTokenGenerator.generateToken(
+//                        for: currentUser.userInfo,
+//                        callId: currentCallId
+//                    ),
+//                    connectOptions: .testSFU
+//                )
+//                await MainActor.run {
+//                    AppState.shared.activeCallController = callController
+//                    action.fulfill()
+//                }
+//            }
         }
     }
     

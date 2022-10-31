@@ -83,30 +83,6 @@ public class CallController {
         return currentCall
     }
     
-    public func testSFU(
-        callSettings: CallSettings,
-        url: String,
-        token: String,
-        connectOptions: ConnectOptions
-    ) async throws -> Call? {
-        webRTCClient = WebRTCClient(
-            userInfo: userInfo,
-            apiKey: apiKey,
-            hostname: url,
-            token: token,
-            tokenProvider: tokenProvider
-        )
-    
-        let webRTCClient = try currentWebRTCClient()
-        try await webRTCClient.connect(
-            callSettings: callSettings,
-            videoOptions: VideoOptions(),
-            connectOptions: connectOptions
-        )
-        call = Call.create(callId: callId, callType: callType)
-        return call
-    }
-    
     /// Renders the local video in the provided renderer.
     /// - Parameter renderer: Any view (both UIKit and SwiftUI) implementing the `RTCVideoRenderer` protocol.
     public func renderLocalVideo(renderer: RTCVideoRenderer) {
@@ -151,6 +127,7 @@ public class CallController {
         call = nil
         Task {
             await webRTCClient?.cleanUp()
+            webRTCClient = nil
         }
     }
     

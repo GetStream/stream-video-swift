@@ -186,6 +186,7 @@ public class StreamVideo {
         postNotification(with: CallNotification.callEnded)
         webSocketClient?.set(callInfo: [:])
         currentCallController?.cleanUp()
+        currentCallController = nil
         if videoConfig.persitingSocketConnection {
             return
         }

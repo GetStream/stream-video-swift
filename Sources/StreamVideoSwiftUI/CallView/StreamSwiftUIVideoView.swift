@@ -27,28 +27,23 @@ public struct LocalVideoView: View {
             
     public var body: some View {
         GeometryReader { reader in
-            ZStack {
-                if callSettings.videoOn {
-                    StreamVideoViewSwiftUI(id: streamVideo.userInfo.id, size: reader.size) { view in
-                        onLocalVideoUpdate(view)
-                    }
-                    .rotation3DEffect(
-                        .degrees(callSettings.cameraPosition == .front ? 180 : 0),
-                        axis: (x: 0, y: 1, z: 0)
-                    )
-                } else if showBackground || streamVideo.userInfo.imageURL == nil {
-                    CallParticipantImageView(
-                        id: streamVideo.userInfo.id,
-                        name: streamVideo.userInfo.name,
-                        imageURL: streamVideo.userInfo.imageURL
-                    )
-                    .frame(maxWidth: reader.size.width)
-                } else {
-                    LazyImage(url: streamVideo.userInfo.imageURL)
-                        .aspectRatio(contentMode: .fill)
-                        .frame(maxWidth: reader.size.width)
-                }
+            StreamVideoViewSwiftUI(id: streamVideo.userInfo.id, size: reader.size) { view in
+                onLocalVideoUpdate(view)
             }
+            .rotation3DEffect(
+                .degrees(callSettings.cameraPosition == .front ? 180 : 0),
+                axis: (x: 0, y: 1, z: 0)
+            )
+            .opacity(callSettings.videoOn ? 1 : 0)
+            .overlay(
+                CallParticipantImageView(
+                    id: streamVideo.userInfo.id,
+                    name: streamVideo.userInfo.name,
+                    imageURL: streamVideo.userInfo.imageURL
+                )
+                .frame(maxWidth: reader.size.width)
+                .opacity(callSettings.videoOn ? 0 : 1)
+            )
             .edgesIgnoringSafeArea(.all)
             .background(Color(UIColor.systemBackground))
         }
@@ -79,13 +74,22 @@ struct StreamVideoViewSwiftUI: UIViewRepresentable {
 
 public class StreamMTLVideoView: RTCMTLVideoView {
     
+    let queue = DispatchQueue(label: "video-track")
+    
     weak var track: RTCVideoTrack?
     
     public func add(track: RTCVideoTrack) {
-        guard track.trackId != self.track?.trackId else { return }
-        self.track?.remove(self)
-        log.debug("Adding track to the view")
-        self.track = track
-        track.add(self)
+        queue.sync {
+            guard track.trackId != self.track?.trackId else { return }
+            self.track?.remove(self)
+            log.debug("Adding track to the view")
+            self.track = track
+            track.add(self)
+        }
+    }
+    
+    deinit {
+        log.debug("Deinit of video view")
+        track?.remove(self)
     }
 }

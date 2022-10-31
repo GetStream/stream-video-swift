@@ -208,6 +208,6 @@ struct CallParticipantView: View {
 extension CallParticipant {
     
     var renderingId: String {
-        "\(id)-\(isOnline)-\(hasAudio)-\(hasVideo)"
+        "\(trackLookupPrefix ?? id)-\(isOnline)-\(hasAudio)-\(shouldDisplayTrack)"
     }
 }
