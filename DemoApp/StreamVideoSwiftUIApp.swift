@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import Intents
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
@@ -34,7 +35,15 @@ struct StreamVideoSwiftUIApp: App {
             .onOpenURL { url in
                 handle(url: url)
             }
+            .onContinueUserActivity(
+                NSStringFromClass(INStartCallIntent.self),
+                perform: handleCallKitVideoTap(_:)
+            )
         }
+    }
+    
+    func handleCallKitVideoTap(_ userActivity: NSUserActivity) {
+        log.debug("new user activity \(userActivity)")
     }
     
     private func handle(url: URL) {

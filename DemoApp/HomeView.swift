@@ -2,6 +2,7 @@
 // Copyright © 2022 Stream.io Inc. All rights reserved.
 //
 
+import Intents
 import NukeUI
 import SwiftUI
 import StreamVideo
@@ -153,17 +154,6 @@ struct HomeView: View {
             .cornerRadius(16)
         }
     }
-    
-    var useLocalhost = false
-    // Just temporary solution.
-    var url: String {
-        if useLocalhost {
-            return "http://192.168.0.132:3031/twirp"
-        } else {
-            return "https://sfu2.fra1.gtstrm.com/rpc/twirp"
-        }
-    }
-    
 }
 
 enum CallAction: String {
