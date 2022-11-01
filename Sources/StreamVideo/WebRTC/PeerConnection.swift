@@ -97,7 +97,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 } else {
                     Task {
                         for candidate in self.pendingIceCandidates {
-                            try? await self.add(iceCandidate: candidate)
+                            _ = try? await self.add(iceCandidate: candidate)
                         }
                         self.pendingIceCandidates = []
                         continuation.resume(returning: ())
@@ -196,7 +196,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         log.debug("Data channel opened for \(type.rawValue)")
     }
     
-    private func add(iceCandidate: RTCIceCandidate) async throws {
+    @discardableResult
+    private func add(iceCandidate: RTCIceCandidate) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
             self.pc.add(iceCandidate) { error in
                 if let error = error {
@@ -204,7 +205,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                     continuation.resume(throwing: error)
                 } else {
                     log.debug("Added ice candidate successfully")
-                    continuation.resume(returning: ())
+                    continuation.resume(returning: true)
                 }
             }
         }
