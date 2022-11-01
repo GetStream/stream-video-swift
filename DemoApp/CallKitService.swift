@@ -29,6 +29,7 @@ class CallKitService: NSObject, CXProviderDelegate {
     func reportIncomingCall(completion: @escaping (Error?) -> Void) {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = true
+        configuration.supportedHandleTypes = [.generic]
         let provider = CXProvider(
             configuration: configuration
         )
