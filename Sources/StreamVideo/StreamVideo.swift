@@ -24,12 +24,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: TokenProvider
-    
-    // Change it to your local IP address.
-    private let hostname = "http://192.168.0.132:26991/rpc"
-    private let wsEndpoint =
-        "ws://192.168.0.132:8989/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
-    
+    private let endpointConfig: EndpointConfig = .localhostConfig
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
@@ -103,7 +98,7 @@ public class StreamVideo {
             httpClient,
             user,
             apiKey,
-            hostname,
+            endpointConfig.hostname,
             token, videoConfig
         )
         latencyService = environment.latencyServiceBuilder(httpClient)
@@ -206,7 +201,7 @@ public class StreamVideo {
     }
     
     private func connectWebSocketClient() {
-        if let connectURL = URL(string: wsEndpoint) {
+        if let connectURL = URL(string: endpointConfig.wsEndpoint) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         }

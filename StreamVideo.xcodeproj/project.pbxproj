@@ -164,6 +164,7 @@
 		84AF64D9287C79F60012A503 /* Errors.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64D8287C79F60012A503 /* Errors.swift */; };
 		84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64DA287C7A2C0012A503 /* ErrorPayload.swift */; };
 		84B04BE728941EA6003A8DCD /* StatsConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B04BE628941EA6003A8DCD /* StatsConstants.swift */; };
+		84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9A56C29112F39004DE31A /* EndpointConfig.swift */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
 		84BBF62F28AFDED200387A02 /* DataChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62E28AFDED200387A02 /* DataChannel.swift */; };
@@ -447,6 +448,7 @@
 		84AF64D8287C79F60012A503 /* Errors.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Errors.swift; sourceTree = "<group>"; };
 		84AF64DA287C7A2C0012A503 /* ErrorPayload.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPayload.swift; sourceTree = "<group>"; };
 		84B04BE628941EA6003A8DCD /* StatsConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatsConstants.swift; sourceTree = "<group>"; };
+		84B9A56C29112F39004DE31A /* EndpointConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointConfig.swift; sourceTree = "<group>"; };
 		84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
 		84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCMediaConstraints.swift; sourceTree = "<group>"; };
 		84BBF62E28AFDED200387A02 /* DataChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DataChannel.swift; sourceTree = "<group>"; };
@@ -1014,6 +1016,7 @@
 				84A7E1A72883E46200526C98 /* Timers.swift */,
 				841947972886D9CD0007B36E /* BundleExtensions.swift */,
 				841947992886EBD20007B36E /* UserConnectionProvider.swift */,
+				84B9A56C29112F39004DE31A /* EndpointConfig.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1632,6 +1635,7 @@
 				84A7E18A2883638200526C98 /* URLSessionWebSocketEngine.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84A737D128F4716E001A6769 /* events.pb.swift in Sources */,
+				84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */,
 				84F7383D287C18E500A363F4 /* CallViewModel.swift in Sources */,
 				84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */,
 				84A7E1812883629700526C98 /* WebSocketPingController.swift in Sources */,
