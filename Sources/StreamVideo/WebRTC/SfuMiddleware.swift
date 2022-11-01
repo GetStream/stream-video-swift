@@ -155,7 +155,7 @@ class SfuMiddleware: EventMiddleware {
         guard let json = try JSONSerialization.jsonObject(
             with: data,
             options: .mutableContainers
-        ) as? [String: Any], let sdp = json["sdp"] as? String else {
+        ) as? [String: Any], let sdp = json["candidate"] as? String else {
             throw ClientError.Unexpected()
         }
         let iceCandidate = RTCIceCandidate(

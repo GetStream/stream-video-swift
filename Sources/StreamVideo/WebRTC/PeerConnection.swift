@@ -95,17 +95,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else {
-                    for candidate in self.pendingIceCandidates {
-                        self.pc.add(candidate) { error in
-                            if let error = error {
-                                log.debug("Error adding ice candidate \(error.localizedDescription)")
-                            } else {
-                                log.debug("Added ice candidate successfully")
-                            }
+                    Task {
+                        for candidate in self.pendingIceCandidates {
+                            try? await self.add(iceCandidate: candidate)
                         }
+                        self.pendingIceCandidates = []
+                        continuation.resume(returning: ())
                     }
-                    self.pendingIceCandidates = []
-                    continuation.resume(returning: ())
                 }
             }
         }
@@ -171,9 +167,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         onNegotiationNeeded?(self)
     }
     
-    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
+        log.debug("Peer connection state changed to \(newState)")
+    }
     
-    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {}
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
+        log.debug("Ice gathering state changed to \(newState)")
+    }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
@@ -194,6 +194,20 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
         log.debug("Data channel opened for \(type.rawValue)")
+    }
+    
+    private func add(iceCandidate: RTCIceCandidate) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            self.pc.add(iceCandidate) { error in
+                if let error = error {
+                    log.debug("Error adding ice candidate \(error.localizedDescription)")
+                    continuation.resume(throwing: error)
+                } else {
+                    log.debug("Added ice candidate successfully")
+                    continuation.resume(returning: ())
+                }
+            }
+        }
     }
 }
 

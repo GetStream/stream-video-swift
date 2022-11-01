@@ -3,8 +3,8 @@
 //
 
 import Foundation
-@preconcurrency import CallKit
-@preconcurrency import StreamVideo
+import CallKit
+import StreamVideo
 
 class CallKitService: NSObject, CXProviderDelegate {
     
