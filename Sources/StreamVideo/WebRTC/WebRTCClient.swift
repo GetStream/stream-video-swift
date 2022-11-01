@@ -406,7 +406,11 @@ class WebRTCClient: NSObject {
     
     private func webSocketURL(from hostname: String) -> URL? {
         let host = URL(string: hostname)?.host ?? hostname
-        let wsURLString = "ws://\(host):3031/ws"
+        var wsURLString = "wss://\(host)/ws"
+        if host.starts(with: "192.") {
+            // Temporary for localhost testing.
+            wsURLString = "ws://\(host):3031/ws"
+        }
         let wsURL = URL(string: wsURLString)
         return wsURL
     }
