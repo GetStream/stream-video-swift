@@ -12,6 +12,13 @@ The StreamVideo product consists of three separate SDKs:
 
 The low-level client is used as a dependency in the UI frameworks, and can also be used standalone if you plan to build your own UI. The UI SDKs depend on the low-level client.
 
+### Main Principles
+
+- Progressive disclosure: The SDK can be used easily with very minimal knowledge of it. As you become more familiar with it, you can dig deeper and start customizing it on all levels.
+- Swift native API: Uses Swift's powerful language features to make the SDK usage easy and type-safe.
+- Familiar behavior: The UI elements are good platform citizens and behave like native elements; they respect tintColor, paddings, light/dark mode, dynamic font sizes, etc.
+- Fully open-source implementation: You have access to the complete source code of the SDK on GitHub.
+
 ## Low-Level Client
 
 The low-level client is used for establishing audio and video calls. It integrates with Stream's backend infrastructure, and implements the WebRTC protocol. 
