@@ -3,6 +3,7 @@
     {
       "Basics": [
       	"basics/quick-start",
+      	"basics/integration",
         "basics/architecture-overview"
       ]
     }    

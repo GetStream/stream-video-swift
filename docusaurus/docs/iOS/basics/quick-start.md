@@ -4,7 +4,7 @@ title: Quick Start
 
 ### Your First App with StreamVideo
 
-Before starting, make sure you have installed StreamVideo [TODO: link] as explained in the Installation section.
+Before starting, make sure you have installed StreamVideo as explained in the [Installation](./integration.md) section.
 
 ### Setting up the StreamVideo object
 
