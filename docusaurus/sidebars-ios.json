@@ -5,6 +5,11 @@
       	"basics/quick-start",
       	"basics/integration",
         "basics/architecture-overview"
+      ],
+      "Guides": [
+      	"guides/call-lifecycle",
+      	"guides/call-events",
+      	"guides/call-state"
       ]
     }    
   ]
