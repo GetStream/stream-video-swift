@@ -125,6 +125,7 @@ public class StreamVideo {
             callId: callId,
             callType: callType,
             apiKey: apiKey.apiKeyString,
+            videoEnabled: videoConfig.videoEnabled,
             tokenProvider: tokenProvider
         )
         currentCallController = controller

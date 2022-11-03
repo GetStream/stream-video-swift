@@ -91,6 +91,7 @@ class WebRTCClient: NSObject {
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
+    private let videoEnabled: Bool
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
@@ -123,10 +124,12 @@ class WebRTCClient: NSObject {
         apiKey: String,
         hostname: String,
         token: String,
+        videoEnabled: Bool,
         tokenProvider: @escaping TokenProvider
     ) {
         self.userInfo = userInfo
         self.token = token
+        self.videoEnabled = videoEnabled
         httpClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession(),
             tokenProvider: tokenProvider
@@ -228,7 +231,9 @@ class WebRTCClient: NSObject {
         if callSettings.shouldPublish {
             log.debug("publishing local tracks")
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"])
-            publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"])
+            if videoEnabled {
+                publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"])
+            }
         }
     }
     
@@ -269,7 +274,7 @@ class WebRTCClient: NSObject {
         let trackId = idParts.first ?? UUID().uuidString
         let track = stream.videoTracks.first
         Task {
-            if idParts.last == "video" && track != nil {
+            if videoEnabled && idParts.last == "video" && track != nil {
                 await self.state.add(track: track, id: trackId)
             }
             let participants = await state.callParticipants

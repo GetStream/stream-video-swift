@@ -67,11 +67,13 @@ public struct OutgoingCallView: View {
 
 struct OutgoingCallBackground: View {
     
+    @Injected(\.streamVideo) var streamVideo
+    
     @ObservedObject var viewModel: CallViewModel
     
     var body: some View {
         ZStack {
-            if viewModel.callSettings.videoOn && !isSimulator {
+            if streamVideo.videoConfig.videoEnabled && viewModel.callSettings.videoOn && !isSimulator {
                 LocalVideoView(callSettings: viewModel.callSettings) { view in
                     if let track = viewModel.localParticipant?.track {
                         view.add(track: track)

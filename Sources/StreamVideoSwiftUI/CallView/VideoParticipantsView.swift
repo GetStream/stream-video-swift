@@ -120,6 +120,7 @@ struct VerticalParticipantsView: View {
 struct VideoCallParticipantView: View {
     
     @Injected(\.images) var images
+    @Injected(\.streamVideo) var streamVideo
         
     let participant: CallParticipant
     var availableSize: CGSize
@@ -129,7 +130,7 @@ struct VideoCallParticipantView: View {
         StreamVideoViewSwiftUI(id: participant.id, size: availableSize) { view in
             onViewUpdate(participant, view)
         }
-        .opacity(participant.shouldDisplayTrack ? 1 : 0)
+        .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(.all)
         .overlay(
             CallParticipantImageView(
@@ -138,9 +139,13 @@ struct VideoCallParticipantView: View {
                 imageURL: participant.profileImageURL
             )
             .frame(maxWidth: availableSize.width)
-            .opacity(participant.shouldDisplayTrack ? 0 : 1)
+            .opacity(showVideo ? 0 : 1)
         )
         .border(Color.green, width: participant.isDominantSpeaker ? 2 : 0)
+    }
+    
+    private var showVideo: Bool {
+        participant.shouldDisplayTrack && streamVideo.videoConfig.videoEnabled
     }
 }
 

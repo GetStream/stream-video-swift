@@ -22,6 +22,7 @@ public class CallController {
     private let callType: CallType
     private let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
+    private let videoEnabled: Bool
     private let tokenProvider: TokenProvider
     
     init(
@@ -30,6 +31,7 @@ public class CallController {
         callId: String,
         callType: CallType,
         apiKey: String,
+        videoEnabled: Bool,
         tokenProvider: @escaping TokenProvider
     ) {
         self.userInfo = userInfo
@@ -38,6 +40,7 @@ public class CallController {
         self.callCoordinatorController = callCoordinatorController
         self.apiKey = apiKey
         self.tokenProvider = tokenProvider
+        self.videoEnabled = videoEnabled
     }
     
     /// Joins a call with the provided information.
@@ -67,6 +70,7 @@ public class CallController {
             apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
+            videoEnabled: videoEnabled,
             tokenProvider: tokenProvider
         )
         

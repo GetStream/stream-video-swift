@@ -73,6 +73,9 @@ open class CallViewModel: ObservableObject {
     }
     
     public init() {
+        if !streamVideo.videoConfig.videoEnabled {
+            callSettings = CallSettings(speakerOn: false)
+        }
         NotificationCenter.default.addObserver(
             self,
             selector: #selector(checkForOngoingCall),
@@ -89,7 +92,6 @@ open class CallViewModel: ObservableObject {
     }
 
     public func toggleCameraEnabled() {
-        // TODO: throw error
         guard let callController = callController else {
             return
         }
@@ -110,7 +112,6 @@ open class CallViewModel: ObservableObject {
     
     /// Toggles the state of the microphone (muted vs unmuted).
     public func toggleMicrophoneEnabled() {
-        // TODO: throw error
         guard let callController = callController else {
             return
         }
@@ -131,7 +132,6 @@ open class CallViewModel: ObservableObject {
     
     /// Toggles the state of the camera (visible vs non-visible).
     public func toggleCameraPosition() {
-        // TODO: throw error
         guard let callController = callController else {
             return
         }

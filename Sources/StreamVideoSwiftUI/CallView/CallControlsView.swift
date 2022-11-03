@@ -6,6 +6,8 @@ import StreamVideo
 import SwiftUI
 
 public struct CallControlsView: View {
+    
+    @Injected(\.streamVideo) var streamVideo
         
     private let size: CGFloat = 50
     
@@ -22,21 +24,23 @@ public struct CallControlsView: View {
         HStack(alignment: .top) {
             Spacer()
             
-            Button(
-                action: {
-                    viewModel.toggleCameraEnabled()
-                },
-                label: {
-                    CallIconView(
-                        icon: (viewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
-                        size: size,
-                        iconStyle: (viewModel.callSettings.videoOn ? .primary : .transparent)
-                    )
-                }
-            )
+            if streamVideo.videoConfig.videoEnabled {
+                Button(
+                    action: {
+                        viewModel.toggleCameraEnabled()
+                    },
+                    label: {
+                        CallIconView(
+                            icon: (viewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
+                            size: size,
+                            iconStyle: (viewModel.callSettings.videoOn ? .primary : .transparent)
+                        )
+                    }
+                )
+                
+                Spacer()
+            }
             
-            Spacer()
-
             Button(
                 action: {
                     viewModel.toggleMicrophoneEnabled()
@@ -52,20 +56,22 @@ public struct CallControlsView: View {
             
             Spacer()
             
-            Button(
-                action: {
-                    viewModel.toggleCameraPosition()
-                },
-                label: {
-                    CallIconView(
-                        icon: images.toggleCamera,
-                        size: size,
-                        iconStyle: .primary
-                    )
-                }
-            )
-            
-            Spacer()
+            if streamVideo.videoConfig.videoEnabled {
+                Button(
+                    action: {
+                        viewModel.toggleCameraPosition()
+                    },
+                    label: {
+                        CallIconView(
+                            icon: images.toggleCamera,
+                            size: size,
+                            iconStyle: .primary
+                        )
+                    }
+                )
+                
+                Spacer()
+            }
             
             Button {
                 viewModel.hangUp()

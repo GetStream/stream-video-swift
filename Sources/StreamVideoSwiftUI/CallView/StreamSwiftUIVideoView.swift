@@ -34,7 +34,7 @@ public struct LocalVideoView: View {
                 .degrees(callSettings.cameraPosition == .front ? 180 : 0),
                 axis: (x: 0, y: 1, z: 0)
             )
-            .opacity(callSettings.videoOn ? 1 : 0)
+            .opacity(showVideo ? 1 : 0)
             .overlay(
                 CallParticipantImageView(
                     id: streamVideo.userInfo.id,
@@ -42,12 +42,16 @@ public struct LocalVideoView: View {
                     imageURL: streamVideo.userInfo.imageURL
                 )
                 .frame(maxWidth: reader.size.width)
-                .opacity(callSettings.videoOn ? 0 : 1)
+                .opacity(showVideo ? 0 : 1)
             )
             .edgesIgnoringSafeArea(.all)
             .background(Color(UIColor.systemBackground))
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+    
+    private var showVideo: Bool {
+        callSettings.videoOn && streamVideo.videoConfig.videoEnabled
     }
 }
 
