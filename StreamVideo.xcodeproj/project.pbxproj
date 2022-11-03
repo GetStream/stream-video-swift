@@ -7,8 +7,6 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		8403BFCC28EB09D100CBE341 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 8403BFCB28EB09D100CBE341 /* Nuke */; };
-		8403BFCE28EB09D100CBE341 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 8403BFCD28EB09D100CBE341 /* NukeUI */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -165,6 +163,10 @@
 		84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64DA287C7A2C0012A503 /* ErrorPayload.swift */; };
 		84B04BE728941EA6003A8DCD /* StatsConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B04BE628941EA6003A8DCD /* StatsConstants.swift */; };
 		84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9A56C29112F39004DE31A /* EndpointConfig.swift */; };
+		84B9A58F29140D3D004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A58E29140D3D004DE31A /* Nuke */; };
+		84B9A59129140D3D004DE31A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59029140D3D004DE31A /* NukeUI */; };
+		84B9A59329140D44004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59229140D44004DE31A /* Nuke */; };
+		84B9A59529140D44004DE31A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59429140D44004DE31A /* NukeUI */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
 		84BBF62F28AFDED200387A02 /* DataChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62E28AFDED200387A02 /* DataChannel.swift */; };
@@ -520,10 +522,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8403BFCE28EB09D100CBE341 /* NukeUI in Frameworks */,
 				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
-				8403BFCC28EB09D100CBE341 /* Nuke in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -539,7 +539,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84B9A59129140D3D004DE31A /* NukeUI in Frameworks */,
 				84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */,
+				84B9A58F29140D3D004DE31A /* Nuke in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -556,7 +558,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84B9A59529140D44004DE31A /* NukeUI in Frameworks */,
 				84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */,
+				84B9A59329140D44004DE31A /* Nuke in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1278,8 +1282,6 @@
 			packageProductDependencies = (
 				84AF64BB287C34320012A503 /* WebRTC */,
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
-				8403BFCB28EB09D100CBE341 /* Nuke */,
-				8403BFCD28EB09D100CBE341 /* NukeUI */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -1320,6 +1322,8 @@
 			);
 			name = StreamVideoSwiftUI;
 			packageProductDependencies = (
+				84B9A58E29140D3D004DE31A /* Nuke */,
+				84B9A59029140D3D004DE31A /* NukeUI */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */;
@@ -1362,6 +1366,10 @@
 				84F7384B287C196B00A363F4 /* PBXTargetDependency */,
 			);
 			name = StreamVideoUIKit;
+			packageProductDependencies = (
+				84B9A59229140D44004DE31A /* Nuke */,
+				84B9A59429140D44004DE31A /* NukeUI */,
+			);
 			productName = StreamVideoUIKit;
 			productReference = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */;
 			productType = "com.apple.product-type.framework";
@@ -2531,16 +2539,6 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		8403BFCB28EB09D100CBE341 /* Nuke */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = Nuke;
-		};
-		8403BFCD28EB09D100CBE341 /* NukeUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = NukeUI;
-		};
 		84767501290A824B0015DC53 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
@@ -2565,6 +2563,26 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
 			productName = WebRTC;
+		};
+		84B9A58E29140D3D004DE31A /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		84B9A59029140D3D004DE31A /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+		84B9A59229140D44004DE31A /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		84B9A59429140D44004DE31A /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
 		};
 		84BE8A5528BE314000B34D2F /* SwiftProtobuf */ = {
 			isa = XCSwiftPackageProductDependency;
