@@ -10,8 +10,8 @@ class CallKitService: NSObject, CXProviderDelegate {
     
     @Injected(\.streamVideo) var streamVideo
         
-    //TODO: load this from the notification
-    var currentCallId = "callkit"
+    var callId: String = ""
+    var callType: String = ""
     
     private var callKitId: UUID?
     private let callController = CXCallController()
@@ -26,7 +26,7 @@ class CallKitService: NSObject, CXProviderDelegate {
         )
     }
         
-    func reportIncomingCall(completion: @escaping (Error?) -> Void) {
+    func reportIncomingCall(callCid: String, completion: @escaping (Error?) -> Void) {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = true
         configuration.supportedHandleTypes = [.generic]
@@ -35,11 +35,18 @@ class CallKitService: NSObject, CXProviderDelegate {
         )
         provider.setDelegate(self, queue: nil)
         let update = CXCallUpdate()
-        let callId = UUID()
-        callKitId = callId
+        let idComponents = callCid.components(separatedBy: ":")
+        guard idComponents.count >= 2 else {
+            //TODO: handle this case.
+            return
+        }
+        self.callId = idComponents[1]
+        self.callType = idComponents[0]
+        //TODO: add mapping
+        callKitId = UUID()
         update.remoteHandle = CXHandle(type: .generic, value: "You are receiving a call")
         provider.reportNewIncomingCall(
-            with: callId,
+            with: callKitId!,
             update: update,
             completion: completion
         )
@@ -72,7 +79,7 @@ class CallKitService: NSObject, CXProviderDelegate {
             action.fail()
             return
         }
-        if !currentCallId.isEmpty {
+        if !callId.isEmpty {
             if AppState.shared.streamVideo == nil {
                 let streamVideo = StreamVideo(
                     apiKey: "key1",
@@ -88,12 +95,13 @@ class CallKitService: NSObject, CXProviderDelegate {
                 )
                 AppState.shared.streamVideo = streamVideo
             }
-            let callController = streamVideo.makeCallController(callType: .default, callId: currentCallId)
+            let callType: CallType = .init(name: callType)
+            let callController = streamVideo.makeCallController(callType: callType, callId: callId)
             Task {
                 //TODO: change this to use the call creation flow.
                 _ = try await callController.joinCall(
-                    callType: .default,
-                    callId: currentCallId,
+                    callType: callType,
+                    callId: callId,
                     callSettings: CallSettings(),
                     videoOptions: VideoOptions(),
                     participantIds: []
@@ -112,12 +120,4 @@ class CallKitService: NSObject, CXProviderDelegate {
         action.fulfill()
     }
     
-}
-
-extension ConnectOptions {
-    
-    static let testSFU = ConnectOptions(iceServers: [
-        ICEServerConfig(urls: ["stun:stun.l.google.com:19302"]),
-        ICEServerConfig(urls: ["turn:sfu2.fra1.gtstrm.com:3478"], username: "video", password: "video")
-    ])
 }

@@ -7,6 +7,7 @@
         "basics/architecture-overview"
       ],
       "Guides": [
+        "guides/call-viewmodel",
       	"guides/call-lifecycle",
       	"guides/call-events",
       	"guides/call-state"

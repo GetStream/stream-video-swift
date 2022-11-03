@@ -13,8 +13,11 @@ class CallService {
     lazy var voipPushService = VoipPushService(
         voipTokenHandler: UnsecureUserRepository.shared
     ) { [weak self] payload, type, completion in
-        guard let self = self else { return }
-        self.callService.reportIncomingCall { _ in
+        guard let self = self,
+              let callCid = payload.dictionaryPayload["callCid"] as? String else {
+            return
+        }
+        self.callService.reportIncomingCall(callCid: callCid) { _ in
             completion()
         }
     }
