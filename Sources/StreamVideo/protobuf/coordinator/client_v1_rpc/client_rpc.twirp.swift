@@ -45,6 +45,18 @@ class Stream_Video_Coordinator_ClientV1Rpc_ClientRPC: @unchecked Sendable {
         try await execute(request: updateCallRequest, path: "UpdateCall")
     }
     
+    func updateCallPermissions(
+        updateCallPermissionsRequest: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest
+    ) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsResponse {
+        try await execute(request: updateCallPermissionsRequest, path: "UpdateCallPermissions")
+    }
+    
+    func endCall(endCallRequest: Stream_Video_Coordinator_ClientV1Rpc_EndCallRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_EndCallResponse {
+        try await execute(request: endCallRequest, path: "EndCall")
+    }
+    
     func queryCalls(queryCallsRequest: Stream_Video_Coordinator_ClientV1Rpc_QueryCallsRequest) async throws
         -> Stream_Video_Coordinator_ClientV1Rpc_QueryCallsResponse {
         try await execute(request: queryCallsRequest, path: "QueryCalls")

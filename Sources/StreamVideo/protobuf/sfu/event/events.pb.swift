@@ -135,6 +135,14 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         set { eventPayload = .healthCheckResponse(newValue) }
     }
 
+    var callEnded: Stream_Video_Sfu_Event_CallEnded {
+        get {
+            if case let .callEnded(v)? = eventPayload { return v }
+            return Stream_Video_Sfu_Event_CallEnded()
+        }
+        set { eventPayload = .callEnded(newValue) }
+    }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_EventPayload: Equatable {
@@ -152,6 +160,7 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         case dominantSpeakerChanged(Stream_Video_Sfu_Event_DominantSpeakerChanged)
         case joinResponse(Stream_Video_Sfu_Event_JoinResponse)
         case healthCheckResponse(Stream_Video_Sfu_Event_HealthCheckResponse)
+        case callEnded(Stream_Video_Sfu_Event_CallEnded)
 
         #if !swift(>=4.1)
         static func == (
@@ -221,6 +230,10 @@ struct Stream_Video_Sfu_Event_SfuEvent {
             case (.healthCheckResponse, .healthCheckResponse): return {
                     guard case let .healthCheckResponse(l) = lhs,
                           case let .healthCheckResponse(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.callEnded, .callEnded): return {
+                    guard case let .callEnded(l) = lhs, case let .callEnded(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
             default: return false
@@ -557,6 +570,18 @@ struct Stream_Video_Sfu_Event_AudioLevelChanged {
     init() {}
 }
 
+struct Stream_Video_Sfu_Event_CallEnded {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var message: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 struct Stream_Video_Sfu_Event_AudioLevel {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -794,6 +819,7 @@ extension Stream_Video_Sfu_Event_ICECandidateTrickle: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ConnectionQualityChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_DominantSpeakerChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLevelChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_CallEnded: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLevel: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLayerSetting: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioMediaRequest: @unchecked Sendable {}
@@ -814,10 +840,10 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     static let protoMessageName: String = _protobuf_package + ".SfuEvent"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "subscriber_offer"),
-        14: .standard(proto: "publisher_answer"),
-        2: .standard(proto: "connection_quality_changed"),
-        3: .standard(proto: "audio_level_changed"),
-        4: .standard(proto: "ice_trickle"),
+        2: .standard(proto: "publisher_answer"),
+        3: .standard(proto: "connection_quality_changed"),
+        4: .standard(proto: "audio_level_changed"),
+        5: .standard(proto: "ice_trickle"),
         6: .standard(proto: "change_publish_quality"),
         7: .standard(proto: "local_device_change"),
         8: .standard(proto: "mute_state_changed"),
@@ -826,7 +852,8 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
         11: .standard(proto: "participant_left"),
         12: .standard(proto: "dominant_speaker_changed"),
         13: .standard(proto: "join_response"),
-        15: .standard(proto: "health_check_response")
+        14: .standard(proto: "health_check_response"),
+        15: .standard(proto: "call_ended")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -849,6 +876,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                     }
                 }()
             case 2: try {
+                    var v: Stream_Video_Sfu_Event_PublisherAnswer?
+                    var hadOneofValue = false
+                    if let current = self.eventPayload {
+                        hadOneofValue = true
+                        if case let .publisherAnswer(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.eventPayload = .publisherAnswer(v)
+                    }
+                }()
+            case 3: try {
                     var v: Stream_Video_Sfu_Event_ConnectionQualityChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
@@ -861,7 +901,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                         self.eventPayload = .connectionQualityChanged(v)
                     }
                 }()
-            case 3: try {
+            case 4: try {
                     var v: Stream_Video_Sfu_Event_AudioLevelChanged?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
@@ -874,7 +914,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                         self.eventPayload = .audioLevelChanged(v)
                     }
                 }()
-            case 4: try {
+            case 5: try {
                     var v: Stream_Video_Sfu_Models_ICETrickle?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
@@ -992,19 +1032,6 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                     }
                 }()
             case 14: try {
-                    var v: Stream_Video_Sfu_Event_PublisherAnswer?
-                    var hadOneofValue = false
-                    if let current = self.eventPayload {
-                        hadOneofValue = true
-                        if case let .publisherAnswer(m) = current { v = m }
-                    }
-                    try decoder.decodeSingularMessageField(value: &v)
-                    if let v = v {
-                        if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.eventPayload = .publisherAnswer(v)
-                    }
-                }()
-            case 15: try {
                     var v: Stream_Video_Sfu_Event_HealthCheckResponse?
                     var hadOneofValue = false
                     if let current = self.eventPayload {
@@ -1015,6 +1042,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                     if let v = v {
                         if hadOneofValue { try decoder.handleConflictingOneOf() }
                         self.eventPayload = .healthCheckResponse(v)
+                    }
+                }()
+            case 15: try {
+                    var v: Stream_Video_Sfu_Event_CallEnded?
+                    var hadOneofValue = false
+                    if let current = self.eventPayload {
+                        hadOneofValue = true
+                        if case let .callEnded(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.eventPayload = .callEnded(v)
                     }
                 }()
             default: break
@@ -1032,17 +1072,21 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                 guard case let .subscriberOffer(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
             }()
+        case .publisherAnswer?: try {
+                guard case let .publisherAnswer(v)? = self.eventPayload else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+            }()
         case .connectionQualityChanged?: try {
                 guard case let .connectionQualityChanged(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
             }()
         case .audioLevelChanged?: try {
                 guard case let .audioLevelChanged(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
             }()
         case .iceTrickle?: try {
                 guard case let .iceTrickle(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
             }()
         case .changePublishQuality?: try {
                 guard case let .changePublishQuality(v)? = self.eventPayload else { preconditionFailure() }
@@ -1076,12 +1120,12 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                 guard case let .joinResponse(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 13)
             }()
-        case .publisherAnswer?: try {
-                guard case let .publisherAnswer(v)? = self.eventPayload else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
-            }()
         case .healthCheckResponse?: try {
                 guard case let .healthCheckResponse(v)? = self.eventPayload else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 14)
+            }()
+        case .callEnded?: try {
+                guard case let .callEnded(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 15)
             }()
         case nil: break
@@ -1733,6 +1777,39 @@ extension Stream_Video_Sfu_Event_AudioLevelChanged: SwiftProtobuf.Message, Swift
 
     static func == (lhs: Stream_Video_Sfu_Event_AudioLevelChanged, rhs: Stream_Video_Sfu_Event_AudioLevelChanged) -> Bool {
         if lhs.audioLevels != rhs.audioLevels { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Event_CallEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".CallEnded"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "message")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.message) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !message.isEmpty {
+            try visitor.visitSingularStringField(value: message, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_Event_CallEnded, rhs: Stream_Video_Sfu_Event_CallEnded) -> Bool {
+        if lhs.message != rhs.message { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

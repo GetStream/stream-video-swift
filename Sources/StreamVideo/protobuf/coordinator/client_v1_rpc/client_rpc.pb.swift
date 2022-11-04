@@ -441,6 +441,139 @@ struct Stream_Video_Coordinator_ClientV1Rpc_UpdateCallResponse {
     fileprivate var _call: Stream_Video_Coordinator_ClientV1Rpc_CallEnvelope?
 }
 
+struct Stream_Video_Coordinator_ClientV1Rpc_RoleOverride {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// the users that should get the new role, cannot be empty
+    var userIds: [String] = []
+
+    /// the new role
+    var roleName: String {
+        get { _roleName ?? String() }
+        set { _roleName = newValue }
+    }
+
+    /// Returns true if `roleName` has been explicitly set.
+    var hasRoleName: Bool { self._roleName != nil }
+    /// Clears the value of `roleName`. Subsequent reads from it will return its default value.
+    mutating func clearRoleName() { _roleName = nil }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _roleName: String?
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// the users that will get the new permissions granted
+    /// if empty, the grant applies to all users
+    var userIds: [String] = []
+
+    /// the list of permissions granted to users
+    var permissions: [String] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
+
+    var grantInput: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest.OneOf_GrantInput?
+
+    var roleOverride: Stream_Video_Coordinator_ClientV1Rpc_RoleOverride {
+        get {
+            if case let .roleOverride(v)? = grantInput { return v }
+            return Stream_Video_Coordinator_ClientV1Rpc_RoleOverride()
+        }
+        set { grantInput = .roleOverride(newValue) }
+    }
+
+    var permissionOverride: Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride {
+        get {
+            if case let .permissionOverride(v)? = grantInput { return v }
+            return Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride()
+        }
+        set { grantInput = .permissionOverride(newValue) }
+    }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    enum OneOf_GrantInput: Equatable {
+        case roleOverride(Stream_Video_Coordinator_ClientV1Rpc_RoleOverride)
+        case permissionOverride(Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride)
+
+        #if !swift(>=4.1)
+        static func == (
+            lhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest.OneOf_GrantInput,
+            rhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest.OneOf_GrantInput
+        ) -> Bool {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch (lhs, rhs) {
+            case (.roleOverride, .roleOverride): return {
+                    guard case let .roleOverride(l) = lhs, case let .roleOverride(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.permissionOverride, .permissionOverride): return {
+                    guard case let .permissionOverride(l) = lhs,
+                          case let .permissionOverride(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            default: return false
+            }
+        }
+        #endif
+    }
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_EndCallRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callCid: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_EndCallResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 struct Stream_Video_Coordinator_ClientV1Rpc_CreateCallResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -947,6 +1080,13 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CallInput: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetOrCreateCallResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_RoleOverride: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest.OneOf_GrantInput: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_EndCallRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_EndCallResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryCallsRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryCallsResponse: @unchecked Sendable {}
@@ -1253,7 +1393,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "call"),
         2: .same(proto: "members"),
-        4: .same(proto: "ring")
+        3: .same(proto: "ring")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1264,7 +1404,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
             case 2: try { try decoder.decodeRepeatedMessageField(value: &self.members) }()
-            case 4: try { try decoder.decodeSingularBoolField(value: &self._ring) }()
+            case 3: try { try decoder.decodeSingularBoolField(value: &self._ring) }()
             default: break
             }
         }
@@ -1282,7 +1422,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
             try visitor.visitRepeatedMessageField(value: members, fieldNumber: 2)
         }
         try { if let v = self._ring {
-            try visitor.visitSingularBoolField(value: v, fieldNumber: 4)
+            try visitor.visitSingularBoolField(value: v, fieldNumber: 3)
         } }()
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -1758,6 +1898,254 @@ extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallResponse: SwiftProtobuf
         rhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallResponse
     ) -> Bool {
         if lhs._call != rhs._call { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_RoleOverride: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".RoleOverride"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "user_ids"),
+        2: .standard(proto: "role_name")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedStringField(value: &self.userIds) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self._roleName) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !userIds.isEmpty {
+            try visitor.visitRepeatedStringField(value: userIds, fieldNumber: 1)
+        }
+        try { if let v = self._roleName {
+            try visitor.visitSingularStringField(value: v, fieldNumber: 2)
+        } }()
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_RoleOverride,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_RoleOverride
+    ) -> Bool {
+        if lhs.userIds != rhs.userIds { return false }
+        if lhs._roleName != rhs._roleName { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".PermissionGrantOverride"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "user_ids"),
+        2: .same(proto: "permissions")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedStringField(value: &self.userIds) }()
+            case 2: try { try decoder.decodeRepeatedStringField(value: &self.permissions) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !userIds.isEmpty {
+            try visitor.visitRepeatedStringField(value: userIds, fieldNumber: 1)
+        }
+        if !permissions.isEmpty {
+            try visitor.visitRepeatedStringField(value: permissions, fieldNumber: 2)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride
+    ) -> Bool {
+        if lhs.userIds != rhs.userIds { return false }
+        if lhs.permissions != rhs.permissions { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".UpdateCallPermissionsRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid"),
+        2: .standard(proto: "role_override"),
+        3: .standard(proto: "permission_override")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            case 2: try {
+                    var v: Stream_Video_Coordinator_ClientV1Rpc_RoleOverride?
+                    var hadOneofValue = false
+                    if let current = self.grantInput {
+                        hadOneofValue = true
+                        if case let .roleOverride(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.grantInput = .roleOverride(v)
+                    }
+                }()
+            case 3: try {
+                    var v: Stream_Video_Coordinator_ClientV1Rpc_PermissionGrantOverride?
+                    var hadOneofValue = false
+                    if let current = self.grantInput {
+                        hadOneofValue = true
+                        if case let .permissionOverride(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.grantInput = .permissionOverride(v)
+                    }
+                }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        switch grantInput {
+        case .roleOverride?: try {
+                guard case let .roleOverride(v)? = self.grantInput else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+            }()
+        case .permissionOverride?: try {
+                guard case let .permissionOverride(v)? = self.grantInput else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+            }()
+        case nil: break
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsRequest
+    ) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
+        if lhs.grantInput != rhs.grantInput { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsResponse: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".UpdateCallPermissionsResponse"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_UpdateCallPermissionsResponse
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_EndCallRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".EndCallRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_cid")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callCid.isEmpty {
+            try visitor.visitSingularStringField(value: callCid, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_EndCallRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_EndCallRequest
+    ) -> Bool {
+        if lhs.callCid != rhs.callCid { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_EndCallResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".EndCallResponse"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_EndCallResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_EndCallResponse
+    ) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

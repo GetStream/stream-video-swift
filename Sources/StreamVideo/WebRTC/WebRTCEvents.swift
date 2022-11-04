@@ -29,3 +29,4 @@ extension Stream_Video_Sfu_Event_HealthCheckResponse: Event {}
 extension Stream_Video_Sfu_Event_SfuRequest: SendableEvent {}
 extension Stream_Video_Sfu_Event_HealthCheckRequest: SendableEvent {}
 extension Stream_Video_Sfu_Event_HealthCheckResponse: HealthCheckEvent {}
+extension Stream_Video_Sfu_Event_CallEnded: Event {}
