@@ -5,5 +5,5 @@ source_directory: Sources/
 output_directory: reports
 ignore:
   - "**/*_Vendor.swift"
-  - "**/Generated/*.swift"
-  - "**/protobuf/*.swift"
+  - "**/Generated/"
+  - "**/protobuf/"
