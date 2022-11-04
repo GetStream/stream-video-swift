@@ -4,6 +4,9 @@ scheme: StreamVideo
 source_directory: Sources/
 output_directory: reports
 ignore:
-  - "Tests/**/*"
+  - "StreamVideoTests/**/*"
+  - "StreamVideoUIKitTests/**/*"
+  - "StreamVideoSwiftUITests/**/*"
   - "**/*_Vendor.swift"
   - "**/Generated/*.swift"
+  - "**/protobuf/*.swift"
