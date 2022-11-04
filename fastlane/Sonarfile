@@ -1,0 +1,38 @@
+#!/usr/bin/env ruby
+
+desc 'Get code coverage report and run complexity analysis for Sonar'
+lane :sonar_upload do
+  sonar_args = ''
+  version_number = get_version_number(
+    xcodeproj: 'StreamVideo.xcodeproj',
+    target: 'StreamVideo'
+  )[/\d+\.\d+\.\d/]
+
+  unless Dir.glob('test_output/*.xcresult').empty?
+    slather
+    lizard(
+      source_folder: './Sources/',
+      language: 'swift',
+      export_type: 'xml',
+      report_file: 'reports/lizard.xml'
+    )
+    sonar_args = '-Dsonar.coverageReportPaths="reports/sonarqube-generic-coverage.xml" ' \
+                 '-Dsonar.swift.lizard.report="reports/lizard.xml"'
+  end
+
+  options = sonar_options(sonar_args: sonar_args, version_number: version_number)
+  sonar(options)
+end
+
+desc 'Gets Sonar options'
+private_lane :sonar_options do |options|
+  default_options = { sonar_login: ENV['SONAR_TOKEN'], sonar_runner_args: options[:sonar_args] }
+
+  if ENV['GITHUB_PR_NUM']
+    default_options.merge(pull_request_branch: ENV['GITHUB_HEAD_REF'],
+                          pull_request_base: ENV['GITHUB_BASE_REF'],
+                          pull_request_key: ENV['GITHUB_PR_NUM'])
+  else
+    default_options.merge(branch_name: current_branch, project_version: options[:version_number])
+  end
+end

@@ -1,0 +1,213 @@
+default_platform :ios
+skip_docs
+
+require 'json'
+require 'net/http'
+import 'Sonarfile'
+
+xcode_version = ENV['XCODE_VERSION'] || '14.1'
+xcode_project = 'StreamVideo.xcodeproj'
+sdk_names = ['StreamVideo', 'StreamVideoSwiftUI']
+github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
+
+before_all do
+  if is_ci
+    setup_ci
+    xcversion(version: "~> #{xcode_version}")
+  end
+end
+
+desc "Release a new version"
+lane :release do |options|
+  release_ios_sdk(
+    version: options[:version],
+    bump_type: options[:type],
+    sdk_names: sdk_names,
+    github_repo: github_repo,
+    pod_sync: options[:pod_sync],
+    skip_pod_list: true # This argument needs to be removed after first release
+  )
+end
+
+lane :match_me do |options|
+  ids = ['io.getstream.iOS.VideoDemoApp', 'io.getstream.iOS.DemoAppUIKit']
+  custom_match(api_key: appstore_api_key, app_identifier: ids, register_device: options[:register_device])
+end
+
+lane :swiftui_testflight_build do
+  upload_beta(app_target: 'DemoApp', app_identifier: 'io.getstream.iOS.VideoDemoApp')
+end
+
+lane :uikit_testflight_build do
+  upload_beta(app_target: 'DemoAppUIKit', app_identifier: 'io.getstream.iOS.DemoAppUIKit')
+end
+
+private_lane :upload_beta do |options|
+  match_me
+  testflight_build(
+    api_key: appstore_api_key,
+    xcode_project: xcode_project,
+    sdk_target: 'StreamVideo',
+    app_target: options[:app_target],
+    app_identifier: options[:app_identifier]
+  )
+end
+
+private_lane :appstore_api_key do
+  @appstore_api_key ||= app_store_connect_api_key(
+    key_id: 'MT3PRT8TB7',
+    issuer_id: '69a6de96-0738-47e3-e053-5b8c7c11a4d1',
+    key_content: ENV['APPSTORE_API_KEY'],
+    in_house: false
+  )
+end
+
+desc 'Runs LLC tests in Debug config'
+lane :test do |options|
+  next unless is_check_required(sources: sources_matrix[:unit])
+
+  update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
+
+  scan(
+    project: xcode_project,
+    scheme: 'StreamVideo',
+    testplan: 'StreamVideo',
+    clean: true,
+    devices: options[:device]
+  )
+end
+
+desc 'Runs SwiftUI tests in Debug config'
+lane :test_swiftui do |options|
+  next unless is_check_required(sources: sources_matrix[:swiftui])
+
+  remove_snapshots if options[:record]
+
+  update_testplan_on_ci(path: 'StreamVideoSwiftUITests/StreamVideoSwiftUI.xctestplan')
+
+  scan(
+    project: xcode_project,
+    scheme: 'StreamVideoSwiftUI',
+    testplan: 'StreamVideoSwiftUI',
+    clean: true,
+    result_bundle: true,
+    devices: options[:device],
+    build_for_testing: options[:build_for_testing]
+  )
+end
+
+desc 'Runs UIKit tests in Debug config'
+lane :test_uikit do |options|
+  next unless is_check_required(sources: sources_matrix[:uikit])
+
+  remove_snapshots if options[:record]
+
+  update_testplan_on_ci(path: 'StreamVideoUIKitTests/StreamVideoUIKit.xctestplan')
+
+  scan(
+    project: xcode_project,
+    scheme: 'StreamVideoUIKit',
+    testplan: 'StreamVideoUIKit',
+    clean: true,
+    result_bundle: true,
+    devices: options[:device],
+    build_for_testing: options[:build_for_testing]
+  )
+end
+
+private_lane :update_testplan_on_ci do |options|
+  update_testplan(path: options[:path], env_vars: { key: 'CI', value: 'TRUE' }) if is_ci
+end
+
+desc 'Builds SwiftUI Demo app'
+lane :build_swiftui_demo do
+  build_example_app(scheme: 'DemoApp')
+end
+
+desc 'Builds UIKit Demo app'
+lane :build_uikit_demo do
+  build_example_app(scheme: 'DemoAppUIKit')
+end
+
+private_lane :build_example_app do |options|
+  app_sources =
+    case options[:scheme]
+    when 'DemoApp'
+      :swiftui_sample_apps
+    when 'DemoAppUIKit'
+      :uikit_sample_apps
+    end
+  next unless is_check_required(sources: sources_matrix[app_sources])
+
+  scan(
+    project: xcode_project,
+    scheme: options[:scheme],
+    clean: true,
+    build_for_testing: true
+  )
+end
+
+lane :emerge_swiftui do
+  next unless is_check_required(sources: sources_matrix[:emerge_swiftui])
+
+  emerge_upload(scheme: 'DemoApp')
+end
+
+lane :emerge_uikit do
+  next unless is_check_required(sources: sources_matrix[:emerge_uikit])
+
+  emerge_upload(scheme: 'DemoApp')
+end
+
+desc 'Build and upload DemoApp to Emerge'
+private_lane :emerge_upload do |options|
+  gym(
+    export_method: 'ad-hoc',
+    project: xcode_project,
+    scheme: options[:scheme],
+    skip_package_ipa: true,
+    skip_archive: false,
+    clean: true
+  )
+
+  emerge(
+    build_type: 'release',
+    repo_name: github_repo,
+    pr_number: ENV['GITHUB_PR_NUM'], # If `nil` then local run or merge to main
+    sha: ENV['GITHUB_COMMIT_SHA'] || ENV['GITHUB_SHA'] || last_git_commit[:commit_hash]
+  )
+end
+
+desc 'Run fastlane linting'
+lane :rubocop do
+  next unless is_check_required(sources: sources_matrix[:ruby])
+
+  sh('bundle exec rubocop')
+end
+
+desc 'Run source code linting'
+lane :run_linter do
+  Dir.chdir('..') { sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated') }
+end
+
+desc 'Remove SwiftUI snapshots'
+private_lane :remove_snapshots do |options|
+  Dir.glob("../#{options[:scheme]}Tests/**/__Snapshots__/**/*.png").select { |file| File.delete(file) }
+end
+
+lane :sources_matrix do
+  {
+    unit: ['Sources', 'StreamVideoTests', xcode_project],
+    swiftui: ['Sources', 'StreamVideoSwiftUITests', xcode_project],
+    emerge_swiftui: ['Sources/StreamVideoSwiftUI', 'Sources/StreamVideo', xcode_project],
+    emerge_uikit: ['Sources/StreamVideoUIKit'],
+    uikit: ['Sources', 'StreamVideoUIKitTests', xcode_project],
+    swiftui_sample_apps: ['Sources', 'DemoApp', xcode_project],
+    uikit_sample_apps: ['Sources', 'DemoAppUIKit', xcode_project],
+    ruby: ['fastlane']
+  }
+end
+
+private_lane :current_branch do
+  ENV['BRANCH_NAME'] || git_branch
+end

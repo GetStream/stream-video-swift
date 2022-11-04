@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>provisioningProfiles</key>
+    <dict>
+        <key>io.getstream.iOS.VideoDemoApp</key>
+        <string>match AppStore io.getstream.iOS.VideoDemoApp</string>
+        <key>io.getstream.iOS.DemoAppUIKit</key>
+        <string>match AppStore io.getstream.iOS.DemoAppUIKit</string>
+    </dict>
+</dict>
+</plist>

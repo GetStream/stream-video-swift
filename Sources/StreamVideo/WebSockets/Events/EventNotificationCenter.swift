@@ -38,7 +38,7 @@ class EventNotificationCenter: NotificationCenter {
             return
         }
         
-        self.eventPostingQueue.async {
+        eventPostingQueue.async {
             eventsToPost.forEach { self.post(Notification(newEventReceived: $0, sender: self)) }
             completion?()
         }
