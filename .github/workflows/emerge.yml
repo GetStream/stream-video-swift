@@ -1,0 +1,46 @@
+name: Size Check
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+  pull_request:
+    branches:
+      - main
+      - develop
+
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
+
+jobs:
+  upload--build:
+    name: Upload Build to Emerge
+    runs-on: macos-12
+    env:
+      APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.number }}
+      GITHUB_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+      EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_TOKEN }}
+    steps:
+      - name: Install Bot SSH Key
+        uses: webfactory/ssh-agent@v0.4.1
+        with:
+          ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
+      - uses: actions/checkout@v2.5.0
+      - uses: ./.github/actions/bootstrap
+      - name: Run match_me
+        env:
+          MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+        run: bundle exec fastlane match_me
+      - name: Emerge SwiftUI Demo App
+        run: bundle exec fastlane emerge_swiftui
+      - name: Emerge UIKit Demo App
+        run: bundle exec fastlane emerge_uikit

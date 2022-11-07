@@ -1,0 +1,9 @@
+coverage_service: sonarqube_xml
+xcodeproj: StreamVideo.xcodeproj
+scheme: StreamVideo
+source_directory: Sources/
+output_directory: reports
+ignore:
+  - "**/*_Vendor.swift"
+  - "**/Generated/"
+  - "**/protobuf/"
