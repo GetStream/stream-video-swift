@@ -73,7 +73,6 @@ jobs:
         BRANCH_NAME: ${{ steps.get_branch_name.outputs.branch }}
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-        GITHUB_PR_NUM: ${{ github.event.number }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}

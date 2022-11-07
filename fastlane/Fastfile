@@ -30,8 +30,12 @@ lane :release do |options|
 end
 
 lane :match_me do |options|
-  ids = ['io.getstream.iOS.VideoDemoApp', 'io.getstream.iOS.DemoAppUIKit']
-  custom_match(api_key: appstore_api_key, app_identifier: ids, register_device: options[:register_device])
+  custom_match(
+    api_key: appstore_api_key,
+    app_identifier: ['io.getstream.iOS.VideoDemoApp', 'io.getstream.iOS.DemoAppUIKit'],
+    readonly: options[:readonly],
+    register_device: options[:register_device]
+  )
 end
 
 lane :swiftui_testflight_build do
