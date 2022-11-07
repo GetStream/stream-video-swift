@@ -21,7 +21,7 @@ public final class VoipNotificationsController {
             var createDeviceRequest = Stream_Video_CreateDeviceRequest()
             var deviceInput = Stream_Video_DeviceInput()
             deviceInput.id = id
-            deviceInput.pushProviderID = "apns"
+            deviceInput.pushProviderID = "apn"
             createDeviceRequest.input = deviceInput
             do {
                 _ = try await callCoordinatorService.createDevice(createDeviceRequest: createDeviceRequest)

@@ -26,7 +26,11 @@ class CallKitService: NSObject, CXProviderDelegate {
         )
     }
         
-    func reportIncomingCall(callCid: String, completion: @escaping (Error?) -> Void) {
+    func reportIncomingCall(
+        callCid: String,
+        callInfo: String,
+        completion: @escaping (Error?) -> Void
+    ) {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = true
         configuration.supportedHandleTypes = [.generic]
@@ -36,17 +40,15 @@ class CallKitService: NSObject, CXProviderDelegate {
         provider.setDelegate(self, queue: nil)
         let update = CXCallUpdate()
         let idComponents = callCid.components(separatedBy: ":")
-        guard idComponents.count >= 2 else {
-            //TODO: handle this case.
-            return
+        if idComponents.count >= 2  {
+            self.callId = idComponents[1]
+            self.callType = idComponents[0]
         }
-        self.callId = idComponents[1]
-        self.callType = idComponents[0]
-        //TODO: add mapping
-        callKitId = UUID()
-        update.remoteHandle = CXHandle(type: .generic, value: "You are receiving a call")
+        let callUUID = UUID()
+        callKitId = callUUID
+        update.remoteHandle = CXHandle(type: .generic, value: callInfo)
         provider.reportNewIncomingCall(
-            with: callKitId!,
+            with: callUUID,
             update: update,
             completion: completion
         )
@@ -70,9 +72,7 @@ class CallKitService: NSObject, CXProviderDelegate {
         }
     }
     
-    func providerDidReset(_ provider: CXProvider) {
-        
-    }
+    func providerDidReset(_ provider: CXProvider) {}
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
@@ -98,7 +98,6 @@ class CallKitService: NSObject, CXProviderDelegate {
             let callType: CallType = .init(name: callType)
             let callController = streamVideo.makeCallController(callType: callType, callId: callId)
             Task {
-                //TODO: change this to use the call creation flow.
                 _ = try await callController.joinCall(
                     callType: callType,
                     callId: callId,
