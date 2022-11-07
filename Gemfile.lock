@@ -189,7 +189,7 @@ GEM
       bundler
       fastlane
       pry
-    fastlane-plugin-stream_actions (0.1.14)
+    fastlane-plugin-stream_actions (0.1.19)
     fastlane-plugin-versioning (0.5.1)
     ffi (1.15.5)
     fourflusher (2.3.1)
@@ -403,7 +403,7 @@ DEPENDENCIES
   fastlane
   fastlane-plugin-emerge
   fastlane-plugin-lizard
-  fastlane-plugin-stream_actions (= 0.1.14)
+  fastlane-plugin-stream_actions (= 0.1.19)
   fastlane-plugin-versioning
   jazzy
   json
