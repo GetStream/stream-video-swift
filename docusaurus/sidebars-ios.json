@@ -10,7 +10,8 @@
         "guides/call-viewmodel",
       	"guides/call-lifecycle",
       	"guides/call-events",
-      	"guides/call-state"
+      	"guides/call-state",
+        "guides/callkit-integration"
       ]
     }    
   ]

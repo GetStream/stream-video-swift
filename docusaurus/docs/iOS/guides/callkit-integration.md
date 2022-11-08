@@ -30,6 +30,8 @@ From iOS app perspective, there are two Apple frameworks that we need to integra
 
 We have a working CallKit integration in our demo app. Feel free to reference it for more details, while we will cover the most important bits here.
 
+In order for the CallKit integration to work, you should have a logged in user into your app. For simplicity, we are saving the user in the `UserDefaults`, but we strongly discourage that in production apps, since it's not secure.
+
 ### PushKit integration
 
 For handling VoIP push notifications, we will create a new class, called `VoipPushService`, that implements the `PKPushRegistryDelegate`. Internally, we will create an instance of `PKPushRegistry`, which requests the delivery and handles the receipt of PushKit notifications.
@@ -187,3 +189,70 @@ func reportIncomingCall(
 ```
 
 The method also saves the `callId` and `callType`, and it generates a call UUID, which is required by CallKit for identifying calls.
+
+The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDK's calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions. 
+
+First, we need to accept the call both from `CallKit`, as well as initiate the call inside the SDK. This is done with the `provider(_ provider: CXProvider, perform action: CXAnswerCallAction)` method in the `CXProviderDelegate`.
+
+```swift
+func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
+    guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
+        action.fail()
+        return
+    }
+    if !callId.isEmpty {
+        if AppState.shared.streamVideo == nil {
+            let streamVideo = StreamVideo(
+                apiKey: "key1",
+                user: currentUser.userInfo,
+                token: currentUser.token,
+                videoConfig: VideoConfig(
+                    persitingSocketConnection: true,
+                    joinVideoCallInstantly: false
+                ),
+                tokenProvider: { result in
+                    result(.success(currentUser.token))
+                }
+            )
+            AppState.shared.streamVideo = streamVideo
+        }
+        let callType: CallType = .init(name: callType)
+        let callController = streamVideo.makeCallController(callType: callType, callId: callId)
+        Task {
+            _ = try await callController.joinCall(
+                callType: callType,
+                callId: callId,
+                callSettings: CallSettings(),
+                videoOptions: VideoOptions(),
+                participantIds: []
+            )
+            await MainActor.run {
+                AppState.shared.activeCallController = callController
+                action.fulfill()
+            }
+        }
+    }
+}
+```
+
+We're also listening to `CallNotification.callEnded` notification, published from the StreamVideo SDK. This notification is sent whenever the user ends the call from the in-app view.
+
+```swift
+@objc func endCurrentCall() {
+    guard let callKitId = callKitId else { return }
+    let endCallAction = CXEndCallAction(call: callKitId)
+    let transaction = CXTransaction(action: endCallAction)
+    requestTransaction(transaction)
+    self.callKitId = nil
+}
+```
+
+Similarly, when the user decides to end the call via the `CallKit` interface, we need to cleanup the session in the StreamVideo SDK.
+
+```swift
+func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
+    callKitId = nil
+    streamVideo.leaveCall()
+    action.fulfill()
+}
+```
