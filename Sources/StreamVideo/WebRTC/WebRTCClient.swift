@@ -92,6 +92,8 @@ class WebRTCClient: NSObject {
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
     private let videoEnabled: Bool
+    private var connectOptions: ConnectOptions?
+    private var callSettings = CallSettings()
     
     var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
@@ -159,38 +161,13 @@ class WebRTCClient: NSObject {
             return
         }
         self.videoOptions = videoOptions
+        self.connectOptions = connectOptions
+        self.callSettings = callSettings
         log.debug("Connecting to SFU")
         await state.update(connectionState: .connecting)
         log.debug("Connecting WS channel")
         signalChannel?.connect()
-        log.debug("Creating subscriber peer connection")
-        let configuration = connectOptions.rtcConfiguration
-        subscriber = try await peerConnectionFactory.makePeerConnection(
-            sessionId: sessionID,
-            configuration: configuration,
-            type: .subscriber,
-            signalService: signalService,
-            videoOptions: videoOptions
-        )
-        
-        subscriber?.onStreamAdded = handleStreamAdded
-        subscriber?.onStreamRemoved = handleStreamRemoved
-        
-        log.debug("Creating data channel")
-        
-        log.debug("Updating connection status to connected")
-        await state.update(connectionState: .connected)
-        if callSettings.shouldPublish {
-            publisher = try await peerConnectionFactory.makePeerConnection(
-                sessionId: sessionID,
-                configuration: configuration,
-                type: .publisher,
-                signalService: signalService,
-                videoOptions: videoOptions
-            )
-            publisher?.onNegotiationNeeded = handleNegotiationNeeded()
-        }
-        await setupUserMedia(callSettings: callSettings)
+        sfuMiddleware.onSocketConnected = handleOnSocketConnected
     }
     
     func cleanUp() async {
@@ -268,6 +245,49 @@ class WebRTCClient: NSObject {
     }
     
     // MARK: - private
+    
+    private func handleOnSocketConnected() {
+        Task {
+            do {
+                try await self.setupPeerConnections()
+            } catch {
+                log.error("Error setting up peer connections")
+                await self.state.update(connectionState: .disconnected())
+            }
+        }
+    }
+    
+    private func setupPeerConnections() async throws {
+        guard let connectOptions = connectOptions else {
+            throw ClientError.Unexpected("Connect options not setup")
+        }
+        log.debug("Creating subscriber peer connection")
+        let configuration = connectOptions.rtcConfiguration
+        subscriber = try await peerConnectionFactory.makePeerConnection(
+            sessionId: sessionID,
+            configuration: configuration,
+            type: .subscriber,
+            signalService: signalService,
+            videoOptions: videoOptions
+        )
+        
+        subscriber?.onStreamAdded = handleStreamAdded
+        subscriber?.onStreamRemoved = handleStreamRemoved
+        
+        log.debug("Updating connection status to connected")
+        await state.update(connectionState: .connected)
+        if callSettings.shouldPublish {
+            publisher = try await peerConnectionFactory.makePeerConnection(
+                sessionId: sessionID,
+                configuration: configuration,
+                type: .publisher,
+                signalService: signalService,
+                videoOptions: videoOptions
+            )
+            publisher?.onNegotiationNeeded = handleNegotiationNeeded()
+        }
+        await setupUserMedia(callSettings: callSettings)
+    }
     
     private func handleStreamAdded(_ stream: RTCMediaStream) {
         let idParts = stream.streamId.components(separatedBy: ":")

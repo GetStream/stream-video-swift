@@ -14,6 +14,7 @@ class SfuMiddleware: EventMiddleware {
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
+    var onSocketConnected: (() -> Void)?
     
     init(
         sessionID: String,
@@ -59,6 +60,7 @@ class SfuMiddleware: EventMiddleware {
             } else if let event = event as? Stream_Video_Sfu_Models_ICETrickle {
                 try await handleICETrickle(event)
             } else if let event = event as? Stream_Video_Sfu_Event_JoinResponse {
+                onSocketConnected?()
                 await loadParticipants(from: event)
             }
         }
