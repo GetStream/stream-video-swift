@@ -20,7 +20,6 @@ jobs:
     name: Upload Build to Emerge
     runs-on: macos-12
     env:
-      APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.number }}
       GITHUB_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
@@ -35,6 +34,7 @@ jobs:
       - name: Run match_me
         env:
           MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
+          APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
         run: bundle exec fastlane match_me
       - name: Emerge SwiftUI Demo App
         run: bundle exec fastlane emerge_swiftui
