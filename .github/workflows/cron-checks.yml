@@ -13,7 +13,7 @@ jobs:
     name: Test LLC (Debug)
     strategy:
       matrix:
-        xcode: [13.1, 13.4.1, 14.1]
+        xcode: [14.1] # TODO: 13.1, 13.4.1
         os: [macos-12]
       fail-fast: false
     runs-on: ${{ matrix.os }}
@@ -37,3 +37,12 @@ jobs:
         SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         MATRIX_CONTEXT: ${{ toJson(matrix) }}
       if: failure()
+
+  automated-code-review:
+    name: Automated Code Review
+    runs-on: macos-12
+    steps:
+    - uses: actions/checkout@v2.5.0
+    - uses: ./.github/actions/bootstrap
+    - run: bundle exec fastlane rubocop
+    - run: bundle exec fastlane run_linter

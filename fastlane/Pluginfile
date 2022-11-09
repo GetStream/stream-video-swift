@@ -4,4 +4,4 @@
 
 gem 'fastlane-plugin-versioning'
 gem 'fastlane-plugin-emerge'
-gem 'fastlane-plugin-stream_actions', '0.1.19'
+gem 'fastlane-plugin-stream_actions', '0.1.24'
