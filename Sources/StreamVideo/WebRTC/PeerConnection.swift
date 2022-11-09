@@ -20,6 +20,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
+    private let reportStats: Bool
+    private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
     private var pendingIceCandidates = [RTCIceCandidate]()
         
@@ -32,16 +34,19 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         pc: RTCPeerConnection,
         type: PeerConnectionType,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
-        videoOptions: VideoOptions
+        videoOptions: VideoOptions,
+        reportStats: Bool = false
     ) {
         self.sessionId = sessionId
         self.pc = pc
         self.signalService = signalService
         self.type = type
+        self.reportStats = reportStats
         self.videoOptions = videoOptions
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
+        setupStatsTimer()
     }
     
     func createOffer() async throws -> RTCSessionDescription {
@@ -196,6 +201,23 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         log.debug("Data channel opened for \(type.rawValue)")
     }
     
+    // MARK: - private
+    
+    private func setupStatsTimer() {
+        if reportStats {
+            statsTimer = Foundation.Timer.scheduledTimer(
+                withTimeInterval: 5.0,
+                repeats: true,
+                block: { [weak self] _ in
+                    self?.pc.stats(for: nil, statsOutputLevel: .standard) { _ in
+                        log.debug("received stats for peer connection")
+                    }
+                }
+            )
+            statsTimer?.fire()
+        }
+    }
+    
     @discardableResult
     private func add(iceCandidate: RTCIceCandidate) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
@@ -209,6 +231,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 }
             }
         }
+    }
+    
+    deinit {
+        statsTimer?.invalidate()
+        statsTimer = nil
     }
 }
 
