@@ -6,11 +6,18 @@
       	"basics/integration",
         "basics/architecture-overview"
       ],
+      "Client": [
+        "client/call-viewmodel",
+      	"client/call-lifecycle",
+      	"client/call-events",
+      	"client/call-state"
+      ],
+      "UI": [
+        "ui/ui-overview",
+        "ui/customizing-views",
+        "ui/text-localization"
+      ],
       "Guides": [
-        "guides/call-viewmodel",
-      	"guides/call-lifecycle",
-      	"guides/call-events",
-      	"guides/call-state",
         "guides/callkit-integration"
       ]
     }    
