@@ -9,7 +9,7 @@ public struct VideoParticipantsView: View {
     
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewRendering: (StreamMTLVideoView, CallParticipant) -> Void
+    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public var body: some View {
@@ -59,7 +59,7 @@ struct TwoColumnParticipantsView: View {
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
+    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -90,7 +90,7 @@ struct VerticalParticipantsView: View {
             
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
+    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -124,10 +124,10 @@ struct VideoCallParticipantView: View {
         
     let participant: CallParticipant
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
+    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     var body: some View {
-        StreamVideoViewSwiftUI(id: participant.id, size: availableSize) { view in
+        VideoRendererView(id: participant.id, size: availableSize) { view in
             onViewUpdate(participant, view)
         }
         .opacity(showVideo ? 1 : 0)

@@ -10,7 +10,7 @@ struct ParticipantsGridView: View {
     
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, StreamMTLVideoView) -> Void
+    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
     
     var body: some View {

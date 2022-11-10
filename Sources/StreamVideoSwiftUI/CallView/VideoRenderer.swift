@@ -13,12 +13,12 @@ public struct LocalVideoView: View {
     
     private let callSettings: CallSettings
     private var showBackground: Bool
-    private var onLocalVideoUpdate: (StreamMTLVideoView) -> Void
+    private var onLocalVideoUpdate: (VideoRenderer) -> Void
     
     public init(
         callSettings: CallSettings,
         showBackground: Bool = true,
-        onLocalVideoUpdate: @escaping (StreamMTLVideoView) -> Void
+        onLocalVideoUpdate: @escaping (VideoRenderer) -> Void
     ) {
         self.callSettings = callSettings
         self.showBackground = showBackground
@@ -27,7 +27,7 @@ public struct LocalVideoView: View {
             
     public var body: some View {
         GeometryReader { reader in
-            StreamVideoViewSwiftUI(id: streamVideo.userInfo.id, size: reader.size) { view in
+            VideoRendererView(id: streamVideo.userInfo.id, size: reader.size) { view in
                 onLocalVideoUpdate(view)
             }
             .rotation3DEffect(
@@ -55,28 +55,38 @@ public struct LocalVideoView: View {
     }
 }
 
-struct StreamVideoViewSwiftUI: UIViewRepresentable {
-        
-    typealias UIViewType = StreamMTLVideoView
+public struct VideoRendererView: UIViewRepresentable {
+            
+    public typealias UIViewType = VideoRenderer
     
     var id: String
     var size: CGSize
-    var handleRendering: (StreamMTLVideoView) -> Void
+    var handleRendering: (VideoRenderer) -> Void
+    
+    public init(
+        id: String,
+        size: CGSize,
+        handleRendering: @escaping (VideoRenderer) -> Void
+    ) {
+        self.id = id
+        self.size = size
+        self.handleRendering = handleRendering
+    }
 
-    func makeUIView(context: Context) -> StreamMTLVideoView {
-        let view = StreamMTLVideoView(frame: .init(origin: .zero, size: size))
+    public func makeUIView(context: Context) -> VideoRenderer {
+        let view = VideoRenderer(frame: .init(origin: .zero, size: size))
         view.videoContentMode = .scaleAspectFill
         view.backgroundColor = UIColor.black
         handleRendering(view)
         return view
     }
     
-    func updateUIView(_ uiView: StreamMTLVideoView, context: Context) {
+    public func updateUIView(_ uiView: VideoRenderer, context: Context) {
         handleRendering(uiView)
     }
 }
 
-public class StreamMTLVideoView: RTCMTLVideoView {
+public class VideoRenderer: RTCMTLVideoView {
     
     let queue = DispatchQueue(label: "video-track")
     

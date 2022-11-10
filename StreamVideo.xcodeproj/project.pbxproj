@@ -20,7 +20,7 @@
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947992886EBD20007B36E /* UserConnectionProvider.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
-		84231E4728B2506B007985EF /* StreamSwiftUIVideoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */; };
+		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
 		842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */; };
@@ -330,7 +330,7 @@
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		841947992886EBD20007B36E /* UserConnectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserConnectionProvider.swift; sourceTree = "<group>"; };
 		84201792288AB699004964B3 /* AddUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUserView.swift; sourceTree = "<group>"; };
-		84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSwiftUIVideoView.swift; sourceTree = "<group>"; };
+		84231E4628B2506B007985EF /* VideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer.swift; sourceTree = "<group>"; };
 		84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionRecoveryHandler.swift; sourceTree = "<group>"; };
 		84274F472884251600CF8794 /* InternetConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternetConnection.swift; sourceTree = "<group>"; };
 		842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
@@ -680,7 +680,7 @@
 			children = (
 				846FBE8728AAD81E00147F6E /* Participants */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
-				84231E4628B2506B007985EF /* StreamSwiftUIVideoView.swift */,
+				84231E4628B2506B007985EF /* VideoRenderer.swift */,
 				8457CF9028BB835F00E8CF50 /* CallView.swift */,
 				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
 				843697D028C7A23300839D99 /* ParticipantsGridView.swift */,
@@ -1720,7 +1720,7 @@
 			files = (
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
-				84231E4728B2506B007985EF /* StreamSwiftUIVideoView.swift in Sources */,
+				84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */,
 				842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,

@@ -72,7 +72,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
                 
                 if viewModel.participantsShown {
-                    viewFactory.makeCallParticipantsListView(
+                    viewFactory.makeTrailingTopView(
                         viewModel: viewModel,
                         availableSize: reader.size
                     )
@@ -92,7 +92,7 @@ public struct CallView<Factory: ViewFactory>: View {
         viewModel.participants
     }
     
-    private func handleViewRendering(_ view: StreamMTLVideoView, participant: CallParticipant) {
+    private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
         if let track = participant.track, participant.id != streamVideo.userInfo.id {
             log.debug("adding track to a view \(view)")
             view.add(track: track)
@@ -107,7 +107,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
 }
 
-public struct CallParticipantsListView: View {
+public struct ParticipantListView: View {
     
     private let padding: CGFloat = 16
     

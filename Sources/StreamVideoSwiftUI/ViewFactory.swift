@@ -37,7 +37,7 @@ public protocol ViewFactory: AnyObject {
     func makeVideoParticipantsView(
         participants: [CallParticipant],
         availableSize: CGSize,
-        onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
+        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
     
@@ -46,20 +46,14 @@ public protocol ViewFactory: AnyObject {
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
-    
-    associatedtype WaitingLocalUserViewType: View = WaitingLocalUserView
-    /// Creates the view shown while the user waits for participants to join.
-    /// - Parameter viewModel: The view model used for the call.
-    /// - Returns: view shown in the local user waiting slot.
-    func makeWaitingLocalUserView(viewModel: CallViewModel) -> WaitingLocalUserViewType
-    
-    associatedtype CallParticipantsListViewType: View = CallParticipantsListView
-    /// Creates the view that display the list of participants.
+        
+    associatedtype CallParticipantsListViewType: View = ParticipantListView
+    /// Creates a view in the top trailing section of the call view.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
     ///  - availableSize: The size available to display the view.
     /// - Returns: view shown in the participants list slot.
-    func makeCallParticipantsListView(
+    func makeTrailingTopView(
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> CallParticipantsListViewType
@@ -86,7 +80,7 @@ extension ViewFactory {
     public func makeVideoParticipantsView(
         participants: [CallParticipant],
         availableSize: CGSize,
-        onViewRendering: @escaping (StreamMTLVideoView, CallParticipant) -> Void,
+        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
@@ -101,15 +95,11 @@ extension ViewFactory {
         CallView(viewFactory: self, viewModel: viewModel)
     }
     
-    public func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
-        WaitingLocalUserView(viewModel: viewModel)
-    }
-    
-    public func makeCallParticipantsListView(
+    public func makeTrailingTopView(
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> some View {
-        CallParticipantsListView(viewModel: viewModel, availableSize: availableSize)
+        ParticipantListView(viewModel: viewModel, availableSize: availableSize)
     }
 }
 

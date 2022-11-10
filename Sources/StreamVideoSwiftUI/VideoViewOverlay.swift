@@ -43,7 +43,7 @@ public struct VideoView<Factory: ViewFactory>: View {
                 if !viewModel.participants.isEmpty {
                     viewFactory.makeCallView(viewModel: viewModel)
                 } else {
-                    viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
+                    WaitingLocalUserView(viewModel: viewModel)
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
                 viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
