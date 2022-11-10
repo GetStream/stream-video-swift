@@ -165,6 +165,8 @@ class WebRTCClient: NSObject {
         self.callSettings = callSettings
         log.debug("Connecting to SFU")
         await state.update(connectionState: .connecting)
+        log.debug("Setting user media")
+        await setupUserMedia(callSettings: callSettings)
         log.debug("Connecting WS channel")
         signalChannel?.connect()
         sfuMiddleware.onSocketConnected = handleOnSocketConnected
@@ -204,11 +206,13 @@ class WebRTCClient: NSObject {
         let videoTrack = await makeVideoTrack()
         localVideoTrack = videoTrack
         await state.add(track: localVideoTrack, id: userInfo.id)
-        
-        if callSettings.shouldPublish {
+    }
+    
+    func publishUserMedia(callSettings: CallSettings) {
+        if callSettings.shouldPublish, let audioTrack = localAudioTrack {
             log.debug("publishing local tracks")
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"])
-            if videoEnabled {
+            if videoEnabled, let videoTrack = localVideoTrack {
                 publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"])
             }
         }
@@ -285,8 +289,8 @@ class WebRTCClient: NSObject {
                 videoOptions: videoOptions
             )
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
+            publishUserMedia(callSettings: callSettings)
         }
-        await setupUserMedia(callSettings: callSettings)
     }
     
     private func handleStreamAdded(_ stream: RTCMediaStream) {
