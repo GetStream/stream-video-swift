@@ -16,7 +16,8 @@
         "ui/ui-overview",
         "ui/customizing-views",
         "ui/view-slots",
-        "ui/text-localization"
+        "ui/text-localization",
+        "ui/injecting-dependencies"
       ],
       "Guides": [
         "guides/callkit-integration"
