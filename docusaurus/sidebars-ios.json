@@ -20,7 +20,8 @@
         "ui/injecting-dependencies"
       ],
       "Guides": [
-        "guides/callkit-integration"
+        "guides/callkit-integration",
+        "guides/deep-linking"
       ]
     }    
   ]
