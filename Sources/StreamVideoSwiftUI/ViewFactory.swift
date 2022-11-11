@@ -47,7 +47,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
         
-    associatedtype CallParticipantsListViewType: View = ParticipantListView
+    associatedtype CallParticipantsListViewType: View = CallParticipantsInfoView
     /// Creates a view in the top trailing section of the call view.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
@@ -99,7 +99,7 @@ extension ViewFactory {
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> some View {
-        ParticipantListView(viewModel: viewModel, availableSize: availableSize)
+        CallParticipantsInfoView(viewModel: viewModel, availableSize: availableSize)
     }
 }
 

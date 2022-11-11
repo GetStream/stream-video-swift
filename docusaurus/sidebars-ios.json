@@ -15,6 +15,7 @@
       "UI": [
         "ui/ui-overview",
         "ui/customizing-views",
+        "ui/view-slots",
         "ui/text-localization"
       ],
       "Guides": [

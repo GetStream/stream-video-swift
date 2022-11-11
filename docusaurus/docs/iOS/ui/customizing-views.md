@@ -33,3 +33,5 @@ var body: some View {
         .modifier(CallModifier(viewFactory: CustomViewFactory(), viewModel: viewModel))
 }
 ```
+
+For the full list of supported view slots that can be swapped, please refer to this [page](./view-slots.md).

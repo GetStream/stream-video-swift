@@ -107,7 +107,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
 }
 
-public struct ParticipantListView: View {
+public struct CallParticipantsInfoView: View {
     
     private let padding: CGFloat = 16
     
