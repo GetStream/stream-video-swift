@@ -16,13 +16,18 @@ struct Spacing: View {
     }
 }
 
-struct CallIconView: View {
-    
+public struct CallIconView: View {
     var icon: Image
     var size: CGFloat = 64
     var iconStyle: CallIconStyle = .primary
     
-    var body: some View {
+    public init(icon: Image, size: CGFloat = 64, iconStyle: CallIconStyle = .primary) {
+        self.icon = icon
+        self.size = size
+        self.iconStyle = iconStyle
+    }
+    
+    public var body: some View {
         ZStack {
             Circle().fill(
                 iconStyle.backgroundColor.opacity(iconStyle.opacity)
@@ -38,19 +43,19 @@ struct CallIconView: View {
     }
 }
 
-struct CallIconStyle {
+public struct CallIconStyle {
     let backgroundColor: Color
     let foregroundColor: Color
     let opacity: CGFloat
 }
 
 extension CallIconStyle {
-    static let primary = CallIconStyle(
+    public static let primary = CallIconStyle(
         backgroundColor: .white,
         foregroundColor: .black,
         opacity: 1
     )
-    static let transparent = CallIconStyle(
+    public static let transparent = CallIconStyle(
         backgroundColor: .black,
         foregroundColor: .white,
         opacity: 0.4

@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-enum BackgroundType {
+public enum BackgroundType {
     case circle
     case rectangle
     case none
@@ -13,7 +13,7 @@ enum BackgroundType {
 
 extension Image {
     
-    func applyCallButtonStyle(
+    public func applyCallButtonStyle(
         color: Color,
         backgroundType: BackgroundType = .circle,
         size: CGFloat = 64
