@@ -22,7 +22,7 @@ jobs:
       uses: webfactory/ssh-agent@v0.4.1
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-    - uses: actions/checkout@v2.5.0
+    - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane swiftui_testflight_build
       timeout-minutes: 40
