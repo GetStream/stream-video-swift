@@ -22,15 +22,15 @@ class HomeViewController: UIViewController {
     
     private var cancellables = Set<AnyCancellable>()
     
-    lazy var participants: [UserInfo] = {
+    lazy var participants: [User] = {
         var participants = UserCredentials.builtInUsers.map { $0.userInfo }
         participants.removeAll { userInfo in
-            userInfo.id == streamVideo.userInfo.id
+            userInfo.id == streamVideo.user.id
         }
         return participants
     }()
     
-    var selectedParticipants = [UserInfo]() {
+    var selectedParticipants = [User]() {
         didSet {
             participantsTableView.reloadData()
         }

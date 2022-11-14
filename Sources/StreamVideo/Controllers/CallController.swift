@@ -17,24 +17,24 @@ public class CallController {
     }
 
     private(set) var call: Call?
-    private let userInfo: UserInfo
+    private let user: User
     private let callId: String
     private let callType: CallType
     private let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoEnabled: Bool
-    private let tokenProvider: TokenProvider
+    private let tokenProvider: UserTokenProvider
     
     init(
         callCoordinatorController: CallCoordinatorController,
-        userInfo: UserInfo,
+        user: User,
         callId: String,
         callType: CallType,
         apiKey: String,
         videoEnabled: Bool,
-        tokenProvider: @escaping TokenProvider
+        tokenProvider: @escaping UserTokenProvider
     ) {
-        self.userInfo = userInfo
+        self.user = user
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
@@ -66,7 +66,7 @@ public class CallController {
         )
         
         webRTCClient = WebRTCClient(
-            userInfo: userInfo,
+            user: user,
             apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
@@ -146,7 +146,7 @@ public class CallController {
     
     private func handleLocalTrackUpdate() {
         webRTCClient?.onLocalVideoTrackUpdate = { [weak self] localVideoTrack in
-            guard let userId = self?.userInfo.id else { return }
+            guard let userId = self?.user.id else { return }
             if let participant = self?.call?.participants[userId] {
                 let updated = participant.withUpdated(track: localVideoTrack)
                 self?.call?.participants[userId] = updated
@@ -155,8 +155,8 @@ public class CallController {
                 let participant = CallParticipant(
                     id: userId,
                     role: "user",
-                    name: self?.userInfo.name ?? userId,
-                    profileImageURL: self?.userInfo.imageURL,
+                    name: self?.user.name ?? userId,
+                    profileImageURL: self?.user.imageURL,
                     trackLookupPrefix: userId,
                     isOnline: true,
                     hasVideo: true,

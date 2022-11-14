@@ -87,7 +87,7 @@ class WebRTCClient: NSObject {
     }
 
     private var localAudioTrack: RTCAudioTrack?
-    private let userInfo: UserInfo
+    private let user: User
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
@@ -113,7 +113,7 @@ class WebRTCClient: NSObject {
     
     private(set) lazy var sfuMiddleware = SfuMiddleware(
         sessionID: sessionID,
-        userInfo: userInfo,
+        user: user,
         state: state,
         signalService: signalService,
         subscriber: subscriber,
@@ -122,14 +122,14 @@ class WebRTCClient: NSObject {
     )
     
     init(
-        userInfo: UserInfo,
+        user: User,
         apiKey: String,
         hostname: String,
         token: String,
         videoEnabled: Bool,
-        tokenProvider: @escaping TokenProvider
+        tokenProvider: @escaping UserTokenProvider
     ) {
-        self.userInfo = userInfo
+        self.user = user
         self.token = token
         self.videoEnabled = videoEnabled
         httpClient = URLSessionClient(
@@ -205,7 +205,7 @@ class WebRTCClient: NSObject {
         // Video
         let videoTrack = await makeVideoTrack()
         localVideoTrack = videoTrack
-        await state.add(track: localVideoTrack, id: userInfo.id)
+        await state.add(track: localVideoTrack, id: user.id)
     }
     
     func publishUserMedia(callSettings: CallSettings) {
@@ -479,7 +479,7 @@ class WebRTCClient: NSObject {
         request.sessionID = sessionID
         let callParticipants = await state.callParticipants
         for (_, value) in callParticipants {
-            if value.id != userInfo.id && value.showTrack {
+            if value.id != user.id && value.showTrack {
                 log.debug("updating subscription for user \(value.id) with size \(value.trackSize)")
                 var dimension = Stream_Video_Sfu_Models_VideoDimension()
                 dimension.height = UInt32(value.trackSize.height)

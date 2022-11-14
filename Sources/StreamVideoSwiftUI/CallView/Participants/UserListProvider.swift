@@ -7,14 +7,14 @@ import StreamVideo
 
 public protocol UserListProvider {
 
-    func loadNextUsers(pagination: Pagination) async throws -> [UserInfo]
+    func loadNextUsers(pagination: Pagination) async throws -> [User]
 }
 
 public class StreamUserListProvider: UserListProvider {
 
     public init() {}
 
-    public func loadNextUsers(pagination: Pagination) async throws -> [UserInfo] {
+    public func loadNextUsers(pagination: Pagination) async throws -> [User] {
         // TODO: implement querying of available users.
         []
     }

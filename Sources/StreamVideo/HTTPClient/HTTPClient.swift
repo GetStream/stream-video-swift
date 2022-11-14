@@ -8,22 +8,22 @@ protocol HTTPClient: Sendable {
     
     func execute(request: URLRequest) async throws -> Data
     
-    func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater)
+    func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater)
 }
 
 final class URLSessionClient: HTTPClient, @unchecked Sendable {
     
     private let urlSession: URLSession
-    private let tokenProvider: TokenProvider
+    private let tokenProvider: UserTokenProvider
     private let updateQueue: DispatchQueue = .init(
         label: "io.getStream.video.URLSessionClient",
         qos: .userInitiated
     )
-    private(set) var onTokenUpdate: TokenUpdater?
+    private(set) var onTokenUpdate: UserTokenUpdater?
     
     init(
         urlSession: URLSession,
-        tokenProvider: @escaping TokenProvider
+        tokenProvider: @escaping UserTokenProvider
     ) {
         self.urlSession = urlSession
         self.tokenProvider = tokenProvider
@@ -49,13 +49,13 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         }
     }
     
-    func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater) {
+    func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater) {
         updateQueue.async { [weak self] in
             self?.onTokenUpdate = tokenUpdater
         }
     }
     
-    private func refreshToken() async throws -> Token {
+    private func refreshToken() async throws -> UserToken {
         try await withCheckedThrowingContinuation { continuation in
             tokenProvider { result in
                 switch result {

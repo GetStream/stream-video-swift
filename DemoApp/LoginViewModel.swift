@@ -26,8 +26,8 @@ struct UserCredentials: Identifiable, Codable {
     var id: String {
         userInfo.id
     }
-    let userInfo: UserInfo
-    let token: Token
+    let userInfo: User
+    let token: UserToken
 }
 
 extension UserCredentials {
@@ -75,13 +75,13 @@ extension UserCredentials {
         )
     ].map {
         UserCredentials(
-            userInfo: UserInfo(
+            userInfo: User(
                 id: $0.0,
                 name: $0.1,
                 imageURL: URL(string: $0.2)!,
                 extraData: [:]
             ),
-            token: try! Token(rawValue: $0.3)
+            token: try! UserToken(rawValue: $0.3)
         )
     }
 }

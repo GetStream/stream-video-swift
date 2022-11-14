@@ -12,8 +12,8 @@ struct SelectedParticipantView: View {
     
     private let avatarSize: CGFloat = 50
     
-    var user: UserInfo
-    var onUserTapped: (UserInfo) -> Void
+    var user: User
+    var onUserTapped: (User) -> Void
     
     var body: some View {
         VStack {

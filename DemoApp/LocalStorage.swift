@@ -47,11 +47,11 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler {
         if let savedUser = defaults.object(forKey: userKey) as? Data {
             let decoder = JSONDecoder()
             do {
-                let loadedUser = try decoder.decode(UserInfo.self, from: savedUser)
+                let loadedUser = try decoder.decode(User.self, from: savedUser)
                 guard let tokenValue = defaults.value(forKey: tokenKey) as? String else {
                     throw ClientError.Unexpected()
                 }
-                let token = try Token(rawValue: tokenValue)
+                let token = try UserToken(rawValue: tokenValue)
                 return UserCredentials(userInfo: loadedUser, token: token)
             } catch {
                 log.error("Error while decoding user: \(String(describing: error))")

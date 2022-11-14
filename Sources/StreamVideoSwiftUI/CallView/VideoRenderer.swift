@@ -27,7 +27,7 @@ public struct LocalVideoView: View {
             
     public var body: some View {
         GeometryReader { reader in
-            VideoRendererView(id: streamVideo.userInfo.id, size: reader.size) { view in
+            VideoRendererView(id: streamVideo.user.id, size: reader.size) { view in
                 onLocalVideoUpdate(view)
             }
             .rotation3DEffect(
@@ -37,9 +37,9 @@ public struct LocalVideoView: View {
             .opacity(showVideo ? 1 : 0)
             .overlay(
                 CallParticipantImageView(
-                    id: streamVideo.userInfo.id,
-                    name: streamVideo.userInfo.name,
-                    imageURL: streamVideo.userInfo.imageURL
+                    id: streamVideo.user.id,
+                    name: streamVideo.user.name,
+                    imageURL: streamVideo.user.imageURL
                 )
                 .frame(maxWidth: reader.size.width)
                 .opacity(showVideo ? 0 : 1)

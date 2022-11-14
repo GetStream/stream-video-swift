@@ -11,10 +11,10 @@ public class StreamVideoUI {
     
     public convenience init(
         apiKey: String,
-        user: UserInfo,
-        token: Token,
+        user: User,
+        token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
-        tokenProvider: @escaping TokenProvider,
+        tokenProvider: @escaping UserTokenProvider,
         appearance: Appearance = Appearance(),
         utils: Utils = Utils()
     ) {

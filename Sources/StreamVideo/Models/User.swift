@@ -5,7 +5,7 @@
 import Foundation
 
 /// Model for the user's info.
-public struct UserInfo: Identifiable, Equatable, Sendable, Codable {
+public struct User: Identifiable, Equatable, Sendable, Codable {
     public let id: String
     public let name: String
     public let imageURL: URL?

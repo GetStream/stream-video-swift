@@ -12,7 +12,7 @@ final class CallViewController_Tests: StreamVideoUITestCase {
     func test_callViewController_outgoingSnapshot() {
         // Given
         let callViewController = CallViewController.make()
-        let participants = [UserInfo(id: "Test1"), UserInfo(id: "Test2")]
+        let participants = [User(id: "Test1"), User(id: "Test2")]
         
         // When
         callViewController.startCall(callId: "1234", participants: participants)

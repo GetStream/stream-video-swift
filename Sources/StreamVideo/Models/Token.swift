@@ -5,7 +5,7 @@
 import Foundation
 
 /// The type is designed to store the JWT and the user it is related to.
-public struct Token: Codable, Equatable, ExpressibleByStringLiteral {
+public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral {
     public let rawValue: String
     public let userId: String
     public let expiration: Date?
@@ -56,7 +56,7 @@ public struct Token: Codable, Equatable, ExpressibleByStringLiteral {
     }
 }
 
-public extension Token {
+public extension UserToken {
     /// The token that can be used when user is unknown.
     ///
     /// Is used by `anonymous` token provider.

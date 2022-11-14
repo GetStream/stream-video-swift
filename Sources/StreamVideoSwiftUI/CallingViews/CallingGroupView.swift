@@ -10,7 +10,7 @@ struct CallingGroupView: View {
     
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
     
-    var participants: [UserInfo]
+    var participants: [User]
     @State var isCalling = false
     
     var body: some View {
@@ -96,7 +96,7 @@ struct CallingGroupView: View {
 
 struct IncomingCallParticipantView: View {
         
-    var participant: UserInfo
+    var participant: User
     var size: CGFloat = .expandedAvatarSize
     
     var body: some View {

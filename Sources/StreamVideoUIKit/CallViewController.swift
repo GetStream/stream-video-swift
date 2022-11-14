@@ -29,7 +29,7 @@ open class CallViewController: UIViewController {
         }
     }
     
-    public func startCall(callId: String, participants: [UserInfo]) {
+    public func startCall(callId: String, participants: [User]) {
         viewModel.startCall(callId: callId, participants: participants)
         listenToCallStateChanges()
     }

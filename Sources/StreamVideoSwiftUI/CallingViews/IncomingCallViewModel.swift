@@ -13,7 +13,7 @@ public class IncomingViewModel: ObservableObject {
     public private(set) var callInfo: IncomingCall
     
     var callParticipants: [CallParticipant] {
-        callInfo.participants.filter { $0.id != streamVideo.userInfo.id }
+        callInfo.participants.filter { $0.id != streamVideo.user.id }
     }
     
     public init(callInfo: IncomingCall) {

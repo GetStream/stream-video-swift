@@ -175,8 +175,8 @@ public enum LayoutPriority: Int, Sendable {
 
 extension CallParticipant {
     
-    public func toUserInfo() -> UserInfo {
-        UserInfo(
+    public func toUser() -> User {
+        User(
             id: id,
             name: name,
             imageURL: profileImageURL,

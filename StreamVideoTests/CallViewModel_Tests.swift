@@ -11,7 +11,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     func test_startCall_outgoingState() {
         // Given
         let callViewModel = CallViewModel()
-        let participants = [UserInfo(id: "test1"), UserInfo(id: "test2")]
+        let participants = [User(id: "test1"), User(id: "test2")]
         
         // When
         callViewModel.startCall(callId: "test", participants: participants)

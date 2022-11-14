@@ -11,11 +11,11 @@ final class CallCoordinatorController: Sendable {
     private let latencyService: LatencyService
     private let callCoordinatorService: Stream_Video_CallCoordinatorService
     private let videoConfig: VideoConfig
-    private let userInfo: UserInfo
+    private let user: User
     
     init(
         httpClient: HTTPClient,
-        userInfo: UserInfo,
+        user: User,
         coordinatorInfo: CoordinatorInfo,
         videoConfig: VideoConfig
     ) {
@@ -27,7 +27,7 @@ final class CallCoordinatorController: Sendable {
             token: coordinatorInfo.token
         )
         self.videoConfig = videoConfig
-        self.userInfo = userInfo
+        self.user = user
     }
     
     func joinCall(
@@ -52,7 +52,7 @@ final class CallCoordinatorController: Sendable {
         return edgeServer
     }
 
-    func update(token: Token) {
+    func update(token: UserToken) {
         callCoordinatorService.update(userToken: token.rawValue)
     }
     

@@ -32,13 +32,13 @@ struct AddUserView: View {
                 .padding(.all, 8)
             
             Button {
-                let userInfo = UserInfo(
+                let userInfo = User(
                     id: id,
                     name: name,
                     imageURL: nil,
                     extraData: [:]
                 )
-                if let token = try? Token(rawValue: token) {
+                if let token = try? UserToken(rawValue: token) {
                     let user = UserCredentials(userInfo: userInfo, token: token)
                     UserCredentials.builtInUsers.append(user)
                     presentationMode.wrappedValue.dismiss()

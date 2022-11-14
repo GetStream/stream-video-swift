@@ -7,11 +7,11 @@ import StreamVideoSwiftUI
 
 class MockUserListProvider: UserListProvider {
 
-    func loadNextUsers(pagination: Pagination) async throws -> [UserInfo] {
+    func loadNextUsers(pagination: Pagination) async throws -> [User] {
         return Self.builtInUsers
     }
 
-    static var builtInUsers: [UserInfo] = [
+    static var builtInUsers: [User] = [
         (
             "tommaso",
             "Tommaso",
@@ -43,7 +43,7 @@ class MockUserListProvider: UserListProvider {
             "https://getstream.io/static/379eda22663bae101892ad1d37778c3d/802d2/samuel-jeeves.webp"
         )
     ].map {
-        UserInfo(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))
+        User(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))
     }
 
 }

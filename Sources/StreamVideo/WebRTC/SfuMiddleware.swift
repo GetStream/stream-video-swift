@@ -8,7 +8,7 @@ import WebRTC
 class SfuMiddleware: EventMiddleware {
     private let participantsThreshold = 4
     private let sessionID: String
-    private let userInfo: UserInfo
+    private let user: User
     private let state: WebRTCClient.State
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
     private var subscriber: PeerConnection?
@@ -18,7 +18,7 @@ class SfuMiddleware: EventMiddleware {
     
     init(
         sessionID: String,
-        userInfo: UserInfo,
+        user: User,
         state: WebRTCClient.State,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         subscriber: PeerConnection? = nil,
@@ -26,7 +26,7 @@ class SfuMiddleware: EventMiddleware {
         onParticipantEvent: ((ParticipantEvent) -> Void)? = nil
     ) {
         self.sessionID = sessionID
-        self.userInfo = userInfo
+        self.user = user
         self.state = state
         self.signalService = signalService
         self.subscriber = subscriber

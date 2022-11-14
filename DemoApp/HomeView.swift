@@ -19,15 +19,15 @@ struct HomeView: View {
     
     @State private var callAction = CallAction.startCall
     
-    var participants: [UserInfo] {
+    var participants: [User] {
         var participants = UserCredentials.builtInUsers.map { $0.userInfo }
         participants.removeAll { userInfo in
-            userInfo.id == streamVideo.userInfo.id
+            userInfo.id == streamVideo.user.id
         }
         return participants
     }
     
-    @State var selectedParticipants = [UserInfo]()
+    @State var selectedParticipants = [User]()
     @State var incomingCallInfo: IncomingCall?
     @State var logoutAlertShown = false
     
@@ -38,7 +38,7 @@ struct HomeView: View {
                     Button {
                         logoutAlertShown = true
                     } label: {
-                        LazyImage(url: streamVideo.userInfo.imageURL)
+                        LazyImage(url: streamVideo.user.imageURL)
                             .frame(width: imageSize, height: imageSize)
                             .clipShape(Circle())
                     }

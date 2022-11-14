@@ -15,5 +15,5 @@ final class MockHTTPClient: @unchecked Sendable, HTTPClient {
         return dataResponses.removeFirst()
     }
     
-    func setTokenUpdater(_ tokenUpdater: @escaping TokenUpdater) {}
+    func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater) {}
 }

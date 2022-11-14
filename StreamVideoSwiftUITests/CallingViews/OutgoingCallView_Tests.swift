@@ -13,7 +13,7 @@ final class OutgoingCallView_Tests: StreamVideoUITestCase {
     func test_outgoingCallView_snapshot() {
         // Given
         let callViewModel = CallViewModel()
-        let participants = [UserInfo(id: "Test1"), UserInfo(id: "Test2")]
+        let participants = [User(id: "Test1"), User(id: "Test2")]
         
         // When
         callViewModel.startCall(callId: "123", participants: participants)

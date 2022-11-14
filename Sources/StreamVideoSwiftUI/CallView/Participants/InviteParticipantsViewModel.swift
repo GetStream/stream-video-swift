@@ -15,8 +15,8 @@ class InviteParticipantsViewModel: ObservableObject {
     
     @Published var searchText = ""
     
-    @Published var selectedUsers = [UserInfo]()
-    @Published var allUsers = [UserInfo]()
+    @Published var selectedUsers = [User]()
+    @Published var allUsers = [User]()
     
     private let limit = 15
     private var offset = 0
@@ -25,7 +25,7 @@ class InviteParticipantsViewModel: ObservableObject {
     
     private var currentParticipantIds: [String]
     
-    var filteredUsers: [UserInfo] {
+    var filteredUsers: [User] {
         let displayUsers = allUsers.filter { !currentParticipantIds.contains($0.id) }
         if searchText.isEmpty {
             return displayUsers
@@ -53,7 +53,7 @@ class InviteParticipantsViewModel: ObservableObject {
         }
     }
     
-    func userTapped(_ user: UserInfo) {
+    func userTapped(_ user: User) {
         if selectedUsers.contains(user) {
             selectedUsers.removeAll { current in
                 user.id == current.id
@@ -63,7 +63,7 @@ class InviteParticipantsViewModel: ObservableObject {
         }
     }
     
-    func onUserAppear(user: UserInfo) {
+    func onUserAppear(user: User) {
         guard let index = allUsers.firstIndex(of: user),
               index < allUsers.count - 10 else {
             return
@@ -71,11 +71,11 @@ class InviteParticipantsViewModel: ObservableObject {
         loadNextUsers()
     }
     
-    func isSelected(user: UserInfo) -> Bool {
+    func isSelected(user: User) -> Bool {
         selectedUsers.contains(user)
     }
     
-    func onlineInfo(for user: UserInfo) -> String {
+    func onlineInfo(for user: User) -> String {
         // TODO: provide implementation
         ""
     }
@@ -90,7 +90,7 @@ class InviteParticipantsViewModel: ObservableObject {
             let newUsers = try await utils.userListProvider.loadNextUsers(
                 pagination: Pagination(pageSize: limit, offset: offset)
             )
-            var temp = [UserInfo]()
+            var temp = [User]()
             for user in allUsers {
                 temp.append(user)
             }

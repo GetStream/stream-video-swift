@@ -33,7 +33,7 @@ open class CallViewModel: ObservableObject {
     
     @Published public var inviteParticipantsShown = false
     
-    @Published public var outgoingCallMembers = [UserInfo]()
+    @Published public var outgoingCallMembers = [User]()
     
     @Published public var callParticipants = [String: CallParticipant]() {
         didSet {
@@ -48,7 +48,7 @@ open class CallViewModel: ObservableObject {
     
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (key, _) in
-            key == streamVideo.userInfo.id
+            key == streamVideo.user.id
         })
             .map { $1 }
     }
@@ -62,7 +62,7 @@ open class CallViewModel: ObservableObject {
     
     public var participants: [CallParticipant] {
         callParticipants
-            .filter { $0.value.id != streamVideo.userInfo.id }
+            .filter { $0.value.id != streamVideo.user.id }
             .map(\.value)
             .sorted(by: { $0.layoutPriority.rawValue < $1.layoutPriority.rawValue })
             .sorted(by: { $0.name < $1.name })
@@ -145,7 +145,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
     ///  - participants: list of participants that are part of the call.
-    public func startCall(callId: String, type: String? = nil, participants: [UserInfo]) {
+    public func startCall(callId: String, type: String? = nil, participants: [User]) {
         outgoingCallMembers = participants
         callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
         callingState = .outgoing

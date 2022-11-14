@@ -115,7 +115,7 @@ struct VideoUserView: View {
     
     private let avatarSize: CGFloat = 56
     
-    var user: UserInfo
+    var user: User
     var onlineText: String
     var isSelected: Bool
     

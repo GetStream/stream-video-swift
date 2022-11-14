@@ -6,24 +6,24 @@ import Foundation
 import SwiftProtobuf
 import WebRTC
 
-public typealias TokenProvider = (@escaping (Result<Token, Error>) -> Void) -> Void
-public typealias TokenUpdater = (Token) -> Void
+public typealias UserTokenProvider = (@escaping (Result<UserToken, Error>) -> Void) -> Void
+public typealias UserTokenUpdater = (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo {
     
     // Temporarly storing user in memory.
-    public var userInfo: UserInfo
+    public var user: User
     public let videoConfig: VideoConfig
     
-    var token: Token {
+    var token: UserToken {
         didSet {
             callCoordinatorController.update(token: token)
         }
     }
 
-    private let tokenProvider: TokenProvider
+    private let tokenProvider: UserTokenProvider
     private let endpointConfig: EndpointConfig = .stagingConfig
     private let httpClient: HTTPClient
     
@@ -64,10 +64,10 @@ public class StreamVideo {
     
     public convenience init(
         apiKey: String,
-        user: UserInfo,
-        token: Token,
+        user: User,
+        token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
-        tokenProvider: @escaping TokenProvider
+        tokenProvider: @escaping UserTokenProvider
     ) {
         self.init(
             apiKey: apiKey,
@@ -81,14 +81,14 @@ public class StreamVideo {
         
     init(
         apiKey: String,
-        user: UserInfo,
-        token: Token,
+        user: User,
+        token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
-        tokenProvider: @escaping TokenProvider,
+        tokenProvider: @escaping UserTokenProvider,
         environment: Environment
     ) {
         self.apiKey = APIKey(apiKey)
-        userInfo = user
+        self.user = user
         self.token = token
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
@@ -121,7 +121,7 @@ public class StreamVideo {
     public func makeCallController(callType: CallType, callId: String) -> CallController {
         let controller = CallController(
             callCoordinatorController: callCoordinatorController,
-            userInfo: userInfo,
+            user: user,
             callId: callId,
             callType: callType,
             apiKey: apiKey.apiKeyString,
@@ -236,8 +236,8 @@ public class StreamVideo {
             payload.apiKey = apiKey.apiKeyString
             
             var user = Stream_Video_CreateUserRequest()
-            user.name = self.userInfo.name
-            user.imageURL = self.userInfo.imageURL?.absoluteString ?? ""
+            user.name = self.user.name
+            user.imageURL = self.user.imageURL?.absoluteString ?? ""
             payload.user = user
             
             var event = Stream_Video_WebsocketClientEvent()

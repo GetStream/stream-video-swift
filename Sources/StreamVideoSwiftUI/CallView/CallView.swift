@@ -93,7 +93,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
     
     private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
-        if let track = participant.track, participant.id != streamVideo.userInfo.id {
+        if let track = participant.track, participant.id != streamVideo.user.id {
             log.debug("adding track to a view \(view)")
             view.add(track: track)
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {

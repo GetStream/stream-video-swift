@@ -43,7 +43,7 @@ public struct VideoView<Factory: ViewFactory>: View {
                 if !viewModel.participants.isEmpty {
                     viewFactory.makeCallView(viewModel: viewModel)
                 } else {
-                    WaitingLocalUserView(viewModel: viewModel)
+                    WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
                 viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
@@ -52,9 +52,10 @@ public struct VideoView<Factory: ViewFactory>: View {
     }
 }
 
-public struct WaitingLocalUserView: View {
+public struct WaitingLocalUserView<Factory: ViewFactory>: View {
     
     @ObservedObject var viewModel: CallViewModel
+    var viewFactory: Factory
     
     public var body: some View {
         ZStack {
@@ -67,7 +68,7 @@ public struct WaitingLocalUserView: View {
             }
             VStack {
                 Spacer()
-                CallControlsView(viewModel: viewModel)
+                viewFactory.makeCallControlsView(viewModel: viewModel)
             }
         }
     }
