@@ -7,6 +7,7 @@ on:
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
+  FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT: 180
 
 jobs:
   build-and-test-debug:
@@ -18,7 +19,7 @@ jobs:
       fail-fast: false
     runs-on: ${{ matrix.os }}
     steps:
-    - uses: actions/checkout@v2.5.0
+    - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"iPhone 8"
@@ -42,7 +43,7 @@ jobs:
     name: Automated Code Review
     runs-on: macos-12
     steps:
-    - uses: actions/checkout@v2.5.0
+    - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane rubocop
     - run: bundle exec fastlane run_linter
