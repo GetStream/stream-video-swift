@@ -27,6 +27,8 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
 
 public struct VideoView<Factory: ViewFactory>: View {
     
+    @Injected(\.utils) var utils
+    
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
     
@@ -47,6 +49,11 @@ public struct VideoView<Factory: ViewFactory>: View {
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
                 viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+            }
+        }
+        .onReceive(viewModel.$callingState) { _ in
+            if viewModel.callingState == .idle || viewModel.callingState == .inCall {
+                utils.callSoundsPlayer.stopOngoingSound()
             }
         }
     }
