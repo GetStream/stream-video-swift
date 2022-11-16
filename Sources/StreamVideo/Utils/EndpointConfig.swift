@@ -17,6 +17,6 @@ extension EndpointConfig {
     
     static let stagingConfig = EndpointConfig(
         hostname: "https://rpc-video-coordinator.oregon-v1.stream-io-video.com/rpc",
-        wsEndpoint: "ws://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
+        wsEndpoint: "wss://wss-video-coordinator.oregon-v1.stream-io-video.com/rpc/stream.video.coordinator.client_v1_rpc.Websocket/Connect"
     )
 }

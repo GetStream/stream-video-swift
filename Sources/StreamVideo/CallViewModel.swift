@@ -261,10 +261,11 @@ open class CallViewModel: ObservableObject {
     }
     
     private func handleRingingEvents() {
-        guard ringingSupported else { return }
+        let ringingTimeout = streamVideo.videoConfig.ringingTimeout
+        guard ringingSupported, ringingTimeout > 0 else { return }
         if callingState == .outgoing {
             ringingTimer = Foundation.Timer.scheduledTimer(
-                withTimeInterval: streamVideo.videoConfig.ringingTimeout,
+                withTimeInterval: ringingTimeout,
                 repeats: false,
                 block: { [weak self] _ in
                     guard let self = self else { return }
