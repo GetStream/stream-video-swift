@@ -47,13 +47,24 @@ public struct CallView<Factory: ViewFactory>: View {
                 
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
-                        Button {
-                            viewModel.participantsShown.toggle()
-                        } label: {
-                            images.participants
-                                .padding(.horizontal)
-                                .padding(.horizontal, 2)
-                                .foregroundColor(.white)
+                        HStack {
+                            Button {
+                                viewModel.isMinimized = true
+                            } label: {
+                                Image(systemName: "chevron.backward")
+                                    .foregroundColor(colors.textInverted)
+                                    .padding()
+                            }
+
+                            Spacer()
+                            Button {
+                                viewModel.participantsShown.toggle()
+                            } label: {
+                                images.participants
+                                    .padding(.horizontal)
+                                    .padding(.horizontal, 2)
+                                    .foregroundColor(.white)
+                            }
                         }
                         
                         LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in

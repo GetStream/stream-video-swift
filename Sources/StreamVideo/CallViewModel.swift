@@ -46,6 +46,8 @@ open class CallViewModel: ObservableObject {
     
     @Published public var callSettings = CallSettings()
     
+    @Published public var isMinimized = false
+    
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (key, _) in
             key == streamVideo.user.id
@@ -222,6 +224,7 @@ open class CallViewModel: ObservableObject {
         streamVideo.leaveCall()
         currentEventsTask?.cancel()
         callingState = .idle
+        isMinimized = false
     }
     
     private func enterCall(callId: String, participantIds: [String]) {

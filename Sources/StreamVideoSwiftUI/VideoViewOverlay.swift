@@ -32,6 +32,8 @@ public struct VideoView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
     
+    private let padding: CGFloat = 16
+    
     public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -43,7 +45,11 @@ public struct VideoView<Factory: ViewFactory>: View {
                 viewFactory.makeOutgoingCallView(viewModel: viewModel)
             } else if viewModel.callingState == .inCall {
                 if !viewModel.participants.isEmpty {
-                    viewFactory.makeCallView(viewModel: viewModel)
+                    if viewModel.isMinimized {
+                        MinimizedCallView(viewModel: viewModel)
+                    } else {
+                        viewFactory.makeCallView(viewModel: viewModel)
+                    }
                 } else {
                     WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
                 }
