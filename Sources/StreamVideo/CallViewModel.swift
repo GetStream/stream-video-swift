@@ -48,6 +48,8 @@ open class CallViewModel: ObservableObject {
     
     @Published public var isMinimized = false
     
+    @Published public var localVideoPrimary = false
+    
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (key, _) in
             key == streamVideo.user.id

@@ -25,12 +25,12 @@ public struct CallView<Factory: ViewFactory>: View {
     public var body: some View {
         GeometryReader { reader in
             ZStack {
-                viewFactory.makeVideoParticipantsView(
-                    participants: viewModel.participants,
-                    availableSize: reader.size,
-                    onViewRendering: handleViewRendering(_:participant:),
-                    onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)
-                )
+                if viewModel.localVideoPrimary {
+                    localVideoView
+                        .edgesIgnoringSafeArea(.all)
+                } else {
+                    participantsView(size: reader.size)
+                }
                 
                 VStack {
                     Spacer()
@@ -49,7 +49,9 @@ public struct CallView<Factory: ViewFactory>: View {
                     VStack(alignment: .trailing, spacing: padding) {
                         HStack {
                             Button {
-                                viewModel.isMinimized = true
+                                withAnimation {
+                                    viewModel.isMinimized = true
+                                }
                             } label: {
                                 Image(systemName: "chevron.backward")
                                     .foregroundColor(colors.textInverted)
@@ -67,18 +69,14 @@ public struct CallView<Factory: ViewFactory>: View {
                             }
                         }
                         
-                        LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
-                            if let track = viewModel.localParticipant?.track {
-                                view.add(track: track)
-                            } else {
-                                viewModel.renderLocalVideo(renderer: view)
+                        CornerDragableView(
+                            content: contentDragableView(size: reader.size),
+                            proxy: reader
+                        ) {
+                            withAnimation {
+                                viewModel.localVideoPrimary.toggle()
                             }
                         }
-                        .frame(width: reader.size.width / 4 + padding, height: reader.size.width / 3 + padding)
-                        .background(Color.red)
-                        .cornerRadius(16)
-                        .padding(.horizontal)
-                        .opacity(viewModel.localParticipant != nil ? 1 : 0)
                     }
                 }
                 
@@ -97,6 +95,54 @@ public struct CallView<Factory: ViewFactory>: View {
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
         }
+    }
+    
+    @ViewBuilder
+    private func contentDragableView(size: CGSize) -> some View {
+        if !viewModel.localVideoPrimary {
+            localVideoView
+                .padding(.horizontal)
+        } else {
+            minimizedView(size: size)
+        }
+    }
+    
+    private func minimizedView(size: CGSize) -> some View {
+        Group {
+            if !viewModel.participants.isEmpty {
+                VideoCallParticipantView(
+                    participant: viewModel.participants[0],
+                    availableSize: size
+                ) { participant, view in
+                    if let track = participant.track {
+                        view.add(track: track)
+                    }
+                }
+            } else {
+                EmptyView()
+            }
+        }
+    }
+    
+    private var localVideoView: some View {
+        LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
+            if let track = viewModel.localParticipant?.track {
+                view.add(track: track)
+            } else {
+                viewModel.renderLocalVideo(renderer: view)
+            }
+        }
+        .cornerRadius(16)
+        .opacity(viewModel.localParticipant != nil ? 1 : 0)
+    }
+    
+    private func participantsView(size: CGSize) -> some View {
+        viewFactory.makeVideoParticipantsView(
+            participants: viewModel.participants,
+            availableSize: size,
+            onViewRendering: handleViewRendering(_:participant:),
+            onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)
+        )
     }
     
     private var participants: [CallParticipant] {
