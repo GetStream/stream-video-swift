@@ -229,6 +229,7 @@ public class StreamVideo {
             connectURL: url
         )
         
+        webSocketClient.connectionStateDelegate = self
         webSocketClient.onConnect = { [weak self] in
             guard let self = self else { return }
             var payload = Stream_Video_AuthPayload()
@@ -258,6 +259,32 @@ public class StreamVideo {
             webSocketClient,
             eventNotificationCenter
         )
+    }
+}
+
+extension StreamVideo: ConnectionStateDelegate {
+    
+    func webSocketClient(
+        _ client: WebSocketClient,
+        didUpdateConnectionState state: WebSocketConnectionState
+    ) {
+        switch state {
+        case let .disconnected(source):
+            // TODO: check for token-related error code.
+            if source.serverError != nil {
+                Task {
+                    do {
+                        self.token = try await httpClient.refreshToken()
+                        log.debug("user token updated, will reconnect ws")
+                        webSocketClient?.connect()
+                    } catch {
+                        log.error("Error refreshing token, will disconnect ws connection")
+                    }
+                }
+            }
+        default:
+            log.debug("Web socket connection state update \(state)")
+        }
     }
 }
 

@@ -9,6 +9,8 @@ protocol HTTPClient: Sendable {
     func execute(request: URLRequest) async throws -> Data
     
     func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater)
+    
+    func refreshToken() async throws -> UserToken
 }
 
 final class URLSessionClient: HTTPClient, @unchecked Sendable {
@@ -55,7 +57,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         }
     }
     
-    private func refreshToken() async throws -> UserToken {
+    func refreshToken() async throws -> UserToken {
         try await withCheckedThrowingContinuation { continuation in
             tokenProvider { result in
                 switch result {
@@ -84,6 +86,15 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                     } else if response.statusCode >= 400 {
                         let requestURLString = request.url?.absoluteString ?? ""
                         let errorResponse = Self.errorResponse(from: data, response: response)
+                        if let errorResponse = errorResponse as? [String: Any],
+                           let meta = errorResponse["meta"] as? [String: Any],
+                           let code = meta["code"] as? String,
+                           code == "AUTH_TOKEN_EXPIRED", !isRetry {
+                            // Temporary handling until the backend is ready.
+                            log.debug("Access token expired")
+                            continuation.resume(throwing: ClientError.InvalidToken())
+                            return
+                        }
                         log.debug("Error executing request \(requestURLString) \(errorResponse)")
                         continuation.resume(throwing: ClientError.NetworkError(response.description))
                         return
