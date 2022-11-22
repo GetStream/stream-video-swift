@@ -31,27 +31,27 @@ extension NSLayoutConstraint {
 
 extension NSLayoutAnchor {
     // These methods return an inactive constraint of the form thisAnchor = otherAnchor.
-    @objc func pin(equalTo anchor: NSLayoutAnchor<AnchorType>) -> NSLayoutConstraint {
+    @objc func pinItem(equalTo anchor: NSLayoutAnchor<AnchorType>) -> NSLayoutConstraint {
         constraint(equalTo: anchor).with(priority: .streamRequire)
     }
 
-    @objc func pin(greaterThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>) -> NSLayoutConstraint {
+    @objc func pinItem(greaterThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>) -> NSLayoutConstraint {
         constraint(greaterThanOrEqualTo: anchor).with(priority: .streamRequire)
     }
 
-    @objc func pin(lessThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>) -> NSLayoutConstraint {
+    @objc func pinItem(lessThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>) -> NSLayoutConstraint {
         constraint(lessThanOrEqualTo: anchor).with(priority: .streamRequire)
     }
 
-    @objc func pin(equalTo anchor: NSLayoutAnchor<AnchorType>, constant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(equalTo anchor: NSLayoutAnchor<AnchorType>, constant c: CGFloat) -> NSLayoutConstraint {
         constraint(equalTo: anchor, constant: c).with(priority: .streamRequire)
     }
 
-    @objc func pin(greaterThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>, constant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(greaterThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>, constant c: CGFloat) -> NSLayoutConstraint {
         constraint(greaterThanOrEqualTo: anchor, constant: c).with(priority: .streamRequire)
     }
 
-    @objc func pin(lessThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>, constant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(lessThanOrEqualTo anchor: NSLayoutAnchor<AnchorType>, constant c: CGFloat) -> NSLayoutConstraint {
         constraint(lessThanOrEqualTo: anchor, constant: c).with(priority: .streamRequire)
     }
 }
@@ -60,37 +60,37 @@ extension NSLayoutAnchor {
 
 extension NSLayoutDimension {
     // These methods return an inactive constraint of the form thisVariable = constant.
-    @objc func pin(equalToConstant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(equalToConstant c: CGFloat) -> NSLayoutConstraint {
         constraint(equalToConstant: c).with(priority: .streamRequire)
     }
 
-    @objc func pin(greaterThanOrEqualToConstant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(greaterThanOrEqualToConstant c: CGFloat) -> NSLayoutConstraint {
         constraint(greaterThanOrEqualToConstant: c).with(priority: .streamRequire)
     }
 
-    @objc func pin(lessThanOrEqualToConstant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(lessThanOrEqualToConstant c: CGFloat) -> NSLayoutConstraint {
         constraint(lessThanOrEqualToConstant: c).with(priority: .streamRequire)
     }
 
     // These methods return an inactive constraint of the form thisAnchor = otherAnchor * multiplier.
-    @objc func pin(equalTo anchor: NSLayoutDimension, multiplier m: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(equalTo anchor: NSLayoutDimension, multiplier m: CGFloat) -> NSLayoutConstraint {
         constraint(equalTo: anchor, multiplier: m).with(priority: .streamRequire)
     }
 
-    @objc func pin(greaterThanOrEqualTo anchor: NSLayoutDimension, multiplier m: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(greaterThanOrEqualTo anchor: NSLayoutDimension, multiplier m: CGFloat) -> NSLayoutConstraint {
         constraint(greaterThanOrEqualTo: anchor, multiplier: m).with(priority: .streamRequire)
     }
 
-    @objc func pin(lessThanOrEqualTo anchor: NSLayoutDimension, multiplier m: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(lessThanOrEqualTo anchor: NSLayoutDimension, multiplier m: CGFloat) -> NSLayoutConstraint {
         constraint(lessThanOrEqualTo: anchor, multiplier: m).with(priority: .streamRequire)
     }
 
     // These methods return an inactive constraint of the form thisAnchor = otherAnchor * multiplier + constant.
-    @objc func pin(equalTo anchor: NSLayoutDimension, multiplier m: CGFloat, constant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(equalTo anchor: NSLayoutDimension, multiplier m: CGFloat, constant c: CGFloat) -> NSLayoutConstraint {
         constraint(equalTo: anchor, multiplier: m, constant: c).with(priority: .streamRequire)
     }
 
-    @objc func pin(
+    @objc func pinItem(
         greaterThanOrEqualTo anchor: NSLayoutDimension,
         multiplier m: CGFloat,
         constant c: CGFloat
@@ -98,7 +98,11 @@ extension NSLayoutDimension {
         constraint(greaterThanOrEqualTo: anchor, multiplier: m, constant: c).with(priority: .streamRequire)
     }
 
-    @objc func pin(lessThanOrEqualTo anchor: NSLayoutDimension, multiplier m: CGFloat, constant c: CGFloat) -> NSLayoutConstraint {
+    @objc func pinItem(
+        lessThanOrEqualTo anchor: NSLayoutDimension,
+        multiplier m: CGFloat,
+        constant c: CGFloat
+    ) -> NSLayoutConstraint {
         constraint(lessThanOrEqualTo: anchor, multiplier: m, constant: c).with(priority: .streamRequire)
     }
 }
@@ -110,21 +114,21 @@ extension NSLayoutXAxisAnchor {
      receiver [= | ≥ | ≤] 'anchor' + 'multiplier' * system space,
      where the value of the system space is determined from information available from the anchors.
      */
-    @objc func pin(
+    @objc func pinItem(
         equalToSystemSpacingAfter anchor: NSLayoutXAxisAnchor,
         multiplier: CGFloat = 1
     ) -> NSLayoutConstraint {
         constraint(equalToSystemSpacingAfter: anchor, multiplier: multiplier).with(priority: .streamRequire)
     }
 
-    @objc func pin(
+    @objc func pinItem(
         greaterThanOrEqualToSystemSpacingAfter anchor: NSLayoutXAxisAnchor,
         multiplier: CGFloat = 1
     ) -> NSLayoutConstraint {
         constraint(greaterThanOrEqualToSystemSpacingAfter: anchor, multiplier: multiplier).with(priority: .streamRequire)
     }
 
-    @objc func pin(
+    @objc func pinItem(
         lessThanOrEqualToSystemSpacingAfter anchor: NSLayoutXAxisAnchor,
         multiplier: CGFloat = 1
     ) -> NSLayoutConstraint {
@@ -140,21 +144,21 @@ extension NSLayoutYAxisAnchor {
      If either the receiver or 'anchor' is the firstBaselineAnchor or lastBaselineAnchor of a view with text content
      then the spacing will depend on the fonts involved and will change when those do.
      */
-    @objc func pin(
+    @objc func pinItem(
         equalToSystemSpacingBelow anchor: NSLayoutYAxisAnchor,
         multiplier: CGFloat = 1
     ) -> NSLayoutConstraint {
         constraint(equalToSystemSpacingBelow: anchor, multiplier: multiplier).with(priority: .streamRequire)
     }
 
-    @objc func pin(
+    @objc func pinItem(
         greaterThanOrEqualToSystemSpacingBelow anchor: NSLayoutYAxisAnchor,
         multiplier: CGFloat = 1
     ) -> NSLayoutConstraint {
         constraint(greaterThanOrEqualToSystemSpacingBelow: anchor, multiplier: multiplier).with(priority: .streamRequire)
     }
 
-    @objc func pin(
+    @objc func pinItem(
         lessThanOrEqualToSystemSpacingBelow anchor: NSLayoutYAxisAnchor,
         multiplier: CGFloat = 1
     ) -> NSLayoutConstraint {

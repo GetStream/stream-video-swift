@@ -16,4 +16,8 @@ final class MockHTTPClient: @unchecked Sendable, HTTPClient {
     }
     
     func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater) {}
+    
+    func refreshToken() async throws -> UserToken {
+        fatalError("Not implemented")
+    }
 }
