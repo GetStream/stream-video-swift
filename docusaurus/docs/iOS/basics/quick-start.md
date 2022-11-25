@@ -10,7 +10,7 @@ Before starting, make sure you have installed StreamVideo as explained in the [I
 
 The simplest way to get started is to use our default SwiftUI components, that can add calling support to your views with only few lines of code.
 
-First, we need to create the `StreamVideoUI`, with an api key and the user who's logged in your app.
+First, we need to create the `StreamVideoUI`, with an API key and the user who's logged in your app.
 
 ```swift
 streamVideo = StreamVideoUI(
@@ -26,7 +26,7 @@ streamVideo = StreamVideoUI(
 ``` 
 
 `StreamVideoUI` is the main access point to our SwiftUI SDK. It's created with the following values:
-- `apiKey` - your unique api key that's available in your dashboard.
+- `apiKey` - your unique API key that's available in your dashboard.
 - `user` - the `UserInfo` struct that contains information about the currently logged in user.
 - `token` - the current user's `Token`.
 - `tokenProvider` - called when a token is expired. We strongly recommend that you use token that expires (for security reasons), and provide a way for the SDK to fetch a new token when the current one expires, with the `tokenProvider` closure.

@@ -51,7 +51,7 @@ Button {
 
 ### Accepting a call
 
-When you are receving an incoming call, you can either accept it or reject it. If you don't perform any of these actions after a configurable timeout, the call is canceled. 
+When you are receiving an incoming call, you can either accept it or reject it. If you don't perform any of these actions after a configurable timeout, the call is canceled. 
 
 In order to accept a call, you need to use the method `acceptCall(callId: String, type: String)`, where the parameters are:
 - `callId` - the id of the call.

@@ -190,7 +190,7 @@ func reportIncomingCall(
 
 The method also saves the `callId` and `callType`, and it generates a call UUID, which is required by CallKit for identifying calls.
 
-The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDK's calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions. 
+The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDKs calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions. 
 
 First, we need to accept the call both from `CallKit`, as well as initiate the call inside the SDK. This is done with the `provider(_ provider: CXProvider, perform action: CXAnswerCallAction)` method in the `CXProviderDelegate`.
 

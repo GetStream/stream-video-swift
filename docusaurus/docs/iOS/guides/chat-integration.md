@@ -6,7 +6,7 @@ title: Chat Integration
 
 It's common for calling apps to have chat, as well as the opposite - chat apps to have a calling functionality. Stream's Chat and Video SDKs are compatible between each other, and can easily be integrated into an app.
 
-You can find example integrations, for both our UIKit and SwiftUI SDKs, in our sample apps [repo](https://github.com/GetStream/stream-video-ios-examples).
+You can find example integrations, for both our UIKit and SwiftUI SDKs, in our sample apps [repository](https://github.com/GetStream/stream-video-ios-examples).
 
 In those samples, we provide a `StreamWrapper` class, that handles the creation of the different clients and UI objects for both chat and video.
 
@@ -212,7 +212,7 @@ public struct CallChatChannelHeader: ToolbarContent {
 
 It's important that we're adding a unique call id in the `startCall` method, to invoke the ringing each time.
 
-In order to listen to incoming calls, you should attach the `CallModifier` to the parent view (e.g. the `ChatChannelListView`):
+In order to listen to incoming calls, you should attach the `CallModifier` to the parent view (for example the `ChatChannelListView`):
 
 ```swift
 ChatChannelListView(viewFactory: ChatViewFactory.shared)

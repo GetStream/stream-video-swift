@@ -38,7 +38,7 @@ Before proceeding, please make sure that the uploaded file is a valid one, and i
 
 The minimal data the link that should invoke the call should contain are the call id and type. In your iOS app, you should parse the parameters of your link, and use those to start a call from our `CallViewModel`. Additionally, you should already have a user logged in, since if you're app was not running, you will need to setup the `StreamVideo` client with a user first.
 
-One example of how your url should look like could be this: "https://{host}/{path}/{some_call_id}?type={some_call_type}".
+One example of how your URL should look like could be this: "https://{host}/{path}/{some_call_id}?type={some_call_type}".
 
 If you are using SwiftUI, the easiest way to handle these links is to attach the `onOpenURL` modifier:
 

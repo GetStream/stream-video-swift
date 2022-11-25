@@ -20,6 +20,6 @@ Every call has a call id and type. You can join a call with the same id as many 
 
 ## Web Socket Connection
 
-By default, the web socket connection with our backend is created when the `StreamVideo` client is initalized, and it's persisted throughout its lifecycle. If you go into the background, and come back, the SDK tries to re-establish this connection. The web socket connection is persisted in order to listen to events such as incoming calls, that can be presented in-app (if you're not using CallKit).
+By default, the web socket connection with our backend is created when the `StreamVideo` client is initialized, and it's persisted throughout its lifecycle. If you go into the background, and come back, the SDK tries to re-establish this connection. The web socket connection is persisted in order to listen to events such as incoming calls, that can be presented in-app (if you're not using CallKit).
 
 You can change this behaviour and create the web socket connection only before you start a call. This can be done by setting `persitingSocketConnection` to `false` in the `VideoConfig`, when you create the `StreamVideo` client.

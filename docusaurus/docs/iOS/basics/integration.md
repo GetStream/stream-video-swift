@@ -15,7 +15,7 @@ Open your `.xcodeproj`, select the option "Add Package..." in the File menu, and
 - For the UIKit components (**StreamVideoUIKit**, which depends on **StreamVideo** and **StreamVideoSwiftUI**) use:
   - `https://github.com/GetStream/stream-video-swift`
 
-After introducing the desired url, Xcode will look for the Packages available in the repository and automatically select the latest version tagged. Press next and Xcode will download the dependency.
+After introducing the desired URL, Xcode will look for the Packages available in the repository and automatically select the latest version tagged. Press next and Xcode will download the dependency.
 
 Based on the repository you select you can find 3 different targets: StreamVideo, StreamVideoSwiftUI and StreamVideoUIKit.
 
@@ -23,6 +23,6 @@ Based on the repository you select you can find 3 different targets: StreamVideo
 - If you want to use the UIKit components, select **StreamVideoUIKit**.
 - If you don't need any UI components, select **StreamVideo**.
 
-After you press finish, it's done!
+After you press finish, it's done.
 
 _More information about Swift Package Manager [can be found here](https://www.swift.org/package-manager/)_

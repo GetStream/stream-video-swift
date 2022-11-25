@@ -12,7 +12,7 @@ The UI components are provided in SwiftUI. If you use UIKit, we also provide UIK
 
 The UI SDK provides a context provider object that allows simple access to functionalities exposed by the SDK, such as branding, presentation logic, icons and the low-level video client.
 
-The `StreamVideoUI` object can be initalized in two ways. The first way is to implicitly create the low-level client `StreamVideo`, by only creating the `StreamVideoUI` object.
+The `StreamVideoUI` object can be initialized in two ways. The first way is to implicitly create the low-level client `StreamVideo`, by only creating the `StreamVideoUI` object.
 
 ```swift
 let streamVideoUI = StreamVideoUI(
@@ -44,7 +44,7 @@ let streamVideo = StreamVideo(
 let streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
 ```
 
-It's important to initalize the client early in your app's lifecycle, and as soon as your user is logged in. If you try to display a view without the `StreamVideoUI` object being created, you will receive a crash.
+It's important to initialize the client early in your app's lifecycle, and as soon as your user is logged in. If you try to display a view without the `StreamVideoUI` object being created, you will receive a crash.
 
 ## Customization options
 
