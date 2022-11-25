@@ -21,7 +21,8 @@
       ],
       "Guides": [
         "guides/callkit-integration",
-        "guides/deep-linking"
+        "guides/deep-linking",
+        "guides/chat-integration"
       ]
     }    
   ]

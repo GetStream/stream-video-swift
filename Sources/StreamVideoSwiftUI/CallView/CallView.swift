@@ -78,6 +78,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             }
                         }
                     }
+                    .padding(.top, 4)
                 }
                 
                 if viewModel.participantsShown {
