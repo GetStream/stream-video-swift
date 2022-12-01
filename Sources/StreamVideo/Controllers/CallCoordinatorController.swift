@@ -85,26 +85,12 @@ final class CallCoordinatorController: Sendable {
     }
     
     func enrichUserData(for id: String) async throws -> EnrichedUserData {
-        // TODO: remove this!!!
-        if id == "tommaso" {
-            return EnrichedUserData(
-                imageUrl: URL(string: "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp"),
-                name: "Tommaso",
-                role: "member"
-            )
-        } else if id == "martin" {
-            return EnrichedUserData(
-                imageUrl: URL(string: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp"),
-                name: "Martin",
-                role: "member"
-            )
-        }
-        var request = Stream_Video_Coordinator_ClientV1Rpc_QueryMembersRequest()
-        let query = "{\"id\": {\"$in\": [\(id)]}}"
-        let data = query.data(using: .utf8)
-        request.mqJson = data ?? Data()
-        let response = try await callCoordinatorService.queryMembers(queryMembersRequest: request)
-        guard let member = response.members.users[id] else { return .empty }
+        var request = Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest()
+        let filter = ["id": ["$in": [id]]]
+        let jsonData = try JSONSerialization.data(withJSONObject: filter, options: .prettyPrinted)
+        request.mqJson = jsonData
+        let response = try await callCoordinatorService.queryUsers(queryUsersRequest: request)
+        guard let member = response.users.first else { return .empty }
         return EnrichedUserData(imageUrl: URL(string: member.imageURL), name: member.name, role: member.role)
     }
 
