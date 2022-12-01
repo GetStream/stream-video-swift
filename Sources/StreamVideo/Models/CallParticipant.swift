@@ -20,6 +20,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public var showTrack: Bool
     public var layoutPriority: LayoutPriority
     public var isDominantSpeaker: Bool
+    public var sessionId: String
     
     public init(
         id: String,
@@ -32,9 +33,10 @@ public struct CallParticipant: Identifiable, Sendable {
         hasAudio: Bool,
         showTrack: Bool,
         track: RTCVideoTrack? = nil,
-        trackSize: CGSize = .zero,
+        trackSize: CGSize = CGSize(width: 1024, height: 720),
         layoutPriority: LayoutPriority = .normal,
-        isDominantSpeaker: Bool = false
+        isDominantSpeaker: Bool = false,
+        sessionId: String
     ) {
         self.id = id
         self.role = role
@@ -49,6 +51,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.trackSize = trackSize
         self.layoutPriority = layoutPriority
         self.isDominantSpeaker = isDominantSpeaker
+        self.sessionId = sessionId
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -70,7 +73,8 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
         )
     }
     
@@ -88,7 +92,8 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
         )
     }
     
@@ -106,7 +111,8 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
         )
     }
 
@@ -124,7 +130,8 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
         )
     }
 
@@ -142,7 +149,8 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
         )
     }
 
@@ -162,7 +170,8 @@ public struct CallParticipant: Identifiable, Sendable {
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
-            layoutPriority: layoutPriority
+            layoutPriority: layoutPriority,
+            sessionId: sessionId
         )
     }
 }
@@ -197,7 +206,8 @@ extension Stream_Video_Participant {
             isOnline: online,
             hasVideo: video,
             hasAudio: audio,
-            showTrack: true
+            showTrack: true,
+            sessionId: ""
         )
     }
 }
@@ -214,24 +224,26 @@ extension Stream_Video_User {
             isOnline: false,
             hasVideo: false,
             hasAudio: false,
-            showTrack: false
+            showTrack: false,
+            sessionId: ""
         )
     }
 }
 
 extension Stream_Video_Sfu_Models_Participant {
     
-    func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
+    func toCallParticipant(showTrack: Bool = true, enrichData: EnrichedUserData) -> CallParticipant {
         CallParticipant(
-            id: user.id,
-            role: role,
-            name: user.name.isEmpty ? user.id : user.name,
-            profileImageURL: URL(string: user.imageURL),
+            id: userID,
+            role: enrichData.role,
+            name: enrichData.name,
+            profileImageURL: enrichData.imageUrl,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: online,
-            hasVideo: video,
-            hasAudio: audio,
-            showTrack: showTrack
+            isOnline: true, // TODO: handle this
+            hasVideo: publishedTracks.contains(where: { $0 == .video }),
+            hasAudio: publishedTracks.contains(where: { $0 == .audio }),
+            showTrack: showTrack,
+            sessionId: sessionID
         )
     }
 }

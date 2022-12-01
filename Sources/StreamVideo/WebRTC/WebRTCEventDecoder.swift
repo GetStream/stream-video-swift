@@ -20,12 +20,6 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .changePublishQuality(value):
             return value
-        case let .localDeviceChange(value):
-            return value
-        case let .muteStateChanged(value):
-            return value
-        case let .videoQualityChanged(value):
-            return value
         case let .participantJoined(value):
             return value
         case let .participantLeft(value):
@@ -40,7 +34,9 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .healthCheckResponse(value):
             return value
-        case let .callEnded(value):
+        case let .trackPublished(value):
+            return value
+        case let .trackUnpublished(value):
             return value
         }
     }

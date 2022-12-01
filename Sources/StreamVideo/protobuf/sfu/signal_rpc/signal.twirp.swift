@@ -44,11 +44,6 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         try await execute(request: updateMuteStateRequest, path: "UpdateMuteState")
     }
     
-    func requestVideoQuality(updateVideoQualityRequest: Stream_Video_Sfu_Signal_UpdateVideoQualityRequest) async throws
-        -> Stream_Video_Sfu_Signal_UpdateVideoQualityResponse {
-        try await execute(request: updateVideoQualityRequest, path: "RequestVideoQuality")
-    }
-    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken

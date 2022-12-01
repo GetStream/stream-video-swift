@@ -107,9 +107,24 @@ struct Stream_Video_Coordinator_ClientV1Rpc_MemberInput {
 
     var customJson: Data = Data()
 
+    /// The user data for the user
+    /// If the user does not exist, this will be used to create the user
+    /// If the user already exists, this input will be ignored
+    var userInput: Stream_Video_Coordinator_UserV1_UserInput {
+        get { _userInput ?? Stream_Video_Coordinator_UserV1_UserInput() }
+        set { _userInput = newValue }
+    }
+
+    /// Returns true if `userInput` has been explicitly set.
+    var hasUserInput: Bool { self._userInput != nil }
+    /// Clears the value of `userInput`. Subsequent reads from it will return its default value.
+    mutating func clearUserInput() { _userInput = nil }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    private var _userInput: Stream_Video_Coordinator_UserV1_UserInput?
 }
 
 struct Stream_Video_Coordinator_ClientV1Rpc_UpsertCallMembersRequest {
@@ -692,6 +707,68 @@ struct Stream_Video_Coordinator_ClientV1Rpc_QueryMembersResponse {
     private var _members: Stream_Video_Coordinator_ClientV1Rpc_MembersEnvelope?
 }
 
+struct Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var mqJson: Data = Data()
+
+    var limit: Int32 {
+        get { _limit ?? 0 }
+        set { _limit = newValue }
+    }
+
+    /// Returns true if `limit` has been explicitly set.
+    var hasLimit: Bool { self._limit != nil }
+    /// Clears the value of `limit`. Subsequent reads from it will return its default value.
+    mutating func clearLimit() { _limit = nil }
+
+    var sorts: [Stream_Video_Coordinator_UtilsV1_Sort] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _limit: Int32?
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_QueryUsersResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var users: [Stream_Video_Coordinator_UserV1_User] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var users: [Stream_Video_Coordinator_UserV1_UserInput] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var users: [Stream_Video_Coordinator_UserV1_User] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 /// A request message for GetCallEdgeServer endpoint
 struct Stream_Video_Coordinator_ClientV1Rpc_GetCallEdgeServerRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
@@ -943,6 +1020,22 @@ struct Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest {
 
     var event: Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest.OneOf_Event?
 
+    var participantConnected: Stream_Video_Coordinator_StatV1_ParticipantConnected {
+        get {
+            if case let .participantConnected(v)? = event { return v }
+            return Stream_Video_Coordinator_StatV1_ParticipantConnected()
+        }
+        set { event = .participantConnected(newValue) }
+    }
+
+    var participantDisconnected: Stream_Video_Coordinator_StatV1_ParticipantDisconnected {
+        get {
+            if case let .participantDisconnected(v)? = event { return v }
+            return Stream_Video_Coordinator_StatV1_ParticipantDisconnected()
+        }
+        set { event = .participantDisconnected(newValue) }
+    }
+
     var mediaStateChanged: Stream_Video_Coordinator_StatV1_MediaStateChanged {
         get {
             if case let .mediaStateChanged(v)? = event { return v }
@@ -954,6 +1047,8 @@ struct Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_Event: Equatable {
+        case participantConnected(Stream_Video_Coordinator_StatV1_ParticipantConnected)
+        case participantDisconnected(Stream_Video_Coordinator_StatV1_ParticipantDisconnected)
         case mediaStateChanged(Stream_Video_Coordinator_StatV1_MediaStateChanged)
 
         #if !swift(>=4.1)
@@ -965,10 +1060,21 @@ struct Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest {
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch (lhs, rhs) {
+            case (.participantConnected, .participantConnected): return {
+                    guard case let .participantConnected(l) = lhs,
+                          case let .participantConnected(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.participantDisconnected, .participantDisconnected): return {
+                    guard case let .participantDisconnected(l) = lhs,
+                          case let .participantDisconnected(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
             case (.mediaStateChanged, .mediaStateChanged): return {
                     guard case let .mediaStateChanged(l) = lhs, case let .mediaStateChanged(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
+            default: return false
             }
         }
         #endif
@@ -1062,6 +1168,132 @@ struct Stream_Video_Coordinator_ClientV1Rpc_ReviewCallResponse {
     init() {}
 }
 
+struct Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// Call type and id.
+    var callType: String = String()
+
+    var callID: String = String()
+
+    /// Toggles HLS broadcasting on/off.
+    var hlsBroadcast: Bool = false
+
+    /// Enables rtmp broadcasting.
+    var rtmp: Stream_Video_Coordinator_BroadcastV1_RTMPOptions {
+        get { _rtmp ?? Stream_Video_Coordinator_BroadcastV1_RTMPOptions() }
+        set { _rtmp = newValue }
+    }
+
+    /// Returns true if `rtmp` has been explicitly set.
+    var hasRtmp: Bool { self._rtmp != nil }
+    /// Clears the value of `rtmp`. Subsequent reads from it will return its default value.
+    mutating func clearRtmp() { _rtmp = nil }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    private var _rtmp: Stream_Video_Coordinator_BroadcastV1_RTMPOptions?
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var broadcast: Stream_Video_Coordinator_BroadcastV1_Broadcast {
+        get { _broadcast ?? Stream_Video_Coordinator_BroadcastV1_Broadcast() }
+        set { _broadcast = newValue }
+    }
+
+    /// Returns true if `broadcast` has been explicitly set.
+    var hasBroadcast: Bool { self._broadcast != nil }
+    /// Clears the value of `broadcast`. Subsequent reads from it will return its default value.
+    mutating func clearBroadcast() { _broadcast = nil }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    private var _broadcast: Stream_Video_Coordinator_BroadcastV1_Broadcast?
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// Call type and id.
+    var callType: String = String()
+
+    var callID: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StartRecordingRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callType: String = String()
+
+    var callID: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StartRecordingResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StopRecordingRequest {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var callType: String = String()
+
+    var callID: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Coordinator_ClientV1Rpc_StopRecordingResponse {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_ClientV1Rpc_UserEventType: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetCallRequest: @unchecked Sendable {}
@@ -1092,6 +1324,10 @@ extension Stream_Video_Coordinator_ClientV1Rpc_QueryCallsRequest: @unchecked Sen
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryCallsResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryMembersRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_QueryMembersResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_QueryUsersResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetCallEdgeServerRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetCallEdgeServerResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_CreateDeviceRequest: @unchecked Sendable {}
@@ -1114,6 +1350,14 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportIssueRequest: @unchecked Se
 extension Stream_Video_Coordinator_ClientV1Rpc_ReportIssueResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_ReviewCallRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_ReviewCallResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StartRecordingRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StartRecordingResponse: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StopRecordingRequest: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_StopRecordingResponse: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1211,7 +1455,8 @@ extension Stream_Video_Coordinator_ClientV1Rpc_MemberInput: SwiftProtobuf.Messag
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "user_id"),
         2: .same(proto: "role"),
-        3: .standard(proto: "custom_json")
+        3: .standard(proto: "custom_json"),
+        4: .standard(proto: "user_input")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1223,12 +1468,17 @@ extension Stream_Video_Coordinator_ClientV1Rpc_MemberInput: SwiftProtobuf.Messag
             case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
             case 2: try { try decoder.decodeSingularStringField(value: &self.role) }()
             case 3: try { try decoder.decodeSingularBytesField(value: &self.customJson) }()
+            case 4: try { try decoder.decodeSingularMessageField(value: &self._userInput) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
         if !userID.isEmpty {
             try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
         }
@@ -1238,6 +1488,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_MemberInput: SwiftProtobuf.Messag
         if !customJson.isEmpty {
             try visitor.visitSingularBytesField(value: customJson, fieldNumber: 3)
         }
+        try { if let v = self._userInput {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -1248,6 +1501,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_MemberInput: SwiftProtobuf.Messag
         if lhs.userID != rhs.userID { return false }
         if lhs.role != rhs.role { return false }
         if lhs.customJson != rhs.customJson { return false }
+        if lhs._userInput != rhs._userInput { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -2376,6 +2630,166 @@ extension Stream_Video_Coordinator_ClientV1Rpc_QueryMembersResponse: SwiftProtob
     }
 }
 
+extension Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".QueryUsersRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "mq_json"),
+        2: .same(proto: "limit"),
+        3: .same(proto: "sorts")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularBytesField(value: &self.mqJson) }()
+            case 2: try { try decoder.decodeSingularInt32Field(value: &self._limit) }()
+            case 3: try { try decoder.decodeRepeatedMessageField(value: &self.sorts) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !mqJson.isEmpty {
+            try visitor.visitSingularBytesField(value: mqJson, fieldNumber: 1)
+        }
+        try { if let v = self._limit {
+            try visitor.visitSingularInt32Field(value: v, fieldNumber: 2)
+        } }()
+        if !sorts.isEmpty {
+            try visitor.visitRepeatedMessageField(value: sorts, fieldNumber: 3)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest
+    ) -> Bool {
+        if lhs.mqJson != rhs.mqJson { return false }
+        if lhs._limit != rhs._limit { return false }
+        if lhs.sorts != rhs.sorts { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_QueryUsersResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".QueryUsersResponse"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "users")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.users) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !users.isEmpty {
+            try visitor.visitRepeatedMessageField(value: users, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_QueryUsersResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_QueryUsersResponse
+    ) -> Bool {
+        if lhs.users != rhs.users { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".UpsertUsersRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "users")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.users) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !users.isEmpty {
+            try visitor.visitRepeatedMessageField(value: users, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersRequest
+    ) -> Bool {
+        if lhs.users != rhs.users { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".UpsertUsersResponse"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "users")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.users) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !users.isEmpty {
+            try visitor.visitRepeatedMessageField(value: users, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersResponse
+    ) -> Bool {
+        if lhs.users != rhs.users { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
 extension Stream_Video_Coordinator_ClientV1Rpc_GetCallEdgeServerRequest: SwiftProtobuf.Message,
     SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".GetCallEdgeServerRequest"
@@ -2906,7 +3320,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest: Swift
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "call_cid"),
         2: .same(proto: "timestamp"),
-        3: .standard(proto: "media_state_changed")
+        3: .standard(proto: "participant_connected"),
+        4: .standard(proto: "participant_disconnected"),
+        5: .standard(proto: "media_state_changed")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2918,6 +3334,32 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest: Swift
             case 1: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
             case 2: try { try decoder.decodeSingularMessageField(value: &self._timestamp) }()
             case 3: try {
+                    var v: Stream_Video_Coordinator_StatV1_ParticipantConnected?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .participantConnected(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .participantConnected(v)
+                    }
+                }()
+            case 4: try {
+                    var v: Stream_Video_Coordinator_StatV1_ParticipantDisconnected?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .participantDisconnected(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .participantDisconnected(v)
+                    }
+                }()
+            case 5: try {
                     var v: Stream_Video_Coordinator_StatV1_MediaStateChanged?
                     var hadOneofValue = false
                     if let current = self.event {
@@ -2946,9 +3388,21 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatEventRequest: Swift
         try { if let v = self._timestamp {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
         } }()
-        try { if case let .mediaStateChanged(v)? = self.event {
-            try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-        } }()
+        switch event {
+        case .participantConnected?: try {
+                guard case let .participantConnected(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+            }()
+        case .participantDisconnected?: try {
+                guard case let .participantDisconnected(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+            }()
+        case .mediaStateChanged?: try {
+                guard case let .mediaStateChanged(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+            }()
+        case nil: break
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -3162,6 +3616,298 @@ extension Stream_Video_Coordinator_ClientV1Rpc_ReviewCallResponse: SwiftProtobuf
     static func == (
         lhs: Stream_Video_Coordinator_ClientV1Rpc_ReviewCallResponse,
         rhs: Stream_Video_Coordinator_ClientV1Rpc_ReviewCallResponse
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastRequest: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StartBroadcastRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_type"),
+        2: .standard(proto: "call_id"),
+        3: .standard(proto: "hls_broadcast"),
+        5: .same(proto: "rtmp")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
+            case 3: try { try decoder.decodeSingularBoolField(value: &self.hlsBroadcast) }()
+            case 5: try { try decoder.decodeSingularMessageField(value: &self._rtmp) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !callType.isEmpty {
+            try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
+        }
+        if !callID.isEmpty {
+            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        }
+        if hlsBroadcast != false {
+            try visitor.visitSingularBoolField(value: hlsBroadcast, fieldNumber: 3)
+        }
+        try { if let v = self._rtmp {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+        } }()
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastRequest
+    ) -> Bool {
+        if lhs.callType != rhs.callType { return false }
+        if lhs.callID != rhs.callID { return false }
+        if lhs.hlsBroadcast != rhs.hlsBroadcast { return false }
+        if lhs._rtmp != rhs._rtmp { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastResponse: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StartBroadcastResponse"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "broadcast")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularMessageField(value: &self._broadcast) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        try { if let v = self._broadcast {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+        } }()
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastResponse
+    ) -> Bool {
+        if lhs._broadcast != rhs._broadcast { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastRequest: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StopBroadcastRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_type"),
+        2: .standard(proto: "call_id")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callType.isEmpty {
+            try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
+        }
+        if !callID.isEmpty {
+            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastRequest
+    ) -> Bool {
+        if lhs.callType != rhs.callType { return false }
+        if lhs.callID != rhs.callID { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastResponse: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StopBroadcastResponse"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastResponse
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StartRecordingRequest: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StartRecordingRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_type"),
+        2: .standard(proto: "call_id")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callType.isEmpty {
+            try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
+        }
+        if !callID.isEmpty {
+            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StartRecordingRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StartRecordingRequest
+    ) -> Bool {
+        if lhs.callType != rhs.callType { return false }
+        if lhs.callID != rhs.callID { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StartRecordingResponse: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StartRecordingResponse"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StartRecordingResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StartRecordingResponse
+    ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StopRecordingRequest: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StopRecordingRequest"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "call_type"),
+        2: .standard(proto: "call_id")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.callType) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !callType.isEmpty {
+            try visitor.visitSingularStringField(value: callType, fieldNumber: 1)
+        }
+        if !callID.isEmpty {
+            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StopRecordingRequest,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StopRecordingRequest
+    ) -> Bool {
+        if lhs.callType != rhs.callType { return false }
+        if lhs.callID != rhs.callID { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_StopRecordingResponse: SwiftProtobuf.Message,
+    SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".StopRecordingResponse"
+    static let _protobuf_nameMap = SwiftProtobuf._NameMap()
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let _ = try decoder.nextFieldNumber() {}
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_StopRecordingResponse,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_StopRecordingResponse
     ) -> Bool {
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true

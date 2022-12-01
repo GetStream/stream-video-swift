@@ -249,14 +249,6 @@ open class CallViewModel: ObservableObject {
                 self.call = call
                 self.updateCallStateIfNeeded()
                 listenForParticipantEvents()
-                // TODO: add a check if microphone is already on.
-                if callSettings.audioOn {
-                    toggleMicrophoneEnabled()
-                }
-                // TODO: add a check if camera is already on.
-                if callSettings.videoOn {
-                    toggleCameraEnabled()
-                }
                 log.debug("Started call")
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")

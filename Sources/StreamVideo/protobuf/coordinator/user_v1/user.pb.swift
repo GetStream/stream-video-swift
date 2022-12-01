@@ -68,6 +68,9 @@ struct Stream_Video_Coordinator_UserV1_UserInput {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
+    /// A unique ID for the user
+    var id: String = String()
+
     /// A human-readable name of the user
     var name: String = String()
 
@@ -180,11 +183,12 @@ extension Stream_Video_Coordinator_UserV1_UserInput: SwiftProtobuf.Message, Swif
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".UserInput"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "name"),
-        2: .same(proto: "role"),
-        3: .same(proto: "teams"),
-        4: .standard(proto: "image_url"),
-        5: .standard(proto: "custom_json")
+        1: .same(proto: "id"),
+        2: .same(proto: "name"),
+        3: .same(proto: "role"),
+        4: .same(proto: "teams"),
+        5: .standard(proto: "image_url"),
+        6: .standard(proto: "custom_json")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -193,36 +197,41 @@ extension Stream_Video_Coordinator_UserV1_UserInput: SwiftProtobuf.Message, Swif
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
-            case 2: try { try decoder.decodeSingularStringField(value: &self.role) }()
-            case 3: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
-            case 4: try { try decoder.decodeSingularStringField(value: &self.imageURL) }()
-            case 5: try { try decoder.decodeSingularBytesField(value: &self.customJson) }()
+            case 1: try { try decoder.decodeSingularStringField(value: &self.id) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.name) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self.role) }()
+            case 4: try { try decoder.decodeRepeatedStringField(value: &self.teams) }()
+            case 5: try { try decoder.decodeSingularStringField(value: &self.imageURL) }()
+            case 6: try { try decoder.decodeSingularBytesField(value: &self.customJson) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !id.isEmpty {
+            try visitor.visitSingularStringField(value: id, fieldNumber: 1)
+        }
         if !name.isEmpty {
-            try visitor.visitSingularStringField(value: name, fieldNumber: 1)
+            try visitor.visitSingularStringField(value: name, fieldNumber: 2)
         }
         if !role.isEmpty {
-            try visitor.visitSingularStringField(value: role, fieldNumber: 2)
+            try visitor.visitSingularStringField(value: role, fieldNumber: 3)
         }
         if !teams.isEmpty {
-            try visitor.visitRepeatedStringField(value: teams, fieldNumber: 3)
+            try visitor.visitRepeatedStringField(value: teams, fieldNumber: 4)
         }
         if !imageURL.isEmpty {
-            try visitor.visitSingularStringField(value: imageURL, fieldNumber: 4)
+            try visitor.visitSingularStringField(value: imageURL, fieldNumber: 5)
         }
         if !customJson.isEmpty {
-            try visitor.visitSingularBytesField(value: customJson, fieldNumber: 5)
+            try visitor.visitSingularBytesField(value: customJson, fieldNumber: 6)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Coordinator_UserV1_UserInput, rhs: Stream_Video_Coordinator_UserV1_UserInput) -> Bool {
+        if lhs.id != rhs.id { return false }
         if lhs.name != rhs.name { return false }
         if lhs.role != rhs.role { return false }
         if lhs.teams != rhs.teams { return false }

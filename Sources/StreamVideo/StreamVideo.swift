@@ -24,7 +24,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: UserTokenProvider
-    private let endpointConfig: EndpointConfig = .stagingConfig
+    private let endpointConfig: EndpointConfig = .localhostConfig
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
@@ -237,6 +237,7 @@ public class StreamVideo {
             payload.apiKey = apiKey.apiKeyString
             
             var user = Stream_Video_CreateUserRequest()
+            user.id = self.user.id
             user.name = self.user.name
             user.imageURL = self.user.imageURL?.absoluteString ?? ""
             payload.user = user

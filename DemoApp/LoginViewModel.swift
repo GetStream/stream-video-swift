@@ -41,7 +41,7 @@ extension UserCredentials {
             "tommaso",
             "Tommaso",
             "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoidXNlci90b21tYXNvIiwiaWF0IjoxNjY4MDc4MDEsInVzZXJfaWQiOiJ0b21tYXNvIn0.lOzf0aZ80tKR438N6H5usitSJoWNy97zY1mT8xcXujc"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21tYXNvIiwiZXhwIjoxNjY5OTk1MzUxLCJpYXQiOjE2Njk5MDg5NTEsInVzZXJfaWQiOiJ0b21tYXNvIn0.YW4vIrVLYXLpd8Du9n-A9oMqkLL71O9CAeKeehbpVEA"
         ),
         (
             "marcelo",
@@ -53,7 +53,7 @@ extension UserCredentials {
             "martin",
             "Martin",
             "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NjgwNzc1MiwidXNlcl9pZCI6Im1hcnRpbiJ9.mOqr4LFFXmtyuji7RkmlOimwETTGSQ4tXNdDEYL8FZ8"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJleHAiOjE2Njk5OTUzNDQsImlhdCI6MTY2OTkwODk0NCwidXNlcl9pZCI6Im1hcnRpbiJ9.iVTGSQB_H_M8zVWvszYIsKYN4JJLdS8ooTcGckL8yLE"
         ),
         (
             "filip",
