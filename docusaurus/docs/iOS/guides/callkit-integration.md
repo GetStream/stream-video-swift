@@ -4,7 +4,7 @@ title: CallKit Integration
 
 ## Introduction
 
-[CallKit](https://developer.apple.com/documentation/callkit) allows us to have system-level phone integration. With that, we can use CallKit to present native incoming call screens, even when the app is closed. CallKit integration also enables the calls made through third-party apps be displayed in the phone's Recents app.
+[CallKit](https://developer.apple.com/documentation/callkit) allows us to have system-level phone integration. With that, we can use CallKit to present native incoming call screens, even when the app is closed. CallKit integration also enables the calls made through third-party apps be displayed in the phone's recent call list in the Phone app.
 
 The StreamVideo SDK is compatible with CallKit, enabling a complete calling experience for your users.
 
@@ -12,13 +12,16 @@ The StreamVideo SDK is compatible with CallKit, enabling a complete calling expe
 
 In order to get started, you would need have a paid Apple developer account, and an app id with push notifications enabled.
 
-In the "Signing & Capabilities" section of your target, make sure that you have selected "Voice over IP", "Remote notifications" and "Background processing" in the "Background Modes" section. 
+In the "Signing & Capabilities" section of your target, make sure that in the "Background Modes" section you have selected:
+- "Voice over IP"
+- "Remote notifications"
+- "Background processing"
 
-//TODO: screenshot!
+//TODO: screenshot.
 
-Next, you need to create a VOIP calling certificate. In order to do that, go to your Apple developer account, select "Certificates, Identifiers & Profiles" and create a new certificate. Make sure to select "VoIP Services Certificate", located under the "Services" section. Follow the steps to create the required certificate.
+Next, you need to create a VOIP calling certificate. In order to do that, go to your Apple developer account, select "Certificates, Identifiers & Profiles" and create a new certificate. Make sure to select ``"VoIP Services Certificate"`, located under the "Services" section. Follow the steps to create the required certificate.
 
-//TODO: screenshot!
+//TODO: screenshot.
 
 After you've created the certificate, you would need to upload it to our dashboard. 
 
