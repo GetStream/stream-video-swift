@@ -1,4 +1,6 @@
 100ms
+Your_app_name
+Recents app
 boolean
 Boolean
 CocoaPods
