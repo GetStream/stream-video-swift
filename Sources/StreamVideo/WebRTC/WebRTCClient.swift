@@ -21,6 +21,7 @@ class WebRTCClient: NSObject {
         var connectionState = ConnectionState.disconnected(reason: nil)
         @Published var callParticipants = [String: CallParticipant]()
         var tracks = [String: RTCVideoTrack]()
+        var screensharingTracks = [String: RTCVideoTrack]()
         
         func update(connectionState: ConnectionState) {
             self.connectionState = connectionState
@@ -44,6 +45,14 @@ class WebRTCClient: NSObject {
         
         func removeTrack(id: String) {
             self.tracks[id] = nil
+        }
+        
+        func add(screensharingTrack: RTCVideoTrack?, id: String) {
+            self.screensharingTracks[id] = screensharingTrack
+        }
+        
+        func removeScreensharingTrack(id: String) {
+            self.screensharingTracks[id] = nil
         }
         
         func update(tracks: [String: RTCVideoTrack]) {
@@ -239,22 +248,24 @@ class WebRTCClient: NSObject {
     }
     
     func changeAudioState(isEnabled: Bool) async throws {
-        var request = Stream_Video_Sfu_Signal_UpdateMuteStateRequest()
-        var muteChanged = Stream_Video_Sfu_Signal_AudioMuteChanged()
-        muteChanged.muted = !isEnabled
-        request.audioMuteChanged = muteChanged
+        var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
+        var audio = Stream_Video_Sfu_Signal_TrackMuteState()
+        audio.trackType = .audio
+        audio.muted = !isEnabled
+        request.muteStates = [audio]
         request.sessionID = sessionID
-        _ = try await signalService.updateMuteState(updateMuteStateRequest: request)
+        _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
         localAudioTrack?.isEnabled = isEnabled
     }
     
     func changeVideoState(isEnabled: Bool) async throws {
-        var request = Stream_Video_Sfu_Signal_UpdateMuteStateRequest()
-        var muteChanged = Stream_Video_Sfu_Signal_VideoMuteChanged()
-        muteChanged.muted = !isEnabled
-        request.videoMuteChanged = muteChanged
+        var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
+        var video = Stream_Video_Sfu_Signal_TrackMuteState()
+        video.trackType = .video
+        video.muted = !isEnabled
+        request.muteStates = [video]
         request.sessionID = sessionID
-        _ = try await signalService.updateMuteState(updateMuteStateRequest: request)
+        _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
         localVideoTrack?.isEnabled = isEnabled
     }
     
@@ -319,8 +330,13 @@ class WebRTCClient: NSObject {
         let trackId = idParts.first ?? UUID().uuidString
         let track = stream.videoTracks.first
         Task {
-            if videoEnabled && idParts.last == "TRACK_TYPE_VIDEO" && track != nil {
+            let last = idParts.last
+            var isScreenshare = false
+            if videoEnabled && last == "TRACK_TYPE_VIDEO" && track != nil {
                 await self.state.add(track: track, id: trackId)
+            } else if last == "TRACK_TYPE_SCREEN_SHARE" && track != nil {
+                isScreenshare = true
+                await self.state.add(screensharingTrack: track, id: trackId)
             }
             let participants = await state.callParticipants
             var participant: CallParticipant?
@@ -340,12 +356,17 @@ class WebRTCClient: NSObject {
                     isOnline: true,
                     hasVideo: true,
                     hasAudio: true,
+                    isScreenSharing: last == "TRACK_TYPE_SCREEN_SHARE",
                     showTrack: true,
                     sessionId: ""
                 )
             }
             if track != nil {
-                participant?.track = track
+                if isScreenshare {
+                    participant?.screenshareTrack = track
+                } else {
+                    participant?.track = track
+                }
             }
             if let participant = participant {
                 await self.state.update(callParticipant: participant)
@@ -468,7 +489,7 @@ class WebRTCClient: NSObject {
     private func webSocketURL(from hostname: String) -> URL? {
         let host = URL(string: hostname)?.host ?? hostname
         var wsURLString = "wss://\(host)/ws"
-        if host.starts(with: "192.") || host.starts(with: "172.") {
+        if host.starts(with: "192.") || host.starts(with: "localhost") {
             // Temporary for localhost testing.
             wsURLString = "ws://\(host):3031/ws"
         }
@@ -558,6 +579,15 @@ class WebRTCClient: NSObject {
                     )
                     tracks.append(trackSubscriptionDetails)
                 }
+                if value.isScreensharing {
+                    let trackSubscriptionDetails = trackSubscriptionDetails(
+                        for: value.id,
+                        sessionId: value.sessionId,
+                        dimension: Stream_Video_Sfu_Models_VideoDimension(),
+                        type: .screenShare
+                    )
+                    tracks.append(trackSubscriptionDetails)
+                }
             }
         }
         let connectionState = await state.connectionState
@@ -587,14 +617,26 @@ class WebRTCClient: NSObject {
         let callParticipants = await state.callParticipants
         for (_, participant) in callParticipants {
             var track: RTCVideoTrack?
+            var screenshareTrack: RTCVideoTrack?
             if let trackId = participant.trackLookupPrefix {
                 track = await state.tracks[trackId]
+                screenshareTrack = await state.screensharingTracks[trackId]
             }
             if track == nil {
                 track = await state.tracks[participant.id]
+                if screenshareTrack == nil {
+                    screenshareTrack = await state.screensharingTracks[participant.id]
+                }
             }
+            var updated: CallParticipant?
             if track != nil && participant.track == nil {
-                let updated = participant.withUpdated(track: track)
+                updated = participant.withUpdated(track: track)
+            }
+            if screenshareTrack != nil {
+                let base = updated ?? participant
+                updated = base.withUpdated(screensharingTrack: screenshareTrack)
+            }
+            if let updated = updated {
                 await state.update(callParticipant: updated)
             }
         }

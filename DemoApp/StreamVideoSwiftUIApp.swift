@@ -54,7 +54,7 @@ struct StreamVideoSwiftUIApp: App {
     
     private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
         let streamVideo = StreamVideo(
-            apiKey: "key10",
+            apiKey: "us83cfwuhy8n",
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(

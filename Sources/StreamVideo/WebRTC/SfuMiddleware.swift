@@ -225,6 +225,9 @@ class SfuMiddleware: EventMiddleware {
         } else if event.type == .video {
             let updated = participant.withUpdated(video: true)
             await state.update(callParticipant: updated)
+        } else if event.type == .screenShare {
+            let updated = participant.withUpdated(screensharing: true)
+            await state.update(callParticipant: updated)
         }
     }
     
@@ -238,6 +241,12 @@ class SfuMiddleware: EventMiddleware {
         } else if event.type == .video {
             let updated = participant.withUpdated(video: false)
             await state.removeTrack(id: updated.trackLookupPrefix ?? updated.id)
+            await state.update(callParticipant: updated)
+        } else if event.type == .screenShare {
+            let updated = participant
+                .withUpdated(screensharing: false)
+                .withUpdated(screensharingTrack: nil)
+            await state.removeScreensharingTrack(id: updated.trackLookupPrefix ?? updated.id)
             await state.update(callParticipant: updated)
         }
     }

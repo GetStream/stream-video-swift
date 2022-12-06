@@ -39,9 +39,9 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         try await execute(request: updateSubscriptionsRequest, path: "UpdateSubscriptions")
     }
     
-    func updateMuteState(updateMuteStateRequest: Stream_Video_Sfu_Signal_UpdateMuteStateRequest) async throws
-        -> Stream_Video_Sfu_Signal_UpdateMuteStateResponse {
-        try await execute(request: updateMuteStateRequest, path: "UpdateMuteState")
+    func updateMuteStates(updateMuteStatesRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest) async throws
+        -> Stream_Video_Sfu_Signal_UpdateMuteStatesResponse {
+        try await execute(request: updateMuteStatesRequest, path: "UpdateMuteStates")
     }
     
     func update(userToken: String) {

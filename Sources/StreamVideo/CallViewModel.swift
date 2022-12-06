@@ -39,6 +39,7 @@ open class CallViewModel: ObservableObject {
         didSet {
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
+            checkForScreensharingSession()
         }
     }
     
@@ -49,6 +50,8 @@ open class CallViewModel: ObservableObject {
     @Published public var isMinimized = false
     
     @Published public var localVideoPrimary = false
+    
+    @Published public var screensharingSession: ScreensharingSession?
     
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (key, _) in
@@ -332,6 +335,19 @@ open class CallViewModel: ObservableObject {
             }
         }
     }
+    
+    private func checkForScreensharingSession() {
+        for (_, participant) in callParticipants {
+            if participant.screenshareTrack != nil {
+                screensharingSession = ScreensharingSession(
+                    track: participant.screenshareTrack,
+                    participant: participant
+                )
+                return
+            }
+        }
+        screensharingSession = nil
+    }
 }
 
 /// The state of the call.
@@ -346,4 +362,9 @@ public enum CallingState: Equatable {
     case inCall
     /// The user is trying to reconnect to a call.
     case reconnecting
+}
+
+public struct ScreensharingSession {
+    public let track: RTCVideoTrack?
+    public let participant: CallParticipant
 }

@@ -15,67 +15,38 @@ private struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAPIVer
     typealias Version = _2
 }
 
-struct Stream_Video_Sfu_Signal_UpdateMuteStateRequest {
+struct Stream_Video_Sfu_Signal_UpdateMuteStatesRequest {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
     var sessionID: String = String()
 
-    var mute: Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute?
-
-    var audioMuteChanged: Stream_Video_Sfu_Signal_AudioMuteChanged {
-        get {
-            if case let .audioMuteChanged(v)? = mute { return v }
-            return Stream_Video_Sfu_Signal_AudioMuteChanged()
-        }
-        set { mute = .audioMuteChanged(newValue) }
-    }
-
-    var videoMuteChanged: Stream_Video_Sfu_Signal_VideoMuteChanged {
-        get {
-            if case let .videoMuteChanged(v)? = mute { return v }
-            return Stream_Video_Sfu_Signal_VideoMuteChanged()
-        }
-        set { mute = .videoMuteChanged(newValue) }
-    }
+    var muteStates: [Stream_Video_Sfu_Signal_TrackMuteState] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
-
-    enum OneOf_Mute: Equatable {
-        case audioMuteChanged(Stream_Video_Sfu_Signal_AudioMuteChanged)
-        case videoMuteChanged(Stream_Video_Sfu_Signal_VideoMuteChanged)
-
-        #if !swift(>=4.1)
-        static func == (
-            lhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute,
-            rhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute
-        ) -> Bool {
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every case branch when no optimizations are
-            // enabled. https://github.com/apple/swift-protobuf/issues/1034
-            switch (lhs, rhs) {
-            case (.audioMuteChanged, .audioMuteChanged): return {
-                    guard case let .audioMuteChanged(l) = lhs, case let .audioMuteChanged(r) = rhs else { preconditionFailure() }
-                    return l == r
-                }()
-            case (.videoMuteChanged, .videoMuteChanged): return {
-                    guard case let .videoMuteChanged(l) = lhs, case let .videoMuteChanged(r) = rhs else { preconditionFailure() }
-                    return l == r
-                }()
-            default: return false
-            }
-        }
-        #endif
-    }
 
     init() {}
 }
 
-struct Stream_Video_Sfu_Signal_UpdateMuteStateResponse {
+struct Stream_Video_Sfu_Signal_UpdateMuteStatesResponse {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Sfu_Signal_TrackMuteState {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var trackType: Stream_Video_Sfu_Models_TrackType = .unspecified
+
+    var muted: Bool = false
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -229,9 +200,9 @@ struct Stream_Video_Sfu_Signal_SetPublisherResponse {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
-extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest: @unchecked Sendable {}
-extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest.OneOf_Mute: @unchecked Sendable {}
-extension Stream_Video_Sfu_Signal_UpdateMuteStateResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateMuteStatesRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_UpdateMuteStatesResponse: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_TrackMuteState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_AudioMuteChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_VideoMuteChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest: @unchecked Sendable {}
@@ -248,13 +219,12 @@ extension Stream_Video_Sfu_Signal_SetPublisherResponse: @unchecked Sendable {}
 
 private let _protobuf_package = "stream.video.sfu.signal"
 
-extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateMuteStatesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".UpdateMuteStateRequest"
+    static let protoMessageName: String = _protobuf_package + ".UpdateMuteStatesRequest"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "session_id"),
-        2: .standard(proto: "audio_mute_changed"),
-        3: .standard(proto: "video_mute_changed")
+        3: .standard(proto: "mute_states")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -264,73 +234,36 @@ extension Stream_Video_Sfu_Signal_UpdateMuteStateRequest: SwiftProtobuf.Message,
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-            case 2: try {
-                    var v: Stream_Video_Sfu_Signal_AudioMuteChanged?
-                    var hadOneofValue = false
-                    if let current = self.mute {
-                        hadOneofValue = true
-                        if case let .audioMuteChanged(m) = current { v = m }
-                    }
-                    try decoder.decodeSingularMessageField(value: &v)
-                    if let v = v {
-                        if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.mute = .audioMuteChanged(v)
-                    }
-                }()
-            case 3: try {
-                    var v: Stream_Video_Sfu_Signal_VideoMuteChanged?
-                    var hadOneofValue = false
-                    if let current = self.mute {
-                        hadOneofValue = true
-                        if case let .videoMuteChanged(m) = current { v = m }
-                    }
-                    try decoder.decodeSingularMessageField(value: &v)
-                    if let v = v {
-                        if hadOneofValue { try decoder.handleConflictingOneOf() }
-                        self.mute = .videoMuteChanged(v)
-                    }
-                }()
+            case 3: try { try decoder.decodeRepeatedMessageField(value: &self.muteStates) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        // The use of inline closures is to circumvent an issue where the compiler
-        // allocates stack space for every if/case branch local when no optimizations
-        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-        // https://github.com/apple/swift-protobuf/issues/1182
         if !sessionID.isEmpty {
             try visitor.visitSingularStringField(value: sessionID, fieldNumber: 1)
         }
-        switch mute {
-        case .audioMuteChanged?: try {
-                guard case let .audioMuteChanged(v)? = self.mute else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
-            }()
-        case .videoMuteChanged?: try {
-                guard case let .videoMuteChanged(v)? = self.mute else { preconditionFailure() }
-                try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
-            }()
-        case nil: break
+        if !muteStates.isEmpty {
+            try visitor.visitRepeatedMessageField(value: muteStates, fieldNumber: 3)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (
-        lhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest,
-        rhs: Stream_Video_Sfu_Signal_UpdateMuteStateRequest
+        lhs: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest,
+        rhs: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest
     ) -> Bool {
         if lhs.sessionID != rhs.sessionID { return false }
-        if lhs.mute != rhs.mute { return false }
+        if lhs.muteStates != rhs.muteStates { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Sfu_Signal_UpdateMuteStateResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Sfu_Signal_UpdateMuteStatesResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".UpdateMuteStateResponse"
+    static let protoMessageName: String = _protobuf_package + ".UpdateMuteStatesResponse"
     static let _protobuf_nameMap = SwiftProtobuf._NameMap()
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -342,9 +275,48 @@ extension Stream_Video_Sfu_Signal_UpdateMuteStateResponse: SwiftProtobuf.Message
     }
 
     static func == (
-        lhs: Stream_Video_Sfu_Signal_UpdateMuteStateResponse,
-        rhs: Stream_Video_Sfu_Signal_UpdateMuteStateResponse
+        lhs: Stream_Video_Sfu_Signal_UpdateMuteStatesResponse,
+        rhs: Stream_Video_Sfu_Signal_UpdateMuteStatesResponse
     ) -> Bool {
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Signal_TrackMuteState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".TrackMuteState"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "track_type"),
+        2: .same(proto: "muted")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
+            case 2: try { try decoder.decodeSingularBoolField(value: &self.muted) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if trackType != .unspecified {
+            try visitor.visitSingularEnumField(value: trackType, fieldNumber: 1)
+        }
+        if muted != false {
+            try visitor.visitSingularBoolField(value: muted, fieldNumber: 2)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_Signal_TrackMuteState, rhs: Stream_Video_Sfu_Signal_TrackMuteState) -> Bool {
+        if lhs.trackType != rhs.trackType { return false }
+        if lhs.muted != rhs.muted { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

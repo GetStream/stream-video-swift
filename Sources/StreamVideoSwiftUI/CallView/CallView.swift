@@ -139,7 +139,7 @@ public struct CallView<Factory: ViewFactory>: View {
     
     private func participantsView(size: CGSize) -> some View {
         viewFactory.makeVideoParticipantsView(
-            participants: viewModel.participants,
+            viewModel: viewModel,
             availableSize: size,
             onViewRendering: handleViewRendering(_:participant:),
             onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)

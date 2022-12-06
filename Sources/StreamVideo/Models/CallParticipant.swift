@@ -15,8 +15,10 @@ public struct CallParticipant: Identifiable, Sendable {
     public var isOnline: Bool
     public var hasVideo: Bool
     public var hasAudio: Bool
+    public var isScreensharing: Bool
     public var track: RTCVideoTrack?
     public var trackSize: CGSize
+    public var screenshareTrack: RTCVideoTrack?
     public var showTrack: Bool
     public var layoutPriority: LayoutPriority
     public var isDominantSpeaker: Bool
@@ -31,9 +33,11 @@ public struct CallParticipant: Identifiable, Sendable {
         isOnline: Bool,
         hasVideo: Bool,
         hasAudio: Bool,
+        isScreenSharing: Bool,
         showTrack: Bool,
         track: RTCVideoTrack? = nil,
         trackSize: CGSize = CGSize(width: 1024, height: 720),
+        screenshareTrack: RTCVideoTrack? = nil,
         layoutPriority: LayoutPriority = .normal,
         isDominantSpeaker: Bool = false,
         sessionId: String
@@ -52,6 +56,8 @@ public struct CallParticipant: Identifiable, Sendable {
         self.layoutPriority = layoutPriority
         self.isDominantSpeaker = isDominantSpeaker
         self.sessionId = sessionId
+        self.screenshareTrack = screenshareTrack
+        isScreensharing = isScreenSharing
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -69,9 +75,11 @@ public struct CallParticipant: Identifiable, Sendable {
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId
@@ -88,9 +96,32 @@ public struct CallParticipant: Identifiable, Sendable {
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
+        )
+    }
+    
+    func withUpdated(screensharingTrack: RTCVideoTrack?) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screensharingTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId
@@ -107,9 +138,11 @@ public struct CallParticipant: Identifiable, Sendable {
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: audio,
+            isScreenSharing: isScreensharing,
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId
@@ -126,9 +159,32 @@ public struct CallParticipant: Identifiable, Sendable {
             isOnline: isOnline,
             hasVideo: video,
             hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId
+        )
+    }
+    
+    func withUpdated(screensharing: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: screensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId
@@ -145,9 +201,11 @@ public struct CallParticipant: Identifiable, Sendable {
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId
@@ -167,9 +225,11 @@ public struct CallParticipant: Identifiable, Sendable {
             isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
             showTrack: showTrack,
             track: track,
             trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             sessionId: sessionId
         )
@@ -206,6 +266,7 @@ extension Stream_Video_Participant {
             isOnline: online,
             hasVideo: video,
             hasAudio: audio,
+            isScreenSharing: false,
             showTrack: true,
             sessionId: ""
         )
@@ -224,6 +285,7 @@ extension Stream_Video_User {
             isOnline: false,
             hasVideo: false,
             hasAudio: false,
+            isScreenSharing: false,
             showTrack: false,
             sessionId: ""
         )
@@ -242,6 +304,7 @@ extension Stream_Video_Sfu_Models_Participant {
             isOnline: true, // TODO: handle this
             hasVideo: publishedTracks.contains(where: { $0 == .video }),
             hasAudio: publishedTracks.contains(where: { $0 == .audio }),
+            isScreenSharing: publishedTracks.contains(where: { $0 == .screenShare }),
             showTrack: showTrack,
             sessionId: sessionID
         )

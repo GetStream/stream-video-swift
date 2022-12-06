@@ -7,14 +7,21 @@ import SwiftUI
 
 public struct VideoParticipantsView: View {
     
-    var participants: [CallParticipant]
+    @StateObject var viewModel: CallViewModel
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public var body: some View {
         ZStack {
-            if participants.count <= 3 {
+            if let screenSharing = viewModel.screensharingSession {
+                VideoRendererView(id: screenSharing.participant.id, size: availableSize) { view in
+                    if let track = screenSharing.participant.screenshareTrack {
+                        log.debug("adding screensharing track to a view \(view)")
+                        view.add(track: track)
+                    }
+                }
+            } else if participants.count <= 3 {
                 VerticalParticipantsView(
                     participants: participants,
                     availableSize: availableSize
@@ -49,6 +56,10 @@ public struct VideoParticipantsView: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
+    }
+    
+    var participants: [CallParticipant] {
+        viewModel.participants
     }
 }
 

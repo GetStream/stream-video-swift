@@ -162,6 +162,7 @@ public class CallController {
                     isOnline: true,
                     hasVideo: true,
                     hasAudio: true,
+                    isScreenSharing: false,
                     showTrack: true,
                     sessionId: ""
                 )

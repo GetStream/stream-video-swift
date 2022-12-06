@@ -29,13 +29,13 @@ public protocol ViewFactory: AnyObject {
     associatedtype ParticipantsViewType: View = VideoParticipantsView
     /// Creates the video participants view, shown during a call.
     /// - Parameters:
-    ///  - participants: the participants in the call.
+    ///  - viewModel: The view model used for the call.
     ///  - availableSize: the size available for rendering.
     ///  - onViewRendering: called when the video view is rendered.
     ///  - onChangeTrackVisibility: called when a track changes its visibility.
     /// - Returns: view shown in the video participants slot.
     func makeVideoParticipantsView(
-        participants: [CallParticipant],
+        viewModel: CallViewModel,
         availableSize: CGSize,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
@@ -78,13 +78,13 @@ extension ViewFactory {
     }
     
     public func makeVideoParticipantsView(
-        participants: [CallParticipant],
+        viewModel: CallViewModel,
         availableSize: CGSize,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
-            participants: participants,
+            viewModel: viewModel,
             availableSize: availableSize,
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
