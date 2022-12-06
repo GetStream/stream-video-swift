@@ -28,6 +28,12 @@ public struct CallView<Factory: ViewFactory>: View {
                 if viewModel.localVideoPrimary {
                     localVideoView
                         .edgesIgnoringSafeArea(.all)
+                } else if let screensharing = viewModel.screensharingSession {
+                    viewFactory.makeScreenSharingView(
+                        viewModel: viewModel,
+                        screensharingSession: screensharing,
+                        availableSize: reader.size
+                    )
                 } else {
                     participantsView(size: reader.size)
                 }

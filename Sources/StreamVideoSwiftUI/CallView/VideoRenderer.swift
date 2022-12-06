@@ -61,21 +61,24 @@ public struct VideoRendererView: UIViewRepresentable {
     
     var id: String
     var size: CGSize
+    var contentMode: UIView.ContentMode
     var handleRendering: (VideoRenderer) -> Void
     
     public init(
         id: String,
         size: CGSize,
+        contentMode: UIView.ContentMode = .scaleAspectFill,
         handleRendering: @escaping (VideoRenderer) -> Void
     ) {
         self.id = id
         self.size = size
         self.handleRendering = handleRendering
+        self.contentMode = contentMode
     }
 
     public func makeUIView(context: Context) -> VideoRenderer {
         let view = VideoRenderer(frame: .init(origin: .zero, size: size))
-        view.videoContentMode = .scaleAspectFill
+        view.videoContentMode = contentMode
         view.backgroundColor = UIColor.black
         handleRendering(view)
         return view

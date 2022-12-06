@@ -57,6 +57,19 @@ public protocol ViewFactory: AnyObject {
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> CallParticipantsListViewType
+    
+    associatedtype ScreenSharingViewType: View = ScreenSharingView
+    /// Creates a view shown when there's screen sharing session.
+    /// - Parameters:
+    ///  - viewModel: The view model used for the call.
+    ///  - screensharingSession: The current screensharing session.
+    ///  - availableSize: The size available to display the view.
+    /// - Returns: view shown in the screensharing slot.
+    func makeScreenSharingView(
+        viewModel: CallViewModel,
+        screensharingSession: ScreensharingSession,
+        availableSize: CGSize
+    ) -> ScreenSharingViewType
 }
 
 extension ViewFactory {
@@ -100,6 +113,18 @@ extension ViewFactory {
         availableSize: CGSize
     ) -> some View {
         CallParticipantsInfoView(viewModel: viewModel, availableSize: availableSize)
+    }
+    
+    public func makeScreenSharingView(
+        viewModel: CallViewModel,
+        screensharingSession: ScreensharingSession,
+        availableSize: CGSize
+    ) -> some View {
+        ScreenSharingView(
+            viewModel: viewModel,
+            screenSharing: screensharingSession,
+            availableSize: availableSize
+        )
     }
 }
 

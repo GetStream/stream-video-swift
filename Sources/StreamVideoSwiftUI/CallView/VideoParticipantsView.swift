@@ -14,14 +14,7 @@ public struct VideoParticipantsView: View {
     
     public var body: some View {
         ZStack {
-            if let screenSharing = viewModel.screensharingSession {
-                VideoRendererView(id: screenSharing.participant.id, size: availableSize) { view in
-                    if let track = screenSharing.participant.screenshareTrack {
-                        log.debug("adding screensharing track to a view \(view)")
-                        view.add(track: track)
-                    }
-                }
-            } else if participants.count <= 3 {
+            if participants.count <= 3 {
                 VerticalParticipantsView(
                     participants: participants,
                     availableSize: availableSize
