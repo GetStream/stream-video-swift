@@ -100,6 +100,9 @@ struct HomeView: View {
                 secondaryButton: .cancel()
             )
         }
+        .background(
+            viewModel.callingState == .inCall && !viewModel.isMinimized ? Color.black.edgesIgnoringSafeArea(.all) : nil
+        )        
     }
     
     private var makeCallEnabled: Bool {

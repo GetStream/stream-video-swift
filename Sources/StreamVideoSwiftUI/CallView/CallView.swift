@@ -50,6 +50,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     
                     viewFactory.makeCallControlsView(viewModel: viewModel)
                 }
+                .opacity(viewModel.hideUIElements ? 0 : 1)
                 
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
@@ -88,12 +89,14 @@ public struct CallView<Factory: ViewFactory>: View {
                     }
                     .padding(.top, 4)
                 }
+                .opacity(viewModel.hideUIElements ? 0 : 1)
                 
                 if viewModel.participantsShown {
                     viewFactory.makeTrailingTopView(
                         viewModel: viewModel,
                         availableSize: reader.size
                     )
+                    .opacity(viewModel.hideUIElements ? 0 : 1)
                 }
             }
         }

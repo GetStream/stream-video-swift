@@ -53,6 +53,8 @@ open class CallViewModel: ObservableObject {
     
     @Published public var screensharingSession: ScreensharingSession?
     
+    @Published public var hideUIElements = false
+    
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (key, _) in
             key == streamVideo.user.id
