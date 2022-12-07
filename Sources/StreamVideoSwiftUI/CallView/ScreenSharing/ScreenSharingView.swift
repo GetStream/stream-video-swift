@@ -19,14 +19,16 @@ public struct ScreenSharingView: View {
                 .foregroundColor(.white)
                 .padding()
                 .padding(.top, 40)
-            VideoRendererView(
-                id: screenSharing.participant.id,
-                size: availableSize,
-                contentMode: .scaleAspectFit
-            ) { view in
-                if let track = screenSharing.participant.screenshareTrack {
-                    log.debug("adding screensharing track to a view \(view)")
-                    view.add(track: track)
+            ZoomableScrollView {
+                VideoRendererView(
+                    id: screenSharing.participant.id,
+                    size: availableSize,
+                    contentMode: .scaleAspectFit
+                ) { view in
+                    if let track = screenSharing.participant.screenshareTrack {
+                        log.debug("adding screensharing track to a view \(view)")
+                        view.add(track: track)
+                    }
                 }
             }
             ScrollView(.horizontal) {
