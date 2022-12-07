@@ -75,12 +75,14 @@ public struct CallView<Factory: ViewFactory>: View {
                             }
                         }
                         
-                        CornerDragableView(
-                            content: contentDragableView(size: reader.size),
-                            proxy: reader
-                        ) {
-                            withAnimation {
-                                viewModel.localVideoPrimary.toggle()
+                        if viewModel.screensharingSession == nil {
+                            CornerDragableView(
+                                content: contentDragableView(size: reader.size),
+                                proxy: reader
+                            ) {
+                                withAnimation {
+                                    viewModel.localVideoPrimary.toggle()
+                                }
                             }
                         }
                     }

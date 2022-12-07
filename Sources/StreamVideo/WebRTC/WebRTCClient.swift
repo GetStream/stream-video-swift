@@ -632,7 +632,7 @@ class WebRTCClient: NSObject {
             if track != nil && participant.track == nil {
                 updated = participant.withUpdated(track: track)
             }
-            if screenshareTrack != nil {
+            if screenshareTrack != nil && participant.screenshareTrack == nil {
                 let base = updated ?? participant
                 updated = base.withUpdated(screensharingTrack: screenshareTrack)
             }

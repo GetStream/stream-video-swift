@@ -11,6 +11,8 @@ public struct ScreenSharingView: View {
     var screenSharing: ScreensharingSession
     var availableSize: CGSize
     
+    private let thumbnailSize: CGFloat = 120
+    
     public var body: some View {
         VStack(alignment: .leading) {
             Text("\(screenSharing.participant.name) presenting")
@@ -27,6 +29,37 @@ public struct ScreenSharingView: View {
                     view.add(track: track)
                 }
             }
+            ScrollView(.horizontal) {
+                HStack {
+                    ForEach(viewModel.participants) { participant in
+                        VideoCallParticipantView(
+                            participant: participant,
+                            availableSize: .init(width: thumbnailSize, height: thumbnailSize)
+                        ) { participant, view in
+                            if let track = participant.track {
+                                view.add(track: track)
+                            }
+                        }
+                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                        .cornerRadius(8)
+                        
+                        LocalVideoView(callSettings: viewModel.callSettings) { view in
+                            if let track = viewModel.localParticipant?.track {
+                                view.add(track: track)
+                            } else {
+                                viewModel.renderLocalVideo(renderer: view)
+                            }
+                        }
+                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                        .cornerRadius(8)
+                    }
+                }
+                .frame(height: thumbnailSize)
+                .cornerRadius(8)
+            }
+            .padding()
+            
+            Spacer(minLength: thumbnailSize)
         }
         .background(Color.black)
     }
