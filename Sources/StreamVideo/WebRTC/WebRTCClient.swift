@@ -8,6 +8,11 @@ import Foundation
 
 class WebRTCClient: NSObject {
     
+    enum Constants {
+        static let screenshareTrackType = "TRACK_TYPE_SCREEN_SHARE"
+        static let videoTrackType = "TRACK_TYPE_VIDEO"
+    }
+    
     actor State: ObservableObject {
         private var cancellables = Set<AnyCancellable>()
         
@@ -332,9 +337,9 @@ class WebRTCClient: NSObject {
         Task {
             let last = idParts.last
             var isScreenshare = false
-            if videoEnabled && last == "TRACK_TYPE_VIDEO" && track != nil {
+            if videoEnabled && last == Constants.videoTrackType && track != nil {
                 await self.state.add(track: track, id: trackId)
-            } else if last == "TRACK_TYPE_SCREEN_SHARE" && track != nil {
+            } else if last == Constants.screenshareTrackType && track != nil {
                 isScreenshare = true
                 await self.state.add(screensharingTrack: track, id: trackId)
             }
@@ -356,7 +361,7 @@ class WebRTCClient: NSObject {
                     isOnline: true,
                     hasVideo: true,
                     hasAudio: true,
-                    isScreenSharing: last == "TRACK_TYPE_SCREEN_SHARE",
+                    isScreenSharing: last == Constants.screenshareTrackType,
                     showTrack: true,
                     sessionId: ""
                 )
