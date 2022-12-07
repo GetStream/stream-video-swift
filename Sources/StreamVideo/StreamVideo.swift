@@ -237,6 +237,7 @@ public class StreamVideo {
             payload.apiKey = apiKey.apiKeyString
             
             var user = Stream_Video_CreateUserRequest()
+            user.id = self.user.id
             user.name = self.user.name
             user.imageURL = self.user.imageURL?.absoluteString ?? ""
             payload.user = user

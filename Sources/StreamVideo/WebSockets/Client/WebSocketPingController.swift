@@ -98,8 +98,7 @@ class WebSocketPingController {
             delegate?.sendPing(healthCheckEvent: healthCheckEvent)
         } else {
             var sfuRequest = Stream_Video_Sfu_Event_SfuRequest()
-            var healthCheckEvent = Stream_Video_Sfu_Event_HealthCheckRequest()
-            healthCheckEvent.sessionID = callInfo[WebSocketConstants.sessionId] ?? ""
+            let healthCheckEvent = Stream_Video_Sfu_Event_HealthCheckRequest()
             sfuRequest.healthCheckRequest = healthCheckEvent
             delegate?.sendPing(healthCheckEvent: sfuRequest)
         }

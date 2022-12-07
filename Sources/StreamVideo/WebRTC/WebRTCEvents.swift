@@ -4,15 +4,10 @@
 
 import Foundation
 
-extension Stream_Video_Sfu_Event_MuteStateChanged: Event {}
-extension Stream_Video_Sfu_Event_VideoQualityChanged: Event {}
 extension Stream_Video_Sfu_Event_SubscriberOffer: Event {}
-extension Stream_Video_Sfu_Event_LocalDeviceChange: Event {}
-extension Stream_Video_Sfu_Event_ICECandidateTrickle: Event {}
 extension Stream_Video_Sfu_Event_ConnectionQualityChanged: Event {}
 extension Stream_Video_Sfu_Event_AudioLevelChanged: Event {}
 extension Stream_Video_Sfu_Event_AudioLevel: Event {}
-extension Stream_Video_Sfu_Event_AudioLayerSetting: Event {}
 extension Stream_Video_Sfu_Event_AudioMediaRequest: Event {}
 extension Stream_Video_Sfu_Event_AudioSender: Event {}
 extension Stream_Video_Sfu_Event_VideoMediaRequest: Event {}
@@ -29,4 +24,5 @@ extension Stream_Video_Sfu_Event_HealthCheckResponse: Event {}
 extension Stream_Video_Sfu_Event_SfuRequest: SendableEvent {}
 extension Stream_Video_Sfu_Event_HealthCheckRequest: SendableEvent {}
 extension Stream_Video_Sfu_Event_HealthCheckResponse: HealthCheckEvent {}
-extension Stream_Video_Sfu_Event_CallEnded: Event {}
+extension Stream_Video_Sfu_Event_TrackPublished: Event {}
+extension Stream_Video_Sfu_Event_TrackUnpublished: Event {}

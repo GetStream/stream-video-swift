@@ -29,13 +29,13 @@ public protocol ViewFactory: AnyObject {
     associatedtype ParticipantsViewType: View = VideoParticipantsView
     /// Creates the video participants view, shown during a call.
     /// - Parameters:
-    ///  - participants: the participants in the call.
+    ///  - viewModel: The view model used for the call.
     ///  - availableSize: the size available for rendering.
     ///  - onViewRendering: called when the video view is rendered.
     ///  - onChangeTrackVisibility: called when a track changes its visibility.
     /// - Returns: view shown in the video participants slot.
     func makeVideoParticipantsView(
-        participants: [CallParticipant],
+        viewModel: CallViewModel,
         availableSize: CGSize,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
@@ -57,6 +57,19 @@ public protocol ViewFactory: AnyObject {
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> CallParticipantsListViewType
+    
+    associatedtype ScreenSharingViewType: View = ScreenSharingView
+    /// Creates a view shown when there's screen sharing session.
+    /// - Parameters:
+    ///  - viewModel: The view model used for the call.
+    ///  - screensharingSession: The current screensharing session.
+    ///  - availableSize: The size available to display the view.
+    /// - Returns: view shown in the screensharing slot.
+    func makeScreenSharingView(
+        viewModel: CallViewModel,
+        screensharingSession: ScreensharingSession,
+        availableSize: CGSize
+    ) -> ScreenSharingViewType
 }
 
 extension ViewFactory {
@@ -78,13 +91,13 @@ extension ViewFactory {
     }
     
     public func makeVideoParticipantsView(
-        participants: [CallParticipant],
+        viewModel: CallViewModel,
         availableSize: CGSize,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
-            participants: participants,
+            viewModel: viewModel,
             availableSize: availableSize,
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
@@ -100,6 +113,18 @@ extension ViewFactory {
         availableSize: CGSize
     ) -> some View {
         CallParticipantsInfoView(viewModel: viewModel, availableSize: availableSize)
+    }
+    
+    public func makeScreenSharingView(
+        viewModel: CallViewModel,
+        screensharingSession: ScreensharingSession,
+        availableSize: CGSize
+    ) -> some View {
+        ScreenSharingView(
+            viewModel: viewModel,
+            screenSharing: screensharingSession,
+            availableSize: availableSize
+        )
     }
 }
 

@@ -33,6 +33,14 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
         set { _uniqueStorage()._event = newValue }
     }
 
+    var error: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError {
+        get {
+            if case let .error(v)? = _storage._event { return v }
+            return Stream_Video_Coordinator_ClientV1Rpc_WebsocketError()
+        }
+        set { _uniqueStorage()._event = .error(newValue) }
+    }
+
     var healthcheck: Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck {
         get {
             if case let .healthcheck(v)? = _storage._event { return v }
@@ -144,6 +152,7 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_Event: Equatable {
+        case error(Stream_Video_Coordinator_ClientV1Rpc_WebsocketError)
         case healthcheck(Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck)
         /// Call events
         case callCreated(Stream_Video_Coordinator_EventV1_CallCreated)
@@ -171,6 +180,10 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch (lhs, rhs) {
+            case (.error, .error): return {
+                    guard case let .error(l) = lhs, case let .error(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
             case (.healthcheck, .healthcheck): return {
                     guard case let .healthcheck(l) = lhs, case let .healthcheck(r) = rhs else { preconditionFailure() }
                     return l == r
@@ -363,6 +376,20 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck {
     init() {}
 }
 
+struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketError {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var code: Int32 = 0
+
+    var message: String = String()
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent.OneOf_Event: @unchecked Sendable {}
@@ -370,6 +397,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketClientEvent: @unchecked 
 extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketClientEvent.OneOf_Event: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketAuthRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketError: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -381,6 +409,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
     static let protoMessageName: String = _protobuf_package + ".WebsocketEvent"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "users"),
+        19: .same(proto: "error"),
         20: .same(proto: "healthcheck"),
         30: .standard(proto: "call_created"),
         31: .standard(proto: "call_updated"),
@@ -432,6 +461,19 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                         >.self,
                         value: &_storage._users
                     ) }()
+                case 19: try {
+                        var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError?
+                        var hadOneofValue = false
+                        if let current = _storage._event {
+                            hadOneofValue = true
+                            if case let .error(m) = current { v = m }
+                        }
+                        try decoder.decodeSingularMessageField(value: &v)
+                        if let v = v {
+                            if hadOneofValue { try decoder.handleConflictingOneOf() }
+                            _storage._event = .error(v)
+                        }
+                    }()
                 case 20: try {
                         var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck?
                         var hadOneofValue = false
@@ -622,6 +664,10 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
                 )
             }
             switch _storage._event {
+            case .error?: try {
+                    guard case let .error(v)? = _storage._event else { preconditionFailure() }
+                    try visitor.visitSingularMessageField(value: v, fieldNumber: 19)
+                }()
             case .healthcheck?: try {
                     guard case let .healthcheck(v)? = _storage._event else { preconditionFailure() }
                     try visitor.visitSingularMessageField(value: v, fieldNumber: 20)
@@ -896,6 +942,48 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck: SwiftProtob
         if lhs.callID != rhs.callID { return false }
         if lhs.video != rhs.video { return false }
         if lhs.audio != rhs.audio { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketError: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".WebsocketError"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "code"),
+        2: .same(proto: "message")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularInt32Field(value: &self.code) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.message) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if code != 0 {
+            try visitor.visitSingularInt32Field(value: code, fieldNumber: 1)
+        }
+        if !message.isEmpty {
+            try visitor.visitSingularStringField(value: message, fieldNumber: 2)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError,
+        rhs: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError
+    ) -> Bool {
+        if lhs.code != rhs.code { return false }
+        if lhs.message != rhs.message { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

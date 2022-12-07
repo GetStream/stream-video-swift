@@ -178,11 +178,7 @@ extension WebSocketClient {
 extension WebSocketClient: WebSocketEngineDelegate {
     func webSocketDidConnect() {
         log.debug("Web socket connection established")
-        if requiresAuth {
-            connectionState = .authenticating
-        } else {
-            connectionState = .connected(healthCheckInfo: HealthCheckInfo())
-        }
+        connectionState = .authenticating
         onConnect?()
     }
     
@@ -246,7 +242,9 @@ extension WebSocketClient: WebSocketEngineDelegate {
 extension WebSocketClient: WebSocketPingControllerDelegate {
     func sendPing(healthCheckEvent: SendableEvent) {
         engineQueue.async { [weak engine] in
-            engine?.send(message: healthCheckEvent)
+            if case .connected(healthCheckInfo: _) = self.connectionState {
+                engine?.send(message: healthCheckEvent)
+            }
         }
     }
     

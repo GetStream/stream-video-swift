@@ -257,7 +257,7 @@ struct Stream_Video_Coordinator_StatV1_MediaStateChanged {
 }
 
 /// A stat event from the perspective of a particular participant
-struct Stream_Video_Coordinator_StatV1_TelemetryEvent {
+struct Stream_Video_Coordinator_StatV1_TimelineEvent {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -273,7 +273,7 @@ struct Stream_Video_Coordinator_StatV1_TelemetryEvent {
     /// Clears the value of `timestamp`. Subsequent reads from it will return its default value.
     mutating func clearTimestamp() { _timestamp = nil }
 
-    var event: Stream_Video_Coordinator_StatV1_TelemetryEvent.OneOf_Event?
+    var event: Stream_Video_Coordinator_StatV1_TimelineEvent.OneOf_Event?
 
     var participantConnected: Stream_Video_Coordinator_StatV1_ParticipantConnected {
         get {
@@ -317,8 +317,8 @@ struct Stream_Video_Coordinator_StatV1_TelemetryEvent {
 
         #if !swift(>=4.1)
         static func == (
-            lhs: Stream_Video_Coordinator_StatV1_TelemetryEvent.OneOf_Event,
-            rhs: Stream_Video_Coordinator_StatV1_TelemetryEvent.OneOf_Event
+            lhs: Stream_Video_Coordinator_StatV1_TimelineEvent.OneOf_Event,
+            rhs: Stream_Video_Coordinator_StatV1_TimelineEvent.OneOf_Event
         ) -> Bool {
             // The use of inline closures is to circumvent an issue where the compiler
             // allocates stack space for every case branch when no optimizations are
@@ -361,13 +361,52 @@ struct Stream_Video_Coordinator_StatV1_CallParticipantTimeline {
     /// The events in this timeline are from the perspective of the user with this ID
     var userID: String = String()
 
-    var sessionID: String = String()
-
-    var events: [Stream_Video_Coordinator_StatV1_TelemetryEvent] = []
+    var events: [Stream_Video_Coordinator_StatV1_TimelineEvent] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+}
+
+struct Stream_Video_Coordinator_StatV1_Session {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var sessionID: String = String()
+
+    var callID: String = String()
+
+    var callType: String = String()
+
+    /// time when first participant joined
+    var start: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _start ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _start = newValue }
+    }
+
+    /// Returns true if `start` has been explicitly set.
+    var hasStart: Bool { self._start != nil }
+    /// Clears the value of `start`. Subsequent reads from it will return its default value.
+    mutating func clearStart() { _start = nil }
+
+    /// time when last participant left
+    var end: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _end ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _end = newValue }
+    }
+
+    /// Returns true if `end` has been explicitly set.
+    var hasEnd: Bool { self._end != nil }
+    /// Clears the value of `end`. Subsequent reads from it will return its default value.
+    mutating func clearEnd() { _end = nil }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    private var _start: SwiftProtobuf.Google_Protobuf_Timestamp?
+    private var _end: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
@@ -379,9 +418,10 @@ extension Stream_Video_Coordinator_StatV1_ParticipantConnected: @unchecked Senda
 extension Stream_Video_Coordinator_StatV1_ParticipantDisconnected: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_Freeze: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_MediaStateChanged: @unchecked Sendable {}
-extension Stream_Video_Coordinator_StatV1_TelemetryEvent: @unchecked Sendable {}
-extension Stream_Video_Coordinator_StatV1_TelemetryEvent.OneOf_Event: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_TimelineEvent: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_TimelineEvent.OneOf_Event: @unchecked Sendable {}
 extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: @unchecked Sendable {}
+extension Stream_Video_Coordinator_StatV1_Session: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -567,9 +607,9 @@ extension Stream_Video_Coordinator_StatV1_MediaStateChanged: SwiftProtobuf.Messa
     }
 }
 
-extension Stream_Video_Coordinator_StatV1_TelemetryEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Coordinator_StatV1_TimelineEvent: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".TelemetryEvent"
+    static let protoMessageName: String = _protobuf_package + ".TimelineEvent"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "timestamp"),
         2: .standard(proto: "participant_connected"),
@@ -673,8 +713,8 @@ extension Stream_Video_Coordinator_StatV1_TelemetryEvent: SwiftProtobuf.Message,
     }
 
     static func == (
-        lhs: Stream_Video_Coordinator_StatV1_TelemetryEvent,
-        rhs: Stream_Video_Coordinator_StatV1_TelemetryEvent
+        lhs: Stream_Video_Coordinator_StatV1_TimelineEvent,
+        rhs: Stream_Video_Coordinator_StatV1_TimelineEvent
     ) -> Bool {
         if lhs._timestamp != rhs._timestamp { return false }
         if lhs.event != rhs.event { return false }
@@ -688,8 +728,7 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
     static let protoMessageName: String = _protobuf_package + ".CallParticipantTimeline"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "user_id"),
-        2: .standard(proto: "session_id"),
-        3: .same(proto: "events")
+        2: .same(proto: "events")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -699,8 +738,7 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
-            case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
-            case 3: try { try decoder.decodeRepeatedMessageField(value: &self.events) }()
+            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.events) }()
             default: break
             }
         }
@@ -710,11 +748,8 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
         if !userID.isEmpty {
             try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
         }
-        if !sessionID.isEmpty {
-            try visitor.visitSingularStringField(value: sessionID, fieldNumber: 2)
-        }
         if !events.isEmpty {
-            try visitor.visitRepeatedMessageField(value: events, fieldNumber: 3)
+            try visitor.visitRepeatedMessageField(value: events, fieldNumber: 2)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -724,8 +759,68 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
         rhs: Stream_Video_Coordinator_StatV1_CallParticipantTimeline
     ) -> Bool {
         if lhs.userID != rhs.userID { return false }
-        if lhs.sessionID != rhs.sessionID { return false }
         if lhs.events != rhs.events { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_StatV1_Session: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".Session"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "session_id"),
+        2: .standard(proto: "call_id"),
+        3: .standard(proto: "call_type"),
+        4: .same(proto: "start"),
+        5: .same(proto: "end")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.callID) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self.callType) }()
+            case 4: try { try decoder.decodeSingularMessageField(value: &self._start) }()
+            case 5: try { try decoder.decodeSingularMessageField(value: &self._end) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !sessionID.isEmpty {
+            try visitor.visitSingularStringField(value: sessionID, fieldNumber: 1)
+        }
+        if !callID.isEmpty {
+            try visitor.visitSingularStringField(value: callID, fieldNumber: 2)
+        }
+        if !callType.isEmpty {
+            try visitor.visitSingularStringField(value: callType, fieldNumber: 3)
+        }
+        try { if let v = self._start {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+        } }()
+        try { if let v = self._end {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+        } }()
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Coordinator_StatV1_Session, rhs: Stream_Video_Coordinator_StatV1_Session) -> Bool {
+        if lhs.sessionID != rhs.sessionID { return false }
+        if lhs.callID != rhs.callID { return false }
+        if lhs.callType != rhs.callType { return false }
+        if lhs._start != rhs._start { return false }
+        if lhs._end != rhs._end { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

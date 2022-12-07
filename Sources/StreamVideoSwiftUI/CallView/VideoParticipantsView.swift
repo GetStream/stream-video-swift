@@ -7,7 +7,7 @@ import SwiftUI
 
 public struct VideoParticipantsView: View {
     
-    var participants: [CallParticipant]
+    @StateObject var viewModel: CallViewModel
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -49,6 +49,10 @@ public struct VideoParticipantsView: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
+    }
+    
+    var participants: [CallParticipant] {
+        viewModel.participants
     }
 }
 

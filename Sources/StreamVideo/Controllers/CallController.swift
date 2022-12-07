@@ -71,6 +71,7 @@ public class CallController {
             hostname: edgeServer.url,
             token: edgeServer.token,
             videoEnabled: videoEnabled,
+            callCoordinatorController: callCoordinatorController,
             tokenProvider: tokenProvider
         )
         
@@ -161,7 +162,9 @@ public class CallController {
                     isOnline: true,
                     hasVideo: true,
                     hasAudio: true,
-                    showTrack: true
+                    isScreenSharing: false,
+                    showTrack: true,
+                    sessionId: ""
                 )
                 let updated = participant.withUpdated(track: localVideoTrack)
                 self?.call?.participants[userId] = updated

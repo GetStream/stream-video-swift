@@ -82,6 +82,26 @@ class Stream_Video_Coordinator_ClientV1Rpc_ClientRPC: @unchecked Sendable {
         try await execute(request: queryDevicesRequest, path: "QueryDevices")
     }
     
+    func startBroadcast(startBroadcastRequest: Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_StartBroadcastResponse {
+        try await execute(request: startBroadcastRequest, path: "StartBroadcast")
+    }
+    
+    func stopBroadcast(stopBroadcastRequest: Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_StopBroadcastResponse {
+        try await execute(request: stopBroadcastRequest, path: "StopBroadcast")
+    }
+    
+    func startRecording(startRecordingRequest: Stream_Video_Coordinator_ClientV1Rpc_StartRecordingRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_StartRecordingResponse {
+        try await execute(request: startRecordingRequest, path: "StartRecording")
+    }
+    
+    func stopRecording(stopRecordingRequest: Stream_Video_Coordinator_ClientV1Rpc_StopRecordingRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_StopRecordingResponse {
+        try await execute(request: stopRecordingRequest, path: "StopRecording")
+    }
+    
     func upsertCallMembers(upsertCallMembersRequest: Stream_Video_Coordinator_ClientV1Rpc_UpsertCallMembersRequest) async throws
         -> Stream_Video_Coordinator_ClientV1Rpc_UpsertCallMembersResponse {
         try await execute(request: upsertCallMembersRequest, path: "UpsertCallMembers")
@@ -100,6 +120,16 @@ class Stream_Video_Coordinator_ClientV1Rpc_ClientRPC: @unchecked Sendable {
     func sendCustomEvent(sendCustomEventRequest: Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventRequest) async throws
         -> Stream_Video_Coordinator_ClientV1Rpc_SendCustomEventResponse {
         try await execute(request: sendCustomEventRequest, path: "SendCustomEvent")
+    }
+    
+    func queryUsers(queryUsersRequest: Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_QueryUsersResponse {
+        try await execute(request: queryUsersRequest, path: "QueryUsers")
+    }
+    
+    func upsertUsers(upsertUsersRequest: Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersRequest) async throws
+        -> Stream_Video_Coordinator_ClientV1Rpc_UpsertUsersResponse {
+        try await execute(request: upsertUsersRequest, path: "UpsertUsers")
     }
     
     func reportCallStats(reportCallStatsRequest: Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest) async throws

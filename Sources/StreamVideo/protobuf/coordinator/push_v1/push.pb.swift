@@ -131,15 +131,11 @@ struct Stream_Video_Coordinator_PushV1_ApnCredentials {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var authKey: String = String()
+    var certificateP12: Data = Data()
 
-    var keyID: String = String()
-
-    var apnTopic: String = String()
+    var topic: String = String()
 
     var teamID: String = String()
-
-    var development: Bool = false
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -151,9 +147,7 @@ struct Stream_Video_Coordinator_PushV1_FirebaseCredentials {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var serverKey: String = String()
-
-    var credentialsJson: String = String()
+    var credentials: String = String()
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -405,11 +399,9 @@ extension Stream_Video_Coordinator_PushV1_ApnCredentials: SwiftProtobuf.Message,
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ApnCredentials"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "auth_key"),
-        2: .standard(proto: "key_id"),
-        3: .standard(proto: "apn_topic"),
-        4: .standard(proto: "team_id"),
-        5: .same(proto: "development")
+        1: .standard(proto: "certificate_p12"),
+        2: .same(proto: "topic"),
+        3: .standard(proto: "team_id")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -418,31 +410,23 @@ extension Stream_Video_Coordinator_PushV1_ApnCredentials: SwiftProtobuf.Message,
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.authKey) }()
-            case 2: try { try decoder.decodeSingularStringField(value: &self.keyID) }()
-            case 3: try { try decoder.decodeSingularStringField(value: &self.apnTopic) }()
-            case 4: try { try decoder.decodeSingularStringField(value: &self.teamID) }()
-            case 5: try { try decoder.decodeSingularBoolField(value: &self.development) }()
+            case 1: try { try decoder.decodeSingularBytesField(value: &self.certificateP12) }()
+            case 2: try { try decoder.decodeSingularStringField(value: &self.topic) }()
+            case 3: try { try decoder.decodeSingularStringField(value: &self.teamID) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !authKey.isEmpty {
-            try visitor.visitSingularStringField(value: authKey, fieldNumber: 1)
+        if !certificateP12.isEmpty {
+            try visitor.visitSingularBytesField(value: certificateP12, fieldNumber: 1)
         }
-        if !keyID.isEmpty {
-            try visitor.visitSingularStringField(value: keyID, fieldNumber: 2)
-        }
-        if !apnTopic.isEmpty {
-            try visitor.visitSingularStringField(value: apnTopic, fieldNumber: 3)
+        if !topic.isEmpty {
+            try visitor.visitSingularStringField(value: topic, fieldNumber: 2)
         }
         if !teamID.isEmpty {
-            try visitor.visitSingularStringField(value: teamID, fieldNumber: 4)
-        }
-        if development != false {
-            try visitor.visitSingularBoolField(value: development, fieldNumber: 5)
+            try visitor.visitSingularStringField(value: teamID, fieldNumber: 3)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -451,11 +435,9 @@ extension Stream_Video_Coordinator_PushV1_ApnCredentials: SwiftProtobuf.Message,
         lhs: Stream_Video_Coordinator_PushV1_ApnCredentials,
         rhs: Stream_Video_Coordinator_PushV1_ApnCredentials
     ) -> Bool {
-        if lhs.authKey != rhs.authKey { return false }
-        if lhs.keyID != rhs.keyID { return false }
-        if lhs.apnTopic != rhs.apnTopic { return false }
+        if lhs.certificateP12 != rhs.certificateP12 { return false }
+        if lhs.topic != rhs.topic { return false }
         if lhs.teamID != rhs.teamID { return false }
-        if lhs.development != rhs.development { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -465,8 +447,7 @@ extension Stream_Video_Coordinator_PushV1_FirebaseCredentials: SwiftProtobuf.Mes
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".FirebaseCredentials"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .standard(proto: "server_key"),
-        2: .standard(proto: "credentials_json")
+        1: .same(proto: "credentials")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -475,19 +456,15 @@ extension Stream_Video_Coordinator_PushV1_FirebaseCredentials: SwiftProtobuf.Mes
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularStringField(value: &self.serverKey) }()
-            case 2: try { try decoder.decodeSingularStringField(value: &self.credentialsJson) }()
+            case 1: try { try decoder.decodeSingularStringField(value: &self.credentials) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if !serverKey.isEmpty {
-            try visitor.visitSingularStringField(value: serverKey, fieldNumber: 1)
-        }
-        if !credentialsJson.isEmpty {
-            try visitor.visitSingularStringField(value: credentialsJson, fieldNumber: 2)
+        if !credentials.isEmpty {
+            try visitor.visitSingularStringField(value: credentials, fieldNumber: 1)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -496,8 +473,7 @@ extension Stream_Video_Coordinator_PushV1_FirebaseCredentials: SwiftProtobuf.Mes
         lhs: Stream_Video_Coordinator_PushV1_FirebaseCredentials,
         rhs: Stream_Video_Coordinator_PushV1_FirebaseCredentials
     ) -> Bool {
-        if lhs.serverKey != rhs.serverKey { return false }
-        if lhs.credentialsJson != rhs.credentialsJson { return false }
+        if lhs.credentials != rhs.credentials { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

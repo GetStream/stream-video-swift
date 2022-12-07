@@ -28,6 +28,12 @@ public struct CallView<Factory: ViewFactory>: View {
                 if viewModel.localVideoPrimary {
                     localVideoView
                         .edgesIgnoringSafeArea(.all)
+                } else if let screensharing = viewModel.screensharingSession {
+                    viewFactory.makeScreenSharingView(
+                        viewModel: viewModel,
+                        screensharingSession: screensharing,
+                        availableSize: reader.size
+                    )
                 } else {
                     participantsView(size: reader.size)
                 }
@@ -69,12 +75,14 @@ public struct CallView<Factory: ViewFactory>: View {
                             }
                         }
                         
-                        CornerDragableView(
-                            content: contentDragableView(size: reader.size),
-                            proxy: reader
-                        ) {
-                            withAnimation {
-                                viewModel.localVideoPrimary.toggle()
+                        if viewModel.screensharingSession == nil {
+                            CornerDragableView(
+                                content: contentDragableView(size: reader.size),
+                                proxy: reader
+                            ) {
+                                withAnimation {
+                                    viewModel.localVideoPrimary.toggle()
+                                }
                             }
                         }
                     }
@@ -139,7 +147,7 @@ public struct CallView<Factory: ViewFactory>: View {
     
     private func participantsView(size: CGSize) -> some View {
         viewFactory.makeVideoParticipantsView(
-            participants: viewModel.participants,
+            viewModel: viewModel,
             availableSize: size,
             onViewRendering: handleViewRendering(_:participant:),
             onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)

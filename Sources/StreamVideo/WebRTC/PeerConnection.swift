@@ -116,9 +116,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         pc.add(track, streamIds: streamIds)
     }
     
-    func addTransceiver(_ track: RTCMediaStreamTrack, streamIds: [String]) {
+    func addTransceiver(_ track: RTCMediaStreamTrack, streamIds: [String], direction: RTCRtpTransceiverDirection = .sendOnly) {
         let transceiverInit = RTCRtpTransceiverInit()
-        transceiverInit.direction = .sendOnly
+        transceiverInit.direction = direction
         transceiverInit.streamIds = streamIds
         
         var encodingParams = [RTCRtpEncodingParameters]()
@@ -134,10 +134,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
         
         transceiverInit.sendEncodings = encodingParams
-        
-        syncQueue.async { [weak self] in
-            self?.transceiver = self?.pc.addTransceiver(with: track, init: transceiverInit)
-        }
+        transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }
     
     func add(iceCandidate: RTCIceCandidate) {
@@ -153,6 +150,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 log.debug("Added ice candidate successfully")
             }
         }
+    }
+    
+    func close() {
+        pc.close()
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
@@ -256,8 +257,7 @@ extension RTCVideoCodecInfo {
     
     func toSfuCodec() -> Stream_Video_Sfu_Models_Codec {
         var codec = Stream_Video_Sfu_Models_Codec()
-        codec.mime = name
-        codec.hwAccelerated = name == "H264"
+        codec.name = name
         return codec
     }
 }

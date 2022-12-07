@@ -83,6 +83,16 @@ final class CallCoordinatorController: Sendable {
         request.ring = !videoConfig.joinVideoCallInstantly
         _ = try await callCoordinatorService.upsertCallMembers(upsertCallMembersRequest: request)
     }
+    
+    func enrichUserData(for id: String) async throws -> EnrichedUserData {
+        var request = Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest()
+        let filter = ["id": ["$in": [id]]]
+        let jsonData = try JSONSerialization.data(withJSONObject: filter, options: .prettyPrinted)
+        request.mqJson = jsonData
+        let response = try await callCoordinatorService.queryUsers(queryUsersRequest: request)
+        guard let member = response.users.first else { return .empty }
+        return EnrichedUserData(imageUrl: URL(string: member.imageURL), name: member.name, role: member.role)
+    }
 
     // MARK: - private
         
@@ -168,4 +178,18 @@ struct CoordinatorInfo {
     let apiKey: String
     let hostname: String
     let token: String
+}
+
+struct EnrichedUserData {
+    let imageUrl: URL?
+    let name: String
+    let role: String
+}
+
+extension EnrichedUserData {
+    static let empty = EnrichedUserData(
+        imageUrl: nil,
+        name: "",
+        role: "member"
+    )
 }

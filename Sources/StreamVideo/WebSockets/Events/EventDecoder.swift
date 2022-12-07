@@ -60,6 +60,8 @@ struct EventDecoder {
                 type: value.call.type,
                 users: response.users.map(\.value)
             )
+        case let .error(value):
+            return value
         }
     }
 }

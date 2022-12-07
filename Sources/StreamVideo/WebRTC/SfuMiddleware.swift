@@ -55,13 +55,15 @@ class SfuMiddleware: EventMiddleware {
                 handleChangePublishQualityEvent(event)
             } else if let event = event as? Stream_Video_Sfu_Event_DominantSpeakerChanged {
                 await handleDominantSpeakerChanged(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_MuteStateChanged {
-                await handleMuteStateChangedEvent(event)
             } else if let event = event as? Stream_Video_Sfu_Models_ICETrickle {
                 try await handleICETrickle(event)
             } else if let event = event as? Stream_Video_Sfu_Event_JoinResponse {
                 onSocketConnected?()
                 await loadParticipants(from: event)
+            } else if let event = event as? Stream_Video_Sfu_Event_TrackPublished {
+                await handleTrackPublishedEvent(event)
+            } else if let event = event as? Stream_Video_Sfu_Event_TrackUnpublished {
+                await handleTrackUnpublishedEvent(event)
             }
         }
         return event
@@ -88,7 +90,8 @@ class SfuMiddleware: EventMiddleware {
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_Event_ParticipantJoined) async {
         let callParticipants = await state.callParticipants
         let showTrack = (callParticipants.count + 1) < participantsThreshold
-        let participant = event.participant.toCallParticipant(showTrack: showTrack)
+        let enrichedData = await state.enrichedData(for: event.participant.userID)
+        let participant = event.participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
         await state.update(callParticipant: participant)
         let event = ParticipantEvent(
             id: participant.id,
@@ -101,7 +104,8 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
-        let participant = event.participant.toCallParticipant()
+        let enrichedData = await state.enrichedData(for: event.participant.userID)
+        let participant = event.participant.toCallParticipant(enrichData: enrichedData)
         await state.removeCallParticipant(with: participant.id)
         await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
         let event = ParticipantEvent(
@@ -211,12 +215,40 @@ class SfuMiddleware: EventMiddleware {
         }
     }
     
-    private func handleMuteStateChangedEvent(_ event: Stream_Video_Sfu_Event_MuteStateChanged) async {
+    private func handleTrackPublishedEvent(_ event: Stream_Video_Sfu_Event_TrackPublished) async {
         let userId = event.userID
+        log.debug("received track published event for user \(userId)")
         guard let participant = await state.callParticipants[userId] else { return }
-        var updated = participant.withUpdated(audio: !event.audioMuted)
-        updated = updated.withUpdated(video: !event.videoMuted)
-        await state.update(callParticipant: updated)
+        if event.type == .audio {
+            let updated = participant.withUpdated(audio: true)
+            await state.update(callParticipant: updated)
+        } else if event.type == .video {
+            let updated = participant.withUpdated(video: true)
+            await state.update(callParticipant: updated)
+        } else if event.type == .screenShare {
+            let updated = participant.withUpdated(screensharing: true)
+            await state.update(callParticipant: updated)
+        }
+    }
+    
+    private func handleTrackUnpublishedEvent(_ event: Stream_Video_Sfu_Event_TrackUnpublished) async {
+        let userId = event.userID
+        log.debug("received track unpublished event for user \(userId)")
+        guard let participant = await state.callParticipants[userId] else { return }
+        if event.type == .audio {
+            let updated = participant.withUpdated(audio: false)
+            await state.update(callParticipant: updated)
+        } else if event.type == .video {
+            let updated = participant.withUpdated(video: false)
+            await state.removeTrack(id: updated.trackLookupPrefix ?? updated.id)
+            await state.update(callParticipant: updated)
+        } else if event.type == .screenShare {
+            let updated = participant
+                .withUpdated(screensharing: false)
+                .withUpdated(screensharingTrack: nil)
+            await state.removeScreensharingTrack(id: updated.trackLookupPrefix ?? updated.id)
+            await state.update(callParticipant: updated)
+        }
     }
     
     private func loadParticipants(from response: Stream_Video_Sfu_Event_JoinResponse) async {
@@ -226,7 +258,8 @@ class SfuMiddleware: EventMiddleware {
         let showTrack = participants.count < participantsThreshold
         var temp = [String: CallParticipant]()
         for participant in participants {
-            temp[participant.user.id] = participant.toCallParticipant(showTrack: showTrack)
+            let enrichedData = await state.enrichedData(for: participant.userID)
+            temp[participant.userID] = participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
         }
         await state.update(callParticipants: temp)
     }
