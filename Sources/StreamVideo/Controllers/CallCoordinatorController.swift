@@ -8,8 +8,8 @@ import WebRTC
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
 final class CallCoordinatorController: Sendable {
     
+    let callCoordinatorService: Stream_Video_CallCoordinatorService
     private let latencyService: LatencyService
-    private let callCoordinatorService: Stream_Video_CallCoordinatorService
     private let videoConfig: VideoConfig
     private let user: User
     

@@ -16,7 +16,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
+    private let coordinatorService: Stream_Video_CallCoordinatorService
     private let sessionId: String
+    private let callCid: String
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
@@ -31,22 +33,28 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     init(
         sessionId: String,
+        callCid: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
+        coordinatorService: Stream_Video_CallCoordinatorService,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         videoOptions: VideoOptions,
-        reportStats: Bool = false
+        reportStats: Bool = true
     ) {
         self.sessionId = sessionId
         self.pc = pc
+        self.coordinatorService = coordinatorService
         self.signalService = signalService
         self.type = type
         self.reportStats = reportStats
         self.videoOptions = videoOptions
+        self.callCid = callCid
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
-        setupStatsTimer()
+        DispatchQueue.main.async {
+            self.setupStatsTimer()
+        }
     }
     
     func createOffer() async throws -> RTCSessionDescription {
@@ -207,16 +215,47 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private func setupStatsTimer() {
         if reportStats {
             statsTimer = Foundation.Timer.scheduledTimer(
-                withTimeInterval: 5.0,
+                withTimeInterval: 15.0,
                 repeats: true,
                 block: { [weak self] _ in
-                    self?.pc.stats(for: nil, statsOutputLevel: .standard) { _ in
-                        log.debug("received stats for peer connection")
-                    }
+                    self?.reportCurrentStats()
                 }
             )
-            statsTimer?.fire()
         }
+    }
+    
+    private func reportCurrentStats() {
+        pc.statistics(completionHandler: { [weak self] report in
+            guard let self = self else { return }
+            Task {
+                let stats = report.statistics
+                var updated = [String: Any]()
+                for (key, value) in stats {
+                    let mapped = [
+                        "id": value.id,
+                        "type": value.type,
+                        "timestamp_us": value.timestamp_us,
+                        "values": value.values
+                    ]
+                    updated[key] = mapped
+                }
+                guard let jsonData = try? JSONSerialization.data(
+                    withJSONObject: updated,
+                    options: .prettyPrinted
+                ) else { return }
+                var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
+                request.callCid = self.callCid
+                request.statsJson = jsonData
+                do {
+                    _ = try await self.coordinatorService.reportCallStats(
+                        reportCallStatsRequest: request
+                    )
+                    log.debug("successfully sent stats for \(self.type)")
+                } catch {
+                    log.error("error reporting stats for \(self.type)")
+                }
+            }
+        })
     }
     
     @discardableResult

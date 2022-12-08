@@ -118,6 +118,7 @@ class WebRTCClient: NSObject {
 
     private var localAudioTrack: RTCAudioTrack?
     private let user: User
+    private let callCid: String
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 4
@@ -158,12 +159,14 @@ class WebRTCClient: NSObject {
         hostname: String,
         token: String,
         videoEnabled: Bool,
+        callCid: String,
         callCoordinatorController: CallCoordinatorController,
         tokenProvider: @escaping UserTokenProvider
     ) {
         state = State(callCoordinatorController: callCoordinatorController)
         self.user = user
         self.token = token
+        self.callCid = callCid
         self.videoEnabled = videoEnabled
         self.callCoordinatorController = callCoordinatorController
         httpClient = URLSessionClient(
@@ -305,8 +308,10 @@ class WebRTCClient: NSObject {
         let configuration = connectOptions.rtcConfiguration
         subscriber = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
+            callCid: callCid,
             configuration: configuration,
             type: .subscriber,
+            coordinatorService: callCoordinatorController.callCoordinatorService,
             signalService: signalService,
             videoOptions: videoOptions
         )
@@ -320,8 +325,10 @@ class WebRTCClient: NSObject {
         if callSettings.shouldPublish {
             publisher = try await peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
+                callCid: callCid,
                 configuration: configuration,
                 type: .publisher,
+                coordinatorService: callCoordinatorController.callCoordinatorService,
                 signalService: signalService,
                 videoOptions: videoOptions
             )
@@ -538,10 +545,13 @@ class WebRTCClient: NSObject {
         }
         let tempPeerConnection = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
+            callCid: callCid,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
+            coordinatorService: callCoordinatorController.callCoordinatorService,
             signalService: signalService,
-            videoOptions: videoOptions
+            videoOptions: videoOptions,
+            reportsStats: false
         )
         
         tempPeerConnection.addTrack(localAudioTrack, streamIds: ["temp-audio"])

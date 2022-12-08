@@ -32,11 +32,14 @@ actor PeerConnectionFactory {
     
     func makePeerConnection(
         sessionId: String,
+        callCid: String,
         configuration: RTCConfiguration,
         type: PeerConnectionType,
+        coordinatorService: Stream_Video_CallCoordinatorService,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints,
-        videoOptions: VideoOptions
+        videoOptions: VideoOptions,
+        reportsStats: Bool = true
     ) throws -> PeerConnection {
         let pc = try makePeerConnection(
             configuration: configuration,
@@ -45,10 +48,13 @@ actor PeerConnectionFactory {
         )
         let peerConnection = PeerConnection(
             sessionId: sessionId,
+            callCid: callCid,
             pc: pc,
             type: type,
+            coordinatorService: coordinatorService,
             signalService: signalService,
-            videoOptions: videoOptions
+            videoOptions: videoOptions,
+            reportStats: reportsStats
         )
         return peerConnection
     }

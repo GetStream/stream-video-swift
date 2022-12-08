@@ -71,6 +71,7 @@ public class CallController {
             hostname: edgeServer.url,
             token: edgeServer.token,
             videoEnabled: videoEnabled,
+            callCid: "\(callType)-\(callId)",
             callCoordinatorController: callCoordinatorController,
             tokenProvider: tokenProvider
         )
