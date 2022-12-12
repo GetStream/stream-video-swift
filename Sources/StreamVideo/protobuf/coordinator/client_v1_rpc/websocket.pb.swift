@@ -23,130 +23,124 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
     // methods supported on all messages.
 
     /// All users mentioned in the event payload, indexed by User.id
-    var users: [String: Stream_Video_Coordinator_UserV1_User] {
-        get { _storage._users }
-        set { _uniqueStorage()._users = newValue }
-    }
+    var users: [String: Stream_Video_Coordinator_UserV1_User] = [:]
 
-    var event: OneOf_Event? {
-        get { _storage._event }
-        set { _uniqueStorage()._event = newValue }
-    }
+    var event: Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent.OneOf_Event?
 
     var error: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError {
         get {
-            if case let .error(v)? = _storage._event { return v }
+            if case let .error(v)? = event { return v }
             return Stream_Video_Coordinator_ClientV1Rpc_WebsocketError()
         }
-        set { _uniqueStorage()._event = .error(newValue) }
+        set { event = .error(newValue) }
     }
 
     var healthcheck: Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck {
         get {
-            if case let .healthcheck(v)? = _storage._event { return v }
+            if case let .healthcheck(v)? = event { return v }
             return Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck()
         }
-        set { _uniqueStorage()._event = .healthcheck(newValue) }
+        set { event = .healthcheck(newValue) }
     }
 
     /// Call events
     var callCreated: Stream_Video_Coordinator_EventV1_CallCreated {
         get {
-            if case let .callCreated(v)? = _storage._event { return v }
+            if case let .callCreated(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallCreated()
         }
-        set { _uniqueStorage()._event = .callCreated(newValue) }
+        set { event = .callCreated(newValue) }
     }
 
     var callUpdated: Stream_Video_Coordinator_EventV1_CallUpdated {
         get {
-            if case let .callUpdated(v)? = _storage._event { return v }
+            if case let .callUpdated(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallUpdated()
         }
-        set { _uniqueStorage()._event = .callUpdated(newValue) }
+        set { event = .callUpdated(newValue) }
     }
 
     var callDeleted: Stream_Video_Coordinator_EventV1_CallDeleted {
         get {
-            if case let .callDeleted(v)? = _storage._event { return v }
+            if case let .callDeleted(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallDeleted()
         }
-        set { _uniqueStorage()._event = .callDeleted(newValue) }
+        set { event = .callDeleted(newValue) }
     }
 
     var callMembersCreated: Stream_Video_Coordinator_EventV1_CallMembersCreated {
         get {
-            if case let .callMembersCreated(v)? = _storage._event { return v }
+            if case let .callMembersCreated(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallMembersCreated()
         }
-        set { _uniqueStorage()._event = .callMembersCreated(newValue) }
+        set { event = .callMembersCreated(newValue) }
     }
 
     var callMembersUpdated: Stream_Video_Coordinator_EventV1_CallMembersUpdated {
         get {
-            if case let .callMembersUpdated(v)? = _storage._event { return v }
+            if case let .callMembersUpdated(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallMembersUpdated()
         }
-        set { _uniqueStorage()._event = .callMembersUpdated(newValue) }
+        set { event = .callMembersUpdated(newValue) }
     }
 
     var callMembersDeleted: Stream_Video_Coordinator_EventV1_CallMembersDeleted {
         get {
-            if case let .callMembersDeleted(v)? = _storage._event { return v }
+            if case let .callMembersDeleted(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallMembersDeleted()
         }
-        set { _uniqueStorage()._event = .callMembersDeleted(newValue) }
+        set { event = .callMembersDeleted(newValue) }
     }
 
     var callEnded: Stream_Video_Coordinator_EventV1_CallEnded {
         get {
-            if case let .callEnded(v)? = _storage._event { return v }
+            if case let .callEnded(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallEnded()
         }
-        set { _uniqueStorage()._event = .callEnded(newValue) }
+        set { event = .callEnded(newValue) }
     }
 
     /// User initiated call events
     var callAccepted: Stream_Video_Coordinator_EventV1_CallAccepted {
         get {
-            if case let .callAccepted(v)? = _storage._event { return v }
+            if case let .callAccepted(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallAccepted()
         }
-        set { _uniqueStorage()._event = .callAccepted(newValue) }
+        set { event = .callAccepted(newValue) }
     }
 
     var callRejected: Stream_Video_Coordinator_EventV1_CallRejected {
         get {
-            if case let .callRejected(v)? = _storage._event { return v }
+            if case let .callRejected(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallRejected()
         }
-        set { _uniqueStorage()._event = .callRejected(newValue) }
+        set { event = .callRejected(newValue) }
     }
 
     var callCancelled: Stream_Video_Coordinator_EventV1_CallCancelled {
         get {
-            if case let .callCancelled(v)? = _storage._event { return v }
+            if case let .callCancelled(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallCancelled()
         }
-        set { _uniqueStorage()._event = .callCancelled(newValue) }
+        set { event = .callCancelled(newValue) }
     }
 
     /// User events
     var userUpdated: Stream_Video_Coordinator_EventV1_UserUpdated {
         get {
-            if case let .userUpdated(v)? = _storage._event { return v }
+            if case let .userUpdated(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_UserUpdated()
         }
-        set { _uniqueStorage()._event = .userUpdated(newValue) }
+        set { event = .userUpdated(newValue) }
     }
 
     /// Custom event
     var callCustom: Stream_Video_Coordinator_EventV1_CallCustom {
         get {
-            if case let .callCustom(v)? = _storage._event { return v }
+            if case let .callCustom(v)? = event { return v }
             return Stream_Video_Coordinator_EventV1_CallCustom()
         }
-        set { _uniqueStorage()._event = .callCustom(newValue) }
+        set { event = .callCustom(newValue) }
     }
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -246,8 +240,6 @@ struct Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent {
     }
 
     init() {}
-
-    private var _storage = _StorageClass.defaultInstance
 }
 
 /// WebsocketClientEvent contains all events that client is allowed to send to the server
@@ -425,303 +417,275 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
         99: .standard(proto: "call_custom")
     ]
 
-    fileprivate class _StorageClass {
-        var _users: [String: Stream_Video_Coordinator_UserV1_User] = [:]
-        var _event: Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent.OneOf_Event?
-
-        static let defaultInstance = _StorageClass()
-
-        private init() {}
-
-        init(copying source: _StorageClass) {
-            _users = source._users
-            _event = source._event
-        }
-    }
-
-    fileprivate mutating func _uniqueStorage() -> _StorageClass {
-        if !isKnownUniquelyReferenced(&_storage) {
-            _storage = _StorageClass(copying: _storage)
-        }
-        return _storage
-    }
-
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
-        _ = _uniqueStorage()
-        try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-            while let fieldNumber = try decoder.nextFieldNumber() {
-                // The use of inline closures is to circumvent an issue where the compiler
-                // allocates stack space for every case branch when no optimizations are
-                // enabled. https://github.com/apple/swift-protobuf/issues/1034
-                switch fieldNumber {
-                case 1: try { try decoder.decodeMapField(
-                        fieldType: SwiftProtobuf._ProtobufMessageMap<
-                            SwiftProtobuf.ProtobufString,
-                            Stream_Video_Coordinator_UserV1_User
-                        >.self,
-                        value: &_storage._users
-                    ) }()
-                case 19: try {
-                        var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .error(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .error(v)
-                        }
-                    }()
-                case 20: try {
-                        var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .healthcheck(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .healthcheck(v)
-                        }
-                    }()
-                case 30: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallCreated?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callCreated(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callCreated(v)
-                        }
-                    }()
-                case 31: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallUpdated?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callUpdated(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callUpdated(v)
-                        }
-                    }()
-                case 32: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallDeleted?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callDeleted(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callDeleted(v)
-                        }
-                    }()
-                case 33: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallMembersCreated?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callMembersCreated(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callMembersCreated(v)
-                        }
-                    }()
-                case 34: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallMembersUpdated?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callMembersUpdated(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callMembersUpdated(v)
-                        }
-                    }()
-                case 35: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallMembersDeleted?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callMembersDeleted(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callMembersDeleted(v)
-                        }
-                    }()
-                case 36: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallEnded?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callEnded(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callEnded(v)
-                        }
-                    }()
-                case 40: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallAccepted?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callAccepted(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callAccepted(v)
-                        }
-                    }()
-                case 41: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallRejected?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callRejected(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callRejected(v)
-                        }
-                    }()
-                case 42: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallCancelled?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callCancelled(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callCancelled(v)
-                        }
-                    }()
-                case 50: try {
-                        var v: Stream_Video_Coordinator_EventV1_UserUpdated?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .userUpdated(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .userUpdated(v)
-                        }
-                    }()
-                case 99: try {
-                        var v: Stream_Video_Coordinator_EventV1_CallCustom?
-                        var hadOneofValue = false
-                        if let current = _storage._event {
-                            hadOneofValue = true
-                            if case let .callCustom(m) = current { v = m }
-                        }
-                        try decoder.decodeSingularMessageField(value: &v)
-                        if let v = v {
-                            if hadOneofValue { try decoder.handleConflictingOneOf() }
-                            _storage._event = .callCustom(v)
-                        }
-                    }()
-                default: break
-                }
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeMapField(
+                    fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Coordinator_UserV1_User>
+                        .self,
+                    value: &self.users
+                ) }()
+            case 19: try {
+                    var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketError?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .error(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .error(v)
+                    }
+                }()
+            case 20: try {
+                    var v: Stream_Video_Coordinator_ClientV1Rpc_WebsocketHealthcheck?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .healthcheck(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .healthcheck(v)
+                    }
+                }()
+            case 30: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallCreated?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callCreated(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callCreated(v)
+                    }
+                }()
+            case 31: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallUpdated?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callUpdated(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callUpdated(v)
+                    }
+                }()
+            case 32: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallDeleted?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callDeleted(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callDeleted(v)
+                    }
+                }()
+            case 33: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallMembersCreated?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callMembersCreated(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callMembersCreated(v)
+                    }
+                }()
+            case 34: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallMembersUpdated?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callMembersUpdated(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callMembersUpdated(v)
+                    }
+                }()
+            case 35: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallMembersDeleted?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callMembersDeleted(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callMembersDeleted(v)
+                    }
+                }()
+            case 36: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallEnded?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callEnded(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callEnded(v)
+                    }
+                }()
+            case 40: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallAccepted?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callAccepted(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callAccepted(v)
+                    }
+                }()
+            case 41: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallRejected?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callRejected(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callRejected(v)
+                    }
+                }()
+            case 42: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallCancelled?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callCancelled(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callCancelled(v)
+                    }
+                }()
+            case 50: try {
+                    var v: Stream_Video_Coordinator_EventV1_UserUpdated?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .userUpdated(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .userUpdated(v)
+                    }
+                }()
+            case 99: try {
+                    var v: Stream_Video_Coordinator_EventV1_CallCustom?
+                    var hadOneofValue = false
+                    if let current = self.event {
+                        hadOneofValue = true
+                        if case let .callCustom(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.event = .callCustom(v)
+                    }
+                }()
+            default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        try withExtendedLifetime(_storage) { (_storage: _StorageClass) in
-            // The use of inline closures is to circumvent an issue where the compiler
-            // allocates stack space for every if/case branch local when no optimizations
-            // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
-            // https://github.com/apple/swift-protobuf/issues/1182
-            if !_storage._users.isEmpty {
-                try visitor.visitMapField(
-                    fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Coordinator_UserV1_User>
-                        .self,
-                    value: _storage._users,
-                    fieldNumber: 1
-                )
-            }
-            switch _storage._event {
-            case .error?: try {
-                    guard case let .error(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 19)
-                }()
-            case .healthcheck?: try {
-                    guard case let .healthcheck(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 20)
-                }()
-            case .callCreated?: try {
-                    guard case let .callCreated(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 30)
-                }()
-            case .callUpdated?: try {
-                    guard case let .callUpdated(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 31)
-                }()
-            case .callDeleted?: try {
-                    guard case let .callDeleted(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 32)
-                }()
-            case .callMembersCreated?: try {
-                    guard case let .callMembersCreated(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 33)
-                }()
-            case .callMembersUpdated?: try {
-                    guard case let .callMembersUpdated(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 34)
-                }()
-            case .callMembersDeleted?: try {
-                    guard case let .callMembersDeleted(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 35)
-                }()
-            case .callEnded?: try {
-                    guard case let .callEnded(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 36)
-                }()
-            case .callAccepted?: try {
-                    guard case let .callAccepted(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 40)
-                }()
-            case .callRejected?: try {
-                    guard case let .callRejected(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 41)
-                }()
-            case .callCancelled?: try {
-                    guard case let .callCancelled(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 42)
-                }()
-            case .userUpdated?: try {
-                    guard case let .userUpdated(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 50)
-                }()
-            case .callCustom?: try {
-                    guard case let .callCustom(v)? = _storage._event else { preconditionFailure() }
-                    try visitor.visitSingularMessageField(value: v, fieldNumber: 99)
-                }()
-            case nil: break
-            }
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        if !users.isEmpty {
+            try visitor.visitMapField(
+                fieldType: SwiftProtobuf._ProtobufMessageMap<SwiftProtobuf.ProtobufString, Stream_Video_Coordinator_UserV1_User>
+                    .self,
+                value: users,
+                fieldNumber: 1
+            )
+        }
+        switch event {
+        case .error?: try {
+                guard case let .error(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 19)
+            }()
+        case .healthcheck?: try {
+                guard case let .healthcheck(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 20)
+            }()
+        case .callCreated?: try {
+                guard case let .callCreated(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 30)
+            }()
+        case .callUpdated?: try {
+                guard case let .callUpdated(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 31)
+            }()
+        case .callDeleted?: try {
+                guard case let .callDeleted(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 32)
+            }()
+        case .callMembersCreated?: try {
+                guard case let .callMembersCreated(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 33)
+            }()
+        case .callMembersUpdated?: try {
+                guard case let .callMembersUpdated(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 34)
+            }()
+        case .callMembersDeleted?: try {
+                guard case let .callMembersDeleted(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 35)
+            }()
+        case .callEnded?: try {
+                guard case let .callEnded(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 36)
+            }()
+        case .callAccepted?: try {
+                guard case let .callAccepted(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 40)
+            }()
+        case .callRejected?: try {
+                guard case let .callRejected(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 41)
+            }()
+        case .callCancelled?: try {
+                guard case let .callCancelled(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 42)
+            }()
+        case .userUpdated?: try {
+                guard case let .userUpdated(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 50)
+            }()
+        case .callCustom?: try {
+                guard case let .callCustom(v)? = self.event else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 99)
+            }()
+        case nil: break
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -730,17 +694,8 @@ extension Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent: SwiftProtobuf.Mes
         lhs: Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent,
         rhs: Stream_Video_Coordinator_ClientV1Rpc_WebsocketEvent
     ) -> Bool {
-        if lhs._storage !== rhs._storage {
-            let storagesAreEqual: Bool =
-                withExtendedLifetime((lhs._storage, rhs._storage)) { (_args: (_StorageClass, _StorageClass)) in
-                    let _storage = _args.0
-                    let rhs_storage = _args.1
-                    if _storage._users != rhs_storage._users { return false }
-                    if _storage._event != rhs_storage._event { return false }
-                    return true
-                }
-            if !storagesAreEqual { return false }
-        }
+        if lhs.users != rhs.users { return false }
+        if lhs.event != rhs.event { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

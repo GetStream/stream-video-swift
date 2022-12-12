@@ -11,6 +11,7 @@ class WebRTCClient: NSObject {
     enum Constants {
         static let screenshareTrackType = "TRACK_TYPE_SCREEN_SHARE"
         static let videoTrackType = "TRACK_TYPE_VIDEO"
+        static let audioTrackType = "TRACK_TYPE_AUDIO"
     }
     
     actor State: ObservableObject {
@@ -366,8 +367,8 @@ class WebRTCClient: NSObject {
                     profileImageURL: nil,
                     trackLookupPrefix: trackId,
                     isOnline: true,
-                    hasVideo: true,
-                    hasAudio: true,
+                    hasVideo: last == Constants.videoTrackType,
+                    hasAudio: last == Constants.audioTrackType,
                     isScreenSharing: last == Constants.screenshareTrackType,
                     showTrack: true,
                     sessionId: ""
@@ -572,7 +573,7 @@ class WebRTCClient: NSObject {
         let callParticipants = await state.callParticipants
         for (_, value) in callParticipants {
             if value.id != user.id {
-                if value.showTrack {
+                if value.hasVideo {
                     log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)")
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
                     dimension.height = UInt32(value.trackSize.height)

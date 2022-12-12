@@ -7,7 +7,7 @@ import SwiftUI
 
 public struct ScreenSharingView: View {
     
-    @StateObject var viewModel: CallViewModel
+    @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreensharingSession
     var availableSize: CGSize
     

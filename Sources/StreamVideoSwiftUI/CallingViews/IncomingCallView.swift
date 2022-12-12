@@ -6,6 +6,7 @@ import NukeUI
 import StreamVideo
 import SwiftUI
 
+@available(iOS 14.0, *)
 public struct IncomingCallView: View {
     
     @Injected(\.streamVideo) var streamVideo
@@ -32,23 +33,46 @@ public struct IncomingCallView: View {
     }
     
     public var body: some View {
+        IncomingCallViewContent(
+            callParticipants: viewModel.callParticipants,
+            callInfo: viewModel.callInfo,
+            onCallAccepted: onCallAccepted,
+            onCallRejected: onCallRejected
+        )
+    }
+}
+
+struct IncomingCallViewContent: View {
+    
+    @Injected(\.streamVideo) var streamVideo
+    @Injected(\.fonts) var fonts
+    @Injected(\.colors) var colors
+    @Injected(\.images) var images
+    @Injected(\.utils) var utils
+    
+    var callParticipants: [CallParticipant]
+    var callInfo: IncomingCall
+    var onCallAccepted: (String) -> Void
+    var onCallRejected: (String) -> Void
+    
+    var body: some View {
         VStack(spacing: 16) {
             Spacer()
             
-            if viewModel.callParticipants.count > 1 {
+            if callParticipants.count > 1 {
                 CallingGroupView(
-                    participants: viewModel.callParticipants.map { $0.toUser() }
+                    participants: callParticipants.map { $0.toUser() }
                 )
             } else {
                 AnimatingParticipantView(
-                    participant: viewModel.callParticipants.first?.toUser(),
-                    caller: viewModel.callInfo.callerId
+                    participant: callParticipants.first?.toUser(),
+                    caller: callInfo.callerId
                 )
             }
             
             CallingParticipantsView(
-                participants: viewModel.callParticipants.map { $0.toUser() },
-                caller: viewModel.callInfo.callerId
+                participants: callParticipants.map { $0.toUser() },
+                caller: callInfo.callerId
             )
             .padding()
             
@@ -57,14 +81,14 @@ public struct IncomingCallView: View {
                     .applyCallingStyle()
                 CallingIndicator()
             }
-
+            
             Spacer()
-                        
+            
             HStack {
                 Spacing()
                 
                 Button {
-                    onCallRejected(viewModel.callInfo.id)
+                    onCallRejected(callInfo.id)
                 } label: {
                     images.hangup
                         .applyCallButtonStyle(
@@ -76,9 +100,9 @@ public struct IncomingCallView: View {
                 .padding(.all, 8)
                 
                 Spacing(size: 3)
-
+                
                 Button {
-                    onCallAccepted(viewModel.callInfo.id)
+                    onCallAccepted(callInfo.id)
                 } label: {
                     images.acceptCall
                         .applyCallButtonStyle(

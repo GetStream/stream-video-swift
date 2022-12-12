@@ -193,12 +193,11 @@ public class StreamVideo {
         
     /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
     public func callEvents() -> AsyncStream<CallEvent> {
-        let callEvents = AsyncStream(CallEvent.self) { [weak self] continuation in
+        AsyncStream(CallEvent.self) { [weak self] continuation in
             self?.callsMiddleware.onCallEvent = { callEvent in
                 continuation.yield(callEvent)
             }
         }
-        return callEvents
     }
     
     private func connectWebSocketClient() {

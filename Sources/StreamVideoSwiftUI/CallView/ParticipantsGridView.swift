@@ -15,38 +15,52 @@ struct ParticipantsGridView: View {
     
     var body: some View {
         ScrollView {
-            LazyVGrid(
-                columns: [
-                    .init(.adaptive(minimum: size.width, maximum: size.width), spacing: 0)
-                ],
-                spacing: 0
-            ) {
-                ForEach(participants) { participant in
-                    VideoCallParticipantView(
-                        participant: participant,
-                        availableSize: size,
-                        onViewUpdate: onViewUpdate
-                    )
-                    .adjustVideoFrame(to: size.width, ratio: 0.3)
-                    .overlay(
-                        AudioIndicatorView(participant: participant)
-                    )
-                    .onAppear {
-                        log.debug("Participant \(participant.name) is visible")
-                        participantVisibilityChanged(participant, true)
-                    }
-                    .onDisappear {
-                        log.debug("Participant \(participant.name) is not visible")
-                        participantVisibilityChanged(participant, false)
-                    }
+            if #available(iOS 14.0, *) {
+                LazyVGrid(
+                    columns: [
+                        .init(.adaptive(minimum: size.width, maximum: size.width), spacing: 0)
+                    ],
+                    spacing: 0
+                ) {
+                    participantsContent
+                }
+                .frame(maxWidth: availableSize.width, maxHeight: .infinity)
+            } else {
+                VStack {
+                    participantsContent
                 }
             }
-            .frame(maxWidth: availableSize.width, maxHeight: .infinity)
         }
         .edgesIgnoringSafeArea(.all)
     }
     
+    private var participantsContent: some View {
+        ForEach(participants) { participant in
+            VideoCallParticipantView(
+                participant: participant,
+                availableSize: size,
+                onViewUpdate: onViewUpdate
+            )
+            .adjustVideoFrame(to: size.width, ratio: 0.3)
+            .overlay(
+                AudioIndicatorView(participant: participant)
+            )
+            .onAppear {
+                log.debug("Participant \(participant.name) is visible")
+                participantVisibilityChanged(participant, true)
+            }
+            .onDisappear {
+                log.debug("Participant \(participant.name) is not visible")
+                participantVisibilityChanged(participant, false)
+            }
+        }
+    }
+    
     private var size: CGSize {
-        CGSize(width: availableSize.width / 2, height: availableSize.height / 2)
+        if #available(iOS 14.0, *) {
+            return CGSize(width: availableSize.width / 2, height: availableSize.height / 2)
+        } else {
+            return CGSize(width: availableSize.width, height: availableSize.height / 2)
+        }
     }
 }

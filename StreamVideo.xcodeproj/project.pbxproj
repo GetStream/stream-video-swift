@@ -19,6 +19,7 @@
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947992886EBD20007B36E /* UserConnectionProvider.swift */; };
+		841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
@@ -50,6 +51,13 @@
 		8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8440861D2901A16F0027849C /* SfuMiddleware.swift */; };
 		84429933293FA48B0037232A /* ScreenSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429931293FA4850037232A /* ScreenSharingView.swift */; };
 		844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299342940A16F0037232A /* ZoomableScrollView.swift */; };
+		8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993929422BEA0037232A /* BackportStateObject.swift */; };
+		8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993B294232360037232A /* IncomingCallView_iOS13.swift */; };
+		844299412942394C0037232A /* VideoView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299402942394C0037232A /* VideoView_iOS13.swift */; };
+		844299432942484A0037232A /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* UserCredentials.swift */; };
+		844299442942484A0037232A /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* UserCredentials.swift */; };
+		84429946294248A20037232A /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429945294248A20037232A /* LoginView.swift */; };
+		84429948294248B50037232A /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429947294248B50037232A /* LoginViewModel.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -102,9 +110,7 @@
 		849322582908378B0013C029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 849322572908378B0013C029 /* Assets.xcassets */; };
 		8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 849322592908378B0013C029 /* LaunchScreen.storyboard */; };
 		849322612908385C0013C029 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322602908385C0013C029 /* HomeViewController.swift */; };
-		84932268290919CD0013C029 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8493226A290919F10013C029 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932269290919F10013C029 /* LoginViewController.swift */; };
-		8493226D290923350013C029 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8493226E2909235C0013C029 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		8493226F2909238F0013C029 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		84932270290923960013C029 /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* LocalStorage.swift */; };
@@ -118,6 +124,7 @@
 		8493227E29093A420013C029 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
 		8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493227F29093A9E0013C029 /* SnapshotTesting */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
+		84A26C9929435F4100B29E53 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84A26C9829435F4100B29E53 /* NukeUI */; };
 		84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A6CD6028D49A7700318EC3 /* CallBackgrounds.swift */; };
 		84A7379C28F0557F001A6769 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7379B28F0557F001A6769 /* CallEvents.swift */; };
 		84A737CE28F4716E001A6769 /* signal.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A737AE28F4716E001A6769 /* signal.pb.swift */; };
@@ -167,7 +174,6 @@
 		84B04BE728941EA6003A8DCD /* StatsConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B04BE628941EA6003A8DCD /* StatsConstants.swift */; };
 		84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9A56C29112F39004DE31A /* EndpointConfig.swift */; };
 		84B9A58F29140D3D004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A58E29140D3D004DE31A /* Nuke */; };
-		84B9A59129140D3D004DE31A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59029140D3D004DE31A /* NukeUI */; };
 		84B9A59329140D44004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59229140D44004DE31A /* Nuke */; };
 		84B9A59529140D44004DE31A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59429140D44004DE31A /* NukeUI */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
@@ -175,8 +181,10 @@
 		84BBF62F28AFDED200387A02 /* DataChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62E28AFDED200387A02 /* DataChannel.swift */; };
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
 		84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C267C828F5980F00F0F673 /* ConnectOptions.swift */; };
+		84C619C629432E890051C513 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84C619C529432E890051C513 /* NukeUI */; };
 		84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
 		84D419B828E7155100F574F9 /* VideoViewOverlay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D419B728E7155100F574F9 /* VideoViewOverlay.swift */; };
+		84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7912947476300DD4CE3 /* CallViewHelper.swift */; };
 		84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E7CD3628D64609009F3542 /* CallingIndicator.swift */; };
 		84E86D4F2905E731004BA44C /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E86D4E2905E731004BA44C /* Utils.swift */; };
 		84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */; };
@@ -320,6 +328,7 @@
 		82B82F2229114001001B5FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82B82F242911414D001B5FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82B82F2729114176001B5FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
 		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		8403C0AE2897D9940092BD43 /* VoipPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipPushService.swift; sourceTree = "<group>"; };
 		8403C0B02897E7E70092BD43 /* DemoApp.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoApp.entitlements; sourceTree = "<group>"; };
@@ -332,6 +341,7 @@
 		8415D3E2290BC882006E53CB /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		841947992886EBD20007B36E /* UserConnectionProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserConnectionProvider.swift; sourceTree = "<group>"; };
+		841F2C7D29429DAD00D8D655 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk/usr/lib/swift/libswift_Concurrency.tbd; sourceTree = DEVELOPER_DIR; };
 		84201792288AB699004964B3 /* AddUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUserView.swift; sourceTree = "<group>"; };
 		84231E4628B2506B007985EF /* VideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer.swift; sourceTree = "<group>"; };
 		84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionRecoveryHandler.swift; sourceTree = "<group>"; };
@@ -363,6 +373,12 @@
 		8440861D2901A16F0027849C /* SfuMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SfuMiddleware.swift; sourceTree = "<group>"; };
 		84429931293FA4850037232A /* ScreenSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingView.swift; sourceTree = "<group>"; };
 		844299342940A16F0037232A /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
+		8442993929422BEA0037232A /* BackportStateObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackportStateObject.swift; sourceTree = "<group>"; };
+		8442993B294232360037232A /* IncomingCallView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView_iOS13.swift; sourceTree = "<group>"; };
+		844299402942394C0037232A /* VideoView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView_iOS13.swift; sourceTree = "<group>"; };
+		844299422942484A0037232A /* UserCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCredentials.swift; sourceTree = "<group>"; };
+		84429945294248A20037232A /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		84429947294248B50037232A /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -476,6 +492,7 @@
 		84C2997A28784B500034B735 /* ConnectionState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionState.swift; sourceTree = "<group>"; };
 		84C2997C28784BB30034B735 /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		84D419B728E7155100F574F9 /* VideoViewOverlay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoViewOverlay.swift; sourceTree = "<group>"; };
+		84E4F7912947476300DD4CE3 /* CallViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewHelper.swift; sourceTree = "<group>"; };
 		84E7CD3628D64609009F3542 /* CallingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingIndicator.swift; sourceTree = "<group>"; };
 		84E86D4E2905E731004BA44C /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantImageView.swift; sourceTree = "<group>"; };
@@ -523,6 +540,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				84A26C9929435F4100B29E53 /* NukeUI in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
 				84767502290A824B0015DC53 /* WebRTC in Frameworks */,
 				848A805B290A808C00F3079B /* StreamVideoSwiftUI.framework in Frameworks */,
@@ -551,7 +569,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				84B9A59129140D3D004DE31A /* NukeUI in Frameworks */,
+				84C619C629432E890051C513 /* NukeUI in Frameworks */,
 				84F73843287C195600A363F4 /* StreamVideo.framework in Frameworks */,
 				84B9A58F29140D3D004DE31A /* Nuke in Frameworks */,
 			);
@@ -570,6 +588,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84B9A59529140D44004DE31A /* NukeUI in Frameworks */,
 				84F73848287C196B00A363F4 /* StreamVideo.framework in Frameworks */,
 				84B9A59329140D44004DE31A /* Nuke in Frameworks */,
@@ -656,6 +675,7 @@
 				84ED240C286C9515002A3186 /* CallView.swift */,
 				8456E6C5287EB55F004E180E /* AppState.swift */,
 				84093810288A90390089A35B /* HomeView.swift */,
+				844299422942484A0037232A /* UserCredentials.swift */,
 				8456E6C1287EB405004E180E /* LoginView.swift */,
 				8456E6C3287EB43A004E180E /* LoginViewModel.swift */,
 				84201792288AB699004964B3 /* AddUserView.swift */,
@@ -727,6 +747,16 @@
 			path = ScreenSharing;
 			sourceTree = "<group>";
 		};
+		8442993D294234880037232A /* iOS13 */ = {
+			isa = PBXGroup;
+			children = (
+				8442993929422BEA0037232A /* BackportStateObject.swift */,
+				8442993B294232360037232A /* IncomingCallView_iOS13.swift */,
+				844299402942394C0037232A /* VideoView_iOS13.swift */,
+			);
+			path = iOS13;
+			sourceTree = "<group>";
+		};
 		8456E6C7287EC343004E180E /* Logger */ = {
 			isa = PBXGroup;
 			children = (
@@ -786,6 +816,7 @@
 		8458872828A3F920002A81BF /* CallingViews */ = {
 			isa = PBXGroup;
 			children = (
+				8442993D294234880037232A /* iOS13 */,
 				8458872928A3F935002A81BF /* OutgoingCallView.swift */,
 				842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */,
 				842C7EB728A2916700C2AB7F /* IncomingCallViewModel.swift */,
@@ -843,6 +874,9 @@
 				849322502908378A0013C029 /* SceneDelegate.swift */,
 				84932269290919F10013C029 /* LoginViewController.swift */,
 				849322602908385C0013C029 /* HomeViewController.swift */,
+				84429945294248A20037232A /* LoginView.swift */,
+				84429947294248B50037232A /* LoginViewModel.swift */,
+				84E4F7912947476300DD4CE3 /* CallViewHelper.swift */,
 				849322572908378B0013C029 /* Assets.xcassets */,
 				849322592908378B0013C029 /* LaunchScreen.storyboard */,
 				8493225C2908378B0013C029 /* Info.plist */,
@@ -1196,6 +1230,8 @@
 		84F73842287C195600A363F4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				841F2C7D29429DAD00D8D655 /* libswift_Concurrency.tbd */,
+				8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -1288,6 +1324,7 @@
 			name = DemoAppUIKit;
 			packageProductDependencies = (
 				84767501290A824B0015DC53 /* WebRTC */,
+				84A26C9829435F4100B29E53 /* NukeUI */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -1351,7 +1388,7 @@
 			name = StreamVideoSwiftUI;
 			packageProductDependencies = (
 				84B9A58E29140D3D004DE31A /* Nuke */,
-				84B9A59029140D3D004DE31A /* NukeUI */,
+				84C619C529432E890051C513 /* NukeUI */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */;
@@ -1595,6 +1632,7 @@
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				84093811288A90390089A35B /* HomeView.swift in Sources */,
+				844299432942484A0037232A /* UserCredentials.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				840A5A5829054F98006A1E4B /* MockUserListProvider.swift in Sources */,
@@ -1613,12 +1651,14 @@
 				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
 				84932270290923960013C029 /* LocalStorage.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
+				84429946294248A20037232A /* LoginView.swift in Sources */,
+				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
 				8493226F2909238F0013C029 /* AppState.swift in Sources */,
-				84932268290919CD0013C029 /* LoginView.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
-				8493226D290923350013C029 /* LoginViewModel.swift in Sources */,
 				8493226E2909235C0013C029 /* AddUserView.swift in Sources */,
+				84429948294248B50037232A /* LoginViewModel.swift in Sources */,
+				844299442942484A0037232A /* UserCredentials.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1747,9 +1787,11 @@
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				8415D3E3290BC882006E53CB /* Sounds.swift in Sources */,
+				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* VideoViewOverlay.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
+				844299412942394C0037232A /* VideoView_iOS13.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
@@ -1763,6 +1805,7 @@
 				84F3B0E4289174F60088751D /* ContainerHelpers.swift in Sources */,
 				846FBE8D28AAEBBC00147F6E /* SearchBar.swift in Sources */,
 				844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */,
+				8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */,
 				8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */,
 				842C7EBA28A2A85C00C2AB7F /* CallingGroupView.swift in Sources */,
 				8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */,
@@ -2045,11 +2088,16 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -2086,12 +2134,17 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = VideoDemoAppStore;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AdHoc io.getstream.iOS.VideoDemoApp";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 			};
@@ -2121,10 +2174,14 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.DemoAppUIKit;
@@ -2162,10 +2219,14 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
 				);
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.DemoAppUIKit;
@@ -2181,6 +2242,7 @@
 		84F737FD287C13AD00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2205,6 +2267,7 @@
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2215,6 +2278,7 @@
 		84F737FE287C13AD00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2238,6 +2302,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2284,6 +2349,8 @@
 		84F7381D287C141000A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -2295,7 +2362,7 @@
 				INFOPLIST_FILE = Sources/StreamVideoSwiftUI/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2306,6 +2373,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2316,6 +2384,8 @@
 		84F7381E287C141000A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEFINES_MODULE = YES;
@@ -2327,7 +2397,7 @@
 				INFOPLIST_FILE = Sources/StreamVideoSwiftUI/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2338,6 +2408,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VERSIONING_SYSTEM = "apple-generic";
@@ -2386,6 +2457,8 @@
 		84F73838287C146D00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2398,7 +2471,7 @@
 				INFOPLIST_FILE = Sources/StreamVideoUIKit/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2420,6 +2493,8 @@
 		84F73839287C146D00A363F4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -2432,7 +2507,7 @@
 				INFOPLIST_FILE = Sources/StreamVideoUIKit/Info.plist;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -2623,6 +2698,11 @@
 			package = 8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
 			productName = SnapshotTesting;
 		};
+		84A26C9829435F4100B29E53 /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
 		84AF64BB287C34320012A503 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
@@ -2638,11 +2718,6 @@
 			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
 			productName = Nuke;
 		};
-		84B9A59029140D3D004DE31A /* NukeUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = NukeUI;
-		};
 		84B9A59229140D44004DE31A /* Nuke */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
@@ -2657,6 +2732,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */;
 			productName = SwiftProtobuf;
+		};
+		84C619C529432E890051C513 /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

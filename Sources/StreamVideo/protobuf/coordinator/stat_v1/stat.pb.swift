@@ -20,6 +20,7 @@ enum Stream_Video_Coordinator_StatV1_MediaType: SwiftProtobuf.Enum {
     case unspecified // = 0
     case audio // = 1
     case video // = 2
+    case screenShare // = 3
     case UNRECOGNIZED(Int)
 
     init() {
@@ -31,6 +32,7 @@ enum Stream_Video_Coordinator_StatV1_MediaType: SwiftProtobuf.Enum {
         case 0: self = .unspecified
         case 1: self = .audio
         case 2: self = .video
+        case 3: self = .screenShare
         default: self = .UNRECOGNIZED(rawValue)
         }
     }
@@ -40,6 +42,7 @@ enum Stream_Video_Coordinator_StatV1_MediaType: SwiftProtobuf.Enum {
         case .unspecified: return 0
         case .audio: return 1
         case .video: return 2
+        case .screenShare: return 3
         case let .UNRECOGNIZED(i): return i
         }
     }
@@ -52,7 +55,8 @@ extension Stream_Video_Coordinator_StatV1_MediaType: CaseIterable {
     static var allCases: [Stream_Video_Coordinator_StatV1_MediaType] = [
         .unspecified,
         .audio,
-        .video
+        .video,
+        .screenShare
     ]
 }
 
@@ -432,7 +436,8 @@ extension Stream_Video_Coordinator_StatV1_MediaType: SwiftProtobuf._ProtoNamePro
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         0: .same(proto: "MEDIA_TYPE_UNSPECIFIED"),
         1: .same(proto: "MEDIA_TYPE_AUDIO"),
-        2: .same(proto: "MEDIA_TYPE_VIDEO")
+        2: .same(proto: "MEDIA_TYPE_VIDEO"),
+        3: .same(proto: "MEDIA_TYPE_SCREEN_SHARE")
     ]
 }
 

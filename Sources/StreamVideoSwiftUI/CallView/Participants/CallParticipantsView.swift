@@ -6,6 +6,7 @@ import NukeUI
 import StreamVideo
 import SwiftUI
 
+@available(iOS 14.0, *)
 struct CallParticipantsView: View {
     
     @ObservedObject var viewModel: CallViewModel
@@ -37,6 +38,7 @@ struct CallParticipantsView: View {
     }
 }
 
+@available(iOS 14.0, *)
 struct CallParticipantsViewContainer: View {
     
     @Injected(\.colors) var colors
@@ -178,17 +180,19 @@ struct CallParticipantView: View {
     var body: some View {
         VStack(spacing: 4) {
             HStack {
-                LazyImage(url: participant.profileImageURL)
-                    .frame(width: imageSize, height: imageSize)
-                    .clipShape(Circle())
-                    .overlay(
-                        participant.isOnline ?
-                            TopRightView {
-                                OnlineIndicatorView(indicatorSize: imageSize * 0.3)
-                            }
-                            .offset(x: 3, y: -1)
-                            : nil
-                    )
+                if #available(iOS 14.0, *) {
+                    LazyImage(url: participant.profileImageURL)
+                        .frame(width: imageSize, height: imageSize)
+                        .clipShape(Circle())
+                        .overlay(
+                            participant.isOnline ?
+                                TopRightView {
+                                    OnlineIndicatorView(indicatorSize: imageSize * 0.3)
+                                }
+                                .offset(x: 3, y: -1)
+                                : nil
+                        )
+                }
                 Text(participant.name)
                     .font(fonts.bodyBold)
                 Spacer()

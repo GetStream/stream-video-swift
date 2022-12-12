@@ -127,6 +127,14 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         set { eventPayload = .trackUnpublished(newValue) }
     }
 
+    var error: Stream_Video_Sfu_Event_Error {
+        get {
+            if case let .error(v)? = eventPayload { return v }
+            return Stream_Video_Sfu_Event_Error()
+        }
+        set { eventPayload = .error(newValue) }
+    }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     enum OneOf_EventPayload: Equatable {
@@ -143,6 +151,7 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         case healthCheckResponse(Stream_Video_Sfu_Event_HealthCheckResponse)
         case trackPublished(Stream_Video_Sfu_Event_TrackPublished)
         case trackUnpublished(Stream_Video_Sfu_Event_TrackUnpublished)
+        case error(Stream_Video_Sfu_Event_Error)
 
         #if !swift(>=4.1)
         static func == (
@@ -209,6 +218,10 @@ struct Stream_Video_Sfu_Event_SfuEvent {
                     guard case let .trackUnpublished(l) = lhs, case let .trackUnpublished(r) = rhs else { preconditionFailure() }
                     return l == r
                 }()
+            case (.error, .error): return {
+                    guard case let .error(l) = lhs, case let .error(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
             default: return false
             }
         }
@@ -216,6 +229,28 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     }
 
     init() {}
+}
+
+struct Stream_Video_Sfu_Event_Error {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    var error: Stream_Video_Sfu_Models_Error {
+        get { _error ?? Stream_Video_Sfu_Models_Error() }
+        set { _error = newValue }
+    }
+
+    /// Returns true if `error` has been explicitly set.
+    var hasError: Bool { self._error != nil }
+    /// Clears the value of `error`. Subsequent reads from it will return its default value.
+    mutating func clearError() { _error = nil }
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+
+    fileprivate var _error: Stream_Video_Sfu_Models_Error?
 }
 
 struct Stream_Video_Sfu_Event_ICETrickle {
@@ -714,6 +749,7 @@ struct Stream_Video_Sfu_Event_ChangePublishQuality {
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_Error: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ICETrickle: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuRequest.OneOf_RequestPayload: @unchecked Sendable {}
@@ -760,7 +796,8 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
         13: .standard(proto: "join_response"),
         14: .standard(proto: "health_check_response"),
         16: .standard(proto: "track_published"),
-        17: .standard(proto: "track_unpublished")
+        17: .standard(proto: "track_unpublished"),
+        18: .same(proto: "error")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -938,6 +975,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                         self.eventPayload = .trackUnpublished(v)
                     }
                 }()
+            case 18: try {
+                    var v: Stream_Video_Sfu_Event_Error?
+                    var hadOneofValue = false
+                    if let current = self.eventPayload {
+                        hadOneofValue = true
+                        if case let .error(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.eventPayload = .error(v)
+                    }
+                }()
             default: break
             }
         }
@@ -1001,6 +1051,10 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
                 guard case let .trackUnpublished(v)? = self.eventPayload else { preconditionFailure() }
                 try visitor.visitSingularMessageField(value: v, fieldNumber: 17)
             }()
+        case .error?: try {
+                guard case let .error(v)? = self.eventPayload else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 18)
+            }()
         case nil: break
         }
         try unknownFields.traverse(visitor: &visitor)
@@ -1008,6 +1062,43 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
 
     static func == (lhs: Stream_Video_Sfu_Event_SfuEvent, rhs: Stream_Video_Sfu_Event_SfuEvent) -> Bool {
         if lhs.eventPayload != rhs.eventPayload { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Event_Error: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".Error"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        4: .same(proto: "error")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 4: try { try decoder.decodeSingularMessageField(value: &self._error) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
+        try { if let v = self._error {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+        } }()
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (lhs: Stream_Video_Sfu_Event_Error, rhs: Stream_Video_Sfu_Event_Error) -> Bool {
+        if lhs._error != rhs._error { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

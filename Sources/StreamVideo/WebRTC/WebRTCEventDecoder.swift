@@ -38,6 +38,8 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .trackUnpublished(value):
             return value
+        case let .error(value):
+            return value
         }
     }
 }

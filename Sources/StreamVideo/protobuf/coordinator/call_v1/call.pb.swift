@@ -23,15 +23,15 @@ struct Stream_Video_Coordinator_CallV1_CallType {
     /// The unique name for the call type.
     var name: String = String()
 
-    var options: Stream_Video_Coordinator_CallV1_CallOptions {
-        get { _options ?? Stream_Video_Coordinator_CallV1_CallOptions() }
-        set { _options = newValue }
+    var settings: Stream_Video_Coordinator_CallV1_CallSettings {
+        get { _settings ?? Stream_Video_Coordinator_CallV1_CallSettings() }
+        set { _settings = newValue }
     }
 
-    /// Returns true if `options` has been explicitly set.
-    var hasOptions: Bool { self._options != nil }
-    /// Clears the value of `options`. Subsequent reads from it will return its default value.
-    mutating func clearOptions() { _options = nil }
+    /// Returns true if `settings` has been explicitly set.
+    var hasSettings: Bool { self._settings != nil }
+    /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+    mutating func clearSettings() { _settings = nil }
 
     var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
         get { _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
@@ -57,7 +57,7 @@ struct Stream_Video_Coordinator_CallV1_CallType {
 
     init() {}
 
-    fileprivate var _options: Stream_Video_Coordinator_CallV1_CallOptions?
+    fileprivate var _settings: Stream_Video_Coordinator_CallV1_CallSettings?
     fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
     fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
@@ -81,17 +81,17 @@ struct Stream_Video_Coordinator_CallV1_Call {
 
     var customJson: Data = Data()
 
-    /// Room options that are set explicitly in this room
-    /// This set of options does not include RoomType options
-    var options: Stream_Video_Coordinator_CallV1_CallOptions {
-        get { _options ?? Stream_Video_Coordinator_CallV1_CallOptions() }
-        set { _options = newValue }
+    /// Call settings overrides that are set explicitly in this room
+    /// This set of settings does not include CallType settings
+    var settingsOverrides: Stream_Video_Coordinator_CallV1_CallSettings {
+        get { _settingsOverrides ?? Stream_Video_Coordinator_CallV1_CallSettings() }
+        set { _settingsOverrides = newValue }
     }
 
-    /// Returns true if `options` has been explicitly set.
-    var hasOptions: Bool { self._options != nil }
-    /// Clears the value of `options`. Subsequent reads from it will return its default value.
-    mutating func clearOptions() { _options = nil }
+    /// Returns true if `settingsOverrides` has been explicitly set.
+    var hasSettingsOverrides: Bool { self._settingsOverrides != nil }
+    /// Clears the value of `settingsOverrides`. Subsequent reads from it will return its default value.
+    mutating func clearSettingsOverrides() { _settingsOverrides = nil }
 
     var createdAt: SwiftProtobuf.Google_Protobuf_Timestamp {
         get { _createdAt ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
@@ -113,11 +113,15 @@ struct Stream_Video_Coordinator_CallV1_Call {
     /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
     mutating func clearUpdatedAt() { _updatedAt = nil }
 
+    var recordingActive: Bool = false
+
+    var broadcastingActive: Bool = false
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _options: Stream_Video_Coordinator_CallV1_CallOptions?
+    private var _settingsOverrides: Stream_Video_Coordinator_CallV1_CallSettings?
     fileprivate var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
     fileprivate var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
@@ -128,16 +132,16 @@ struct Stream_Video_Coordinator_CallV1_CallDetails {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    /// Call options merged with CallType options
-    var options: Stream_Video_Coordinator_CallV1_CallOptions {
-        get { _options ?? Stream_Video_Coordinator_CallV1_CallOptions() }
-        set { _options = newValue }
+    /// Call settings_overrides merged with CallType settings
+    var settings: Stream_Video_Coordinator_CallV1_CallSettings {
+        get { _settings ?? Stream_Video_Coordinator_CallV1_CallSettings() }
+        set { _settings = newValue }
     }
 
-    /// Returns true if `options` has been explicitly set.
-    var hasOptions: Bool { self._options != nil }
-    /// Clears the value of `options`. Subsequent reads from it will return its default value.
-    mutating func clearOptions() { _options = nil }
+    /// Returns true if `settings` has been explicitly set.
+    var hasSettings: Bool { self._settings != nil }
+    /// Clears the value of `settings`. Subsequent reads from it will return its default value.
+    mutating func clearSettings() { _settings = nil }
 
     /// Ordered list of member user IDs
     var memberUserIds: [String] = []
@@ -150,13 +154,13 @@ struct Stream_Video_Coordinator_CallV1_CallDetails {
 
     init() {}
 
-    fileprivate var _options: Stream_Video_Coordinator_CallV1_CallOptions?
+    fileprivate var _settings: Stream_Video_Coordinator_CallV1_CallSettings?
 }
 
-/// CallOptions contains all options available to change for a CallType
-/// Options can also be set on the call level where they will be merged with call options using `proto.Merge`
+/// CallSettings contains all options available to change for a CallType
+/// Settings can also be set on the call level where they will be merged with call options using `json.Merge`
 /// To make sure options can be overridden on the call level, all underlying option fields should be optional
-struct Stream_Video_Coordinator_CallV1_CallOptions {
+struct Stream_Video_Coordinator_CallV1_CallSettings {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -243,7 +247,7 @@ struct Stream_Video_Coordinator_CallV1_BroadcastingOptions {
 extension Stream_Video_Coordinator_CallV1_CallType: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_Call: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_CallDetails: @unchecked Sendable {}
-extension Stream_Video_Coordinator_CallV1_CallOptions: @unchecked Sendable {}
+extension Stream_Video_Coordinator_CallV1_CallSettings: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_RecordingOptions: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_BroadcastingOptions: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
@@ -257,7 +261,7 @@ extension Stream_Video_Coordinator_CallV1_CallType: SwiftProtobuf.Message, Swift
     static let protoMessageName: String = _protobuf_package + ".CallType"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "name"),
-        2: .same(proto: "options"),
+        2: .same(proto: "settings"),
         3: .standard(proto: "created_at"),
         4: .standard(proto: "updated_at")
     ]
@@ -269,7 +273,7 @@ extension Stream_Video_Coordinator_CallV1_CallType: SwiftProtobuf.Message, Swift
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
-            case 2: try { try decoder.decodeSingularMessageField(value: &self._options) }()
+            case 2: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
             case 3: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
             case 4: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
             default: break
@@ -285,7 +289,7 @@ extension Stream_Video_Coordinator_CallV1_CallType: SwiftProtobuf.Message, Swift
         if !name.isEmpty {
             try visitor.visitSingularStringField(value: name, fieldNumber: 1)
         }
-        try { if let v = self._options {
+        try { if let v = self._settings {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
         } }()
         try { if let v = self._createdAt {
@@ -299,7 +303,7 @@ extension Stream_Video_Coordinator_CallV1_CallType: SwiftProtobuf.Message, Swift
 
     static func == (lhs: Stream_Video_Coordinator_CallV1_CallType, rhs: Stream_Video_Coordinator_CallV1_CallType) -> Bool {
         if lhs.name != rhs.name { return false }
-        if lhs._options != rhs._options { return false }
+        if lhs._settings != rhs._settings { return false }
         if lhs._createdAt != rhs._createdAt { return false }
         if lhs._updatedAt != rhs._updatedAt { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -316,9 +320,11 @@ extension Stream_Video_Coordinator_CallV1_Call: SwiftProtobuf.Message, SwiftProt
         3: .standard(proto: "call_cid"),
         4: .standard(proto: "created_by_user_id"),
         5: .standard(proto: "custom_json"),
-        6: .same(proto: "options"),
+        6: .standard(proto: "settings_overrides"),
         7: .standard(proto: "created_at"),
-        8: .standard(proto: "updated_at")
+        8: .standard(proto: "updated_at"),
+        9: .standard(proto: "recording_active"),
+        10: .standard(proto: "broadcasting_active")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -332,9 +338,11 @@ extension Stream_Video_Coordinator_CallV1_Call: SwiftProtobuf.Message, SwiftProt
             case 3: try { try decoder.decodeSingularStringField(value: &self.callCid) }()
             case 4: try { try decoder.decodeSingularStringField(value: &self.createdByUserID) }()
             case 5: try { try decoder.decodeSingularBytesField(value: &self.customJson) }()
-            case 6: try { try decoder.decodeSingularMessageField(value: &self._options) }()
+            case 6: try { try decoder.decodeSingularMessageField(value: &self._settingsOverrides) }()
             case 7: try { try decoder.decodeSingularMessageField(value: &self._createdAt) }()
             case 8: try { try decoder.decodeSingularMessageField(value: &self._updatedAt) }()
+            case 9: try { try decoder.decodeSingularBoolField(value: &self.recordingActive) }()
+            case 10: try { try decoder.decodeSingularBoolField(value: &self.broadcastingActive) }()
             default: break
             }
         }
@@ -360,7 +368,7 @@ extension Stream_Video_Coordinator_CallV1_Call: SwiftProtobuf.Message, SwiftProt
         if !customJson.isEmpty {
             try visitor.visitSingularBytesField(value: customJson, fieldNumber: 5)
         }
-        try { if let v = self._options {
+        try { if let v = self._settingsOverrides {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
         } }()
         try { if let v = self._createdAt {
@@ -369,6 +377,12 @@ extension Stream_Video_Coordinator_CallV1_Call: SwiftProtobuf.Message, SwiftProt
         try { if let v = self._updatedAt {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 8)
         } }()
+        if recordingActive != false {
+            try visitor.visitSingularBoolField(value: recordingActive, fieldNumber: 9)
+        }
+        if broadcastingActive != false {
+            try visitor.visitSingularBoolField(value: broadcastingActive, fieldNumber: 10)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -378,9 +392,11 @@ extension Stream_Video_Coordinator_CallV1_Call: SwiftProtobuf.Message, SwiftProt
         if lhs.callCid != rhs.callCid { return false }
         if lhs.createdByUserID != rhs.createdByUserID { return false }
         if lhs.customJson != rhs.customJson { return false }
-        if lhs._options != rhs._options { return false }
+        if lhs._settingsOverrides != rhs._settingsOverrides { return false }
         if lhs._createdAt != rhs._createdAt { return false }
         if lhs._updatedAt != rhs._updatedAt { return false }
+        if lhs.recordingActive != rhs.recordingActive { return false }
+        if lhs.broadcastingActive != rhs.broadcastingActive { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -390,7 +406,7 @@ extension Stream_Video_Coordinator_CallV1_CallDetails: SwiftProtobuf.Message, Sw
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".CallDetails"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        1: .same(proto: "options"),
+        1: .same(proto: "settings"),
         2: .standard(proto: "member_user_ids"),
         3: .same(proto: "members")
     ]
@@ -401,7 +417,7 @@ extension Stream_Video_Coordinator_CallV1_CallDetails: SwiftProtobuf.Message, Sw
             // allocates stack space for every case branch when no optimizations are
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
-            case 1: try { try decoder.decodeSingularMessageField(value: &self._options) }()
+            case 1: try { try decoder.decodeSingularMessageField(value: &self._settings) }()
             case 2: try { try decoder.decodeRepeatedStringField(value: &self.memberUserIds) }()
             case 3: try { try decoder.decodeMapField(
                     fieldType: SwiftProtobuf._ProtobufMessageMap<
@@ -420,7 +436,7 @@ extension Stream_Video_Coordinator_CallV1_CallDetails: SwiftProtobuf.Message, Sw
         // allocates stack space for every if/case branch local when no optimizations
         // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
         // https://github.com/apple/swift-protobuf/issues/1182
-        try { if let v = self._options {
+        try { if let v = self._settings {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
         } }()
         if !memberUserIds.isEmpty {
@@ -438,7 +454,7 @@ extension Stream_Video_Coordinator_CallV1_CallDetails: SwiftProtobuf.Message, Sw
     }
 
     static func == (lhs: Stream_Video_Coordinator_CallV1_CallDetails, rhs: Stream_Video_Coordinator_CallV1_CallDetails) -> Bool {
-        if lhs._options != rhs._options { return false }
+        if lhs._settings != rhs._settings { return false }
         if lhs.memberUserIds != rhs.memberUserIds { return false }
         if lhs.members != rhs.members { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -446,9 +462,9 @@ extension Stream_Video_Coordinator_CallV1_CallDetails: SwiftProtobuf.Message, Sw
     }
 }
 
-extension Stream_Video_Coordinator_CallV1_CallOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Coordinator_CallV1_CallSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".CallOptions"
+    static let protoMessageName: String = _protobuf_package + ".CallSettings"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "recording"),
         2: .same(proto: "broadcasting")
@@ -481,7 +497,7 @@ extension Stream_Video_Coordinator_CallV1_CallOptions: SwiftProtobuf.Message, Sw
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (lhs: Stream_Video_Coordinator_CallV1_CallOptions, rhs: Stream_Video_Coordinator_CallV1_CallOptions) -> Bool {
+    static func == (lhs: Stream_Video_Coordinator_CallV1_CallSettings, rhs: Stream_Video_Coordinator_CallV1_CallSettings) -> Bool {
         if lhs._recording != rhs._recording { return false }
         if lhs._broadcasting != rhs._broadcasting { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }

@@ -254,25 +254,6 @@ extension CallParticipant {
     }
 }
 
-extension Stream_Video_Participant {
-    
-    func toCallParticipant() -> CallParticipant {
-        CallParticipant(
-            id: user.id,
-            role: role,
-            name: user.name.isEmpty ? user.id : user.name,
-            profileImageURL: URL(string: user.imageURL),
-            trackLookupPrefix: nil,
-            isOnline: online,
-            hasVideo: video,
-            hasAudio: audio,
-            isScreenSharing: false,
-            showTrack: true,
-            sessionId: ""
-        )
-    }
-}
-
 extension Stream_Video_User {
     
     func toCallParticipant() -> CallParticipant {

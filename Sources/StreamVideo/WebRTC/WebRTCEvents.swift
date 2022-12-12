@@ -26,3 +26,4 @@ extension Stream_Video_Sfu_Event_HealthCheckRequest: SendableEvent {}
 extension Stream_Video_Sfu_Event_HealthCheckResponse: HealthCheckEvent {}
 extension Stream_Video_Sfu_Event_TrackPublished: Event {}
 extension Stream_Video_Sfu_Event_TrackUnpublished: Event {}
+extension Stream_Video_Sfu_Event_Error: Event {}

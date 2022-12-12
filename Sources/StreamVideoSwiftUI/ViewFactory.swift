@@ -20,7 +20,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the outgoing call slot.
     func makeOutgoingCallView(viewModel: CallViewModel) -> OutgoingCallViewType
     
-    associatedtype IncomingCallViewType: View = IncomingCallView
+    associatedtype IncomingCallViewType: View
     /// Creates the incoming call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the incoming call slot.
@@ -47,7 +47,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
         
-    associatedtype CallParticipantsListViewType: View = CallParticipantsInfoView
+    associatedtype CallParticipantsListViewType: View
     /// Creates a view in the top trailing section of the call view.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
@@ -83,11 +83,19 @@ extension ViewFactory {
     }
     
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
-        IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
-            viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
-        }, onCallRejected: { _ in
-            viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
-        })
+        if #available(iOS 14.0, *) {
+            return IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
+                viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
+            }, onCallRejected: { _ in
+                viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+            })
+        } else {
+            return IncomingCallView_iOS13(callInfo: callInfo, onCallAccepted: { _ in
+                viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
+            }, onCallRejected: { _ in
+                viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+            })
+        }
     }
     
     public func makeVideoParticipantsView(
@@ -112,7 +120,11 @@ extension ViewFactory {
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> some View {
-        CallParticipantsInfoView(viewModel: viewModel, availableSize: availableSize)
+        if #available(iOS 14.0, *) {
+            return CallParticipantsInfoView(viewModel: viewModel, availableSize: availableSize)
+        } else {
+            return EmptyView()
+        }
     }
     
     public func makeScreenSharingView(

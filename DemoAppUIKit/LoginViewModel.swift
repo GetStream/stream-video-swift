@@ -11,7 +11,7 @@ class LoginViewModel: ObservableObject {
     @Published var loading = false
     
     @Published var userCredentials = UserCredentials.builtInUsers
-    
+        
     func login(user: UserCredentials, completion: (UserCredentials) -> ()) {
         UnsecureUserRepository.shared.save(user: user)
         AppState.shared.currentUser = user.userInfo

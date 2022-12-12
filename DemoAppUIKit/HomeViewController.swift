@@ -68,7 +68,7 @@ class HomeViewController: UIViewController {
             forCellReuseIdentifier: reuseIdentifier
         )
         participantsTableView.translatesAutoresizingMaskIntoConstraints = false
-        participantsTableView.heightAnchor.constraint(equalToConstant: CGFloat(participants.count * 44)).isActive = true
+        participantsTableView.heightAnchor.constraint(equalToConstant: CGFloat(participants.count * 36)).isActive = true
         participantsTableView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.size.width).isActive = true
         return participantsTableView
     }
@@ -102,19 +102,18 @@ class HomeViewController: UIViewController {
     
     @objc private func didTapStartButton() {
         let next = CallViewController.make(with: callViewModel)
-        next.modalPresentationStyle = .fullScreen
         next.startCall(callId: text, participants: selectedParticipants)
-        self.navigationController?.present(next, animated: true)
+        CallViewHelper.shared.add(callView: next.view)
     }
     
     private func listenToIncomingCalls() {
-        callViewModel.$callingState.sink { newState in
-            if case .incoming(_) = newState {
+        callViewModel.$callingState.sink { [weak self] newState in
+            guard let self = self else { return }
+            if case .incoming(_) = newState, self == self.navigationController?.topViewController {
                 let next = CallViewController.make(with: self.callViewModel)
-                next.modalPresentationStyle = .fullScreen
-                self.navigationController?.present(next, animated: true)
+                CallViewHelper.shared.add(callView: next.view)
             } else if newState == .idle {
-                self.navigationController?.presentedViewController?.dismiss(animated: true)
+                CallViewHelper.shared.removeCallView()
             }
         }
         .store(in: &cancellables)

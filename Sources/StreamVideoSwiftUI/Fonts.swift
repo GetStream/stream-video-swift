@@ -20,7 +20,23 @@ public struct Fonts {
     public var headline = Font.headline
     public var headlineBold = Font.headline.bold()
     public var title = Font.title
-    public var title2 = Font.title2
-    public var title3 = Font.title3
+    public var title2 = title2Font
+    public var title3 = title3Font
     public var emoji = Font.system(size: 50)
+    
+    private static var title2Font: Font {
+        if #available(iOS 14.0, *) {
+            return Font.title2
+        } else {
+            return Font.headline
+        }
+    }
+    
+    private static var title3Font: Font {
+        if #available(iOS 14.0, *) {
+            return Font.title3
+        } else {
+            return Font.headline
+        }
+    }
 }

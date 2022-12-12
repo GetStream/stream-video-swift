@@ -54,25 +54,27 @@ public struct CallView<Factory: ViewFactory>: View {
                 
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
-                        HStack {
-                            Button {
-                                withAnimation {
-                                    viewModel.isMinimized = true
+                        if #available(iOS 14, *) {
+                            HStack {
+                                Button {
+                                    withAnimation {
+                                        viewModel.isMinimized = true
+                                    }
+                                } label: {
+                                    Image(systemName: "chevron.left")
+                                        .foregroundColor(colors.textInverted)
+                                        .padding()
                                 }
-                            } label: {
-                                Image(systemName: "chevron.backward")
-                                    .foregroundColor(colors.textInverted)
-                                    .padding()
-                            }
 
-                            Spacer()
-                            Button {
-                                viewModel.participantsShown.toggle()
-                            } label: {
-                                images.participants
-                                    .padding(.horizontal)
-                                    .padding(.horizontal, 2)
-                                    .foregroundColor(.white)
+                                Spacer()
+                                Button {
+                                    viewModel.participantsShown.toggle()
+                                } label: {
+                                    images.participants
+                                        .padding(.horizontal)
+                                        .padding(.horizontal, 2)
+                                        .foregroundColor(.white)
+                                }
                             }
                         }
                         
@@ -176,6 +178,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
 }
 
+@available(iOS 14.0, *)
 public struct CallParticipantsInfoView: View {
     
     private let padding: CGFloat = 16

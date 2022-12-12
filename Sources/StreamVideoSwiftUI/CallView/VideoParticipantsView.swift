@@ -7,7 +7,7 @@ import SwiftUI
 
 public struct VideoParticipantsView: View {
     
-    @StateObject var viewModel: CallViewModel
+    @ObservedObject var viewModel: CallViewModel
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void

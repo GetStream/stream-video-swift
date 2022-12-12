@@ -6,6 +6,7 @@ import NukeUI
 import StreamVideo
 import SwiftUI
 
+@available(iOS 14.0, *)
 struct InviteParticipantsView: View {
     
     @StateObject var viewModel: InviteParticipantsViewModel
@@ -121,9 +122,11 @@ struct VideoUserView: View {
     
     var body: some View {
         HStack {
-            LazyImage(url: user.imageURL)
-                .frame(width: avatarSize, height: avatarSize)
-                .clipShape(Circle())
+            if #available(iOS 14.0, *) {
+                LazyImage(url: user.imageURL)
+                    .frame(width: avatarSize, height: avatarSize)
+                    .clipShape(Circle())
+            }
             
             VStack(alignment: .leading, spacing: 4) {
                 Text(user.name)

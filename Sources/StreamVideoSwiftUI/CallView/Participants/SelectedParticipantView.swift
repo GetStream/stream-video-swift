@@ -17,9 +17,11 @@ struct SelectedParticipantView: View {
     
     var body: some View {
         VStack {
-            LazyImage(url: user.imageURL)
-                .frame(width: avatarSize, height: avatarSize)
-                .clipShape(Circle())
+            if #available(iOS 14.0, *) {
+                LazyImage(url: user.imageURL)
+                    .frame(width: avatarSize, height: avatarSize)
+                    .clipShape(Circle())
+            }
             
             Text(user.name)
                 .lineLimit(1)

@@ -10,7 +10,7 @@ import UIKit
 
 open class CallViewController: UIViewController {
     
-    var viewModel: CallViewModel!
+    public var viewModel: CallViewModel!
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -23,9 +23,23 @@ open class CallViewController: UIViewController {
     override open func viewDidLoad() {
         super.viewDidLoad()
         view = PassthroughView(frame: view.frame)
-        let videoView = VideoView(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
-        let uiKitView = VideoViewContainer(view: videoView, frame: view.frame)
-        view.embed(uiKitView)
+        view.backgroundColor = .clear
+        setupVideoView()
+    }
+    
+    open func setupVideoView() {
+        let videoView = makeVideoView(with: DefaultViewFactory.shared)
+        view.embed(videoView)
+    }
+    
+    open func makeVideoView<Factory: ViewFactory>(with viewFactory: Factory) -> UIView {
+        if #available(iOS 14.0, *) {
+            let videoView = VideoView(viewFactory: viewFactory, viewModel: viewModel)
+            return VideoViewContainer(view: videoView, frame: view.frame)
+        } else {
+            let videoView = VideoView_iOS13(viewFactory: viewFactory, viewModel: viewModel)
+            return VideoViewContainer(view: videoView, frame: view.frame)
+        }
     }
     
     public func startCall(callId: String, participants: [User]) {
@@ -55,7 +69,19 @@ class PassthroughView: UIView {
 
 final class VideoViewContainer: UIView {
     
-    init(view: VideoView<DefaultViewFactory>, frame: CGRect) {
+    @available(iOS 14.0, *)
+    init<Factory: ViewFactory>(view: VideoView<Factory>, frame: CGRect) {
+        let uiView = UIHostingController(rootView: view).view!
+        uiView.backgroundColor = .clear
+        
+        super.init(frame: .zero)
+        
+        addSubview(uiView)
+        uiView.frame = frame
+    }
+    
+    @available(iOS, introduced: 13, obsoleted: 14)
+    init<Factory: ViewFactory>(view: VideoView_iOS13<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
         

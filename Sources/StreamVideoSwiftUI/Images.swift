@@ -16,7 +16,7 @@ public class Images {
     public var videoTurnOff = Image(systemName: "video.slash.fill")
     public var micTurnOn = Image(systemName: "mic.fill")
     public var micTurnOff = Image(systemName: "mic.slash.fill")
-    public var toggleCamera = Image(systemName: "arrow.triangle.2.circlepath.camera.fill")
+    public var toggleCamera = Image(systemName: toggleCameraImageName)
     public var hangup = Image(systemName: "phone.down.circle.fill")
     public var acceptCall = Image(systemName: "phone.circle.fill")
     public var participants = Image(systemName: "person.2.fill")
@@ -24,6 +24,14 @@ public class Images {
     public var searchIcon = Image(systemName: "magnifyingglass")
     public var searchCloseIcon = Image(systemName: "multiply.circle")
     public var incomingCallBackground = Image(uiImage: loadImageSafely(with: "incomingCallBackground"))
+    
+    private static var toggleCameraImageName: String {
+        if #available(iOS 14, *) {
+            return "arrow.triangle.2.circlepath.camera.fill"
+        } else {
+            return "arrow.up.arrow.down"
+        }
+    }
     
     /// A private internal function that will safely load an image from the bundle or return a circle image as backup
     /// - Parameter imageName: The required image name to load from the bundle

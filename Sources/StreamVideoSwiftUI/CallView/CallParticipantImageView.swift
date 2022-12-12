@@ -37,7 +37,7 @@ struct CallParticipantImage: View {
     
     var body: some View {
         ZStack {
-            if let imageURL = imageURL {
+            if #available(iOS 14.0, *), let imageURL = imageURL {
                 LazyImage(url: imageURL)
                     .aspectRatio(contentMode: .fit)
                     .frame(width: size, height: size)

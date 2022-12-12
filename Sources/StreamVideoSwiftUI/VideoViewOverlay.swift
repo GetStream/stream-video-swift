@@ -5,6 +5,7 @@
 import StreamVideo
 import SwiftUI
 
+@available(iOS 14.0, *)
 public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     
     var rootView: RootView
@@ -25,6 +26,7 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     }
 }
 
+@available(iOS 14.0, *)
 public struct VideoView<Factory: ViewFactory>: View {
     
     @Injected(\.utils) var utils
@@ -87,6 +89,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
     }
 }
 
+@available(iOS 14.0, *)
 public struct CallModifier<Factory: ViewFactory>: ViewModifier {
     
     var viewFactory: Factory
@@ -102,6 +105,7 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
     }
 }
 
+@available(iOS 14.0, *)
 extension CallModifier where Factory == DefaultViewFactory {
     
     public init(viewModel: CallViewModel) {
