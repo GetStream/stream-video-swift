@@ -111,11 +111,7 @@ class WebRTCClient: NSObject {
     
     // Video tracks.
     private var videoCapturer: VideoCapturer?
-    private var localVideoTrack: RTCVideoTrack? {
-        didSet {
-            onLocalVideoTrackUpdate?(localVideoTrack)
-        }
-    }
+    private var localVideoTrack: RTCVideoTrack?
 
     private var localAudioTrack: RTCAudioTrack?
     private let user: User
@@ -128,7 +124,6 @@ class WebRTCClient: NSObject {
     private var callSettings = CallSettings()
     private let callCoordinatorController: CallCoordinatorController
     
-    var onLocalVideoTrackUpdate: ((RTCVideoTrack?) -> Void)?
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onParticipantEvent: ((ParticipantEvent) -> Void)? {
         didSet {
@@ -344,46 +339,12 @@ class WebRTCClient: NSObject {
         let track = stream.videoTracks.first
         Task {
             let last = idParts.last
-            var isScreenshare = false
             if videoEnabled && last == Constants.videoTrackType && track != nil {
                 await self.state.add(track: track, id: trackId)
             } else if last == Constants.screenshareTrackType && track != nil {
-                isScreenshare = true
                 await self.state.add(screensharingTrack: track, id: trackId)
             }
-            let participants = await state.callParticipants
-            var participant: CallParticipant?
-            for (_, callParticipant) in participants {
-                if callParticipant.trackLookupPrefix == trackId || callParticipant.id == trackId {
-                    participant = callParticipant
-                    break
-                }
-            }
-            if participant == nil {
-                participant = CallParticipant(
-                    id: trackId,
-                    role: "member",
-                    name: trackId,
-                    profileImageURL: nil,
-                    trackLookupPrefix: trackId,
-                    isOnline: true,
-                    hasVideo: last == Constants.videoTrackType,
-                    hasAudio: last == Constants.audioTrackType,
-                    isScreenSharing: last == Constants.screenshareTrackType,
-                    showTrack: true,
-                    sessionId: ""
-                )
-            }
-            if track != nil {
-                if isScreenshare {
-                    participant?.screenshareTrack = track
-                } else {
-                    participant?.track = track
-                }
-            }
-            if let participant = participant {
-                await self.state.update(callParticipant: participant)
-            }
+            await assignTracksToParticipants()
         }
     }
     
@@ -607,7 +568,7 @@ class WebRTCClient: NSObject {
             }
         }
         let connectionState = await state.connectionState
-        if connectionState == .connected {
+        if connectionState == .connected && !tracks.isEmpty {
             request.tracks = tracks
             _ = try? await signalService.updateSubscriptions(
                 updateSubscriptionsRequest: request

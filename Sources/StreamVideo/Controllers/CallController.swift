@@ -10,7 +10,6 @@ public class CallController {
     
     private var webRTCClient: WebRTCClient? {
         didSet {
-            handleLocalTrackUpdate()
             handleParticipantsUpdated()
             handleParticipantEvent()
         }
@@ -144,33 +143,6 @@ public class CallController {
             throw ClientError.Unexpected()
         }
         return webRTCClient
-    }
-    
-    private func handleLocalTrackUpdate() {
-        webRTCClient?.onLocalVideoTrackUpdate = { [weak self] localVideoTrack in
-            guard let userId = self?.user.id else { return }
-            if let participant = self?.call?.participants[userId] {
-                let updated = participant.withUpdated(track: localVideoTrack)
-                self?.call?.participants[userId] = updated
-            } else {
-                // TODO: temporarly create the participant
-                let participant = CallParticipant(
-                    id: userId,
-                    role: "user",
-                    name: self?.user.name ?? userId,
-                    profileImageURL: self?.user.imageURL,
-                    trackLookupPrefix: userId,
-                    isOnline: true,
-                    hasVideo: true,
-                    hasAudio: true,
-                    isScreenSharing: false,
-                    showTrack: true,
-                    sessionId: ""
-                )
-                let updated = participant.withUpdated(track: localVideoTrack)
-                self?.call?.participants[userId] = updated
-            }
-        }
     }
     
     private func handleParticipantsUpdated() {
