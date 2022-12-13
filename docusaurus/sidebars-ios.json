@@ -16,6 +16,7 @@
         "ui/ui-overview",
         "ui/customizing-views",
         "ui/view-slots",
+        "ui/screen-sharing",
         "ui/ui-kit-customizations",
         "ui/text-localization",
         "ui/injecting-dependencies"
