@@ -73,16 +73,8 @@ struct OutgoingCallBackground: View {
     
     var body: some View {
         ZStack {
-            if streamVideo.videoConfig.videoEnabled && viewModel.callSettings.videoOn && !isSimulator {
-                LocalVideoView(callSettings: viewModel.callSettings) { view in
-                    if let track = viewModel.localParticipant?.track {
-                        view.add(track: track)
-                    } else {
-                        viewModel.renderLocalVideo(renderer: view)
-                    }
-                }
-            } else if viewModel.participants.count == 1 {
-                CallingScreenBackground(imageURL: viewModel.participants.first?.profileImageURL)
+            if viewModel.outgoingCallMembers.count == 1 {
+                CallingScreenBackground(imageURL: viewModel.outgoingCallMembers.first?.imageURL)
             } else {
                 FallbackBackground()
             }
