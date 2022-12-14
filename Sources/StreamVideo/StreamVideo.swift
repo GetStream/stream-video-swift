@@ -200,6 +200,17 @@ public class StreamVideo {
         }
     }
     
+    /// Disconnects the current `StreamVideo` client.
+    public func disconnect() async {
+        await withCheckedContinuation { continuation in
+            currentCallController?.cleanUp()
+            currentCallController = nil
+            webSocketClient?.disconnect {
+                continuation.resume(returning: ())
+            }
+        }
+    }
+    
     private func connectWebSocketClient() {
         if let connectURL = URL(string: endpointConfig.wsEndpoint) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)

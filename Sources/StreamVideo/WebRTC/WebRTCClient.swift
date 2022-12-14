@@ -65,6 +65,10 @@ class WebRTCClient: NSObject {
             self.tracks = tracks
         }
         
+        func update(screensharingTracks: [String: RTCVideoTrack]) {
+            self.screensharingTracks = screensharingTracks
+        }
+        
         func callParticipantsUpdates() -> AsyncStream<[Bool]> {
             let updates = AsyncStream([Bool].self) { continuation in
                 $callParticipants.sink { _ in
@@ -217,6 +221,7 @@ class WebRTCClient: NSObject {
         sessionID = UUID().uuidString
         await state.update(callParticipants: [:])
         await state.update(tracks: [:])
+        await state.update(screensharingTracks: [:])
         await state.update(connectionState: .disconnected(reason: .user))
     }
     

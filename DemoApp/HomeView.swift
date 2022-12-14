@@ -94,7 +94,11 @@ struct HomeView: View {
                             controller.removeDevice(with: userToken)
                         }
                         UnsecureUserRepository.shared.removeCurrentUser()
-                        AppState.shared.userState = .notLoggedIn
+                        Task {
+                            await streamVideo.disconnect()
+                            AppState.shared.streamVideo = nil
+                            AppState.shared.userState = .notLoggedIn
+                        }
                     }
                 },
                 secondaryButton: .cancel()
