@@ -4,7 +4,8 @@
       "Basics": [
       	"basics/quick-start",
       	"basics/integration",
-        "basics/architecture-overview"
+        "basics/architecture-overview",
+        "basics/authentication"
       ],
       "Client": [
         "client/call-viewmodel",
