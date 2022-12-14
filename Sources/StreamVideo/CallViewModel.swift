@@ -210,7 +210,7 @@ open class CallViewModel: ObservableObject {
     
     /// Hangs up from the active call.
     public func hangUp() {
-        if let call = call {
+        if let call = call, callingState != .inCall {
             Task {
                 try await streamVideo.cancelCall(callId: call.callId, callType: call.callType)
             }
