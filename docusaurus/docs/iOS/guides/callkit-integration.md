@@ -17,11 +17,11 @@ In the "Signing & Capabilities" section of your target, make sure that in the "B
 - "Remote notifications"
 - "Background processing"
 
-//TODO: screenshot.
+![Screenshot shows the required background modes in Xcode](../assets/callkit_01.png)
 
-Next, you need to create a VOIP calling certificate. In order to do that, go to your Apple developer account, select "Certificates, Identifiers & Profiles" and create a new certificate. Make sure to select ``"VoIP Services Certificate"`, located under the "Services" section. Follow the steps to create the required certificate.
+Next, you need to create a VOIP calling certificate. In order to do that, go to your Apple developer account, select "Certificates, Identifiers & Profiles" and create a new certificate. Make sure to select `"VoIP Services Certificate"`, located under the "Services" section. Follow the steps to create the required certificate.
 
-//TODO: screenshot.
+![Screenshot shows the creation of a voip certificate](../assets/callkit_02.png)
 
 After you've created the certificate, you would need to upload it to our dashboard. 
 
