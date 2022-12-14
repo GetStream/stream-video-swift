@@ -44,7 +44,7 @@ public struct VideoCodec: Sendable {
 
 extension VideoCodec {
     
-    public static let defaultCodecs = [full, half, quarter]
+    public static let defaultCodecs = [quarter, half, full]
     
     static let full = VideoCodec(
         dimensions: .full,
