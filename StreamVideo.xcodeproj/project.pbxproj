@@ -22,6 +22,7 @@
 		841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
+		8423B7562950BB0B00012F8D /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8423B7552950BB0B00012F8D /* Sentry */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
 		842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */; };
@@ -537,6 +538,7 @@
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
+				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1308,6 +1310,7 @@
 			name = DemoApp;
 			packageProductDependencies = (
 				84AF64BD287C34450012A503 /* WebRTC */,
+				8423B7552950BB0B00012F8D /* Sentry */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* DemoApp.app */;
@@ -1519,6 +1522,7 @@
 				84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 				8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */,
 				8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
+				8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -2664,6 +2668,14 @@
 				version = 11.3.1;
 			};
 		};
+		8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			requirement = {
+				branch = 8.0.0;
+				kind = branch;
+			};
+		};
 		8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing.git";
@@ -2691,6 +2703,11 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		8423B7552950BB0B00012F8D /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
+		};
 		84767501290A824B0015DC53 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
