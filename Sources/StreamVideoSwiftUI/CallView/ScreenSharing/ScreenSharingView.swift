@@ -44,17 +44,17 @@ public struct ScreenSharingView: View {
                             }
                             .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                             .cornerRadius(8)
-                            
-                            LocalVideoView(callSettings: viewModel.callSettings) { view in
-                                if let track = viewModel.localParticipant?.track {
-                                    view.add(track: track)
-                                } else {
-                                    viewModel.renderLocalVideo(renderer: view)
-                                }
-                            }
-                            .adjustVideoFrame(to: thumbnailSize, ratio: 1)
-                            .cornerRadius(8)
                         }
+                        
+                        LocalVideoView(callSettings: viewModel.callSettings) { view in
+                            if let track = viewModel.localParticipant?.track {
+                                view.add(track: track)
+                            } else {
+                                viewModel.renderLocalVideo(renderer: view)
+                            }
+                        }
+                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                        .cornerRadius(8)
                     }
                     .frame(height: thumbnailSize)
                     .cornerRadius(8)

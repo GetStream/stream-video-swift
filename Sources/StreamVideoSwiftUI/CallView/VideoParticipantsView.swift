@@ -174,9 +174,10 @@ struct AudioIndicatorView: View {
         HStack(spacing: 2) {
             Text(participant.name)
                 .foregroundColor(.white)
+                .multilineTextAlignment(.leading)
                 .lineLimit(1)
                 .font(fonts.caption1)
-                .frame(maxWidth: 80)
+                        
             (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
                 .foregroundColor(.white)
                 .padding(.all, 4)
