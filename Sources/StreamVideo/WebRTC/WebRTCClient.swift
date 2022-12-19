@@ -122,7 +122,7 @@ class WebRTCClient: NSObject {
     private let callCid: String
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
-    private let participantsThreshold = 4
+    private let participantsThreshold = 8
     private let videoEnabled: Bool
     private var connectOptions: ConnectOptions?
     private var callSettings = CallSettings()
@@ -150,6 +150,7 @@ class WebRTCClient: NSObject {
         signalService: signalService,
         subscriber: subscriber,
         publisher: publisher,
+        participantThreshold: participantsThreshold,
         onParticipantEvent: onParticipantEvent
     )
     

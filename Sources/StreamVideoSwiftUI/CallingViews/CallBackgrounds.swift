@@ -47,5 +47,6 @@ struct CallParticipantBackground<Background: View>: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
+        .background(fallbackBackground())
     }
 }
