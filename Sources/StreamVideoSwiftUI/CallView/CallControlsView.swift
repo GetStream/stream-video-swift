@@ -86,11 +86,19 @@ public struct CallControlsView: View {
             Spacer()
         }
         .frame(maxWidth: .infinity)
-        .frame(height: 100)
+        .frame(height: 85)
         .background(
             colors.callControlsBackground
-                .cornerRadius(16)
                 .edgesIgnoringSafeArea(.all)
+        )
+        .overlay(
+            VStack {
+                colors.callControlsBackground
+                    .frame(height: 30)
+                    .cornerRadius(24)
+                Spacer()
+            }
+            .offset(y: -15)
         )
     }
 }

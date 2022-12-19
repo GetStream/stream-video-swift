@@ -26,7 +26,7 @@ struct Stream_Video_Coordinator_MemberV1_Member {
     /// The user ID of the member
     var userID: String = String()
 
-    /// The role of the member in this room
+    /// The role of the member in this call
     var role: String = String()
 
     /// Custom data for the member

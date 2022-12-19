@@ -76,12 +76,12 @@ struct Stream_Video_Coordinator_CallV1_Call {
     /// A concatenation of call type and call id with ":" inbetween
     var callCid: String = String()
 
-    /// The id of the user that created this room.
+    /// The id of the user that created this call.
     var createdByUserID: String = String()
 
     var customJson: Data = Data()
 
-    /// Call settings overrides that are set explicitly in this room
+    /// Call settings overrides that are set explicitly in this call
     /// This set of settings does not include CallType settings
     var settingsOverrides: Stream_Video_Coordinator_CallV1_CallSettings {
         get { _settingsOverrides ?? Stream_Video_Coordinator_CallV1_CallSettings() }
@@ -113,8 +113,10 @@ struct Stream_Video_Coordinator_CallV1_Call {
     /// Clears the value of `updatedAt`. Subsequent reads from it will return its default value.
     mutating func clearUpdatedAt() { _updatedAt = nil }
 
+    /// If true, the call is currently recording
     var recordingActive: Bool = false
 
+    /// If true, the call is currently broadcasting
     var broadcastingActive: Bool = false
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
@@ -146,7 +148,7 @@ struct Stream_Video_Coordinator_CallV1_CallDetails {
     /// Ordered list of member user IDs
     var memberUserIds: [String] = []
 
-    /// Room members map indexed by Member.user_id
+    /// Call members map indexed by Member.user_id
     /// Cannot have more than 100 members
     var members: [String: Stream_Video_Coordinator_MemberV1_Member] = [:]
 
@@ -165,8 +167,8 @@ struct Stream_Video_Coordinator_CallV1_CallSettings {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var recording: Stream_Video_Coordinator_CallV1_RecordingOptions {
-        get { _recording ?? Stream_Video_Coordinator_CallV1_RecordingOptions() }
+    var recording: Stream_Video_Coordinator_CallV1_RecordingSettings {
+        get { _recording ?? Stream_Video_Coordinator_CallV1_RecordingSettings() }
         set { _recording = newValue }
     }
 
@@ -175,8 +177,8 @@ struct Stream_Video_Coordinator_CallV1_CallSettings {
     /// Clears the value of `recording`. Subsequent reads from it will return its default value.
     mutating func clearRecording() { _recording = nil }
 
-    var broadcasting: Stream_Video_Coordinator_CallV1_BroadcastingOptions {
-        get { _broadcasting ?? Stream_Video_Coordinator_CallV1_BroadcastingOptions() }
+    var broadcasting: Stream_Video_Coordinator_CallV1_BroadcastingSettings {
+        get { _broadcasting ?? Stream_Video_Coordinator_CallV1_BroadcastingSettings() }
         set { _broadcasting = newValue }
     }
 
@@ -185,16 +187,27 @@ struct Stream_Video_Coordinator_CallV1_CallSettings {
     /// Clears the value of `broadcasting`. Subsequent reads from it will return its default value.
     mutating func clearBroadcasting() { _broadcasting = nil }
 
+    var geofencing: Stream_Video_Coordinator_CallV1_GeofencingSettings {
+        get { _geofencing ?? Stream_Video_Coordinator_CallV1_GeofencingSettings() }
+        set { _geofencing = newValue }
+    }
+
+    /// Returns true if `geofencing` has been explicitly set.
+    var hasGeofencing: Bool { self._geofencing != nil }
+    /// Clears the value of `geofencing`. Subsequent reads from it will return its default value.
+    mutating func clearGeofencing() { _geofencing = nil }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
-    fileprivate var _recording: Stream_Video_Coordinator_CallV1_RecordingOptions?
-    fileprivate var _broadcasting: Stream_Video_Coordinator_CallV1_BroadcastingOptions?
+    fileprivate var _recording: Stream_Video_Coordinator_CallV1_RecordingSettings?
+    fileprivate var _broadcasting: Stream_Video_Coordinator_CallV1_BroadcastingSettings?
+    fileprivate var _geofencing: Stream_Video_Coordinator_CallV1_GeofencingSettings?
 }
 
-/// Contains all options regarding to call recording
-struct Stream_Video_Coordinator_CallV1_RecordingOptions {
+/// Contains all settings regarding to call recording
+struct Stream_Video_Coordinator_CallV1_RecordingSettings {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -218,8 +231,8 @@ struct Stream_Video_Coordinator_CallV1_RecordingOptions {
     fileprivate var _enabled: Bool?
 }
 
-/// Contains all options regarding to call broadcasting
-struct Stream_Video_Coordinator_CallV1_BroadcastingOptions {
+/// Contains all settings regarding to call broadcasting
+struct Stream_Video_Coordinator_CallV1_BroadcastingSettings {
     // SwiftProtobuf.Message conformance is added in an extension below. See the
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
@@ -243,13 +256,29 @@ struct Stream_Video_Coordinator_CallV1_BroadcastingOptions {
     fileprivate var _enabled: Bool?
 }
 
+/// Contains all settings regarding to call geofencing
+/// Initialization of geofencing enables the feature
+struct Stream_Video_Coordinator_CallV1_GeofencingSettings {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
+    /// Names of the geofences that are selected
+    var names: [String] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Coordinator_CallV1_CallType: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_Call: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_CallDetails: @unchecked Sendable {}
 extension Stream_Video_Coordinator_CallV1_CallSettings: @unchecked Sendable {}
-extension Stream_Video_Coordinator_CallV1_RecordingOptions: @unchecked Sendable {}
-extension Stream_Video_Coordinator_CallV1_BroadcastingOptions: @unchecked Sendable {}
+extension Stream_Video_Coordinator_CallV1_RecordingSettings: @unchecked Sendable {}
+extension Stream_Video_Coordinator_CallV1_BroadcastingSettings: @unchecked Sendable {}
+extension Stream_Video_Coordinator_CallV1_GeofencingSettings: @unchecked Sendable {}
 #endif // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -467,7 +496,8 @@ extension Stream_Video_Coordinator_CallV1_CallSettings: SwiftProtobuf.Message, S
     static let protoMessageName: String = _protobuf_package + ".CallSettings"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "recording"),
-        2: .same(proto: "broadcasting")
+        2: .same(proto: "broadcasting"),
+        3: .same(proto: "geofencing")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -478,6 +508,7 @@ extension Stream_Video_Coordinator_CallV1_CallSettings: SwiftProtobuf.Message, S
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularMessageField(value: &self._recording) }()
             case 2: try { try decoder.decodeSingularMessageField(value: &self._broadcasting) }()
+            case 3: try { try decoder.decodeSingularMessageField(value: &self._geofencing) }()
             default: break
             }
         }
@@ -494,20 +525,24 @@ extension Stream_Video_Coordinator_CallV1_CallSettings: SwiftProtobuf.Message, S
         try { if let v = self._broadcasting {
             try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
         } }()
+        try { if let v = self._geofencing {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
     static func == (lhs: Stream_Video_Coordinator_CallV1_CallSettings, rhs: Stream_Video_Coordinator_CallV1_CallSettings) -> Bool {
         if lhs._recording != rhs._recording { return false }
         if lhs._broadcasting != rhs._broadcasting { return false }
+        if lhs._geofencing != rhs._geofencing { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
 }
 
-extension Stream_Video_Coordinator_CallV1_RecordingOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Coordinator_CallV1_RecordingSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".RecordingOptions"
+    static let protoMessageName: String = _protobuf_package + ".RecordingSettings"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "enabled")
     ]
@@ -536,8 +571,8 @@ extension Stream_Video_Coordinator_CallV1_RecordingOptions: SwiftProtobuf.Messag
     }
 
     static func == (
-        lhs: Stream_Video_Coordinator_CallV1_RecordingOptions,
-        rhs: Stream_Video_Coordinator_CallV1_RecordingOptions
+        lhs: Stream_Video_Coordinator_CallV1_RecordingSettings,
+        rhs: Stream_Video_Coordinator_CallV1_RecordingSettings
     ) -> Bool {
         if lhs._enabled != rhs._enabled { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
@@ -545,9 +580,9 @@ extension Stream_Video_Coordinator_CallV1_RecordingOptions: SwiftProtobuf.Messag
     }
 }
 
-extension Stream_Video_Coordinator_CallV1_BroadcastingOptions: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+extension Stream_Video_Coordinator_CallV1_BroadcastingSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
     SwiftProtobuf._ProtoNameProviding {
-    static let protoMessageName: String = _protobuf_package + ".BroadcastingOptions"
+    static let protoMessageName: String = _protobuf_package + ".BroadcastingSettings"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "enabled")
     ]
@@ -576,10 +611,46 @@ extension Stream_Video_Coordinator_CallV1_BroadcastingOptions: SwiftProtobuf.Mes
     }
 
     static func == (
-        lhs: Stream_Video_Coordinator_CallV1_BroadcastingOptions,
-        rhs: Stream_Video_Coordinator_CallV1_BroadcastingOptions
+        lhs: Stream_Video_Coordinator_CallV1_BroadcastingSettings,
+        rhs: Stream_Video_Coordinator_CallV1_BroadcastingSettings
     ) -> Bool {
         if lhs._enabled != rhs._enabled { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Coordinator_CallV1_GeofencingSettings: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".GeofencingSettings"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .same(proto: "names")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedStringField(value: &self.names) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !names.isEmpty {
+            try visitor.visitRepeatedStringField(value: names, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Coordinator_CallV1_GeofencingSettings,
+        rhs: Stream_Video_Coordinator_CallV1_GeofencingSettings
+    ) -> Bool {
+        if lhs.names != rhs.names { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

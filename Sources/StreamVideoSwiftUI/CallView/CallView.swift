@@ -25,17 +25,24 @@ public struct CallView<Factory: ViewFactory>: View {
     public var body: some View {
         GeometryReader { reader in
             ZStack {
-                if viewModel.localVideoPrimary {
-                    localVideoView
-                        .edgesIgnoringSafeArea(.all)
-                } else if let screensharing = viewModel.screensharingSession {
-                    viewFactory.makeScreenSharingView(
-                        viewModel: viewModel,
-                        screensharingSession: screensharing,
-                        availableSize: reader.size
-                    )
-                } else {
-                    participantsView(size: reader.size)
+                VStack(spacing: 0) {
+                    GeometryReader { videoFeedProxy in
+                        if viewModel.localVideoPrimary {
+                            localVideoView
+                                .edgesIgnoringSafeArea(.top)
+                        } else if let screensharing = viewModel.screensharingSession {
+                            viewFactory.makeScreenSharingView(
+                                viewModel: viewModel,
+                                screensharingSession: screensharing,
+                                availableSize: videoFeedProxy.size
+                            )
+                        } else {
+                            participantsView(size: videoFeedProxy.size)
+                        }
+                    }
+
+                    viewFactory.makeCallControlsView(viewModel: viewModel)
+                        .opacity(viewModel.hideUIElements ? 0 : 1)
                 }
                 
                 VStack {
@@ -47,10 +54,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             .modifier(ShadowViewModifier())
                             .padding()
                     }
-                    
-                    viewFactory.makeCallControlsView(viewModel: viewModel)
                 }
-                .opacity(viewModel.hideUIElements ? 0 : 1)
                 
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
@@ -115,6 +119,7 @@ public struct CallView<Factory: ViewFactory>: View {
     private func contentDragableView(size: CGSize) -> some View {
         if !viewModel.localVideoPrimary {
             localVideoView
+                .cornerRadius(16)
                 .padding(.horizontal)
         } else {
             minimizedView(size: size)
@@ -146,7 +151,6 @@ public struct CallView<Factory: ViewFactory>: View {
                 viewModel.renderLocalVideo(renderer: view)
             }
         }
-        .cornerRadius(16)
         .opacity(viewModel.localParticipant != nil ? 1 : 0)
     }
     

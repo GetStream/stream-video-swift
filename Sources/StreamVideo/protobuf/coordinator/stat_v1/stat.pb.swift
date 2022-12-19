@@ -365,11 +365,36 @@ struct Stream_Video_Coordinator_StatV1_CallParticipantTimeline {
     /// The events in this timeline are from the perspective of the user with this ID
     var userID: String = String()
 
+    /// time when participant joined
+    var start: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _start ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _start = newValue }
+    }
+
+    /// Returns true if `start` has been explicitly set.
+    var hasStart: Bool { self._start != nil }
+    /// Clears the value of `start`. Subsequent reads from it will return its default value.
+    mutating func clearStart() { _start = nil }
+
+    /// time when participant left
+    var end: SwiftProtobuf.Google_Protobuf_Timestamp {
+        get { _end ?? SwiftProtobuf.Google_Protobuf_Timestamp() }
+        set { _end = newValue }
+    }
+
+    /// Returns true if `end` has been explicitly set.
+    var hasEnd: Bool { self._end != nil }
+    /// Clears the value of `end`. Subsequent reads from it will return its default value.
+    mutating func clearEnd() { _end = nil }
+
     var events: [Stream_Video_Coordinator_StatV1_TimelineEvent] = []
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
+
+    fileprivate var _start: SwiftProtobuf.Google_Protobuf_Timestamp?
+    fileprivate var _end: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
 
 struct Stream_Video_Coordinator_StatV1_Session {
@@ -409,8 +434,8 @@ struct Stream_Video_Coordinator_StatV1_Session {
 
     init() {}
 
-    private var _start: SwiftProtobuf.Google_Protobuf_Timestamp?
-    private var _end: SwiftProtobuf.Google_Protobuf_Timestamp?
+    fileprivate var _start: SwiftProtobuf.Google_Protobuf_Timestamp?
+    fileprivate var _end: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
@@ -733,7 +758,9 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
     static let protoMessageName: String = _protobuf_package + ".CallParticipantTimeline"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "user_id"),
-        2: .same(proto: "events")
+        2: .same(proto: "start"),
+        3: .same(proto: "end"),
+        4: .same(proto: "events")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -743,18 +770,30 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
             // enabled. https://github.com/apple/swift-protobuf/issues/1034
             switch fieldNumber {
             case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
-            case 2: try { try decoder.decodeRepeatedMessageField(value: &self.events) }()
+            case 2: try { try decoder.decodeSingularMessageField(value: &self._start) }()
+            case 3: try { try decoder.decodeSingularMessageField(value: &self._end) }()
+            case 4: try { try decoder.decodeRepeatedMessageField(value: &self.events) }()
             default: break
             }
         }
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        // The use of inline closures is to circumvent an issue where the compiler
+        // allocates stack space for every if/case branch local when no optimizations
+        // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+        // https://github.com/apple/swift-protobuf/issues/1182
         if !userID.isEmpty {
             try visitor.visitSingularStringField(value: userID, fieldNumber: 1)
         }
+        try { if let v = self._start {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+        } }()
+        try { if let v = self._end {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+        } }()
         if !events.isEmpty {
-            try visitor.visitRepeatedMessageField(value: events, fieldNumber: 2)
+            try visitor.visitRepeatedMessageField(value: events, fieldNumber: 4)
         }
         try unknownFields.traverse(visitor: &visitor)
     }
@@ -764,6 +803,8 @@ extension Stream_Video_Coordinator_StatV1_CallParticipantTimeline: SwiftProtobuf
         rhs: Stream_Video_Coordinator_StatV1_CallParticipantTimeline
     ) -> Bool {
         if lhs.userID != rhs.userID { return false }
+        if lhs._start != rhs._start { return false }
+        if lhs._end != rhs._end { return false }
         if lhs.events != rhs.events { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true

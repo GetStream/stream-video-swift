@@ -64,6 +64,8 @@ class SfuMiddleware: EventMiddleware {
                 await handleTrackPublishedEvent(event)
             } else if let event = event as? Stream_Video_Sfu_Event_TrackUnpublished {
                 await handleTrackUnpublishedEvent(event)
+            } else if let event = event as? Stream_Video_Sfu_Event_ConnectionQualityChanged {
+                await handleConnectionQualityChangedEvent(event)
             }
         }
         return event
@@ -247,6 +249,15 @@ class SfuMiddleware: EventMiddleware {
                 .withUpdated(screensharing: false)
                 .withUpdated(screensharingTrack: nil)
             await state.removeScreensharingTrack(id: updated.trackLookupPrefix ?? updated.id)
+            await state.update(callParticipant: updated)
+        }
+    }
+    
+    private func handleConnectionQualityChangedEvent(_ event: Stream_Video_Sfu_Event_ConnectionQualityChanged) async {
+        guard let connectionQualityInfo = event.connectionQualityUpdates.last else { return }
+        let userId = connectionQualityInfo.userID
+        let participant = await state.callParticipants[userId]
+        if let updated = participant?.withUpdated(connectionQuality: connectionQualityInfo.connectionQuality.mapped) {
             await state.update(callParticipant: updated)
         }
     }

@@ -500,6 +500,18 @@ struct Stream_Video_Sfu_Event_ConnectionQualityChanged {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
+    var connectionQualityUpdates: [Stream_Video_Sfu_Event_ConnectionQualityInfo] = []
+
+    var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    init() {}
+}
+
+struct Stream_Video_Sfu_Event_ConnectionQualityInfo {
+    // SwiftProtobuf.Message conformance is added in an extension below. See the
+    // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+    // methods supported on all messages.
+
     var userID: String = String()
 
     var sessionID: String = String()
@@ -764,6 +776,7 @@ extension Stream_Video_Sfu_Event_ParticipantLeft: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SubscriberOffer: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_PublisherAnswer: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ConnectionQualityChanged: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ConnectionQualityInfo: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_DominantSpeakerChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLevel: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_AudioLevelChanged: @unchecked Sendable {}
@@ -1586,6 +1599,42 @@ extension Stream_Video_Sfu_Event_ConnectionQualityChanged: SwiftProtobuf.Message
     SwiftProtobuf._ProtoNameProviding {
     static let protoMessageName: String = _protobuf_package + ".ConnectionQualityChanged"
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+        1: .standard(proto: "connection_quality_updates")
+    ]
+
+    mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+        while let fieldNumber = try decoder.nextFieldNumber() {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch fieldNumber {
+            case 1: try { try decoder.decodeRepeatedMessageField(value: &self.connectionQualityUpdates) }()
+            default: break
+            }
+        }
+    }
+
+    func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+        if !connectionQualityUpdates.isEmpty {
+            try visitor.visitRepeatedMessageField(value: connectionQualityUpdates, fieldNumber: 1)
+        }
+        try unknownFields.traverse(visitor: &visitor)
+    }
+
+    static func == (
+        lhs: Stream_Video_Sfu_Event_ConnectionQualityChanged,
+        rhs: Stream_Video_Sfu_Event_ConnectionQualityChanged
+    ) -> Bool {
+        if lhs.connectionQualityUpdates != rhs.connectionQualityUpdates { return false }
+        if lhs.unknownFields != rhs.unknownFields { return false }
+        return true
+    }
+}
+
+extension Stream_Video_Sfu_Event_ConnectionQualityInfo: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase,
+    SwiftProtobuf._ProtoNameProviding {
+    static let protoMessageName: String = _protobuf_package + ".ConnectionQualityInfo"
+    static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "user_id"),
         2: .standard(proto: "session_id"),
         3: .standard(proto: "connection_quality")
@@ -1618,10 +1667,7 @@ extension Stream_Video_Sfu_Event_ConnectionQualityChanged: SwiftProtobuf.Message
         try unknownFields.traverse(visitor: &visitor)
     }
 
-    static func == (
-        lhs: Stream_Video_Sfu_Event_ConnectionQualityChanged,
-        rhs: Stream_Video_Sfu_Event_ConnectionQualityChanged
-    ) -> Bool {
+    static func == (lhs: Stream_Video_Sfu_Event_ConnectionQualityInfo, rhs: Stream_Video_Sfu_Event_ConnectionQualityInfo) -> Bool {
         if lhs.userID != rhs.userID { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.connectionQuality != rhs.connectionQuality { return false }

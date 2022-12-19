@@ -23,6 +23,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public var layoutPriority: LayoutPriority
     public var isDominantSpeaker: Bool
     public var sessionId: String
+    public var connectionQuality: ConnectionQuality
     
     public init(
         id: String,
@@ -40,7 +41,8 @@ public struct CallParticipant: Identifiable, Sendable {
         screenshareTrack: RTCVideoTrack? = nil,
         layoutPriority: LayoutPriority = .normal,
         isDominantSpeaker: Bool = false,
-        sessionId: String
+        sessionId: String,
+        connectionQuality: ConnectionQuality
     ) {
         self.id = id
         self.role = role
@@ -57,6 +59,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.isDominantSpeaker = isDominantSpeaker
         self.sessionId = sessionId
         self.screenshareTrack = screenshareTrack
+        self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
     }
     
@@ -82,7 +85,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
     
@@ -103,7 +107,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
     
@@ -124,7 +129,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screensharingTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
     
@@ -145,7 +151,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
 
@@ -166,7 +173,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
     
@@ -187,7 +195,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
 
@@ -208,7 +217,8 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isDominantSpeaker: isDominantSpeaker,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
 
@@ -231,7 +241,30 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            sessionId: sessionId
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
+        )
+    }
+    
+    func withUpdated(connectionQuality: ConnectionQuality) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            role: role,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            isOnline: isOnline,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            layoutPriority: layoutPriority,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality
         )
     }
 }
@@ -268,7 +301,8 @@ extension Stream_Video_User {
             hasAudio: false,
             isScreenSharing: false,
             showTrack: false,
-            sessionId: ""
+            sessionId: "",
+            connectionQuality: .unknown
         )
     }
 }
@@ -287,7 +321,8 @@ extension Stream_Video_Sfu_Models_Participant {
             hasAudio: publishedTracks.contains(where: { $0 == .audio }),
             isScreenSharing: publishedTracks.contains(where: { $0 == .screenShare }),
             showTrack: showTrack,
-            sessionId: sessionID
+            sessionId: sessionID,
+            connectionQuality: connectionQuality.mapped
         )
     }
 }

@@ -59,9 +59,9 @@ extension Stream_Video_Sfu_Models_PeerType: CaseIterable {
 enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
     typealias RawValue = Int
     case unspecified // = 0
-    case badUnspecified // = 1
-    case poor // = 2
-    case good // = 3
+    case poor // = 1
+    case good // = 2
+    case excellent // = 3
     case UNRECOGNIZED(Int)
 
     init() {
@@ -71,9 +71,9 @@ enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
     init?(rawValue: Int) {
         switch rawValue {
         case 0: self = .unspecified
-        case 1: self = .badUnspecified
-        case 2: self = .poor
-        case 3: self = .good
+        case 1: self = .poor
+        case 2: self = .good
+        case 3: self = .excellent
         default: self = .UNRECOGNIZED(rawValue)
         }
     }
@@ -81,9 +81,9 @@ enum Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf.Enum {
     var rawValue: Int {
         switch self {
         case .unspecified: return 0
-        case .badUnspecified: return 1
-        case .poor: return 2
-        case .good: return 3
+        case .poor: return 1
+        case .good: return 2
+        case .excellent: return 3
         case let .UNRECOGNIZED(i): return i
         }
     }
@@ -95,9 +95,9 @@ extension Stream_Video_Sfu_Models_ConnectionQuality: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Models_ConnectionQuality] = [
         .unspecified,
-        .badUnspecified,
         .poor,
-        .good
+        .good,
+        .excellent
     ]
 }
 
@@ -105,32 +105,32 @@ extension Stream_Video_Sfu_Models_ConnectionQuality: CaseIterable {
 
 enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
     typealias RawValue = Int
-    case unspecified // = 0
-    case lowUnspecified // = 1
-    case mid // = 2
-    case high // = 3
+    case lowUnspecified // = 0
+    case mid // = 1
+    case high // = 2
+    case off // = 3
     case UNRECOGNIZED(Int)
 
     init() {
-        self = .unspecified
+        self = .lowUnspecified
     }
 
     init?(rawValue: Int) {
         switch rawValue {
-        case 0: self = .unspecified
-        case 1: self = .lowUnspecified
-        case 2: self = .mid
-        case 3: self = .high
+        case 0: self = .lowUnspecified
+        case 1: self = .mid
+        case 2: self = .high
+        case 3: self = .off
         default: self = .UNRECOGNIZED(rawValue)
         }
     }
 
     var rawValue: Int {
         switch self {
-        case .unspecified: return 0
-        case .lowUnspecified: return 1
-        case .mid: return 2
-        case .high: return 3
+        case .lowUnspecified: return 0
+        case .mid: return 1
+        case .high: return 2
+        case .off: return 3
         case let .UNRECOGNIZED(i): return i
         }
     }
@@ -141,10 +141,10 @@ enum Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf.Enum {
 extension Stream_Video_Sfu_Models_VideoQuality: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Models_VideoQuality] = [
-        .unspecified,
         .lowUnspecified,
         .mid,
-        .high
+        .high,
+        .off
     ]
 }
 
@@ -204,7 +204,13 @@ extension Stream_Video_Sfu_Models_TrackType: CaseIterable {
 enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     typealias RawValue = Int
     case unspecified // = 0
-    case publishTrackMismatch // = 1
+    case publishTrackNotFound // = 100
+    case publishTracksMismatch // = 101
+    case publishTrackOutOfOrder // = 102
+    case publishTrackVideoLayerNotFound // = 103
+    case participantNotFound // = 200
+    case callNotFound // = 300
+    case internalServerError // = 500
     case UNRECOGNIZED(Int)
 
     init() {
@@ -214,7 +220,13 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     init?(rawValue: Int) {
         switch rawValue {
         case 0: self = .unspecified
-        case 1: self = .publishTrackMismatch
+        case 100: self = .publishTrackNotFound
+        case 101: self = .publishTracksMismatch
+        case 102: self = .publishTrackOutOfOrder
+        case 103: self = .publishTrackVideoLayerNotFound
+        case 200: self = .participantNotFound
+        case 300: self = .callNotFound
+        case 500: self = .internalServerError
         default: self = .UNRECOGNIZED(rawValue)
         }
     }
@@ -222,7 +234,13 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     var rawValue: Int {
         switch self {
         case .unspecified: return 0
-        case .publishTrackMismatch: return 1
+        case .publishTrackNotFound: return 100
+        case .publishTracksMismatch: return 101
+        case .publishTrackOutOfOrder: return 102
+        case .publishTrackVideoLayerNotFound: return 103
+        case .participantNotFound: return 200
+        case .callNotFound: return 300
+        case .internalServerError: return 500
         case let .UNRECOGNIZED(i): return i
         }
     }
@@ -234,7 +252,13 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     // The compiler won't synthesize support with the UNRECOGNIZED case.
     static var allCases: [Stream_Video_Sfu_Models_ErrorCode] = [
         .unspecified,
-        .publishTrackMismatch
+        .publishTrackNotFound,
+        .publishTracksMismatch,
+        .publishTrackOutOfOrder,
+        .publishTrackVideoLayerNotFound,
+        .participantNotFound,
+        .callNotFound,
+        .internalServerError
     ]
 }
 
@@ -277,6 +301,8 @@ struct Stream_Video_Sfu_Models_Participant {
 
     var trackLookupPrefix: String = String()
 
+    var connectionQuality: Stream_Video_Sfu_Models_ConnectionQuality = .unspecified
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -289,7 +315,7 @@ struct Stream_Video_Sfu_Models_StreamQuality {
     // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
     // methods supported on all messages.
 
-    var videoQuality: Stream_Video_Sfu_Models_VideoQuality = .unspecified
+    var videoQuality: Stream_Video_Sfu_Models_VideoQuality = .lowUnspecified
 
     var userID: String = String()
 
@@ -334,6 +360,8 @@ struct Stream_Video_Sfu_Models_VideoLayer {
     var bitrate: UInt32 = 0
 
     var fps: UInt32 = 0
+
+    var quality: Stream_Video_Sfu_Models_VideoQuality = .lowUnspecified
 
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -501,18 +529,18 @@ extension Stream_Video_Sfu_Models_PeerType: SwiftProtobuf._ProtoNameProviding {
 extension Stream_Video_Sfu_Models_ConnectionQuality: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         0: .same(proto: "CONNECTION_QUALITY_UNSPECIFIED"),
-        1: .same(proto: "CONNECTION_QUALITY_BAD_UNSPECIFIED"),
-        2: .same(proto: "CONNECTION_QUALITY_POOR"),
-        3: .same(proto: "CONNECTION_QUALITY_GOOD")
+        1: .same(proto: "CONNECTION_QUALITY_POOR"),
+        2: .same(proto: "CONNECTION_QUALITY_GOOD"),
+        3: .same(proto: "CONNECTION_QUALITY_EXCELLENT")
     ]
 }
 
 extension Stream_Video_Sfu_Models_VideoQuality: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-        0: .same(proto: "VIDEO_QUALITY_UNSPECIFIED"),
-        1: .same(proto: "VIDEO_QUALITY_LOW_UNSPECIFIED"),
-        2: .same(proto: "VIDEO_QUALITY_MID"),
-        3: .same(proto: "VIDEO_QUALITY_HIGH")
+        0: .same(proto: "VIDEO_QUALITY_LOW_UNSPECIFIED"),
+        1: .same(proto: "VIDEO_QUALITY_MID"),
+        2: .same(proto: "VIDEO_QUALITY_HIGH"),
+        3: .same(proto: "VIDEO_QUALITY_OFF")
     ]
 }
 
@@ -529,7 +557,13 @@ extension Stream_Video_Sfu_Models_TrackType: SwiftProtobuf._ProtoNameProviding {
 extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         0: .same(proto: "ERROR_CODE_UNSPECIFIED"),
-        1: .same(proto: "ERROR_CODE_PUBLISH_TRACK_MISMATCH")
+        100: .same(proto: "ERROR_CODE_PUBLISH_TRACK_NOT_FOUND"),
+        101: .same(proto: "ERROR_CODE_PUBLISH_TRACKS_MISMATCH"),
+        102: .same(proto: "ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER"),
+        103: .same(proto: "ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND"),
+        200: .same(proto: "ERROR_CODE_PARTICIPANT_NOT_FOUND"),
+        300: .same(proto: "ERROR_CODE_CALL_NOT_FOUND"),
+        500: .same(proto: "ERROR_CODE_INTERNAL_SERVER_ERROR")
     ]
 }
 
@@ -574,7 +608,8 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         2: .standard(proto: "session_id"),
         3: .standard(proto: "published_tracks"),
         4: .standard(proto: "joined_at"),
-        5: .standard(proto: "track_lookup_prefix")
+        5: .standard(proto: "track_lookup_prefix"),
+        6: .standard(proto: "connection_quality")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -588,6 +623,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
             case 3: try { try decoder.decodeRepeatedEnumField(value: &self.publishedTracks) }()
             case 4: try { try decoder.decodeSingularMessageField(value: &self._joinedAt) }()
             case 5: try { try decoder.decodeSingularStringField(value: &self.trackLookupPrefix) }()
+            case 6: try { try decoder.decodeSingularEnumField(value: &self.connectionQuality) }()
             default: break
             }
         }
@@ -613,6 +649,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         if !trackLookupPrefix.isEmpty {
             try visitor.visitSingularStringField(value: trackLookupPrefix, fieldNumber: 5)
         }
+        if connectionQuality != .unspecified {
+            try visitor.visitSingularEnumField(value: connectionQuality, fieldNumber: 6)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -622,6 +661,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         if lhs.publishedTracks != rhs.publishedTracks { return false }
         if lhs._joinedAt != rhs._joinedAt { return false }
         if lhs.trackLookupPrefix != rhs.trackLookupPrefix { return false }
+        if lhs.connectionQuality != rhs.connectionQuality { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }
@@ -649,7 +689,7 @@ extension Stream_Video_Sfu_Models_StreamQuality: SwiftProtobuf.Message, SwiftPro
     }
 
     func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-        if videoQuality != .unspecified {
+        if videoQuality != .lowUnspecified {
             try visitor.visitSingularEnumField(value: videoQuality, fieldNumber: 1)
         }
         if !userID.isEmpty {
@@ -712,7 +752,8 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
         1: .same(proto: "rid"),
         2: .standard(proto: "video_dimension"),
         4: .same(proto: "bitrate"),
-        5: .same(proto: "fps")
+        5: .same(proto: "fps"),
+        6: .same(proto: "quality")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -725,6 +766,7 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
             case 2: try { try decoder.decodeSingularMessageField(value: &self._videoDimension) }()
             case 4: try { try decoder.decodeSingularUInt32Field(value: &self.bitrate) }()
             case 5: try { try decoder.decodeSingularUInt32Field(value: &self.fps) }()
+            case 6: try { try decoder.decodeSingularEnumField(value: &self.quality) }()
             default: break
             }
         }
@@ -747,6 +789,9 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
         if fps != 0 {
             try visitor.visitSingularUInt32Field(value: fps, fieldNumber: 5)
         }
+        if quality != .lowUnspecified {
+            try visitor.visitSingularEnumField(value: quality, fieldNumber: 6)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -755,6 +800,7 @@ extension Stream_Video_Sfu_Models_VideoLayer: SwiftProtobuf.Message, SwiftProtob
         if lhs._videoDimension != rhs._videoDimension { return false }
         if lhs.bitrate != rhs.bitrate { return false }
         if lhs.fps != rhs.fps { return false }
+        if lhs.quality != rhs.quality { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

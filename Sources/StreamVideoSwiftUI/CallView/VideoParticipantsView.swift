@@ -106,7 +106,17 @@ struct VerticalParticipantsView: View {
                 )
                 .adjustVideoFrame(to: availableSize.width, ratio: ratio)
                 .overlay(
-                    AudioIndicatorView(participant: participant)
+                    BottomView(content: {
+                        HStack {
+                            AudioIndicatorView(participant: participant)
+                            Spacer()
+                            ConnectionQualityIndicator(
+                                connectionQuality: participant.connectionQuality
+                            )
+                        }
+                        .padding(.bottom, 2)
+                    })
+                        .padding()
                 )
             }
         }
@@ -156,17 +166,25 @@ struct VideoCallParticipantView: View {
 struct AudioIndicatorView: View {
     
     @Injected(\.images) var images
+    @Injected(\.fonts) var fonts
     
     var participant: CallParticipant
     
     var body: some View {
-        BottomRightView {
+        HStack(spacing: 2) {
+            Text(participant.name)
+                .foregroundColor(.white)
+                .lineLimit(1)
+                .font(fonts.caption1)
+                .frame(maxWidth: 80)
             (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
                 .foregroundColor(.white)
                 .padding(.all, 4)
-                .background(Color.black.opacity(0.5))
-                .cornerRadius(8)
         }
-        .padding()
+        .padding(.all, 2)
+        .padding(.horizontal, 4)
+        .frame(height: 28)
+        .background(Color.black.opacity(0.6))
+        .cornerRadius(8)
     }
 }
