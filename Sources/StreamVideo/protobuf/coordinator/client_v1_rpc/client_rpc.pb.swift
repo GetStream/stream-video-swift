@@ -209,7 +209,54 @@ struct Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput {
     /// Clears the value of `ring`. Subsequent reads from it will return its default value.
     mutating func clearRing() { _ring = nil }
 
+    /// The user that creating this call, only needed if the call is created server-side
+    var createdBy: Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput.OneOf_CreatedBy?
+
+    var userID: String {
+        get {
+            if case let .userID(v)? = createdBy { return v }
+            return String()
+        }
+        set { createdBy = .userID(newValue) }
+    }
+
+    var user: Stream_Video_Coordinator_UserV1_UserInput {
+        get {
+            if case let .user(v)? = createdBy { return v }
+            return Stream_Video_Coordinator_UserV1_UserInput()
+        }
+        set { createdBy = .user(newValue) }
+    }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
+
+    /// The user that creating this call, only needed if the call is created server-side
+    enum OneOf_CreatedBy: Equatable {
+        case userID(String)
+        case user(Stream_Video_Coordinator_UserV1_UserInput)
+
+        #if !swift(>=4.1)
+        static func == (
+            lhs: Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput.OneOf_CreatedBy,
+            rhs: Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput.OneOf_CreatedBy
+        ) -> Bool {
+            // The use of inline closures is to circumvent an issue where the compiler
+            // allocates stack space for every case branch when no optimizations are
+            // enabled. https://github.com/apple/swift-protobuf/issues/1034
+            switch (lhs, rhs) {
+            case (.userID, .userID): return {
+                    guard case let .userID(l) = lhs, case let .userID(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            case (.user, .user): return {
+                    guard case let .user(l) = lhs, case let .user(r) = rhs else { preconditionFailure() }
+                    return l == r
+                }()
+            default: return false
+            }
+        }
+        #endif
+    }
 
     init() {}
 
@@ -1296,6 +1343,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_UpsertCallMembersResponse: @unche
 extension Stream_Video_Coordinator_ClientV1Rpc_DeleteCallMembersRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_DeleteCallMembersResponse: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: @unchecked Sendable {}
+extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput.OneOf_CreatedBy: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_GetOrCreateCallRequest: @unchecked Sendable {}
 extension Stream_Video_Coordinator_ClientV1Rpc_JoinCallRequest: @unchecked Sendable {}
@@ -1639,7 +1687,9 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .same(proto: "call"),
         2: .same(proto: "members"),
-        3: .same(proto: "ring")
+        3: .same(proto: "ring"),
+        4: .standard(proto: "user_id"),
+        5: .same(proto: "user")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1651,6 +1701,27 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
             case 1: try { try decoder.decodeSingularMessageField(value: &self._call) }()
             case 2: try { try decoder.decodeRepeatedMessageField(value: &self.members) }()
             case 3: try { try decoder.decodeSingularBoolField(value: &self._ring) }()
+            case 4: try {
+                    var v: String?
+                    try decoder.decodeSingularStringField(value: &v)
+                    if let v = v {
+                        if self.createdBy != nil { try decoder.handleConflictingOneOf() }
+                        self.createdBy = .userID(v)
+                    }
+                }()
+            case 5: try {
+                    var v: Stream_Video_Coordinator_UserV1_UserInput?
+                    var hadOneofValue = false
+                    if let current = self.createdBy {
+                        hadOneofValue = true
+                        if case let .user(m) = current { v = m }
+                    }
+                    try decoder.decodeSingularMessageField(value: &v)
+                    if let v = v {
+                        if hadOneofValue { try decoder.handleConflictingOneOf() }
+                        self.createdBy = .user(v)
+                    }
+                }()
             default: break
             }
         }
@@ -1670,6 +1741,17 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
         try { if let v = self._ring {
             try visitor.visitSingularBoolField(value: v, fieldNumber: 3)
         } }()
+        switch createdBy {
+        case .userID?: try {
+                guard case let .userID(v)? = self.createdBy else { preconditionFailure() }
+                try visitor.visitSingularStringField(value: v, fieldNumber: 4)
+            }()
+        case .user?: try {
+                guard case let .user(v)? = self.createdBy else { preconditionFailure() }
+                try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
+            }()
+        case nil: break
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -1680,6 +1762,7 @@ extension Stream_Video_Coordinator_ClientV1Rpc_CreateCallInput: SwiftProtobuf.Me
         if lhs._call != rhs._call { return false }
         if lhs.members != rhs.members { return false }
         if lhs._ring != rhs._ring { return false }
+        if lhs.createdBy != rhs.createdBy { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

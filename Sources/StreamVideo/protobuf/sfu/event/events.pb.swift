@@ -550,6 +550,8 @@ struct Stream_Video_Sfu_Event_AudioLevel {
     /// 0.0 means complete silence, 1.0 loudest
     var level: Float = 0
 
+    var isSpeaking: Bool = false
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -1724,7 +1726,8 @@ extension Stream_Video_Sfu_Event_AudioLevel: SwiftProtobuf.Message, SwiftProtobu
     static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
         1: .standard(proto: "user_id"),
         2: .standard(proto: "session_id"),
-        3: .same(proto: "level")
+        3: .same(proto: "level"),
+        4: .standard(proto: "is_speaking")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1736,6 +1739,7 @@ extension Stream_Video_Sfu_Event_AudioLevel: SwiftProtobuf.Message, SwiftProtobu
             case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
             case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
             case 3: try { try decoder.decodeSingularFloatField(value: &self.level) }()
+            case 4: try { try decoder.decodeSingularBoolField(value: &self.isSpeaking) }()
             default: break
             }
         }
@@ -1751,6 +1755,9 @@ extension Stream_Video_Sfu_Event_AudioLevel: SwiftProtobuf.Message, SwiftProtobu
         if level != 0 {
             try visitor.visitSingularFloatField(value: level, fieldNumber: 3)
         }
+        if isSpeaking != false {
+            try visitor.visitSingularBoolField(value: isSpeaking, fieldNumber: 4)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -1758,6 +1765,7 @@ extension Stream_Video_Sfu_Event_AudioLevel: SwiftProtobuf.Message, SwiftProtobu
         if lhs.userID != rhs.userID { return false }
         if lhs.sessionID != rhs.sessionID { return false }
         if lhs.level != rhs.level { return false }
+        if lhs.isSpeaking != rhs.isSpeaking { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

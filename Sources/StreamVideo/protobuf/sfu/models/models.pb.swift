@@ -303,6 +303,12 @@ struct Stream_Video_Sfu_Models_Participant {
 
     var connectionQuality: Stream_Video_Sfu_Models_ConnectionQuality = .unspecified
 
+    var isSpeaking: Bool = false
+
+    var isDominantSpeaker: Bool = false
+
+    var audioLevel: Float = 0
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
@@ -609,7 +615,10 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         3: .standard(proto: "published_tracks"),
         4: .standard(proto: "joined_at"),
         5: .standard(proto: "track_lookup_prefix"),
-        6: .standard(proto: "connection_quality")
+        6: .standard(proto: "connection_quality"),
+        7: .standard(proto: "is_speaking"),
+        8: .standard(proto: "is_dominant_speaker"),
+        9: .standard(proto: "audio_level")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -624,6 +633,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
             case 4: try { try decoder.decodeSingularMessageField(value: &self._joinedAt) }()
             case 5: try { try decoder.decodeSingularStringField(value: &self.trackLookupPrefix) }()
             case 6: try { try decoder.decodeSingularEnumField(value: &self.connectionQuality) }()
+            case 7: try { try decoder.decodeSingularBoolField(value: &self.isSpeaking) }()
+            case 8: try { try decoder.decodeSingularBoolField(value: &self.isDominantSpeaker) }()
+            case 9: try { try decoder.decodeSingularFloatField(value: &self.audioLevel) }()
             default: break
             }
         }
@@ -652,6 +664,15 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         if connectionQuality != .unspecified {
             try visitor.visitSingularEnumField(value: connectionQuality, fieldNumber: 6)
         }
+        if isSpeaking != false {
+            try visitor.visitSingularBoolField(value: isSpeaking, fieldNumber: 7)
+        }
+        if isDominantSpeaker != false {
+            try visitor.visitSingularBoolField(value: isDominantSpeaker, fieldNumber: 8)
+        }
+        if audioLevel != 0 {
+            try visitor.visitSingularFloatField(value: audioLevel, fieldNumber: 9)
+        }
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -662,6 +683,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         if lhs._joinedAt != rhs._joinedAt { return false }
         if lhs.trackLookupPrefix != rhs.trackLookupPrefix { return false }
         if lhs.connectionQuality != rhs.connectionQuality { return false }
+        if lhs.isSpeaking != rhs.isSpeaking { return false }
+        if lhs.isDominantSpeaker != rhs.isDominantSpeaker { return false }
+        if lhs.audioLevel != rhs.audioLevel { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

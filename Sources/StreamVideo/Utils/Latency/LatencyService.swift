@@ -17,7 +17,8 @@ final class LatencyService: Sendable {
         var results = [Double]()
         for _ in 0..<tries {
             let startDate = Date()
-            let request = URLRequest(url: url)
+            var request = URLRequest(url: url)
+            request.timeoutInterval = 6.0
             do {
                 _ = try await httpClient.execute(request: request)
                 let diff = Double(Date().timeIntervalSince(startDate))
