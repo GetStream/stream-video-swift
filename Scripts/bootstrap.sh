@@ -44,7 +44,7 @@ if [[ ${XCODE_ACTIONS-default} == default ]]; then
   brew install mint
 
   puts "Bootstrap Mint dependencies"
-  mint bootstrap
+  mint bootstrap --link
 fi
 
 if [[ ${INSTALL_SONAR-default} == true ]]; then

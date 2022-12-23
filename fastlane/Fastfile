@@ -5,7 +5,7 @@ require 'json'
 require 'net/http'
 import 'Sonarfile'
 
-xcode_version = ENV['XCODE_VERSION'] || '14.1'
+xcode_version = ENV['XCODE_VERSION'] || '14.2'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
@@ -13,7 +13,7 @@ github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 before_all do
   if is_ci
     setup_ci
-    xcversion(version: "~> #{xcode_version}")
+    xcodes(version: xcode_version, select_for_current_build_only: true)
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
   end
 end
