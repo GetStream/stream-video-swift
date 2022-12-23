@@ -38,7 +38,7 @@ class InviteParticipantsViewModel: ObservableObject {
     }
         
     init(currentParticipants: [CallParticipant]) {
-        currentParticipantIds = currentParticipants.map(\.id)
+        currentParticipantIds = currentParticipants.map(\.userId)
         loadNextUsers()
     }
     

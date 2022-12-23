@@ -98,7 +98,7 @@ class SfuMiddleware: EventMiddleware {
         let participant = event.participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
         await state.update(callParticipant: participant)
         let event = ParticipantEvent(
-            id: participant.id,
+            id: participant.userId,
             action: .join,
             user: participant.name,
             imageURL: participant.profileImageURL
@@ -113,7 +113,7 @@ class SfuMiddleware: EventMiddleware {
         await state.removeCallParticipant(with: participant.id)
         await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
         let event = ParticipantEvent(
-            id: participant.id,
+            id: participant.userId,
             action: .leave,
             user: participant.name,
             imageURL: participant.profileImageURL
@@ -183,7 +183,7 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleTrackPublishedEvent(_ event: Stream_Video_Sfu_Event_TrackPublished) async {
-        let userId = event.userID
+        let userId = event.sessionID
         log.debug("received track published event for user \(userId)")
         guard let participant = await state.callParticipants[userId] else { return }
         if event.type == .audio {
@@ -199,7 +199,7 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleTrackUnpublishedEvent(_ event: Stream_Video_Sfu_Event_TrackUnpublished) async {
-        let userId = event.userID
+        let userId = event.sessionID
         log.debug("received track unpublished event for user \(userId)")
         guard let participant = await state.callParticipants[userId] else { return }
         if event.type == .audio {
@@ -220,7 +220,7 @@ class SfuMiddleware: EventMiddleware {
     
     private func handleConnectionQualityChangedEvent(_ event: Stream_Video_Sfu_Event_ConnectionQualityChanged) async {
         guard let connectionQualityInfo = event.connectionQualityUpdates.last else { return }
-        let userId = connectionQualityInfo.userID
+        let userId = connectionQualityInfo.sessionID
         let participant = await state.callParticipants[userId]
         if let updated = participant?.withUpdated(connectionQuality: connectionQualityInfo.connectionQuality.mapped) {
             await state.update(callParticipant: updated)
@@ -230,7 +230,7 @@ class SfuMiddleware: EventMiddleware {
     private func handleAudioLevelsChanged(_ event: Stream_Video_Sfu_Event_AudioLevelChanged) async {
         let participants = await state.callParticipants
         for level in event.audioLevels {
-            let participant = participants[level.userID]
+            let participant = participants[level.sessionID]
             if participant?.isSpeaking != level.isSpeaking {
                 if let updated = participant?.withUpdated(
                     layoutPriority: .normal,
@@ -250,7 +250,8 @@ class SfuMiddleware: EventMiddleware {
         var temp = [String: CallParticipant]()
         for participant in participants {
             let enrichedData = await state.enrichedData(for: participant.userID)
-            temp[participant.userID] = participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
+            let mapped = participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
+            temp[mapped.id] = mapped
         }
         await state.update(callParticipants: temp)
     }

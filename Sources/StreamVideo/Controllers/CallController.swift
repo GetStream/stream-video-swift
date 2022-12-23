@@ -83,7 +83,8 @@ public class CallController {
             videoOptions: videoOptions,
             connectOptions: connectOptions
         )
-        let currentCall = Call.create(callId: callId, callType: callType)
+        let sessionId = webRTCClient?.sessionID ?? ""
+        let currentCall = Call.create(callId: callId, callType: callType, sessionId: sessionId)
         call = currentCall
         return currentCall
     }

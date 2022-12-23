@@ -8,6 +8,7 @@ import Foundation
 /// Represents a participant in the call.
 public struct CallParticipant: Identifiable, Sendable {
     public var id: String
+    public let userId: String
     public let role: String
     public let name: String
     public let profileImageURL: URL?
@@ -27,6 +28,7 @@ public struct CallParticipant: Identifiable, Sendable {
     
     public init(
         id: String,
+        userId: String,
         role: String,
         name: String,
         profileImageURL: URL?,
@@ -45,6 +47,7 @@ public struct CallParticipant: Identifiable, Sendable {
         connectionQuality: ConnectionQuality
     ) {
         self.id = id
+        self.userId = userId
         self.role = role
         self.name = name
         self.profileImageURL = profileImageURL
@@ -71,6 +74,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public func withUpdated(trackSize: CGSize) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -93,6 +97,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(track: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -115,6 +120,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(screensharingTrack: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -137,6 +143,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(audio: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -159,6 +166,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(video: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -181,6 +189,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(screensharing: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -203,6 +212,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(showTrack: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -228,6 +238,7 @@ public struct CallParticipant: Identifiable, Sendable {
     ) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -250,6 +261,7 @@ public struct CallParticipant: Identifiable, Sendable {
     func withUpdated(connectionQuality: ConnectionQuality) -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: userId,
             role: role,
             name: name,
             profileImageURL: profileImageURL,
@@ -293,6 +305,7 @@ extension Stream_Video_User {
     func toCallParticipant() -> CallParticipant {
         CallParticipant(
             id: id,
+            userId: id,
             role: role,
             name: name.isEmpty ? id : name,
             profileImageURL: URL(string: imageURL),
@@ -312,7 +325,8 @@ extension Stream_Video_Sfu_Models_Participant {
     
     func toCallParticipant(showTrack: Bool = true, enrichData: EnrichedUserData) -> CallParticipant {
         CallParticipant(
-            id: userID,
+            id: sessionID,
+            userId: userID,
             role: enrichData.role,
             name: enrichData.name,
             profileImageURL: enrichData.imageUrl,
@@ -325,14 +339,5 @@ extension Stream_Video_Sfu_Models_Participant {
             sessionId: sessionID,
             connectionQuality: connectionQuality.mapped
         )
-    }
-}
-
-extension Stream_Video_JoinCallResponse {
-    
-    func callParticipants() -> [CallParticipant] {
-        call.users.map { (_, participant) in
-            participant.toCallParticipant()
-        }
     }
 }

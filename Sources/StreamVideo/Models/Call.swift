@@ -17,18 +17,20 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     public let callId: String
     public let callType: CallType
+    public let sessionId: String
     
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
-    static func create(callId: String, callType: CallType) -> Call {
-        Call(callId: callId, callType: callType)
+    static func create(callId: String, callType: CallType, sessionId: String) -> Call {
+        Call(callId: callId, callType: callType, sessionId: sessionId)
     }
     
-    private init(callId: String, callType: CallType) {
+    private init(callId: String, callType: CallType, sessionId: String) {
         self.callId = callId
         self.callType = callType
+        self.sessionId = sessionId
     }
     
     /// Async stream that publishes participant events.

@@ -109,7 +109,7 @@ class WebRTCClient: NSObject {
     
     private var signalChannel: WebSocketClient?
     
-    private var sessionID = UUID().uuidString
+    private(set) var sessionID = UUID().uuidString
     private let token: String
     private let timeoutInterval: TimeInterval = 15
     
@@ -244,7 +244,7 @@ class WebRTCClient: NSObject {
         // Video
         let videoTrack = await makeVideoTrack()
         localVideoTrack = videoTrack
-        await state.add(track: localVideoTrack, id: user.id)
+        await state.add(track: localVideoTrack, id: sessionID)
     }
     
     func publishUserMedia(callSettings: CallSettings) {
@@ -539,14 +539,14 @@ class WebRTCClient: NSObject {
         request.sessionID = sessionID
         let callParticipants = await state.callParticipants
         for (_, value) in callParticipants {
-            if value.id != user.id {
+            if value.id != sessionID {
                 if value.hasVideo {
                     log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)")
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
                     dimension.height = UInt32(value.trackSize.height)
                     dimension.width = UInt32(value.trackSize.width)
                     let trackSubscriptionDetails = trackSubscriptionDetails(
-                        for: value.id,
+                        for: value.userId,
                         sessionId: value.sessionId,
                         dimension: dimension,
                         type: .video
@@ -555,7 +555,7 @@ class WebRTCClient: NSObject {
                 }
                 if value.hasAudio {
                     let trackSubscriptionDetails = trackSubscriptionDetails(
-                        for: value.id,
+                        for: value.userId,
                         sessionId: value.sessionId,
                         dimension: Stream_Video_Sfu_Models_VideoDimension(),
                         type: .audio
@@ -564,7 +564,7 @@ class WebRTCClient: NSObject {
                 }
                 if value.isScreensharing {
                     let trackSubscriptionDetails = trackSubscriptionDetails(
-                        for: value.id,
+                        for: value.userId,
                         sessionId: value.sessionId,
                         dimension: Stream_Video_Sfu_Models_VideoDimension(),
                         type: .screenShare

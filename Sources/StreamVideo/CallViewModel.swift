@@ -56,8 +56,8 @@ open class CallViewModel: ObservableObject {
     @Published public var hideUIElements = false
     
     public var localParticipant: CallParticipant? {
-        callParticipants.first(where: { (key, _) in
-            key == streamVideo.user.id
+        callParticipants.first(where: { (_, value) in
+            value.id == call?.sessionId
         })
             .map { $1 }
     }
@@ -71,7 +71,7 @@ open class CallViewModel: ObservableObject {
     
     public var participants: [CallParticipant] {
         callParticipants
-            .filter { $0.value.id != streamVideo.user.id }
+            .filter { $0.value.id != call?.sessionId }
             .map(\.value)
             .sorted(by: { $0.layoutPriority.rawValue < $1.layoutPriority.rawValue })
             .sorted(by: { $0.name < $1.name })
@@ -167,7 +167,7 @@ open class CallViewModel: ObservableObject {
     ///  - type: optional type of a call. If not provided, the default would be used.
     public func joinCall(callId: String, type: String? = nil) {
         callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
-        enterCall(callId: callId, participantIds: participants.map(\.id))
+        enterCall(callId: callId, participantIds: participants.map(\.userId))
     }
     
     /// Accepts the call with the provided call id and type.
@@ -178,7 +178,7 @@ open class CallViewModel: ObservableObject {
         callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: callType(from: type))
-            enterCall(callId: callId, participantIds: participants.map(\.id))
+            enterCall(callId: callId, participantIds: participants.map(\.userId))
         }
     }
     
