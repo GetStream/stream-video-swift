@@ -21,7 +21,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public var screenshareTrack: RTCVideoTrack?
     public var showTrack: Bool
     public var layoutPriority: LayoutPriority
-    public var isDominantSpeaker: Bool
+    public var isSpeaking: Bool
     public var sessionId: String
     public var connectionQuality: ConnectionQuality
     
@@ -40,7 +40,7 @@ public struct CallParticipant: Identifiable, Sendable {
         trackSize: CGSize = CGSize(width: 1024, height: 720),
         screenshareTrack: RTCVideoTrack? = nil,
         layoutPriority: LayoutPriority = .normal,
-        isDominantSpeaker: Bool = false,
+        isSpeaking: Bool = false,
         sessionId: String,
         connectionQuality: ConnectionQuality
     ) {
@@ -56,7 +56,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.track = track
         self.trackSize = trackSize
         self.layoutPriority = layoutPriority
-        self.isDominantSpeaker = isDominantSpeaker
+        self.isSpeaking = isSpeaking
         self.sessionId = sessionId
         self.screenshareTrack = screenshareTrack
         self.connectionQuality = connectionQuality
@@ -84,7 +84,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -106,7 +106,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -128,7 +128,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screensharingTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -150,7 +150,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -172,7 +172,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -194,7 +194,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -216,7 +216,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -224,7 +224,7 @@ public struct CallParticipant: Identifiable, Sendable {
 
     func withUpdated(
         layoutPriority: LayoutPriority,
-        isDominantSpeaker: Bool
+        isSpeaking: Bool
     ) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -241,6 +241,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )
@@ -262,7 +263,7 @@ public struct CallParticipant: Identifiable, Sendable {
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
-            isDominantSpeaker: isDominantSpeaker,
+            isSpeaking: isSpeaking,
             sessionId: sessionId,
             connectionQuality: connectionQuality
         )

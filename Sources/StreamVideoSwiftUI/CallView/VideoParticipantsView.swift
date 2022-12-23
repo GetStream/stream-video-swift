@@ -48,7 +48,7 @@ public struct VideoParticipantsView: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(.all)
+        .edgesIgnoringSafeArea(participants.count > 1 ? .bottom : .all)
     }
     
     var participants: [CallParticipant] {
@@ -106,17 +106,24 @@ struct VerticalParticipantsView: View {
                 )
                 .adjustVideoFrame(to: availableSize.width, ratio: ratio)
                 .overlay(
-                    BottomView(content: {
-                        HStack {
-                            AudioIndicatorView(participant: participant)
-                            Spacer()
-                            ConnectionQualityIndicator(
-                                connectionQuality: participant.connectionQuality
-                            )
+                    ZStack {
+                        BottomView(content: {
+                            HStack {
+                                AudioIndicatorView(participant: participant)
+                                Spacer()
+                                ConnectionQualityIndicator(
+                                    connectionQuality: participant.connectionQuality
+                                )
+                            }
+                            .padding(.bottom, 2)
+                        })
+                            .padding()
+                        
+                        if participant.isSpeaking && participants.count > 1 {
+                            Rectangle()
+                                .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
                         }
-                        .padding(.bottom, 2)
-                    })
-                        .padding()
+                    }
                 )
             }
         }
@@ -155,7 +162,6 @@ struct VideoCallParticipantView: View {
             .frame(maxWidth: availableSize.width)
             .opacity(showVideo ? 0 : 1)
         )
-        .border(Color.green, width: participant.isDominantSpeaker ? 2 : 0)
     }
     
     private var showVideo: Bool {

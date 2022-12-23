@@ -55,8 +55,6 @@ class SfuMiddleware: EventMiddleware {
                 await handleParticipantLeft(event)
             } else if let event = event as? Stream_Video_Sfu_Event_ChangePublishQuality {
                 handleChangePublishQualityEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_DominantSpeakerChanged {
-                await handleDominantSpeakerChanged(event)
             } else if let event = event as? Stream_Video_Sfu_Models_ICETrickle {
                 try await handleICETrickle(event)
             } else if let event = event as? Stream_Video_Sfu_Event_JoinResponse {
@@ -68,6 +66,8 @@ class SfuMiddleware: EventMiddleware {
                 await handleTrackUnpublishedEvent(event)
             } else if let event = event as? Stream_Video_Sfu_Event_ConnectionQualityChanged {
                 await handleConnectionQualityChangedEvent(event)
+            } else if let event = event as? Stream_Video_Sfu_Event_AudioLevelChanged {
+                await handleAudioLevelsChanged(event)
             }
         }
         return event
@@ -182,43 +182,6 @@ class SfuMiddleware: EventMiddleware {
         }
     }
     
-    private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_Event_DominantSpeakerChanged) async {
-        let userId = event.userID
-        var temp = [String: CallParticipant]()
-        let callParticipants = await state.callParticipants
-        for (key, participant) in callParticipants {
-            let updated: CallParticipant
-            if key == userId {
-                updated = participant.withUpdated(
-                    layoutPriority: .high,
-                    isDominantSpeaker: true
-                )
-                log.debug("Participant \(participant.name) is the dominant speaker")
-                resetDominantSpeaker(participant)
-            } else {
-                updated = participant.withUpdated(
-                    layoutPriority: .normal,
-                    isDominantSpeaker: false
-                )
-            }
-            temp[key] = updated
-        }
-        await state.update(callParticipants: temp)
-    }
-    
-    private func resetDominantSpeaker(_ participant: CallParticipant) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) { [weak self] in
-            guard let self = self else { return }
-            let updated = participant.withUpdated(
-                layoutPriority: .normal,
-                isDominantSpeaker: false
-            )
-            Task {
-                await self.state.update(callParticipant: updated)
-            }
-        }
-    }
-    
     private func handleTrackPublishedEvent(_ event: Stream_Video_Sfu_Event_TrackPublished) async {
         let userId = event.userID
         log.debug("received track published event for user \(userId)")
@@ -261,6 +224,21 @@ class SfuMiddleware: EventMiddleware {
         let participant = await state.callParticipants[userId]
         if let updated = participant?.withUpdated(connectionQuality: connectionQualityInfo.connectionQuality.mapped) {
             await state.update(callParticipant: updated)
+        }
+    }
+    
+    private func handleAudioLevelsChanged(_ event: Stream_Video_Sfu_Event_AudioLevelChanged) async {
+        let participants = await state.callParticipants
+        for level in event.audioLevels {
+            let participant = participants[level.userID]
+            if participant?.isSpeaking != level.isSpeaking {
+                if let updated = participant?.withUpdated(
+                    layoutPriority: .normal,
+                    isSpeaking: level.isSpeaking
+                ) {
+                    await state.update(callParticipant: updated)
+                }
+            }
         }
     }
     
