@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -123,10 +123,10 @@ class WebRTCClient: NSObject {
     private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 8
-    private let videoEnabled: Bool
     private var connectOptions: ConnectOptions?
     private var callSettings = CallSettings()
     private let callCoordinatorController: CallCoordinatorController
+    private let videoConfig: VideoConfig
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onParticipantEvent: ((ParticipantEvent) -> Void)? {
@@ -159,16 +159,16 @@ class WebRTCClient: NSObject {
         apiKey: String,
         hostname: String,
         token: String,
-        videoEnabled: Bool,
         callCid: String,
         callCoordinatorController: CallCoordinatorController,
+        videoConfig: VideoConfig,
         tokenProvider: @escaping UserTokenProvider
     ) {
         state = State(callCoordinatorController: callCoordinatorController)
         self.user = user
         self.token = token
         self.callCid = callCid
-        self.videoEnabled = videoEnabled
+        self.videoConfig = videoConfig
         self.callCoordinatorController = callCoordinatorController
         httpClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession(),
@@ -251,7 +251,7 @@ class WebRTCClient: NSObject {
         if callSettings.shouldPublish, let audioTrack = localAudioTrack {
             log.debug("publishing local tracks")
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"])
-            if videoEnabled, let videoTrack = localVideoTrack {
+            if videoConfig.videoEnabled, let videoTrack = localVideoTrack {
                 publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"])
             }
         }
@@ -287,6 +287,10 @@ class WebRTCClient: NSObject {
         log.debug("Setting track for \(participant.name) to \(isVisible)")
         let updated = participant.withUpdated(showTrack: isVisible)
         await state.update(callParticipant: updated)
+    }
+    
+    func setVideoFilter(_ videoFilter: VideoFilter?) {
+        videoCapturer?.setVideoFilter(videoFilter)
     }
     
     // MARK: - private
@@ -345,7 +349,7 @@ class WebRTCClient: NSObject {
         let track = stream.videoTracks.first
         Task {
             let last = idParts.last
-            if videoEnabled && last == Constants.videoTrackType && track != nil {
+            if videoConfig.videoEnabled && last == Constants.videoTrackType && track != nil {
                 await self.state.add(track: track, id: trackId)
             } else if last == Constants.screenshareTrackType && track != nil {
                 await self.state.add(screensharingTrack: track, id: trackId)
@@ -436,7 +440,11 @@ class WebRTCClient: NSObject {
     
     private func makeVideoTrack(screenshare: Bool = false) async -> RTCVideoTrack {
         let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshare)
-        videoCapturer = VideoCapturer(videoSource: videoSource, videoOptions: videoOptions)
+        videoCapturer = VideoCapturer(
+            videoSource: videoSource,
+            videoOptions: videoOptions,
+            videoFilters: videoConfig.videoFilters
+        )
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -21,7 +21,7 @@ public class CallController {
     private let callType: CallType
     private let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
-    private let videoEnabled: Bool
+    private let videoConfig: VideoConfig
     private let tokenProvider: UserTokenProvider
     
     init(
@@ -30,7 +30,7 @@ public class CallController {
         callId: String,
         callType: CallType,
         apiKey: String,
-        videoEnabled: Bool,
+        videoConfig: VideoConfig,
         tokenProvider: @escaping UserTokenProvider
     ) {
         self.user = user
@@ -39,7 +39,7 @@ public class CallController {
         self.callCoordinatorController = callCoordinatorController
         self.apiKey = apiKey
         self.tokenProvider = tokenProvider
-        self.videoEnabled = videoEnabled
+        self.videoConfig = videoConfig
     }
     
     /// Joins a call with the provided information.
@@ -69,9 +69,9 @@ public class CallController {
             apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
-            videoEnabled: videoEnabled,
             callCid: "\(callType)-\(callId)",
             callCoordinatorController: callCoordinatorController,
+            videoConfig: videoConfig,
             tokenProvider: tokenProvider
         )
         
@@ -126,6 +126,10 @@ public class CallController {
     public func addMembersToCall(ids: [String]) async throws {
         let callCid = "\(callType.name):\(callId)"
         try await callCoordinatorController.addMembersToCall(with: callCid, memberIds: ids)
+    }
+    
+    public func setVideoFilter(_ videoFilter: VideoFilter?) {
+        webRTCClient?.setVideoFilter(videoFilter)
     }
     
     /// Cleans up the call controller.

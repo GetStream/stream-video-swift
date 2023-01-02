@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -125,7 +125,7 @@ public class StreamVideo {
             callId: callId,
             callType: callType,
             apiKey: apiKey.apiKeyString,
-            videoEnabled: videoConfig.videoEnabled,
+            videoConfig: videoConfig,
             tokenProvider: tokenProvider
         )
         currentCallController = controller

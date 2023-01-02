@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -10,14 +10,25 @@ class VideoCapturer {
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
+    private var videoFiltersHandler: VideoFiltersHandler?
     
-    init(videoSource: RTCVideoSource, videoOptions: VideoOptions) {
+    init(
+        videoSource: RTCVideoSource,
+        videoOptions: VideoOptions,
+        videoFilters: [VideoFilter]
+    ) {
         self.videoOptions = videoOptions
         self.videoSource = videoSource
         #if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         #else
-        videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
+        if videoFilters.isEmpty {
+            videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
+        } else {
+            let filtersHandler = VideoFiltersHandler(source: videoSource, filters: videoFilters)
+            videoFiltersHandler = filtersHandler
+            videoCapturer = RTCCameraVideoCapturer(delegate: filtersHandler)
+        }
         #endif
     }
     
@@ -72,6 +83,10 @@ class VideoCapturer {
             format: selectedFormat.format,
             fps: selectedFps
         )
+    }
+    
+    func setVideoFilter(_ videoFilter: VideoFilter?) {
+        videoFiltersHandler?.selectedFilter = videoFilter
     }
     
     func stopCameraCapture() {

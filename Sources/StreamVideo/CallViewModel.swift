@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -216,6 +216,10 @@ open class CallViewModel: ObservableObject {
             }
         }
         leaveCall()
+    }
+    
+    public func setVideoFilter(_ videoFilter: VideoFilter?) {
+        callController?.setVideoFilter(videoFilter)
     }
     
     // MARK: - private
