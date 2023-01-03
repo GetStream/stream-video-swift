@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -25,7 +25,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public var isSpeaking: Bool
     public var sessionId: String
     public var connectionQuality: ConnectionQuality
-    
+
     public init(
         id: String,
         userId: String,
@@ -65,12 +65,12 @@ public struct CallParticipant: Identifiable, Sendable {
         self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
     }
-    
+
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
         hasVideo && track != nil && showTrack
     }
-    
+
     public func withUpdated(trackSize: CGSize) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -93,7 +93,7 @@ public struct CallParticipant: Identifiable, Sendable {
             connectionQuality: connectionQuality
         )
     }
-    
+
     func withUpdated(track: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -116,7 +116,7 @@ public struct CallParticipant: Identifiable, Sendable {
             connectionQuality: connectionQuality
         )
     }
-    
+
     func withUpdated(screensharingTrack: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -139,7 +139,7 @@ public struct CallParticipant: Identifiable, Sendable {
             connectionQuality: connectionQuality
         )
     }
-    
+
     func withUpdated(audio: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -185,7 +185,7 @@ public struct CallParticipant: Identifiable, Sendable {
             connectionQuality: connectionQuality
         )
     }
-    
+
     func withUpdated(screensharing: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -257,7 +257,7 @@ public struct CallParticipant: Identifiable, Sendable {
             connectionQuality: connectionQuality
         )
     }
-    
+
     func withUpdated(connectionQuality: ConnectionQuality) -> CallParticipant {
         CallParticipant(
             id: id,
@@ -289,7 +289,7 @@ public enum LayoutPriority: Int, Sendable {
 }
 
 extension CallParticipant {
-    
+
     public func toUser() -> User {
         User(
             id: id,
@@ -301,7 +301,7 @@ extension CallParticipant {
 }
 
 extension Stream_Video_User {
-    
+
     func toCallParticipant() -> CallParticipant {
         CallParticipant(
             id: id,
@@ -322,7 +322,7 @@ extension Stream_Video_User {
 }
 
 extension Stream_Video_Sfu_Models_Participant {
-    
+
     func toCallParticipant(showTrack: Bool = true, enrichData: EnrichedUserData) -> CallParticipant {
         CallParticipant(
             id: sessionID,

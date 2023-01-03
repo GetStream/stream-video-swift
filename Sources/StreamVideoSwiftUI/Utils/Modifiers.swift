@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -12,7 +12,7 @@ public enum BackgroundType {
 }
 
 extension Image {
-    
+
     public func applyCallButtonStyle(
         color: Color,
         backgroundType: BackgroundType = .circle,
@@ -26,7 +26,7 @@ extension Image {
             .background(background(for: backgroundType))
             .modifier(ShadowModifier())
     }
-    
+
     @ViewBuilder
     func background(for type: BackgroundType) -> some View {
         if type == .none {
@@ -40,7 +40,7 @@ extension Image {
 }
 
 extension Text {
-    
+
     func applyCallingStyle() -> some View {
         font(InjectedValues[\.fonts].title2)
             .fontWeight(.semibold)
@@ -49,7 +49,7 @@ extension Text {
 }
 
 extension View {
-    
+
     func adjustVideoFrame(to width: CGFloat, ratio: CGFloat = 0.5) -> some View {
         aspectRatio(ratio, contentMode: .fill)
             .frame(width: width)
@@ -59,7 +59,7 @@ extension View {
 
 /// Modifier for adding shadow and corner radius to a view.
 struct ShadowViewModifier: ViewModifier {
-    
+
     var cornerRadius: CGFloat = 16
 
     func body(content: Content) -> some View {

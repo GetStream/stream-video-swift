@@ -1,12 +1,12 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
 import WebRTC
 
 actor AudioSession {
-    
+
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,
         callSettings: CallSettings
@@ -30,7 +30,7 @@ actor AudioSession {
 }
 
 extension RTCAudioSessionConfiguration {
-    
+
     static let `default`: RTCAudioSessionConfiguration = {
         let configuration = RTCAudioSessionConfiguration.webRTC()
         var categoryOptions: AVAudioSession.CategoryOptions = [.allowBluetooth, .allowBluetoothA2DP]

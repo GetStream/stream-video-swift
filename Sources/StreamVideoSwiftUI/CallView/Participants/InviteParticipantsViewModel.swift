@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -9,22 +9,22 @@ import SwiftUI
 
 @MainActor
 class InviteParticipantsViewModel: ObservableObject {
-    
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.utils) var utils
-    
+
     @Published var searchText = ""
-    
+
     @Published var selectedUsers = [User]()
     @Published var allUsers = [User]()
-    
+
     private let limit = 15
     private var offset = 0
-    
+
     private var loading = false
-    
+
     private var currentParticipantIds: [String]
-    
+
     var filteredUsers: [User] {
         let displayUsers = allUsers.filter { !currentParticipantIds.contains($0.id) }
         if searchText.isEmpty {
@@ -36,12 +36,12 @@ class InviteParticipantsViewModel: ObservableObject {
             }
         }
     }
-        
+
     init(currentParticipants: [CallParticipant]) {
         currentParticipantIds = currentParticipants.map(\.userId)
         loadNextUsers()
     }
-    
+
     func inviteUsersTapped() {
         guard let controller = streamVideo.currentCallController else { return }
         Task {
@@ -52,7 +52,7 @@ class InviteParticipantsViewModel: ObservableObject {
             }
         }
     }
-    
+
     func userTapped(_ user: User) {
         if selectedUsers.contains(user) {
             selectedUsers.removeAll { current in
@@ -62,7 +62,7 @@ class InviteParticipantsViewModel: ObservableObject {
             selectedUsers.append(user)
         }
     }
-    
+
     func onUserAppear(user: User) {
         guard let index = allUsers.firstIndex(of: user),
               index < allUsers.count - 10 else {
@@ -70,21 +70,21 @@ class InviteParticipantsViewModel: ObservableObject {
         }
         loadNextUsers()
     }
-    
+
     func isSelected(user: User) -> Bool {
         selectedUsers.contains(user)
     }
-    
+
     func onlineInfo(for user: User) -> String {
         // TODO: provide implementation
         ""
     }
-    
+
     private func loadNextUsers() {
         if loading {
             return
         }
-        
+
         loading = true
         Task {
             let newUsers = try await utils.userListProvider.loadNextUsers(

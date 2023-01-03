@@ -1,18 +1,18 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
 import SwiftUI
 
 public struct ScreenSharingView: View {
-    
+
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreensharingSession
     var availableSize: CGSize
-    
+
     private let thumbnailSize: CGFloat = 120
-        
+
     public var body: some View {
         VStack(alignment: .leading) {
             if !viewModel.hideUIElements {
@@ -29,7 +29,7 @@ public struct ScreenSharingView: View {
                     screensharingView
                 }
             }
-            
+
             if !viewModel.hideUIElements {
                 ScrollView(.horizontal) {
                     HStack {
@@ -45,7 +45,7 @@ public struct ScreenSharingView: View {
                             .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                             .cornerRadius(8)
                         }
-                        
+
                         LocalVideoView(callSettings: viewModel.callSettings) { view in
                             if let track = viewModel.localParticipant?.track {
                                 view.add(track: track)
@@ -60,7 +60,7 @@ public struct ScreenSharingView: View {
                     .cornerRadius(8)
                 }
                 .padding()
-                
+
                 Spacer(minLength: thumbnailSize)
             }
         }
@@ -70,7 +70,7 @@ public struct ScreenSharingView: View {
         )
         .background(Color.black)
     }
-    
+
     private var screensharingView: some View {
         VideoRendererView(
             id: screenSharing.participant.id,
@@ -94,7 +94,7 @@ public struct ScreenSharingView: View {
         .id("\(viewModel.hideUIElements)")
         .rotationEffect(.degrees(viewModel.hideUIElements ? 90 : 0))
     }
-    
+
     private var videoSize: CGSize {
         if viewModel.hideUIElements {
             return .init(width: availableSize.height, height: availableSize.width)

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -7,12 +7,12 @@ import WebRTC
 
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
 final class CallCoordinatorController: Sendable {
-    
+
     let callCoordinatorService: Stream_Video_CallCoordinatorService
     private let latencyService: LatencyService
     private let videoConfig: VideoConfig
     private let user: User
-    
+
     init(
         httpClient: HTTPClient,
         user: User,
@@ -29,7 +29,7 @@ final class CallCoordinatorController: Sendable {
         self.videoConfig = videoConfig
         self.user = user
     }
-    
+
     func joinCall(
         callType: CallType,
         callId: String,
@@ -41,25 +41,25 @@ final class CallCoordinatorController: Sendable {
             type: callType.name,
             participantIds: participantIds
         )
-        
+
         let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
-        
+
         let edgeServer = try await selectEdgeServer(
             callId: joinCallResponse.call.call.callCid,
             latencyByEdge: latencyByEdge
         )
-        
+
         return edgeServer
     }
 
     func update(token: UserToken) {
         callCoordinatorService.update(userToken: token.rawValue)
     }
-    
+
     func makeVoipNotificationsController() -> VoipNotificationsController {
         VoipNotificationsController(callCoordinatorService: callCoordinatorService)
     }
-    
+
     func sendEvent(
         type: Stream_Video_UserEventType,
         callId: String,
@@ -70,7 +70,7 @@ final class CallCoordinatorController: Sendable {
         request.eventType = type
         _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
     }
-    
+
     func addMembersToCall(with cid: String, memberIds: [String]) async throws {
         var request = Stream_Video_UpsertCallMembersRequest()
         request.callCid = cid
@@ -83,7 +83,7 @@ final class CallCoordinatorController: Sendable {
         request.ring = !videoConfig.joinVideoCallInstantly
         _ = try await callCoordinatorService.upsertCallMembers(upsertCallMembersRequest: request)
     }
-    
+
     func enrichUserData(for id: String) async throws -> EnrichedUserData {
         var request = Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest()
         let filter = ["id": ["$in": [id]]]
@@ -95,7 +95,7 @@ final class CallCoordinatorController: Sendable {
     }
 
     // MARK: - private
-        
+
     private func measureLatencies(
         for endpoints: [Stream_Video_Edge]
     ) async -> [String: Stream_Video_Latency] {
@@ -109,19 +109,19 @@ final class CallCoordinatorController: Sendable {
                     return [endpoint.name: latency]
                 }
             }
-            
+
             for await latency in group {
                 for (key, value) in latency {
                     result[key] = value
                 }
             }
-            
+
             log.debug("Reported latencies for edges: \(result)")
-            
+
             return result
         }
     }
-    
+
     private func joinCall(
         callId: String,
         type: String,
@@ -146,7 +146,7 @@ final class CallCoordinatorController: Sendable {
         let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
         return joinCallResponse
     }
-    
+
     private func selectEdgeServer(
         callId: String,
         latencyByEdge: [String: Stream_Video_Latency]

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -7,15 +7,15 @@ import Foundation
 @preconcurrency import StreamVideo
 
 class CallKitService: NSObject, CXProviderDelegate {
-    
+
     @Injected(\.streamVideo) var streamVideo
-        
+
     var callId: String = ""
     var callType: String = ""
-    
+
     private var callKitId: UUID?
     private let callController = CXCallController()
-    
+
     override init() {
         super.init()
         NotificationCenter.default.addObserver(
@@ -25,7 +25,7 @@ class CallKitService: NSObject, CXProviderDelegate {
             object: nil
         )
     }
-        
+
     func reportIncomingCall(
         callCid: String,
         callInfo: String,
@@ -53,7 +53,7 @@ class CallKitService: NSObject, CXProviderDelegate {
             completion: completion
         )
     }
-    
+
     @objc func endCurrentCall() {
         guard let callKitId = callKitId else { return }
         let endCallAction = CXEndCallAction(call: callKitId)
@@ -71,9 +71,9 @@ class CallKitService: NSObject, CXProviderDelegate {
             }
         }
     }
-    
+
     func providerDidReset(_ provider: CXProvider) {}
-    
+
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
             action.fail()
@@ -112,11 +112,11 @@ class CallKitService: NSObject, CXProviderDelegate {
             }
         }
     }
-    
+
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         callKitId = nil
         streamVideo.leaveCall()
         action.fulfill()
     }
-    
+
 }

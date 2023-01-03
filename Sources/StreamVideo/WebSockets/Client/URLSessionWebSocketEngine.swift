@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -10,27 +10,27 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             oldValue?.cancel()
         }
     }
-    
+
     let request: URLRequest
     private var session: URLSession?
     let delegateOperationQueue: OperationQueue
     let sessionConfiguration: URLSessionConfiguration
     var urlSessionDelegateHandler: URLSessionDelegateHandler?
-    
+
     var callbackQueue: DispatchQueue { delegateOperationQueue.underlyingQueue! }
-    
+
     weak var delegate: WebSocketEngineDelegate?
-    
+
     required init(request: URLRequest, sessionConfiguration: URLSessionConfiguration, callbackQueue: DispatchQueue) {
         self.request = request
         self.sessionConfiguration = sessionConfiguration
-        
+
         delegateOperationQueue = OperationQueue()
         delegateOperationQueue.underlyingQueue = callbackQueue
 
         super.init()
     }
-    
+
     func connect() {
         urlSessionDelegateHandler = makeURLSessionDelegateHandler()
 
@@ -51,7 +51,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         doRead()
         task?.resume()
     }
-    
+
     func disconnect() {
         task?.cancel(with: .normalClosure, reason: nil)
         session?.invalidateAndCancel()
@@ -60,7 +60,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         task = nil
         urlSessionDelegateHandler = nil
     }
-    
+
     func send(message: SendableEvent) {
         do {
             let data = try message.serializedData()
@@ -75,14 +75,14 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             log.error("error occurred")
         }
     }
-    
+
     private func doRead() {
         task?.receive { [weak self] result in
             log.debug("received new event \(result)")
             guard let self = self else {
                 return
             }
-            
+
             switch result {
             case let .success(message):
                 if case let .data(data) = message {
@@ -91,7 +91,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                     }
                 }
                 self.doRead()
-                
+
             case let .failure(error):
                 log.error("Failed receiving Web Socket Message with error: \(error)", subsystems: .webSocket)
             }
@@ -141,7 +141,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         disconnect()
     }
 }
-    
+
 class URLSessionDelegateHandler: NSObject, URLSessionDataDelegate, URLSessionWebSocketDelegate {
     var onOpen: ((_ protocol: String?) -> Void)?
     var onClose: ((_ code: URLSessionWebSocketTask.CloseCode, _ reason: Data?) -> Void)?

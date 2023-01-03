@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -18,7 +18,7 @@ extension URLRequest {
 extension Array where Element == URLQueryItem {
     var prettyPrinted: String {
         var message = ""
-        
+
         forEach { item in
             if let value = item.value,
                value.hasPrefix("{"),
@@ -28,11 +28,11 @@ extension Array where Element == URLQueryItem {
                 message += "- \(item.description)\n"
             }
         }
-        
+
         if message.isEmpty {
             message = "<Empty>"
         }
-        
+
         return message
     }
 }

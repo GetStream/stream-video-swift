@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -12,12 +12,12 @@ public struct IncomingCallView_iOS13: View {
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
-    
+
     @BackportStateObject var viewModel: IncomingViewModel
-            
+
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
-    
+
     public init(
         callInfo: IncomingCall,
         onCallAccepted: @escaping (String) -> Void,
@@ -29,7 +29,7 @@ public struct IncomingCallView_iOS13: View {
         self.onCallAccepted = onCallAccepted
         self.onCallRejected = onCallRejected
     }
-    
+
     public var body: some View {
         IncomingCallViewContent(
             callParticipants: viewModel.callParticipants,

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
@@ -9,19 +9,19 @@ import Sentry
 
 @main
 struct StreamVideoSwiftUIApp: App {
-    
+
     private let userRepository: UserRepository = UnsecureUserRepository.shared
-    
+
     @State var streamVideoUI: StreamVideoUI?
-    
+
     @ObservedObject var appState = AppState.shared
-        
+
     init() {
         checkLoggedInUser()
         LogConfig.level = .debug
         configureSentry()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ZStack {
@@ -38,7 +38,7 @@ struct StreamVideoSwiftUIApp: App {
             }
         }
     }
-    
+
     private func handle(url: URL) {
         let queryParams = url.queryParameters
         let users = UserCredentials.builtInUsers
@@ -53,7 +53,7 @@ struct StreamVideoSwiftUIApp: App {
             handleSelectedUser(user, callId: callId)
         }
     }
-    
+
     private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
         let streamVideo = StreamVideo(
             apiKey: "us83cfwuhy8n",
@@ -71,7 +71,7 @@ struct StreamVideoSwiftUIApp: App {
         let utils = Utils(userListProvider: MockUserListProvider())
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
     }
-    
+
     private func checkLoggedInUser() {
         if let user = userRepository.loadCurrentUser() {
             appState.currentUser = user.userInfo
@@ -79,7 +79,7 @@ struct StreamVideoSwiftUIApp: App {
             handleSelectedUser(user)
         }
     }
-    
+
     private func configureSentry() {
     #if RELEASE
         // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
@@ -91,5 +91,5 @@ struct StreamVideoSwiftUIApp: App {
         }
     #endif
     }
-    
+
 }

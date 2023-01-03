@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -11,7 +11,7 @@ public class Appearance {
     public var images: Images
     public var fonts: Fonts
     public var sounds: Sounds
-    
+
     public init(
         colors: Colors = Colors(),
         images: Images = Images(),
@@ -23,7 +23,7 @@ public class Appearance {
         self.fonts = fonts
         self.sounds = sounds
     }
-    
+
     /// Provider for custom localization which is dependent on App Bundle.
     public static var localizationProvider: (_ key: String, _ table: String) -> String = { key, table in
         Bundle.streamVideoUI.localizedString(forKey: key, value: nil, table: table)

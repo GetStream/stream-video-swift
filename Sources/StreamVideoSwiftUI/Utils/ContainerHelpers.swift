@@ -1,13 +1,13 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
 
 struct TrailingView<Content: View>: View {
-    
+
     var content: () -> Content
-    
+
     var body: some View {
         HStack {
             Spacer()
@@ -17,9 +17,9 @@ struct TrailingView<Content: View>: View {
 }
 
 struct TopView<Content: View>: View {
-    
+
     var content: () -> Content
-    
+
     var body: some View {
         VStack {
             content()
@@ -31,11 +31,11 @@ struct TopView<Content: View>: View {
 /// View container that allows injecting another view in its top right corner.
 public struct TopRightView<Content: View>: View {
     var content: () -> Content
-    
+
     public init(content: @escaping () -> Content) {
         self.content = content
     }
-        
+
     public var body: some View {
         HStack {
             Spacer()
@@ -49,11 +49,11 @@ public struct TopRightView<Content: View>: View {
 
 public struct BottomRightView<Content: View>: View {
     var content: () -> Content
-    
+
     public init(content: @escaping () -> Content) {
         self.content = content
     }
-        
+
     public var body: some View {
         HStack {
             Spacer()
@@ -66,9 +66,9 @@ public struct BottomRightView<Content: View>: View {
 }
 
 struct BottomView<Content: View>: View {
-    
+
     var content: () -> Content
-    
+
     var body: some View {
         VStack {
             Spacer()

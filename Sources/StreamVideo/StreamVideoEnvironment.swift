@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -14,7 +14,7 @@ extension StreamVideo {
                 tokenProvider: $0
             )
         }
-        
+
         var callCoordinatorControllerBuilder: (
             _ httpClient: HTTPClient,
             _ user: User,
@@ -34,13 +34,13 @@ extension StreamVideo {
                 videoConfig: $5
             )
         }
-        
+
         var latencyServiceBuilder: (
             _ httpClient: HTTPClient
         ) -> LatencyService = {
             LatencyService(httpClient: $0)
         }
-        
+
         var connectionRecoveryHandlerBuilder: (
             _ webSocketClient: WebSocketClient,
             _ eventNotificationCenter: EventNotificationCenter
@@ -55,7 +55,7 @@ extension StreamVideo {
                 keepConnectionAliveInBackground: true
             )
         }
-        
+
         private static var backgroundTaskSchedulerBuilder: () -> BackgroundTaskScheduler? = {
             if Bundle.main.isAppExtension {
                 // No background task scheduler exists for app extensions.
@@ -69,7 +69,7 @@ extension StreamVideo {
                 #endif
             }
         }
-        
+
         internal static func makeURLSession() -> URLSession {
             let config = URLSessionConfiguration.default
             config.requestCachePolicy = .reloadIgnoringLocalCacheData

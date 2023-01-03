@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -7,15 +7,15 @@ import SwiftUI
 
 public struct MinimizedCallView: View {
     @ObservedObject var viewModel: CallViewModel
-    
+
     @State var callViewPlacement = CallViewPlacement.topTrailing
-    
+
     @State private var dragAmount = CGSize.zero
-        
+
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         GeometryReader { proxy in
             CornerDragableView(
@@ -27,7 +27,7 @@ public struct MinimizedCallView: View {
             )
         }
     }
-    
+
     func content(for proxy: GeometryProxy) -> some View {
         Group {
             if !viewModel.participants.isEmpty {

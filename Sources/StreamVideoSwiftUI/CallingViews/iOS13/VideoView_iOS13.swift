@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -7,19 +7,19 @@ import SwiftUI
 
 @available(iOS, introduced: 13, obsoleted: 14)
 public struct VideoView_iOS13<Factory: ViewFactory>: View {
-    
+
     @Injected(\.utils) var utils
-    
+
     var viewFactory: Factory
     @BackportStateObject var viewModel: CallViewModel
-    
+
     private let padding: CGFloat = 16
-    
+
     public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         _viewModel = BackportStateObject(wrappedValue: viewModel)
     }
-    
+
     public var body: some View {
         ZStack {
             if viewModel.callingState == .outgoing {

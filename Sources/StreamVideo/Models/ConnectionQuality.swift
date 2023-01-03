@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -13,7 +13,7 @@ public enum ConnectionQuality: Sendable {
 }
 
 extension Stream_Video_Sfu_Models_ConnectionQuality {
-    
+
     var mapped: ConnectionQuality {
         switch self {
         case .poor:

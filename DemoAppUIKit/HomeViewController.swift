@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -10,18 +10,18 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 class HomeViewController: UIViewController {
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     let callViewModel = CallViewModel()
     let reuseIdentifier = "ParticipantCell"
     let startButton = UIButton(type: .system)
     var textField = UITextField()
     var participantsTableView: UITableView!
     var text: String = ""
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     lazy var participants: [User] = {
         var participants = UserCredentials.builtInUsers.map { $0.userInfo }
         participants.removeAll { userInfo in
@@ -29,13 +29,13 @@ class HomeViewController: UIViewController {
         }
         return participants
     }()
-    
+
     var selectedParticipants = [User]() {
         didSet {
             participantsTableView.reloadData()
         }
     }
-        
+
     override func viewDidLoad() {
         super.viewDidLoad()
         self.title = "Call Details"
@@ -58,7 +58,7 @@ class HomeViewController: UIViewController {
         self.view.backgroundColor = UIColor.white
         listenToIncomingCalls()
     }
-    
+
     private func createParticipantsView() -> UITableView {
         participantsTableView = UITableView()
         participantsTableView.delegate = self
@@ -72,21 +72,21 @@ class HomeViewController: UIViewController {
         participantsTableView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.size.width).isActive = true
         return participantsTableView
     }
-    
+
     private func createParticipantsTitle() -> UILabel {
         let title = UILabel()
         title.text = "Select participants"
         title.font = .preferredFont(forTextStyle: .title3)
         return title
     }
-    
+
     private func createInputField() -> UITextField {
         textField.placeholder = "Insert a call id"
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         return textField
     }
-    
+
     private func createStartButton() -> UIButton {
         startButton.translatesAutoresizingMaskIntoConstraints = false
         startButton.setTitle("Start Call", for: .normal)
@@ -94,18 +94,18 @@ class HomeViewController: UIViewController {
         startButton.isEnabled = false
         return startButton
     }
-    
+
     @objc private func textFieldDidChange() {
         text = textField.text ?? ""
         startButton.isEnabled = !text.isEmpty
     }
-    
+
     @objc private func didTapStartButton() {
         let next = CallViewController.make(with: callViewModel)
         next.startCall(callId: text, participants: selectedParticipants)
         CallViewHelper.shared.add(callView: next.view)
     }
-    
+
     private func listenToIncomingCalls() {
         callViewModel.$callingState.sink { [weak self] newState in
             guard let self = self else { return }
@@ -118,15 +118,15 @@ class HomeViewController: UIViewController {
         }
         .store(in: &cancellables)
     }
-    
+
 }
 
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
-    
+
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         participants.count
     }
-    
+
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         var cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier)
         if cell == nil {
@@ -140,7 +140,7 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         cell?.textLabel?.text = text
         return cell!
     }
-    
+
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         let participant = participants[indexPath.row]
         if selectedParticipants.contains(participant) {

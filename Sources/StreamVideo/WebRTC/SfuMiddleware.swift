@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -15,7 +15,7 @@ class SfuMiddleware: EventMiddleware {
     private var publisher: PeerConnection?
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     var onSocketConnected: (() -> Void)?
-    
+
     init(
         sessionID: String,
         user: User,
@@ -35,15 +35,15 @@ class SfuMiddleware: EventMiddleware {
         self.onParticipantEvent = onParticipantEvent
         participantsThreshold = participantThreshold
     }
-    
+
     func update(subscriber: PeerConnection?) {
         self.subscriber = subscriber
     }
-    
+
     func update(publisher: PeerConnection?) {
         self.publisher = publisher
     }
-    
+
     func handle(event: Event) -> Event? {
         log.debug("Received an event \(event)")
         Task {
@@ -72,7 +72,7 @@ class SfuMiddleware: EventMiddleware {
         }
         return event
     }
-    
+
     private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {
         do {
             log.debug("Handling subscriber offer")
@@ -90,7 +90,7 @@ class SfuMiddleware: EventMiddleware {
             log.error("Error handling offer event \(error.localizedDescription)")
         }
     }
-    
+
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_Event_ParticipantJoined) async {
         let callParticipants = await state.callParticipants
         let showTrack = (callParticipants.count + 1) < participantsThreshold
@@ -106,7 +106,7 @@ class SfuMiddleware: EventMiddleware {
         log.debug("Participant \(participant.name) joined the call")
         onParticipantEvent?(event)
     }
-    
+
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
         let enrichedData = await state.enrichedData(for: event.participant.userID)
         let participant = event.participant.toCallParticipant(enrichData: enrichedData)
@@ -121,7 +121,7 @@ class SfuMiddleware: EventMiddleware {
         log.debug("Participant \(participant.name) left the call")
         onParticipantEvent?(event)
     }
-    
+
     private func handleChangePublishQualityEvent(
         _ event: Stream_Video_Sfu_Event_ChangePublishQuality
     ) {
@@ -152,7 +152,7 @@ class SfuMiddleware: EventMiddleware {
             publisher?.transceiver?.sender.parameters = params
         }
     }
-    
+
     private func handleICETrickle(_ event: Stream_Video_Sfu_Models_ICETrickle) async throws {
         log.debug("Handling ice trickle")
         let peerType = event.peerType
@@ -181,7 +181,7 @@ class SfuMiddleware: EventMiddleware {
             publisher.add(iceCandidate: iceCandidate)
         }
     }
-    
+
     private func handleTrackPublishedEvent(_ event: Stream_Video_Sfu_Event_TrackPublished) async {
         let userId = event.sessionID
         log.debug("received track published event for user \(userId)")
@@ -197,7 +197,7 @@ class SfuMiddleware: EventMiddleware {
             await state.update(callParticipant: updated)
         }
     }
-    
+
     private func handleTrackUnpublishedEvent(_ event: Stream_Video_Sfu_Event_TrackUnpublished) async {
         let userId = event.sessionID
         log.debug("received track unpublished event for user \(userId)")
@@ -217,7 +217,7 @@ class SfuMiddleware: EventMiddleware {
             await state.update(callParticipant: updated)
         }
     }
-    
+
     private func handleConnectionQualityChangedEvent(_ event: Stream_Video_Sfu_Event_ConnectionQualityChanged) async {
         guard let connectionQualityInfo = event.connectionQualityUpdates.last else { return }
         let userId = connectionQualityInfo.sessionID
@@ -226,7 +226,7 @@ class SfuMiddleware: EventMiddleware {
             await state.update(callParticipant: updated)
         }
     }
-    
+
     private func handleAudioLevelsChanged(_ event: Stream_Video_Sfu_Event_AudioLevelChanged) async {
         let participants = await state.callParticipants
         for level in event.audioLevels {
@@ -241,7 +241,7 @@ class SfuMiddleware: EventMiddleware {
             }
         }
     }
-    
+
     private func loadParticipants(from response: Stream_Video_Sfu_Event_JoinResponse) async {
         log.debug("Loading participants from joinResponse")
         let participants = response.callState.participants

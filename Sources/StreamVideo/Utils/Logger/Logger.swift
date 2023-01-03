@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -11,18 +11,18 @@ public var log: Logger {
 /// Entity for identifying which subsystem the log message comes from.
 public struct LogSubsystem: OptionSet {
     public let rawValue: Int
-    
+
     public init(rawValue: Int) {
         self.rawValue = rawValue
     }
-    
+
     /// All subsystems within the SDK.
     public static let all: LogSubsystem = [.database, .httpRequests, .webSocket, .other, .offlineSupport]
-    
+
     /// The subsystem responsible for any other part of the SDK.
     /// This is the default subsystem value for logging, to be used when `subsystem` is not specified.
     public static let other = Self(rawValue: 1 << 0)
-    
+
     /// The subsystem responsible for database operations.
     public static let database = Self(rawValue: 1 << 1)
     /// The subsystem responsible for HTTP operations.
@@ -40,14 +40,14 @@ public enum LogConfig {
             invalidateLogger()
         }
     }
-    
+
     /// Output level for the logger.
     public static var level: LogLevel = .error {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Date formatter for the logger. Defaults to ISO8601
     public static var dateFormatter: DateFormatter = {
         let df = DateFormatter()
@@ -58,7 +58,7 @@ public enum LogConfig {
             invalidateLogger()
         }
     }
-    
+
     /// Log formatters to be applied in order before logs are outputted. Defaults to empty (no formatters).
     /// Please see `LogFormatter` for more info.
     public static var formatters = [LogFormatter]() {
@@ -66,63 +66,63 @@ public enum LogConfig {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing date in logs
     public static var showDate = true {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing log level in logs
     public static var showLevel = true {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing identifier in logs
     public static var showIdentifier = false {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing thread name in logs
     public static var showThreadName = true {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing file name in logs
     public static var showFileName = true {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing line number in logs
     public static var showLineNumber = true {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Toggle for showing function name in logs
     public static var showFunctionName = true {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Subsystems for the logger
     public static var subsystems: LogSubsystem = .all {
         didSet {
             invalidateLogger()
         }
     }
-    
+
     /// Destination types this logger will use.
     ///
     /// Logger will initialize the destinations with its own parameters. If you want full control on the parameters, use `destinations` directly,
@@ -132,9 +132,9 @@ public enum LogConfig {
             invalidateLogger()
         }
     }
-    
+
     private static var _destinations: [LogDestination]?
-    
+
     /// Destinations for the default logger. Please see `LogDestination`.
     /// Defaults to only `ConsoleLogDestination`, which only prints the messages.
     ///
@@ -168,10 +168,10 @@ public enum LogConfig {
             _destinations = newValue
         }
     }
-    
+
     /// Underlying logger instance to control singleton.
     private static var _logger: Logger?
-    
+
     /// Logger instance to be used by StreamChat.
     ///
     /// - Important: Other options in `LogConfig` will not take affect if this is changed.
@@ -188,7 +188,7 @@ public enum LogConfig {
             _logger = newValue
         }
     }
-    
+
     /// Invalidates the current logger instance so it can be recreated.
     private static func invalidateLogger() {
         _logger = nil
@@ -200,19 +200,19 @@ public enum LogConfig {
 public class Logger {
     /// Identifier of the Logger. Will be visible if a destination has `showIdentifiers` enabled.
     public let identifier: String
-    
+
     /// Destinations for this logger.
     /// See `LogDestination` protocol for details.
     public var destinations: [LogDestination]
-    
+
     private let loggerQueue = DispatchQueue(label: "LoggerQueue \(UUID())")
-    
+
     /// Init a logger with a given identifier and destinations.
     public init(identifier: String = "", destinations: [LogDestination] = []) {
         self.identifier = identifier
         self.destinations = destinations
     }
-    
+
     /// Allows logger to be called as function.
     /// Transforms, given that `let log = Logger()`, `log.log(.info, "Hello")` to `log(.info, "Hello")` for ease of use.
     ///
@@ -239,7 +239,7 @@ public class Logger {
             subsystems: subsystems
         )
     }
-    
+
     /// Log a message to all enabled destinations.
     /// See  `Logger.destinations` for customizing the output.
     ///
@@ -259,7 +259,7 @@ public class Logger {
     ) {
         let enabledDestinations = destinations.filter { $0.isEnabled(level: level, subsystems: subsystems) }
         guard !enabledDestinations.isEmpty else { return }
-        
+
         let logDetails = LogDetails(
             loggerIdentifier: identifier,
             level: level,
@@ -276,7 +276,7 @@ public class Logger {
             }
         }
     }
-    
+
     /// Log an info message.
     ///
     /// - Parameters:
@@ -300,7 +300,7 @@ public class Logger {
             subsystems: subsystems
         )
     }
-    
+
     /// Log a debug message.
     ///
     /// - Parameters:
@@ -324,7 +324,7 @@ public class Logger {
             subsystems: subsystems
         )
     }
-    
+
     /// Log a warning message.
     ///
     /// - Parameters:
@@ -348,7 +348,7 @@ public class Logger {
             subsystems: subsystems
         )
     }
-    
+
     /// Log an error message.
     ///
     /// - Parameters:
@@ -372,7 +372,7 @@ public class Logger {
             subsystems: subsystems
         )
     }
-    
+
     /// Performs `Swift.assert` and stops program execution if `condition` evaluated to false. In RELEASE builds only
     /// logs the failure.
     ///
@@ -400,7 +400,7 @@ public class Logger {
             subsystems: subsystems
         )
     }
-    
+
     /// Stops program execution with `Swift.assertionFailure`. In RELEASE builds only
     /// logs the failure.
     ///

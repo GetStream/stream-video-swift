@@ -1,40 +1,40 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
 import StreamVideo
 
 protocol UserRepository {
-    
+
     func save(user: UserCredentials)
-    
+
     func loadCurrentUser() -> UserCredentials?
-    
+
     func removeCurrentUser()
-    
+
 }
 
 protocol VoipTokenHandler {
-    
+
     func save(voipPushToken: String?)
-    
+
     func currentVoipPushToken() -> String?
-    
+
 }
 
 //NOTE: This is just for simplicity. User data shouldn't be kept in `UserDefaults`.
 class UnsecureUserRepository: UserRepository, VoipTokenHandler {
-    
+
     private let defaults = UserDefaults.standard
     private let userKey = "stream.video.user"
     private let tokenKey = "stream.video.token"
     private let voipPushTokenKey = "stream.video.voip.token"
-    
+
     static let shared = UnsecureUserRepository()
-    
+
     private init() {}
-    
+
     func save(user: UserCredentials) {
         let encoder = JSONEncoder()
         if let encoded = try? encoder.encode(user.userInfo) {
@@ -42,7 +42,7 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler {
             defaults.set(user.token.rawValue, forKey: tokenKey)
         }
     }
-    
+
     func loadCurrentUser() -> UserCredentials? {
         if let savedUser = defaults.object(forKey: userKey) as? Data {
             let decoder = JSONDecoder()
@@ -59,20 +59,20 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler {
         }
         return nil
     }
-    
+
     func save(voipPushToken: String?) {
         defaults.set(voipPushToken, forKey: voipPushTokenKey)
     }
-    
+
     func currentVoipPushToken() -> String? {
         defaults.value(forKey: voipPushTokenKey) as? String
     }
-    
+
     func removeCurrentUser() {
         defaults.set(nil, forKey: userKey)
         defaults.set(nil, forKey: tokenKey)
         defaults.set(nil, forKey: voipPushTokenKey)
     }
-    
-    
+
+
 }

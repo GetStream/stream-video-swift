@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
@@ -7,9 +7,9 @@ import UIKit
 
 /// Provides the colors used throughout the SDK.
 public struct Colors {
-    
+
     public init() { /* Public init. */ }
- 
+
     public var text = Color(.streamBlack)
     public var accentRed = Color(.streamAccentRed)
     public var tintColor = Color.accentColor
@@ -53,7 +53,7 @@ private extension UIColor {
     static let streamDarkBackground = mode(0x272a30, 0x272a30)
     static let streamPulsingColor = mode(0x005fff, 0x005fff)
     static let streamCallControlsBackground = mode(0x1c1e22, 0x1c1e22)
-    
+
     // Currently we are not using the correct shadow color from figma's color palette. This is to avoid
     // an issue with snapshots inconsistency between Intel vs M1. We can't use shadows with transparency.
     // So we apply a light gray color to fake the transparency.

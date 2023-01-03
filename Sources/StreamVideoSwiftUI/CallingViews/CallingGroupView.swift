@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -7,12 +7,12 @@ import StreamVideo
 import SwiftUI
 
 struct CallingGroupView: View {
-    
+
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
-    
+
     var participants: [User]
     @State var isCalling = false
-    
+
     var body: some View {
         VStack {
             if participants.count >= 3 {
@@ -43,7 +43,7 @@ struct CallingGroupView: View {
                             animation: easeGently.delay(0.4)
                         )
                     )
-                    
+
                     ZStack {
                         if participants.count == 3 {
                             IncomingCallParticipantView(
@@ -95,10 +95,10 @@ struct CallingGroupView: View {
 }
 
 struct IncomingCallParticipantView: View {
-        
+
     var participant: User
     var size: CGFloat = .expandedAvatarSize
-    
+
     var body: some View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = participant.imageURL {
@@ -118,13 +118,13 @@ struct IncomingCallParticipantView: View {
 }
 
 struct CircledTitleView: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
-    
+
     var title: String
     var size: CGFloat = .expandedAvatarSize
-    
+
     var body: some View {
         ZStack {
             Circle()

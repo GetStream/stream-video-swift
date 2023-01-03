@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -14,7 +14,7 @@ public final class CallSettings: ObservableObject, Sendable {
     public let speakerOn: Bool
     /// The camera position for the current user.
     public let cameraPosition: CameraPosition
-        
+
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
@@ -26,11 +26,11 @@ public final class CallSettings: ObservableObject, Sendable {
         self.speakerOn = speakerOn
         self.cameraPosition = cameraPosition
     }
-    
+
     var shouldPublish: Bool {
         audioOn || videoOn
     }
-    
+
     func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -45,7 +45,7 @@ public final class CallSettings: ObservableObject, Sendable {
 public enum CameraPosition: Sendable {
     case front
     case back
-    
+
     func next() -> CameraPosition {
         self == .front ? .back : .front
     }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -7,48 +7,48 @@ import Foundation
 class WebSocketClient {
     /// The notification center `WebSocketClient` uses to send notifications about incoming events.
     let eventNotificationCenter: EventNotificationCenter
-    
+
     /// The batch of events received via the web-socket that wait to be processed.
     private(set) lazy var eventsBatcher = environment.eventBatcherBuilder { [weak self] events, completion in
         self?.eventNotificationCenter.process(events, completion: completion)
     }
-    
+
     /// The current state the web socket connection.
     @Atomic private(set) var connectionState: WebSocketConnectionState = .initialized {
         didSet {
             pingController.connectionStateDidChange(connectionState)
-            
+
             guard connectionState != oldValue else { return }
-            
+
             log.info("Web socket connection state changed: \(connectionState)", subsystems: .webSocket)
-                
+
             connectionStateDelegate?.webSocketClient(self, didUpdateConnectionState: connectionState)
         }
     }
-    
+
     weak var connectionStateDelegate: ConnectionStateDelegate?
-    
+
     var connectURL: URL
-    
+
     var requiresAuth: Bool
 
     /// The decoder used to decode incoming events
     private let eventDecoder: AnyEventDecoder
-    
+
     /// The web socket engine used to make the actual WS connection
     private(set) var engine: WebSocketEngine?
-    
+
     /// The queue on which web socket engine methods are called
     private let engineQueue: DispatchQueue = .init(label: "io.getStream.video.core.web_socket_engine_queue", qos: .userInitiated)
-        
+
     /// The session config used for the web socket engine
     private let sessionConfiguration: URLSessionConfiguration
-    
+
     /// An object containing external dependencies of `WebSocketClient`
     private let environment: Environment
-    
+
     private let webSocketClientType: WebSocketClientType
-    
+
     private(set) lazy var pingController: WebSocketPingController = {
         let pingController = environment.createPingController(
             environment.timerType,
@@ -58,7 +58,7 @@ class WebSocketClient {
         pingController.delegate = self
         return pingController
     }()
-    
+
     private func createEngineIfNeeded(for connectURL: URL) -> WebSocketEngine {
         let request = URLRequest(url: connectURL)
 
@@ -70,15 +70,15 @@ class WebSocketClient {
         engine.delegate = self
         return engine
     }
-        
+
     var onConnect: (() -> Void)?
-    
+
     internal var callInfo = [String: String]() {
         didSet {
             pingController.callInfo = callInfo
         }
     }
-    
+
     init(
         sessionConfiguration: URLSessionConfiguration,
         eventDecoder: AnyEventDecoder,
@@ -96,7 +96,7 @@ class WebSocketClient {
         self.eventNotificationCenter = eventNotificationCenter
         self.requiresAuth = requiresAuth
     }
-    
+
     /// Connects the web connect.
     ///
     /// Calling this method has no effect is the web socket is already connected, or is in the connecting phase.
@@ -107,16 +107,16 @@ class WebSocketClient {
             return
         default: break
         }
-        
+
         engine = createEngineIfNeeded(for: connectURL)
-        
+
         connectionState = .connecting
-        
+
         engineQueue.async { [weak engine] in
             engine?.connect()
         }
     }
-    
+
     /// Disconnects the web socket.
     ///
     /// Calling this function has no effect, if the connection is in an inactive state.
@@ -128,11 +128,11 @@ class WebSocketClient {
         connectionState = .disconnecting(source: source)
         engineQueue.async { [engine, eventsBatcher] in
             engine?.disconnect()
-            
+
             eventsBatcher.processImmediately(completion: completion)
         }
     }
-    
+
     func set(callInfo: [String: String]) {
         self.callInfo = callInfo
     }
@@ -150,21 +150,21 @@ extension WebSocketClient {
             _ timerQueue: DispatchQueue,
             _ webSocketClientType: WebSocketClientType
         ) -> WebSocketPingController
-        
+
         typealias CreateEngine = (
             _ request: URLRequest,
             _ sessionConfiguration: URLSessionConfiguration,
             _ callbackQueue: DispatchQueue
         ) -> WebSocketEngine
-        
+
         var timerType: Timer.Type = DefaultTimer.self
-        
+
         var createPingController: CreatePingController = WebSocketPingController.init
-        
+
         var createEngine: CreateEngine = {
             URLSessionWebSocketEngine(request: $0, sessionConfiguration: $1, callbackQueue: $2)
         }
-        
+
         var eventBatcherBuilder: (
             _ handler: @escaping ([Event], @escaping () -> Void) -> Void
         ) -> EventBatcher = {
@@ -181,7 +181,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         connectionState = .authenticating
         onConnect?()
     }
-    
+
     func webSocketDidReceiveMessage(_ data: Data) {
         do {
             let messageData = data
@@ -201,22 +201,22 @@ extension WebSocketClient: WebSocketEngineDelegate {
             connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
         }
     }
-    
+
     func webSocketDidDisconnect(error engineError: WebSocketEngineError?) {
         switch connectionState {
         case .connecting, .authenticating, .connected:
             let serverError = engineError.map { ClientError.WebSocket(with: $0) }
-            
+
             connectionState = .disconnected(source: .serverInitiated(error: serverError))
-        
+
         case let .disconnecting(source):
             connectionState = .disconnected(source: source)
-        
+
         case .initialized, .disconnected:
             log.error("Web socket can not be disconnected when in \(connectionState) state.")
         }
     }
-    
+
     private func handle<Event: HealthCheckEvent>(healthCheckEvent: Event) {
         log.debug("Handling healthcheck event")
         var healthCheckInfo = HealthCheckInfo()
@@ -247,7 +247,7 @@ extension WebSocketClient: WebSocketPingControllerDelegate {
             }
         }
     }
-    
+
     func disconnectOnNoPongReceived() {
         log.debug("disconnecting from \(connectURL)")
         disconnect(source: .noPongReceived) {
@@ -270,11 +270,11 @@ extension Notification.Name {
 
 extension Notification {
     private static let eventKey = "io.getStream.video.core.event_key"
-    
+
     init(newEventReceived event: Event, sender: Any) {
         self.init(name: .NewEventReceived, object: sender, userInfo: [Self.eventKey: event])
     }
-    
+
     var event: Event? {
         userInfo?[Self.eventKey] as? Event
     }

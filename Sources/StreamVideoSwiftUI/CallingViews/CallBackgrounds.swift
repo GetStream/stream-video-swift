@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -7,9 +7,9 @@ import StreamVideo
 import SwiftUI
 
 struct CallingScreenBackground: View {
-    
+
     var imageURL: URL?
-    
+
     var body: some View {
         CallParticipantBackground(imageURL: imageURL) {
             FallbackBackground()
@@ -18,9 +18,9 @@ struct CallingScreenBackground: View {
 }
 
 struct FallbackBackground: View {
-    
+
     @Injected(\.images) var images
-    
+
     var body: some View {
         images.incomingCallBackground
             .resizable()
@@ -30,10 +30,10 @@ struct FallbackBackground: View {
 }
 
 struct CallParticipantBackground<Background: View>: View {
-    
+
     var imageURL: URL?
     var fallbackBackground: () -> Background
-    
+
     var body: some View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = imageURL {

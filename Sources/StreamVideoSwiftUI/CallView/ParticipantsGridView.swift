@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -7,12 +7,12 @@ import SwiftUI
 import WebRTC
 
 struct ParticipantsGridView: View {
-    
+
     var participants: [CallParticipant]
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
-    
+
     var body: some View {
         ScrollView {
             if #available(iOS 14.0, *) {
@@ -33,7 +33,7 @@ struct ParticipantsGridView: View {
         }
         .edgesIgnoringSafeArea(.all)
     }
-    
+
     private var participantsContent: some View {
         ForEach(participants) { participant in
             VideoCallParticipantView(
@@ -55,7 +55,7 @@ struct ParticipantsGridView: View {
             }
         }
     }
-    
+
     private var size: CGSize {
         if #available(iOS 14.0, *) {
             return CGSize(width: availableSize.width / 2, height: availableSize.height / 2)

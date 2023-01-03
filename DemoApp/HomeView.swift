@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Intents
@@ -10,15 +10,15 @@ import StreamVideoSwiftUI
 
 struct HomeView: View {
     @ObservedObject var viewModel: CallViewModel
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     private let imageSize: CGFloat = 32
-        
+
     @State private var callId = ""
-    
+
     @State private var callAction = CallAction.startCall
-    
+
     var participants: [User] {
         var participants = UserCredentials.builtInUsers.map { $0.userInfo }
         participants.removeAll { userInfo in
@@ -26,11 +26,11 @@ struct HomeView: View {
         }
         return participants
     }
-    
+
     @State var selectedParticipants = [User]()
     @State var incomingCallInfo: IncomingCall?
     @State var logoutAlertShown = false
-    
+
     var body: some View {
         VStack {
             ZStack {
@@ -50,17 +50,17 @@ struct HomeView: View {
                     .font(.title)
                     .padding()
             }
-            
+
             Picker("Call action", selection: $callAction) {
                 Text(CallAction.startCall.rawValue).tag(CallAction.startCall)
                 Text(CallAction.joinCall.rawValue).tag(CallAction.joinCall)
             }
             .pickerStyle(.segmented)
-            
+
             TextField("Insert a call id", text: $callId)
                 .textFieldStyle(.roundedBorder)
                 .padding()
-            
+
             if callAction == .startCall {
                 startCallView
                     .transition(.opacity)
@@ -106,13 +106,13 @@ struct HomeView: View {
         }
         .background(
             viewModel.callingState == .inCall && !viewModel.isMinimized ? Color.black.edgesIgnoringSafeArea(.all) : nil
-        )        
+        )
     }
-    
+
     private var makeCallEnabled: Bool {
         callId.isEmpty || participants.isEmpty
     }
-    
+
     var startCallView: some View {
         Group {
             HStack {
@@ -121,7 +121,7 @@ struct HomeView: View {
                 Spacer()
             }
             .padding(.horizontal)
-            
+
             List(participants) { participant in
                 Button {
                     if selectedParticipants.contains(participant) {
@@ -147,7 +147,7 @@ struct HomeView: View {
             }
             .frame(maxHeight: UIScreen.main.bounds.height / 4)
             .listStyle(PlainListStyle())
-                        
+
             Button {
                 resignFirstResponder()
                 viewModel.startCall(callId: callId, participants: selectedParticipants)

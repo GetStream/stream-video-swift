@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
@@ -7,11 +7,11 @@ import StreamVideo
 
 @MainActor
 class LoginViewModel: ObservableObject {
-        
+
     @Published var loading = false
-    
+
     @Published var userCredentials = UserCredentials.builtInUsers
-        
+
     func login(user: UserCredentials, completion: (UserCredentials) -> ()) {
         UnsecureUserRepository.shared.save(user: user)
         AppState.shared.currentUser = user.userInfo
@@ -19,5 +19,5 @@ class LoginViewModel: ObservableObject {
         // Perform login
         completion(user)
     }
-    
+
 }

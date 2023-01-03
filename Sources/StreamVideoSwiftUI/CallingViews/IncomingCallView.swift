@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -8,18 +8,18 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 public struct IncomingCallView: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
-    
+
     @StateObject var viewModel: IncomingViewModel
-            
+
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
-    
+
     public init(
         callInfo: IncomingCall,
         onCallAccepted: @escaping (String) -> Void,
@@ -31,7 +31,7 @@ public struct IncomingCallView: View {
         self.onCallAccepted = onCallAccepted
         self.onCallRejected = onCallRejected
     }
-    
+
     public var body: some View {
         IncomingCallViewContent(
             callParticipants: viewModel.callParticipants,
@@ -43,22 +43,22 @@ public struct IncomingCallView: View {
 }
 
 struct IncomingCallViewContent: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.fonts) var fonts
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.utils) var utils
-    
+
     var callParticipants: [CallParticipant]
     var callInfo: IncomingCall
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
-    
+
     var body: some View {
         VStack(spacing: 16) {
             Spacer()
-            
+
             if callParticipants.count > 1 {
                 CallingGroupView(
                     participants: callParticipants.map { $0.toUser() }
@@ -69,24 +69,24 @@ struct IncomingCallViewContent: View {
                     caller: callInfo.callerId
                 )
             }
-            
+
             CallingParticipantsView(
                 participants: callParticipants.map { $0.toUser() },
                 caller: callInfo.callerId
             )
             .padding()
-            
+
             HStack(alignment: .firstTextBaseline, spacing: 2) {
                 Text(L10n.Call.Incoming.title)
                     .applyCallingStyle()
                 CallingIndicator()
             }
-            
+
             Spacer()
-            
+
             HStack {
                 Spacing()
-                
+
                 Button {
                     onCallRejected(callInfo.id)
                 } label: {
@@ -98,9 +98,9 @@ struct IncomingCallViewContent: View {
                         )
                 }
                 .padding(.all, 8)
-                
+
                 Spacing(size: 3)
-                
+
                 Button {
                     onCallAccepted(callInfo.id)
                 } label: {
@@ -112,7 +112,7 @@ struct IncomingCallViewContent: View {
                         )
                 }
                 .padding(.all, 8)
-                
+
                 Spacing()
             }
             .padding()

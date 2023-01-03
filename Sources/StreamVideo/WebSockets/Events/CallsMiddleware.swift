@@ -1,13 +1,13 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
 
 class CallsMiddleware: EventMiddleware {
-    
+
     var onCallEvent: ((CallEvent) -> Void)?
-    
+
     func handle(event: Event) -> Event? {
         if let incomingCallEvent = event as? IncomingCallEvent {
             log.debug("Received call created \(incomingCallEvent)")
@@ -34,7 +34,7 @@ class CallsMiddleware: EventMiddleware {
             }
             onCallEvent?(callEvent)
         }
-        
+
         return event
     }
 }

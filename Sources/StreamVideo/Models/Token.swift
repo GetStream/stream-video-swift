@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -9,7 +9,7 @@ public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral {
     public let rawValue: String
     public let userId: String
     public let expiration: Date?
-    
+
     public var isExpired: Bool {
         expiration.map { $0 < Date() } ?? false
     }
@@ -72,21 +72,21 @@ extension ClientError {
 private extension String {
     var jwtPayload: [String: Any]? {
         let parts = split(separator: ".")
-        
+
         if parts.count == 3,
            let payloadData = jwtDecodeBase64(String(parts[1])),
            let json = (try? JSONSerialization.jsonObject(with: payloadData)) as? [String: Any] {
             return json
         }
-        
+
         return nil
     }
-    
+
     func jwtDecodeBase64(_ input: String) -> Data? {
         let removeEndingCount = input.count % 4
         let ending = removeEndingCount > 0 ? String(repeating: "=", count: 4 - removeEndingCount) : ""
         let base64 = input.replacingOccurrences(of: "-", with: "+").replacingOccurrences(of: "_", with: "/") + ending
-        
+
         return Data(base64Encoded: base64)
     }
 }
@@ -94,12 +94,12 @@ private extension String {
 extension String {
     /// The prefix used for anonymous user ids
     private static let anonymousIdPrefix = "__anonymous__"
-    
+
     /// Creates a new anonymous User id.
     static var anonymous: String {
         anonymousIdPrefix + UUID().uuidString
     }
-    
+
     var isAnonymousUser: Bool {
         hasPrefix(Self.anonymousIdPrefix)
     }

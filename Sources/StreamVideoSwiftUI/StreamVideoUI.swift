@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -8,7 +8,7 @@ public class StreamVideoUI {
     var streamVideo: StreamVideo
     var appearance: Appearance
     var utils: Utils
-    
+
     public convenience init(
         apiKey: String,
         user: User,
@@ -31,7 +31,7 @@ public class StreamVideoUI {
             utils: utils
         )
     }
-    
+
     public init(
         streamVideo: StreamVideo,
         appearance: Appearance = Appearance(),
@@ -46,7 +46,7 @@ public class StreamVideoUI {
 }
 
 extension InjectedValues {
-    
+
     /// Provides access to the `Colors` instance.
     public var colors: Colors {
         get {
@@ -56,7 +56,7 @@ extension InjectedValues {
             appearance.colors = newValue
         }
     }
-    
+
     /// Provides access to the `Images` instance.
     public var images: Images {
         get {
@@ -66,7 +66,7 @@ extension InjectedValues {
             appearance.images = newValue
         }
     }
-    
+
     /// Provides access to the `Fonts` instance.
     public var fonts: Fonts {
         get {
@@ -76,7 +76,7 @@ extension InjectedValues {
             appearance.fonts = newValue
         }
     }
-    
+
     /// Provides access to the `Sounds` instance.
     public var sounds: Sounds {
         get {

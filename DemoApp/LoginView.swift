@@ -1,21 +1,21 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
 
 struct LoginView: View {
-    
+
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> ()
-    
+
     @State var addUserShown = false
-    
+
     init(completion: @escaping (UserCredentials) -> ()) {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
         self.completion = completion
     }
-    
+
     var body: some View {
         VStack {
             Text("Select a user")
@@ -29,7 +29,7 @@ struct LoginView: View {
                 }
                 .padding(.all, 8)
             }
-         
+
             Button {
                 addUserShown = true
             } label: {

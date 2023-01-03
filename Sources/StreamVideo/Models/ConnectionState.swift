@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 public enum ConnectionState: Equatable, Sendable {
@@ -10,7 +10,7 @@ public enum ConnectionState: Equatable, Sendable {
 }
 
 public enum DisconnectionReason: Equatable, Sendable {
-    
+
     public static func == (lhs: DisconnectionReason, rhs: DisconnectionReason) -> Bool {
         switch (lhs, rhs) {
         case (.user, .user):
@@ -21,7 +21,7 @@ public enum DisconnectionReason: Equatable, Sendable {
             return false
         }
     }
-    
+
     case user // User initiated
     case networkError(_ error: Error)
 }

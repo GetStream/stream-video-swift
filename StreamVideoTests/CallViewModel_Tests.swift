@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -12,10 +12,10 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // Given
         let callViewModel = CallViewModel()
         let participants = [User(id: "test1"), User(id: "test2")]
-        
+
         // When
         callViewModel.startCall(callId: "test", participants: participants)
-        
+
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
         XCTAssert(callViewModel.callingState == .outgoing)

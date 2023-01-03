@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -9,17 +9,17 @@ import SwiftUI
 @propertyWrapper @available(iOS, introduced: 13, obsoleted: 14)
 public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
     where ObjectType.ObjectWillChangePublisher == ObservableObjectPublisher {
-    
+
     /// Wrapper that helps with initialising without actually having an ObservableObject yet
     private class ObservedObjectWrapper: ObservableObject {
         @PublishedObject var wrappedObject: ObjectType? = nil
         init() {}
     }
-    
+
     private var thunk: () -> ObjectType
     @ObservedObject private var observedObject = ObservedObjectWrapper()
     @State private var state = ObservedObjectWrapper()
-    
+
     public var wrappedValue: ObjectType {
         if state.wrappedObject == nil {
             // There is no State yet so we need to initialise the object
@@ -32,15 +32,15 @@ public struct BackportStateObject<ObjectType: ObservableObject>: DynamicProperty
         }
         return state.wrappedObject!
     }
-    
+
     public var projectedValue: ObservedObject<ObjectType>.Wrapper {
         ObservedObject(wrappedValue: wrappedValue).projectedValue
     }
-    
+
     public init(wrappedValue thunk: @autoclosure @escaping () -> ObjectType) {
         self.thunk = thunk
     }
-    
+
     public mutating func update() {
         // Not sure what this does but we'll just forward it
         _state.update()
@@ -69,7 +69,7 @@ public struct PublishedObject<Value> {
         }
         startListening(to: wrappedValue)
     }
-    
+
     public init<V>(wrappedValue: V?) where V? == Value, V: ObservableObject,
         V.ObjectWillChangePublisher == ObservableObjectPublisher {
         self.wrappedValue = wrappedValue
@@ -92,7 +92,7 @@ public struct PublishedObject<Value> {
         willSet { parent.objectWillChange?() }
         didSet { startListening(to: wrappedValue) }
     }
-    
+
     public static subscript<EnclosingSelf: ObservableObject>(
         _enclosingInstance observed: EnclosingSelf,
         wrapped wrappedKeyPath: ReferenceWritableKeyPath<EnclosingSelf, Value>,
@@ -107,7 +107,7 @@ public struct PublishedObject<Value> {
             observed[keyPath: storageKeyPath].wrappedValue = newValue
         }
     }
-    
+
     public static subscript<EnclosingSelf: ObservableObject>(
         _enclosingInstance observed: EnclosingSelf,
         projected wrappedKeyPath: KeyPath<EnclosingSelf, Publisher>,
@@ -123,7 +123,7 @@ public struct PublishedObject<Value> {
         var objectWillChange: (() -> Void)?
         init() {}
     }
-    
+
     private func setParent<Parent: ObservableObject>(_ parentObject: Parent)
         where Parent.ObjectWillChangePublisher == ObservableObjectPublisher {
         guard parent.objectWillChange == nil else { return }
@@ -133,14 +133,14 @@ public struct PublishedObject<Value> {
             }
         }
     }
-    
+
     private var _startListening: (inout Self, _ toValue: Value) -> Void
     private mutating func startListening(to wrappedValue: Value) {
         _startListening(&self, wrappedValue)
     }
-    
+
     public typealias Publisher = AnyPublisher<Value, Never>
-    
+
     private lazy var _projectedValue = CurrentValueSubject<Value, Never>(wrappedValue)
     public var projectedValue: Publisher {
         mutating get { _projectedValue.eraseToAnyPublisher() }

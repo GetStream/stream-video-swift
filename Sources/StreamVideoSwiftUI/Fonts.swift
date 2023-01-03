@@ -1,14 +1,14 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
 
 /// Provides access to fonts used in the SDK.
 public struct Fonts {
-    
+
     public init() { /* Public init. */ }
-    
+
     public var caption1 = Font.caption
     public var footnoteBold = Font.footnote.bold()
     public var footnote = Font.footnote
@@ -23,7 +23,7 @@ public struct Fonts {
     public var title2 = title2Font
     public var title3 = title3Font
     public var emoji = Font.system(size: 50)
-    
+
     private static var title2Font: Font {
         if #available(iOS 14.0, *) {
             return Font.title2
@@ -31,7 +31,7 @@ public struct Fonts {
             return Font.headline
         }
     }
-    
+
     private static var title3Font: Font {
         if #available(iOS 14.0, *) {
             return Font.title3

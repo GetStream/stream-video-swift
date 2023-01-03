@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -8,13 +8,13 @@ import SwiftUI
 import WebRTC
 
 public struct LocalVideoView: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     private let callSettings: CallSettings
     private var showBackground: Bool
     private var onLocalVideoUpdate: (VideoRenderer) -> Void
-    
+
     public init(
         callSettings: CallSettings,
         showBackground: Bool = true,
@@ -24,7 +24,7 @@ public struct LocalVideoView: View {
         self.showBackground = showBackground
         self.onLocalVideoUpdate = onLocalVideoUpdate
     }
-            
+
     public var body: some View {
         GeometryReader { reader in
             VideoRendererView(id: streamVideo.user.id, size: reader.size) { view in
@@ -49,21 +49,21 @@ public struct LocalVideoView: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
-    
+
     private var showVideo: Bool {
         callSettings.videoOn && streamVideo.videoConfig.videoEnabled
     }
 }
 
 public struct VideoRendererView: UIViewRepresentable {
-            
+
     public typealias UIViewType = VideoRenderer
-    
+
     var id: String
     var size: CGSize
     var contentMode: UIView.ContentMode
     var handleRendering: (VideoRenderer) -> Void
-    
+
     public init(
         id: String,
         size: CGSize,
@@ -83,18 +83,18 @@ public struct VideoRendererView: UIViewRepresentable {
         handleRendering(view)
         return view
     }
-    
+
     public func updateUIView(_ uiView: VideoRenderer, context: Context) {
         handleRendering(uiView)
     }
 }
 
 public class VideoRenderer: RTCMTLVideoView {
-    
+
     let queue = DispatchQueue(label: "video-track")
-    
+
     weak var track: RTCVideoTrack?
-    
+
     public func add(track: RTCVideoTrack) {
         queue.sync {
             guard track.trackId != self.track?.trackId else { return }
@@ -104,7 +104,7 @@ public class VideoRenderer: RTCMTLVideoView {
             track.add(self)
         }
     }
-    
+
     deinit {
         log.debug("Deinit of video view")
         track?.remove(self)

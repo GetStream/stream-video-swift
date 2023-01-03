@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -8,11 +8,11 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 struct CallParticipantsView: View {
-    
+
     @ObservedObject var viewModel: CallViewModel
 
     var maxHeight: CGFloat
-        
+
     var body: some View {
         CallParticipantsViewContainer(
             participants: participants,
@@ -30,7 +30,7 @@ struct CallParticipantsView: View {
             }
         )
     }
-    
+
     private var participants: [CallParticipant] {
         viewModel.callParticipants
             .map(\.value)
@@ -40,10 +40,10 @@ struct CallParticipantsView: View {
 
 @available(iOS 14.0, *)
 struct CallParticipantsViewContainer: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.images) var images
-        
+
     var participants: [CallParticipant]
     var callSettings: CallSettings
     var maxHeight: CGFloat
@@ -51,9 +51,9 @@ struct CallParticipantsViewContainer: View {
     var inviteTapped: () -> Void
     var muteTapped: () -> Void
     var closeTapped: () -> Void
-    
+
     @State private var listHeight: CGFloat = 0
-        
+
     var body: some View {
         NavigationView {
             VStack {
@@ -77,10 +77,10 @@ struct CallParticipantsViewContainer: View {
                     }
                     .frame(maxWidth: .infinity, maxHeight: listHeight)
                 }
-                
+
                 HStack(spacing: 16) {
                     ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
-                    
+
                     ParticipantsButton(
                         title: callSettings.audioOn ? L10n.Call.Participants.unmuteme : L10n.Call.Participants.muteme,
                         primaryStyle: false,
@@ -88,7 +88,7 @@ struct CallParticipantsViewContainer: View {
                     )
                 }
                 .padding()
-                
+
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
                         inviteParticipantsShown: $inviteParticipantsShown,
@@ -114,7 +114,7 @@ struct CallParticipantsViewContainer: View {
         .frame(height: inviteParticipantsShown ? maxHeight : popupHeight)
         .modifier(ShadowViewModifier())
     }
-    
+
     private var popupHeight: CGFloat {
         // TODO: update this.
         let height = 44 + listHeight + 80
@@ -128,23 +128,23 @@ struct CallParticipantsViewContainer: View {
 
 struct HeightPreferenceKey: PreferenceKey {
     static var defaultValue: CGFloat? = nil
-    
+
     static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
         value = value ?? nextValue()
     }
 }
 
 struct ParticipantsButton: View {
-    
+
     @Injected(\.colors) private var colors
     @Injected(\.fonts) private var fonts
-    
+
     private let cornerRadius: CGFloat = 24
-    
+
     var title: String
     var primaryStyle: Bool = true
     var onTapped: () -> Void
-    
+
     var body: some View {
         Button {
             onTapped()
@@ -168,15 +168,15 @@ struct ParticipantsButton: View {
 }
 
 struct CallParticipantView: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
     @Injected(\.images) var images
-    
+
     private let imageSize: CGFloat = 48
-    
+
     var participant: CallParticipant
-    
+
     var body: some View {
         VStack(spacing: 4) {
             HStack {
@@ -210,7 +210,7 @@ struct CallParticipantView: View {
 }
 
 extension CallParticipant {
-    
+
     var renderingId: String {
         "\(trackLookupPrefix ?? id)-\(isOnline)-\(hasAudio)-\(shouldDisplayTrack)"
     }

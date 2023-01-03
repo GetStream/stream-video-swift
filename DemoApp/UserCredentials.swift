@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
@@ -14,11 +14,11 @@ struct UserCredentials: Identifiable, Codable {
 }
 
 extension UserCredentials {
-    
+
     static func builtInUsersByID(id: String) -> UserCredentials? {
         builtInUsers.filter { $0.id == id }.first
     }
-    
+
     static var builtInUsers: [UserCredentials] = [
         (
             "tommaso",

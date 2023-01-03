@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -44,7 +44,7 @@ public indirect enum RawJSON: Codable, Hashable, Sendable {
                     .Context(codingPath: decoder.codingPath, debugDescription: "Could not find reasonable type to map to JSONValue")
             )
     }
-    
+
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {

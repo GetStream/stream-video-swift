@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -7,17 +7,17 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
-    
+
     var rootView: RootView
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
-    
+
     public init(rootView: RootView, viewFactory: Factory, viewModel: CallViewModel) {
         self.rootView = rootView
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     public var body: some View {
         ZStack {
             rootView
@@ -28,19 +28,19 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
 
 @available(iOS 14.0, *)
 public struct VideoView<Factory: ViewFactory>: View {
-    
+
     @Injected(\.utils) var utils
-    
+
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
-    
+
     private let padding: CGFloat = 16
-    
+
     public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         _viewModel = StateObject(wrappedValue: viewModel)
     }
-    
+
     public var body: some View {
         ZStack {
             if viewModel.callingState == .outgoing {
@@ -68,10 +68,10 @@ public struct VideoView<Factory: ViewFactory>: View {
 }
 
 public struct WaitingLocalUserView<Factory: ViewFactory>: View {
-    
+
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory
-    
+
     public var body: some View {
         ZStack {
             LocalVideoView(callSettings: viewModel.callSettings) { view in
@@ -91,15 +91,15 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
 
 @available(iOS 14.0, *)
 public struct CallModifier<Factory: ViewFactory>: ViewModifier {
-    
+
     var viewFactory: Factory
     var viewModel: CallViewModel
-    
+
     public init(viewFactory: Factory = DefaultViewFactory.shared, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
-    
+
     public func body(content: Content) -> some View {
         VideoViewOverlay(rootView: content, viewFactory: viewFactory, viewModel: viewModel)
     }
@@ -107,7 +107,7 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
 
 @available(iOS 14.0, *)
 extension CallModifier where Factory == DefaultViewFactory {
-    
+
     public init(viewModel: CallViewModel) {
         self.init(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
     }

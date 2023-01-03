@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -7,16 +7,16 @@ import SwiftUI
 
 public struct CornerDragableView<Content: View>: View {
     @State var callViewPlacement = CallViewPlacement.topTrailing
-    
+
     @State private var dragAmount = CGSize.zero
-    
+
     private var scaleFactorX: CGFloat
     private var scaleFactorY: CGFloat
-    
+
     var content: Content
     var proxy: GeometryProxy
     var onTap: () -> Void
-    
+
     public init(
         scaleFactorX: CGFloat = 0.33,
         scaleFactorY: CGFloat = 0.33,
@@ -30,7 +30,7 @@ public struct CornerDragableView<Content: View>: View {
         self.proxy = proxy
         self.onTap = onTap
     }
-    
+
     public var body: some View {
         content
             .onTapGesture {
@@ -69,7 +69,7 @@ public struct CornerDragableView<Content: View>: View {
             .padding()
             .background(Color.clear)
     }
-    
+
     private func checkCallPlacement(for location: CGPoint, in rect: CGRect) -> CallViewPlacement {
         let availablePlacements: [CallViewPlacement] = [
             .topTrailing,
@@ -92,7 +92,7 @@ public enum CallViewPlacement {
     case topTrailing
     case bottomLeading
     case bottomTrailing
-    
+
     func xOffset(
         for viewWidth: CGFloat,
         availableWidth: CGFloat
@@ -104,7 +104,7 @@ public enum CallViewPlacement {
             return (availableWidth - viewWidth) / 2
         }
     }
-    
+
     func yOffset(
         for viewHeight: CGFloat,
         availableHeight: CGFloat
@@ -116,7 +116,7 @@ public enum CallViewPlacement {
             return (availableHeight - viewHeight) / 2
         }
     }
-    
+
     func matchingFrame(in totalArea: CGRect) -> CGRect {
         let originX = totalArea.origin.x
         let originY = totalArea.origin.y

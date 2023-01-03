@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -8,11 +8,11 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 struct InviteParticipantsView: View {
-    
+
     @StateObject var viewModel: InviteParticipantsViewModel
-    
+
     @Binding var inviteParticipantsShown: Bool
-    
+
     init(
         inviteParticipantsShown: Binding<Bool>,
         currentParticipants: [CallParticipant]
@@ -24,12 +24,12 @@ struct InviteParticipantsView: View {
         )
         _inviteParticipantsShown = inviteParticipantsShown
     }
-    
+
     var body: some View {
         VStack(spacing: 0) {
             SearchBar(text: $viewModel.searchText)
                 .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : 16)
-            
+
             ScrollView(.horizontal) {
                 HStack(spacing: 16) {
                     ForEach(viewModel.selectedUsers) { user in
@@ -68,12 +68,12 @@ struct InviteParticipantsView: View {
                     Image(systemName: "chevron.left")
                 }
             }
-            
+
             ToolbarItem(placement: .principal) {
                 Text(L10n.Call.Participants.add)
                     .bold()
             }
-            
+
             ToolbarItem(placement: .navigationBarTrailing) {
                 Button {
                     viewModel.inviteUsersTapped()
@@ -89,12 +89,12 @@ struct InviteParticipantsView: View {
 }
 
 struct UsersHeaderView: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
-    
+
     var title = L10n.Call.Participants.onPlatform
-    
+
     var body: some View {
         HStack {
             Text(title)
@@ -102,7 +102,7 @@ struct UsersHeaderView: View {
                 .padding(.vertical, 2)
                 .font(fonts.body)
                 .foregroundColor(Color(colors.textLowEmphasis))
-            
+
             Spacer()
         }
         .background(Color(colors.background1))
@@ -110,16 +110,16 @@ struct UsersHeaderView: View {
 }
 
 struct VideoUserView: View {
-    
+
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
-    
+
     private let avatarSize: CGFloat = 56
-    
+
     var user: User
     var onlineText: String
     var isSelected: Bool
-    
+
     var body: some View {
         HStack {
             if #available(iOS 14.0, *) {
@@ -127,7 +127,7 @@ struct VideoUserView: View {
                     .frame(width: avatarSize, height: avatarSize)
                     .clipShape(Circle())
             }
-            
+
             VStack(alignment: .leading, spacing: 4) {
                 Text(user.name)
                     .lineLimit(1)
@@ -137,7 +137,7 @@ struct VideoUserView: View {
                     .foregroundColor(Color(colors.textLowEmphasis))
             }
             Spacer()
-            
+
             if isSelected {
                 Image(systemName: "checkmark.circle.fill")
                     .renderingMode(.template)

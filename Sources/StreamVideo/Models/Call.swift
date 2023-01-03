@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import AVFoundation
@@ -7,32 +7,32 @@ import SwiftUI
 
 /// Represents a call that's in progress.
 public class Call: ObservableObject, @unchecked Sendable {
-            
+
     /// The current participants dictionary.
     @Published public internal(set) var participants = [String: CallParticipant]() {
         didSet {
             log.debug("Participants changed: \(participants)")
         }
     }
-    
+
     public let callId: String
     public let callType: CallType
     public let sessionId: String
-    
+
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
-    
+
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
-    
+
     static func create(callId: String, callType: CallType, sessionId: String) -> Call {
         Call(callId: callId, callType: callType, sessionId: sessionId)
     }
-    
+
     private init(callId: String, callType: CallType, sessionId: String) {
         self.callId = callId
         self.callType = callType
         self.sessionId = sessionId
     }
-    
+
     /// Async stream that publishes participant events.
     public func participantEvents() -> AsyncStream<ParticipantEvent> {
         let events = AsyncStream(ParticipantEvent.self) { [weak self] continuation in
@@ -42,9 +42,9 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
         return events
     }
-    
+
     // MARK: - internal
-    
+
     func add(participants: [CallParticipant]) {
         syncQueue.async { [weak self] in
             guard let self = self else { return }
@@ -57,14 +57,14 @@ public class Call: ObservableObject, @unchecked Sendable {
             self.participants = result
         }
     }
-    
+
     func clearParticipants() {
         syncQueue.async { [weak self] in
             guard let self = self else { return }
             self.participants = [:]
         }
     }
-    
+
     func add(participant: CallParticipant) {
         syncQueue.async { [weak self] in
             guard let self = self else { return }
@@ -73,21 +73,21 @@ public class Call: ObservableObject, @unchecked Sendable {
             self.participants[participant.id] = updated
         }
     }
-    
+
     func removeParticipant(with id: String) {
         syncQueue.async { [weak self] in
             guard let self = self else { return }
             self.participants[id] = nil
         }
     }
-    
+
     func remove(participant: CallParticipant) {
         syncQueue.async { [weak self] in
             guard let self = self else { return }
             self.participants[participant.id] = nil
         }
     }
-    
+
     func handleParticipantEvent(_ eventType: CallEventType, for participantId: String) {
         syncQueue.async { [weak self] in
             guard let self = self,
@@ -129,7 +129,7 @@ public struct ParticipantEvent: Sendable {
 public enum ParticipantAction: Sendable {
     case join
     case leave
-    
+
     public var display: String {
         switch self {
         case .leave:

@@ -1,20 +1,20 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
 import WebRTC
 
 actor PeerConnectionFactory {
-    
+
     static let supportedVideoCodecEncoding: [RTCVideoCodecInfo] = {
         RTCDefaultVideoEncoderFactory().supportedCodecs()
     }()
-    
+
     static let supportedVideoCodecDecoding: [RTCVideoCodecInfo] = {
         RTCDefaultVideoDecoderFactory().supportedCodecs()
     }()
-    
+
     private let factory: RTCPeerConnectionFactory = {
         RTCInitializeSSL()
         let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
@@ -29,7 +29,7 @@ actor PeerConnectionFactory {
         )
         return factory
     }()
-    
+
     func makePeerConnection(
         sessionId: String,
         callCid: String,
@@ -58,7 +58,7 @@ actor PeerConnectionFactory {
         )
         return peerConnection
     }
-    
+
     func makeVideoSource(forScreenShare: Bool) -> RTCVideoSource {
         factory.videoSource(forScreenCast: forScreenShare)
     }
@@ -87,7 +87,7 @@ actor PeerConnectionFactory {
         ) else {
             throw ClientError.Unexpected()
         }
-        
+
         return peerConnection
     }
 }

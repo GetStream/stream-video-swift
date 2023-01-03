@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 @testable import StreamVideo
@@ -13,10 +13,10 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         // Given
         let callViewController = CallViewController.make()
         let participants = [User(id: "Test1"), User(id: "Test2")]
-        
+
         // When
         callViewController.startCall(callId: "1234", participants: participants)
-        
+
         // Then
         assertSnapshot(matching: callViewController.view, as: .image)
     }

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import UIKit
@@ -29,7 +29,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         window.rootViewController = loginViewController
         window.makeKeyAndVisible()
     }
-    
+
     private func login(_ user: UserCredentials) {
         let streamVideo = StreamVideo(
             apiKey: "us83cfwuhy8n",

@@ -1,15 +1,15 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
 
 struct CallingIndicator: View {
-    
+
     private let size: CGFloat = 4
-    
+
     @State var isTransparent = false
-    
+
     var body: some View {
         HStack(alignment: .firstTextBaseline, spacing: 2) {
             Circle()

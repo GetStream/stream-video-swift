@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -7,7 +7,7 @@ import Foundation
 
 /// Configuration for the video options for a call.
 public struct VideoOptions: Sendable {
-    
+
     /// The preferred video format.
     public var preferredFormat: AVCaptureDevice.Format?
     /// The preferred video dimensions.
@@ -16,7 +16,7 @@ public struct VideoOptions: Sendable {
     public var preferredFps: Int
     /// The supported codecs.
     public var supportedCodecs: [VideoCodec]
-    
+
     public init(
         supportedCodecs: [VideoCodec] = VideoCodec.defaultCodecs,
         preferredFormat: AVCaptureDevice.Format? = nil,
@@ -43,22 +43,22 @@ public struct VideoCodec: Sendable {
 }
 
 extension VideoCodec {
-    
+
     public static let defaultCodecs = [quarter, half, full]
-    
+
     static let full = VideoCodec(
         dimensions: .full,
         quality: "f",
         maxBitrate: 1_000_000
     )
-    
+
     static let half = VideoCodec(
         dimensions: .half,
         quality: "h",
         maxBitrate: 500_000,
         scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.half.area
     )
-    
+
     static let quarter = VideoCodec(
         dimensions: .quarter,
         quality: "q",

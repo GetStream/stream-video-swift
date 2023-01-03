@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -12,7 +12,7 @@ enum PeerConnectionType: String {
 }
 
 class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
-    
+
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
@@ -26,11 +26,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
     private var pendingIceCandidates = [RTCIceCandidate]()
-        
+
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
-    
+
     init(
         sessionId: String,
         callCid: String,
@@ -56,7 +56,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             self.setupStatsTimer()
         }
     }
-    
+
     func createOffer() async throws -> RTCSessionDescription {
         try await withCheckedThrowingContinuation { continuation in
             pc.offer(for: .defaultConstraints) { sdp, error in
@@ -70,7 +70,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
     }
-    
+
     func createAnswer() async throws -> RTCSessionDescription {
         try await withCheckedThrowingContinuation { continuation in
             pc.answer(for: .defaultConstraints) { sdp, error in
@@ -84,7 +84,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
     }
-    
+
     func setLocalDescription(_ sdp: RTCSessionDescription?) async throws {
         guard let sdp = sdp else {
             throw ClientError.Unexpected() // TODO: add appropriate errors
@@ -99,7 +99,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
     }
-    
+
     func setRemoteDescription(_ sdp: String, type: RTCSdpType) async throws {
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
         return try await withCheckedThrowingContinuation { continuation in
@@ -119,18 +119,18 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
     }
-    
+
     func addTrack(_ track: RTCMediaStreamTrack, streamIds: [String]) {
         pc.add(track, streamIds: streamIds)
     }
-    
+
     func addTransceiver(_ track: RTCMediaStreamTrack, streamIds: [String], direction: RTCRtpTransceiverDirection = .sendOnly) {
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = direction
         transceiverInit.streamIds = streamIds
-        
+
         var encodingParams = [RTCRtpEncodingParameters]()
-        
+
         for codec in videoOptions.supportedCodecs {
             let encodingParam = RTCRtpEncodingParameters()
             encodingParam.rid = codec.quality
@@ -140,11 +140,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
             encodingParams.append(encodingParam)
         }
-        
+
         transceiverInit.sendEncodings = encodingParams
         transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }
-    
+
     func add(iceCandidate: RTCIceCandidate) {
         guard pc.remoteDescription != nil else {
             log.debug("remote description not set, adding pending ice candidate")
@@ -159,36 +159,36 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
     }
-    
+
     func close() {
         pc.close()
     }
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)")
         onStreamAdded?(stream)
     }
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
         log.debug("Stream removed from peer connection \(type.rawValue)")
         onStreamRemoved?(stream)
     }
-    
+
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
         log.debug("Negotiation needed for peer connection \(type.rawValue)")
         onNegotiationNeeded?(self)
     }
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         log.debug("Peer connection state changed to \(newState)")
     }
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
         log.debug("Ice gathering state changed to \(newState)")
     }
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
         Task {
@@ -203,15 +203,15 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             _ = try await signalService.iceTrickle(iCETrickle: iceTrickle)
         }
     }
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
-    
+
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
         log.debug("Data channel opened for \(type.rawValue)")
     }
-    
+
     // MARK: - private
-    
+
     private func setupStatsTimer() {
         if reportStats {
             statsTimer = Foundation.Timer.scheduledTimer(
@@ -223,7 +223,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             )
         }
     }
-    
+
     private func reportCurrentStats() {
         pc.statistics(completionHandler: { [weak self] report in
             guard let self = self else { return }
@@ -257,7 +257,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         })
     }
-    
+
     @discardableResult
     private func add(iceCandidate: RTCIceCandidate) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
@@ -272,7 +272,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
     }
-    
+
     deinit {
         statsTimer?.invalidate()
         statsTimer = nil
@@ -286,14 +286,14 @@ struct ICECandidate: Codable {
 }
 
 extension RTCIceCandidate {
-    
+
     func toIceCandidate() -> ICECandidate {
         ICECandidate(candidate: sdp, sdpMid: sdpMid, sdpMLineIndex: sdpMLineIndex)
     }
 }
 
 extension RTCVideoCodecInfo {
-    
+
     func toSfuCodec() -> Stream_Video_Sfu_Models_Codec {
         var codec = Stream_Video_Sfu_Models_Codec()
         codec.name = name

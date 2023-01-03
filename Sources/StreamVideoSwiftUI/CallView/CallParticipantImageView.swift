@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import NukeUI
@@ -7,13 +7,13 @@ import StreamVideo
 import SwiftUI
 
 struct CallParticipantImageView: View {
-    
+
     @Injected(\.colors) var colors
-    
+
     var id: String
     var name: String
     var imageURL: URL?
-    
+
     var body: some View {
         ZStack {
             CallParticipantBackground(imageURL: imageURL) {
@@ -26,15 +26,15 @@ struct CallParticipantImageView: View {
 }
 
 struct CallParticipantImage: View {
-    
+
     @Injected(\.colors) var colors
-    
+
     private let size: CGFloat = 138
-    
+
     var id: String
     var name: String
     var imageURL: URL?
-    
+
     var body: some View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = imageURL {

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
@@ -7,21 +7,21 @@ import SwiftUI
 import WebRTC
 
 public struct CallView<Factory: ViewFactory>: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
     @Injected(\.colors) var colors
-    
+
     private let padding: CGFloat = 16
-    
+
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
-    
+
     public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         GeometryReader { reader in
             ZStack {
@@ -44,7 +44,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     viewFactory.makeCallControlsView(viewModel: viewModel)
                         .opacity(viewModel.hideUIElements ? 0 : 1)
                 }
-                
+
                 VStack {
                     Spacer()
                     if let event = viewModel.participantEvent {
@@ -55,7 +55,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             .padding()
                     }
                 }
-                
+
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
                         if #available(iOS 14, *) {
@@ -81,7 +81,7 @@ public struct CallView<Factory: ViewFactory>: View {
                                 }
                             }
                         }
-                        
+
                         if viewModel.screensharingSession == nil {
                             CornerDragableView(
                                 content: contentDragableView(size: reader.size),
@@ -96,7 +96,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     .padding(.top, 4)
                 }
                 .opacity(viewModel.hideUIElements ? 0 : 1)
-                
+
                 if viewModel.participantsShown {
                     viewFactory.makeTrailingTopView(
                         viewModel: viewModel,
@@ -114,7 +114,7 @@ public struct CallView<Factory: ViewFactory>: View {
             UIApplication.shared.isIdleTimerDisabled = false
         }
     }
-    
+
     @ViewBuilder
     private func contentDragableView(size: CGSize) -> some View {
         if !viewModel.localVideoPrimary {
@@ -125,7 +125,7 @@ public struct CallView<Factory: ViewFactory>: View {
             minimizedView(size: size)
         }
     }
-    
+
     private func minimizedView(size: CGSize) -> some View {
         Group {
             if !viewModel.participants.isEmpty {
@@ -142,7 +142,7 @@ public struct CallView<Factory: ViewFactory>: View {
             }
         }
     }
-    
+
     private var localVideoView: some View {
         LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
             if let track = viewModel.localParticipant?.track {
@@ -153,7 +153,7 @@ public struct CallView<Factory: ViewFactory>: View {
         }
         .opacity(viewModel.localParticipant != nil ? 1 : 0)
     }
-    
+
     private func participantsView(size: CGSize) -> some View {
         viewFactory.makeVideoParticipantsView(
             viewModel: viewModel,
@@ -162,11 +162,11 @@ public struct CallView<Factory: ViewFactory>: View {
             onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)
         )
     }
-    
+
     private var participants: [CallParticipant] {
         viewModel.participants
     }
-    
+
     private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
         if let track = participant.track, participant.id != viewModel.call?.sessionId {
             log.debug("adding track to a view \(view)")
@@ -184,12 +184,12 @@ public struct CallView<Factory: ViewFactory>: View {
 
 @available(iOS 14.0, *)
 public struct CallParticipantsInfoView: View {
-    
+
     private let padding: CGFloat = 16
-    
+
     @ObservedObject var viewModel: CallViewModel
     var availableSize: CGSize
-    
+
     public var body: some View {
         VStack {
             CallParticipantsView(
@@ -198,7 +198,7 @@ public struct CallParticipantsInfoView: View {
             )
             .padding()
             .padding(.vertical, padding / 2)
-            
+
             Spacer()
         }
     }

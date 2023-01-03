@@ -1,29 +1,29 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
 import SwiftUI
 
 public struct CallControlsView: View {
-    
+
     @Injected(\.streamVideo) var streamVideo
-        
+
     private let size: CGFloat = 50
-    
+
     @ObservedObject var viewModel: CallViewModel
-    
+
     @Injected(\.images) var images
     @Injected(\.colors) var colors
-    
+
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         HStack(alignment: .top) {
             Spacer()
-            
+
             if streamVideo.videoConfig.videoEnabled {
                 Button(
                     action: {
@@ -37,10 +37,10 @@ public struct CallControlsView: View {
                         )
                     }
                 )
-                
+
                 Spacer()
             }
-            
+
             Button(
                 action: {
                     viewModel.toggleMicrophoneEnabled()
@@ -53,9 +53,9 @@ public struct CallControlsView: View {
                     )
                 }
             )
-            
+
             Spacer()
-            
+
             if streamVideo.videoConfig.videoEnabled {
                 Button(
                     action: {
@@ -69,10 +69,10 @@ public struct CallControlsView: View {
                         )
                     }
                 )
-                
+
                 Spacer()
             }
-            
+
             Button {
                 viewModel.hangUp()
             } label: {
@@ -82,7 +82,7 @@ public struct CallControlsView: View {
                         size: size
                     )
             }
-            
+
             Spacer()
         }
         .frame(maxWidth: .infinity)

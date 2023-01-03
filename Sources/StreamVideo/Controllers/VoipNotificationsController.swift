@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -7,13 +7,13 @@ import WebRTC
 
 /// Controller that handles device management for voip notifications.
 public final class VoipNotificationsController {
-    
+
     private let callCoordinatorService: Stream_Video_CallCoordinatorService
-    
+
     init(callCoordinatorService: Stream_Video_CallCoordinatorService) {
         self.callCoordinatorService = callCoordinatorService
     }
-    
+
     /// Adds a device with the provided id.
     /// - Parameter id: the id of the device.
     public func addDevice(with id: String) {
@@ -30,7 +30,7 @@ public final class VoipNotificationsController {
             }
         }
     }
-    
+
     /// Removes a device with the provided id.
     /// - Parameter id: the id of the device.
     public func removeDevice(with id: String) {

@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Combine
@@ -9,29 +9,29 @@ import SwiftUI
 import UIKit
 
 open class CallViewController: UIViewController {
-    
+
     public var viewModel: CallViewModel!
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     public static func make(with viewModel: CallViewModel? = nil) -> CallViewController {
         let controller = CallViewController()
         controller.viewModel = viewModel ?? CallViewModel()
         return controller
     }
-    
+
     override open func viewDidLoad() {
         super.viewDidLoad()
         view = PassthroughView(frame: view.frame)
         view.backgroundColor = .clear
         setupVideoView()
     }
-    
+
     open func setupVideoView() {
         let videoView = makeVideoView(with: DefaultViewFactory.shared)
         view.embed(videoView)
     }
-    
+
     open func makeVideoView<Factory: ViewFactory>(with viewFactory: Factory) -> UIView {
         if #available(iOS 14.0, *) {
             let videoView = VideoView(viewFactory: viewFactory, viewModel: viewModel)
@@ -41,12 +41,12 @@ open class CallViewController: UIViewController {
             return VideoViewContainer(view: videoView, frame: view.frame)
         }
     }
-    
+
     public func startCall(callId: String, participants: [User]) {
         viewModel.startCall(callId: callId, participants: participants)
         listenToCallStateChanges()
     }
-    
+
     private func listenToCallStateChanges() {
         viewModel.$callingState.sink { newState in
             if newState == .idle {
@@ -62,35 +62,35 @@ class PassthroughView: UIView {
         guard let slideView = subviews.first else {
             return false
         }
-        
+
         return slideView.hitTest(convert(point, to: slideView), with: event) != nil
     }
 }
 
 final class VideoViewContainer: UIView {
-    
+
     @available(iOS 14.0, *)
     init<Factory: ViewFactory>(view: VideoView<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
-        
+
         super.init(frame: .zero)
-        
+
         addSubview(uiView)
         uiView.frame = frame
     }
-    
+
     @available(iOS, introduced: 13, obsoleted: 14)
     init<Factory: ViewFactory>(view: VideoView_iOS13<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
-        
+
         super.init(frame: .zero)
-        
+
         addSubview(uiView)
         uiView.frame = frame
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")

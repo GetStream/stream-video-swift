@@ -1,15 +1,15 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import StreamVideo
 import SwiftUI
 
 struct CallingParticipantView: View {
-    
+
     var participant: User?
     var caller: String = ""
-    
+
     var body: some View {
         ZStack {
             if let participant = participant {
@@ -22,14 +22,14 @@ struct CallingParticipantView: View {
 }
 
 struct AnimatingParticipantView: View {
-    
+
     @Injected(\.colors) var colors
-    
+
     @State var isCalling = false
-    
+
     var participant: User?
     var caller: String = ""
-    
+
     var body: some View {
         CallingParticipantView(participant: participant, caller: caller)
             .scaleEffect(isCalling ? 0.8 : 1)
@@ -45,14 +45,14 @@ struct AnimatingParticipantView: View {
                         opacity: 0.2,
                         isCalling: isCalling
                     )
-                    
+
                     // Middle circle
                     PulsatingCircle(
                         scaleEffect: isCalling ? 0.7 : 1.1,
                         opacity: 0.5,
                         isCalling: isCalling
                     )
-                    
+
                     // Inner circle
                     PulsatingCircle(
                         scaleEffect: isCalling ? 0.5 : 1.2,
@@ -68,14 +68,14 @@ struct AnimatingParticipantView: View {
 }
 
 struct PulsatingCircle: View {
-    
+
     @Injected(\.colors) var colors
     var scaleEffect: CGFloat
     var opacity: CGFloat
     var isCalling: Bool
     var size: CGFloat = .expandedAvatarSize
     var animation: Animation = .easeOut(duration: 1).repeatForever(autoreverses: true)
-    
+
     var body: some View {
         Circle()
             .fill(colors.callPulsingColor)
@@ -87,7 +87,7 @@ struct PulsatingCircle: View {
 }
 
 extension CGFloat {
-    
+
     static let expandedAvatarSize: CGFloat = 172
     static let standardAvatarSize: CGFloat = 80
 }

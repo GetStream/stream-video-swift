@@ -1,5 +1,5 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import UIKit
@@ -10,11 +10,11 @@ import SwiftUI
 class LoginViewController: UIViewController {
 
     var onUserSelected: ((UserCredentials) -> ())?
-        
+
     override func viewDidLoad() {
         super.viewDidLoad()
     }
-    
+
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         let loginView = LoginView { [weak self] credentials in

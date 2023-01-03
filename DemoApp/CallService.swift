@@ -1,17 +1,17 @@
 //
-// Copyright © 2022 Stream.io Inc. All rights reserved.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
 
 class CallService {
-    
+
     private static let defaultCallText = "You are receiving a call"
-    
+
     static let shared = CallService()
-    
+
     let callService = CallKitService()
-    
+
     lazy var voipPushService = VoipPushService(
         voipTokenHandler: UnsecureUserRepository.shared
     ) { [weak self] payload, type, completion in
@@ -25,11 +25,11 @@ class CallService {
             completion()
         }
     }
-    
+
     func registerForIncomingCalls() {
         voipPushService.registerForVoIPPushes()
     }
-    
+
     private func callInfo(from callPayload: [String: Any]?) -> String {
         guard let userIds = callPayload?["user_ids"] as? String else { return Self.defaultCallText }
         let parts = userIds.components(separatedBy: ",")
