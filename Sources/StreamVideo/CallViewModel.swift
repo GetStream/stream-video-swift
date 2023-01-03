@@ -61,6 +61,8 @@ open class CallViewModel: ObservableObject {
         })
             .map { $1 }
     }
+    
+    public var videoOptions = VideoOptions()
             
     private var participantUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
@@ -247,12 +249,11 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let callType = CallType.default
-                let options = VideoOptions()
                 let call: Call = try await callController.joinCall(
                     callType: callType,
                     callId: callId,
                     callSettings: callSettings,
-                    videoOptions: options,
+                    videoOptions: videoOptions,
                     participantIds: participantIds
                 )
                 self.call = call

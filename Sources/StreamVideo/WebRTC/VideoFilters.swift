@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-public class VideoFilter {
+public final class VideoFilter: @unchecked Sendable {
     public let id: String
     public let name: String
     public var filter: (CIImage) async -> CIImage
