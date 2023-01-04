@@ -25,7 +25,8 @@
       "Guides": [
         "guides/callkit-integration",
         "guides/deep-linking",
-        "guides/chat-integration"
+        "guides/chat-integration",
+        "guides/custom-filters"
       ]
     }    
   ]
