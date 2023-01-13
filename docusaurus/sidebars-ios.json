@@ -7,7 +7,8 @@
         "basics/swiftui-vs-uikit",
         "basics/integration",
         "basics/architecture",
-        "basics/authentication"
+        "basics/authentication",
+        "basics/release-notes"
       ],
       "Client": [
         "client/call-viewmodel",
