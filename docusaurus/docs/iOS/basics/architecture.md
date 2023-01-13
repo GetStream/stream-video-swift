@@ -1,11 +1,11 @@
 ---
-title: Architecture Overview
-slug: /
+title: Architecture
 ---
 
 ## Introduction
 
 The StreamVideo product consists of three separate SDKs:
+
 - low-level client - responsible for establishing calls, built on top of WebRTC.
 - SwiftUI SDK - SwiftUI components for different types of call flows.
 - UIKit SDK - UIKit wrapper over the SwiftUI components, for easier usage in UIKit based apps.
@@ -21,16 +21,17 @@ The low-level client is used as a dependency in the UI frameworks, and can also 
 
 ## Low-Level Client
 
-The low-level client is used for establishing audio and video calls. It integrates with Stream's backend infrastructure, and implements the WebRTC protocol. 
+The low-level client is used for establishing audio and video calls. It integrates with Stream's backend infrastructure, and implements the WebRTC protocol.
 
 Here are the most important components that the low-level client provides:
+
 - `StreamVideo` - the main SDK object.
 - `CallController` - controller that deals with a particular call.
 - `CallViewModel` - stateful ViewModel that contains presentation logic.
 
 ### StreamVideo
 
-This is the main object for interfacing with the low-level client. It needs to be initialized with an API key and a user/token, before the SDK can be used. 
+This is the main object for interfacing with the low-level client. It needs to be initialized with an API key and a user/token, before the SDK can be used.
 
 ```swift
 let streamVideo = StreamVideo(
@@ -48,6 +49,7 @@ let streamVideo = StreamVideo(
 ```
 
 Here are parameters that the `StreamVideo` class expects:
+
 - `apiKey` - your Stream Video API key (note: it's different from chat)
 - `user` - the logged in user, represented by the `UserInfo` struct.
 - `token` - the user's token.
@@ -72,7 +74,7 @@ The `CallViewModel` is a presentation object that can be used directly if you ne
 
 The view model provides methods for starting and joining a call. It also wraps the call-related actions such as muting audio/video, changing the camera input, hanging up, for easier access from the views.
 
-You should use this class directly, if you want to build your custom UI components. 
+You should use this class directly, if you want to build your custom UI components.
 
 ## SwiftUI SDK
 
@@ -82,13 +84,13 @@ The simplest way to add calling support to your hosting view is to attach the `C
 
 ```swift
 struct CallView: View {
-    
+
     @StateObject var viewModel: CallViewModel
-    
+
     init() {
-        _viewModel = StateObject(wrappedValue: CallViewModel())        
+        _viewModel = StateObject(wrappedValue: CallViewModel())
     }
-        
+
     var body: some View {
         HomeView(viewModel: viewModel)
             .modifier(CallModifier(viewModel: viewModel))
@@ -101,7 +103,7 @@ With this setup, the `CallViewModel` will listen to incoming call events and pre
 
 You can customize the look and feel of the screens presented in the calling flow, by implementing the corresponding methods in our `ViewFactory`.
 
-Most of our components are public, so you can use them as building blocks if you want to build your custom UI. 
+Most of our components are public, so you can use them as building blocks if you want to build your custom UI.
 
 All the texts, images, fonts and sounds used in the SDK are configurable via our `Appearance` class, to help you brand the views to be inline with your hosting app.
 

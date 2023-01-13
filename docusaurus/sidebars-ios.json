@@ -2,16 +2,18 @@
   "docs": [
     {
       "Basics": [
-      	"basics/quick-start",
-      	"basics/integration",
-        "basics/architecture-overview",
+        "basics/overview",
+        "basics/quick-start",
+        "basics/swiftui-vs-uikit",
+        "basics/integration",
+        "basics/architecture",
         "basics/authentication"
       ],
       "Client": [
         "client/call-viewmodel",
-      	"client/call-lifecycle",
-      	"client/call-events",
-      	"client/call-state"
+        "client/call-lifecycle",
+        "client/call-events",
+        "client/call-state"
       ],
       "UI": [
         "ui/ui-overview",
@@ -28,6 +30,6 @@
         "guides/chat-integration",
         "guides/custom-filters"
       ]
-    }    
+    }
   ]
 }
