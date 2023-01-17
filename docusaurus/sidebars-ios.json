@@ -2,6 +2,7 @@
   "docs": [
     {
       "Basics": [
+        "basics/tutorial",
       	"basics/quick-start",
       	"basics/integration",
         "basics/architecture-overview",
