@@ -2,6 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import AVKit
 import Foundation
 import WebRTC
 
@@ -11,6 +12,7 @@ class VideoCapturer {
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
     private var videoFiltersHandler: VideoFiltersHandler?
+    private var pictureInPictureHandler: PictureInPictureHandler?
     
     init(
         videoSource: RTCVideoSource,
@@ -23,7 +25,9 @@ class VideoCapturer {
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         #else
         if videoFilters.isEmpty {
-            videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
+            let pictureInPictureHandler = PictureInPictureHandler(source: videoSource)
+            self.pictureInPictureHandler = pictureInPictureHandler
+            videoCapturer = PictureInPictureCapturer(delegate: pictureInPictureHandler)
         } else {
             let filtersHandler = VideoFiltersHandler(source: videoSource, filters: videoFilters)
             videoFiltersHandler = filtersHandler
