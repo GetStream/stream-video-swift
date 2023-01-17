@@ -1,29 +1,35 @@
 ---
-title: Quick Start
+title: Tutorial
 ---
 
-### Your First App with StreamVideo
+### Creating a project
 
-Before starting, make sure you have installed StreamVideo as explained in the [Installation](./integration.md) section.
+To get started with the `StreamVideo` SDK, open Xcode and create a new project.
 
-### Setting up the StreamVideo object
+- Create a new Swift project in Xcode 14
+- Choose iOS from the list of platforms
+- Choose the "App" template
+- Use VideoDemoSwiftUI for the project name
+- Select "SwiftUI" in the Interface option
 
-The simplest way to get started is to use our default SwiftUI components, that can add calling support to your views with only few lines of code.
+![Screenshot shows how to create a project in Xcode](../assets/new_project.png)
 
-First, we need to create the `StreamVideoUI`, with an API key and the user who's logged in your app.
+We are going to use the Swift Package Manager to fetch the SDK.
 
-```swift
-streamVideo = StreamVideoUI(
-    apiKey: apiKey,
-    user: userCredentials.user,
-    token: userCredentials.token,
-    tokenProvider: { result in
-        // Call your networking service to generate a new token here.
-        // When finished, call the result handler with either .success or .failure.
-        result(.success(userCredentials.token))
-    }
-)
-``` 
+- In Xcode, go to File -> "Add Packages..."
+- Paste the URL https://github.com/GetStream/stream-video-swift.git
+- In the option "Dependency Rule" choose "Branch", in the single text input next to it, enter "main"
+
+![Screenshot shows how to add the SPM dependency](../assets/spm.png)
+
+- Choose "Add Package" and wait for the dialog to complete.
+- Select `StreamVideo` and `StreamVideoSwiftUI` (if you use SwiftUI, otherwise also select `StreamVideoUIKit`).
+
+![Screenshot shows selection of dependencies](../assets/spm_select.png)
+
+You now have an empty project for your video calling app with the `StreamVideo` SDK as a dependency. Let's get started by displaying some content.
+
+### Setting up the StreamVideoUI object
 
 `StreamVideoUI` is the main access point to our SwiftUI SDK. It's created with the following values:
 - `apiKey` - your unique API key that's available in your dashboard.
@@ -35,13 +41,15 @@ Depending on your app architecture, you can keep the `StreamVideoUI` in a place 
 
 In this example, for simplicity, we will add it in the SwiftUI `App` file, as a `@State` variable, and set it up on `init`. In your app, you should setup the `StreamVideoUI` object after you login your user.
 
-```swift
+Open up the file `VideoDemoSwiftUIApp` in your Xcode project and add the following contents to it:
+
+```
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
 
 @main
-struct VideoTutorialApp: App {
+struct VideoDemoSwiftUIApp: App {
     
     @State var streamVideo: StreamVideoUI?
     
@@ -72,7 +80,7 @@ struct VideoTutorialApp: App {
         }
     }
 }
-```
+``` 
 
 In this example, we're using a hardcoded demo user, with a token that never expires:
 
@@ -96,9 +104,12 @@ extension UserCredentials {
 }
 ```
 
+
 With this, our `StreamVideoUI` object is setup, and the UI components are ready to be used inside your app.
 
 Let's see an example on how to invoke a call. The UI would be simple - just a text field to enter the call id and a button to start the call.
+
+Add the following code in the `ContentView` file in Xcode.
 
 ```swift
 import StreamVideo
@@ -142,6 +153,8 @@ Making a video call requires the usage of the camera and the microphone of the d
 
 `Privacy - Camera Usage Description` - "Your_app_name requires camera access in order to capture and transmit video"
 `Privacy - Microphone Usage Description` - "Your_app_name requires microphone access in order to capture and transmit audio"
+
+![Screenshot shows permissions in the plist file](../assets/permissions.png)
 
 Note that you should replace "Your_app_name" (or also use your custom strings instead).
 

@@ -6,23 +6,19 @@ To integrate Stream Video in your app, you can use the [**Swift Package Manager*
 
 ### Swift Package Manager
 
-Open your `.xcodeproj`, select the option "Add Package..." in the File menu, and paste the URL for the library you want to integrate:
+In order to add the `StreamVideo` SDK as a Swift Package, follow the following steps:
 
-- For the LLC (**StreamVideo**) use:
-  - `https://github.com/GetStream/stream-video-swift`
-- For the SwiftUI components (**StreamVideoSwiftUI**, which depends on **StreamVideo**) use:
-  - `https://github.com/GetStream/stream-video-swift`
-- For the UIKit components (**StreamVideoUIKit**, which depends on **StreamVideo** and **StreamVideoSwiftUI**) use:
-  - `https://github.com/GetStream/stream-video-swift`
+- In Xcode, go to File -> "Add Packages..."
+- Paste the URL https://github.com/GetStream/stream-video-swift.git
+- In the option "Dependency Rule" choose "Branch", in the single text input next to it, enter "main"
 
-After introducing the desired URL, Xcode will look for the Packages available in the repository and automatically select the latest version tagged. Press next and Xcode will download the dependency.
+![Screenshot shows how to add the SPM dependency](../assets/spm.png)
 
-Based on the repository you select you can find 3 different targets: StreamVideo, StreamVideoSwiftUI and StreamVideoUIKit.
+- Choose "Add Package" and wait for the dialog to complete.
+- Select `StreamVideo` and `StreamVideoSwiftUI` (if you use SwiftUI, otherwise also select `StreamVideoUIKit`).
 
-- If you want to use the SwiftUI components, select **StreamVideoSwiftUI**.
-- If you want to use the UIKit components, select **StreamVideoUIKit**.
-- If you don't need any UI components, select **StreamVideo**.
+![Screenshot shows selection of dependencies](../assets/spm_select.png)
 
-After you press finish, it's done.
+With that, the `StreamVideo` SDK is added to your project.
 
 _More information about Swift Package Manager [can be found here](https://www.swift.org/package-manager/)_
