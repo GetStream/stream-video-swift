@@ -1,45 +1,72 @@
-# Stream Video iOS
-Repo for Stream Video on iOS.
+# StreamVideo iOS
 
-# Introduction
+This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repo includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
+
+## Introduction
 
 This repo contains the following parts:
-- low-level client for video
-- SwiftUI SDK
-- Demo app example
+- low-level client for calling (can be used standalone if you want to build your own UI)
+- SwiftUI SDK (UI components developed in SwiftUI)
+- UIKit SDK (wrappers for easier usage in UIKit apps)
 
-Additionally, there's an empty (for now), UIKit SDK. We will either provide a UIKit wrapper around the SwiftUI SDK, or build a new native one in the future.
+### Main Principles
 
-### Swift protobuf and twirp code
+- Progressive disclosure: The SDK can be used easily with very minimal knowledge of it. As you become more familiar with it, you can dig deeper and start customizing it on all levels.
+- Swift native API: Uses Swift's powerful language features to make the SDK usage easy and type-safe.
+- Familiar behavior: The UI elements are good platform citizens and behave like native elements; they respect `tintColor`, padding, light/dark mode, dynamic font sizes, etc.
+- Fully open-source implementation: You have access to the complete source code of the SDK on GitHub.
 
-The backend APIs consist of two parts:
-- coordinator API, for determining which edge server to use for connecting to a call
-- SFU (Selective Forwarding Unit) - used for performing the video call
+### Low-Level Client
 
-We use protobufs and twirp for communicating with these APIs. The Swift protobufs are generated and integrated in the Xcode project.
+The low-level client is used for establishing audio and video calls. It integrates with Stream's backend infrastructure, and implements the WebRTC protocol. 
 
-For the coordinator API, the protobufs are located at our internal [video-proto](https://github.com/GetStream/video-proto) repo. Follow the steps there if you want to generate newer version of these files. The generated files are part of the versioning control and all updates related to them should be pushed.
+Here are the most important components that the low-level client provides:
+- `StreamVideo` - the main SDK object.
+- `CallController` - controller that deals with a particular call.
+- `CallViewModel` - stateful ViewModel that contains presentation logic.
 
-For the SFU API, at the moment, the Swift protobufs are in two parts (this is not ideal and will be addressed by the backend team). The first part, can be found in the same video-proto repo from above. The second part, needs still to be generated locally on this repo. In order to do this, you need to copy the latest files from the [SFU repo](https://github.com/GetStream/video-sfu), in the protobuf folder. 
+### SwiftUI SDK
 
-After you copy these files, you need to run the local generate.sh script, which can be found at `Sources/StreamVideo/protobuf`. 
+The SwiftUI SDK provides out of the box UI components, ready to be used in your app. The currently supported flows are "ringing" mode - with outgoing / incoming screens, and the "meeting" mode, which adds users to the call directly. The `joinVideoCallInstantly` property in the `VideoConfig` determines this behaviour.
+
+The simplest way to add calling support to your hosting view is to attach the `CallModifier`:
+
+```swift
+struct CallView: View {
+    
+    @StateObject var viewModel: CallViewModel
+    
+    init() {
+        _viewModel = StateObject(wrappedValue: CallViewModel())        
+    }
+        
+    var body: some View {
+        HomeView(viewModel: viewModel)
+            .modifier(CallModifier(viewModel: viewModel))
+    }
+}
 
 ```
-./generate.sh
+
+You can customize the look and feel of the screens presented in the calling flow, by implementing the corresponding methods in our `ViewFactory`.
+
+Most of our components are public, so you can use them as building blocks if you want to build your custom UI. 
+
+All the texts, images, fonts and sounds used in the SDK are configurable via our `Appearance` class, to help you brand the views to be inline with your hosting app.
+
+### UIKit SDK
+
+The UIKit SDK provides UIKit wrappers around the SwiftUI views. Its main integration point is the `CallViewController` which you can easily push in your navigation stack, or add as a modal screen.
+
+```swift
+private func didTapStartButton() {
+    let next = CallViewController.make(with: callViewModel)
+    next.modalPresentationStyle = .fullScreen
+    next.startCall(callId: text, participants: selectedParticipants)
+    self.navigationController?.present(next, animated: true)
+}
 ```
 
-This will create the .swift files. The ones from the folders above are already automatically added in the Xcode project. If you create new ones, you would need to explicitly add them to the Xcode project, only the first time.
+The `CallViewController` is created with a `CallViewModel` - the same one used in our SwiftUI SDK.
 
-This creates async/await versions of all the twirp service methods in the SFU. It's written in go, so if you want to change something, you will need to open client.go in `Sources/StreamVideo/protobuf/twirp/generator` and run:
-```
-go build
-```
-This will generate another executable, with the name `protoc-gen-swiftwirp` that you can use to create protobufs.
-
-In order to create Swift protobufs, you will need to first setup the Swift code generator plugin, as described [here](https://github.com/apple/swift-protobuf).
-
-### Sample app
-
-The sample app integrates the low-level client and the SwiftUI UI components. In the app, you can test the following:
-- full flow, consisting of edge selection (coordinator API) and call establishing. If you test with multiple devices, make sure that you use the same call id for all of them. The coordinator API is still not deployed anywhere. In order to test it, you will need to run it locally. In that case, make sure to change the `192.168.0.132` IP address with your own one. In order to invoke this flow, press the button `Start call`.
-- test only the SFU, which already has a deployed test instance. You can invoke this flow by pressing the "Test SFU" button (no local server setup is required for this test).
+At the moment, all the customizations in the UIKit SDK, need to be done in SwiftUI.
