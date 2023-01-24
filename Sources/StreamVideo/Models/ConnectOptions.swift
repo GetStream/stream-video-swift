@@ -25,7 +25,7 @@ public struct ICEServerConfig {
     }
 }
 
-extension Stream_Video_ICEServer {
+extension IceServer {
     
     func toICEServerConfig() -> ICEServerConfig {
         ICEServerConfig(urls: urls, username: username, password: password)

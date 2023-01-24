@@ -23,6 +23,9 @@ public struct Colors {
     public var background1: UIColor = .streamWhiteSmoke
     public var textLowEmphasis: UIColor = .streamGrayDisabledText
     public var callBackground: UIColor = .streamDarkBackground
+    public var waitingRoomBackground: Color = Color(.streamWaitingRoomBackground)
+    public var waitingRoomSecondaryBackground: Color = Color(.streamWaitingRoomSecondaryBackground)
+    public var primaryButtonBackground: Color = Color(.streamBlue)
     public var callPulsingColor = Color(.streamPulsingColor)
     public var callControlsBackground = Color(.streamCallControlsBackground)
 }
@@ -53,6 +56,9 @@ private extension UIColor {
     static let streamDarkBackground = mode(0x272a30, 0x272a30)
     static let streamPulsingColor = mode(0x005fff, 0x005fff)
     static let streamCallControlsBackground = mode(0x1c1e22, 0x1c1e22)
+    static let streamWaitingRoomBackground = mode(0xffffff, 0x2c2c2e)
+    static let streamWaitingRoomSecondaryBackground = mode(0xf2f2f2, 0x1c1c1e)
+    static let streamBlue = mode(0x005fff, 0x005fff)
     
     // Currently we are not using the correct shadow color from figma's color palette. This is to avoid
     // an issue with snapshots inconsistency between Intel vs M1. We can't use shadows with transparency.

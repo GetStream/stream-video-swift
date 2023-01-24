@@ -19,6 +19,8 @@ struct HomeView: View {
     
     @State private var callAction = CallAction.startCall
     
+    @State private var callFlow: CallFlow = .ringEvents
+    
     var participants: [User] {
         var participants = UserCredentials.builtInUsers.map { $0.userInfo }
         participants.removeAll { userInfo in
@@ -147,10 +149,20 @@ struct HomeView: View {
             }
             .frame(maxHeight: UIScreen.main.bounds.height / 4)
             .listStyle(PlainListStyle())
+            
+            Picker("Call flow", selection: $callFlow) {
+                Text(CallFlow.ringEvents.rawValue).tag(CallFlow.ringEvents)
+                Text(CallFlow.waitingRoom.rawValue).tag(CallFlow.waitingRoom)
+            }
+            .pickerStyle(.segmented)
                         
             Button {
                 resignFirstResponder()
-                viewModel.startCall(callId: callId, participants: selectedParticipants)
+                if callFlow == .waitingRoom {
+                    viewModel.enterWaitingRoom(callId: callId, participants: selectedParticipants)
+                } else {
+                    viewModel.startCall(callId: callId, participants: selectedParticipants)
+                }
             } label: {
                 Text("Start a call")
                     .padding()
@@ -166,4 +178,9 @@ struct HomeView: View {
 enum CallAction: String {
     case startCall = "Start a call"
     case joinCall = "Join a call"
+}
+
+enum CallFlow: String {
+    case ringEvents = "Ring events"
+    case waitingRoom = "Waiting room"
 }

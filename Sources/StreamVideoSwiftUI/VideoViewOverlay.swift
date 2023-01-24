@@ -57,6 +57,8 @@ public struct VideoView<Factory: ViewFactory>: View {
                 }
             } else if case let .incoming(callInfo) = viewModel.callingState {
                 viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+            } else if case let .waitingRoom(waitingRoomInfo) = viewModel.callingState {
+                viewFactory.makePreJoiningView(viewModel: viewModel, waitingRoomInfo: waitingRoomInfo)
             }
         }
         .onReceive(viewModel.$callingState) { _ in

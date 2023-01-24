@@ -39,6 +39,25 @@ internal enum L10n {
       internal static var unmuteme: String { L10n.tr("Localizable", "call.participants.unmuteme") }
     }
   }
+
+  internal enum WaitingRoom {
+    /// It seems you are having issues with your internet connection.
+    internal static var connectionIssues: String { L10n.tr("Localizable", "waiting-room.connection-issues") }
+    /// You are about to join a call.
+    internal static var description: String { L10n.tr("Localizable", "waiting-room.description") }
+    /// Join Call
+    internal static var join: String { L10n.tr("Localizable", "waiting-room.join") }
+    /// more people are in the call.
+    internal static var numberOfParticipants: String { L10n.tr("Localizable", "waiting-room.number-of-participants") }
+    /// Setup your audio and video
+    internal static var subtitle: String { L10n.tr("Localizable", "waiting-room.subtitle") }
+    /// Before Joining
+    internal static var title: String { L10n.tr("Localizable", "waiting-room.title") }
+    internal enum Mic {
+      /// Your microphone doesn't seem to be working. Make sure you have all permissions accepted.
+      internal static var notWorking: String { L10n.tr("Localizable", "waiting-room.mic.not-working") }
+    }
+  }
 }
 
 // MARK: - Implementation Details
