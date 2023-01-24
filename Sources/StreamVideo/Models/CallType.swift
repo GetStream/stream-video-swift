@@ -3,8 +3,8 @@
 //
 
 /// The type of a call.
-public struct CallType: Sendable {
-    let name: String
+public struct CallType: Sendable, Equatable {
+    public let name: String
     
     public init(name: String) {
         self.name = name

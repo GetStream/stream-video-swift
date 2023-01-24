@@ -70,6 +70,17 @@ public protocol ViewFactory: AnyObject {
         screensharingSession: ScreensharingSession,
         availableSize: CGSize
     ) -> ScreenSharingViewType
+    
+    associatedtype PreJoiningViewType: View
+    /// Creates the view that's displayed before the user joins the call.
+    /// - Parameters:
+    ///  - viewModel: The view model used for the call.
+    ///  - waitingRoomInfo: The waiting room info.
+    /// - Returns: view shown in the pre-joining slot.
+    func makePreJoiningView(
+        viewModel: CallViewModel,
+        waitingRoomInfo: WaitingRoomInfo
+    ) -> PreJoiningViewType
 }
 
 extension ViewFactory {
@@ -137,6 +148,27 @@ extension ViewFactory {
             screenSharing: screensharingSession,
             availableSize: availableSize
         )
+    }
+    
+    public func makePreJoiningView(
+        viewModel: CallViewModel,
+        waitingRoomInfo: WaitingRoomInfo
+    ) -> some View {
+        if #available(iOS 14.0, *) {
+            return PreJoiningView(
+                callViewModel: viewModel,
+                callId: waitingRoomInfo.callId,
+                callType: waitingRoomInfo.callType.name,
+                callParticipants: waitingRoomInfo.participants
+            )
+        } else {
+            return PreJoiningView_iOS13(
+                callViewModel: viewModel,
+                callId: waitingRoomInfo.callId,
+                callType: waitingRoomInfo.callType.name,
+                callParticipants: waitingRoomInfo.participants
+            )
+        }
     }
 }
 

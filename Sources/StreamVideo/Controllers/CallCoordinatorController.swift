@@ -46,7 +46,8 @@ final class CallCoordinatorController: Sendable {
         
         let edgeServer = try await selectEdgeServer(
             callId: joinCallResponse.call.call.callCid,
-            latencyByEdge: latencyByEdge
+            latencyByEdge: latencyByEdge,
+            edges: joinCallResponse.edges
         )
         
         return edgeServer
@@ -149,7 +150,8 @@ final class CallCoordinatorController: Sendable {
     
     private func selectEdgeServer(
         callId: String,
-        latencyByEdge: [String: Stream_Video_Latency]
+        latencyByEdge: [String: Stream_Video_Latency],
+        edges: [Stream_Video_Edge]
     ) async throws -> EdgeServer {
         var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
         selectEdgeRequest.callCid = callId
@@ -159,19 +161,49 @@ final class CallCoordinatorController: Sendable {
         let response = try await callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest: selectEdgeRequest)
         let url = response.credentials.server.url
         let token = response.credentials.token
+        let edgeName = response.credentials.server.edgeName
+        var latencyURL = edges.first { $0.name == edgeName }.map(\.latencyURL)
+        if latencyURL == nil {
+            for edge in edges {
+                let maxLatency = Double(Int.max)
+                let name = edge.name
+                let latency = latencyByEdge[name]?.measurementsSeconds.last ?? maxLatency
+                if latency != maxLatency {
+                    latencyURL = edge.latencyURL
+                }
+            }
+        }
         log.debug("Selected edge server \(url)")
         return EdgeServer(
             url: url,
             token: token,
-            iceServers: response.credentials.iceServers
+            iceServers: response.credentials.iceServers.map { $0.toIceServer() },
+            latencyURL: latencyURL
         )
     }
 }
 
-struct EdgeServer {
+public struct EdgeServer: Sendable {
     let url: String
     let token: String
-    let iceServers: [Stream_Video_ICEServer]
+    let iceServers: [IceServer]
+    public let latencyURL: String?
+}
+
+public struct IceServer: Sendable {
+    let urls: [String]
+    let username: String
+    let password: String
+}
+
+extension Stream_Video_ICEServer {
+    func toIceServer() -> IceServer {
+        IceServer(
+            urls: urls,
+            username: username,
+            password: password
+        )
+    }
 }
 
 struct CoordinatorInfo {

@@ -64,29 +64,44 @@ public class CallController {
             participantIds: participantIds
         )
         
-        webRTCClient = WebRTCClient(
-            user: user,
-            apiKey: apiKey,
-            hostname: edgeServer.url,
-            token: edgeServer.token,
-            callCid: "\(callType)-\(callId)",
-            callCoordinatorController: callCoordinatorController,
-            videoConfig: videoConfig,
-            tokenProvider: tokenProvider
-        )
-        
-        let connectOptions = ConnectOptions(
-            iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
-        )
-        try await webRTCClient?.connect(
+        return try await connectToEdge(
+            edgeServer,
+            callType: callType,
+            callId: callId,
             callSettings: callSettings,
             videoOptions: videoOptions,
-            connectOptions: connectOptions
+            participantIds: participantIds
         )
-        let sessionId = webRTCClient?.sessionID ?? ""
-        let currentCall = Call.create(callId: callId, callType: callType, sessionId: sessionId)
-        call = currentCall
-        return currentCall
+    }
+    
+    public func joinCall(
+        on edgeServer: EdgeServer,
+        callType: CallType,
+        callId: String,
+        callSettings: CallSettings,
+        videoOptions: VideoOptions,
+        participantIds: [String]
+    ) async throws -> Call {
+        try await connectToEdge(
+            edgeServer,
+            callType: callType,
+            callId: callId,
+            callSettings: callSettings,
+            videoOptions: videoOptions,
+            participantIds: participantIds
+        )
+    }
+
+    public func selectEdgeServer(
+        videoOptions: VideoOptions,
+        participantIds: [String]
+    ) async throws -> EdgeServer {
+        try await callCoordinatorController.joinCall(
+            callType: callType,
+            callId: callId,
+            videoOptions: videoOptions,
+            participantIds: participantIds
+        )
     }
     
     /// Renders the local video in the provided renderer.
@@ -142,6 +157,39 @@ public class CallController {
     }
     
     // MARK: - private
+    
+    private func connectToEdge(
+        _ edgeServer: EdgeServer,
+        callType: CallType,
+        callId: String,
+        callSettings: CallSettings,
+        videoOptions: VideoOptions,
+        participantIds: [String]
+    ) async throws -> Call {
+        webRTCClient = WebRTCClient(
+            user: user,
+            apiKey: apiKey,
+            hostname: edgeServer.url,
+            token: edgeServer.token,
+            callCid: "\(callType)-\(callId)",
+            callCoordinatorController: callCoordinatorController,
+            videoConfig: videoConfig,
+            tokenProvider: tokenProvider
+        )
+        
+        let connectOptions = ConnectOptions(
+            iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
+        )
+        try await webRTCClient?.connect(
+            callSettings: callSettings,
+            videoOptions: videoOptions,
+            connectOptions: connectOptions
+        )
+        let sessionId = webRTCClient?.sessionID ?? ""
+        let currentCall = Call.create(callId: callId, callType: callType, sessionId: sessionId)
+        call = currentCall
+        return currentCall
+    }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
         guard let webRTCClient = webRTCClient else {
