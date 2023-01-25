@@ -8,10 +8,11 @@ If you are using our `CallViewModel`, the state of the call is managed for you a
 
 The `CallingState` enumeration has the following possible values:
 - `idle` - There's no active call at the moment. In this case, your hosting view should be displayed.
+- `waitingRoom(WaitingRoomInfo)` - The user is in a waiting room before joining the call.
 - `incoming(IncomingCall)` - There's an incoming call, therefore an incoming call screen needs to be displayed.
 - `outgoing` - The user rings someone, therefore an outgoing call needs to be displayed.
 - `inCall` - The user is in a call.
-- `reconnecting` - The user dropped the connection and now it's trying to reconnect.
+- `reconnecting` - The user dropped the connection and now they are trying to reconnect.
 
 ### Example handling
 
@@ -60,3 +61,11 @@ private func listenToIncomingCalls() {
     .store(in: &cancellables)
 }
 ```
+
+### Call Settings
+
+The `CallViewModel` provides information about the current call settings, such as the camera position and whether there's an audio and video turned on. This is available as a `@Published` property called `callSettings`.
+
+If you are building a custom UI, you should use the values from this struct to show the corresponding call controls and camera (front or back).
+
+If you want to learn more about the call settings and how to use them, please check the following [page](../client/call-viewmodel.md).
