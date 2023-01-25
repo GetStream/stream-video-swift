@@ -43,7 +43,7 @@ In this example, for simplicity, we will add it in the SwiftUI `App` file, as a 
 
 Open up the file `VideoDemoSwiftUIApp` in your Xcode project and add the following contents to it:
 
-```
+```swift
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
@@ -146,6 +146,90 @@ struct ContentView: View {
 Here, you need to create the `CallViewModel`, which deals with the call related state and provides access to features like muting audio/video, changing the camera, starting / stopping calls etc.
 
 In the example, we're also setting a `CallModifier` to the view. With this modifier, the calling support is added to your view. The modifier handles everything from reporting incoming / outgoing calls to showing the appropriate UI based on the call state.
+
+### UI Customizations
+
+#### Appearance
+
+When you create the `StreamVideoUI` object, you can optionally provide your own version of the `Appearance` class, that will allow you to customize things like fonts, colors, icons and sounds used in the SDK.
+
+For example, let's change the default hang up icon. For this, we would need to create a new `Images` class, and modify its `hangup` property. Then, we need to initialize the `Appearance` class with the updated `Images` and pass it to the `StreamVideoUI` object.
+
+```swift
+var images = Images()
+images.hangup = Image(systemName: "phone.down")
+let appearance = Appearance(images: images)
+streamVideo = StreamVideoUI(
+    apiKey: "your_api_key",
+    user: userCredentials.userInfo,
+    token: userCredentials.token,
+    videoConfig: VideoConfig(
+        persitingSocketConnection: true,
+        joinVideoCallInstantly: true
+    ),
+    tokenProvider: { result in
+        result(.success(user.token))
+    },
+    appearance: appearance
+)
+```
+
+If you want to learn about all the possible appearance customizations (fonts, colors, icons and sounds), please check the following [page](../ui/ui-overview.md).
+
+#### View Customizations
+
+The SwiftUI SDK allows complete view swapping of some of its components. This means you can, for example, create your own (different) outgoing call view and inject it in the slot of the default one. For most of the views, the SDK doesn't require anything else than the view to conform to the standard SwiftUI `View` protocol and return a view from the `body` variable.
+
+To abstract away the creation of the views, a protocol called `ViewFactory` is used in the SDK. This protocol defines the swappable views of the video experience. There are default implementations for all the views used in the SDK. If you want to customize a view, you will need to provide your own implementation of the `ViewFactory`, but you will need to implement only the view you want to swap.
+
+For example, let's customize the outgoing call view and attach a text overlay to it. For this, we will need to implement the `makeOutgoingCallView(viewModel: CallViewModel) -> some View` in the `ViewFactory`:
+
+```swift
+class CustomViewFactory: ViewFactory {
+    
+    func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
+        // Here you can also provide your own custom view.
+        // In this example, we are re-using the standard one, while also adding an overlay.
+        let view = DefaultViewFactory.shared.makeOutgoingCallView(viewModel: viewModel)
+        return view.overlay(
+            Text("Custom text overlay")
+        )
+    }
+}
+```
+Next, when you attach the `CallModifier` to your hosting view, you need to inject the newly created `CustomViewFactory`. The SDK will use the views you have provided in your custom implementation, while it will default back to the ones from the SDK in the slots where you haven't provided any implementation.
+
+In order to inject the `ViewFactory`, you will need to update the `CallModifier` initializer.
+
+```swift
+struct ContentView: View {
+    
+    @StateObject var callViewModel = CallViewModel()
+    @State var callId = ""
+
+    var body: some View {
+        VStack {
+            TextField("Insert a call id", text: $callId)
+                .textFieldStyle(.roundedBorder)
+                .padding()
+            
+            Button {
+                resignFirstResponder()
+                callViewModel.startCall(
+                    callId: callId,
+                    participants: [/* Your list of participants goes here. */]
+                )
+            } label: {
+                Text("Start a call")
+            }
+        }
+        .padding()
+        .modifier(CallModifier(viewFactory: CustomViewFactory(), viewModel: callViewModel))
+    }
+}
+```
+
+For the full list of supported view slots that can be swapped, please refer to this [page](./view-slots.md).
 
 ### Permissions
 
