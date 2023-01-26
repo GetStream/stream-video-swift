@@ -1,12 +1,19 @@
 {
   "docs": [
     {
+      "Tutorial": [
+        "tutorial/tutorial"
+      ],
       "Basics": [
-        "basics/tutorial",
-      	"basics/quick-start",
-      	"basics/integration",
+          "basics/install",
+          "basics/authentication",
         "basics/architecture-overview",
-        "basics/authentication"
+        "basics/ui"
+      ],
+      "Quickstart": [
+          "quickstart/video-call",
+          "quickstart/audio-room",
+          "quickstart/livestream"
       ],
       "Client": [
         "client/call-viewmodel",
@@ -14,7 +21,24 @@
       	"client/call-events",
       	"client/call-state"
       ],
-      "UI": [
+      "Features": [
+        "features/screensharing",
+        "features/recording",
+        "features/chat-integration",
+        "features/push-ringing",
+        "features/interrupt-handling",
+        "features/webhooks-sqs",
+        "features/custom-data",
+        "features/custom-events",
+        "features/custom-filters",
+        "features/GDPR",
+        "features/moderation",
+        "features/permissions",
+        "features/user-experience",
+        "features/callkit-integration",
+        "features/deep-linking"
+      ],
+      "UI Components": [
         "ui/ui-overview",
         "ui/customizing-views",
         "ui/view-slots",
@@ -23,11 +47,12 @@
         "ui/text-localization",
         "ui/injecting-dependencies"
       ],
+      "UI Cookbook": [
+        "cookbook/introduction",
+        "cookbook/preview-screen"
+      ],
       "Guides": [
-        "guides/callkit-integration",
-        "guides/deep-linking",
-        "guides/chat-integration",
-        "guides/custom-filters"
+
       ]
     }    
   ]

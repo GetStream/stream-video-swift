@@ -2,6 +2,9 @@
 title: Tutorial
 ---
 
+This tutorial will be moved to the site. Similar to this:
+https://getstream.io/chat/react-chat/tutorial/
+
 ### Creating a project
 
 To get started with the `StreamVideo` SDK, open Xcode and create a new project.
