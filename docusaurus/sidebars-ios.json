@@ -16,10 +16,16 @@
           "quickstart/livestream"
       ],
       "Client": [
+        "client/authentication-users",
+        "client/joining-leaving-calls",
+        "client/call-types",
+        "client/mic-camera-setup",
+        "client/audio-out",
         "client/call-viewmodel",
       	"client/call-lifecycle",
       	"client/call-events",
-      	"client/call-state"
+      	"client/call-state",
+        "client/sdk-size-impact"
       ],
       "Features": [
         "features/screensharing",
@@ -36,7 +42,8 @@
         "features/permissions",
         "features/user-experience",
         "features/callkit-integration",
-        "features/deep-linking"
+        "features/deep-linking",
+        "features/background-modes"
       ],
       "UI Components": [
         "ui/ui-overview",
@@ -49,10 +56,13 @@
       ],
       "UI Cookbook": [
         "cookbook/introduction",
-        "cookbook/preview-screen"
-      ],
-      "Guides": [
-
+        "cookbook/preview-screen",
+        "cookbook/network-quality",
+        "cookbook/video-card",
+        "cookbook/video-layout",
+        "cookbook/avatar",
+        "cookbook/changing-camera",
+        "cookbook/audio-levels"
       ]
     }    
   ]
