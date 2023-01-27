@@ -1,5 +1,5 @@
 ---
-title: Authentication
+title: Client & User
 ---
 
 Stream uses JWT (JSON Web Tokens) to authenticate video users, enabling them to login. The same token can be used to login into our chat services (provided that your app ID is enabled for both chat and video).

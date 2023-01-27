@@ -2,6 +2,18 @@
 title: Tutorial
 ---
 
+This tutorial will be moved to the site. Similar to this:
+https://getstream.io/chat/react-chat/tutorial/
+
+### Introduction
+
+`StreamVideo` is a highly customizable SDK that facilitates adding calling (audio and video) support to your apps. The SDK consists of three parts:
+- low-level client - responsible for establishing calls, built on top of WebRTC.
+- SwiftUI SDK - SwiftUI components for different types of call flows.
+- UIKit SDK - UIKit wrapper over the SwiftUI components, for easier usage in UIKit based apps.
+
+In this tutorial, we will build a video calling app that shows how you can integrate the SDK in few simple steps.
+
 ### Creating a project
 
 To get started with the `StreamVideo` SDK, open Xcode and create a new project.
