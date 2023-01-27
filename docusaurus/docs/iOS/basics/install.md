@@ -1,5 +1,5 @@
 ---
-title: Install & Permissions
+title: Installation & Permissions
 ---
 
 ### Creating a project
@@ -18,7 +18,7 @@ We are going to use the Swift Package Manager to fetch the SDK.
 
 - In Xcode, go to File -> "Add Packages..."
 - Paste the URL https://github.com/GetStream/stream-video-swift.git
-- In the option "Dependency Rule" choose "Branch", in the single text input next to it, enter "main"
+- In the option "Dependency Rule" choose "Branch," in the single text input next to it, enter "main"
 
 ![Screenshot shows how to add the SPM dependency](../assets/spm.png)
 
@@ -34,7 +34,7 @@ Making a video call requires the usage of the camera and the microphone of the d
 `Privacy - Camera Usage Description` - "Your_app_name requires camera access in order to capture and transmit video"
 `Privacy - Microphone Usage Description` - "Your_app_name requires microphone access in order to capture and transmit audio"
 
-![Screenshot shows permissions in the plist file](../assets/permissions.png)
+![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
 Note that you should replace "Your_app_name" (or also use your custom strings instead).
 
