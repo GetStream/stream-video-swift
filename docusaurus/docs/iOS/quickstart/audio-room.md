@@ -4,15 +4,15 @@ title: Audio Room/ Spaces
 
 In this quickstart you'll build an audio room experience similar to Twitter Spaces/ Clubhouse.
 
-* The audio room will run on Stream's Edge network of servers around the world. 
-* This ensures the lowest latency for your users
-* Opus RED is used to improve audio quality
-* DTX and our edge network ensure you can scale to millions of users at low bandwidth
-* You can have multiple active participants in the audio room
+- The audio room will run on Stream's Edge network of servers around the world.
+- This ensures the lowest latency for your users
+- Opus RED is used to improve audio quality
+- DTX and our edge network ensure you can scale to millions of users at low bandwidth
+- You can have multiple active participants in the audio room
 
 IMAGE PREVIEW HERE
 
-Alright, let's get started! If you want to see a fully fledged example, check out this sample app.
+Alright, let's get started. If you want to see a fully fledged example, check out this sample app.
 
 ### Step 1 - Prep
 
@@ -37,7 +37,7 @@ Roles & permissions
 
 ### Other useful extensions for audio rooms
 
-* Reactions for participants
-* Participant sorting (it's different than a regular call)
-* Tiny audio indicator
-* Mute everyone
+- Reactions for participants
+- Participant sorting (it's different than a regular call)
+- Tiny audio indicator
+- Mute everyone

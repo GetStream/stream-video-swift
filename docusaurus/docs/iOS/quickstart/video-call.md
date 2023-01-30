@@ -6,15 +6,15 @@ title: Video Call
 
 In this quickstart you'll build a video call experience similar to Zoom or messenger.
 
-* Stream's video edge network ensures a reliable call experience with low latency
-* You can scale to thousands of participants
-* Our Dynascale technology automatically adjusts the quality of video, codecs and resolutions. 
-* This saves you months of work compared to other providers.
-* Opus RED creates a reliable audio connection
+- Stream's video edge network ensures a reliable call experience with low latency
+- You can scale to thousands of participants
+- Our Dynascale technology automatically adjusts the quality of video, codecs and resolutions.
+- This saves you months of work compared to other providers.
+- Opus RED creates a reliable audio connection
 
 IMAGE PREVIEW HERE
 
-Alright, let's get started! If you want to see a fully fledged example, check out this sample app.
+Alright, let's get started. If you want to see a fully fledged example, check out this sample app.
 
 ### Your First App with StreamVideo
 
@@ -37,9 +37,10 @@ streamVideo = StreamVideoUI(
         result(.success(userCredentials.token))
     }
 )
-``` 
+```
 
 `StreamVideoUI` is the main access point to our SwiftUI SDK. It's created with the following values:
+
 - `apiKey` - your unique API key that's available in your dashboard.
 - `user` - the `UserInfo` struct that contains information about the currently logged in user.
 - `token` - the current user's `Token`.
@@ -56,13 +57,13 @@ import StreamVideoSwiftUI
 
 @main
 struct VideoTutorialApp: App {
-    
+
     @State var streamVideo: StreamVideoUI?
-    
+
     init() {
         setupStreamVideo(with: "key1", userCredentials: .demoUser)
     }
-    
+
     private func setupStreamVideo(
         with apiKey: String,
         userCredentials: UserCredentials
@@ -79,7 +80,7 @@ struct VideoTutorialApp: App {
             }
         )
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
@@ -120,7 +121,7 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct ContentView: View {
-    
+
     @StateObject var callViewModel = CallViewModel()
     @State var callId = ""
 
@@ -129,7 +130,7 @@ struct ContentView: View {
             TextField("Insert a call id", text: $callId)
                 .textFieldStyle(.roundedBorder)
                 .padding()
-            
+
             Button {
                 resignFirstResponder()
                 callViewModel.startCall(

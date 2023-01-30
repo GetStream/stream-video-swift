@@ -8,6 +8,7 @@ https://getstream.io/chat/react-chat/tutorial/
 ### Introduction
 
 `StreamVideo` is a highly customizable SDK that facilitates adding calling (audio and video) support to your apps. The SDK consists of three parts:
+
 - low-level client - responsible for establishing calls, built on top of WebRTC.
 - SwiftUI SDK - SwiftUI components for different types of call flows.
 - UIKit SDK - UIKit wrapper over the SwiftUI components, for easier usage in UIKit based apps.
@@ -30,7 +31,7 @@ We are going to use the Swift Package Manager to fetch the SDK.
 
 - In Xcode, go to File -> "Add Packages..."
 - Paste the URL https://github.com/GetStream/stream-video-swift.git
-- In the option "Dependency Rule" choose "Branch", in the single text input next to it, enter "main"
+- In the option "Dependency Rule" choose "Branch," in the single text input next to it, enter "main"
 
 ![Screenshot shows how to add the SPM dependency](../assets/spm.png)
 
@@ -44,6 +45,7 @@ You now have an empty project for your video calling app with the `StreamVideo` 
 ### Setting up the StreamVideoUI object
 
 `StreamVideoUI` is the main access point to our SwiftUI SDK. It's created with the following values:
+
 - `apiKey` - your unique API key that's available in your dashboard.
 - `user` - the `UserInfo` struct that contains information about the currently logged in user.
 - `token` - the current user's `Token`.
@@ -62,13 +64,13 @@ import StreamVideoSwiftUI
 
 @main
 struct VideoDemoSwiftUIApp: App {
-    
+
     @State var streamVideo: StreamVideoUI?
-    
+
     init() {
         setupStreamVideo(with: "key1", userCredentials: .demoUser)
     }
-    
+
     private func setupStreamVideo(
         with apiKey: String,
         userCredentials: UserCredentials
@@ -85,14 +87,14 @@ struct VideoDemoSwiftUIApp: App {
             }
         )
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ContentView()
         }
     }
 }
-``` 
+```
 
 In this example, we're using a hardcoded demo user, with a token that never expires:
 
@@ -116,7 +118,6 @@ extension UserCredentials {
 }
 ```
 
-
 With this, our `StreamVideoUI` object is setup, and the UI components are ready to be used inside your app.
 
 Let's see an example on how to invoke a call. The UI would be simple - just a text field to enter the call id and a button to start the call.
@@ -129,7 +130,7 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct ContentView: View {
-    
+
     @StateObject var callViewModel = CallViewModel()
     @State var callId = ""
 
@@ -138,7 +139,7 @@ struct ContentView: View {
             TextField("Insert a call id", text: $callId)
                 .textFieldStyle(.roundedBorder)
                 .padding()
-            
+
             Button {
                 resignFirstResponder()
                 callViewModel.startCall(
@@ -198,7 +199,7 @@ For example, let's customize the outgoing call view and attach a text overlay to
 
 ```swift
 class CustomViewFactory: ViewFactory {
-    
+
     func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         // Here you can also provide your own custom view.
         // In this example, we are re-using the standard one, while also adding an overlay.
@@ -209,13 +210,14 @@ class CustomViewFactory: ViewFactory {
     }
 }
 ```
+
 Next, when you attach the `CallModifier` to your hosting view, you need to inject the newly created `CustomViewFactory`. The SDK will use the views you have provided in your custom implementation, while it will default back to the ones from the SDK in the slots where you haven't provided any implementation.
 
 In order to inject the `ViewFactory`, you will need to update the `CallModifier` initializer.
 
 ```swift
 struct ContentView: View {
-    
+
     @StateObject var callViewModel = CallViewModel()
     @State var callId = ""
 
@@ -224,7 +226,7 @@ struct ContentView: View {
             TextField("Insert a call id", text: $callId)
                 .textFieldStyle(.roundedBorder)
                 .padding()
-            
+
             Button {
                 resignFirstResponder()
                 callViewModel.startCall(
@@ -250,7 +252,7 @@ Making a video call requires the usage of the camera and the microphone of the d
 `Privacy - Camera Usage Description` - "Your_app_name requires camera access in order to capture and transmit video"
 `Privacy - Microphone Usage Description` - "Your_app_name requires microphone access in order to capture and transmit audio"
 
-![Screenshot shows permissions in the plist file](../assets/permissions.png)
+![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
 Note that you should replace "Your_app_name" (or also use your custom strings instead).
 
