@@ -13,7 +13,7 @@ TODO before launch:
 
 :::
 
-In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.m
+In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.
 
 The final result will look like this:
 
