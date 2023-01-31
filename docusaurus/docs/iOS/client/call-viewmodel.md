@@ -8,7 +8,7 @@ The `CallViewModel` is a stateful component, that can be used as a presentation 
 
 The `CallViewModel` is an observable object, and it can be used with both SwiftUI and UIKit views. It provides information about the call state, events, participants, as well as different actions that you can perform while on a call (muting/unmuting yourself, changing camera source, etc).
 
-## Available functionalities 
+## Available functionalities
 
 ### Calling State
 
@@ -17,6 +17,7 @@ The `CallViewModel` exposes a `@Published` `callingState` variable, that can be 
 ### Starting a call
 
 You can start a call using the method `startCall(callId: String, type: String? = nil, participants: [UserInfo])`, where the parameters are:
+
 - `callId` - the id of the call. If you use the ringing functionality, this should be always a unique value.
 - `type` - optional call type. If you don't specify it, a default one would be set.
 - `participants` - the list of participants in the call.
@@ -36,6 +37,7 @@ After you call this method (or the other ones below), the `callingState` will ch
 ### Joining a call
 
 You can join an existing call using the method `joinCall(callId: String, type: String? = nil)`, where the parameters are:
+
 - `callId` - the id of the call. If you use the ringing functionality, this should be always a unique value.
 - `type` - optional call type. If you don't specify it, a default one would be set.
 
@@ -51,15 +53,17 @@ Button {
 
 ### Accepting a call
 
-When you are receiving an incoming call, you can either accept it or reject it. If you don't perform any of these actions after a configurable timeout, the call is canceled. 
+When you are receiving an incoming call, you can either accept it or reject it. If you don't perform any of these actions after a configurable timeout, the call is canceled.
 
 In order to accept a call, you need to use the method `acceptCall(callId: String, type: String)`, where the parameters are:
+
 - `callId` - the id of the call.
 - `type` - the type of the call.
 
 ### Rejecting a call
 
 In order to reject a call, you need to use the method `rejectCall(callId: String, type: String)`, where the parameters are:
+
 - `callId` - the id of the call.
 - `type` - the type of the call.
 
@@ -83,7 +87,7 @@ The `callSettings` are updated by performing the following actions from the view
 
 You can toggle the camera position by calling the method `toggleCameraPosition`. The method takes into consideration the current camera state (front or back), and it updates it to the new one.
 
-The video view will automatically update itself and send the new feed to the backend. 
+The video view will automatically update itself and send the new feed to the backend.
 
 #### toggleCameraEnabled
 
