@@ -241,4 +241,4 @@ The end result will look like this (supposedly with a different face):
 
 This guide shows you a concrete example how to add a specific AI filter. However, with the way this is structured we aim to give you full control over what you can build with this.
 
-We would love to see the cool things you'll build with this functionality, feel free to tweet about them and [tag us](https://twitter.com/getstream_io)!
+We would love to see the cool things you'll build with this functionality, feel free to tweet about them and [tag us](https://twitter.com/getstream_io).
