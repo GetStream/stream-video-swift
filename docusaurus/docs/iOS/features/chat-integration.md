@@ -140,9 +140,17 @@ Not sure how to do this? Start [here for video](https://staging.getstream.io/vid
 
 ## Adding video into a chat app
 
-The simplest way to add a video in a chat app is to customize the chat channel header and add a call icon in the top right corner.
+In this example, you will take a chat application and add video capabilities to it. Here is how the end result will look like:
 
-Here's an example how to do that:
+// TODO: add sample video
+
+:::info
+The starting point for this guide is a chat application built with the Stream Chat SDK. Not sure were to start? Follow along [this step-by-step tutorial](https://getstream.io/tutorials/swiftui-chat/) and you are ready for this guide.
+:::
+
+The simplest way to add video calling in a chat app is to customize the chat channel header and add a call icon in the top right corner.
+
+To do this, you need to implement the `makeChannelHeaderViewModifier` function in your custom implementation of the `ViewFactory` from the Stream Chat SDK:
 
 ```swift
 @MainActor
@@ -151,7 +159,7 @@ func makeChannelHeaderViewModifier(for channel: ChatChannel) -> some ChatChannel
 }
 ```
 
-Where the `CallHeaderModifier` looks like this:
+For this code to compile you need a `CallHeaderModifier` that looks like this:
 
 ```swift
 struct CallHeaderModifier: ChatChannelHeaderViewModifier {
@@ -166,50 +174,33 @@ struct CallHeaderModifier: ChatChannelHeaderViewModifier {
     }
 
 }
+```
 
+This creates a toolbar with the content of type `CallChatChannelHeader` that can be created like this (this is simplified code, find the [full version here](https://github.com/GetStream/stream-video-ios-examples/blob/main/ChatWithVideo/ChatWithVideo/ChatViewFactory.swift)):
+
+```swift
 public struct CallChatChannelHeader: ToolbarContent {
-    @Injected(\.fonts) private var fonts
-    @Injected(\.utils) private var utils
-    @Injected(\.colors) private var colors
-    @Injected(\.chatClient) private var chatClient
 
-    private var currentUserId: String {
-        chatClient.currentUserId ?? ""
-    }
-
-    private var shouldShowTypingIndicator: Bool {
-        !channel.currentlyTypingUsersFiltered(currentUserId: currentUserId).isEmpty
-            && utils.messageListConfig.typingIndicatorPlacement == .navigationBar
-            && channel.config.typingEventsEnabled
-    }
-
-    private var onlineIndicatorShown: Bool {
-        !channel.lastActiveMembers.filter { member in
-            member.id != chatClient.currentUserId && member.isOnline
-        }
-        .isEmpty
-    }
+    private var shouldShowTypingIndicator: Bool { /* ... */ }
 
     public var channel: ChatChannel
     @ObservedObject var callViewModel: CallViewModel
 
-    public init(
-        channel: ChatChannel,
-        callViewModel: CallViewModel
-    ) {
-        self.channel = channel
-        self.callViewModel = callViewModel
-    }
-
     public var body: some ToolbarContent {
+        // highlight-next-line
+        // 1. Add the title of the channel in the center position
         ToolbarItem(placement: .principal) {
             ChannelTitleView(
                 channel: channel,
                 shouldShowTypingIndicator: shouldShowTypingIndicator
             )
         }
+        // highlight-next-line
+        // 2. Add a trailing item to the toolbar with a phone icon
         ToolbarItem(placement: .navigationBarTrailing) {
             Button {
+                // highlight-next-line
+                // 3. Create and start a call with the participants from the channel
                 let participants = channel.lastActiveMembers.map { member in
                     User(
                         id: member.id,
@@ -227,7 +218,15 @@ public struct CallChatChannelHeader: ToolbarContent {
 }
 ```
 
-It's important that we're adding a unique call id in the `startCall` method, to invoke the ringing each time.
+The interesting code steps here are:
+
+1. The header has the title (and typing indicator) of the channel in the center position (indicated by `placement: .principal`)
+2. To initiate a call a trailing icon in the form of a phone is added
+3. The call is initiated with the `lastActiveMembers` of the `channel` item and started with the convenient `startCall` method of the `callViewModel`
+
+:::note
+It's important that we're adding a unique call id (for example with the `UUID().uuidString`) in the `startCall` method, to invoke the ringing each time.
+:::
 
 In order to listen to incoming calls, you should attach the `CallModifier` to the parent view (for example the `ChatChannelListView`):
 
@@ -235,3 +234,5 @@ In order to listen to incoming calls, you should attach the `CallModifier` to th
 ChatChannelListView(viewFactory: ChatViewFactory.shared)
     .modifier(CallModifier(viewModel: callViewModel))
 ```
+
+With that you have added video calling to a functioning Stream Chat application. If you want to have a look at other examples, feel free to check out [our iOS samples repository](https://github.com/GetStream/stream-video-ios-examples).
