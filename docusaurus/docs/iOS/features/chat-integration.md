@@ -41,7 +41,7 @@ class VideoViewFactory: ViewFactory {
 Inside of the `ChatCallControls` you will use a `ToggleChatButton` that looks like this:
 
 ```swift
-var toggleChatButton = Button(
+Button(
     action: {
         // highlight-next-line
         // 1. Toggle chat window
@@ -67,7 +67,7 @@ var toggleChatButton = Button(
             : nil
         )
     }
-))
+)
 ```
 
 The code does three interesting things (see the numbered comments):
@@ -85,16 +85,16 @@ struct ChatCallControls: View {
 
     @StateObject private var chatHelper = ChatHelper()
 
-    var toggleChatButton = Button(/* button you just created */)
-
     public var body: some View {
         // highlight-next-line
         // 1. Arrange code in VStack
         VStack {
             HStack {
-                toggleChatButton
+                Button(
+                    // Button code you just created
+                )
 
-                // Other unrelated code skipped. Check repository complete code.
+                // Unrelated code skipped. Check repository for complete code.
             }
 
             // highlight-next-line
