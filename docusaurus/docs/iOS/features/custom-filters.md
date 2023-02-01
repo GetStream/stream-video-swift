@@ -141,9 +141,15 @@ That is everything that is needed for a basic video filter support.
 
 ## Adding AI Filters
 
-In some cases, you might also want to apply AI filters, whether that is some addition to the user's face (glasses, moustaches, etc), or an ML filter. In this section we will cover this case, where we will show Stream's logo over the user's face. Whenever the user moves along, we will update the logo's location.
+In some cases, you might also want to apply AI filters. That can be an addition to the user's face (glasses, moustaches, etc), or an ML filter. In this section this use-case will be covered. Specifically, you will show Stream's logo over the user's face. Whenever the user moves along, you will update the logo's location.
 
-To do this, we will use the Vision framework and the `VNDetectFaceRectanglesRequest`. First, let's create the method that will detect the faces:
+// TODO add sample video
+
+:::tip
+The code will be slightly simplified for the sake of this guide. If you want to see the entire example with the full code, you can see the [sample on GitHub](https://github.com/GetStream/stream-video-ios-examples/tree/main/VideoWithChat).
+:::
+
+To do this, you will use the [Vision framework](https://developer.apple.com/documentation/vision) and the `VNDetectFaceRectanglesRequest`. First, let's create the method that will detect the faces:
 
 ```swift
 static func detectFaces(image: CIImage) async throws -> CGRect {
@@ -160,6 +166,10 @@ static func detectFaces(image: CIImage) async throws -> CGRect {
     }
 }
 ```
+
+:::note
+The `VNDetectFaceRectanglesRequest` does not support the `async/await` syntax yet, so it is converted using the `withCheckedThrowingContinuation` mechanism ([see Apple documentation](<https://developer.apple.com/documentation/swift/withcheckedthrowingcontinuation(function:_:)>).
+:::
 
 Next, let's add some helper methods, that will allow conversion between `CIImage` and `UIImage`, as well as the possibility to draw over an image:
 
@@ -184,11 +194,13 @@ static func drawImageIn(_ image: UIImage, size: CGSize, _ logo: UIImage, inRect:
 }
 ```
 
-With those two in place, we can now implement our custom AI filter:
+With those two helpers in place, you can now implement your custom AI filter. The same principle applies when creating a `VideoFilter` as in [the first part](#adding-a-video-filter) of this guide.
 
 ```swift
 static let stream: VideoFilter = {
     let stream = VideoFilter(id: "stream", name: "Stream") { image in
+        // highlight-next-line
+        // 1. detect, where the face is located (if there's any)
         guard let faceRect = try? await detectFaces(image: image) else { return image }
         let converted = convert(cmage: image)
         let bounds = image.extent
@@ -198,8 +210,12 @@ static let stream: VideoFilter = {
             width: faceRect.width * bounds.width,
             height: faceRect.height * bounds.height
         )
+        // highlight-next-line
+        // 2. Overlay the rectangle onto the original image
         let overlayed = await drawImageIn(converted, size: bounds.size, streamLogo, inRect: convertedRect)
 
+        // highlight-next-line
+        // 3. convert the created image to a CIImage
         let result = CIImage(cgImage: overlayed.cgImage!)
         return result
     }
@@ -207,14 +223,22 @@ static let stream: VideoFilter = {
 }()
 ```
 
-First, we are detecting the face rectangle using the `detectFaces` method we defined earlier and we convert the `CIImage` to `UIImage`. Next, we convert the rectangle to the real screen dimensions (since it returns percentages). We are passing this information to the `drawImageIn` method, that adds the logo at the `convertedRect` frame. At the end, we convert back the image to `CIImage` and return the result.
+Here's what this code does:
 
-Also, don't forget to add the `stream` filter in the supported filters method:
+1. It's detecting the face rectangle using the `detectFaces` method you defined earlier and it converts the `CIImage` to `UIImage`. The rectangle to the real screen dimensions (since it returns percentages).
+2. This information is passed to the `drawImageIn` method, that adds the logo at the `convertedRect` frame.
+3. The result is then converted back to a `CIImage` and returned.
+
+The last remaining thing to do is to add the `stream` filter in the supported filters method. This is done in the `FiltersService` class:
 
 ```swift
 static let supportedFilters = [sepia, stream]
 ```
 
-The end result should look like this:
+The end result will look like this (supposedly with a different face):
 
 ![Stream Filter](../assets/stream_filter.jpg)
+
+This guide shows you a concrete example how to add a specific AI filter. However, with the way this is structured we aim to give you full control over what you can build with this.
+
+We would love to see the cool things you'll build with this functionality, feel free to tweet about them and [tag us](https://twitter.com/getstream_io)!
