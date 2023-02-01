@@ -2,19 +2,21 @@
 title: Custom Video Filters
 ---
 
-### Introduction
+## Introduction
 
 Some calling apps allow filters to be applied to the current user's video, such as blurring the background, adding AR elements (glasses, moustaches, etc) or applying image filters (such as sepia, bloom etc). StreamVideo's iOS SDK has support for injecting your custom filters into the calling experience.
 
-If you initialized the SDK with custom filters support and the user selected a filter, you will receive each frame of the user's local video as `CIImage`, allowing you to apply the filters.
+How does this work? If you initialized the SDK with custom filters support and the user selected a filter, you will receive each frame of the user's local video as `CIImage`, allowing you to apply the filters. This way you have complete freedom over the processing pipeline.
 
-You can find a working example of the filters in our `VideoWithChat` sample project [here](https://github.com/GetStream/stream-video-ios-examples/tree/main/VideoWithChat).
+You can find a working example of the filters (together with other great example projects) in our `VideoWithChat` [sample project](https://github.com/GetStream/stream-video-ios-examples/tree/main/VideoWithChat). Here is how the project you are about to build will look like in the end:
 
-### VideoFilter
+// TODO sample video
 
-The `VideoFilter` class allows you to create your own filters. It contains the id and name of the filter, along with an async function that converts the original `CIImage` to an output `CIImage`. If no filter is selected, the same input image is returned.
+## Adding a Video Filter
 
-For example, let's add a simple "Sepia" filter, from the default ones by Apple:
+The `VideoFilter` class allows you to create your own filters. It contains the `id` and `name` of the filter, along with an `async` function that converts the original `CIImage` to an output `CIImage`. If no filter is selected, the same input image is returned.
+
+For example, let's add a simple "Sepia" filter, from the default `CIFilter` options by Apple:
 
 ```swift
 static let sepia: VideoFilter = {
@@ -27,112 +29,117 @@ static let sepia: VideoFilter = {
 }()
 ```
 
-We can create a helper `FilterService`, that will keep the available filters, as well as some state information about the selected filter and whether the filters picker is shown:
+You can now create a helper `FilterService`, that will keep track of the available filters, as well as hold state information about the selected filter and whether the filters picker is shown:
 
 ```swift
 class FiltersService: ObservableObject {
     @Published var filtersShown = false
     @Published var selectedFilter: VideoFilter?
-    
+
     static let supportedFilters = [sepia]
 }
 ```
 
-Next, we need to pass the supported filters to the `StreamVideo` object, via its `VideoConfig`:
+Next, you need to pass the supported filters to the `StreamVideo` object, via its `VideoConfig`:
 
 ```swift
 let streamVideo = StreamVideo(
     apiKey: apiKey,
     user: userCredentials.user,
     token: token,
+    // highlight-start
     videoConfig: VideoConfig(
         joinVideoCallInstantly: true,
         videoFilters: FiltersService.supportedFilters
     ),
+    // highlight-end
     tokenProvider: { result in
-        tokenProvider { tokenResult in
-            switch tokenResult {
-            case .success(let rawValue):
-                do {
-                    let updatedToken = try UserToken(rawValue: rawValue)
-                    result(.success(updatedToken))
-                } catch {
-                    result(.failure(error))
-                }
-            case .failure(let error):
-                result(.failure(error))
-            }
-        }
+        // Unrelated code skipped. Check repository for complete code.
     }
 )
 ```
 
-Now, let's enable the filter selection in the user interface. One option is to include the filters in the call controls shown at the bottom of the call view. In this section, only the filters relevant parts are added, see the full code [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/ChatCallControls.swift): 
+Now, let's enable the filter selection in the user interface. One option is to include the filters in the call controls shown at the bottom of the call view. For this, the first step is to override the `makeCallControlsView` function in your custom implementation of the `ViewFactory`:
 
+```swift
+class VideoViewFactory: ViewFactory {
+
+    /* ... Previous code skipped. */
+
+    // highlight-start
+    func makeCallControlsView(viewModel: CallViewModel) -> some View {
+        ChatCallControls(viewModel: viewModel)
+    }
+    // highlight-end
+}
+```
+
+You will now create the `ChatCallControls` view that does two things. It will first place an icon to toggle the filters menu (via the `filtersService.filtersShown` property) and allows users to select the filter they want to apply.
+
+Second, it will conditionally show a list of the filters with a button for each one to (de-)select it.
+
+In this section, only the code to show the filters is added. You can see the full code [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/ChatCallControls.swift), but let's have a look at the simplified version:
 
 ```swift
 public var body: some View {
-        VStack {
-            EqualSpacingHStack(views: [                
-                /// removed not relevant code
-                AnyView(
-                    Button(
-                        action: {
-                            withAnimation {
-                                filtersService.filtersShown.toggle()
-                            }
-                        },
-                        label: {
-                            CallIconView(
-                                icon: Image(systemName: "camera.filters"),
-                                size: size,
-                                iconStyle: filtersService.filtersShown ? .primary : .transparent
-                            )
-                        }
-                    ))
-                    /// removed not relevant code
-            ])            
-            
-            if filtersService.filtersShown {
-                HStack(spacing: 16) {
-                    ForEach(FiltersService.supportedFilters) { filter in
-                        Button {
-                            withAnimation {
-                                if filtersService.selectedFilter == filter {
-                                    filtersService.selectedFilter = nil
-                                } else {
-                                    filtersService.selectedFilter = filter
-                                }
-                                viewModel.setVideoFilter(filtersService.selectedFilter)
-                            }
-                        } label: {
-                            Text(filter.name)
-                                .padding(.horizontal)
-                                .padding(.vertical, 4)
-                                .background(filtersService.selectedFilter == filter ? Color.blue : Color.gray)
-                                .foregroundColor(.white)
-                                .cornerRadius(16)
-                        }
+    VStack {
+        HStack {
+            /* Skip unrelated code */
+            // highlight-next-line
+            // 1. Button to toggle filters view
+            Button {
+                withAnimation {
+                    filtersService.filtersShown.toggle()
+                }
+            }, label: {
+                CallIconView(
+                    icon: Image(systemName: "camera.filters"),
+                    size: size,
+                    iconStyle: filtersService.filtersShown ? .primary : .transparent
+                )
+            }
+            /* Skip unrelated code */
+        }
 
+        if filtersService.filtersShown {
+            HStack(spacing: 16) {
+                // highlight-next-line
+                // 2. Show a button for each filter
+                ForEach(FiltersService.supportedFilters) { filter in
+                    Button {
+                        withAnimation {
+                            // highlight-next-line
+                            // 3. Select or de-select filter on tap
+                            if filtersService.selectedFilter == filter {
+                                filtersService.selectedFilter = nil
+                            } else {
+                                filtersService.selectedFilter = filter
+                            }
+                            viewModel.setVideoFilter(filtersService.selectedFilter)
+                        }
+                    } label: {
+                        Text(filter.name)
+                            .background(filtersService.selectedFilter == filter ? Color.blue : Color.gray)
+                            /* more modifiers */
                     }
+
                 }
             }
         }
-        .frame(maxWidth: .infinity)
-        .frame(height: chatHelper.chatShown ? chatHeight + 120 : 120)
-        .background(
-            colors.callControlsBackground
-                .cornerRadius(16)
-                .edgesIgnoringSafeArea(.all)
-        )
     }
+    /* more modifiers */
+}
 ```
 
-First, we're adding the icon for the filters, that will control the `filtersShown` state. Next, whenever the `filtersShown` is true, we're showing the list of the available filters. When a user selects a filter, we're calling the `CallViewModel`'s method `setVideoFilter`. This will enable the video filter for the ongoing call.
+Here are the three things this code does:
+
+1. Adding the icon for the filters, that will control the `filtersShown` state.
+2. Whenever the `filtersShown` is true, you're showing the list of the available filters.
+3. When a user taps on a filter, the `CallViewModel`'s `setVideoFilter` method is called. This will enable or disable the video filter for the ongoing call.
 
 That is everything that is needed for a basic video filter support.
 
-### Adding AI Filters
+## Adding AI Filters
 
 In some cases, you might also want to apply AI filters, whether that is some addition to the user's face (glasses, moustaches, etc), or an ML filter. In this section we will cover this case, where we will show Stream's logo over the user's face. Whenever the user moves along, we will update the logo's location.
 
@@ -192,7 +199,7 @@ static let stream: VideoFilter = {
             height: faceRect.height * bounds.height
         )
         let overlayed = await drawImageIn(converted, size: bounds.size, streamLogo, inRect: convertedRect)
-        
+
         let result = CIImage(cgImage: overlayed.cgImage!)
         return result
     }
