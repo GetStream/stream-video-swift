@@ -31,7 +31,7 @@ We are going to use the Swift Package Manager to fetch the SDK.
 
 - In Xcode, go to File -> "Add Packages..."
 - Paste the URL https://github.com/GetStream/stream-video-swift.git
-- In the option "Dependency Rule" choose "Branch," in the single text input next to it, enter "main"
+- In the option "Dependency Rule" choose "Branch" and in the single text input next to it, enter "main"
 
 ![Screenshot shows how to add the SPM dependency](../assets/spm.png)
 
