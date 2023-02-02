@@ -54,7 +54,8 @@ let streamVideo = StreamVideo(
     ),
     // highlight-end
     tokenProvider: { result in
-        // Unrelated code skipped. Check repository for complete code.
+        // Unrelated code skipped. Check repository for complete code:
+        // https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/StreamWrapper.swift
     }
 )
 ```

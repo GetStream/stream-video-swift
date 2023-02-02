@@ -41,33 +41,38 @@ class VideoViewFactory: ViewFactory {
 Inside of the `ChatCallControls` you will use a `ToggleChatButton` that looks like this:
 
 ```swift
-Button(
-    action: {
-        // highlight-next-line
-        // 1. Toggle chat window
-        withAnimation {
-            chatHelper.chatShown.toggle()
+struct ToggleChatButton: View {
+
+    @ObservedObject var chatHelper: ChatHelper
+
+    var body: some View {
+        Button {
+            // highlight-next-line
+            // 1. Toggle chat window
+            withAnimation {
+                chatHelper.chatShown.toggle()
+            }
         }
-    },
-    label: {
-        // highlight-next-line
-        // 2. Show button
-        CallIconView(
-            icon: Image(systemName: "message"),
-            size: size,
-            iconStyle: chatHelper.chatShown ? .primary : .transparent
-        )
-        // highlight-next-line
-        // 3. Overlay unread indicator
-        .overlay(
-            chatHelper.unreadCount > 0 ?
+        label: {
+            // highlight-next-line
+            // 2. Show button
+            CallIconView(
+                icon: Image(systemName: "message"),
+                size: 50,
+                iconStyle: chatHelper.chatShown ? .primary : .transparent
+            )
+            // highlight-next-line
+            // 3. Overlay unread indicator
+            .overlay(
+                chatHelper.unreadCount > 0 ?
                 TopRightView(content: {
                     UnreadIndicatorView(unreadCount: chatHelper.unreadCount)
                 })
-            : nil
-        )
+                : nil
+            )
+        }
     }
-)
+}
 ```
 
 The code does three interesting things (see the numbered comments):
@@ -90,11 +95,10 @@ struct ChatCallControls: View {
         // 1. Arrange code in VStack
         VStack {
             HStack {
-                Button(
-                    // Button code you just created
-                )
+                ToggleChatButton(chatHelper: chatHelper)
 
-                // Unrelated code skipped. Check repository for complete code.
+                // Unrelated code skipped. Check repository for complete code:
+                // https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/ChatCallControls.swift
             }
 
             // highlight-next-line
@@ -114,6 +118,8 @@ struct ChatCallControls: View {
                 }
             }
         }
+        .frame(maxWidth: .infinity)
+        .frame(height: chatHelper.chatShown ? (UIScreen.main.bounds.height / 3 + 50) + 100 : 100)
         /* more modifiers */
         // highlight-next-line
         // 3. Listen to changes in call participants and update the UI accordingly
