@@ -14,6 +14,8 @@ protocol WebSocketEngine: AnyObject {
     func connect()
     func disconnect()
     func send(message: SendableEvent)
+    func send(jsonMessage: Codable)
+    func sendPing()
 }
 
 protocol WebSocketEngineDelegate: AnyObject {

@@ -6,19 +6,19 @@ import Foundation
 
 /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
 protocol WebSocketPingControllerDelegate: AnyObject {
-    
-    /// Information about the ongoing call.
-    var callInfo: [String: String] { get set }
-    
+        
     /// `WebSocketPingController` will call this function periodically to keep a connection alive.
     func sendPing(healthCheckEvent: SendableEvent)
+    
+    /// Regular ping, without sending any data.
+    func sendPing()
     
     /// `WebSocketPingController` will call this function to force disconnect `WebSocketClient`.
     func disconnectOnNoPongReceived()
 }
 
 struct HealthCheckInfo: Equatable {
-    var coordinatorHealthCheck: Stream_Video_Healthcheck? = nil
+    var coordinatorHealthCheck: HealthCheck? = nil
     var sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse? = nil
 }
 
@@ -45,12 +45,6 @@ class WebSocketPingController {
         
     /// A delegate to control `WebSocketClient` connection by `WebSocketPingController`.
     weak var delegate: WebSocketPingControllerDelegate?
-    
-    var callInfo = [String: String]() {
-        didSet {
-            sendPing()
-        }
-    }
     
     deinit {
         cancelPongTimeoutTimer()
@@ -92,10 +86,7 @@ class WebSocketPingController {
 
         log.info("WebSocket Ping")
         if webSocketClientType == .coordinator {
-            var healthCheckEvent = Stream_Video_Healthcheck()
-            healthCheckEvent.callID = callInfo[WebSocketConstants.callId] ?? ""
-            healthCheckEvent.callType = callInfo[WebSocketConstants.callType] ?? ""
-            delegate?.sendPing(healthCheckEvent: healthCheckEvent)
+            delegate?.sendPing()
         } else {
             var sfuRequest = Stream_Video_Sfu_Event_SfuRequest()
             let healthCheckEvent = Stream_Video_Sfu_Event_HealthCheckRequest()

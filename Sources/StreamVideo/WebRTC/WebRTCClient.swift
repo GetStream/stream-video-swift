@@ -505,11 +505,7 @@ class WebRTCClient: NSObject {
                 try await self.handleSocketConnected()
             }
         }
-        
-        webSocketClient.set(
-            callInfo: [WebSocketConstants.sessionId: sessionID]
-        )
-        
+
         return webSocketClient
     }
     
