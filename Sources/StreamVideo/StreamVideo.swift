@@ -24,7 +24,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: UserTokenProvider
-    private let endpointConfig: EndpointConfig = .stagingConfig
+    private let endpointConfig: EndpointConfig = .newStagingConfig
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
@@ -34,9 +34,7 @@ public class StreamVideo {
     }
     
     private let callsMiddleware = CallsMiddleware()
-    
-    private var currentCallInfo = [String: String]()
-    
+        
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
@@ -180,7 +178,6 @@ public class StreamVideo {
     /// Leaves the current call. It clears all call-related state.
     public func leaveCall() {
         postNotification(with: CallNotification.callEnded)
-        webSocketClient?.set(callInfo: [:])
         currentCallController?.cleanUp()
         currentCallController = nil
         if videoConfig.persitingSocketConnection {
@@ -212,18 +209,12 @@ public class StreamVideo {
     }
     
     private func connectWebSocketClient() {
-        if let connectURL = URL(string: endpointConfig.wsEndpoint) {
+        let urlString =
+            "\(endpointConfig.wsEndpoint)?api_key=\(apiKey.apiKeyString)&stream-auth-type=jwt&X-Stream-Client=stream-video-swift"
+        if let connectURL = URL(string: urlString) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         }
-    }
-    
-    private func updateCallInfo(callId: String, callType: String) {
-        currentCallInfo = [
-            WebSocketConstants.callId: callId,
-            WebSocketConstants.callType: callType
-        ]
-        webSocketClient?.set(callInfo: currentCallInfo)
     }
     
     private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {
@@ -233,7 +224,7 @@ public class StreamVideo {
         // Create a WebSocketClient.
         let webSocketClient = WebSocketClient(
             sessionConfiguration: config,
-            eventDecoder: EventDecoder(),
+            eventDecoder: JsonEventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
             webSocketClientType: .coordinator,
             connectURL: url
@@ -242,19 +233,29 @@ public class StreamVideo {
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onConnect = { [weak self] in
             guard let self = self else { return }
-            var payload = Stream_Video_AuthPayload()
-            payload.token = self.token.rawValue
-            payload.apiKey = apiKey.apiKeyString
+            let userDetails = UserDetailsPayload(
+                id: self.user.id,
+                name: self.user.name,
+                username: self.user.id,
+                role: "member" // TODO:
+            )
+            let connectRequest = ConnectRequest(
+                token: self.token.rawValue,
+                user_details: userDetails
+            )
             
-            var user = Stream_Video_CreateUserRequest()
-            user.id = self.user.id
-            user.name = self.user.name
-            user.imageURL = self.user.imageURL?.absoluteString ?? ""
-            payload.user = user
+            /*
+              //TODO: when it's ready.
+             let userObject = UserObjectRequest(id: self.user.id)
+             let deviceFieldsRequest = DeviceFieldsRequest() //TODO: add stuff
+             let authRequest = VideoWSAuthMessageRequest(
+                 device: deviceFieldsRequest,
+                 token: self.token.rawValue,
+                 userDetails: userObject
+             )
+              */
             
-            var event = Stream_Video_WebsocketClientEvent()
-            event.event = .authRequest(payload)
-            webSocketClient.engine?.send(message: event)
+            webSocketClient.engine?.send(jsonMessage: connectRequest)
         }
         
         return webSocketClient
@@ -292,6 +293,10 @@ extension StreamVideo: ConnectionStateDelegate {
                         log.error("Error refreshing token, will disconnect ws connection")
                     }
                 }
+            }
+        case let .connected(healthCheckInfo: healtCheckInfo):
+            if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
+                callCoordinatorController.update(connectionId: healthCheck.connection_id)
             }
         default:
             log.debug("Web socket connection state update \(state)")

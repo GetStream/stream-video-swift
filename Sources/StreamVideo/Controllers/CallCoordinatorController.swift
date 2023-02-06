@@ -9,6 +9,7 @@ import WebRTC
 final class CallCoordinatorController: Sendable {
     
     let callCoordinatorService: Stream_Video_CallCoordinatorService
+    let coordinatorClient: CoordinatorClient
     private let latencyService: LatencyService
     private let videoConfig: VideoConfig
     private let user: User
@@ -26,6 +27,13 @@ final class CallCoordinatorController: Sendable {
             hostname: coordinatorInfo.hostname,
             token: coordinatorInfo.token
         )
+        coordinatorClient = CoordinatorClient(
+            httpClient: httpClient,
+            apiKey: coordinatorInfo.apiKey,
+            hostname: coordinatorInfo.hostname,
+            token: coordinatorInfo.token,
+            userId: user.id
+        )
         self.videoConfig = videoConfig
         self.user = user
     }
@@ -42,19 +50,24 @@ final class CallCoordinatorController: Sendable {
             participantIds: participantIds
         )
         
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
+        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges ?? [])
         
         let edgeServer = try await selectEdgeServer(
-            callId: joinCallResponse.call.call.callCid,
+            callId: joinCallResponse.call.id!,
+            type: callType.name,
             latencyByEdge: latencyByEdge,
-            edges: joinCallResponse.edges
+            edges: joinCallResponse.edges ?? []
         )
         
         return edgeServer
     }
 
     func update(token: UserToken) {
-        callCoordinatorService.update(userToken: token.rawValue)
+        coordinatorClient.update(userToken: token.rawValue)
+    }
+    
+    func update(connectionId: String) {
+        coordinatorClient.connectionId = connectionId
     }
     
     func makeVoipNotificationsController() -> VoipNotificationsController {
@@ -98,16 +111,14 @@ final class CallCoordinatorController: Sendable {
     // MARK: - private
         
     private func measureLatencies(
-        for endpoints: [Stream_Video_Edge]
-    ) async -> [String: Stream_Video_Latency] {
-        await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
-            var result: [String: Stream_Video_Latency] = [:]
+        for endpoints: [DatacenterResponse]
+    ) async -> [String: [Float]] {
+        await withTaskGroup(of: [String: [Float]].self) { group in
+            var result: [String: [Float]] = [:]
             for endpoint in endpoints {
                 group.addTask {
-                    var latency = Stream_Video_Latency()
                     let value = await self.latencyService.measureLatency(for: endpoint, tries: 3)
-                    latency.measurementsSeconds = value
-                    return [endpoint.name: latency]
+                    return [endpoint.name!: value]
                 }
             }
             
@@ -128,56 +139,88 @@ final class CallCoordinatorController: Sendable {
         type: String,
         participantIds: [String]
     ) async throws -> Stream_Video_JoinCallResponse {
-        var joinCallRequest = Stream_Video_JoinCallRequest()
-        joinCallRequest.id = callId
-        joinCallRequest.type = type
-        if !participantIds.isEmpty {
-            var input = Stream_Video_CreateCallInput()
-            input.ring = !videoConfig.joinVideoCallInstantly
-            var members = [Stream_Video_MemberInput]()
-            for participantId in participantIds {
-                var memberInput = Stream_Video_MemberInput()
-                memberInput.userID = participantId
-                memberInput.role = "member"
-                members.append(memberInput)
-            }
-            input.members = members
-            joinCallRequest.input = input
+        let ring = !videoConfig.joinVideoCallInstantly
+        let role = "member" // TODO:
+        
+        var members = [MemberRequest]()
+        for participantId in participantIds {
+            let callMemberRequest = MemberRequest(
+                role: role,
+                userId: participantId
+            )
+            members.append(callMemberRequest)
         }
-        let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
+        
+        let userRequest = UserRequest(
+            id: user.id,
+            image: user.imageURL?.absoluteString,
+            name: user.name,
+            role: role,
+            teams: nil // TODO:
+        )
+        let callRequest = CallRequest(
+            createdBy: userRequest,
+            createdById: user.id,
+            members: members,
+            settingsOverride: nil,
+            team: nil // TODO:
+        )
+        let paginationParamsRequest = PaginationParamsRequest()
+        let getOrCreateCallRequest = GetOrCreateCallRequest(
+            data: callRequest,
+            members: paginationParamsRequest,
+            ring: ring
+        )
+        let joinCallRequest = JoinCallRequest(id: callId, type: type, getOrCreateCallRequest: getOrCreateCallRequest)
+        let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
     }
     
     private func selectEdgeServer(
         callId: String,
-        latencyByEdge: [String: Stream_Video_Latency],
-        edges: [Stream_Video_Edge]
+        type: String,
+        latencyByEdge: [String: [Float]],
+        edges: [DatacenterResponse]
     ) async throws -> EdgeServer {
-        var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
-        selectEdgeRequest.callCid = callId
-        var measurements = Stream_Video_LatencyMeasurements()
-        measurements.measurements = latencyByEdge
-        selectEdgeRequest.measurements = measurements
-        let response = try await callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest: selectEdgeRequest)
-        let url = response.credentials.server.url
-        let token = response.credentials.token
-        let edgeName = response.credentials.server.edgeName
-        var latencyURL = edges.first { $0.name == edgeName }.map(\.latencyURL)
+        let getCallEdgeServerRequest = GetCallEdgeServerRequest(
+            latencyMeasurements: latencyByEdge
+        )
+        let selectEdgeRequest = SelectEdgeServerRequest(
+            id: callId,
+            type: type,
+            getCallEdgeServerRequest: getCallEdgeServerRequest
+        )
+        let response = try await coordinatorClient.getCallEdgeServer(with: selectEdgeRequest)
+        let credentials = response.credentials
+        let iceServersResponse: [ICEServer] = credentials.iceServers ?? []
+        let iceServers = iceServersResponse.map { iceServer in
+            IceServer(
+                urls: iceServer.urls ?? [],
+                username: iceServer.username ?? "",
+                password: iceServer.password ?? ""
+            )
+        }
+        let edgeName = response.credentials.server?.edgeName
+        let edge = edges.first { $0.name == edgeName }
+        var latencyURL: String? = edge.map(\.latencyUrl) ?? nil
         if latencyURL == nil {
             for edge in edges {
-                let maxLatency = Double(Int.max)
-                let name = edge.name
-                let latency = latencyByEdge[name]?.measurementsSeconds.last ?? maxLatency
-                if latency != maxLatency {
-                    latencyURL = edge.latencyURL
+                let maxLatency = Float(Int.max)
+                if let name = edge.name {
+                    let latency = latencyByEdge[name]?.last ?? maxLatency
+                    if latency != maxLatency {
+                        latencyURL = edge.latencyUrl
+                    }
                 }
             }
         }
-        log.debug("Selected edge server \(url)")
+        guard let url = credentials.server?.url, let token = credentials.token else {
+            throw ClientError.Unexpected()
+        }
         return EdgeServer(
             url: url,
             token: token,
-            iceServers: response.credentials.iceServers.map { $0.toIceServer() },
+            iceServers: iceServers,
             latencyURL: latencyURL
         )
     }

@@ -21,10 +21,10 @@ extension UserCredentials {
     
     static var builtInUsers: [UserCredentials] = [
         (
-            "tommaso",
-            "Tommaso",
+            "oliver.lazoroski@getstream.io",
+            "Oliver",
             "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90b21tYXNvIiwiaWF0IjoxNjcwMzM5NDQwLCJ1c2VyX2lkIjoidG9tbWFzbyJ9.t5YFZFqm-XjDFJV_z_y-UdT8HjZpOunAm-6L_h_mW7A"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoidXNlci9vbGl2ZXIubGF6b3Jvc2tpQGdldHN0cmVhbS5pbyIsImlhdCI6MTY3NTY4NDE3OSwidXNlcl9pZCI6Im9saXZlci5sYXpvcm9za2lAZ2V0c3RyZWFtLmlvIn0._jJtu0ECQL73ohteU1fZFjcnLHb1m3SyyKabEMopS2A"
         ),
         (
             "marcelo",
@@ -36,7 +36,7 @@ extension UserCredentials {
             "martin",
             "Martin",
             "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci9tYXJ0aW4iLCJpYXQiOjE2NzAzMzkzNDMsInVzZXJfaWQiOiJtYXJ0aW4ifQ.EGMuYyXti8IMCMX4oiLKTkVZe8ZqUJr93Kj214-jCHg"
+            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoibWFydGluIiwiaWF0IjoxNjc1Njg0MTc5LCJ1c2VyX2lkIjoibWFydGluIn0.6kY4Ks5uW5aC12KttggDgXa38JwRRTyMPty7hdtG8e8"
         ),
         (
             "filip",

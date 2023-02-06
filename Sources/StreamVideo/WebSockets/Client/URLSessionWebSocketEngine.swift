@@ -64,15 +64,32 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
     func send(message: SendableEvent) {
         do {
             let data = try message.serializedData()
-            let message: URLSessionWebSocketTask.Message = .data(data)
-            task?.send(message) { [weak self] error in
-                if error == nil {
-                    log.debug("Event message sent")
-                    self?.doRead()
-                }
-            }
+            send(data: data)
         } catch {
             log.error("error occurred")
+        }
+    }
+    
+    func send(jsonMessage: Codable) {
+        do {
+            let data = try JSONEncoder().encode(jsonMessage)
+            send(data: data)
+        } catch {
+            log.error("error occurred")
+        }
+    }
+    
+    func sendPing() {
+        task?.sendPing { _ in }
+    }
+    
+    private func send(data: Data) {
+        let message: URLSessionWebSocketTask.Message = .data(data)
+        task?.send(message) { [weak self] error in
+            if error == nil {
+                log.debug("Event message sent")
+                self?.doRead()
+            }
         }
     }
     
@@ -88,6 +105,11 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                 if case let .data(data) = message {
                     self.callbackQueue.async { [weak self] in
                         self?.delegate?.webSocketDidReceiveMessage(data)
+                    }
+                } else if case let .string(string) = message {
+                    let messageData = Data(string.utf8)
+                    self.callbackQueue.async { [weak self] in
+                        self?.delegate?.webSocketDidReceiveMessage(messageData)
                     }
                 }
                 self.doRead()

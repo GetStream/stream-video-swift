@@ -73,12 +73,6 @@ class WebSocketClient {
         
     var onConnect: (() -> Void)?
     
-    internal var callInfo = [String: String]() {
-        didSet {
-            pingController.callInfo = callInfo
-        }
-    }
-    
     init(
         sessionConfiguration: URLSessionConfiguration,
         eventDecoder: AnyEventDecoder,
@@ -131,10 +125,6 @@ class WebSocketClient {
             
             eventsBatcher.processImmediately(completion: completion)
         }
-    }
-    
-    func set(callInfo: [String: String]) {
-        self.callInfo = callInfo
     }
 }
 
@@ -220,7 +210,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
     private func handle<Event: HealthCheckEvent>(healthCheckEvent: Event) {
         log.debug("Handling healthcheck event")
         var healthCheckInfo = HealthCheckInfo()
-        if let healthCheckEvent = healthCheckEvent as? Stream_Video_Healthcheck {
+        if let healthCheckEvent = healthCheckEvent as? HealthCheck {
             healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
         } else if let healthCheckEvent = healthCheckEvent as? Stream_Video_Sfu_Event_HealthCheckResponse {
             healthCheckInfo = HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
@@ -240,12 +230,17 @@ extension WebSocketClient: WebSocketEngineDelegate {
 // MARK: - Ping Controller Delegate
 
 extension WebSocketClient: WebSocketPingControllerDelegate {
+    
     func sendPing(healthCheckEvent: SendableEvent) {
         engineQueue.async { [weak engine] in
             if case .connected(healthCheckInfo: _) = self.connectionState {
                 engine?.send(message: healthCheckEvent)
             }
         }
+    }
+    
+    func sendPing() {
+        engine?.sendPing()
     }
     
     func disconnectOnNoPongReceived() {
