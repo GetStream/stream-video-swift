@@ -17,7 +17,7 @@ struct EventDecoder {
                 callCid: value.call.callCid,
                 createdBy: value.call.createdByUserID,
                 type: value.call.type,
-                users: response.users.map(\.value)
+                users: []
             )
         case let .callUpdated(value):
             return value
@@ -36,19 +36,16 @@ struct EventDecoder {
         case let .callAccepted(value):
             return CallEventInfo(
                 callId: value.call.callCid,
-                senderId: value.senderUserID,
                 action: .accept
             )
         case let .callRejected(value):
             return CallEventInfo(
                 callId: value.call.callCid,
-                senderId: value.senderUserID,
                 action: .reject
             )
         case let .callCancelled(value):
             return CallEventInfo(
                 callId: value.call.callCid,
-                senderId: value.senderUserID,
                 action: .cancel
             )
         case let .callCustom(value):
@@ -58,7 +55,7 @@ struct EventDecoder {
                 callCid: value.call.callCid,
                 createdBy: value.call.createdByUserID,
                 type: value.call.type,
-                users: response.users.map(\.value)
+                users: []
             )
         case let .error(value):
             return value

@@ -7,17 +7,25 @@ import Foundation
 import AnyCodable
 #endif
 
-internal struct CallAccepted: Codable, JSONEncodable, Hashable {
+internal struct CallPermissionRequest: Codable, JSONEncodable, Hashable {
 
     /** Call CID */
     internal var callCid: String?
     internal var createdAt: Date?
+    internal var permissions: [String]?
     internal var type: String
     internal var user: UserResponse?
 
-    internal init(callCid: String? = nil, createdAt: Date? = nil, type: String, user: UserResponse? = nil) {
+    internal init(
+        callCid: String? = nil,
+        createdAt: Date? = nil,
+        permissions: [String]? = nil,
+        type: String,
+        user: UserResponse? = nil
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.permissions = permissions
         self.type = type
         self.user = user
     }
@@ -25,6 +33,7 @@ internal struct CallAccepted: Codable, JSONEncodable, Hashable {
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
+        case permissions
         case type
         case user
     }
@@ -35,6 +44,7 @@ internal struct CallAccepted: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(callCid, forKey: .callCid)
         try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(permissions, forKey: .permissions)
         try container.encode(type, forKey: .type)
         try container.encodeIfPresent(user, forKey: .user)
     }

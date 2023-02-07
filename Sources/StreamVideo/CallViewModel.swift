@@ -338,14 +338,18 @@ open class CallViewModel: ObservableObject {
     private func subscribeToCallEvents() {
         Task {
             for await callEvent in streamVideo.callEvents() {
-                if case let .incoming(incomingCall) = callEvent, ringingSupported {
+                if case let .incoming(incomingCall) = callEvent,
+                   ringingSupported,
+                   incomingCall.callerId != streamVideo.user.id {
                     // TODO: implement holding a call.
                     if callingState == .idle {
                         callingState = .incoming(incomingCall)
                     }
                 } else if case .rejected = callEvent, ringingSupported {
                     leaveCall()
-                } else if case .canceled = callEvent, ringingSupported {
+                } else if case .canceled = callEvent, callParticipants.count < 2, ringingSupported {
+                    leaveCall()
+                } else if case .ended = callEvent {
                     leaveCall()
                 }
             }

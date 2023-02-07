@@ -9,19 +9,59 @@ struct JsonEventDecoder: AnyEventDecoder {
     func decode(from data: Data) throws -> Event {
         let decoder = JSONDecoder.stream
         let typeDto = try decoder.decode(JsonEvent.self, from: data)
+        log.debug("received an event with type \(typeDto.type.rawValue)")
         switch typeDto.type {
         case .healthCheck:
             return try decoder.decode(HealthCheck.self, from: data)
         case .callCreated:
-            return try decoder.decode(CallCreated.self, from: data)
+            let callCreated = try decoder.decode(CallCreated.self, from: data)
+            guard let call = callCreated.call,
+                  let callCid = call.cid,
+                  let createdBy = call.createdBy.id,
+                  let type = call.type else {
+                throw ClientError.Unexpected()
+            }
+            let members = callCreated.members?.compactMap { member in
+                User(
+                    id: member.userId ?? "",
+                    name: member.user.name,
+                    imageURL: URL(string: member.user.image ?? "")
+                )
+            } ?? []
+            return IncomingCallEvent(
+                callCid: callCid,
+                createdBy: createdBy,
+                type: type,
+                users: members
+            )
         case .callCancelled:
-            return try decoder.decode(CallCancelled.self, from: data)
+            let callCanceled = try decoder.decode(CallCancelled.self, from: data)
+            let callId = callCanceled.callCid ?? ""
+            return CallEventInfo(
+                callId: callId,
+                action: .cancel
+            )
         case .callRejected:
-            return try decoder.decode(CallRejected.self, from: data)
+            let callRejected = try decoder.decode(CallRejected.self, from: data)
+            let callId = callRejected.callCid ?? ""
+            return CallEventInfo(
+                callId: callId,
+                action: .reject
+            )
         case .callAccepted:
-            return try decoder.decode(CallAccepted.self, from: data)
+            let callAccepted = try decoder.decode(CallAccepted.self, from: data)
+            let callId = callAccepted.callCid ?? ""
+            return CallEventInfo(
+                callId: callId,
+                action: .accept
+            )
         case .callEnded:
-            return try decoder.decode(CallEnded.self, from: data)
+            let callEnded = try decoder.decode(CallEnded.self, from: data)
+            let callId = callEnded.callCid ?? ""
+            return CallEventInfo(
+                callId: callId,
+                action: .end
+            )
         case .userUpdated:
             return try decoder.decode(UserUpdated.self, from: data)
         default:

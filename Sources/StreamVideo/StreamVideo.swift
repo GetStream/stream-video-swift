@@ -24,7 +24,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: UserTokenProvider
-    private let endpointConfig: EndpointConfig = .newStagingConfig
+    private let endpointConfig: EndpointConfig = .frankfurtStagingConfig
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
@@ -145,7 +145,7 @@ public class StreamVideo {
     ///  - callType: the type of the call.
     public func acceptCall(callId: String, callType: CallType) async throws {
         try await callCoordinatorController.sendEvent(
-            type: .acceptedCall,
+            type: .callAccepted,
             callId: callId,
             callType: callType
         )
@@ -157,7 +157,7 @@ public class StreamVideo {
     ///  - callType: the type of the call.
     public func rejectCall(callId: String, callType: CallType) async throws {
         try await callCoordinatorController.sendEvent(
-            type: .rejectedCall,
+            type: .callRejected,
             callId: callId,
             callType: callType
         )
@@ -169,7 +169,7 @@ public class StreamVideo {
     ///  - callType: the type of the call.
     public func cancelCall(callId: String, callType: CallType) async throws {
         try await callCoordinatorController.sendEvent(
-            type: .cancelledCall,
+            type: .callCancelled,
             callId: callId,
             callType: callType
         )

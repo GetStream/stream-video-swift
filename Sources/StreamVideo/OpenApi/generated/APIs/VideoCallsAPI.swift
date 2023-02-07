@@ -90,6 +90,7 @@ internal class VideoCallsAPI {
      
      - parameter type: (path)
      - parameter id: (path)
+     - parameter getCallEdgeServerRequest: (body)
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
@@ -97,17 +98,19 @@ internal class VideoCallsAPI {
     internal class func getCallEdgeServer(
         type: String,
         id: String,
+        getCallEdgeServerRequest: GetCallEdgeServerRequest,
         apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
         completion: @escaping ((_ data: GetCallEdgeServerResponse?, _ error: Error?) -> Void)
     ) -> RequestTask {
-        getCallEdgeServerWithRequestBuilder(type: type, id: id).execute(apiResponseQueue) { result in
-            switch result {
-            case let .success(response):
-                completion(response.body, nil)
-            case let .failure(error):
-                completion(nil, error)
+        getCallEdgeServerWithRequestBuilder(type: type, id: id, getCallEdgeServerRequest: getCallEdgeServerRequest)
+            .execute(apiResponseQueue) { result in
+                switch result {
+                case let .success(response):
+                    completion(response.body, nil)
+                case let .failure(error):
+                    completion(nil, error)
+                }
             }
-        }
     }
 
     /**
@@ -124,9 +127,14 @@ internal class VideoCallsAPI {
        - name: stream-auth-type
      - parameter type: (path)
      - parameter id: (path)
+     - parameter getCallEdgeServerRequest: (body)
      - returns: RequestBuilder<GetCallEdgeServerResponse>
      */
-    internal class func getCallEdgeServerWithRequestBuilder(type: String, id: String) -> RequestBuilder<GetCallEdgeServerResponse> {
+    internal class func getCallEdgeServerWithRequestBuilder(
+        type: String,
+        id: String,
+        getCallEdgeServerRequest: GetCallEdgeServerRequest
+    ) -> RequestBuilder<GetCallEdgeServerResponse> {
         var localVariablePath = "/get_call_edge_server/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -140,7 +148,7 @@ internal class VideoCallsAPI {
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters: [String: Any]? = nil
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: getCallEdgeServerRequest)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
@@ -167,6 +175,7 @@ internal class VideoCallsAPI {
      
      - parameter type: (path)
      - parameter id: (path)
+     - parameter getOrCreateCallRequest: (body)
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
@@ -174,17 +183,19 @@ internal class VideoCallsAPI {
     internal class func getOrCreateCall(
         type: String,
         id: String,
+        getOrCreateCallRequest: GetOrCreateCallRequest,
         apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
         completion: @escaping ((_ data: GetOrCreateCallResponse?, _ error: Error?) -> Void)
     ) -> RequestTask {
-        getOrCreateCallWithRequestBuilder(type: type, id: id).execute(apiResponseQueue) { result in
-            switch result {
-            case let .success(response):
-                completion(response.body, nil)
-            case let .failure(error):
-                completion(nil, error)
+        getOrCreateCallWithRequestBuilder(type: type, id: id, getOrCreateCallRequest: getOrCreateCallRequest)
+            .execute(apiResponseQueue) { result in
+                switch result {
+                case let .success(response):
+                    completion(response.body, nil)
+                case let .failure(error):
+                    completion(nil, error)
+                }
             }
-        }
     }
 
     /**
@@ -202,9 +213,14 @@ internal class VideoCallsAPI {
        - name: stream-auth-type
      - parameter type: (path)
      - parameter id: (path)
+     - parameter getOrCreateCallRequest: (body)
      - returns: RequestBuilder<GetOrCreateCallResponse>
      */
-    internal class func getOrCreateCallWithRequestBuilder(type: String, id: String) -> RequestBuilder<GetOrCreateCallResponse> {
+    internal class func getOrCreateCallWithRequestBuilder(
+        type: String,
+        id: String,
+        getOrCreateCallRequest: GetOrCreateCallRequest
+    ) -> RequestBuilder<GetOrCreateCallResponse> {
         var localVariablePath = "/call/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -218,7 +234,7 @@ internal class VideoCallsAPI {
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters: [String: Any]? = nil
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: getOrCreateCallRequest)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
@@ -245,6 +261,7 @@ internal class VideoCallsAPI {
      
      - parameter type: (path)
      - parameter id: (path)
+     - parameter getOrCreateCallRequest: (body)
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
@@ -252,17 +269,19 @@ internal class VideoCallsAPI {
     internal class func joinCall(
         type: String,
         id: String,
+        getOrCreateCallRequest: GetOrCreateCallRequest,
         apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
         completion: @escaping ((_ data: JoinCallResponse?, _ error: Error?) -> Void)
     ) -> RequestTask {
-        joinCallWithRequestBuilder(type: type, id: id).execute(apiResponseQueue) { result in
-            switch result {
-            case let .success(response):
-                completion(response.body, nil)
-            case let .failure(error):
-                completion(nil, error)
+        joinCallWithRequestBuilder(type: type, id: id, getOrCreateCallRequest: getOrCreateCallRequest)
+            .execute(apiResponseQueue) { result in
+                switch result {
+                case let .success(response):
+                    completion(response.body, nil)
+                case let .failure(error):
+                    completion(nil, error)
+                }
             }
-        }
     }
 
     /**
@@ -280,9 +299,14 @@ internal class VideoCallsAPI {
        - name: stream-auth-type
      - parameter type: (path)
      - parameter id: (path)
+     - parameter getOrCreateCallRequest: (body)
      - returns: RequestBuilder<JoinCallResponse>
      */
-    internal class func joinCallWithRequestBuilder(type: String, id: String) -> RequestBuilder<JoinCallResponse> {
+    internal class func joinCallWithRequestBuilder(
+        type: String,
+        id: String,
+        getOrCreateCallRequest: GetOrCreateCallRequest
+    ) -> RequestBuilder<JoinCallResponse> {
         var localVariablePath = "/join_call/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -296,7 +320,7 @@ internal class VideoCallsAPI {
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters: [String: Any]? = nil
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: getOrCreateCallRequest)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
@@ -310,6 +334,90 @@ internal class VideoCallsAPI {
 
         return localVariableRequestBuilder.init(
             method: "POST",
+            URLString: (localVariableUrlComponents?.string ?? localVariableURLString),
+            parameters: localVariableParameters,
+            headers: localVariableHeaderParameters,
+            requiresAuthentication: true
+        )
+    }
+
+    /**
+     Update Call
+     
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateCallRequest: (body)
+     - parameter apiResponseQueue: The queue on which api response is dispatched.
+     - parameter completion: completion handler to receive the data and the error objects
+     */
+    @discardableResult
+    internal class func updateCall(
+        type: String,
+        id: String,
+        updateCallRequest: UpdateCallRequest,
+        apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
+        completion: @escaping ((_ data: UpdateCallResponse?, _ error: Error?) -> Void)
+    ) -> RequestTask {
+        updateCallWithRequestBuilder(type: type, id: id, updateCallRequest: updateCallRequest).execute(apiResponseQueue) { result in
+            switch result {
+            case let .success(response):
+                completion(response.body, nil)
+            case let .failure(error):
+                completion(nil, error)
+            }
+        }
+    }
+
+    /**
+     Update Call
+     - PATCH /call/{type}/{id}
+     - API Key:
+       - type: apiKey Authorization
+       - name: JWT
+     - API Key:
+       - type: apiKey api_key (QUERY)
+       - name: api_key
+     - API Key:
+       - type: apiKey Stream-Auth-Type
+       - name: stream-auth-type
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter updateCallRequest: (body)
+     - returns: RequestBuilder<UpdateCallResponse>
+     */
+    internal class func updateCallWithRequestBuilder(
+        type: String,
+        id: String,
+        updateCallRequest: UpdateCallRequest
+    ) -> RequestBuilder<UpdateCallResponse> {
+        var localVariablePath = "/call/{type}/{id}"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(
+            of: "{type}",
+            with: typePostEscape,
+            options: .literal,
+            range: nil
+        )
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: updateCallRequest)
+
+        let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+
+        let localVariableNillableHeaders: [String: Any?] = [
+            :
+        ]
+
+        let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+        let localVariableRequestBuilder: RequestBuilder<UpdateCallResponse>.Type = OpenAPIClientAPI.requestBuilderFactory
+            .getBuilder()
+
+        return localVariableRequestBuilder.init(
+            method: "PATCH",
             URLString: (localVariableUrlComponents?.string ?? localVariableURLString),
             parameters: localVariableParameters,
             headers: localVariableHeaderParameters,

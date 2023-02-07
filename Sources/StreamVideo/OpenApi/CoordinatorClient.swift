@@ -55,6 +55,20 @@ class CoordinatorClient: @unchecked Sendable {
         return try await execute(urlRequest: request)
     }
     
+    func requestPermission(with request: PermissionsRequest) async throws -> RequestPermissionRequest {
+        try await execute(
+            request: request.requestPermissionRequest,
+            path: "/call/\(request.type)/\(request.id)/request_permission"
+        )
+    }
+    
+    func updateUserPermissions(with request: UpdatePermissionsRequest) async throws -> UpdateUserPermissionsResponse {
+        try await execute(
+            request: request.updateUserPermissionsRequest,
+            path: "/call/\(request.type)/\(request.id)/user_permissions"
+        )
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken

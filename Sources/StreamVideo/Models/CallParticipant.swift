@@ -300,15 +300,15 @@ extension CallParticipant {
     }
 }
 
-extension Stream_Video_User {
+extension User {
     
     func toCallParticipant() -> CallParticipant {
         CallParticipant(
             id: id,
             userId: id,
-            role: role,
+            role: "",
             name: name.isEmpty ? id : name,
-            profileImageURL: URL(string: imageURL),
+            profileImageURL: imageURL,
             trackLookupPrefix: nil,
             isOnline: false,
             hasVideo: false,
