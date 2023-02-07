@@ -24,7 +24,7 @@ extension UserCredentials {
             "oliver.lazoroski@getstream.io",
             "Oliver",
             "https://getstream.io/static/712bb5c0bd5ed8d3fa6e5842f6cfbeed/c59de/tommaso.webp",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoidXNlci9vbGl2ZXIubGF6b3Jvc2tpQGdldHN0cmVhbS5pbyIsImlhdCI6MTY3NTY4NDE3OSwidXNlcl9pZCI6Im9saXZlci5sYXpvcm9za2lAZ2V0c3RyZWFtLmlvIn0._jJtu0ECQL73ohteU1fZFjcnLHb1m3SyyKabEMopS2A"
+            token(for: "oliver.lazoroski@getstream.io", config: .frankfurt)
         ),
         (
             "marcelo",
@@ -36,7 +36,7 @@ extension UserCredentials {
             "martin",
             "Martin",
             "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/802d2/martin-mitrevski.webp",
-            "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoibWFydGluIiwiaWF0IjoxNjc1Njg0MTc5LCJ1c2VyX2lkIjoibWFydGluIn0.6kY4Ks5uW5aC12KttggDgXa38JwRRTyMPty7hdtG8e8"
+            token(for: "martin", config: .frankfurt)
         ),
         (
             "filip",
@@ -66,6 +66,24 @@ extension UserCredentials {
             ),
             token: try! UserToken(rawValue: $0.3)
         )
+    }
+    
+    //TODO: temp
+    static func token(for userId: String, config: ApiKeyConfig) -> String {
+        if config == .oregon {
+            if userId == "martin" {
+                return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoibWFydGluIiwiaWF0IjoxNjc1Njg0MTc5LCJ1c2VyX2lkIjoibWFydGluIn0.6kY4Ks5uW5aC12KttggDgXa38JwRRTyMPty7hdtG8e8"
+            } else if userId == "oliver.lazoroski@getstream.io" {
+                return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tanNAdjAuMC4wIiwic3ViIjoidXNlci9vbGl2ZXIubGF6b3Jvc2tpQGdldHN0cmVhbS5pbyIsImlhdCI6MTY3NTY4NDE3OSwidXNlcl9pZCI6Im9saXZlci5sYXpvcm9za2lAZ2V0c3RyZWFtLmlvIn0._jJtu0ECQL73ohteU1fZFjcnLHb1m3SyyKabEMopS2A"
+            }
+        } else if config == .frankfurt {
+            if userId == "martin" {
+                return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcl9pZCI6Im1hcnRpbiIsImlhdCI6MTUxNjIzOTAyMn0.Rgz8X6arOZduR03BuDFH-ji5yixtPrj5w7PKj1gNyMg"
+            } else if userId == "oliver.lazoroski@getstream.io" {
+                return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwidXNlcl9pZCI6Im9saXZlci5sYXpvcm9za2lAZ2V0c3RyZWFtLmlvIiwiaWF0IjoxNTE2MjM5MDIyfQ.qDNb4I_zygaWL_qgHyjV0dg2IiSmvNpuuU86F8eFy1s"
+            }
+        }
+        return ""
     }
 
 }

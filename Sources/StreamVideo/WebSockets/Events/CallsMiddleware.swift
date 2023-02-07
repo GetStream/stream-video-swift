@@ -31,6 +31,8 @@ class CallsMiddleware: EventMiddleware {
                 callEvent = .rejected(event)
             case .cancel:
                 callEvent = .canceled(event)
+            case .end:
+                callEvent = .ended(event)
             }
             onCallEvent?(callEvent)
         }

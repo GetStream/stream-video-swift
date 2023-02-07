@@ -12,15 +12,17 @@ internal class UsersAPI {
     /**
      Video Connect (WebSocket)
      
+     - parameter videoWSAuthMessageRequest: (body)
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
     internal class func videoConnect(
+        videoWSAuthMessageRequest: VideoWSAuthMessageRequest,
         apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
         completion: @escaping ((_ data: Void?, _ error: Error?) -> Void)
     ) -> RequestTask {
-        videoConnectWithRequestBuilder().execute(apiResponseQueue) { result in
+        videoConnectWithRequestBuilder(videoWSAuthMessageRequest: videoWSAuthMessageRequest).execute(apiResponseQueue) { result in
             switch result {
             case .success:
                 completion((), nil)
@@ -43,12 +45,14 @@ internal class UsersAPI {
      - API Key:
        - type: apiKey Stream-Auth-Type
        - name: stream-auth-type
+     - parameter videoWSAuthMessageRequest: (body)
      - returns: RequestBuilder<Void>
      */
-    internal class func videoConnectWithRequestBuilder() -> RequestBuilder<Void> {
+    internal class func videoConnectWithRequestBuilder(videoWSAuthMessageRequest: VideoWSAuthMessageRequest)
+        -> RequestBuilder<Void> {
         let localVariablePath = "/video/connect"
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters: [String: Any]? = nil
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: videoWSAuthMessageRequest)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 

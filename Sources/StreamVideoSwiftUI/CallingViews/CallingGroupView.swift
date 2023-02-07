@@ -132,6 +132,7 @@ struct CircledTitleView: View {
             Text(title)
                 .foregroundColor(.white)
                 .font(fonts.title)
+                .padding()
         }
         .frame(width: size, height: size)
         .modifier(ShadowModifier())

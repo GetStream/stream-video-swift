@@ -14,12 +14,20 @@ internal struct Custom: Codable, JSONEncodable, Hashable {
     internal var createdAt: Date?
     internal var custom: [String: AnyCodable]?
     internal var type: String
+    internal var user: UserResponse?
 
-    internal init(callCid: String? = nil, createdAt: Date? = nil, custom: [String: AnyCodable]? = nil, type: String) {
+    internal init(
+        callCid: String? = nil,
+        createdAt: Date? = nil,
+        custom: [String: AnyCodable]? = nil,
+        type: String,
+        user: UserResponse? = nil
+    ) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
         self.type = type
+        self.user = user
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
@@ -27,6 +35,7 @@ internal struct Custom: Codable, JSONEncodable, Hashable {
         case createdAt = "created_at"
         case custom
         case type
+        case user
     }
 
     // Encodable protocol methods
@@ -37,5 +46,6 @@ internal struct Custom: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(createdAt, forKey: .createdAt)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encode(type, forKey: .type)
+        try container.encodeIfPresent(user, forKey: .user)
     }
 }

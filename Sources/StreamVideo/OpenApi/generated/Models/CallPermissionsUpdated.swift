@@ -7,26 +7,26 @@ import Foundation
 import AnyCodable
 #endif
 
-internal struct CallAccepted: Codable, JSONEncodable, Hashable {
+internal struct CallPermissionsUpdated: Codable, JSONEncodable, Hashable {
 
     /** Call CID */
     internal var callCid: String?
     internal var createdAt: Date?
+    internal var ownCapabilities: [String]?
     internal var type: String
-    internal var user: UserResponse?
 
-    internal init(callCid: String? = nil, createdAt: Date? = nil, type: String, user: UserResponse? = nil) {
+    internal init(callCid: String? = nil, createdAt: Date? = nil, ownCapabilities: [String]? = nil, type: String) {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.ownCapabilities = ownCapabilities
         self.type = type
-        self.user = user
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
+        case ownCapabilities = "own_capabilities"
         case type
-        case user
     }
 
     // Encodable protocol methods
@@ -35,7 +35,7 @@ internal struct CallAccepted: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(callCid, forKey: .callCid)
         try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encodeIfPresent(ownCapabilities, forKey: .ownCapabilities)
         try container.encode(type, forKey: .type)
-        try container.encodeIfPresent(user, forKey: .user)
     }
 }

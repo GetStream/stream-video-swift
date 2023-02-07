@@ -39,6 +39,18 @@ struct UserDetailsPayload: Codable {
     let role: String
 }
 
+struct PermissionsRequest {
+    let id: String
+    let type: String
+    let requestPermissionRequest: RequestPermissionRequest
+}
+
+struct UpdatePermissionsRequest {
+    let id: String
+    let type: String
+    let updateUserPermissionsRequest: UpdateUserPermissionsRequest
+}
+
 struct HealthCheck: HealthCheckEvent, Codable {
     let connection_id: String
 }

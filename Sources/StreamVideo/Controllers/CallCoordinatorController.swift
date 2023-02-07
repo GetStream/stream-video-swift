@@ -85,6 +85,20 @@ final class CallCoordinatorController: Sendable {
         _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
     }
     
+    func sendEvent(
+        type: EventType,
+        callId: String,
+        callType: CallType
+    ) async throws {
+        let sendEventRequest = SendEventRequest(eventType: type.rawValue)
+        let request = EventRequest(
+            id: callId,
+            type: callType.name,
+            sendEventRequest: sendEventRequest
+        )
+        _ = try await coordinatorClient.sendEvent(with: request)
+    }
+    
     func addMembersToCall(with cid: String, memberIds: [String]) async throws {
         var request = Stream_Video_UpsertCallMembersRequest()
         request.callCid = cid
