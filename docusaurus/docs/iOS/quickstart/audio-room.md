@@ -2,6 +2,12 @@
 title: Audio Room/ Spaces
 ---
 
+TODO before launch:
+
+- Add the permission system once implemented in the backend + SDK
+- Add features such as "Raise Hand" for listeners in a room
+- Record demo videos to showcase what is built in this guide
+
 In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.
 
 - The audio room will run on Stream's Edge network of servers around the world.
