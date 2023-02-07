@@ -92,7 +92,7 @@ class AppState: ObservableObject {
 The `login` function will take care of the selected user and initialize the `StreamVideo` object with the parameters that you just learned about.
 
 :::note
-The `apiKey` provided will use a Stream project that we set up for you. You can also use your own application with your own key. For that, visit the [Stream Dashboard](https://dashboard.getstream.io).
+The `apiKey` provided will use a Stream project that we set up for you. You can also use your application with your key. For that, visit the [Stream Dashboard](https://dashboard.getstream.io).
 :::
 
 This will not yet compile as the `UserCredentials` type does not exist yet. Therefore, create a new file called `UserCredentials` and add this code:
@@ -227,7 +227,7 @@ For this to work you'll need to add a `currentUser` variable to your `AppState` 
 var currentUser: User?
 ```
 
-You might have caught that in order to save the current user you are accessing a `UnsecureUserRepository` object. We didn't discuss this yet, but we implemented a convenience class for this. The full code can be found [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/LocalStorage.swift), so please create a new Swift file, call it `LocalStorage` and copy the code from the file there.
+You might have caught that to save the current user you are accessing a `UnsecureUserRepository` object. We didn't discuss this yet, but we implemented a convenience class for this. The full code can be found [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/LocalStorage.swift), so please create a new Swift file, call it `LocalStorage` and copy the code from the file there.
 
 :::warning
 It is also mentioned in the source code, but in a production app you should not save user-sensitive data in `UserDefaults`. For the sake of this guide and because we are using hard-coded credentials anyways we went that route, but in a production app, you should treat your user data with a very high sense of privacy.
@@ -541,7 +541,7 @@ private func checkAudioSettings() {
 }
 ```
 
-Next, in order to keep the list of the participants of a call up-to-date you'll subscribe to the `callParticipants` and update the `hosts` and `otherUsers` properties accordingly:
+Next, to keep the list of the participants of a call up-to-date you'll subscribe to the `callParticipants` and update the `hosts` and `otherUsers` properties accordingly:
 
 ```swift
 private func subscribeForParticipantChanges() {
