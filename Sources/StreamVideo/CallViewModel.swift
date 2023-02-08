@@ -236,6 +236,7 @@ open class CallViewModel: ObservableObject {
     public func rejectCall(callId: String, type: String) {
         Task {
             try await streamVideo.rejectCall(callId: callId, callType: callType(from: type))
+            self.callingState = .idle
         }
     }
     
