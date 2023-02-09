@@ -2,11 +2,14 @@
 title: Audio Room/ Spaces
 ---
 
+:::warning
 TODO before launch:
 
 - Add the permission system once implemented in the backend + SDK
 - Add features such as "Raise Hand" for listeners in a room
 - Record demo videos to showcase what is built in this guide
+
+:::
 
 In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.
 
@@ -78,7 +81,7 @@ class AppState: ObservableObject {
 
     func login(_ user: UserCredentials) {
         let streamVideo = StreamVideo(
-            apiKey: "us83cfwuhy8n",
+            apiKey: "your_api_key",
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(
@@ -98,7 +101,7 @@ class AppState: ObservableObject {
 The `login` function will take care of the selected user and initialize the `StreamVideo` object with the parameters that you just learned about.
 
 :::note
-The `apiKey` provided will use a Stream project that we set up for you. You can also use your application with your key. For that, visit the [Stream Dashboard](https://dashboard.getstream.io).
+The `apiKey` provided [here](https://github.com/GetStream/stream-video-ios-examples/blob/5ae414d09cbcff39e68b77c6527d8586d11d73fb/AudioRooms/AudioRooms/AppState.swift#L27) will use a Stream project that we set up for you. You can also use your application with your key. For that, visit the [Stream Dashboard](https://dashboard.getstream.io).
 :::
 
 This will not yet compile as the `UserCredentials` type does not exist yet. Therefore, create a new file called `UserCredentials` and add this code:
@@ -531,10 +534,10 @@ class AudioRoomViewModel: ObservableObject {
 ```
 
 ```note
-The `cancellables` object is used to make sure subscriptions are handled correctly and released once the object itself is destroyed. If you are unsure what it does, a refresher in `Combine` is probably a good idea.
+The `cancellables` object is used to make sure subscriptions are handled correctly and released once the object itself is destroyed. If you are unsure what it does, a refresher in `Combine` is probably a good idea, you can find Apple's docs [here](https://developer.apple.com/documentation/combine).
 ```
 
-As mentioned before you'll do a few steps in the initializer, so let's create helper functions for each of them, starting with the check of the audio settings to determine whether a user is part of the speakers or listeners and configuring the `CallSettings` accordingly:
+As mentioned before you'll do a few steps in the initializer. Let's create helper functions for each of them, starting with the check of the audio settings. This is used to determine whether a user is part of the speakers or listeners and configuring the `CallSettings` accordingly:
 
 ```swift
 private func checkAudioSettings() {
