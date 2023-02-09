@@ -171,7 +171,7 @@ The latter one does not exist yet, so create a new file, select _SwiftUI View_ f
 @ObservedObject var appState: AppState
 ```
 
-Now, this code compiles but it doesn't do anything useful yet. What you'll show in the `LoginView` is a list of pre-built users that can be tapped to log the selected user in. For that, you need a list of user credentials. We have created a static variable called `builtInUsers` in the `UserCredentials` file, that you can re-use. The code is extensive and you can find the [full version here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/UserCredentials.swift). It takes a list of users and maps their `id`, `name`, `imageUrl`, and `token` to a `UserCredentials` object so that you can iterate through it.
+Now, this code compiles but it doesn't do anything useful yet. What you'll show in the `LoginView` is a list of pre-built users that can be tapped to log the selected user in. For that, you need a list of user credentials. We have created a static variable called `builtInUsers` in the `UserCredentials` file, that you can re-use. The code is extensive and you can find the [full version here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/Model/UserCredentials.swift). It takes a list of users and maps their `id`, `name`, `imageUrl`, and `token` to a `UserCredentials` object so that you can iterate through it.
 
 With that in place you can add the view code for the `LoginView`, so put this code into your `body`:
 
@@ -236,7 +236,7 @@ For this to work you'll need to add a `currentUser` variable to your `AppState` 
 var currentUser: User?
 ```
 
-You might have caught that to save the current user you are accessing a `UnsecureUserRepository` object. We didn't discuss this yet, but we implemented a convenience class for this. The full code can be found [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/LocalStorage.swift), so please create a new Swift file, call it `LocalStorage` and copy the code from the file there.
+You might have caught that to save the current user you are accessing a `UnsecureUserRepository` object. We didn't discuss this yet, but we implemented a convenience class for this. The full code can be found [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/Helpers/LocalStorage.swift), so please create a new Swift file, call it `LocalStorage` and copy the code from the file there.
 
 :::warning
 It is also mentioned in the source code, but in a production app you should not save user-sensitive data in `UserDefaults`. For the sake of this guide and because we are using hard-coded credentials anyways we went that route, but in a production app, you should treat your user data with a very high sense of privacy.
@@ -314,7 +314,7 @@ struct AudioRoom: Identifiable {
 }
 ```
 
-Similar to the `UserCredentials` we have defined a bunch of audio rooms in advance. This code was added to the `AudioRoom` file (see full code [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/AudioRoom.swift)). Most noticeable there is a `DemoAudioRoomRepository`, that conforms to the `AudioRoomRepository` protocol. That defines a single static function called `loadAudioRooms` and returns an array of `AudioRoom` objects. Please copy the code from the file into your project.
+Similar to the `UserCredentials` we have defined a bunch of audio rooms in advance. This code was added to the `AudioRoom` file (see full code [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/Model/AudioRoom.swift)). Most noticeable there is a `DemoAudioRoomRepository`, that conforms to the `AudioRoomRepository` protocol. That defines a single static function called `loadAudioRooms` and returns an array of `AudioRoom` objects. Please copy the code from the file into your project.
 
 Next, you'll create the view model that will take care of the data flow. Create a new Swift file and call it `AudioRoomsViewModel`. This will contain two `@Published` properties: `audioRooms` (an array of `AudioRoom` objects) and an optional `selectedAudioRoom` that will be set when a room is entered to open up a sheet. On initialization, it will load the available rooms from the `DemoAudioRoomRepository` and assign them to its `audioRooms` property.
 
