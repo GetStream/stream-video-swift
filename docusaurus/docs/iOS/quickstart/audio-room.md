@@ -639,9 +639,11 @@ struct ParticipantsView: View {
       HStack {
          ForEach(participants) { participant in
             VStack {
-               LazyImage(url: participant.profileImageURL)
-                  .frame(width: 64, height: 64)
-                  .clipShape(Circle())
+               ZStack(alignment: .bottomTrailing) {
+                  ImageFromUrl(
+                     url: participant.profileImageURL,
+                     size: 64
+                  )
                   .overlay(
                      Circle()
                         .stroke(
@@ -649,6 +651,13 @@ struct ParticipantsView: View {
                            lineWidth: participant.isSpeaking ? 1 : 0
                         )
                   )
+
+                  if !participant.hasAudio {
+                     IconView(imageName: "mic.slash")
+                        .frame(width: 12, height: 12)
+                  }
+               }
+
                Text(participant.name)
             }
          }
@@ -657,7 +666,7 @@ struct ParticipantsView: View {
 }
 ```
 
-Note, that the `LazyImage` has an overlay (a `Circle` with a stroke border) to indicate whether or not the participant is speaking.
+Note, that the `ImageFromUrl` has an overlay (a `Circle` with a stroke border) to indicate whether or not the participant is speaking. You're also indicating when a user is either muted or is not allowed to speak (indicated by the `participant.hasAudio` property) by showing an image in that case.
 
 Next, since you'll show a few images in the main `AudioRoomView` you'll create a helper view for that. Create a new SwiftUI view and call it `IconView`. It'll receive an `imageName` as the only parameter and use the `systemImage` for it. Here is the code:
 
