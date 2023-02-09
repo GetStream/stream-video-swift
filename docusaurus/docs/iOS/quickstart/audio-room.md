@@ -342,51 +342,54 @@ Before you start with the list you will create a helper view that creates the UI
 ```swift
 struct AudioRoomCell: View {
 
-    let audioRoom: AudioRoom
-    let imageOffset: CGFloat = 10
+   let audioRoom: AudioRoom
+   let imageOffset: CGFloat = 10
 
-    var body: some View {
-        HStack {
-            VStack(alignment: .leading) {
-                Text(audioRoom.title)
-                    .font(.headline)
+   var body: some View {
+      HStack {
+         VStack(alignment: .leading) {
+            Text(audioRoom.title)
+               .font(.headline)
 
-                Text(audioRoom.subtitle)
-                    .font(.caption)
+            Text(audioRoom.subtitle)
+               .font(.caption)
 
-                HStack(spacing: 30) {
-                    if audioRoom.hosts.count > 1 {
-                        ZStack {
-                            LazyImage(url: audioRoom.hosts[0].imageURL)
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                                .offset(x: -imageOffset, y: -imageOffset)
-                            LazyImage(url: audioRoom.hosts[1].imageURL)
-                                .frame(width: 40, height: 40)
-                                .clipShape(Circle())
-                                .offset(x: imageOffset, y: imageOffset)
-                        }
-                        .frame(height: 80)
-                        .padding(.leading, imageOffset)
-                    }
+            HStack(spacing: 30) {
+               if audioRoom.hosts.count > 1 {
+                  ZStack {
+                     ImageFromUrl(
+                        url: audioRoom.hosts[0].imageURL,
+                        size: 40,
+                        offset: -imageOffset
+                     )
 
-                    VStack(alignment: .leading, spacing: imageOffset / 2) {
-                        ForEach(audioRoom.hosts) { host in
-                            Text(host.name)
-                                .font(.headline)
-                        }
-                    }
-                }
+                     ImageFromUrl(
+                        url: audioRoom.hosts[1].imageURL,
+                        size: 40,
+                        offset: imageOffset
+                     )
+                  }
+                  .frame(height: 80)
+                  .padding(.leading, imageOffset)
+               }
+
+               VStack(alignment: .leading, spacing: imageOffset / 2) {
+                  ForEach(audioRoom.hosts) { host in
+                     Text(host.name)
+                        .font(.headline)
+                  }
+               }
             }
-            .padding()
+         }
+         .padding()
 
-            Spacer()
-        }
-        .foregroundColor(.primary)
-        .background(Color.backgroundColor)
-        .cornerRadius(16)
-        .padding(.horizontal)
-    }
+         Spacer()
+      }
+      .foregroundColor(.primary)
+      .background(Color.backgroundColor)
+      .cornerRadius(16)
+      .padding(.horizontal)
+   }
 }
 
 extension Color {
@@ -472,9 +475,10 @@ Next, go back to the `AudioRoomsView` file and add the following code below the 
             Text("Logout")
                .foregroundColor(.primary)
 
-            LazyImage(url: streamVideo.user.imageURL)
-               .frame(width: 32, height: 32)
-               .clipShape(Circle())
+            ImageFromUrl(
+               url: streamVideo.user.imageURL,
+               size: 32
+            )
          }
          .padding(8)
          .overlay(Capsule().stroke(Color.secondary, lineWidth: 1))
@@ -620,16 +624,59 @@ func changeMuteState() {
 }
 ```
 
-The logic is in place, let's get started with the UI. As before you'll first create two helper views, which will help make the view code more neatly arranged. The first is the `ParticipantsView` which will hold a list of `CallParticipant` objects (taken from the `StreamVideo` SDK).
+The logic is in place, let's get started with the UI. As before you'll first create three helper views, which will help make the view code more neatly arranged.
 
-Create a new SwiftUI view and call it `ParticipantsView`. The participants will be arranged horizontally (so in an `HStack`) and you'll show each participant's photo (loading it from a URL using the `LazyImage` from the great [Nuke package](https://github.com/kean/Nuke)) and text in a `VStack`.
+The first helper will be to display images from a URL. You'll make use of Apple's `AsyncImage` to load the image and show a placeholder while waiting for the network response.
+
+:::note
+This requires the app to have a minimum target of iOS 15. If you want to support older iOS versions, there is the great [Nuke package](https://github.com/kean/Nuke) which adds a similar component called `LazyImage`. We didn't want to add it here to avoid having more dependencies but can highly recommend the package.
+:::
+
+Create a new SwiftUI view and call it `ImageFromUrl`. As parameters it will have an optional `url` to load the image from, the `size` of the image and an optional `offset` so that you can re-arrange the image if needed.
+
+Here is the code for the view:
+
+```swift
+struct ImageFromUrl: View {
+
+    var url: URL?
+    var size: CGFloat
+    var offset: CGFloat?
+
+    var body: some View {
+        AsyncImage(url: url) { image in
+            image.resizable()
+                .frame(width: size, height: size)
+                .aspectRatio(contentMode: .fit)
+                .clipShape(Circle())
+                .offset(x: offset ?? 0, y: offset ?? 0)
+        } placeholder: {
+            ProgressView()
+                .frame(width: size, height: size)
+                .offset(x: offset ?? 0, y: offset ?? 0)
+        }
+    }
+}
+
+struct ImageFromUrl_Previews: PreviewProvider {
+    static var previews: some View {
+        ImageFromUrl(
+            url: URL(string: "https://getstream.io/static/237f45f28690696ad8fff92726f45106/c59de/thierry.webp"),
+            size: 40
+        )
+    }
+}
+```
+
+The second helper view is the `ParticipantsView` which will hold a list of `CallParticipant` objects (taken from the `StreamVideo` SDK).
+
+Create a new SwiftUI view and call it `ParticipantsView`. The participants will be arranged horizontally (so in an `HStack`) and you'll show each participant's photo (gladly, you already created a helper view for that) and text in a `VStack`.
 
 Fill in the following code in the `ParticipantsView`:
 
 ```swift
 import SwiftUI
 import StreamVideo
-import NukeUI
 
 struct ParticipantsView: View {
 
