@@ -4,6 +4,14 @@ title: Chat Integration
 
 ## Introduction
 
+:::warning
+Still to add:
+
+- reference to the starter projects
+- explanation of the StreamWrapper class
+
+:::
+
 It's common for calling apps to have chat, as well as the opposite - chat apps to have a calling functionality. Stream's Chat and Video SDKs are perfectly compatible between each other, and can easily be integrated into an app.
 
 :::tip
@@ -22,10 +30,10 @@ In this guide you will take a video-based application and add chat functionality
 The starting point for this guide is a functioning video calling application. If you don't have one and want to follow along, feel free to do our [step-by-step tutorial](../tutorial/tutorial.md) first.
 :::
 
-The simplest way to add chat to an existing video calling app is to extend the call controls with an additional chat icon. To do this, you should implement the `makeCallControlsView` in your custom implementation of the `ViewFactory` from the Stream Video SDK:
+The simplest way to add chat to an existing video calling app is to extend the call controls with an additional chat icon. To do this, implement the `makeCallControlsView` in your custom implementation of the `ViewFactory` from the Stream Video SDK (in our case it's called `VideoWithChatViewFactory`, see [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/VideoWithChatViewFactory.swift)):
 
 ```swift
-class VideoViewFactory: ViewFactory {
+class VideoWithChatViewFactory: ViewFactory {
 
     /* ... Previous code skipped. */
 
@@ -38,7 +46,7 @@ class VideoViewFactory: ViewFactory {
 
 ```
 
-Inside of the `ChatCallControls` you will use a `ToggleChatButton` that looks like this:
+Create a new SwiftUI view called `ChatCallControls` and add the code for the `ToggleChatButton` to the file (for example at the bottom):
 
 ```swift
 struct ToggleChatButton: View {
@@ -81,7 +89,7 @@ The code does three interesting things (see the numbered comments):
 2. Showing a button that indicates that there is a chat to open
 3. It overlays an unread indicator when there's new chat messages
 
-Here's the (simplified, [see full version](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/ChatCallControls.swift)) implementation of the `ChatCallControls`, that handles the display of the chat inside it.
+Here's the (simplified, [see full version](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/ChatCallControls.swift)) implementation of the `ChatCallControls` itself, that handles the display of the chat inside it.
 
 ```swift
 struct ChatCallControls: View {
