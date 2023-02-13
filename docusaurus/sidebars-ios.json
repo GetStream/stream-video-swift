@@ -14,7 +14,8 @@
       "Quickstart": [
         "quickstart/video-call",
         "quickstart/audio-room",
-        "quickstart/livestream"
+        "quickstart/livestream",
+        "quickstart/using-ui-elements"
       ],
       "Client": [
         "client/authentication-users",
