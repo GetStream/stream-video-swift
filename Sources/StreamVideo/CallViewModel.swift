@@ -84,9 +84,7 @@ open class CallViewModel: ObservableObject {
             .sorted(by: { $0.name < $1.name })
     }
     
-    private var ringingSupported: Bool {
-        !streamVideo.videoConfig.joinVideoCallInstantly
-    }
+    private var ringingSupported: Bool = false
     
     public init() {
         if !streamVideo.videoConfig.videoEnabled {
@@ -161,12 +159,13 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
     ///  - participants: list of participants that are part of the call.
-    public func startCall(callId: String, type: String? = nil, participants: [User]) {
+    public func startCall(callId: String, type: String? = nil, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
+        ringingSupported = ring
         callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
         callingState = .outgoing
         let callType = callType(from: type)
-        enterCall(callId: callId, callType: callType, participantIds: participants.map(\.id))
+        enterCall(callId: callId, callType: callType, participants: participants, ring: ring)
     }
     
     /// Joins an existing call with the provided info.
@@ -176,7 +175,7 @@ open class CallViewModel: ObservableObject {
     public func joinCall(callId: String, type: String? = nil) {
         let callType = callType(from: type)
         callController = streamVideo.makeCallController(callType: callType, callId: callId)
-        enterCall(callId: callId, callType: callType, participantIds: participants.map(\.userId))
+        enterCall(callId: callId, callType: callType, participants: [])
     }
     
     public func enterWaitingRoom(callId: String, type: String? = nil, participants: [User]) {
@@ -187,12 +186,12 @@ open class CallViewModel: ObservableObject {
         Task {
             self.edgeServer = try await callController?.selectEdgeServer(
                 videoOptions: VideoOptions(),
-                participantIds: participants.map(\.id)
+                participants: participants
             )
         }
     }
     
-    public func joinCallFromWaitingRoom(callId: String, type: String? = nil, participantIds: [String]) throws {
+    public func joinCallFromWaitingRoom(callId: String, type: String? = nil, participants: [User]) throws {
         guard let edgeServer = edgeServer, let callController = callController else {
             throw ClientError.Unexpected("Edge server not available")
         }
@@ -205,8 +204,7 @@ open class CallViewModel: ObservableObject {
                     callType: callType(from: type),
                     callId: callId,
                     callSettings: callSettings,
-                    videoOptions: VideoOptions(),
-                    participantIds: participantIds
+                    videoOptions: VideoOptions()
                 )
                 save(call: call)
             } catch {
@@ -225,7 +223,7 @@ open class CallViewModel: ObservableObject {
         callController = streamVideo.makeCallController(callType: callType, callId: callId)
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: callType)
-            enterCall(callId: callId, callType: callType, participantIds: participants.map(\.userId))
+            enterCall(callId: callId, callType: callType, participants: [])
         }
     }
     
@@ -286,7 +284,7 @@ open class CallViewModel: ObservableObject {
         isMinimized = false
     }
     
-    private func enterCall(callId: String, callType: CallType, participantIds: [String]) {
+    private func enterCall(callId: String, callType: CallType, participants: [User], ring: Bool = false) {
         guard let callController = callController else {
             return
         }
@@ -299,7 +297,8 @@ open class CallViewModel: ObservableObject {
                     callId: callId,
                     callSettings: callSettings,
                     videoOptions: videoOptions,
-                    participantIds: participantIds
+                    participants: participants,
+                    ring: ring
                 )
                 save(call: call)
             } catch {
@@ -366,7 +365,7 @@ open class CallViewModel: ObservableObject {
     }
     
     private func updateCallStateIfNeeded() {
-        if streamVideo.videoConfig.joinVideoCallInstantly {
+        if !ringingSupported {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1

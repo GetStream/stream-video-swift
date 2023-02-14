@@ -9,13 +9,16 @@ import AnyCodable
 
 internal struct VideoSettings: Codable, JSONEncodable, Hashable {
 
-    internal var enabled: Bool?
+    internal var accessRequestEnabled: Bool
+    internal var enabled: Bool
 
-    internal init(enabled: Bool? = nil) {
+    internal init(accessRequestEnabled: Bool, enabled: Bool) {
+        self.accessRequestEnabled = accessRequestEnabled
         self.enabled = enabled
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
+        case accessRequestEnabled = "access_request_enabled"
         case enabled
     }
 
@@ -23,6 +26,7 @@ internal struct VideoSettings: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encode(enabled, forKey: .enabled)
     }
 }

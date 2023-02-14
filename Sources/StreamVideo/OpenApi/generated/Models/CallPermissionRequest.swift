@@ -9,20 +9,14 @@ import AnyCodable
 
 internal struct CallPermissionRequest: Codable, JSONEncodable, Hashable {
 
-    /** Call CID */
-    internal var callCid: String?
-    internal var createdAt: Date?
-    internal var permissions: [String]?
+    internal var callCid: String
+    internal var createdAt: Date
+    /** The list of permissions requested by the user */
+    internal var permissions: [String]
     internal var type: String
-    internal var user: UserResponse?
+    internal var user: UserResponse
 
-    internal init(
-        callCid: String? = nil,
-        createdAt: Date? = nil,
-        permissions: [String]? = nil,
-        type: String,
-        user: UserResponse? = nil
-    ) {
+    internal init(callCid: String, createdAt: Date, permissions: [String], type: String, user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.permissions = permissions
@@ -42,10 +36,10 @@ internal struct CallPermissionRequest: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(callCid, forKey: .callCid)
-        try container.encodeIfPresent(createdAt, forKey: .createdAt)
-        try container.encodeIfPresent(permissions, forKey: .permissions)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(permissions, forKey: .permissions)
         try container.encode(type, forKey: .type)
-        try container.encodeIfPresent(user, forKey: .user)
+        try container.encode(user, forKey: .user)
     }
 }

@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct JoinCallRequest {
+struct JoinCallRequestDto {
     let id: String
     let type: String
     let getOrCreateCallRequest: GetOrCreateCallRequest
@@ -35,11 +35,10 @@ struct ConnectRequest: Codable {
 struct UserDetailsPayload: Codable {
     let id: String
     let name: String
-    let username: String
-    let role: String
+    let custom: [String: String]
 }
 
-struct PermissionsRequest {
+struct RequestPermissionsRequest {
     let id: String
     let type: String
     let requestPermissionRequest: RequestPermissionRequest
@@ -54,3 +53,5 @@ struct UpdatePermissionsRequest {
 struct HealthCheck: HealthCheckEvent, Codable {
     let connection_id: String
 }
+
+extension DatacenterResponse: @unchecked Sendable {}

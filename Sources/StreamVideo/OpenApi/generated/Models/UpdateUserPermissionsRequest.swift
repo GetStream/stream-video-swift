@@ -9,23 +9,11 @@ import AnyCodable
 
 internal struct UpdateUserPermissionsRequest: Codable, JSONEncodable, Hashable {
 
-    internal enum GrantPermissions: String, Codable, CaseIterable {
-        case screenshare
-        case sendAudio = "send-audio"
-        case sendVideo = "send-video"
-    }
-
-    internal enum RevokePermissions: String, Codable, CaseIterable {
-        case screenshare
-        case sendAudio = "send-audio"
-        case sendVideo = "send-video"
-    }
-
-    internal var grantPermissions: GrantPermissions?
-    internal var revokePermissions: RevokePermissions?
+    internal var grantPermissions: [String]?
+    internal var revokePermissions: [String]?
     internal var userId: String
 
-    internal init(grantPermissions: GrantPermissions? = nil, revokePermissions: RevokePermissions? = nil, userId: String) {
+    internal init(grantPermissions: [String]? = nil, revokePermissions: [String]? = nil, userId: String) {
         self.grantPermissions = grantPermissions
         self.revokePermissions = revokePermissions
         self.userId = userId

@@ -13,7 +13,7 @@ final class LatencyService: Sendable {
     }
     
     func measureLatency(for endpoint: DatacenterResponse, tries: Int = 1) async -> [Float] {
-        guard let latencyUrl = endpoint.latencyUrl, let url = URL(string: latencyUrl) else {
+        guard let url = URL(string: endpoint.latencyUrl) else {
             return [Float(Int.max)]
         }
         var results = [Float]()

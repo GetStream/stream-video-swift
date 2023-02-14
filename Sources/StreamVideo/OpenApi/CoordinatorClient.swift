@@ -29,7 +29,7 @@ class CoordinatorClient: @unchecked Sendable {
         self.userId = userId
     }
     
-    func joinCall(with request: JoinCallRequest) async throws -> JoinCallResponse {
+    func joinCall(with request: JoinCallRequestDto) async throws -> JoinCallResponse {
         try await execute(
             request: request.getOrCreateCallRequest,
             path: "/join_call/\(request.type)/\(request.id)"
@@ -39,7 +39,7 @@ class CoordinatorClient: @unchecked Sendable {
     func getCallEdgeServer(with request: SelectEdgeServerRequest) async throws -> GetCallEdgeServerResponse {
         try await execute(
             request: request.getCallEdgeServerRequest,
-            path: "/get_call_edge_server/\(request.type)/\(request.id)"
+            path: "/call/\(request.type)/\(request.id)/get_edge_server"
         )
     }
     
@@ -55,7 +55,7 @@ class CoordinatorClient: @unchecked Sendable {
         return try await execute(urlRequest: request)
     }
     
-    func requestPermission(with request: PermissionsRequest) async throws -> RequestPermissionRequest {
+    func requestPermission(with request: RequestPermissionsRequest) async throws -> RequestPermissionResponse {
         try await execute(
             request: request.requestPermissionRequest,
             path: "/call/\(request.type)/\(request.id)/request_permission"
@@ -67,6 +67,10 @@ class CoordinatorClient: @unchecked Sendable {
             request: request.updateUserPermissionsRequest,
             path: "/call/\(request.type)/\(request.id)/user_permissions"
         )
+    }
+    
+    func queryMembers(with request: QueryMembersRequest) async throws -> QueryMembersResponse {
+        try await execute(request: request, path: "/call/members")
     }
     
     func update(userToken: String) {

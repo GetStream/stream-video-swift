@@ -34,12 +34,14 @@ public class StreamVideo {
     }
     
     private let callsMiddleware = CallsMiddleware()
+    private let permissionsMiddleware = PermissionsMiddleware()
         
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
         let middlewares: [EventMiddleware] = [
-            callsMiddleware
+            callsMiddleware,
+            permissionsMiddleware
         ]
         center.add(middlewares: middlewares)
         return center
@@ -59,6 +61,7 @@ public class StreamVideo {
     public private(set) var currentCallController: CallController?
     private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
+    private var permissionsController: PermissionsController?
     
     public convenience init(
         apiKey: String,
@@ -105,10 +108,7 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
-        
-        if videoConfig.persitingSocketConnection {
-            connectWebSocketClient()
-        }
+        connectWebSocketClient()
     }
     
     /// Creates a call controller, used for establishing and managing a call.
@@ -127,9 +127,6 @@ public class StreamVideo {
             tokenProvider: tokenProvider
         )
         currentCallController = controller
-        if !videoConfig.persitingSocketConnection {
-            connectWebSocketClient()
-        }
         return controller
     }
     
@@ -137,6 +134,21 @@ public class StreamVideo {
     /// - Returns: `VoipNotificationsController`
     public func makeVoipNotificationsController() -> VoipNotificationsController {
         callCoordinatorController.makeVoipNotificationsController()
+    }
+    
+    public func makePermissionsController() -> PermissionsController {
+        let controller = PermissionsController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        permissionsController = controller
+        permissionsMiddleware.onPermissionRequestEvent = { [weak self] request in
+            self?.permissionsController?.onPermissionRequestEvent?(request)
+        }
+        permissionsMiddleware.onPermissionsUpdatedEvent = { [weak self] request in
+            self?.permissionsController?.onPermissionsUpdatedEvent?(request)
+        }
+        return controller
     }
     
     /// Accepts the call with the provided call id and type.
@@ -180,12 +192,6 @@ public class StreamVideo {
         postNotification(with: CallNotification.callEnded)
         currentCallController?.cleanUp()
         currentCallController = nil
-        if videoConfig.persitingSocketConnection {
-            return
-        }
-        webSocketClient?.disconnect {
-            log.debug("Web socket connection closed")
-        }
     }
         
     /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
@@ -236,8 +242,9 @@ public class StreamVideo {
             let userDetails = UserDetailsPayload(
                 id: self.user.id,
                 name: self.user.name,
-                username: self.user.id,
-                role: "member" // TODO:
+                custom: [
+                    "imageURL": self.user.imageURL?.absoluteString ?? ""
+                ]
             )
             let connectRequest = ConnectRequest(
                 token: self.token.rawValue,

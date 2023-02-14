@@ -15,23 +15,22 @@ internal struct MemberResponse: Codable, JSONEncodable, Hashable {
     internal var custom: [String: AnyCodable]?
     /** Date/time of deletion */
     internal var deletedAt: Date?
-    internal var duration: String?
-    internal var role: String?
+    internal var duration: String
+    internal var role: String
     /** Date/time of the last update */
     internal var updatedAt: Date
     internal var user: UserResponse
-    /** User ID */
-    internal var userId: String?
+    internal var userId: String
 
     internal init(
         createdAt: Date,
-        custom: [String: AnyCodable]? = nil,
+        custom: [String: AnyCodable],
         deletedAt: Date? = nil,
-        duration: String? = nil,
-        role: String? = nil,
+        duration: String,
+        role: String,
         updatedAt: Date,
         user: UserResponse,
-        userId: String? = nil
+        userId: String
     ) {
         self.createdAt = createdAt
         self.custom = custom
@@ -59,12 +58,12 @@ internal struct MemberResponse: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(createdAt, forKey: .createdAt)
-        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encode(custom, forKey: .custom)
         try container.encodeIfPresent(deletedAt, forKey: .deletedAt)
-        try container.encodeIfPresent(duration, forKey: .duration)
-        try container.encodeIfPresent(role, forKey: .role)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(role, forKey: .role)
         try container.encode(updatedAt, forKey: .updatedAt)
         try container.encode(user, forKey: .user)
-        try container.encodeIfPresent(userId, forKey: .userId)
+        try container.encode(userId, forKey: .userId)
     }
 }

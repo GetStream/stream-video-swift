@@ -9,9 +9,9 @@ import AnyCodable
 
 internal struct GeofenceSettings: Codable, JSONEncodable, Hashable {
 
-    internal var names: [String]?
+    internal var names: [String]
 
-    internal init(names: [String]? = nil) {
+    internal init(names: [String]) {
         self.names = names
     }
 
@@ -23,6 +23,6 @@ internal struct GeofenceSettings: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(names, forKey: .names)
+        try container.encode(names, forKey: .names)
     }
 }

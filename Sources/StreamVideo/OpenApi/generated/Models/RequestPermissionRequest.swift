@@ -9,15 +9,9 @@ import AnyCodable
 
 internal struct RequestPermissionRequest: Codable, JSONEncodable, Hashable {
 
-    internal enum Permissions: String, Codable, CaseIterable {
-        case screenshare
-        case sendAudio = "send-audio"
-        case sendVideo = "send-video"
-    }
+    internal var permissions: [String]
 
-    internal var permissions: Permissions
-
-    internal init(permissions: Permissions) {
+    internal init(permissions: [String]) {
         self.permissions = permissions
     }
 

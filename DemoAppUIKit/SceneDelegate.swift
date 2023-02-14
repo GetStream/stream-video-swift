@@ -35,10 +35,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             apiKey: "us83cfwuhy8n",
             user: user.userInfo,
             token: user.token,
-            videoConfig: VideoConfig(
-                persitingSocketConnection: true,
-                joinVideoCallInstantly: true
-            ),
+            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 result(.success(user.token))
             }
@@ -48,3 +45,21 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 
 }
 
+//TODO: remove this.
+enum ApiKeyConfig {
+    case frankfurt
+    case oregon
+}
+
+extension ApiKeyConfig {
+    
+    var apiKey: String {
+        switch self {
+        case .frankfurt:
+            return "w6yaq5388uym"
+        case .oregon:
+            return "554fuj7wzx4r"
+        }
+    }
+    
+}

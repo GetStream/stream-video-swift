@@ -39,7 +39,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         coordinatorService: Stream_Video_CallCoordinatorService,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         videoOptions: VideoOptions,
-        reportStats: Bool = true
+        reportStats: Bool = false
     ) {
         self.sessionId = sessionId
         self.pc = pc
@@ -52,9 +52,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
-        DispatchQueue.main.async {
-            self.setupStatsTimer()
-        }
     }
     
     func createOffer() async throws -> RTCSessionDescription {

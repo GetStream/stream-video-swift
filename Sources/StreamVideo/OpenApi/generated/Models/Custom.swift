@@ -9,20 +9,14 @@ import AnyCodable
 
 internal struct Custom: Codable, JSONEncodable, Hashable {
 
-    /** Call CID */
-    internal var callCid: String?
-    internal var createdAt: Date?
-    internal var custom: [String: AnyCodable]?
+    internal var callCid: String
+    internal var createdAt: Date
+    /** Custom data for this object */
+    internal var custom: [String: AnyCodable]
     internal var type: String
-    internal var user: UserResponse?
+    internal var user: UserResponse
 
-    internal init(
-        callCid: String? = nil,
-        createdAt: Date? = nil,
-        custom: [String: AnyCodable]? = nil,
-        type: String,
-        user: UserResponse? = nil
-    ) {
+    internal init(callCid: String, createdAt: Date, custom: [String: AnyCodable], type: String, user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
@@ -42,10 +36,10 @@ internal struct Custom: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(callCid, forKey: .callCid)
-        try container.encodeIfPresent(createdAt, forKey: .createdAt)
-        try container.encodeIfPresent(custom, forKey: .custom)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(custom, forKey: .custom)
         try container.encode(type, forKey: .type)
-        try container.encodeIfPresent(user, forKey: .user)
+        try container.encode(user, forKey: .user)
     }
 }

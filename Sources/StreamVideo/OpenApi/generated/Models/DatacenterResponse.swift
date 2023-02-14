@@ -10,10 +10,10 @@ import AnyCodable
 internal struct DatacenterResponse: Codable, JSONEncodable, Hashable {
 
     internal var coordinates: Coordinates
-    internal var latencyUrl: String?
-    internal var name: String?
+    internal var latencyUrl: String
+    internal var name: String
 
-    internal init(coordinates: Coordinates, latencyUrl: String? = nil, name: String? = nil) {
+    internal init(coordinates: Coordinates, latencyUrl: String, name: String) {
         self.coordinates = coordinates
         self.latencyUrl = latencyUrl
         self.name = name
@@ -30,7 +30,7 @@ internal struct DatacenterResponse: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(coordinates, forKey: .coordinates)
-        try container.encodeIfPresent(latencyUrl, forKey: .latencyUrl)
-        try container.encodeIfPresent(name, forKey: .name)
+        try container.encode(latencyUrl, forKey: .latencyUrl)
+        try container.encode(name, forKey: .name)
     }
 }

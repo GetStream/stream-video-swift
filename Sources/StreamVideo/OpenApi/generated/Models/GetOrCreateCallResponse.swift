@@ -10,16 +10,16 @@ import AnyCodable
 internal struct GetOrCreateCallResponse: Codable, JSONEncodable, Hashable {
 
     internal var call: CallResponse
-    internal var created: Bool?
-    internal var duration: String?
-    internal var members: [MemberResponse]?
+    internal var created: Bool
+    internal var duration: String
+    internal var members: [MemberResponse]
     internal var membership: MemberResponse?
 
     internal init(
         call: CallResponse,
-        created: Bool? = nil,
-        duration: String? = nil,
-        members: [MemberResponse]? = nil,
+        created: Bool,
+        duration: String,
+        members: [MemberResponse],
         membership: MemberResponse? = nil
     ) {
         self.call = call
@@ -42,9 +42,9 @@ internal struct GetOrCreateCallResponse: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(call, forKey: .call)
-        try container.encodeIfPresent(created, forKey: .created)
-        try container.encodeIfPresent(duration, forKey: .duration)
-        try container.encodeIfPresent(members, forKey: .members)
+        try container.encode(created, forKey: .created)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(members, forKey: .members)
         try container.encodeIfPresent(membership, forKey: .membership)
     }
 }

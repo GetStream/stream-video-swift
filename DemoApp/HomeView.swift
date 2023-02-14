@@ -161,7 +161,7 @@ struct HomeView: View {
                 if callFlow == .waitingRoom {
                     viewModel.enterWaitingRoom(callId: callId, participants: selectedParticipants)
                 } else {
-                    viewModel.startCall(callId: callId, participants: selectedParticipants)
+                    viewModel.startCall(callId: callId, participants: selectedParticipants, ring: true)
                 }
             } label: {
                 Text("Start a call")
