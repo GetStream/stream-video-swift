@@ -7,22 +7,22 @@ import Foundation
 import AnyCodable
 #endif
 
-internal struct EndCallResponse: Codable, JSONEncodable, Hashable {
+internal struct AudioSettings: Codable, JSONEncodable, Hashable {
 
-    internal var duration: String
+    internal var accessRequestEnabled: Bool
 
-    internal init(duration: String) {
-        self.duration = duration
+    internal init(accessRequestEnabled: Bool) {
+        self.accessRequestEnabled = accessRequestEnabled
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
-        case duration
+        case accessRequestEnabled = "access_request_enabled"
     }
 
     // Encodable protocol methods
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(duration, forKey: .duration)
+        try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
     }
 }

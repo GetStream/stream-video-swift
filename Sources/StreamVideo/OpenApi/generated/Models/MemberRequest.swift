@@ -9,22 +9,20 @@ import AnyCodable
 
 internal struct MemberRequest: Codable, JSONEncodable, Hashable {
 
+    /** Custom data for this object */
     internal var custom: [String: AnyCodable]?
-    internal var role: String
-    internal var user: UserObjectRequest?
+    internal var role: String?
     internal var userId: String
 
-    internal init(custom: [String: AnyCodable]? = nil, role: String, user: UserObjectRequest? = nil, userId: String) {
+    internal init(custom: [String: AnyCodable]? = nil, role: String? = nil, userId: String) {
         self.custom = custom
         self.role = role
-        self.user = user
         self.userId = userId
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
         case role
-        case user
         case userId = "user_id"
     }
 
@@ -33,8 +31,7 @@ internal struct MemberRequest: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
-        try container.encode(role, forKey: .role)
-        try container.encodeIfPresent(user, forKey: .user)
+        try container.encodeIfPresent(role, forKey: .role)
         try container.encode(userId, forKey: .userId)
     }
 }

@@ -85,10 +85,7 @@ class CallKitService: NSObject, CXProviderDelegate {
                     apiKey: "key1",
                     user: currentUser.userInfo,
                     token: currentUser.token,
-                    videoConfig: VideoConfig(
-                        persitingSocketConnection: true,
-                        joinVideoCallInstantly: false
-                    ),
+                    videoConfig: VideoConfig(),
                     tokenProvider: { result in
                         result(.success(currentUser.token))
                     }
@@ -103,7 +100,8 @@ class CallKitService: NSObject, CXProviderDelegate {
                     callId: callId,
                     callSettings: CallSettings(),
                     videoOptions: VideoOptions(),
-                    participantIds: []
+                    participants: [],
+                    ring: false
                 )
                 await MainActor.run {
                     AppState.shared.activeCallController = callController

@@ -9,10 +9,10 @@ import AnyCodable
 
 internal struct SFUResponse: Codable, JSONEncodable, Hashable {
 
-    internal var edgeName: String?
-    internal var url: String?
+    internal var edgeName: String
+    internal var url: String
 
-    internal init(edgeName: String? = nil, url: String? = nil) {
+    internal init(edgeName: String, url: String) {
         self.edgeName = edgeName
         self.url = url
     }
@@ -26,7 +26,7 @@ internal struct SFUResponse: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(edgeName, forKey: .edgeName)
-        try container.encodeIfPresent(url, forKey: .url)
+        try container.encode(edgeName, forKey: .edgeName)
+        try container.encode(url, forKey: .url)
     }
 }

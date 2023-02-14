@@ -15,7 +15,7 @@ internal struct UserRequest: Codable, JSONEncodable, Hashable {
     internal var image: String?
     /** Optional name of user */
     internal var name: String?
-    internal var role: String
+    internal var role: String?
     internal var teams: [String]?
 
     internal init(
@@ -23,7 +23,7 @@ internal struct UserRequest: Codable, JSONEncodable, Hashable {
         id: String,
         image: String? = nil,
         name: String? = nil,
-        role: String,
+        role: String? = nil,
         teams: [String]? = nil
     ) {
         self.custom = custom
@@ -51,7 +51,7 @@ internal struct UserRequest: Codable, JSONEncodable, Hashable {
         try container.encode(id, forKey: .id)
         try container.encodeIfPresent(image, forKey: .image)
         try container.encodeIfPresent(name, forKey: .name)
-        try container.encode(role, forKey: .role)
+        try container.encodeIfPresent(role, forKey: .role)
         try container.encodeIfPresent(teams, forKey: .teams)
     }
 }

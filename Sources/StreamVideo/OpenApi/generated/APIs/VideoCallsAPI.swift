@@ -115,7 +115,7 @@ internal class VideoCallsAPI {
 
     /**
      Get Call Edge Server
-     - POST /get_call_edge_server/{type}/{id}
+     - POST /call/{type}/{id}/get_edge_server
      - API Key:
        - type: apiKey Authorization
        - name: JWT
@@ -135,7 +135,7 @@ internal class VideoCallsAPI {
         id: String,
         getCallEdgeServerRequest: GetCallEdgeServerRequest
     ) -> RequestBuilder<GetCallEdgeServerResponse> {
-        var localVariablePath = "/get_call_edge_server/{type}/{id}"
+        var localVariablePath = "/call/{type}/{id}/get_edge_server"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(
@@ -261,7 +261,8 @@ internal class VideoCallsAPI {
      
      - parameter type: (path)
      - parameter id: (path)
-     - parameter getOrCreateCallRequest: (body)
+     - parameter joinCallRequest: (body)
+     - parameter connectionId: (query)  (optional)
      - parameter apiResponseQueue: The queue on which api response is dispatched.
      - parameter completion: completion handler to receive the data and the error objects
      */
@@ -269,11 +270,12 @@ internal class VideoCallsAPI {
     internal class func joinCall(
         type: String,
         id: String,
-        getOrCreateCallRequest: GetOrCreateCallRequest,
+        joinCallRequest: JoinCallRequest,
+        connectionId: String? = nil,
         apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
         completion: @escaping ((_ data: JoinCallResponse?, _ error: Error?) -> Void)
     ) -> RequestTask {
-        joinCallWithRequestBuilder(type: type, id: id, getOrCreateCallRequest: getOrCreateCallRequest)
+        joinCallWithRequestBuilder(type: type, id: id, joinCallRequest: joinCallRequest, connectionId: connectionId)
             .execute(apiResponseQueue) { result in
                 switch result {
                 case let .success(response):
@@ -299,13 +301,15 @@ internal class VideoCallsAPI {
        - name: stream-auth-type
      - parameter type: (path)
      - parameter id: (path)
-     - parameter getOrCreateCallRequest: (body)
+     - parameter joinCallRequest: (body)
+     - parameter connectionId: (query)  (optional)
      - returns: RequestBuilder<JoinCallResponse>
      */
     internal class func joinCallWithRequestBuilder(
         type: String,
         id: String,
-        getOrCreateCallRequest: GetOrCreateCallRequest
+        joinCallRequest: JoinCallRequest,
+        connectionId: String? = nil
     ) -> RequestBuilder<JoinCallResponse> {
         var localVariablePath = "/join_call/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
@@ -320,7 +324,94 @@ internal class VideoCallsAPI {
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
         let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
-        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: getOrCreateCallRequest)
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: joinCallRequest)
+
+        var localVariableUrlComponents = URLComponents(string: localVariableURLString)
+        localVariableUrlComponents?.queryItems = APIHelper.mapValuesToQueryItems([
+            "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: false)
+        ])
+
+        let localVariableNillableHeaders: [String: Any?] = [
+            :
+        ]
+
+        let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+        let localVariableRequestBuilder: RequestBuilder<JoinCallResponse>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+
+        return localVariableRequestBuilder.init(
+            method: "POST",
+            URLString: (localVariableUrlComponents?.string ?? localVariableURLString),
+            parameters: localVariableParameters,
+            headers: localVariableHeaderParameters,
+            requiresAuthentication: true
+        )
+    }
+
+    /**
+     Mute users
+     
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter muteUsersRequest: (body)
+     - parameter apiResponseQueue: The queue on which api response is dispatched.
+     - parameter completion: completion handler to receive the data and the error objects
+     */
+    @discardableResult
+    internal class func muteUsers(
+        type: String,
+        id: String,
+        muteUsersRequest: MuteUsersRequest,
+        apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
+        completion: @escaping ((_ data: MuteUsersResponse?, _ error: Error?) -> Void)
+    ) -> RequestTask {
+        muteUsersWithRequestBuilder(type: type, id: id, muteUsersRequest: muteUsersRequest).execute(apiResponseQueue) { result in
+            switch result {
+            case let .success(response):
+                completion(response.body, nil)
+            case let .failure(error):
+                completion(nil, error)
+            }
+        }
+    }
+
+    /**
+     Mute users
+     - POST /call/{type}/{id}/mute_users
+     - Mutes users in a call
+     - API Key:
+       - type: apiKey Authorization
+       - name: JWT
+     - API Key:
+       - type: apiKey api_key (QUERY)
+       - name: api_key
+     - API Key:
+       - type: apiKey Stream-Auth-Type
+       - name: stream-auth-type
+     - parameter type: (path)
+     - parameter id: (path)
+     - parameter muteUsersRequest: (body)
+     - returns: RequestBuilder<MuteUsersResponse>
+     */
+    internal class func muteUsersWithRequestBuilder(
+        type: String,
+        id: String,
+        muteUsersRequest: MuteUsersRequest
+    ) -> RequestBuilder<MuteUsersResponse> {
+        var localVariablePath = "/call/{type}/{id}/mute_users"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(
+            of: "{type}",
+            with: typePostEscape,
+            options: .literal,
+            range: nil
+        )
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: muteUsersRequest)
 
         let localVariableUrlComponents = URLComponents(string: localVariableURLString)
 
@@ -330,7 +421,8 @@ internal class VideoCallsAPI {
 
         let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
 
-        let localVariableRequestBuilder: RequestBuilder<JoinCallResponse>.Type = OpenAPIClientAPI.requestBuilderFactory.getBuilder()
+        let localVariableRequestBuilder: RequestBuilder<MuteUsersResponse>.Type = OpenAPIClientAPI.requestBuilderFactory
+            .getBuilder()
 
         return localVariableRequestBuilder.init(
             method: "POST",
@@ -351,21 +443,22 @@ internal class VideoCallsAPI {
      - parameter completion: completion handler to receive the data and the error objects
      */
     @discardableResult
-    internal class func updateCall(
+    internal class func nameVideoUpdateCall(
         type: String,
         id: String,
         updateCallRequest: UpdateCallRequest,
         apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
         completion: @escaping ((_ data: UpdateCallResponse?, _ error: Error?) -> Void)
     ) -> RequestTask {
-        updateCallWithRequestBuilder(type: type, id: id, updateCallRequest: updateCallRequest).execute(apiResponseQueue) { result in
-            switch result {
-            case let .success(response):
-                completion(response.body, nil)
-            case let .failure(error):
-                completion(nil, error)
+        nameVideoUpdateCallWithRequestBuilder(type: type, id: id, updateCallRequest: updateCallRequest)
+            .execute(apiResponseQueue) { result in
+                switch result {
+                case let .success(response):
+                    completion(response.body, nil)
+                case let .failure(error):
+                    completion(nil, error)
+                }
             }
-        }
     }
 
     /**
@@ -385,7 +478,7 @@ internal class VideoCallsAPI {
      - parameter updateCallRequest: (body)
      - returns: RequestBuilder<UpdateCallResponse>
      */
-    internal class func updateCallWithRequestBuilder(
+    internal class func nameVideoUpdateCallWithRequestBuilder(
         type: String,
         id: String,
         updateCallRequest: UpdateCallRequest
@@ -418,6 +511,71 @@ internal class VideoCallsAPI {
 
         return localVariableRequestBuilder.init(
             method: "PATCH",
+            URLString: (localVariableUrlComponents?.string ?? localVariableURLString),
+            parameters: localVariableParameters,
+            headers: localVariableHeaderParameters,
+            requiresAuthentication: true
+        )
+    }
+
+    /**
+     Query call members
+     
+     - parameter queryMembersRequest: (body)
+     - parameter apiResponseQueue: The queue on which api response is dispatched.
+     - parameter completion: completion handler to receive the data and the error objects
+     */
+    @discardableResult
+    internal class func queryMembers(
+        queryMembersRequest: QueryMembersRequest,
+        apiResponseQueue: DispatchQueue = OpenAPIClientAPI.apiResponseQueue,
+        completion: @escaping ((_ data: QueryMembersResponse?, _ error: Error?) -> Void)
+    ) -> RequestTask {
+        queryMembersWithRequestBuilder(queryMembersRequest: queryMembersRequest).execute(apiResponseQueue) { result in
+            switch result {
+            case let .success(response):
+                completion(response.body, nil)
+            case let .failure(error):
+                completion(nil, error)
+            }
+        }
+    }
+
+    /**
+     Query call members
+     - POST /call/members
+     - Query call members with filter query
+     - API Key:
+       - type: apiKey Authorization
+       - name: JWT
+     - API Key:
+       - type: apiKey api_key (QUERY)
+       - name: api_key
+     - API Key:
+       - type: apiKey Stream-Auth-Type
+       - name: stream-auth-type
+     - parameter queryMembersRequest: (body)
+     - returns: RequestBuilder<QueryMembersResponse>
+     */
+    internal class func queryMembersWithRequestBuilder(queryMembersRequest: QueryMembersRequest)
+        -> RequestBuilder<QueryMembersResponse> {
+        let localVariablePath = "/call/members"
+        let localVariableURLString = OpenAPIClientAPI.basePath + localVariablePath
+        let localVariableParameters = JSONEncodingHelper.encodingParameters(forEncodableObject: queryMembersRequest)
+
+        let localVariableUrlComponents = URLComponents(string: localVariableURLString)
+
+        let localVariableNillableHeaders: [String: Any?] = [
+            :
+        ]
+
+        let localVariableHeaderParameters = APIHelper.rejectNilHeaders(localVariableNillableHeaders)
+
+        let localVariableRequestBuilder: RequestBuilder<QueryMembersResponse>.Type = OpenAPIClientAPI.requestBuilderFactory
+            .getBuilder()
+
+        return localVariableRequestBuilder.init(
+            method: "POST",
             URLString: (localVariableUrlComponents?.string ?? localVariableURLString),
             parameters: localVariableParameters,
             headers: localVariableHeaderParameters,

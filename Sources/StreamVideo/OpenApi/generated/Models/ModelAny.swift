@@ -9,12 +9,10 @@ import AnyCodable
 
 internal struct ModelAny: Codable, JSONEncodable, Hashable {
 
-    /** Date/time of creation */
-    internal var createdAt: Date?
-    /** Event Type */
+    internal var createdAt: Date
     internal var type: String
 
-    internal init(createdAt: Date? = nil, type: String) {
+    internal init(createdAt: Date, type: String) {
         self.createdAt = createdAt
         self.type = type
     }
@@ -28,7 +26,7 @@ internal struct ModelAny: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encode(createdAt, forKey: .createdAt)
         try container.encode(type, forKey: .type)
     }
 }

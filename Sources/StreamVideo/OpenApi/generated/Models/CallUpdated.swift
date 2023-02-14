@@ -9,12 +9,12 @@ import AnyCodable
 
 internal struct CallUpdated: Codable, JSONEncodable, Hashable {
 
-    internal var call: CallResponse?
-    internal var capabilitiesByRole: [String: [String]]?
-    internal var createdAt: Date?
+    internal var call: CallResponse
+    internal var capabilitiesByRole: [String: [String]]
+    internal var createdAt: Date
     internal var type: String
 
-    internal init(call: CallResponse? = nil, capabilitiesByRole: [String: [String]]? = nil, createdAt: Date? = nil, type: String) {
+    internal init(call: CallResponse, capabilitiesByRole: [String: [String]], createdAt: Date, type: String) {
         self.call = call
         self.capabilitiesByRole = capabilitiesByRole
         self.createdAt = createdAt
@@ -32,9 +32,9 @@ internal struct CallUpdated: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(call, forKey: .call)
-        try container.encodeIfPresent(capabilitiesByRole, forKey: .capabilitiesByRole)
-        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encode(call, forKey: .call)
+        try container.encode(capabilitiesByRole, forKey: .capabilitiesByRole)
+        try container.encode(createdAt, forKey: .createdAt)
         try container.encode(type, forKey: .type)
     }
 }

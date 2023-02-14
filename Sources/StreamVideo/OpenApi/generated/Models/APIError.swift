@@ -10,28 +10,28 @@ import AnyCodable
 internal struct APIError: Codable, JSONEncodable, Hashable {
 
     /** Response HTTP status code */
-    internal var statusCode: Double?
+    internal var statusCode: Double
     /** API error code */
-    internal var code: Double?
+    internal var code: Double
     /** Additional error-specific information */
-    internal var details: [Double]?
+    internal var details: [Double]
     /** Request duration */
-    internal var duration: String?
+    internal var duration: String
     /** Additional error info */
     internal var exceptionFields: [String: String]?
     /** Message describing an error */
-    internal var message: String?
+    internal var message: String
     /** URL with additional information */
-    internal var moreInfo: String?
+    internal var moreInfo: String
 
     internal init(
-        statusCode: Double? = nil,
-        code: Double? = nil,
-        details: [Double]? = nil,
-        duration: String? = nil,
+        statusCode: Double,
+        code: Double,
+        details: [Double],
+        duration: String,
         exceptionFields: [String: String]? = nil,
-        message: String? = nil,
-        moreInfo: String? = nil
+        message: String,
+        moreInfo: String
     ) {
         self.statusCode = statusCode
         self.code = code
@@ -56,12 +56,12 @@ internal struct APIError: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(statusCode, forKey: .statusCode)
-        try container.encodeIfPresent(code, forKey: .code)
-        try container.encodeIfPresent(details, forKey: .details)
-        try container.encodeIfPresent(duration, forKey: .duration)
+        try container.encode(statusCode, forKey: .statusCode)
+        try container.encode(code, forKey: .code)
+        try container.encode(details, forKey: .details)
+        try container.encode(duration, forKey: .duration)
         try container.encodeIfPresent(exceptionFields, forKey: .exceptionFields)
-        try container.encodeIfPresent(message, forKey: .message)
-        try container.encodeIfPresent(moreInfo, forKey: .moreInfo)
+        try container.encode(message, forKey: .message)
+        try container.encode(moreInfo, forKey: .moreInfo)
     }
 }

@@ -7,8 +7,9 @@ import Foundation
 import AnyCodable
 #endif
 
-internal struct EndCallResponse: Codable, JSONEncodable, Hashable {
+internal struct MuteUsersResponse: Codable, JSONEncodable, Hashable {
 
+    /** Duration of the request in human-readable format */
     internal var duration: String
 
     internal init(duration: String) {

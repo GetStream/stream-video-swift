@@ -12,15 +12,15 @@ internal struct GetCallEdgeServerResponse: Codable, JSONEncodable, Hashable {
     internal var call: CallResponse
     internal var credentials: Credentials
     /** Duration of the request in human-readable format */
-    internal var duration: String?
-    internal var members: [MemberResponse]?
+    internal var duration: String
+    internal var members: [MemberResponse]
     internal var membership: MemberResponse?
 
     internal init(
         call: CallResponse,
         credentials: Credentials,
-        duration: String? = nil,
-        members: [MemberResponse]? = nil,
+        duration: String,
+        members: [MemberResponse],
         membership: MemberResponse? = nil
     ) {
         self.call = call
@@ -44,8 +44,8 @@ internal struct GetCallEdgeServerResponse: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(call, forKey: .call)
         try container.encode(credentials, forKey: .credentials)
-        try container.encodeIfPresent(duration, forKey: .duration)
-        try container.encodeIfPresent(members, forKey: .members)
+        try container.encode(duration, forKey: .duration)
+        try container.encode(members, forKey: .members)
         try container.encodeIfPresent(membership, forKey: .membership)
     }
 }

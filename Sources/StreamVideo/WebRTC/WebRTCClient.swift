@@ -19,9 +19,19 @@ class WebRTCClient: NSObject {
         
         private var enrichedUserData = [String: EnrichedUserData]()
         private let callCoordinatorController: CallCoordinatorController
+        private let callId: String
+        private let callType: String
         
-        init(callCoordinatorController: CallCoordinatorController) {
+        init(callCoordinatorController: CallCoordinatorController, callCid: String) {
             self.callCoordinatorController = callCoordinatorController
+            let idComponents = callCid.components(separatedBy: ":")
+            if idComponents.count >= 2 {
+                self.callId = idComponents[1]
+                self.callType = idComponents[0]
+            } else {
+                self.callId = ""
+                self.callType = ""
+            }
         }
         
         var connectionState = ConnectionState.disconnected(reason: nil)
@@ -83,7 +93,11 @@ class WebRTCClient: NSObject {
             if let data = enrichedUserData[userId] {
                 return data
             }
-            let enrichedData = try? await callCoordinatorController.enrichUserData(for: userId)
+            let enrichedData = try? await callCoordinatorController.enrichUserData(
+                for: userId,
+                callId: callId,
+                callType: callType
+            )
             enrichedUserData[userId] = enrichedData
             return enrichedData ?? .empty
         }
@@ -164,7 +178,10 @@ class WebRTCClient: NSObject {
         videoConfig: VideoConfig,
         tokenProvider: @escaping UserTokenProvider
     ) {
-        state = State(callCoordinatorController: callCoordinatorController)
+        state = State(
+            callCoordinatorController: callCoordinatorController,
+            callCid: callCid
+        )
         self.user = user
         self.token = token
         self.callCid = callCid
@@ -248,7 +265,7 @@ class WebRTCClient: NSObject {
     }
     
     func publishUserMedia(callSettings: CallSettings) {
-        if callSettings.shouldPublish, let audioTrack = localAudioTrack {
+        if let audioTrack = localAudioTrack {
             log.debug("publishing local tracks")
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"])
             if videoConfig.videoEnabled, let videoTrack = localVideoTrack {
@@ -258,6 +275,22 @@ class WebRTCClient: NSObject {
     }
     
     func changeAudioState(isEnabled: Bool) async throws {
+        // TODO: only temp solution, fix this properly.
+        if isEnabled && publisher == nil {
+            callSettings = CallSettings(
+                audioOn: isEnabled,
+                videoOn: callSettings.videoOn,
+                speakerOn: callSettings.speakerOn,
+                cameraPosition: callSettings.cameraPosition
+            )
+            let configuration = connectOptions!.rtcConfiguration // TODO: safe unwrap
+            do {
+                try await publishLocalTracks(configuration: configuration)
+            } catch {
+                print("\(error)")
+                throw error
+            }
+        }
         var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
         var audio = Stream_Video_Sfu_Signal_TrackMuteState()
         audio.trackType = .audio
@@ -329,18 +362,22 @@ class WebRTCClient: NSObject {
         await state.update(connectionState: .connected)
         signalChannel?.engine?.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
         if callSettings.shouldPublish {
-            publisher = try await peerConnectionFactory.makePeerConnection(
-                sessionId: sessionID,
-                callCid: callCid,
-                configuration: configuration,
-                type: .publisher,
-                coordinatorService: callCoordinatorController.callCoordinatorService,
-                signalService: signalService,
-                videoOptions: videoOptions
-            )
-            publisher?.onNegotiationNeeded = handleNegotiationNeeded()
-            publishUserMedia(callSettings: callSettings)
+            try await publishLocalTracks(configuration: configuration)
         }
+    }
+    
+    private func publishLocalTracks(configuration: RTCConfiguration) async throws {
+        publisher = try await peerConnectionFactory.makePeerConnection(
+            sessionId: sessionID,
+            callCid: callCid,
+            configuration: configuration,
+            type: .publisher,
+            coordinatorService: callCoordinatorController.callCoordinatorService,
+            signalService: signalService,
+            videoOptions: videoOptions
+        )
+        publisher?.onNegotiationNeeded = handleNegotiationNeeded()
+        publishUserMedia(callSettings: callSettings)
     }
     
     private func handleStreamAdded(_ stream: RTCMediaStream) {
@@ -447,22 +484,6 @@ class WebRTCClient: NSObject {
         )
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
-    }
-    
-    private func loadParticipants(from response: Stream_Video_Sfu_Event_JoinResponse) async {
-        log.debug("Loading participants from joinResponse")
-        let participants = response.callState.participants
-        // For more than threshold participants, the activation of track is on view appearance.
-        let showTrack = participants.count < participantsThreshold
-        var temp = [String: CallParticipant]()
-        for participant in participants {
-            let enrichedData = await state.enrichedData(for: participant.userID)
-            temp[participant.userID] = participant.toCallParticipant(
-                showTrack: showTrack,
-                enrichData: enrichedData
-            )
-        }
-        await state.update(callParticipants: temp)
     }
     
     private func makeJoinRequest(subscriberSdp: String) -> Stream_Video_Sfu_Event_JoinRequest {

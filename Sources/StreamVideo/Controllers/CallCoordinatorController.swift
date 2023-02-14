@@ -2,14 +2,16 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import AnyCodable
 import Foundation
 import WebRTC
 
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
-final class CallCoordinatorController: Sendable {
+final class CallCoordinatorController: @unchecked Sendable {
     
     let callCoordinatorService: Stream_Video_CallCoordinatorService
     let coordinatorClient: CoordinatorClient
+    private(set) var currentCallSettings: CallSettingsInfo?
     private let latencyService: LatencyService
     private let videoConfig: VideoConfig
     private let user: User
@@ -42,22 +44,26 @@ final class CallCoordinatorController: Sendable {
         callType: CallType,
         callId: String,
         videoOptions: VideoOptions,
-        participantIds: [String]
+        participants: [User],
+        ring: Bool
     ) async throws -> EdgeServer {
         let joinCallResponse = try await joinCall(
             callId: callId,
             type: callType.name,
-            participantIds: participantIds
+            participants: participants,
+            ring: ring
         )
         
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges ?? [])
+        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
         
         let edgeServer = try await selectEdgeServer(
-            callId: joinCallResponse.call.id!,
+            callId: joinCallResponse.call.id,
             type: callType.name,
             latencyByEdge: latencyByEdge,
-            edges: joinCallResponse.edges ?? []
+            edges: joinCallResponse.edges
         )
+        
+        currentCallSettings = edgeServer.callSettings
         
         return edgeServer
     }
@@ -108,7 +114,6 @@ final class CallCoordinatorController: Sendable {
             memberInput.role = "member"
             return memberInput
         }
-        request.ring = !videoConfig.joinVideoCallInstantly
         _ = try await callCoordinatorService.upsertCallMembers(upsertCallMembersRequest: request)
     }
     
@@ -121,6 +126,23 @@ final class CallCoordinatorController: Sendable {
         guard let member = response.users.first else { return .empty }
         return EnrichedUserData(imageUrl: URL(string: member.imageURL), name: member.name, role: member.role)
     }
+    
+    func enrichUserData(for id: String, callId: String, callType: String) async throws -> EnrichedUserData {
+        let filter: [String: AnyCodable] = ["user_id": ["$in": [id]]]
+        let request = QueryMembersRequest(
+            filterConditions: filter,
+            id: callId,
+            type: callType
+        )
+        let response = try await coordinatorClient.queryMembers(with: request)
+        guard let member = response.members.first?.user else { return .empty }
+        let imageURL = member.custom["imageURL"]?.value as? String
+        return EnrichedUserData(
+            imageUrl: URL(string: imageURL ?? ""),
+            name: member.name ?? id,
+            role: member.role
+        )
+    }
 
     // MARK: - private
         
@@ -132,7 +154,7 @@ final class CallCoordinatorController: Sendable {
             for endpoint in endpoints {
                 group.addTask {
                     let value = await self.latencyService.measureLatency(for: endpoint, tries: 3)
-                    return [endpoint.name!: value]
+                    return [endpoint.name: value]
                 }
             }
             
@@ -151,25 +173,24 @@ final class CallCoordinatorController: Sendable {
     private func joinCall(
         callId: String,
         type: String,
-        participantIds: [String]
+        participants: [User],
+        ring: Bool
     ) async throws -> Stream_Video_JoinCallResponse {
-        let ring = !videoConfig.joinVideoCallInstantly
-        let role = "member" // TODO:
-        
         var members = [MemberRequest]()
-        for participantId in participantIds {
+        for participant in participants {
             let callMemberRequest = MemberRequest(
-                role: role,
-                userId: participantId
+                role: participant.role,
+                userId: participant.id
             )
             members.append(callMemberRequest)
         }
         
+        let currentUserRole = participants.filter { user.id == $0.id }.first?.role ?? user.role
         let userRequest = UserRequest(
             id: user.id,
             image: user.imageURL?.absoluteString,
             name: user.name,
-            role: role,
+            role: currentUserRole,
             teams: nil // TODO:
         )
         let callRequest = CallRequest(
@@ -185,7 +206,11 @@ final class CallCoordinatorController: Sendable {
             members: paginationParamsRequest,
             ring: ring
         )
-        let joinCallRequest = JoinCallRequest(id: callId, type: type, getOrCreateCallRequest: getOrCreateCallRequest)
+        let joinCallRequest = JoinCallRequestDto(
+            id: callId,
+            type: type,
+            getOrCreateCallRequest: getOrCreateCallRequest
+        )
         let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
     }
@@ -206,35 +231,36 @@ final class CallCoordinatorController: Sendable {
         )
         let response = try await coordinatorClient.getCallEdgeServer(with: selectEdgeRequest)
         let credentials = response.credentials
-        let iceServersResponse: [ICEServer] = credentials.iceServers ?? []
+        let iceServersResponse: [ICEServer] = credentials.iceServers
         let iceServers = iceServersResponse.map { iceServer in
             IceServer(
-                urls: iceServer.urls ?? [],
-                username: iceServer.username ?? "",
-                password: iceServer.password ?? ""
+                urls: iceServer.urls,
+                username: iceServer.username,
+                password: iceServer.password
             )
         }
-        let edgeName = response.credentials.server?.edgeName
+        let edgeName = response.credentials.server.edgeName
         let edge = edges.first { $0.name == edgeName }
         var latencyURL: String? = edge.map(\.latencyUrl) ?? nil
         if latencyURL == nil {
             for edge in edges {
                 let maxLatency = Float(Int.max)
-                if let name = edge.name {
-                    let latency = latencyByEdge[name]?.last ?? maxLatency
-                    if latency != maxLatency {
-                        latencyURL = edge.latencyUrl
-                    }
+                let name = edge.name
+                let latency = latencyByEdge[name]?.last ?? maxLatency
+                if latency != maxLatency {
+                    latencyURL = edge.latencyUrl
                 }
             }
         }
-        guard let url = credentials.server?.url, let token = credentials.token else {
-            throw ClientError.Unexpected()
-        }
+        let callSettings = CallSettingsInfo(
+            callCapabilities: response.call.ownCapabilities,
+            callSettings: response.call.settings
+        )
         return EdgeServer(
-            url: url,
-            token: token,
+            url: credentials.server.url,
+            token: credentials.token,
             iceServers: iceServers,
+            callSettings: callSettings,
             latencyURL: latencyURL
         )
     }
@@ -244,8 +270,16 @@ public struct EdgeServer: Sendable {
     let url: String
     let token: String
     let iceServers: [IceServer]
+    let callSettings: CallSettingsInfo
     public let latencyURL: String?
 }
+
+struct CallSettingsInfo: Sendable {
+    let callCapabilities: [String]
+    let callSettings: CallSettingsResponse
+}
+
+extension CallSettingsResponse: @unchecked Sendable {}
 
 public struct IceServer: Sendable {
     let urls: [String]

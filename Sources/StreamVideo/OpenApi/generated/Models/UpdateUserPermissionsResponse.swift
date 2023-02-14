@@ -10,9 +10,9 @@ import AnyCodable
 internal struct UpdateUserPermissionsResponse: Codable, JSONEncodable, Hashable {
 
     /** Duration of the request in human-readable format */
-    internal var duration: String?
+    internal var duration: String
 
-    internal init(duration: String? = nil) {
+    internal init(duration: String) {
         self.duration = duration
     }
 
@@ -24,6 +24,6 @@ internal struct UpdateUserPermissionsResponse: Codable, JSONEncodable, Hashable 
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(duration, forKey: .duration)
+        try container.encode(duration, forKey: .duration)
     }
 }

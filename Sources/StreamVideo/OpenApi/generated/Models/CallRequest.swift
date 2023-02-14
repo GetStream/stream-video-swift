@@ -12,7 +12,7 @@ internal struct CallRequest: Codable, JSONEncodable, Hashable {
     internal var createdBy: UserRequest?
     internal var createdById: String?
     internal var custom: [String: AnyCodable]?
-    internal var members: [MemberRequest]
+    internal var members: [MemberRequest]?
     internal var settingsOverride: CallSettingsRequest?
     internal var team: String?
 
@@ -20,7 +20,7 @@ internal struct CallRequest: Codable, JSONEncodable, Hashable {
         createdBy: UserRequest? = nil,
         createdById: String? = nil,
         custom: [String: AnyCodable]? = nil,
-        members: [MemberRequest],
+        members: [MemberRequest]? = nil,
         settingsOverride: CallSettingsRequest? = nil,
         team: String? = nil
     ) {
@@ -48,7 +48,7 @@ internal struct CallRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(createdBy, forKey: .createdBy)
         try container.encodeIfPresent(createdById, forKey: .createdById)
         try container.encodeIfPresent(custom, forKey: .custom)
-        try container.encode(members, forKey: .members)
+        try container.encodeIfPresent(members, forKey: .members)
         try container.encodeIfPresent(settingsOverride, forKey: .settingsOverride)
         try container.encodeIfPresent(team, forKey: .team)
     }

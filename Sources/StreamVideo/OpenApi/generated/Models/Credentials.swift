@@ -9,11 +9,11 @@ import AnyCodable
 
 internal struct Credentials: Codable, JSONEncodable, Hashable {
 
-    internal var iceServers: [ICEServer]?
-    internal var server: SFUResponse?
-    internal var token: String?
+    internal var iceServers: [ICEServer]
+    internal var server: SFUResponse
+    internal var token: String
 
-    internal init(iceServers: [ICEServer]? = nil, server: SFUResponse? = nil, token: String? = nil) {
+    internal init(iceServers: [ICEServer], server: SFUResponse, token: String) {
         self.iceServers = iceServers
         self.server = server
         self.token = token
@@ -29,8 +29,8 @@ internal struct Credentials: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(iceServers, forKey: .iceServers)
-        try container.encodeIfPresent(server, forKey: .server)
-        try container.encodeIfPresent(token, forKey: .token)
+        try container.encode(iceServers, forKey: .iceServers)
+        try container.encode(server, forKey: .server)
+        try container.encode(token, forKey: .token)
     }
 }

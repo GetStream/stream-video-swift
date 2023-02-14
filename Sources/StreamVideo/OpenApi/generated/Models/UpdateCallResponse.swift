@@ -11,9 +11,9 @@ import AnyCodable
 internal struct UpdateCallResponse: Codable, JSONEncodable, Hashable {
 
     internal var call: CallResponse
-    internal var duration: String?
+    internal var duration: String
 
-    internal init(call: CallResponse, duration: String? = nil) {
+    internal init(call: CallResponse, duration: String) {
         self.call = call
         self.duration = duration
     }
@@ -28,6 +28,6 @@ internal struct UpdateCallResponse: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(call, forKey: .call)
-        try container.encodeIfPresent(duration, forKey: .duration)
+        try container.encode(duration, forKey: .duration)
     }
 }

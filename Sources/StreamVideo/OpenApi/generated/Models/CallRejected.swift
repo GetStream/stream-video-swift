@@ -9,13 +9,12 @@ import AnyCodable
 
 internal struct CallRejected: Codable, JSONEncodable, Hashable {
 
-    /** Call CID */
-    internal var callCid: String?
-    internal var createdAt: Date?
+    internal var callCid: String
+    internal var createdAt: Date
     internal var type: String
-    internal var user: UserResponse?
+    internal var user: UserResponse
 
-    internal init(callCid: String? = nil, createdAt: Date? = nil, type: String, user: UserResponse? = nil) {
+    internal init(callCid: String, createdAt: Date, type: String, user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type
@@ -33,9 +32,9 @@ internal struct CallRejected: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(callCid, forKey: .callCid)
-        try container.encodeIfPresent(createdAt, forKey: .createdAt)
+        try container.encode(callCid, forKey: .callCid)
+        try container.encode(createdAt, forKey: .createdAt)
         try container.encode(type, forKey: .type)
-        try container.encodeIfPresent(user, forKey: .user)
+        try container.encode(user, forKey: .user)
     }
 }

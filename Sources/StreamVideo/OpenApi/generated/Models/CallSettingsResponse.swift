@@ -9,6 +9,7 @@ import AnyCodable
 
 internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
 
+    internal var audio: AudioSettings
     internal var broadcasting: BroadcastSettings
     internal var geofencing: GeofenceSettings
     internal var recording: RecordSettings
@@ -16,12 +17,14 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
     internal var video: VideoSettings
 
     internal init(
+        audio: AudioSettings,
         broadcasting: BroadcastSettings,
         geofencing: GeofenceSettings,
         recording: RecordSettings,
         screensharing: ScreensharingSettings,
         video: VideoSettings
     ) {
+        self.audio = audio
         self.broadcasting = broadcasting
         self.geofencing = geofencing
         self.recording = recording
@@ -30,6 +33,7 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
+        case audio
         case broadcasting
         case geofencing
         case recording
@@ -41,6 +45,7 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(audio, forKey: .audio)
         try container.encode(broadcasting, forKey: .broadcasting)
         try container.encode(geofencing, forKey: .geofencing)
         try container.encode(recording, forKey: .recording)

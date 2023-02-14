@@ -9,10 +9,10 @@ import AnyCodable
 
 internal struct Coordinates: Codable, JSONEncodable, Hashable {
 
-    internal var latitude: Float?
-    internal var longitude: Float?
+    internal var latitude: Float
+    internal var longitude: Float
 
-    internal init(latitude: Float? = nil, longitude: Float? = nil) {
+    internal init(latitude: Float, longitude: Float) {
         self.latitude = latitude
         self.longitude = longitude
     }
@@ -26,7 +26,7 @@ internal struct Coordinates: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(latitude, forKey: .latitude)
-        try container.encodeIfPresent(longitude, forKey: .longitude)
+        try container.encode(latitude, forKey: .latitude)
+        try container.encode(longitude, forKey: .longitude)
     }
 }
