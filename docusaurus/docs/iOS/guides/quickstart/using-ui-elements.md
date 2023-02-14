@@ -6,16 +6,111 @@ title: Using UI elements
 
 # Adding Stream Video to your project
 
-- add dependency
-- create private `func` in ...App (don't forget the imports for `StreamVideo` and `StreamVideoSwiftUI`)
-- need to pick an API key for that from the Stream Dashboard
-- call in `init`
-- create the `UserCredentials` and the `demoUser`
+## Project setup and Stream Video SDK installation
+
+This project requires a machine that is running _macOS_ as well as the latest _Xcode_ version to follow along the guide.
+
+The first thing to do is to create a new _Xcode_ project (_File_ -> _New_ -> _Project_), select _iOS_ and _App_ and hit _Next_. Give it a name that you like and make sure that `SwiftUI` is selected under _Interface_. Save it somewhere on your machine.
+
+// TODO: record a gif that shows the process
+
+Now that the project is created you can add the dependency for the Stream Video SDK. In your newly created project, go to _File_ -> _Add Packages_. In the search bar on the top right, enter the URL to the SDK on GitHub (https://github.com/GetStream/stream-video-swift).
+
+Select the package that pops up and make sure for _Dependency Rule_ to select _Branch_ -> `main`. When clicking on _Add Package_ it will take a moment but then you can select `StreamVideo` and `StreamVideoSwiftUI` in the list of packages that pop up. Hit _Add Package_ again and wait for the package loading to finish.
+
+// TODO: record a gif that shows the process
+
+:::note
+The other package `StreamVideoUIKit` provides built-in UI elements for `UIKit`, ready for you to use and customize.
+:::
+
+With this, the project is set up and all dependencies are installed.
+
+Before starting with the code of the application itself, let's take a look at how to initialize the Stream Video SDK. This is the low-level client that directly exposes the calling functionality to you so that you have full control. It requires a few parameters for setup:
+
+- `apiKey`: when creating an application in the [Stream Dashboard](https://dashboard.getstream.io) you will be provided with an API key to identify your application.
+- `user`: the `User` that you are logging in to the application. For this application, there are pre-built users provided.
+- `token`: for the authentication with the Stream backend, a user token is required. In this example, the users will have non-expiring tokens provided for simplicity. Otherwise, this requires a backend, handling token generation.
+- `videoConfig`: the `VideoConfig` object allows you to set some more advanced settings in the SDK.
+- `tokenProvider`: once a token expires, this function will be called so that you can request a new token from your backend and update it. (Not necessary here, since non-expiring tokens are provided)
+
+Now, in your `App` file (exact naming depends on the name of your project) you will add the initialization of the `StreamVideoUI` element. Paste this code into your app struct:
+
+```swift
+@State var streamVideo: StreamVideoUI?
+
+init() {
+    setupStreamVideo(with: "your-api-key", userCredentials: .demoUser)
+}
+
+private func setupStreamVideo(
+    with apiKey: String,
+    userCredentials: UserCredentials
+) {
+    streamVideo = StreamVideoUI(
+        apiKey: apiKey,
+        user: userCredentials.user,
+        token: userCredentials.token,
+        videoConfig: VideoConfig(joinVideoCallInstantly: true),
+        tokenProvider: { result in
+            // Call your networking service to generate a new token here.
+            // When finished, call the result handler with either .success or .failure.
+            result(.success(userCredentials.token))
+        }
+    )
+}
+```
+
+:::note
+The `apiKey` provided [here](https://github.com/GetStream/stream-video-ios-examples/blob/5ae414d09cbcff39e68b77c6527d8586d11d73fb/AudioRooms/AudioRooms/AppState.swift#L27) will use a Stream project that we set up for you. You can also use your application with your key. For that, visit the [Stream Dashboard](https://dashboard.getstream.io).
+:::
+
+This will not yet compile as the `UserCredentials` type does not exist yet. Therefore, create a new file called `UserCredentials` and add this code:
+
+```swift
+import Foundation
+import StreamVideo
+
+struct UserCredentials: Identifiable, Codable {
+    var id: String {
+        userInfo.id
+    }
+    let userInfo: User
+    let token: UserToken
+}
+```
+
+And in order to login a user, you will create a sample user as a static property of `UserCredentials`. Add the following code below your `UserCredentials` definition:
+
+```swift
+extension UserCredentials {
+    static let demoUser = UserCredentials(
+        user: User(
+            id: "testuser",
+            name: "Test User",
+            imageURL: URL(string: "https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg")!,
+            extraData: [:]
+        ),
+        token: try! UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0"
+        )
+    )
+}
+
+```
+
+With that, the initial setup is done and you can start with the functionality.
 
 # Add logic to determine current call state
 
-- initialize `CallViewModel` in ContentView as `@StateObject`
-- create a `switch` over the `callViewModel.callingState`
+The SDK is setup and now you want to be able to start and join calls and know when you receive calls. The `StreamVideoSwiftUI` SDK offers the `CallViewModel` that provides you with all necessary call-related logic.
+
+Get started by creating a property in the `ContentView` that is a `CallViewModel`:
+
+```swift
+@StateObject var callViewModel = CallViewModel()
+```
+
+You will look at different functionalities of the `CallViewModel` in this guide, the first is its `callingState`. This `enum` tells you which state the current call is in. It's best to learn about it in code, so let's replace the `body` of the `ContentView` with a `switch` statement over the `callViewModel.callingState`.
 
 ```swift
 switch callViewModel.callingState {
@@ -33,6 +128,10 @@ switch callViewModel.callingState {
         Text("In waiting room: \(waitingRoomInfo.callId)")
     }
 ```
+
+You can see all states, that a call can be in and with that show UI that is suited for that. Right now, this UI doesn't do much. In fact, you only have `Text` views that point out the state.
+
+In the next chapter, let's have a look how to properly fill the UI with real views.
 
 # Create and use the ViewFactory
 
