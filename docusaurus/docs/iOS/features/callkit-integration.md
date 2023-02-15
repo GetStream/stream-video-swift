@@ -13,6 +13,7 @@ The StreamVideo SDK is compatible with CallKit, enabling a complete calling expe
 In order to get started, you would need have a paid Apple developer account, and an app id with push notifications enabled.
 
 In the "Signing & Capabilities" section of your target, make sure that in the "Background Modes" section you have selected:
+
 - "Voice over IP"
 - "Remote notifications"
 - "Background processing"
@@ -21,15 +22,15 @@ In the "Signing & Capabilities" section of your target, make sure that in the "B
 
 Next, you need to create a VOIP calling certificate. In order to do that, go to your Apple developer account, select "Certificates, Identifiers & Profiles" and create a new certificate. Make sure to select `"VoIP Services Certificate"`, located under the "Services" section. Follow the steps to create the required certificate.
 
-![Screenshot shows the creation of a voip certificate](../assets/callkit_02.png)
+![Screenshot shows the creation of a VoIP certificate](../assets/callkit_02.png)
 
-After you've created the certificate, you would need to upload it to our dashboard. 
+After you've created the certificate, you would need to upload it to our dashboard.
 
 //TODO: we need to implement this feature in the dashboard.
 
 ## iOS app integration
 
-From iOS app perspective, there are two Apple frameworks that we need to integrate in order to have a working CallKit integration: `CallKit` and `PushKit`. [PushKit](https://developer.apple.com/documentation/pushkit) is needed for handling VoIP push notifications, which are different than regular push notifications. 
+From iOS app perspective, there are two Apple frameworks that we need to integrate in order to have a working CallKit integration: `CallKit` and `PushKit`. [PushKit](https://developer.apple.com/documentation/pushkit) is needed for handling VoIP push notifications, which are different than regular push notifications.
 
 We have a working CallKit integration in our demo app. Feel free to reference it for more details, while we will cover the most important bits here.
 
@@ -41,20 +42,20 @@ For handling VoIP push notifications, we will create a new class, called `VoipPu
 
 ```swift
 class VoipPushService: NSObject, PKPushRegistryDelegate {
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     private let voipQueue: DispatchQueue
     private let voipRegistry: PKPushRegistry
     private let voipTokenHandler: VoipTokenHandler
     private lazy var voipNotificationsController = streamVideo.makeVoipNotificationsController()
-    
+
     var onReceiveIncomingPush: VoipPushHandler
-    
+
     init(voipTokenHandler: VoipTokenHandler, pushHandler: @escaping VoipPushHandler) {
         self.voipTokenHandler = voipTokenHandler
         self.voipQueue = DispatchQueue(label: "io.getstream.voip")
-        self.voipRegistry = PKPushRegistry(queue: voipQueue)        
+        self.voipRegistry = PKPushRegistry(queue: voipQueue)
         self.onReceiveIncomingPush = pushHandler
     }
 }
@@ -80,7 +81,7 @@ func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCrede
     voipNotificationsController.addDevice(with: deviceToken)
     voipTokenHandler.save(voipPushToken: deviceToken)
 }
-        
+
 func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
     log.debug("pushRegistry:didInvalidatePushTokenForType:")
     if let savedToken = voipTokenHandler.currentVoipPushToken() {
@@ -117,13 +118,13 @@ The `CallService` class handles the `onReceiveIncomingPush` callbacks invoked by
 
 ```swift
 class CallService {
-    
+
     private static let defaultCallText = "You are receiving a call"
-    
+
     static let shared = CallService()
-    
+
     let callService = CallKitService()
-    
+
     lazy var voipPushService = VoipPushService(
         voipTokenHandler: UnsecureUserRepository.shared
     ) { [weak self] payload, type, completion in
@@ -137,11 +138,11 @@ class CallService {
             completion()
         }
     }
-    
+
     func registerForIncomingCalls() {
         voipPushService.registerForVoIPPushes()
     }
-    
+
     private func callInfo(from callPayload: [String: Any]?) -> String {
         guard let userIds = callPayload?["user_ids"] as? String else { return Self.defaultCallText }
         let parts = userIds.components(separatedBy: ",")
@@ -193,7 +194,7 @@ func reportIncomingCall(
 
 The method also saves the `callId` and `callType`, and it generates a call UUID, which is required by CallKit for identifying calls.
 
-The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDKs calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions. 
+The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDKs calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions.
 
 First, we need to accept the call both from `CallKit`, as well as initiate the call inside the SDK. This is done with the `provider(_ provider: CXProvider, perform action: CXAnswerCallAction)` method in the `CXProviderDelegate`.
 

@@ -49,3 +49,5 @@ telehealth
 subclassing
 [Ss]ubview
 scrollable
+codecs
+Dynascale
