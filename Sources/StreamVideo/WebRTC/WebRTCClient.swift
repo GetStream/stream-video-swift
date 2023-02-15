@@ -265,31 +265,27 @@ class WebRTCClient: NSObject {
     }
     
     func publishUserMedia(callSettings: CallSettings) {
-        if let audioTrack = localAudioTrack {
-            log.debug("publishing local tracks")
-            publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"])
-            if videoConfig.videoEnabled, let videoTrack = localVideoTrack {
-                publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"])
-            }
+        if let audioTrack = localAudioTrack, callSettings.audioOn, publisher?.audioTrackPublished == false {
+            log.debug("publishing audio track")
+            publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"], trackType: .audio)
+        }
+        if videoConfig.videoEnabled, callSettings.videoOn, let videoTrack = localVideoTrack,
+           publisher?.videoTrackPublished == false {
+            log.debug("publishing video track")
+            publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"], trackType: .video)
         }
     }
     
     func changeAudioState(isEnabled: Bool) async throws {
-        // TODO: only temp solution, fix this properly.
-        if isEnabled && publisher == nil {
+        if isEnabled && (publisher == nil || publisher?.audioTrackPublished == false),
+           let configuration = connectOptions?.rtcConfiguration {
             callSettings = CallSettings(
                 audioOn: isEnabled,
                 videoOn: callSettings.videoOn,
                 speakerOn: callSettings.speakerOn,
                 cameraPosition: callSettings.cameraPosition
             )
-            let configuration = connectOptions!.rtcConfiguration // TODO: safe unwrap
-            do {
-                try await publishLocalTracks(configuration: configuration)
-            } catch {
-                print("\(error)")
-                throw error
-            }
+            try await publishLocalTracks(configuration: configuration)
         }
         var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
         var audio = Stream_Video_Sfu_Signal_TrackMuteState()
@@ -302,6 +298,16 @@ class WebRTCClient: NSObject {
     }
     
     func changeVideoState(isEnabled: Bool) async throws {
+        if isEnabled && (publisher == nil || publisher?.videoTrackPublished == false),
+           let configuration = connectOptions?.rtcConfiguration {
+            callSettings = CallSettings(
+                audioOn: callSettings.audioOn,
+                videoOn: isEnabled,
+                speakerOn: callSettings.speakerOn,
+                cameraPosition: callSettings.cameraPosition
+            )
+            try await publishLocalTracks(configuration: configuration)
+        }
         var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
         var video = Stream_Video_Sfu_Signal_TrackMuteState()
         video.trackType = .video
@@ -367,16 +373,18 @@ class WebRTCClient: NSObject {
     }
     
     private func publishLocalTracks(configuration: RTCConfiguration) async throws {
-        publisher = try await peerConnectionFactory.makePeerConnection(
-            sessionId: sessionID,
-            callCid: callCid,
-            configuration: configuration,
-            type: .publisher,
-            coordinatorService: callCoordinatorController.callCoordinatorService,
-            signalService: signalService,
-            videoOptions: videoOptions
-        )
-        publisher?.onNegotiationNeeded = handleNegotiationNeeded()
+        if publisher == nil {
+            publisher = try await peerConnectionFactory.makePeerConnection(
+                sessionId: sessionID,
+                callCid: callCid,
+                configuration: configuration,
+                type: .publisher,
+                coordinatorService: callCoordinatorController.callCoordinatorService,
+                signalService: signalService,
+                videoOptions: videoOptions
+            )
+            publisher?.onNegotiationNeeded = handleNegotiationNeeded()
+        }
         publishUserMedia(callSettings: callSettings)
     }
     
@@ -547,8 +555,17 @@ class WebRTCClient: NSObject {
             reportsStats: false
         )
         
-        tempPeerConnection.addTrack(localAudioTrack, streamIds: ["temp-audio"])
-        tempPeerConnection.addTransceiver(localVideoTrack, streamIds: ["temp-video"], direction: .recvOnly)
+        tempPeerConnection.addTrack(
+            localAudioTrack,
+            streamIds: ["temp-audio"],
+            trackType: .audio
+        )
+        tempPeerConnection.addTransceiver(
+            localVideoTrack,
+            streamIds: ["temp-video"],
+            direction: .recvOnly,
+            trackType: .video
+        )
         let offer = try await tempPeerConnection.createOffer()
         tempPeerConnection.transceiver?.stopInternal()
         tempPeerConnection.close()

@@ -26,6 +26,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
     private var pendingIceCandidates = [RTCIceCandidate]()
+    private var publishedTracks = [TrackType]()
         
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
@@ -52,6 +53,14 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
+    }
+    
+    var audioTrackPublished: Bool {
+        publishedTracks.contains(.audio)
+    }
+    
+    var videoTrackPublished: Bool {
+        publishedTracks.contains(.video)
     }
     
     func createOffer() async throws -> RTCSessionDescription {
@@ -117,11 +126,17 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
     
-    func addTrack(_ track: RTCMediaStreamTrack, streamIds: [String]) {
+    func addTrack(_ track: RTCMediaStreamTrack, streamIds: [String], trackType: TrackType) {
+        publishedTracks.append(trackType)
         pc.add(track, streamIds: streamIds)
     }
     
-    func addTransceiver(_ track: RTCMediaStreamTrack, streamIds: [String], direction: RTCRtpTransceiverDirection = .sendOnly) {
+    func addTransceiver(
+        _ track: RTCMediaStreamTrack,
+        streamIds: [String],
+        direction: RTCRtpTransceiverDirection = .sendOnly,
+        trackType: TrackType
+    ) {
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = direction
         transceiverInit.streamIds = streamIds
@@ -139,6 +154,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
         
         transceiverInit.sendEncodings = encodingParams
+        publishedTracks.append(trackType)
         transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }
     
@@ -274,6 +290,24 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         statsTimer?.invalidate()
         statsTimer = nil
     }
+}
+
+struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
+    let rawValue: String
+
+    init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    init(stringLiteral value: String) {
+        self.init(rawValue: value)
+    }
+}
+
+extension TrackType {
+    static let audio: Self = "audio"
+    static let video: Self = "video"
+    static let screenshare: Self = "screenshare"
 }
 
 struct ICECandidate: Codable {
