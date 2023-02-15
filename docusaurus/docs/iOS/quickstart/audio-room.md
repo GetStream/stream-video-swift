@@ -8,16 +8,12 @@ TODO before launch:
 - Add the permission system once implemented in the backend + SDK
 - Add features such as "Raise Hand" for listeners in a room
 - Record demo videos to showcase what is built in this guide
+- Polish the intro with sample video and relevant explanation of it
+- find good way to address repeating installation and setup guide
 
 :::
 
-In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.
-
-- The audio room will run on Stream's Edge network of servers around the world.
-- This ensures the lowest latency for your users
-- Opus RED is used to improve audio quality
-- DTX and our edge network ensure you can scale to millions of users at low bandwidth
-- You can have multiple active participants in the audio room
+In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.m
 
 The final result will look like this:
 
