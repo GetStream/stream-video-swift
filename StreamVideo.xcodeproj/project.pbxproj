@@ -248,6 +248,9 @@
 		84A881F7299E2B0B00EA22ED /* CodableHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A8816B299BB25300EA22ED /* CodableHelper.swift */; };
 		84A881F8299E2B0B00EA22ED /* Configuration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A8816A299BB25200EA22ED /* Configuration.swift */; };
 		84A881F9299E2B0B00EA22ED /* JSONDataEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A88168299BB25200EA22ED /* JSONDataEncoding.swift */; };
+		84A881FC299E476000EA22ED /* AnyCodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A881FB299E476000EA22ED /* AnyCodable.swift */; };
+		84A881FE299E478D00EA22ED /* AnyDecodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A881FD299E478D00EA22ED /* AnyDecodable.swift */; };
+		84A88200299E484800EA22ED /* AnyEncodable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A881FF299E484800EA22ED /* AnyEncodable.swift */; };
 		84A8B88F2993CAFD003AA570 /* PermissionsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A8B88E2993CAFD003AA570 /* PermissionsController.swift */; };
 		84A8B8912993D3AB003AA570 /* PermissionsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A8B8902993D3AB003AA570 /* PermissionsMiddleware.swift */; };
 		84AF64BC287C34320012A503 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84AF64BB287C34320012A503 /* WebRTC */; };
@@ -261,7 +264,6 @@
 		84B57D33297F278500E4E709 /* MicrophoneChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D32297F278500E4E709 /* MicrophoneChecker.swift */; };
 		84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D36297F406400E4E709 /* MicrophoneCheckView.swift */; };
 		84B57D39297FFF8300E4E709 /* PreJoiningView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D38297FFF8300E4E709 /* PreJoiningView_iOS13.swift */; };
-		84B57DA92981655A00E4E709 /* AnyCodable in Frameworks */ = {isa = PBXBuildFile; productRef = 84B57DA82981655A00E4E709 /* AnyCodable */; };
 		84B57E1729817A5900E4E709 /* CoordinatorClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57E1629817A5900E4E709 /* CoordinatorClient.swift */; };
 		84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9A56C29112F39004DE31A /* EndpointConfig.swift */; };
 		84B9A58F29140D3D004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A58E29140D3D004DE31A /* Nuke */; };
@@ -657,6 +659,9 @@
 		84A881E7299BB2DC00EA22ED /* CallCancelled.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallCancelled.swift; sourceTree = "<group>"; };
 		84A881E8299BB2DC00EA22ED /* CallCreated.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallCreated.swift; sourceTree = "<group>"; };
 		84A881E9299BB2DC00EA22ED /* BroadcastSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BroadcastSettings.swift; sourceTree = "<group>"; };
+		84A881FB299E476000EA22ED /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
+		84A881FD299E478D00EA22ED /* AnyDecodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyDecodable.swift; sourceTree = "<group>"; };
+		84A881FF299E484800EA22ED /* AnyEncodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyEncodable.swift; sourceTree = "<group>"; };
 		84A8B88E2993CAFD003AA570 /* PermissionsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsController.swift; sourceTree = "<group>"; };
 		84A8B8902993D3AB003AA570 /* PermissionsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PermissionsMiddleware.swift; sourceTree = "<group>"; };
 		84AF64D1287C78E70012A503 /* User.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
@@ -754,7 +759,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
-				84B57DA92981655A00E4E709 /* AnyCodable in Frameworks */,
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1402,6 +1406,16 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		84A881FA299E474B00EA22ED /* AnyCodable */ = {
+			isa = PBXGroup;
+			children = (
+				84A881FB299E476000EA22ED /* AnyCodable.swift */,
+				84A881FD299E478D00EA22ED /* AnyDecodable.swift */,
+				84A881FF299E484800EA22ED /* AnyEncodable.swift */,
+			);
+			path = AnyCodable;
+			sourceTree = "<group>";
+		};
 		84A8B79E29927830003AA570 /* generated */ = {
 			isa = PBXGroup;
 			children = (
@@ -1440,6 +1454,7 @@
 		84B57D3A2981645900E4E709 /* OpenApi */ = {
 			isa = PBXGroup;
 			children = (
+				84A881FA299E474B00EA22ED /* AnyCodable */,
 				84A8B79E29927830003AA570 /* generated */,
 				84B57E1629817A5900E4E709 /* CoordinatorClient.swift */,
 				849FD33B2982D4870032B914 /* CoordinatorRequests.swift */,
@@ -1735,7 +1750,6 @@
 			packageProductDependencies = (
 				84AF64BB287C34320012A503 /* WebRTC */,
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
-				84B57DA82981655A00E4E709 /* AnyCodable */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -1907,7 +1921,6 @@
 				8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */,
 				8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
-				84B57DA72981655900E4E709 /* XCRemoteSwiftPackageReference "AnyCodable" */,
 				82392D622993CD4700941435 /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
@@ -2180,7 +2193,9 @@
 				84A7E1862883632100526C98 /* ConnectionStatus.swift in Sources */,
 				84A881B7299BB2AD00EA22ED /* GeofenceSettings.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
+				84A881FE299E478D00EA22ED /* AnyDecodable.swift in Sources */,
 				84A881D8299BB2AD00EA22ED /* VideoSettings.swift in Sources */,
+				84A881FC299E476000EA22ED /* AnyCodable.swift in Sources */,
 				84A881DE299BB2AD00EA22ED /* JoinCallRequest.swift in Sources */,
 				84A737D728F4716E001A6769 /* call.pb.swift in Sources */,
 				848EDB8D29940DA8008A65E5 /* CallCapabilities.swift in Sources */,
@@ -2207,6 +2222,7 @@
 				84A8B88F2993CAFD003AA570 /* PermissionsController.swift in Sources */,
 				84A881C4299BB2AD00EA22ED /* DatacenterResponse.swift in Sources */,
 				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
+				84A88200299E484800EA22ED /* AnyEncodable.swift in Sources */,
 				84A881EA299BB2DC00EA22ED /* CallPermissionsUpdated.swift in Sources */,
 				84A881DC299BB2AD00EA22ED /* MemberResponse.swift in Sources */,
 				84A881C3299BB2AD00EA22ED /* CallSettingsRequest.swift in Sources */,
@@ -3241,14 +3257,6 @@
 				version = 104.5112.6;
 			};
 		};
-		84B57DA72981655900E4E709 /* XCRemoteSwiftPackageReference "AnyCodable" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/Flight-School/AnyCodable";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 0.6.7;
-			};
-		};
 		84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/apple/swift-protobuf.git";
@@ -3299,11 +3307,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
 			productName = WebRTC;
-		};
-		84B57DA82981655A00E4E709 /* AnyCodable */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 84B57DA72981655900E4E709 /* XCRemoteSwiftPackageReference "AnyCodable" */;
-			productName = AnyCodable;
 		};
 		84B9A58E29140D3D004DE31A /* Nuke */ = {
 			isa = XCSwiftPackageProductDependency;
