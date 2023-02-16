@@ -16,7 +16,7 @@ The StreamVideo product consists of three separate SDKs:
 The low-level client is used as a dependency in the UI frameworks, and can also be used standalone if you plan to build your own UI. The UI SDKs depend on the low-level client.
 
 :::note
-For more info about the architecture, go to our [Architecture Overview](./architecture.md).
+For more info about the architecture, go to our [Architecture Overview](./architecture-overview.md).
 :::
 
 ## Getting started
