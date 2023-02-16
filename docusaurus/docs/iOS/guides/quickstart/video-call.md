@@ -18,7 +18,7 @@ Alright, let's get started. If you want to see a fully fledged example, check ou
 
 ### Your First App with StreamVideo
 
-Before starting, make sure you have installed StreamVideo as explained in the [Installation](./integration.md) section.
+Before starting, make sure you have installed StreamVideo as explained in the [Installation](../../basics/install.md) section.
 
 ### Setting up the StreamVideo object
 
