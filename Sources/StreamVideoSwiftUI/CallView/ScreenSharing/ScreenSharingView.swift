@@ -20,6 +20,7 @@ public struct ScreenSharingView: View {
                     .foregroundColor(.white)
                     .padding()
                     .padding(.top, 40)
+                    .accessibility(identifier: "presentingLabel")
             }
 
             if viewModel.hideUIElements {
