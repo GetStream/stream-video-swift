@@ -27,13 +27,12 @@ let package = Package(
     dependencies: [
         .package(name: "WebRTC", url: "https://github.com/webrtc-sdk/Specs.git", .exact("104.5112.6")),
         .package(url: "https://github.com/kean/Nuke.git", .exact("11.3.1")),
-        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0"),
-        .package(url: "https://github.com/Flight-School/AnyCodable.git", from: "0.6.7")
+        .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0")
     ],
     targets: [
         .target(
             name: "StreamVideo",
-            dependencies: ["WebRTC", .product(name: "SwiftProtobuf", package: "swift-protobuf"), "AnyCodable"]
+            dependencies: ["WebRTC", .product(name: "SwiftProtobuf", package: "swift-protobuf")]
         ),
         .target(
             name: "StreamVideoSwiftUI",
