@@ -86,7 +86,8 @@ open class CallViewModel: ObservableObject {
     
     private var ringingSupported: Bool = false
     
-    public init() {
+    public init(listenToRingingEvents: Bool = false) {
+        ringingSupported = listenToRingingEvents
         if !streamVideo.videoConfig.videoEnabled {
             callSettings = CallSettings(speakerOn: false)
         }

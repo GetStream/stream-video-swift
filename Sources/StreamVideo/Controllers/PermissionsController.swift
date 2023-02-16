@@ -49,8 +49,7 @@ public class PermissionsController {
         callType: String
     ) async throws {
         guard currentUserCanRequestPermissions(permissions) else {
-            // TODO: throw correct error.
-            throw ClientError.Unexpected()
+            throw ClientError.MissingPermissions()
         }
         let request = RequestPermissionRequest(
             permissions: permissions.map(\.rawValue)
@@ -112,8 +111,7 @@ public class PermissionsController {
     ) async throws {
         if !currentUserCanModifyPermissions(granted.map(\.rawValue), for: userId)
             || !currentUserCanModifyPermissions(revoked.map(\.rawValue), for: userId) {
-            // TODO: proper error.
-            throw ClientError.Unexpected()
+            throw ClientError.MissingPermissions()
         }
         let updatePermissionsRequest = UpdateUserPermissionsRequest(
             grantPermissions: granted.map(\.rawValue),

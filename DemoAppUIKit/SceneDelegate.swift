@@ -32,7 +32,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func login(_ user: UserCredentials) {
         let streamVideo = StreamVideo(
-            apiKey: "us83cfwuhy8n",
+            apiKey: "w6yaq5388uym",
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(),
@@ -43,23 +43,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
     }
 
-}
-
-//TODO: remove this.
-enum ApiKeyConfig {
-    case frankfurt
-    case oregon
-}
-
-extension ApiKeyConfig {
-    
-    var apiKey: String {
-        switch self {
-        case .frankfurt:
-            return "w6yaq5388uym"
-        case .oregon:
-            return "554fuj7wzx4r"
-        }
-    }
-    
 }
