@@ -15,9 +15,7 @@ struct StreamVideoSwiftUIApp: App {
     @State var streamVideoUI: StreamVideoUI?
     
     @ObservedObject var appState = AppState.shared
-    
-    private let config: ApiKeyConfig = .frankfurt
-        
+            
     init() {
         checkLoggedInUser()
         LogConfig.level = .debug
@@ -58,7 +56,7 @@ struct StreamVideoSwiftUIApp: App {
     
     private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
         let streamVideo = StreamVideo(
-            apiKey: config.apiKey,
+            apiKey: "w6yaq5388uym",
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(),
@@ -89,24 +87,6 @@ struct StreamVideoSwiftUIApp: App {
             options.enableAppHangTracking = true
         }
     #endif
-    }
-    
-}
-
-enum ApiKeyConfig {
-    case frankfurt
-    case oregon
-}
-
-extension ApiKeyConfig {
-    
-    var apiKey: String {
-        switch self {
-        case .frankfurt:
-            return "w6yaq5388uym"
-        case .oregon:
-            return "554fuj7wzx4r"
-        }
     }
     
 }
