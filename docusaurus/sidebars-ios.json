@@ -1,20 +1,52 @@
 {
   "docs": [
     {
+      "Tutorial": ["tutorial/tutorial"],
       "Basics": [
-        "basics/tutorial",
-      	"basics/quick-start",
-      	"basics/integration",
+        "basics/overview",
+        "basics/install",
+        "basics/authentication",
         "basics/architecture-overview",
-        "basics/authentication"
+        "basics/swiftui-vs-uikit",
+        "basics/ui",
+        "basics/release-notes"
+      ],
+      "Quickstart": [
+        "quickstart/video-call",
+        "quickstart/audio-room",
+        "quickstart/livestream"
       ],
       "Client": [
+        "client/authentication-users",
+        "client/joining-leaving-calls",
+        "client/call-types",
+        "client/mic-camera-setup",
+        "client/audio-out",
         "client/call-viewmodel",
-      	"client/call-lifecycle",
-      	"client/call-events",
-      	"client/call-state"
+        "client/call-lifecycle",
+        "client/call-events",
+        "client/call-state",
+        "client/sdk-size-impact"
       ],
-      "UI": [
+      "Features": [
+        "features/screensharing",
+        "features/recording",
+        "features/chat-integration",
+        "features/push-ringing",
+        "features/interrupt-handling",
+        "features/webhooks-sqs",
+        "features/custom-data",
+        "features/custom-events",
+        "features/custom-filters",
+        "features/GDPR",
+        "features/moderation",
+        "features/permissions",
+        "features/user-experience",
+        "features/callkit-integration",
+        "features/deep-linking",
+        "features/background-modes"
+      ],
+      "UI Components": [
         "ui/ui-overview",
         "ui/customizing-views",
         "ui/view-slots",
@@ -23,12 +55,16 @@
         "ui/text-localization",
         "ui/injecting-dependencies"
       ],
-      "Guides": [
-        "guides/callkit-integration",
-        "guides/deep-linking",
-        "guides/chat-integration",
-        "guides/custom-filters"
+      "UI Cookbook": [
+        "cookbook/introduction",
+        "cookbook/preview-screen",
+        "cookbook/network-quality",
+        "cookbook/video-card",
+        "cookbook/video-layout",
+        "cookbook/avatar",
+        "cookbook/changing-camera",
+        "cookbook/audio-levels"
       ]
-    }    
+    }
   ]
 }
