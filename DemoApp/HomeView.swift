@@ -43,6 +43,7 @@ struct HomeView: View {
                         LazyImage(url: streamVideo.user.imageURL)
                             .frame(width: imageSize, height: imageSize)
                             .clipShape(Circle())
+                            .accessibilityIdentifier("userAvatar")
                     }
                     .padding()
 
@@ -62,6 +63,7 @@ struct HomeView: View {
             TextField("Insert a call id", text: $callId)
                 .textFieldStyle(.roundedBorder)
                 .padding()
+                .accessibilityIdentifier("callId")
             
             if callAction == .startCall {
                 startCallView
@@ -72,6 +74,7 @@ struct HomeView: View {
                 } label: {
                     Text("Join a call")
                         .padding()
+                        .accessibilityIdentifier("joinCall")
                 }
                 .foregroundColor(Color.white)
                 .background(makeCallEnabled ? Color.gray : Color.blue)
@@ -167,6 +170,7 @@ struct HomeView: View {
             } label: {
                 Text("Start a call")
                     .padding()
+                    .accessibilityIdentifier("startCall")
             }
             .foregroundColor(Color.white)
             .background(makeCallEnabled ? Color.gray : Color.blue)
