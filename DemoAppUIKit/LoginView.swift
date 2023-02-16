@@ -28,6 +28,7 @@ struct LoginView: View {
                     viewModel.login(user: user, completion: completion)
                 } label: {
                     Text(user.userInfo.name)
+                        .accessibility(identifier: "userName")
                 }
                 .padding(.all, 8)
             }

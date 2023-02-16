@@ -81,7 +81,9 @@ docusaurus/.env
 reports/
 .scannerwork/
 push_payload.json
-sinatra_log.txt
+sinatra-log.txt
+video-buddy-log.txt
+video-buddy-session.json
 
 # Ignore Products folder
 Products/
