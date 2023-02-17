@@ -93,9 +93,13 @@ final class CallCoordinatorController: @unchecked Sendable {
     func sendEvent(
         type: EventType,
         callId: String,
-        callType: CallType
+        callType: CallType,
+        customData: [String: AnyCodable]? = nil
     ) async throws {
-        let sendEventRequest = SendEventRequest(eventType: type.rawValue)
+        let sendEventRequest = SendEventRequest(
+            custom: customData,
+            eventType: type.rawValue
+        )
         let request = EventRequest(
             id: callId,
             type: callType.name,

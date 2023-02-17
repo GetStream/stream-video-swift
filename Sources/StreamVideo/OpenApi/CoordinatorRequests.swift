@@ -54,4 +54,23 @@ struct HealthCheck: HealthCheckEvent, Codable {
     let connection_id: String
 }
 
+public struct CustomEventRequest {
+    public let callId: String
+    public let callType: CallType
+    public let type: EventType
+    public let extraData: [String: RawJSON]
+    
+    public init(
+        callId: String,
+        callType: CallType,
+        type: EventType,
+        extraData: [String: RawJSON]
+    ) {
+        self.callId = callId
+        self.callType = callType
+        self.type = type
+        self.extraData = extraData
+    }
+}
+
 extension DatacenterResponse: @unchecked Sendable {}
