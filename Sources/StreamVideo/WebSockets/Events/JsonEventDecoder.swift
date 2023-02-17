@@ -62,7 +62,12 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .permissionsUpdated:
             return try decoder.decode(CallPermissionsUpdated.self, from: data)
         default:
-            throw ClientError.UnsupportedEventType()
+            do {
+                // Try to decode a custom event.
+                return try decoder.decode(Custom.self, from: data)
+            } catch {
+                throw ClientError.UnsupportedEventType()
+            }
         }
     }
 }
@@ -74,6 +79,7 @@ extension CallAccepted: Event {}
 extension CallEnded: Event {}
 extension CallPermissionRequest: Event {}
 extension CallPermissionsUpdated: Event {}
+extension Custom: Event {}
 
 class JsonEvent: Decodable {
     let type: EventType
