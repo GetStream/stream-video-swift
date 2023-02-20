@@ -12,7 +12,7 @@ internal struct MemberResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of creation */
     internal var createdAt: Date
     /** Custom member response data */
-    internal var custom: [String: AnyCodable]?
+    internal var custom: [String: AnyCodable]
     /** Date/time of deletion */
     internal var deletedAt: Date?
     internal var duration: String

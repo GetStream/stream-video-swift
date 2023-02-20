@@ -98,7 +98,7 @@ final class CallCoordinatorController: @unchecked Sendable {
     ) async throws {
         let sendEventRequest = SendEventRequest(
             custom: customData,
-            eventType: type.rawValue
+            type: type.rawValue
         )
         let request = EventRequest(
             id: callId,

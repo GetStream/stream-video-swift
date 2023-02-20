@@ -6,8 +6,10 @@ import StreamVideo
 import SwiftUI
 import WebRTC
 
-struct ParticipantsGridView: View {
+@MainActor
+struct ParticipantsGridView<Factory: ViewFactory>: View {
     
+    var viewFactory: Factory
     var participants: [CallParticipant]
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
@@ -36,14 +38,18 @@ struct ParticipantsGridView: View {
     
     private var participantsContent: some View {
         ForEach(participants) { participant in
-            VideoCallParticipantView(
+            viewFactory.makeVideoParticipantView(
                 participant: participant,
                 availableSize: size,
                 onViewUpdate: onViewUpdate
             )
-            .adjustVideoFrame(to: size.width, ratio: 0.3)
-            .overlay(
-                AudioIndicatorView(participant: participant)
+            .modifier(
+                viewFactory.makeVideoCallParticipantModifier(
+                    participant: participant,
+                    participantCount: participants.count,
+                    availableSize: size,
+                    ratio: 0.3
+                )
             )
             .onAppear {
                 log.debug("Participant \(participant.name) is visible")
