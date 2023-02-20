@@ -26,7 +26,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the incoming call slot.
     func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> IncomingCallViewType
     
-    associatedtype ParticipantsViewType: View = VideoParticipantsView
+    associatedtype ParticipantsViewType: View = VideoParticipantsView<Self>
     /// Creates the video participants view, shown during a call.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
@@ -40,6 +40,21 @@ public protocol ViewFactory: AnyObject {
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
+    
+    associatedtype ParticipantViewType: View = VideoCallParticipantView
+    func makeVideoParticipantView(
+        participant: CallParticipant,
+        availableSize: CGSize,
+        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    ) -> ParticipantViewType
+    
+    associatedtype ParticipantViewModifierType: ViewModifier = VideoCallParticipantModifier
+    func makeVideoCallParticipantModifier(
+        participant: CallParticipant,
+        participantCount: Int,
+        availableSize: CGSize,
+        ratio: CGFloat
+    ) -> ParticipantViewModifierType
     
     associatedtype CallViewType: View = CallView<Self>
     /// Creates the call view, shown when a call is in progress.
@@ -116,10 +131,37 @@ extension ViewFactory {
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
+            viewFactory: self,
             viewModel: viewModel,
             availableSize: availableSize,
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
+        )
+    }
+    
+    public func makeVideoParticipantView(
+        participant: CallParticipant,
+        availableSize: CGSize,
+        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    ) -> some View {
+        VideoCallParticipantView(
+            participant: participant,
+            availableSize: availableSize,
+            onViewUpdate: onViewUpdate
+        )
+    }
+    
+    public func makeVideoCallParticipantModifier(
+        participant: CallParticipant,
+        participantCount: Int,
+        availableSize: CGSize,
+        ratio: CGFloat
+    ) -> some ViewModifier {
+        VideoCallParticipantModifier(
+            participant: participant,
+            participantCount: participantCount,
+            availableSize: availableSize,
+            ratio: ratio
         )
     }
     

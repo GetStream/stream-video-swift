@@ -10,16 +10,16 @@ import AnyCodable
 internal struct SendEventRequest: Codable, JSONEncodable, Hashable {
 
     internal var custom: [String: AnyCodable]?
-    internal var eventType: String
+    internal var type: String
 
-    internal init(custom: [String: AnyCodable]? = nil, eventType: String) {
+    internal init(custom: [String: AnyCodable]? = nil, type: String) {
         self.custom = custom
-        self.eventType = eventType
+        self.type = type
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
-        case eventType = "event_type"
+        case type
     }
 
     // Encodable protocol methods
@@ -27,6 +27,6 @@ internal struct SendEventRequest: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
-        try container.encode(eventType, forKey: .eventType)
+        try container.encode(type, forKey: .type)
     }
 }
