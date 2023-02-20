@@ -1,8 +1,8 @@
 {
   "docs": [
     {
-      "Tutorial": ["tutorial/tutorial"],
       "Basics": [
+        "basics/tutorial",
         "basics/overview",
         "basics/install",
         "basics/architecture-overview",
@@ -12,12 +12,14 @@
       ],
       "Guides": [
         "guides/authentication",
+        "guides/quickstart/audio-room",
         "guides/chat-integration",
         "guides/call-lifecycle",
         "guides/authentication-users",
         "guides/joining-leaving-calls",
         "guides/call-types",
         "guides/mic-camera-setup",
+        "guides/quickstart/livestream",
         "guides/audio-out",
         "guides/call-viewmodel",
         "guides/call-events",
@@ -25,13 +27,7 @@
         "guides/sdk-size-impact",
         "guides/deep-linking",
         "guides/user-experience",
-        {
-          "Quickstart": [
-            "guides/quickstart/video-call",
-            "guides/quickstart/audio-room",
-            "guides/quickstart/livestream"
-          ]
-        }
+        "guides/quickstart/video-call"
       ],
       "Video UI Components": [
         "ui/ui-overview",
@@ -41,6 +37,12 @@
         "ui/ui-kit-customizations",
         "ui/text-localization",
         "ui/injecting-dependencies"
+      ],
+      "Client": [
+        "client/overview",
+        "client/stream-video",
+        "client/call-viewmodel",
+        "client/call-controller"
       ],
       "Advanced Guides": [
         "advanced/screensharing",
