@@ -243,7 +243,7 @@ struct ContentView: View {
 }
 ```
 
-For the full list of supported view slots that can be swapped, please refer to this [page](./view-slots.md).
+For the full list of supported view slots that can be swapped, please refer to this [page](../../ui/view-slots.md).
 
 ### Permissions
 

@@ -27,7 +27,7 @@ In this guide you will take a video-based application and add chat functionality
 // TODO: add sample video
 
 :::info
-The starting point for this guide is a functioning video calling application. If you don't have one and want to follow along, feel free to do our [step-by-step tutorial](../tutorial/tutorial.md) first.
+The starting point for this guide is a functioning video calling application. If you don't have one and want to follow along, feel free to do our [step-by-step tutorial](../../basics/tutorial) first.
 :::
 
 The simplest way to add chat to an existing video calling app is to extend the call controls with an additional chat icon. To do this, implement the `makeCallControlsView` in your custom implementation of the `ViewFactory` from the Stream Video SDK (in our case it's called `VideoWithChatViewFactory`, see [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/VideoWithChatViewFactory.swift)):
