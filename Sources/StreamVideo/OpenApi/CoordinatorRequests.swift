@@ -34,9 +34,10 @@ struct ConnectRequestData: Codable {
 
 struct UserDetailsPayload: Codable {
     let id: String
-    let name: String
-    let image: String?
-    let custom: [String: AnyCodable]
+    // TODO: revert this when fixed on the backend.
+//    let name: String
+//    let image: String?
+    let Custom: [String: AnyCodable]
 }
 
 struct RequestPermissionsRequestData {
@@ -77,6 +78,28 @@ public struct CustomEventRequest {
         self.callType = callType
         self.type = type
         self.extraData = extraData
+    }
+}
+
+public struct MuteRequest {
+    public let userIds: [String]
+    public let muteAllUsers: Bool
+    public let audio: Bool
+    public let video: Bool
+    public let screenshare: Bool
+    
+    public init(
+        userIds: [String],
+        muteAllUsers: Bool,
+        audio: Bool,
+        video: Bool,
+        screenshare: Bool
+    ) {
+        self.userIds = userIds
+        self.muteAllUsers = muteAllUsers
+        self.audio = audio
+        self.video = video
+        self.screenshare = screenshare
     }
 }
 

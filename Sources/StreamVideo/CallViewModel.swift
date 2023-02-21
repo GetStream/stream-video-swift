@@ -43,6 +43,7 @@ open class CallViewModel: ObservableObject {
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkForScreensharingSession()
+            checkCallSettingsForCurrentUser()
         }
     }
     
@@ -407,6 +408,20 @@ open class CallViewModel: ObservableObject {
             }
         }
         screensharingSession = nil
+    }
+    
+    private func checkCallSettingsForCurrentUser() {
+        guard let localParticipant = localParticipant, callingState == .inCall else { return }
+        if localParticipant.hasAudio != callSettings.audioOn
+            || localParticipant.hasVideo != callSettings.videoOn {
+            let previous = callSettings
+            callSettings = CallSettings(
+                audioOn: localParticipant.hasAudio,
+                videoOn: localParticipant.hasVideo,
+                speakerOn: previous.speakerOn,
+                cameraPosition: previous.cameraPosition
+            )
+        }
     }
 }
 
