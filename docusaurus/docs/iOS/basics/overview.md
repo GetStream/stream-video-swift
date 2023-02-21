@@ -25,7 +25,7 @@ If you want to know where to get started with coding right away, we have a lot o
 
 - [Quick start](quick-start.md): Build your first app with video
 - [Chat Integration](../guides/chat-integration.md): Learn how to integrate chat in your video applications
-- [Custom Video Filters](../guides/custom-filters.md): Enhance video capabilities with custom filters
+- [Custom Video Filters](../advanced/custom-filters.md): Enhance video capabilities with custom filters
 - COMING SOON: Sample Application: See an entire codebase filled with best practices and examples how to integrate video (and chat)
 
 // TODO: Add more resources here how to get started
@@ -47,7 +47,7 @@ We know that everyone consumes documentation differently, which is why we want t
 
 - Go through it sequentially and look at the next pages (heading to [Installation](./install.md) next) to get a thorough introduction that covers the most important topics and gets you up to speed in the quickest way.
 - Search for a specific problem using the search bar at the top, getting guided there directly.
-- Explore our guides where we cover the more advanced topics that you might encounter, for example [CallKit integration](../guides/callkit-integration.md), [Custom Filters](../guides/custom-filters.md), and [Deep Linking](../guides/deep-linking.md).
+- Explore our guides where we cover the more advanced topics that you might encounter, for example [CallKit integration](../advanced/callkit-integration.md), [Custom Filters](../advanced/custom-filters.md), and [Deep Linking](../guides/deep-linking.md).
 
 :::tip
 Did you know that you can also use the keyboard command _CMD + K_ to open up the search bar. Try it now and feel like a pro.
