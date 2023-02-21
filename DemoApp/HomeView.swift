@@ -154,9 +154,15 @@ struct HomeView: View {
             .listStyle(PlainListStyle())
             
             Picker("Call flow", selection: $callFlow) {
-                Text(CallFlow.joinImmediately.rawValue).tag(CallFlow.joinImmediately)
-                Text(CallFlow.ringEvents.rawValue).tag(CallFlow.ringEvents)
-                Text(CallFlow.lobby.rawValue).tag(CallFlow.lobby)
+                Text(CallFlow.joinImmediately.rawValue)
+                    .tag(CallFlow.joinImmediately)
+                    .accessibility(identifier: CallFlow.joinImmediately.rawValue)
+                Text(CallFlow.ringEvents.rawValue)
+                    .tag(CallFlow.ringEvents)
+                    .accessibility(identifier: CallFlow.ringEvents.rawValue)
+                Text(CallFlow.lobby.rawValue)
+                    .tag(CallFlow.lobby)
+                    .accessibility(identifier: CallFlow.lobby.rawValue)
             }
             .pickerStyle(.segmented)
                         

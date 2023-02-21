@@ -389,6 +389,7 @@ public struct VideoCallParticipantView: View {
             .frame(maxWidth: availableSize.width)
             .opacity(showVideo ? 0 : 1)
         )
+        .accessibility(identifier: showVideo ? "CallParticipantVideoView" : "CallParticipantImageView")
     }
     
     private var showVideo: Bool {
@@ -410,10 +411,12 @@ struct AudioIndicatorView: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
                 .font(fonts.caption1)
+                .accessibility(identifier: "participantName")
                         
             (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
                 .foregroundColor(.white)
                 .padding(.all, 4)
+                .accessibility(identifier: participant.hasAudio ? "participantMicIsOn" : "participantMicIsOff")
         }
         .padding(.all, 2)
         .padding(.horizontal, 4)

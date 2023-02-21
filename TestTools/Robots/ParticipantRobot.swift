@@ -5,10 +5,10 @@
 import XCTest
 
 public class ParticipantRobot {
-    private let videoBuddyUrl = URL(string: "http://localhost:5678/stream-video-buddy")!
+    private let videoBuddyUrlString = "http://localhost:5678/stream-video-buddy"
     private var screenSharingDuration: Int? = nil
     private var callRecordingDuration: Int? = nil
-    private var callDuration: Int? = 15
+    private var callDuration: Double? = 10
     private var userCount: Int = 1
     
     public enum Options: String {
@@ -22,6 +22,7 @@ public class ParticipantRobot {
         case shareScreen = "screen-share"
         case recordCall = "record"
         case showWindow = "show-window"
+        case recordSession = "record-session"
     }
     
     private enum Config: String {
@@ -32,28 +33,32 @@ public class ParticipantRobot {
         case callRecordingDuration = "recording-duration"
     }
 
+    @discardableResult
     func setScreenSharingDuration(_ duration: Int) -> Self {
         screenSharingDuration = duration
         return self
     }
     
+    @discardableResult
     func setCallRecordingDuration(_ duration: Int) -> Self {
         callRecordingDuration = duration
         return self
     }
     
-    func setCallDuration(_ duration: Int) -> Self {
+    @discardableResult
+    func setCallDuration(_ duration: Double) -> Self {
         callDuration = duration
         return self
     }
     
+    @discardableResult
     func setUserCount(_ count: Int) -> Self {
         userCount = count
         return self
     }
 
-    func join(
-        callId: String,
+    func joinCall(
+        _ callId: String,
         options: [Options] = [],
         actions: [Actions] = [],
         async: Bool = true
@@ -86,20 +91,17 @@ public class ParticipantRobot {
     }
        
     private func invokeBuddy(with params: [String: Any], async: Bool) {
-        var request = URLRequest(url: videoBuddyUrl)
+        guard let apiUrl = URL(string: "\(videoBuddyUrlString)/?async=\(async)") else { return }
+        var request = URLRequest(url: apiUrl)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: params, options: [])
         
-        if async {
-            URLSession.shared.dataTask(with: request).resume()
-        } else {
-            let semaphore = DispatchSemaphore(value: 0)
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                semaphore.signal()
-            }
-            task.resume()
-            semaphore.wait()
+        let semaphore = DispatchSemaphore(value: 0)
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            semaphore.signal()
         }
+        task.resume()
+        semaphore.wait()
     }
 }

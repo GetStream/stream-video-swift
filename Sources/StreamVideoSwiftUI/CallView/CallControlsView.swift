@@ -85,6 +85,8 @@ public struct VideoIconView: View {
                 )
             }
         )
+        .accessibility(identifier: "cameraToggle")
+        .accessibility(value: viewModel.callSettings.videoOn ? Text("1") : Text("0"))
     }
 }
 
@@ -113,6 +115,8 @@ public struct MicrophoneIconView: View {
                 )
             }
         )
+        .accessibility(identifier: "microphoneToggle")
+        .accessibility(value: viewModel.callSettings.audioOn ? Text("1") : Text("0"))
     }
 }
 
@@ -141,6 +145,8 @@ public struct ToggleCameraIconView: View {
                 )
             }
         )
+        .accessibility(identifier: "cameraPositionToggle")
+        .accessibility(value: viewModel.callSettings.cameraPosition == .front ? Text("1") : Text("0"))
     }
 }
 
@@ -167,6 +173,7 @@ public struct HangUpIconView: View {
                     size: size
                 )
         }
+        .accessibility(identifier: "hangUp")
     }
 }
 

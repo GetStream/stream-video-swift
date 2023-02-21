@@ -13,6 +13,7 @@ class StreamTestCase: XCTestCase {
     var participantRobot = ParticipantRobot()
     var terminalRobot = TerminalRobot()
     var recordVideo = false
+    let callId = randomCallId
 
     override func setUpWithError() throws {
         try super.setUpWithError()
@@ -35,7 +36,7 @@ class StreamTestCase: XCTestCase {
 
 extension StreamTestCase {
     
-    func randomCallId() -> String {
+    static var randomCallId: String {
         let uuid = UUID().uuidString.split(separator: "-")
         if let first = uuid.first { return String(first) } else { return "Test" }
     }

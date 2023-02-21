@@ -1,9 +1,9 @@
 name: Cron Checks
 
 on:
-  schedule:
-    # Runs "At 01:00 every night"
-    - cron: '0 1 * * *'
+  # schedule:
+  #   # Runs "At 01:00 every night"
+  #   - cron: '0 1 * * *'
 
   workflow_dispatch:
 
@@ -15,6 +15,70 @@ env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
 
 jobs:
+  build-and-test-e2e-debug:
+    name: Test E2E UI (Debug)
+    strategy:
+      matrix:
+        include:
+          - ios: latest
+            device: "iPad Air (5th generation)"
+          - ios: 15.4
+            device: "iPhone 11"
+          - ios: 14.5
+            device: "iPhone SE (2nd generation)"
+      fail-fast: false
+    runs-on: macos-12
+    env:
+      GITHUB_EVENT: ${{ toJson(github.event) }}
+      GITHUB_PR_NUM: ${{ github.event.number }}
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+      STREAM_DEMO_APP_SECRET: ${{ secrets.STREAM_DEMO_APP_SECRET }}
+      IOS_SIMULATOR_DEVICE: "${{ matrix.device }} (${{ matrix.ios }})"
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - uses: ./.github/actions/bootstrap
+      env:
+        INSTALL_ALLURE: true
+        INSTALL_XCPARSE: true
+    - name: Setup iOS ${{ matrix.ios }} Runtime
+      if: ${{ matrix.ios != 'latest' }}
+      timeout-minutes: 60
+      run: sudo xcodes runtimes install 'iOS ${{ matrix.ios }}'
+    - name: Launch Allure TestOps
+      run: bundle exec fastlane allure_launch cron:true
+    - name: Run UI Tests (Debug)
+      run: bundle exec fastlane test_e2e cron:true device:"${{ matrix.device }}" ios:"${{ matrix.ios }}"
+      timeout-minutes: 90
+    - name: Allure TestOps Upload
+      if: success() || failure()
+      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+    - name: Allure TestOps Launch Removal
+      if: cancelled()
+      run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+    - uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "You shall not pass!"
+        job_name: "${{ github.workflow }}: ${{ github.job }}"
+        fields: message,commit,author,action,workflow,job,took
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      if: failure()
+    - name: Parse xcresult
+      if: failure()
+      run: xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: Test Data
+        path: |
+          fastlane/recordings
+          fastlane/sinatra-log.txt
+          fastlane/video-buddy-log.txt
+          fastlane/test_output/logs/*/Diagnostics/SwiftUIDemoAppUITests-*/*/*.txt
+
   build-and-test-debug:
     name: Test LLC (Debug)
     strategy:

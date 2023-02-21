@@ -30,6 +30,7 @@ public struct CallView<Factory: ViewFactory>: View {
                         if viewModel.localVideoPrimary {
                             localVideoView
                                 .edgesIgnoringSafeArea(.top)
+                                .accessibility(identifier: "localVideoView")
                         } else if let screensharing = viewModel.screensharingSession {
                             viewFactory.makeScreenSharingView(
                                 viewModel: viewModel,
@@ -53,6 +54,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             .foregroundColor(colors.text)
                             .modifier(ShadowViewModifier())
                             .padding()
+                            .accessibility(identifier: "participantEventLabel")
                     }
                 }
                 
@@ -69,6 +71,7 @@ public struct CallView<Factory: ViewFactory>: View {
                                         .foregroundColor(colors.textInverted)
                                         .padding()
                                 }
+                                .accessibility(identifier: "minimizeCallView")
 
                                 Spacer()
                                 Button {
@@ -79,6 +82,7 @@ public struct CallView<Factory: ViewFactory>: View {
                                         .padding(.horizontal, 2)
                                         .foregroundColor(.white)
                                 }
+                                .accessibility(identifier: "participantMenu")
                             }
                         }
                         
@@ -103,6 +107,7 @@ public struct CallView<Factory: ViewFactory>: View {
                         availableSize: reader.size
                     )
                     .opacity(viewModel.hideUIElements ? 0 : 1)
+                    .accessibility(identifier: "trailingTopView")
                 }
             }
         }
@@ -137,6 +142,7 @@ public struct CallView<Factory: ViewFactory>: View {
                         view.add(track: track)
                     }
                 }
+                .accessibility(identifier: "minimizedParticipantView")
             } else {
                 EmptyView()
             }

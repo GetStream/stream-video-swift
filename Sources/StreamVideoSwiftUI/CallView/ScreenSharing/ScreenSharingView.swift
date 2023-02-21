@@ -20,14 +20,14 @@ public struct ScreenSharingView: View {
                     .foregroundColor(.white)
                     .padding()
                     .padding(.top, 40)
-                    .accessibility(identifier: "presentingLabel")
+                    .accessibility(identifier: "participantPresentingLabel")
             }
 
             if viewModel.hideUIElements {
-                screensharingView
+                screensharingView.accessibility(identifier: "screenSharingView")
             } else {
                 ZoomableScrollView {
-                    screensharingView
+                    screensharingView.accessibility(identifier: "screenSharingView")
                 }
             }
             
@@ -45,6 +45,7 @@ public struct ScreenSharingView: View {
                             }
                             .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                             .cornerRadius(8)
+                            .accessibility(identifier: "screenSharingParticipantView")
                         }
                         
                         LocalVideoView(callSettings: viewModel.callSettings) { view in
