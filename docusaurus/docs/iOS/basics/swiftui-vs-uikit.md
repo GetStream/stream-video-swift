@@ -9,7 +9,7 @@ The SDK was developed with SwiftUI as the primary use-case in mind. However, we 
 Find explanations for integrating both of the SDK on this page.
 
 :::info
-You can also have a direct view at the [SwiftUI SDK and the UIKit SDK](https://github.com/GetStream/stream-video-swift) on GitHub and see how to integrate them into your apps [on the next page](./integration.md).
+You can also have a direct view at the [SwiftUI SDK and the UIKit SDK](https://github.com/GetStream/stream-video-swift) on GitHub and see how to integrate them into your apps [on the next page](../guides/chat-integration.md).
 :::
 
 ## SwiftUI SDK
