@@ -94,8 +94,7 @@ class SfuMiddleware: EventMiddleware {
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_Event_ParticipantJoined) async {
         let callParticipants = await state.callParticipants
         let showTrack = (callParticipants.count + 1) < participantsThreshold
-        let enrichedData = await state.enrichedData(for: event.participant.userID)
-        let participant = event.participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
+        let participant = event.participant.toCallParticipant(showTrack: showTrack)
         await state.update(callParticipant: participant)
         let event = ParticipantEvent(
             id: participant.userId,
@@ -108,8 +107,7 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
-        let enrichedData = await state.enrichedData(for: event.participant.userID)
-        let participant = event.participant.toCallParticipant(enrichData: enrichedData)
+        let participant = event.participant.toCallParticipant()
         await state.removeCallParticipant(with: participant.id)
         await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
         let event = ParticipantEvent(
@@ -249,8 +247,7 @@ class SfuMiddleware: EventMiddleware {
         let showTrack = participants.count < participantsThreshold
         var temp = [String: CallParticipant]()
         for participant in participants {
-            let enrichedData = await state.enrichedData(for: participant.userID)
-            let mapped = participant.toCallParticipant(showTrack: showTrack, enrichData: enrichedData)
+            let mapped = participant.toCallParticipant(showTrack: showTrack)
             temp[mapped.id] = mapped
         }
         await state.update(callParticipants: temp)

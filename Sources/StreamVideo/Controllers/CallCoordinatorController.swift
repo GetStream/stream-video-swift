@@ -8,7 +8,6 @@ import WebRTC
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
 final class CallCoordinatorController: @unchecked Sendable {
     
-    let callCoordinatorService: Stream_Video_CallCoordinatorService
     let coordinatorClient: CoordinatorClient
     private(set) var currentCallSettings: CallSettingsInfo?
     private let latencyService: LatencyService
@@ -22,12 +21,6 @@ final class CallCoordinatorController: @unchecked Sendable {
         videoConfig: VideoConfig
     ) {
         latencyService = LatencyService(httpClient: httpClient)
-        callCoordinatorService = Stream_Video_CallCoordinatorService(
-            httpClient: httpClient,
-            apiKey: coordinatorInfo.apiKey,
-            hostname: coordinatorInfo.hostname,
-            token: coordinatorInfo.token
-        )
         coordinatorClient = CoordinatorClient(
             httpClient: httpClient,
             apiKey: coordinatorInfo.apiKey,
@@ -76,18 +69,7 @@ final class CallCoordinatorController: @unchecked Sendable {
     }
     
     func makeVoipNotificationsController() -> VoipNotificationsController {
-        VoipNotificationsController(callCoordinatorService: callCoordinatorService)
-    }
-    
-    func sendEvent(
-        type: Stream_Video_UserEventType,
-        callId: String,
-        callType: CallType
-    ) async throws {
-        var request = Stream_Video_SendEventRequest()
-        request.callCid = "\(callType.name):\(callId)"
-        request.eventType = type
-        _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
+        VoipNotificationsController(coordinatorClient: coordinatorClient)
     }
     
     func sendEvent(
@@ -100,7 +82,7 @@ final class CallCoordinatorController: @unchecked Sendable {
             custom: customData,
             type: type.rawValue
         )
-        let request = EventRequest(
+        let request = EventRequestData(
             id: callId,
             type: callType.name,
             sendEventRequest: sendEventRequest
@@ -109,42 +91,7 @@ final class CallCoordinatorController: @unchecked Sendable {
     }
     
     func addMembersToCall(with cid: String, memberIds: [String]) async throws {
-        var request = Stream_Video_UpsertCallMembersRequest()
-        request.callCid = cid
-        request.members = memberIds.map { id in
-            var memberInput = Stream_Video_MemberInput()
-            memberInput.userID = id
-            memberInput.role = "member"
-            return memberInput
-        }
-        _ = try await callCoordinatorService.upsertCallMembers(upsertCallMembersRequest: request)
-    }
-    
-    func enrichUserData(for id: String) async throws -> EnrichedUserData {
-        var request = Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest()
-        let filter = ["id": ["$in": [id]]]
-        let jsonData = try JSONSerialization.data(withJSONObject: filter, options: .prettyPrinted)
-        request.mqJson = jsonData
-        let response = try await callCoordinatorService.queryUsers(queryUsersRequest: request)
-        guard let member = response.users.first else { return .empty }
-        return EnrichedUserData(imageUrl: URL(string: member.imageURL), name: member.name, role: member.role)
-    }
-    
-    func enrichUserData(for id: String, callId: String, callType: String) async throws -> EnrichedUserData {
-        let filter: [String: AnyCodable] = ["user_id": ["$in": [id]]]
-        let request = QueryMembersRequest(
-            filterConditions: filter,
-            id: callId,
-            type: callType
-        )
-        let response = try await coordinatorClient.queryMembers(with: request)
-        guard let member = response.members.first?.user else { return .empty }
-        let imageURL = member.custom["imageURL"]?.value as? String
-        return EnrichedUserData(
-            imageUrl: URL(string: imageURL ?? ""),
-            name: member.name ?? id,
-            role: member.role
-        )
+        throw ClientError.Unexpected("Not implemented")
     }
 
     // MARK: - private
@@ -178,7 +125,7 @@ final class CallCoordinatorController: @unchecked Sendable {
         type: String,
         participants: [User],
         ring: Bool
-    ) async throws -> Stream_Video_JoinCallResponse {
+    ) async throws -> JoinCallResponse {
         var members = [MemberRequest]()
         for participant in participants {
             let callMemberRequest = MemberRequest(
@@ -209,7 +156,7 @@ final class CallCoordinatorController: @unchecked Sendable {
             members: paginationParamsRequest,
             ring: ring
         )
-        let joinCallRequest = JoinCallRequestDto(
+        let joinCallRequest = JoinCallRequestData(
             id: callId,
             type: type,
             getOrCreateCallRequest: getOrCreateCallRequest
@@ -227,7 +174,7 @@ final class CallCoordinatorController: @unchecked Sendable {
         let getCallEdgeServerRequest = GetCallEdgeServerRequest(
             latencyMeasurements: latencyByEdge
         )
-        let selectEdgeRequest = SelectEdgeServerRequest(
+        let selectEdgeRequest = SelectEdgeServerRequestData(
             id: callId,
             type: type,
             getCallEdgeServerRequest: getCallEdgeServerRequest
@@ -290,32 +237,8 @@ public struct IceServer: Sendable {
     let password: String
 }
 
-extension Stream_Video_ICEServer {
-    func toIceServer() -> IceServer {
-        IceServer(
-            urls: urls,
-            username: username,
-            password: password
-        )
-    }
-}
-
 struct CoordinatorInfo {
     let apiKey: String
     let hostname: String
     let token: String
-}
-
-struct EnrichedUserData {
-    let imageUrl: URL?
-    let name: String
-    let role: String
-}
-
-extension EnrichedUserData {
-    static let empty = EnrichedUserData(
-        imageUrl: nil,
-        name: "",
-        role: "member"
-    )
 }

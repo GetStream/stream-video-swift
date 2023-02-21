@@ -16,7 +16,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
-    private let coordinatorService: Stream_Video_CallCoordinatorService
+    private let coordinatorClient: CoordinatorClient
     private let sessionId: String
     private let callCid: String
     private let type: PeerConnectionType
@@ -37,14 +37,14 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         callCid: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        coordinatorService: Stream_Video_CallCoordinatorService,
+        coordinatorClient: CoordinatorClient,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         videoOptions: VideoOptions,
         reportStats: Bool = false
     ) {
         self.sessionId = sessionId
         self.pc = pc
-        self.coordinatorService = coordinatorService
+        self.coordinatorClient = coordinatorClient
         self.signalService = signalService
         self.type = type
         self.reportStats = reportStats
@@ -239,7 +239,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private func reportCurrentStats() {
         pc.statistics(completionHandler: { [weak self] report in
-            guard let self = self else { return }
             Task {
                 let stats = report.statistics
                 var updated = [String: Any]()
@@ -256,17 +255,21 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                     withJSONObject: updated,
                     options: .prettyPrinted
                 ) else { return }
-                var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
-                request.callCid = self.callCid
-                request.statsJson = jsonData
-                do {
-                    _ = try await self.coordinatorService.reportCallStats(
-                        reportCallStatsRequest: request
-                    )
-                    log.debug("successfully sent stats for \(self.type)")
-                } catch {
-                    log.error("error reporting stats for \(self.type)")
-                }
+                // TODO: implement this.
+                log.debug("Stats still not reported")
+                /*
+                 var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
+                 request.callCid = self.callCid
+                 request.statsJson = jsonData
+                 do {
+                     _ = try await self.coordinatorService.reportCallStats(
+                         reportCallStatsRequest: request
+                     )
+                     log.debug("successfully sent stats for \(self.type)")
+                 } catch {
+                     log.error("error reporting stats for \(self.type)")
+                 }
+                  */
             }
         })
     }

@@ -9,6 +9,7 @@ import Foundation
 public struct CallParticipant: Identifiable, Sendable {
     public var id: String
     public let userId: String
+    // TODO: maybe remove it.
     public let role: String
     public let name: String
     public let profileImageURL: URL?
@@ -323,13 +324,13 @@ extension User {
 
 extension Stream_Video_Sfu_Models_Participant {
     
-    func toCallParticipant(showTrack: Bool = true, enrichData: EnrichedUserData) -> CallParticipant {
+    func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
         CallParticipant(
             id: sessionID,
             userId: userID,
-            role: enrichData.role,
-            name: enrichData.name,
-            profileImageURL: enrichData.imageUrl,
+            role: "", // TODO: should be exposed by the SFU.
+            name: name,
+            profileImageURL: URL(string: image),
             trackLookupPrefix: trackLookupPrefix,
             isOnline: true, // TODO: handle this
             hasVideo: publishedTracks.contains(where: { $0 == .video }),

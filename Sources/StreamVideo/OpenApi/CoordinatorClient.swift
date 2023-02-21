@@ -29,43 +29,50 @@ class CoordinatorClient: @unchecked Sendable {
         self.userId = userId
     }
     
-    func joinCall(with request: JoinCallRequestDto) async throws -> JoinCallResponse {
+    func joinCall(with request: JoinCallRequestData) async throws -> JoinCallResponse {
         try await execute(
             request: request.getOrCreateCallRequest,
             path: "/join_call/\(request.type)/\(request.id)"
         )
     }
     
-    func getCallEdgeServer(with request: SelectEdgeServerRequest) async throws -> GetCallEdgeServerResponse {
+    func getCallEdgeServer(with request: SelectEdgeServerRequestData) async throws -> GetCallEdgeServerResponse {
         try await execute(
             request: request.getCallEdgeServerRequest,
             path: "/call/\(request.type)/\(request.id)/get_edge_server"
         )
     }
     
-    func sendEvent(with request: EventRequest) async throws -> SendEventResponse {
+    func sendEvent(with request: EventRequestData) async throws -> SendEventResponse {
         try await execute(
             request: request.sendEventRequest,
             path: "/call/\(request.type)/\(request.id)/event"
         )
     }
     
-    func endCall(with request: EndCallRequest) async throws -> EndCallResponse {
+    func endCall(with request: EndCallRequestData) async throws -> EndCallResponse {
         let request = try makeRequest(for: "/call/\(request.type)/\(request.id)/mark_ended")
         return try await execute(urlRequest: request)
     }
     
-    func requestPermission(with request: RequestPermissionsRequest) async throws -> RequestPermissionResponse {
+    func requestPermission(with request: RequestPermissionsRequestData) async throws -> RequestPermissionResponse {
         try await execute(
             request: request.requestPermissionRequest,
             path: "/call/\(request.type)/\(request.id)/request_permission"
         )
     }
     
-    func updateUserPermissions(with request: UpdatePermissionsRequest) async throws -> UpdateUserPermissionsResponse {
+    func updateUserPermissions(with request: UpdatePermissionsRequestData) async throws -> UpdateUserPermissionsResponse {
         try await execute(
             request: request.updateUserPermissionsRequest,
             path: "/call/\(request.type)/\(request.id)/user_permissions"
+        )
+    }
+    
+    func muteUsers(with request: MuteUsersRequestData) async throws -> MuteUsersResponse {
+        try await execute(
+            request: request.muteUsersRequest,
+            path: "/call/\(request.type)/\(request.id)/mute_users"
         )
     }
     

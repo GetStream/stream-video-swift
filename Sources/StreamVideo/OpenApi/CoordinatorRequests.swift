@@ -4,30 +4,30 @@
 
 import Foundation
 
-struct JoinCallRequestDto {
+struct JoinCallRequestData {
     let id: String
     let type: String
     let getOrCreateCallRequest: GetOrCreateCallRequest
 }
 
-struct SelectEdgeServerRequest {
+struct SelectEdgeServerRequestData {
     let id: String
     let type: String
     let getCallEdgeServerRequest: GetCallEdgeServerRequest
 }
 
-struct EventRequest {
+struct EventRequestData {
     let id: String
     let type: String
     let sendEventRequest: SendEventRequest
 }
 
-struct EndCallRequest {
+struct EndCallRequestData {
     let id: String
     let type: String
 }
 
-struct ConnectRequest: Codable {
+struct ConnectRequestData: Codable {
     let token: String
     let user_details: UserDetailsPayload
 }
@@ -35,19 +35,26 @@ struct ConnectRequest: Codable {
 struct UserDetailsPayload: Codable {
     let id: String
     let name: String
-    let custom: [String: String]
+    let image: String?
+    let custom: [String: AnyCodable]
 }
 
-struct RequestPermissionsRequest {
+struct RequestPermissionsRequestData {
     let id: String
     let type: String
     let requestPermissionRequest: RequestPermissionRequest
 }
 
-struct UpdatePermissionsRequest {
+struct UpdatePermissionsRequestData {
     let id: String
     let type: String
     let updateUserPermissionsRequest: UpdateUserPermissionsRequest
+}
+
+struct MuteUsersRequestData {
+    let id: String
+    let type: String
+    let muteUsersRequest: MuteUsersRequest
 }
 
 struct HealthCheck: HealthCheckEvent, Codable {

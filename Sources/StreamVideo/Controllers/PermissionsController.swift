@@ -54,7 +54,7 @@ public class PermissionsController {
         let request = RequestPermissionRequest(
             permissions: permissions.map(\.rawValue)
         )
-        let permissionsRequest = RequestPermissionsRequest(
+        let permissionsRequest = RequestPermissionsRequestData(
             id: callId,
             type: callType,
             requestPermissionRequest: request
@@ -118,7 +118,7 @@ public class PermissionsController {
             revokePermissions: revoked.map(\.rawValue),
             userId: userId
         )
-        let request = UpdatePermissionsRequest(
+        let request = UpdatePermissionsRequestData(
             id: callId,
             type: callType,
             updateUserPermissionsRequest: updatePermissionsRequest

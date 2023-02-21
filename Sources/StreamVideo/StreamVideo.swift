@@ -257,26 +257,14 @@ public class StreamVideo {
             let userDetails = UserDetailsPayload(
                 id: self.user.id,
                 name: self.user.name,
-                custom: [
-                    "imageURL": self.user.imageURL?.absoluteString ?? ""
-                ]
+                image: self.user.imageURL?.absoluteString,
+                custom: RawJSON.convert(extraData: self.user.extraData)
             )
-            let connectRequest = ConnectRequest(
+            let connectRequest = ConnectRequestData(
                 token: self.token.rawValue,
                 user_details: userDetails
             )
-            
-            /*
-              //TODO: when it's ready.
-             let userObject = UserObjectRequest(id: self.user.id)
-             let deviceFieldsRequest = DeviceFieldsRequest() //TODO: add stuff
-             let authRequest = VideoWSAuthMessageRequest(
-                 device: deviceFieldsRequest,
-                 token: self.token.rawValue,
-                 userDetails: userObject
-             )
-              */
-            
+
             webSocketClient.engine?.send(jsonMessage: connectRequest)
         }
         
