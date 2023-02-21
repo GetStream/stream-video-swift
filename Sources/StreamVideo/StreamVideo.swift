@@ -256,9 +256,14 @@ public class StreamVideo {
             guard let self = self else { return }
             let userDetails = UserDetailsPayload(
                 id: self.user.id,
-                name: self.user.name,
-                image: self.user.imageURL?.absoluteString,
-                custom: RawJSON.convert(extraData: self.user.extraData)
+                // TODO: revert this when fixed on the backend.
+//                name: self.user.name,
+//                image: self.user.imageURL?.absoluteString,
+//                Custom: RawJSON.convert(extraData: self.user.extraData)
+                Custom: [
+                    "name": AnyCodable(self.user.name),
+                    "image": AnyCodable(self.user.imageURL?.absoluteString)
+                ]
             )
             let connectRequest = ConnectRequestData(
                 token: self.token.rawValue,

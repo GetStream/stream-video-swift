@@ -62,13 +62,10 @@ public class PermissionsController {
         _ = try await coordinatorClient.requestPermission(with: permissionsRequest)
     }
     
-    public func currentUserCanModifyPermissions(
-        _ permissions: [String],
-        for userId: String
-    ) -> Bool {
+    public func currentUserHasCapability(_ capability: CallCapability) -> Bool {
         let currentCallCapabilities = callCoordinatorController.currentCallSettings?.callCapabilities
         return currentCallCapabilities?.contains(
-            CallCapability.updateCallPermissions.rawValue
+            capability.rawValue
         ) == true
     }
     
@@ -109,8 +106,7 @@ public class PermissionsController {
         granted: [Permission],
         revoked: [Permission]
     ) async throws {
-        if !currentUserCanModifyPermissions(granted.map(\.rawValue), for: userId)
-            || !currentUserCanModifyPermissions(revoked.map(\.rawValue), for: userId) {
+        if !currentUserHasCapability(.updateCallPermissions) {
             throw ClientError.MissingPermissions()
         }
         let updatePermissionsRequest = UpdateUserPermissionsRequest(
@@ -126,10 +122,35 @@ public class PermissionsController {
         _ = try await coordinatorClient.updateUserPermissions(with: request)
     }
     
+    public func muteUsers(
+        with request: MuteRequest,
+        callId: String,
+        callType: String
+    ) async throws {
+        let muteRequest = MuteUsersRequest(
+            audio: request.audio,
+            muteAllUsers: request.muteAllUsers,
+            screenshare: request.screenshare,
+            userIds: request.userIds,
+            video: request.video
+        )
+        let requestData = MuteUsersRequestData(
+            id: callId,
+            type: callType,
+            muteUsersRequest: muteRequest
+        )
+        _ = try await coordinatorClient.muteUsers(with: requestData)
+    }
+    
+    public func endCall(callId: String, callType: String) async throws {
+        let endCallRequest = EndCallRequestData(id: callId, type: callType)
+        _ = try await coordinatorClient.endCall(with: endCallRequest)
+    }
+    
     public func permissionRequests() -> AsyncStream<PermissionRequest> {
         let requests = AsyncStream(PermissionRequest.self) { [weak self] continuation in
             self?.onPermissionRequestEvent = { event in
-                if self?.currentUserCanModifyPermissions(event.permissions, for: event.user.id) == true {
+                if self?.currentUserHasCapability(.updateCallPermissions) == true {
                     continuation.yield(event)
                 }
             }
