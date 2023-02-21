@@ -16,24 +16,6 @@ class WebRTCClient: NSObject {
     
     actor State: ObservableObject {
         private var cancellables = Set<AnyCancellable>()
-        
-        private var enrichedUserData = [String: EnrichedUserData]()
-        private let callCoordinatorController: CallCoordinatorController
-        private let callId: String
-        private let callType: String
-        
-        init(callCoordinatorController: CallCoordinatorController, callCid: String) {
-            self.callCoordinatorController = callCoordinatorController
-            let idComponents = callCid.components(separatedBy: ":")
-            if idComponents.count >= 2 {
-                self.callId = idComponents[1]
-                self.callType = idComponents[0]
-            } else {
-                self.callId = ""
-                self.callType = ""
-            }
-        }
-        
         var connectionState = ConnectionState.disconnected(reason: nil)
         @Published var callParticipants = [String: CallParticipant]()
         var tracks = [String: RTCVideoTrack]()
@@ -87,19 +69,6 @@ class WebRTCClient: NSObject {
                 .store(in: &cancellables)
             }
             return updates
-        }
-        
-        func enrichedData(for userId: String) async -> EnrichedUserData {
-            if let data = enrichedUserData[userId] {
-                return data
-            }
-            let enrichedData = try? await callCoordinatorController.enrichUserData(
-                for: userId,
-                callId: callId,
-                callType: callType
-            )
-            enrichedUserData[userId] = enrichedData
-            return enrichedData ?? .empty
         }
     }
     
@@ -178,10 +147,7 @@ class WebRTCClient: NSObject {
         videoConfig: VideoConfig,
         tokenProvider: @escaping UserTokenProvider
     ) {
-        state = State(
-            callCoordinatorController: callCoordinatorController,
-            callCid: callCid
-        )
+        state = State()
         self.user = user
         self.token = token
         self.callCid = callCid
@@ -356,7 +322,7 @@ class WebRTCClient: NSObject {
             callCid: callCid,
             configuration: configuration,
             type: .subscriber,
-            coordinatorService: callCoordinatorController.callCoordinatorService,
+            coordinatorClient: callCoordinatorController.coordinatorClient,
             signalService: signalService,
             videoOptions: videoOptions
         )
@@ -379,7 +345,7 @@ class WebRTCClient: NSObject {
                 callCid: callCid,
                 configuration: configuration,
                 type: .publisher,
-                coordinatorService: callCoordinatorController.callCoordinatorService,
+                coordinatorClient: callCoordinatorController.coordinatorClient,
                 signalService: signalService,
                 videoOptions: videoOptions
             )
@@ -549,7 +515,7 @@ class WebRTCClient: NSObject {
             callCid: callCid,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
-            coordinatorService: callCoordinatorController.callCoordinatorService,
+            coordinatorClient: callCoordinatorController.coordinatorClient,
             signalService: signalService,
             videoOptions: videoOptions,
             reportsStats: false
