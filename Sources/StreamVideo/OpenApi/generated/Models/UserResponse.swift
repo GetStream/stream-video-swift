@@ -11,7 +11,7 @@ internal struct UserResponse: Codable, JSONEncodable, Hashable {
 
     /** Date/time of creation */
     internal var createdAt: Date
-    internal var custom: [String: AnyCodable]
+    internal var custom: [String: AnyCodable]?
     /** Date/time of deletion */
     internal var deletedAt: Date?
     internal var id: String
