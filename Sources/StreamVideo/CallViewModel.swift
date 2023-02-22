@@ -180,10 +180,10 @@ open class CallViewModel: ObservableObject {
         enterCall(callId: callId, callType: callType, participants: [])
     }
     
-    public func enterWaitingRoom(callId: String, type: String? = nil, participants: [User]) {
+    public func enterLobby(callId: String, type: String? = nil, participants: [User]) {
         let callType = callType(from: type)
-        let waitingRoomInfo = WaitingRoomInfo(callId: callId, callType: callType, participants: participants)
-        callingState = .waitingRoom(waitingRoomInfo)
+        let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: participants)
+        callingState = .lobby(lobbyInfo)
         callController = streamVideo.makeCallController(callType: callType, callId: callId)
         Task {
             self.edgeServer = try await callController?.selectEdgeServer(
@@ -193,7 +193,7 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    public func joinCallFromWaitingRoom(callId: String, type: String? = nil, participants: [User]) throws {
+    public func joinCallFromLobby(callId: String, type: String? = nil, participants: [User]) throws {
         guard let edgeServer = edgeServer, let callController = callController else {
             throw ClientError.Unexpected("Edge server not available")
         }
@@ -434,7 +434,7 @@ public enum CallingState: Equatable {
     /// Call is not started (idle state).
     case idle
     /// The user is in a waiting room.
-    case waitingRoom(WaitingRoomInfo)
+    case lobby(LobbyInfo)
     /// There's an incoming call.
     case incoming(IncomingCall)
     /// There's an outgoing call.
@@ -445,7 +445,7 @@ public enum CallingState: Equatable {
     case reconnecting
 }
 
-public struct WaitingRoomInfo: Equatable {
+public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: CallType
     public let participants: [User]
