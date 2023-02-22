@@ -23,8 +23,8 @@ public struct Colors {
     public var background1: UIColor = .streamWhiteSmoke
     public var textLowEmphasis: UIColor = .streamGrayDisabledText
     public var callBackground: UIColor = .streamDarkBackground
-    public var waitingRoomBackground: Color = Color(.streamWaitingRoomBackground)
-    public var waitingRoomSecondaryBackground: Color = Color(.streamWaitingRoomSecondaryBackground)
+    public var lobbyBackground: Color = Color(.streamWaitingRoomBackground)
+    public var lobbySecondaryBackground: Color = Color(.streamWaitingRoomSecondaryBackground)
     public var primaryButtonBackground: Color = Color(.streamBlue)
     public var callPulsingColor = Color(.streamPulsingColor)
     public var callControlsBackground = Color(.streamCallControlsBackground)

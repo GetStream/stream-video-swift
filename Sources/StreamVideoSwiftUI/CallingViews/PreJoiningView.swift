@@ -7,10 +7,10 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct PreJoiningView: View {
+public struct LobbyView: View {
     
     @ObservedObject var callViewModel: CallViewModel
-    @StateObject var viewModel = PreJoiningViewModel()
+    @StateObject var viewModel = LobbyViewModel()
     @StateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
@@ -30,7 +30,7 @@ public struct PreJoiningView: View {
     }
     
     public var body: some View {
-        PreJoiningContentView(
+        LobbyContentView(
             callViewModel: callViewModel,
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,
@@ -41,14 +41,14 @@ public struct PreJoiningView: View {
     }
 }
 
-struct PreJoiningContentView: View {
+struct LobbyContentView: View {
     
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
     
     @ObservedObject var callViewModel: CallViewModel
-    @ObservedObject var viewModel: PreJoiningViewModel
+    @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
     
     var callId: String
@@ -110,7 +110,7 @@ struct PreJoiningContentView: View {
                 }
             }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colors.waitingRoomBackground.edgesIgnoringSafeArea(.all))
+            .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         }
         .onReceive(callViewModel.$edgeServer, perform: { edgeServer in
             viewModel.latencyURL = edgeServer?.latencyURL
@@ -127,7 +127,7 @@ struct CameraCheckView: View {
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
     
-    @ObservedObject var viewModel: PreJoiningViewModel
+    @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var callViewModel: CallViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
     var availableSize: CGSize
@@ -143,7 +143,7 @@ struct CameraCheckView: View {
             } else {
                 ZStack {
                     Rectangle()
-                        .fill(colors.waitingRoomSecondaryBackground)
+                        .fill(colors.lobbySecondaryBackground)
                         .frame(width: availableSize.width - 32, height: availableSize.height / 2)
                         .cornerRadius(16)
 
@@ -202,7 +202,7 @@ struct JoinCallView: View {
             .foregroundColor(.white)
         }
         .padding()
-        .background(colors.waitingRoomSecondaryBackground)
+        .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
     }
     

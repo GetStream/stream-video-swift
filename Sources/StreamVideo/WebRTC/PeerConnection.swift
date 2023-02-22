@@ -238,39 +238,38 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     private func reportCurrentStats() {
-        pc.statistics(completionHandler: { [weak self] report in
-            Task {
-                let stats = report.statistics
-                var updated = [String: Any]()
-                for (key, value) in stats {
-                    let mapped = [
-                        "id": value.id,
-                        "type": value.type,
-                        "timestamp_us": value.timestamp_us,
-                        "values": value.values
-                    ]
-                    updated[key] = mapped
-                }
-                guard let jsonData = try? JSONSerialization.data(
-                    withJSONObject: updated,
-                    options: .prettyPrinted
-                ) else { return }
-                // TODO: implement this.
-                log.debug("Stats still not reported")
-                /*
-                 var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
-                 request.callCid = self.callCid
-                 request.statsJson = jsonData
-                 do {
-                     _ = try await self.coordinatorService.reportCallStats(
-                         reportCallStatsRequest: request
-                     )
-                     log.debug("successfully sent stats for \(self.type)")
-                 } catch {
-                     log.error("error reporting stats for \(self.type)")
+        pc.statistics(completionHandler: { _ in
+            log.debug("Stats still not reported")
+            /*
+             Task {
+                 let stats = report.statistics
+                 var updated = [String: Any]()
+                 for (key, value) in stats {
+                     let mapped = [
+                         "id": value.id,
+                         "type": value.type,
+                         "timestamp_us": value.timestamp_us,
+                         "values": value.values
+                     ]
+                     updated[key] = mapped
                  }
-                  */
-            }
+                 guard let jsonData = try? JSONSerialization.data(
+                     withJSONObject: updated,
+                     options: .prettyPrinted
+                 ) else { return }
+                  var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
+                  request.callCid = self.callCid
+                  request.statsJson = jsonData
+                  do {
+                      _ = try await self.coordinatorService.reportCallStats(
+                          reportCallStatsRequest: request
+                      )
+                      log.debug("successfully sent stats for \(self.type)")
+                  } catch {
+                      log.error("error reporting stats for \(self.type)")
+                  }
+             }
+              */
         })
     }
     

@@ -32,8 +32,8 @@ public struct VideoView_iOS13<Factory: ViewFactory>: View {
                 } else {
                     WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
                 }
-            } else if case let .waitingRoom(waitingRoomInfo) = viewModel.callingState {
-                viewFactory.makePreJoiningView(viewModel: viewModel, waitingRoomInfo: waitingRoomInfo)
+            } else if case let .lobby(lobbyInfo) = viewModel.callingState {
+                viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)
             }
         }
         .overlay(overlayView)
