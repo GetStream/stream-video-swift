@@ -230,9 +230,8 @@ public class StreamVideo {
     }
     
     private func connectWebSocketClient() {
-        let urlString =
-            "\(endpointConfig.wsEndpoint)?api_key=\(apiKey.apiKeyString)&stream-auth-type=jwt&X-Stream-Client=stream-video-swift"
-        if let connectURL = URL(string: urlString) {
+        let queryParams = endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
+        if let connectURL = try? URL(string: endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         }
