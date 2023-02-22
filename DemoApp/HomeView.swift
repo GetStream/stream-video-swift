@@ -19,7 +19,7 @@ struct HomeView: View {
     
     @State private var callAction = CallAction.startCall
     
-    @State private var callFlow: CallFlow = .ringEvents
+    @State private var callFlow: CallFlow = .joinImmediately
     
     var participants: [User] {
         var participants = UserCredentials.builtInUsers.map { $0.userInfo }
@@ -154,17 +154,18 @@ struct HomeView: View {
             .listStyle(PlainListStyle())
             
             Picker("Call flow", selection: $callFlow) {
+                Text(CallFlow.joinImmediately.rawValue).tag(CallFlow.joinImmediately)
                 Text(CallFlow.ringEvents.rawValue).tag(CallFlow.ringEvents)
-                Text(CallFlow.waitingRoom.rawValue).tag(CallFlow.waitingRoom)
+                Text(CallFlow.lobby.rawValue).tag(CallFlow.lobby)
             }
             .pickerStyle(.segmented)
                         
             Button {
                 resignFirstResponder()
-                if callFlow == .waitingRoom {
-                    viewModel.enterWaitingRoom(callId: callId, participants: selectedParticipants)
+                if callFlow == .lobby {
+                    viewModel.enterLobby(callId: callId, participants: selectedParticipants)
                 } else {
-                    viewModel.startCall(callId: callId, participants: selectedParticipants)
+                    viewModel.startCall(callId: callId, participants: selectedParticipants, ring: callFlow == .ringEvents)
                 }
             } label: {
                 Text("Start a call")
@@ -186,5 +187,6 @@ enum CallAction: String {
 
 enum CallFlow: String {
     case ringEvents = "Ring events"
-    case waitingRoom = "Waiting room"
+    case lobby = "Lobby"
+    case joinImmediately = "Join immediately"
 }

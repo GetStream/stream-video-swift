@@ -5,17 +5,33 @@
 import StreamVideo
 import SwiftUI
 
-public struct VideoParticipantsView: View {
+public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
+    var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
+    public init(
+        viewFactory: Factory,
+        viewModel: CallViewModel,
+        availableSize: CGSize,
+        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) {
+        self.viewFactory = viewFactory
+        _viewModel = ObservedObject(wrappedValue: viewModel)
+        self.availableSize = availableSize
+        self.onViewRendering = onViewRendering
+        self.onChangeTrackVisibility = onChangeTrackVisibility
+    }
+    
     public var body: some View {
         ZStack {
             if participants.count <= 3 {
                 VerticalParticipantsView(
+                    viewFactory: viewFactory,
                     participants: participants,
                     availableSize: availableSize
                 ) { participant, view in
@@ -23,6 +39,7 @@ public struct VideoParticipantsView: View {
                 }
             } else if participants.count == 4 {
                 TwoColumnParticipantsView(
+                    viewFactory: viewFactory,
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3]],
                     availableSize: availableSize
@@ -31,6 +48,7 @@ public struct VideoParticipantsView: View {
                 }
             } else if participants.count == 5 {
                 TwoColumnParticipantsView(
+                    viewFactory: viewFactory,
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3], participants[4]],
                     availableSize: availableSize
@@ -39,6 +57,7 @@ public struct VideoParticipantsView: View {
                 }
             } else {
                 ParticipantsGridView(
+                    viewFactory: viewFactory,
                     participants: participants,
                     availableSize: availableSize
                 ) { participant, view in
@@ -56,10 +75,11 @@ public struct VideoParticipantsView: View {
     }
 }
 
-struct TwoColumnParticipantsView: View {
+struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     
     @Injected(\.streamVideo) var streamVideo
     
+    var viewFactory: Factory
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
     var availableSize: CGSize
@@ -68,6 +88,7 @@ struct TwoColumnParticipantsView: View {
     var body: some View {
         HStack(spacing: 0) {
             VerticalParticipantsView(
+                viewFactory: viewFactory,
                 participants: leftColumnParticipants,
                 availableSize: size,
                 onViewUpdate: onViewUpdate
@@ -75,6 +96,7 @@ struct TwoColumnParticipantsView: View {
             .adjustVideoFrame(to: size.width)
             
             VerticalParticipantsView(
+                viewFactory: viewFactory,
                 participants: rightColumnParticipants,
                 availableSize: size,
                 onViewUpdate: onViewUpdate
@@ -90,8 +112,9 @@ struct TwoColumnParticipantsView: View {
     }
 }
 
-struct VerticalParticipantsView: View {
+struct VerticalParticipantsView<Factory: ViewFactory>: View {
             
+    var viewFactory: Factory
     var participants: [CallParticipant]
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
@@ -99,31 +122,18 @@ struct VerticalParticipantsView: View {
     var body: some View {
         VStack(spacing: 0) {
             ForEach(participants) { participant in
-                VideoCallParticipantView(
+                viewFactory.makeVideoParticipantView(
                     participant: participant,
                     availableSize: availableSize,
                     onViewUpdate: onViewUpdate
                 )
-                .adjustVideoFrame(to: availableSize.width, ratio: ratio)
-                .overlay(
-                    ZStack {
-                        BottomView(content: {
-                            HStack {
-                                AudioIndicatorView(participant: participant)
-                                Spacer()
-                                ConnectionQualityIndicator(
-                                    connectionQuality: participant.connectionQuality
-                                )
-                            }
-                            .padding(.bottom, 2)
-                        })
-                            .padding()
-                        
-                        if participant.isSpeaking && participants.count > 1 {
-                            Rectangle()
-                                .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
-                        }
-                    }
+                .modifier(
+                    viewFactory.makeVideoCallParticipantModifier(
+                        participant: participant,
+                        participantCount: participants.count,
+                        availableSize: availableSize,
+                        ratio: ratio
+                    )
                 )
             }
         }
@@ -138,7 +148,52 @@ struct VerticalParticipantsView: View {
     }
 }
 
-struct VideoCallParticipantView: View {
+public struct VideoCallParticipantModifier: ViewModifier {
+            
+    var participant: CallParticipant
+    var participantCount: Int
+    var availableSize: CGSize
+    var ratio: CGFloat
+    
+    public init(
+        participant: CallParticipant,
+        participantCount: Int,
+        availableSize: CGSize,
+        ratio: CGFloat
+    ) {
+        self.participant = participant
+        self.participantCount = participantCount
+        self.availableSize = availableSize
+        self.ratio = ratio
+    }
+    
+    public func body(content: Content) -> some View {
+        content
+            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .overlay(
+                ZStack {
+                    BottomView(content: {
+                        HStack {
+                            AudioIndicatorView(participant: participant)
+                            Spacer()
+                            ConnectionQualityIndicator(
+                                connectionQuality: participant.connectionQuality
+                            )
+                        }
+                        .padding(.bottom, 2)
+                    })
+                        .padding()
+                    
+                    if participant.isSpeaking && participantCount > 1 {
+                        Rectangle()
+                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
+                    }
+                }
+            )
+    }
+}
+
+public struct VideoCallParticipantView: View {
     
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
@@ -147,7 +202,17 @@ struct VideoCallParticipantView: View {
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
-    var body: some View {
+    public init(
+        participant: CallParticipant,
+        availableSize: CGSize,
+        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    ) {
+        self.participant = participant
+        self.availableSize = availableSize
+        self.onViewUpdate = onViewUpdate
+    }
+    
+    public var body: some View {
         VideoRendererView(id: participant.id, size: availableSize) { view in
             onViewUpdate(participant, view)
         }

@@ -6,7 +6,7 @@ import AVFoundation
 import StreamVideo
 import SwiftUI
 
-public class PreJoiningViewModel: ObservableObject, @unchecked Sendable {
+public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     private let camera: Any
  
     @Published public var viewfinderImage: Image?

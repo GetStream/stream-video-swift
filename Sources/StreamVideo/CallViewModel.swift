@@ -43,6 +43,7 @@ open class CallViewModel: ObservableObject {
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkForScreensharingSession()
+            checkCallSettingsForCurrentUser()
         }
     }
     
@@ -84,11 +85,10 @@ open class CallViewModel: ObservableObject {
             .sorted(by: { $0.name < $1.name })
     }
     
-    private var ringingSupported: Bool {
-        !streamVideo.videoConfig.joinVideoCallInstantly
-    }
+    private var ringingSupported: Bool = false
     
-    public init() {
+    public init(listenToRingingEvents: Bool = false) {
+        ringingSupported = listenToRingingEvents
         if !streamVideo.videoConfig.videoEnabled {
             callSettings = CallSettings(speakerOn: false)
         }
@@ -161,12 +161,13 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
     ///  - participants: list of participants that are part of the call.
-    public func startCall(callId: String, type: String? = nil, participants: [User]) {
+    public func startCall(callId: String, type: String? = nil, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
+        ringingSupported = ring
         callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
         callingState = .outgoing
         let callType = callType(from: type)
-        enterCall(callId: callId, callType: callType, participantIds: participants.map(\.id))
+        enterCall(callId: callId, callType: callType, participants: participants, ring: ring)
     }
     
     /// Joins an existing call with the provided info.
@@ -176,23 +177,23 @@ open class CallViewModel: ObservableObject {
     public func joinCall(callId: String, type: String? = nil) {
         let callType = callType(from: type)
         callController = streamVideo.makeCallController(callType: callType, callId: callId)
-        enterCall(callId: callId, callType: callType, participantIds: participants.map(\.userId))
+        enterCall(callId: callId, callType: callType, participants: [])
     }
     
-    public func enterWaitingRoom(callId: String, type: String? = nil, participants: [User]) {
+    public func enterLobby(callId: String, type: String? = nil, participants: [User]) {
         let callType = callType(from: type)
-        let waitingRoomInfo = WaitingRoomInfo(callId: callId, callType: callType, participants: participants)
-        callingState = .waitingRoom(waitingRoomInfo)
+        let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: participants)
+        callingState = .lobby(lobbyInfo)
         callController = streamVideo.makeCallController(callType: callType, callId: callId)
         Task {
             self.edgeServer = try await callController?.selectEdgeServer(
                 videoOptions: VideoOptions(),
-                participantIds: participants.map(\.id)
+                participants: participants
             )
         }
     }
     
-    public func joinCallFromWaitingRoom(callId: String, type: String? = nil, participantIds: [String]) throws {
+    public func joinCallFromLobby(callId: String, type: String? = nil, participants: [User]) throws {
         guard let edgeServer = edgeServer, let callController = callController else {
             throw ClientError.Unexpected("Edge server not available")
         }
@@ -205,8 +206,7 @@ open class CallViewModel: ObservableObject {
                     callType: callType(from: type),
                     callId: callId,
                     callSettings: callSettings,
-                    videoOptions: VideoOptions(),
-                    participantIds: participantIds
+                    videoOptions: VideoOptions()
                 )
                 save(call: call)
             } catch {
@@ -225,7 +225,7 @@ open class CallViewModel: ObservableObject {
         callController = streamVideo.makeCallController(callType: callType, callId: callId)
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: callType)
-            enterCall(callId: callId, callType: callType, participantIds: participants.map(\.userId))
+            enterCall(callId: callId, callType: callType, participants: [])
         }
     }
     
@@ -236,6 +236,7 @@ open class CallViewModel: ObservableObject {
     public func rejectCall(callId: String, type: String) {
         Task {
             try await streamVideo.rejectCall(callId: callId, callType: callType(from: type))
+            self.callingState = .idle
         }
     }
     
@@ -285,7 +286,7 @@ open class CallViewModel: ObservableObject {
         isMinimized = false
     }
     
-    private func enterCall(callId: String, callType: CallType, participantIds: [String]) {
+    private func enterCall(callId: String, callType: CallType, participants: [User], ring: Bool = false) {
         guard let callController = callController else {
             return
         }
@@ -298,7 +299,8 @@ open class CallViewModel: ObservableObject {
                     callId: callId,
                     callSettings: callSettings,
                     videoOptions: videoOptions,
-                    participantIds: participantIds
+                    participants: participants,
+                    ring: ring
                 )
                 save(call: call)
             } catch {
@@ -338,14 +340,18 @@ open class CallViewModel: ObservableObject {
     private func subscribeToCallEvents() {
         Task {
             for await callEvent in streamVideo.callEvents() {
-                if case let .incoming(incomingCall) = callEvent, ringingSupported {
+                if case let .incoming(incomingCall) = callEvent,
+                   ringingSupported,
+                   incomingCall.callerId != streamVideo.user.id {
                     // TODO: implement holding a call.
                     if callingState == .idle {
                         callingState = .incoming(incomingCall)
                     }
                 } else if case .rejected = callEvent, ringingSupported {
                     leaveCall()
-                } else if case .canceled = callEvent, ringingSupported {
+                } else if case .canceled = callEvent, callParticipants.count < 2, ringingSupported {
+                    leaveCall()
+                } else if case .ended = callEvent {
                     leaveCall()
                 }
             }
@@ -361,7 +367,7 @@ open class CallViewModel: ObservableObject {
     }
     
     private func updateCallStateIfNeeded() {
-        if streamVideo.videoConfig.joinVideoCallInstantly {
+        if !ringingSupported {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1
@@ -403,6 +409,24 @@ open class CallViewModel: ObservableObject {
         }
         screensharingSession = nil
     }
+    
+    private func checkCallSettingsForCurrentUser() {
+        guard let localParticipant = localParticipant,
+              // Skip updates for the initial period while the connection is established.
+              Date().timeIntervalSince(localParticipant.joinedAt) > 5.0 else {
+            return
+        }
+        if localParticipant.hasAudio != callSettings.audioOn
+            || localParticipant.hasVideo != callSettings.videoOn {
+            let previous = callSettings
+            callSettings = CallSettings(
+                audioOn: localParticipant.hasAudio,
+                videoOn: localParticipant.hasVideo,
+                speakerOn: previous.speakerOn,
+                cameraPosition: previous.cameraPosition
+            )
+        }
+    }
 }
 
 /// The state of the call.
@@ -410,7 +434,7 @@ public enum CallingState: Equatable {
     /// Call is not started (idle state).
     case idle
     /// The user is in a waiting room.
-    case waitingRoom(WaitingRoomInfo)
+    case lobby(LobbyInfo)
     /// There's an incoming call.
     case incoming(IncomingCall)
     /// There's an outgoing call.
@@ -421,7 +445,7 @@ public enum CallingState: Equatable {
     case reconnecting
 }
 
-public struct WaitingRoomInfo: Equatable {
+public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: CallType
     public let participants: [User]

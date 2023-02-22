@@ -6,9 +6,10 @@ import Foundation
 import WebRTC
 
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
-final class CallCoordinatorController: Sendable {
+final class CallCoordinatorController: @unchecked Sendable {
     
-    let callCoordinatorService: Stream_Video_CallCoordinatorService
+    let coordinatorClient: CoordinatorClient
+    private(set) var currentCallSettings: CallSettingsInfo?
     private let latencyService: LatencyService
     private let videoConfig: VideoConfig
     private let user: User
@@ -20,11 +21,12 @@ final class CallCoordinatorController: Sendable {
         videoConfig: VideoConfig
     ) {
         latencyService = LatencyService(httpClient: httpClient)
-        callCoordinatorService = Stream_Video_CallCoordinatorService(
+        coordinatorClient = CoordinatorClient(
             httpClient: httpClient,
             apiKey: coordinatorInfo.apiKey,
             hostname: coordinatorInfo.hostname,
-            token: coordinatorInfo.token
+            token: coordinatorInfo.token,
+            userId: user.id
         )
         self.videoConfig = videoConfig
         self.user = user
@@ -34,80 +36,75 @@ final class CallCoordinatorController: Sendable {
         callType: CallType,
         callId: String,
         videoOptions: VideoOptions,
-        participantIds: [String]
+        participants: [User],
+        ring: Bool
     ) async throws -> EdgeServer {
         let joinCallResponse = try await joinCall(
             callId: callId,
             type: callType.name,
-            participantIds: participantIds
+            participants: participants,
+            ring: ring
         )
         
         let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
         
         let edgeServer = try await selectEdgeServer(
-            callId: joinCallResponse.call.call.callCid,
+            callId: joinCallResponse.call.id,
+            type: callType.name,
             latencyByEdge: latencyByEdge,
             edges: joinCallResponse.edges
         )
+        
+        currentCallSettings = edgeServer.callSettings
         
         return edgeServer
     }
 
     func update(token: UserToken) {
-        callCoordinatorService.update(userToken: token.rawValue)
+        coordinatorClient.update(userToken: token.rawValue)
+    }
+    
+    func update(connectionId: String) {
+        coordinatorClient.connectionId = connectionId
     }
     
     func makeVoipNotificationsController() -> VoipNotificationsController {
-        VoipNotificationsController(callCoordinatorService: callCoordinatorService)
+        VoipNotificationsController(coordinatorClient: coordinatorClient)
     }
     
     func sendEvent(
-        type: Stream_Video_UserEventType,
+        type: EventType,
         callId: String,
-        callType: CallType
+        callType: CallType,
+        customData: [String: AnyCodable]? = nil
     ) async throws {
-        var request = Stream_Video_SendEventRequest()
-        request.callCid = "\(callType.name):\(callId)"
-        request.eventType = type
-        _ = try await callCoordinatorService.sendEvent(sendEventRequest: request)
+        let sendEventRequest = SendEventRequest(
+            custom: customData,
+            type: type.rawValue
+        )
+        let request = EventRequestData(
+            id: callId,
+            type: callType.name,
+            sendEventRequest: sendEventRequest
+        )
+        _ = try await coordinatorClient.sendEvent(with: request)
     }
     
     func addMembersToCall(with cid: String, memberIds: [String]) async throws {
-        var request = Stream_Video_UpsertCallMembersRequest()
-        request.callCid = cid
-        request.members = memberIds.map { id in
-            var memberInput = Stream_Video_MemberInput()
-            memberInput.userID = id
-            memberInput.role = "member"
-            return memberInput
-        }
-        request.ring = !videoConfig.joinVideoCallInstantly
-        _ = try await callCoordinatorService.upsertCallMembers(upsertCallMembersRequest: request)
-    }
-    
-    func enrichUserData(for id: String) async throws -> EnrichedUserData {
-        var request = Stream_Video_Coordinator_ClientV1Rpc_QueryUsersRequest()
-        let filter = ["id": ["$in": [id]]]
-        let jsonData = try JSONSerialization.data(withJSONObject: filter, options: .prettyPrinted)
-        request.mqJson = jsonData
-        let response = try await callCoordinatorService.queryUsers(queryUsersRequest: request)
-        guard let member = response.users.first else { return .empty }
-        return EnrichedUserData(imageUrl: URL(string: member.imageURL), name: member.name, role: member.role)
+        throw ClientError.Unexpected("Not implemented")
     }
 
     // MARK: - private
         
     private func measureLatencies(
-        for endpoints: [Stream_Video_Edge]
-    ) async -> [String: Stream_Video_Latency] {
-        await withTaskGroup(of: [String: Stream_Video_Latency].self) { group in
-            var result: [String: Stream_Video_Latency] = [:]
+        for endpoints: [DatacenterResponse]
+    ) async -> [String: [Float]] {
+        await withTaskGroup(of: [String: [Float]].self) { group in
+            var result: [String: [Float]] = [:]
             for endpoint in endpoints {
                 group.addTask {
-                    var latency = Stream_Video_Latency()
                     let value = await self.latencyService.measureLatency(for: endpoint, tries: 3)
-                    latency.measurementsSeconds = value
-                    return [endpoint.name: latency]
+                    return [endpoint.name: value]
                 }
             }
             
@@ -126,58 +123,94 @@ final class CallCoordinatorController: Sendable {
     private func joinCall(
         callId: String,
         type: String,
-        participantIds: [String]
-    ) async throws -> Stream_Video_JoinCallResponse {
-        var joinCallRequest = Stream_Video_JoinCallRequest()
-        joinCallRequest.id = callId
-        joinCallRequest.type = type
-        if !participantIds.isEmpty {
-            var input = Stream_Video_CreateCallInput()
-            input.ring = !videoConfig.joinVideoCallInstantly
-            var members = [Stream_Video_MemberInput]()
-            for participantId in participantIds {
-                var memberInput = Stream_Video_MemberInput()
-                memberInput.userID = participantId
-                memberInput.role = "member"
-                members.append(memberInput)
-            }
-            input.members = members
-            joinCallRequest.input = input
+        participants: [User],
+        ring: Bool
+    ) async throws -> JoinCallResponse {
+        var members = [MemberRequest]()
+        for participant in participants {
+            let callMemberRequest = MemberRequest(
+                role: participant.role,
+                userId: participant.id
+            )
+            members.append(callMemberRequest)
         }
-        let joinCallResponse = try await callCoordinatorService.joinCall(joinCallRequest: joinCallRequest)
+        
+        let currentUserRole = participants.filter { user.id == $0.id }.first?.role ?? user.role
+        let userRequest = UserRequest(
+            id: user.id,
+            image: user.imageURL?.absoluteString,
+            name: user.name,
+            role: currentUserRole,
+            teams: nil // TODO:
+        )
+        let callRequest = CallRequest(
+            createdBy: userRequest,
+            createdById: user.id,
+            members: members,
+            settingsOverride: nil,
+            team: nil // TODO:
+        )
+        let paginationParamsRequest = PaginationParamsRequest()
+        let getOrCreateCallRequest = GetOrCreateCallRequest(
+            data: callRequest,
+            members: paginationParamsRequest,
+            ring: ring
+        )
+        let joinCallRequest = JoinCallRequestData(
+            id: callId,
+            type: type,
+            getOrCreateCallRequest: getOrCreateCallRequest
+        )
+        let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
     }
     
     private func selectEdgeServer(
         callId: String,
-        latencyByEdge: [String: Stream_Video_Latency],
-        edges: [Stream_Video_Edge]
+        type: String,
+        latencyByEdge: [String: [Float]],
+        edges: [DatacenterResponse]
     ) async throws -> EdgeServer {
-        var selectEdgeRequest = Stream_Video_SelectEdgeServerRequest()
-        selectEdgeRequest.callCid = callId
-        var measurements = Stream_Video_LatencyMeasurements()
-        measurements.measurements = latencyByEdge
-        selectEdgeRequest.measurements = measurements
-        let response = try await callCoordinatorService.getCallEdgeServer(getCallEdgeServerRequest: selectEdgeRequest)
-        let url = response.credentials.server.url
-        let token = response.credentials.token
+        let getCallEdgeServerRequest = GetCallEdgeServerRequest(
+            latencyMeasurements: latencyByEdge
+        )
+        let selectEdgeRequest = SelectEdgeServerRequestData(
+            id: callId,
+            type: type,
+            getCallEdgeServerRequest: getCallEdgeServerRequest
+        )
+        let response = try await coordinatorClient.getCallEdgeServer(with: selectEdgeRequest)
+        let credentials = response.credentials
+        let iceServersResponse: [ICEServer] = credentials.iceServers
+        let iceServers = iceServersResponse.map { iceServer in
+            IceServer(
+                urls: iceServer.urls,
+                username: iceServer.username,
+                password: iceServer.password
+            )
+        }
         let edgeName = response.credentials.server.edgeName
-        var latencyURL = edges.first { $0.name == edgeName }.map(\.latencyURL)
+        let edge = edges.first { $0.name == edgeName }
+        var latencyURL: String? = edge.map(\.latencyUrl) ?? nil
         if latencyURL == nil {
             for edge in edges {
-                let maxLatency = Double(Int.max)
+                let maxLatency = Float(Int.max)
                 let name = edge.name
-                let latency = latencyByEdge[name]?.measurementsSeconds.last ?? maxLatency
+                let latency = latencyByEdge[name]?.last ?? maxLatency
                 if latency != maxLatency {
-                    latencyURL = edge.latencyURL
+                    latencyURL = edge.latencyUrl
                 }
             }
         }
-        log.debug("Selected edge server \(url)")
+        let callSettings = CallSettingsInfo(
+            callCapabilities: response.call.ownCapabilities,
+            callSettings: response.call.settings
+        )
         return EdgeServer(
-            url: url,
-            token: token,
-            iceServers: response.credentials.iceServers.map { $0.toIceServer() },
+            url: credentials.server.url,
+            token: credentials.token,
+            iceServers: iceServers,
+            callSettings: callSettings,
             latencyURL: latencyURL
         )
     }
@@ -187,8 +220,16 @@ public struct EdgeServer: Sendable {
     let url: String
     let token: String
     let iceServers: [IceServer]
+    let callSettings: CallSettingsInfo
     public let latencyURL: String?
 }
+
+struct CallSettingsInfo: Sendable {
+    let callCapabilities: [String]
+    let callSettings: CallSettingsResponse
+}
+
+extension CallSettingsResponse: @unchecked Sendable {}
 
 public struct IceServer: Sendable {
     let urls: [String]
@@ -196,32 +237,8 @@ public struct IceServer: Sendable {
     let password: String
 }
 
-extension Stream_Video_ICEServer {
-    func toIceServer() -> IceServer {
-        IceServer(
-            urls: urls,
-            username: username,
-            password: password
-        )
-    }
-}
-
 struct CoordinatorInfo {
     let apiKey: String
     let hostname: String
     let token: String
-}
-
-struct EnrichedUserData {
-    let imageUrl: URL?
-    let name: String
-    let role: String
-}
-
-extension EnrichedUserData {
-    static let empty = EnrichedUserData(
-        imageUrl: nil,
-        name: "",
-        role: "member"
-    )
 }

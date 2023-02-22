@@ -14,24 +14,26 @@ public enum CallEvent: Sendable {
     case rejected(CallEventInfo)
     /// An outgoing call is canceled.
     case canceled(CallEventInfo)
+    /// The call is ended.
+    case ended(CallEventInfo)
 }
 
 enum CallEventAction: Sendable {
     case accept
     case reject
     case cancel
+    case end
 }
 
 struct IncomingCallEvent: Event {
     let callCid: String
     let createdBy: String
     let type: String
-    let users: [Stream_Video_User]
+    let users: [User]
 }
 
 /// Contains info about a call event.
 public struct CallEventInfo: Event, Sendable {
     let callId: String
-    let senderId: String
     let action: CallEventAction
 }

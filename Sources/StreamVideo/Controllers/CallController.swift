@@ -49,19 +49,22 @@ public class CallController {
     ///  - callSettings: the current call settings
     ///  - videoOptions: configuration options about the video
     ///  - participantIds: array of the ids of the participants
+    ///  - ring: whether ringing events should be handled
     /// - Returns: a newly created `Call`.
     public func joinCall(
         callType: CallType,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        participantIds: [String]
+        participants: [User],
+        ring: Bool = false
     ) async throws -> Call {
         let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            participantIds: participantIds
+            participants: participants,
+            ring: ring
         )
         
         return try await connectToEdge(
@@ -69,8 +72,7 @@ public class CallController {
             callType: callType,
             callId: callId,
             callSettings: callSettings,
-            videoOptions: videoOptions,
-            participantIds: participantIds
+            videoOptions: videoOptions
         )
     }
     
@@ -79,28 +81,27 @@ public class CallController {
         callType: CallType,
         callId: String,
         callSettings: CallSettings,
-        videoOptions: VideoOptions,
-        participantIds: [String]
+        videoOptions: VideoOptions
     ) async throws -> Call {
         try await connectToEdge(
             edgeServer,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
-            videoOptions: videoOptions,
-            participantIds: participantIds
+            videoOptions: videoOptions
         )
     }
 
     public func selectEdgeServer(
         videoOptions: VideoOptions,
-        participantIds: [String]
+        participants: [User]
     ) async throws -> EdgeServer {
         try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            participantIds: participantIds
+            participants: participants,
+            ring: false
         )
     }
     
@@ -163,15 +164,14 @@ public class CallController {
         callType: CallType,
         callId: String,
         callSettings: CallSettings,
-        videoOptions: VideoOptions,
-        participantIds: [String]
+        videoOptions: VideoOptions
     ) async throws -> Call {
         webRTCClient = WebRTCClient(
             user: user,
             apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
-            callCid: "\(callType)-\(callId)",
+            callCid: "\(callType.name):\(callId)",
             callCoordinatorController: callCoordinatorController,
             videoConfig: videoConfig,
             tokenProvider: tokenProvider

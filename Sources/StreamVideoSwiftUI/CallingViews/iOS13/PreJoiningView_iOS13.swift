@@ -7,10 +7,10 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS, introduced: 13, obsoleted: 14)
-struct PreJoiningView_iOS13: View {
+struct LobbyView_iOS13: View {
     
     @ObservedObject var callViewModel: CallViewModel
-    @BackportStateObject var viewModel = PreJoiningViewModel()
+    @BackportStateObject var viewModel = LobbyViewModel()
     @BackportStateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
@@ -30,7 +30,7 @@ struct PreJoiningView_iOS13: View {
     }
     
     public var body: some View {
-        PreJoiningContentView(
+        LobbyContentView(
             callViewModel: callViewModel,
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,

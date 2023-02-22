@@ -15,7 +15,7 @@ struct StreamVideoSwiftUIApp: App {
     @State var streamVideoUI: StreamVideoUI?
     
     @ObservedObject var appState = AppState.shared
-        
+            
     init() {
         checkLoggedInUser()
         LogConfig.level = .debug
@@ -56,13 +56,10 @@ struct StreamVideoSwiftUIApp: App {
     
     private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
         let streamVideo = StreamVideo(
-            apiKey: "us83cfwuhy8n",
+            apiKey: "w6yaq5388uym",
             user: user.userInfo,
             token: user.token,
-            videoConfig: VideoConfig(
-                persitingSocketConnection: true,
-                joinVideoCallInstantly: true
-            ),
+            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 result(.success(user.token))
             }

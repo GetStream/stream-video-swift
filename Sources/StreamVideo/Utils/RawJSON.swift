@@ -65,3 +65,13 @@ public extension RawJSON {
         return .dictionary(content)
     }
 }
+
+extension RawJSON {
+    static func convert(extraData: [String: RawJSON]) -> [String: AnyCodable] {
+        var result = [String: AnyCodable]()
+        for (key, value) in extraData {
+            result[key] = AnyCodable(value)
+        }
+        return result
+    }
+}

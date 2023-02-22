@@ -62,6 +62,12 @@ extension ClientError {
     
     /// Token missing error.
     public class MissingToken: ClientError {}
+    
+    /// Permissions error.
+    public class MissingPermissions: ClientError {}
+    
+    /// Invalid url error.
+    public class InvalidURL: ClientError {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable

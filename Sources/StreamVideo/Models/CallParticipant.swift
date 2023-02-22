@@ -9,6 +9,7 @@ import Foundation
 public struct CallParticipant: Identifiable, Sendable {
     public var id: String
     public let userId: String
+    // TODO: maybe remove it.
     public let role: String
     public let name: String
     public let profileImageURL: URL?
@@ -25,6 +26,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public var isSpeaking: Bool
     public var sessionId: String
     public var connectionQuality: ConnectionQuality
+    public var joinedAt: Date
     
     public init(
         id: String,
@@ -44,7 +46,8 @@ public struct CallParticipant: Identifiable, Sendable {
         layoutPriority: LayoutPriority = .normal,
         isSpeaking: Bool = false,
         sessionId: String,
-        connectionQuality: ConnectionQuality
+        connectionQuality: ConnectionQuality,
+        joinedAt: Date
     ) {
         self.id = id
         self.userId = userId
@@ -64,6 +67,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.screenshareTrack = screenshareTrack
         self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
+        self.joinedAt = joinedAt
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -90,7 +94,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -113,7 +118,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -136,7 +142,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -159,7 +166,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 
@@ -182,7 +190,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -205,7 +214,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 
@@ -228,7 +238,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 
@@ -254,7 +265,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -277,7 +289,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 }
@@ -300,15 +313,15 @@ extension CallParticipant {
     }
 }
 
-extension Stream_Video_User {
+extension User {
     
     func toCallParticipant() -> CallParticipant {
         CallParticipant(
             id: id,
             userId: id,
-            role: role,
+            role: "",
             name: name.isEmpty ? id : name,
-            profileImageURL: URL(string: imageURL),
+            profileImageURL: imageURL,
             trackLookupPrefix: nil,
             isOnline: false,
             hasVideo: false,
@@ -316,20 +329,21 @@ extension Stream_Video_User {
             isScreenSharing: false,
             showTrack: false,
             sessionId: "",
-            connectionQuality: .unknown
+            connectionQuality: .unknown,
+            joinedAt: Date()
         )
     }
 }
 
 extension Stream_Video_Sfu_Models_Participant {
     
-    func toCallParticipant(showTrack: Bool = true, enrichData: EnrichedUserData) -> CallParticipant {
+    func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
         CallParticipant(
             id: sessionID,
             userId: userID,
-            role: enrichData.role,
-            name: enrichData.name,
-            profileImageURL: enrichData.imageUrl,
+            role: "", // TODO: should be exposed by the SFU.
+            name: name,
+            profileImageURL: URL(string: image),
             trackLookupPrefix: trackLookupPrefix,
             isOnline: true, // TODO: handle this
             hasVideo: publishedTracks.contains(where: { $0 == .video }),
@@ -337,7 +351,8 @@ extension Stream_Video_Sfu_Models_Participant {
             isScreenSharing: publishedTracks.contains(where: { $0 == .screenShare }),
             showTrack: showTrack,
             sessionId: sessionID,
-            connectionQuality: connectionQuality.mapped
+            connectionQuality: connectionQuality.mapped,
+            joinedAt: joinedAt.date
         )
     }
 }

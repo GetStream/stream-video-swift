@@ -16,7 +16,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
-    private let coordinatorService: Stream_Video_CallCoordinatorService
+    private let coordinatorClient: CoordinatorClient
     private let sessionId: String
     private let callCid: String
     private let type: PeerConnectionType
@@ -26,6 +26,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
     private var pendingIceCandidates = [RTCIceCandidate]()
+    private var publishedTracks = [TrackType]()
         
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
@@ -36,14 +37,14 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         callCid: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        coordinatorService: Stream_Video_CallCoordinatorService,
+        coordinatorClient: CoordinatorClient,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         videoOptions: VideoOptions,
-        reportStats: Bool = true
+        reportStats: Bool = false
     ) {
         self.sessionId = sessionId
         self.pc = pc
-        self.coordinatorService = coordinatorService
+        self.coordinatorClient = coordinatorClient
         self.signalService = signalService
         self.type = type
         self.reportStats = reportStats
@@ -52,9 +53,14 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
-        DispatchQueue.main.async {
-            self.setupStatsTimer()
-        }
+    }
+    
+    var audioTrackPublished: Bool {
+        publishedTracks.contains(.audio)
+    }
+    
+    var videoTrackPublished: Bool {
+        publishedTracks.contains(.video)
     }
     
     func createOffer() async throws -> RTCSessionDescription {
@@ -120,11 +126,17 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
     
-    func addTrack(_ track: RTCMediaStreamTrack, streamIds: [String]) {
+    func addTrack(_ track: RTCMediaStreamTrack, streamIds: [String], trackType: TrackType) {
+        publishedTracks.append(trackType)
         pc.add(track, streamIds: streamIds)
     }
     
-    func addTransceiver(_ track: RTCMediaStreamTrack, streamIds: [String], direction: RTCRtpTransceiverDirection = .sendOnly) {
+    func addTransceiver(
+        _ track: RTCMediaStreamTrack,
+        streamIds: [String],
+        direction: RTCRtpTransceiverDirection = .sendOnly,
+        trackType: TrackType
+    ) {
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = direction
         transceiverInit.streamIds = streamIds
@@ -142,6 +154,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
         
         transceiverInit.sendEncodings = encodingParams
+        publishedTracks.append(trackType)
         transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }
     
@@ -225,36 +238,38 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     private func reportCurrentStats() {
-        pc.statistics(completionHandler: { [weak self] report in
-            guard let self = self else { return }
-            Task {
-                let stats = report.statistics
-                var updated = [String: Any]()
-                for (key, value) in stats {
-                    let mapped = [
-                        "id": value.id,
-                        "type": value.type,
-                        "timestamp_us": value.timestamp_us,
-                        "values": value.values
-                    ]
-                    updated[key] = mapped
-                }
-                guard let jsonData = try? JSONSerialization.data(
-                    withJSONObject: updated,
-                    options: .prettyPrinted
-                ) else { return }
-                var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
-                request.callCid = self.callCid
-                request.statsJson = jsonData
-                do {
-                    _ = try await self.coordinatorService.reportCallStats(
-                        reportCallStatsRequest: request
-                    )
-                    log.debug("successfully sent stats for \(self.type)")
-                } catch {
-                    log.error("error reporting stats for \(self.type)")
-                }
-            }
+        pc.statistics(completionHandler: { _ in
+            log.debug("Stats still not reported")
+            /*
+             Task {
+                 let stats = report.statistics
+                 var updated = [String: Any]()
+                 for (key, value) in stats {
+                     let mapped = [
+                         "id": value.id,
+                         "type": value.type,
+                         "timestamp_us": value.timestamp_us,
+                         "values": value.values
+                     ]
+                     updated[key] = mapped
+                 }
+                 guard let jsonData = try? JSONSerialization.data(
+                     withJSONObject: updated,
+                     options: .prettyPrinted
+                 ) else { return }
+                  var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
+                  request.callCid = self.callCid
+                  request.statsJson = jsonData
+                  do {
+                      _ = try await self.coordinatorService.reportCallStats(
+                          reportCallStatsRequest: request
+                      )
+                      log.debug("successfully sent stats for \(self.type)")
+                  } catch {
+                      log.error("error reporting stats for \(self.type)")
+                  }
+             }
+              */
         })
     }
     
@@ -277,6 +292,24 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         statsTimer?.invalidate()
         statsTimer = nil
     }
+}
+
+struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
+    let rawValue: String
+
+    init(rawValue: String) {
+        self.rawValue = rawValue
+    }
+
+    init(stringLiteral value: String) {
+        self.init(rawValue: value)
+    }
+}
+
+extension TrackType {
+    static let audio: Self = "audio"
+    static let video: Self = "video"
+    static let screenshare: Self = "screenshare"
 }
 
 struct ICECandidate: Codable {

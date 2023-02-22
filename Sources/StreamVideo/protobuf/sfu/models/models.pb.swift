@@ -309,11 +309,26 @@ struct Stream_Video_Sfu_Models_Participant {
 
     var audioLevel: Float = 0
 
+    var name: String = String()
+
+    var image: String = String()
+
+    var custom: SwiftProtobuf.Google_Protobuf_Struct {
+        get { _custom ?? SwiftProtobuf.Google_Protobuf_Struct() }
+        set { _custom = newValue }
+    }
+
+    /// Returns true if `custom` has been explicitly set.
+    var hasCustom: Bool { self._custom != nil }
+    /// Clears the value of `custom`. Subsequent reads from it will return its default value.
+    mutating func clearCustom() { _custom = nil }
+
     var unknownFields = SwiftProtobuf.UnknownStorage()
 
     init() {}
 
     private var _joinedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
+    fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct?
 }
 
 struct Stream_Video_Sfu_Models_StreamQuality {
@@ -484,7 +499,7 @@ struct Stream_Video_Sfu_Models_Call {
 
     init() {}
 
-    private var _custom: SwiftProtobuf.Google_Protobuf_Struct?
+    fileprivate var _custom: SwiftProtobuf.Google_Protobuf_Struct?
     private var _createdAt: SwiftProtobuf.Google_Protobuf_Timestamp?
     private var _updatedAt: SwiftProtobuf.Google_Protobuf_Timestamp?
 }
@@ -618,7 +633,10 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         6: .standard(proto: "connection_quality"),
         7: .standard(proto: "is_speaking"),
         8: .standard(proto: "is_dominant_speaker"),
-        9: .standard(proto: "audio_level")
+        9: .standard(proto: "audio_level"),
+        10: .same(proto: "name"),
+        11: .same(proto: "image"),
+        12: .same(proto: "custom")
     ]
 
     mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -636,6 +654,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
             case 7: try { try decoder.decodeSingularBoolField(value: &self.isSpeaking) }()
             case 8: try { try decoder.decodeSingularBoolField(value: &self.isDominantSpeaker) }()
             case 9: try { try decoder.decodeSingularFloatField(value: &self.audioLevel) }()
+            case 10: try { try decoder.decodeSingularStringField(value: &self.name) }()
+            case 11: try { try decoder.decodeSingularStringField(value: &self.image) }()
+            case 12: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
             default: break
             }
         }
@@ -673,6 +694,15 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         if audioLevel != 0 {
             try visitor.visitSingularFloatField(value: audioLevel, fieldNumber: 9)
         }
+        if !name.isEmpty {
+            try visitor.visitSingularStringField(value: name, fieldNumber: 10)
+        }
+        if !image.isEmpty {
+            try visitor.visitSingularStringField(value: image, fieldNumber: 11)
+        }
+        try { if let v = self._custom {
+            try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
+        } }()
         try unknownFields.traverse(visitor: &visitor)
     }
 
@@ -686,6 +716,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
         if lhs.isSpeaking != rhs.isSpeaking { return false }
         if lhs.isDominantSpeaker != rhs.isDominantSpeaker { return false }
         if lhs.audioLevel != rhs.audioLevel { return false }
+        if lhs.name != rhs.name { return false }
+        if lhs.image != rhs.image { return false }
+        if lhs._custom != rhs._custom { return false }
         if lhs.unknownFields != rhs.unknownFields { return false }
         return true
     }

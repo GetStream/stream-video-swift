@@ -32,13 +32,10 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func login(_ user: UserCredentials) {
         let streamVideo = StreamVideo(
-            apiKey: "us83cfwuhy8n",
+            apiKey: "w6yaq5388uym",
             user: user.userInfo,
             token: user.token,
-            videoConfig: VideoConfig(
-                persitingSocketConnection: true,
-                joinVideoCallInstantly: true
-            ),
+            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 result(.success(user.token))
             }
@@ -47,4 +44,3 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     }
 
 }
-

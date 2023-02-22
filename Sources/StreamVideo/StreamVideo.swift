@@ -24,7 +24,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: UserTokenProvider
-    private let endpointConfig: EndpointConfig = .stagingConfig
+    private let endpointConfig: EndpointConfig = .frankfurtStagingConfig
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
@@ -34,14 +34,16 @@ public class StreamVideo {
     }
     
     private let callsMiddleware = CallsMiddleware()
-    
-    private var currentCallInfo = [String: String]()
-    
+    private let permissionsMiddleware = PermissionsMiddleware()
+    private let customEventsMiddleware = CustomEventsMiddleware()
+        
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
         let middlewares: [EventMiddleware] = [
-            callsMiddleware
+            callsMiddleware,
+            permissionsMiddleware,
+            customEventsMiddleware
         ]
         center.add(middlewares: middlewares)
         return center
@@ -61,6 +63,8 @@ public class StreamVideo {
     public private(set) var currentCallController: CallController?
     private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
+    private var permissionsController: PermissionsController?
+    private var eventsController: EventsController?
     
     public convenience init(
         apiKey: String,
@@ -107,10 +111,7 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
-        
-        if videoConfig.persitingSocketConnection {
-            connectWebSocketClient()
-        }
+        connectWebSocketClient()
     }
     
     /// Creates a call controller, used for establishing and managing a call.
@@ -129,9 +130,6 @@ public class StreamVideo {
             tokenProvider: tokenProvider
         )
         currentCallController = controller
-        if !videoConfig.persitingSocketConnection {
-            connectWebSocketClient()
-        }
         return controller
     }
     
@@ -141,13 +139,40 @@ public class StreamVideo {
         callCoordinatorController.makeVoipNotificationsController()
     }
     
+    public func makePermissionsController() -> PermissionsController {
+        let controller = PermissionsController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        permissionsController = controller
+        permissionsMiddleware.onPermissionRequestEvent = { [weak self] request in
+            self?.permissionsController?.onPermissionRequestEvent?(request)
+        }
+        permissionsMiddleware.onPermissionsUpdatedEvent = { [weak self] request in
+            self?.permissionsController?.onPermissionsUpdatedEvent?(request)
+        }
+        return controller
+    }
+    
+    public func makeEventsController() -> EventsController {
+        let controller = EventsController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        eventsController = controller
+        customEventsMiddleware.onCustomEvent = { [weak self] event in
+            self?.eventsController?.onCustomEvent?(event)
+        }
+        return controller
+    }
+    
     /// Accepts the call with the provided call id and type.
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
     public func acceptCall(callId: String, callType: CallType) async throws {
         try await callCoordinatorController.sendEvent(
-            type: .acceptedCall,
+            type: .callAccepted,
             callId: callId,
             callType: callType
         )
@@ -159,7 +184,7 @@ public class StreamVideo {
     ///  - callType: the type of the call.
     public func rejectCall(callId: String, callType: CallType) async throws {
         try await callCoordinatorController.sendEvent(
-            type: .rejectedCall,
+            type: .callRejected,
             callId: callId,
             callType: callType
         )
@@ -171,7 +196,7 @@ public class StreamVideo {
     ///  - callType: the type of the call.
     public func cancelCall(callId: String, callType: CallType) async throws {
         try await callCoordinatorController.sendEvent(
-            type: .cancelledCall,
+            type: .callCancelled,
             callId: callId,
             callType: callType
         )
@@ -180,15 +205,8 @@ public class StreamVideo {
     /// Leaves the current call. It clears all call-related state.
     public func leaveCall() {
         postNotification(with: CallNotification.callEnded)
-        webSocketClient?.set(callInfo: [:])
         currentCallController?.cleanUp()
         currentCallController = nil
-        if videoConfig.persitingSocketConnection {
-            return
-        }
-        webSocketClient?.disconnect {
-            log.debug("Web socket connection closed")
-        }
     }
         
     /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
@@ -212,18 +230,11 @@ public class StreamVideo {
     }
     
     private func connectWebSocketClient() {
-        if let connectURL = URL(string: endpointConfig.wsEndpoint) {
+        let queryParams = endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
+        if let connectURL = try? URL(string: endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         }
-    }
-    
-    private func updateCallInfo(callId: String, callType: String) {
-        currentCallInfo = [
-            WebSocketConstants.callId: callId,
-            WebSocketConstants.callType: callType
-        ]
-        webSocketClient?.set(callInfo: currentCallInfo)
     }
     
     private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {
@@ -233,7 +244,7 @@ public class StreamVideo {
         // Create a WebSocketClient.
         let webSocketClient = WebSocketClient(
             sessionConfiguration: config,
-            eventDecoder: EventDecoder(),
+            eventDecoder: JsonEventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
             webSocketClientType: .coordinator,
             connectURL: url
@@ -242,19 +253,23 @@ public class StreamVideo {
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onConnect = { [weak self] in
             guard let self = self else { return }
-            var payload = Stream_Video_AuthPayload()
-            payload.token = self.token.rawValue
-            payload.apiKey = apiKey.apiKeyString
-            
-            var user = Stream_Video_CreateUserRequest()
-            user.id = self.user.id
-            user.name = self.user.name
-            user.imageURL = self.user.imageURL?.absoluteString ?? ""
-            payload.user = user
-            
-            var event = Stream_Video_WebsocketClientEvent()
-            event.event = .authRequest(payload)
-            webSocketClient.engine?.send(message: event)
+            let userDetails = UserDetailsPayload(
+                id: self.user.id,
+                // TODO: revert this when fixed on the backend.
+//                name: self.user.name,
+//                image: self.user.imageURL?.absoluteString,
+//                Custom: RawJSON.convert(extraData: self.user.extraData)
+                Custom: [
+                    "name": AnyCodable(self.user.name),
+                    "image": AnyCodable(self.user.imageURL?.absoluteString)
+                ]
+            )
+            let connectRequest = ConnectRequestData(
+                token: self.token.rawValue,
+                user_details: userDetails
+            )
+
+            webSocketClient.engine?.send(jsonMessage: connectRequest)
         }
         
         return webSocketClient
@@ -292,6 +307,10 @@ extension StreamVideo: ConnectionStateDelegate {
                         log.error("Error refreshing token, will disconnect ws connection")
                     }
                 }
+            }
+        case let .connected(healthCheckInfo: healtCheckInfo):
+            if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
+                callCoordinatorController.update(connectionId: healthCheck.connection_id)
             }
         default:
             log.debug("Web socket connection state update \(state)")
