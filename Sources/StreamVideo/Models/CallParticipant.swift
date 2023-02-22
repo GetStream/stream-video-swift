@@ -26,6 +26,7 @@ public struct CallParticipant: Identifiable, Sendable {
     public var isSpeaking: Bool
     public var sessionId: String
     public var connectionQuality: ConnectionQuality
+    public var joinedAt: Date
     
     public init(
         id: String,
@@ -45,7 +46,8 @@ public struct CallParticipant: Identifiable, Sendable {
         layoutPriority: LayoutPriority = .normal,
         isSpeaking: Bool = false,
         sessionId: String,
-        connectionQuality: ConnectionQuality
+        connectionQuality: ConnectionQuality,
+        joinedAt: Date
     ) {
         self.id = id
         self.userId = userId
@@ -65,6 +67,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.screenshareTrack = screenshareTrack
         self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
+        self.joinedAt = joinedAt
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -91,7 +94,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -114,7 +118,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -137,7 +142,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -160,7 +166,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 
@@ -183,7 +190,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -206,7 +214,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 
@@ -229,7 +238,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 
@@ -255,7 +265,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
     
@@ -278,7 +289,8 @@ public struct CallParticipant: Identifiable, Sendable {
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             sessionId: sessionId,
-            connectionQuality: connectionQuality
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
         )
     }
 }
@@ -317,7 +329,8 @@ extension User {
             isScreenSharing: false,
             showTrack: false,
             sessionId: "",
-            connectionQuality: .unknown
+            connectionQuality: .unknown,
+            joinedAt: Date()
         )
     }
 }
@@ -338,7 +351,8 @@ extension Stream_Video_Sfu_Models_Participant {
             isScreenSharing: publishedTracks.contains(where: { $0 == .screenShare }),
             showTrack: showTrack,
             sessionId: sessionID,
-            connectionQuality: connectionQuality.mapped
+            connectionQuality: connectionQuality.mapped,
+            joinedAt: joinedAt.date
         )
     }
 }
