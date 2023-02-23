@@ -58,6 +58,18 @@ struct MuteUsersRequestData {
     let muteUsersRequest: MuteUsersRequest
 }
 
+struct BlockUserRequestData {
+    let id: String
+    let type: String
+    let blockUserRequest: BlockUserRequest
+}
+
+struct UnblockUserRequestData {
+    let id: String
+    let type: String
+    let unblockUserRequest: UnblockUserRequest
+}
+
 struct HealthCheck: HealthCheckEvent, Codable {
     let connection_id: String
 }

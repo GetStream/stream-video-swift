@@ -99,29 +99,6 @@ public class PermissionsController {
         )
     }
     
-    func updatePermissions(
-        for userId: String,
-        callId: String,
-        callType: String,
-        granted: [Permission],
-        revoked: [Permission]
-    ) async throws {
-        if !currentUserHasCapability(.updateCallPermissions) {
-            throw ClientError.MissingPermissions()
-        }
-        let updatePermissionsRequest = UpdateUserPermissionsRequest(
-            grantPermissions: granted.map(\.rawValue),
-            revokePermissions: revoked.map(\.rawValue),
-            userId: userId
-        )
-        let request = UpdatePermissionsRequestData(
-            id: callId,
-            type: callType,
-            updateUserPermissionsRequest: updatePermissionsRequest
-        )
-        _ = try await coordinatorClient.updateUserPermissions(with: request)
-    }
-    
     public func muteUsers(
         with request: MuteRequest,
         callId: String,
@@ -147,6 +124,26 @@ public class PermissionsController {
         _ = try await coordinatorClient.endCall(with: endCallRequest)
     }
     
+    public func blockUser(with userId: String, callId: String, callType: String) async throws {
+        let blockUserRequest = BlockUserRequest(userId: userId)
+        let requestData = BlockUserRequestData(
+            id: callId,
+            type: callType,
+            blockUserRequest: blockUserRequest
+        )
+        _ = try await coordinatorClient.blockUser(with: requestData)
+    }
+    
+    public func unblockUser(with userId: String, callId: String, callType: String) async throws {
+        let unblockUserRequest = UnblockUserRequest(userId: userId)
+        let requestData = UnblockUserRequestData(
+            id: callId,
+            type: callType,
+            unblockUserRequest: unblockUserRequest
+        )
+        _ = try await coordinatorClient.unblockUser(with: requestData)
+    }
+    
     public func permissionRequests() -> AsyncStream<PermissionRequest> {
         let requests = AsyncStream(PermissionRequest.self) { [weak self] continuation in
             self?.onPermissionRequestEvent = { event in
@@ -165,6 +162,31 @@ public class PermissionsController {
             }
         }
         return requests
+    }
+    
+    // MARK: - private
+    
+    private func updatePermissions(
+        for userId: String,
+        callId: String,
+        callType: String,
+        granted: [Permission],
+        revoked: [Permission]
+    ) async throws {
+        if !currentUserHasCapability(.updateCallPermissions) {
+            throw ClientError.MissingPermissions()
+        }
+        let updatePermissionsRequest = UpdateUserPermissionsRequest(
+            grantPermissions: granted.map(\.rawValue),
+            revokePermissions: revoked.map(\.rawValue),
+            userId: userId
+        )
+        let request = UpdatePermissionsRequestData(
+            id: callId,
+            type: callType,
+            updateUserPermissionsRequest: updatePermissionsRequest
+        )
+        _ = try await coordinatorClient.updateUserPermissions(with: request)
     }
 }
 
