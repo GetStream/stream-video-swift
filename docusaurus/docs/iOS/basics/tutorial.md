@@ -79,7 +79,7 @@ struct VideoDemoSwiftUIApp: App {
             apiKey: apiKey,
             user: userCredentials.user,
             token: userCredentials.token,
-            videoConfig: VideoConfig(joinVideoCallInstantly: true),
+            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 // Call your networking service to generate a new token here.
                 // When finished, call the result handler with either .success or .failure.
@@ -176,10 +176,7 @@ streamVideo = StreamVideoUI(
     apiKey: "your_api_key",
     user: userCredentials.userInfo,
     token: userCredentials.token,
-    videoConfig: VideoConfig(
-        persitingSocketConnection: true,
-        joinVideoCallInstantly: true
-    ),
+    videoConfig: VideoConfig(),
     tokenProvider: { result in
         result(.success(user.token))
     },

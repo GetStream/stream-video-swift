@@ -72,7 +72,7 @@ struct VideoTutorialApp: App {
             apiKey: apiKey,
             user: userCredentials.user,
             token: userCredentials.token,
-            videoConfig: VideoConfig(joinVideoCallInstantly: true),
+            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 // Call your networking service to generate a new token here.
                 // When finished, call the result handler with either .success or .failure.
