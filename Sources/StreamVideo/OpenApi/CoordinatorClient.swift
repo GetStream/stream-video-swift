@@ -80,6 +80,20 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/call/members")
     }
     
+    func blockUser(with request: BlockUserRequestData) async throws -> BlockUserResponse {
+        try await execute(
+            request: request.blockUserRequest,
+            path: "/call/\(request.type)/\(request.id)/block"
+        )
+    }
+    
+    func unblockUser(with request: UnblockUserRequestData) async throws -> UnblockUserResponse {
+        try await execute(
+            request: request.unblockUserRequest,
+            path: "/call/\(request.type)/\(request.id)/unblock"
+        )
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
