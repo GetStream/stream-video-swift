@@ -33,10 +33,7 @@ let streamVideo = StreamVideo(
     apiKey: "your_api_key",
     user: user.userInfo,
     token: user.token,
-    videoConfig: VideoConfig(
-        persitingSocketConnection: true,
-        joinVideoCallInstantly: true
-    ),
+    videoConfig: VideoConfig(),
     tokenProvider: { result in
         result(.success(user.token))
     }

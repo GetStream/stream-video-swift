@@ -49,7 +49,6 @@ let streamVideo = StreamVideo(
     token: token,
     // highlight-start
     videoConfig: VideoConfig(
-        joinVideoCallInstantly: true,
         videoFilters: FiltersService.supportedFilters
     ),
     // highlight-end

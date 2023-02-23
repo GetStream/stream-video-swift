@@ -210,10 +210,7 @@ func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
                 apiKey: "key1",
                 user: currentUser.userInfo,
                 token: currentUser.token,
-                videoConfig: VideoConfig(
-                    persitingSocketConnection: true,
-                    joinVideoCallInstantly: false
-                ),
+                videoConfig: VideoConfig(),
                 tokenProvider: { result in
                     result(.success(currentUser.token))
                 }

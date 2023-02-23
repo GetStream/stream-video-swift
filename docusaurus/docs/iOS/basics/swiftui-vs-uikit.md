@@ -14,8 +14,6 @@ You can also have a direct view at the [SwiftUI SDK and the UIKit SDK](https://g
 
 ## SwiftUI SDK
 
-The SwiftUI SDK provides out of the box UI components, ready to be used in your app. The currently supported flows are "ringing" mode - with outgoing / incoming screens, and the "meeting" mode, which adds users to the call directly. The `joinVideoCallInstantly` property in the `VideoConfig` determines this behaviour (as described above).
-
 The simplest way to add calling support to your hosting view is to attach the `CallModifier`:
 
 ```swift

@@ -81,9 +81,7 @@ class AppState: ObservableObject {
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(
-               videoEnabled: false,
-               persitingSocketConnection: true,
-               joinVideoCallInstantly: true
+               videoEnabled: false
             ),
             tokenProvider: { result in
                 result(.success(user.token))
@@ -211,9 +209,7 @@ func login(_ user: UserCredentials) {
       user: user.userInfo,
       token: user.token,
       videoConfig: VideoConfig(
-            videoEnabled: false,
-            persitingSocketConnection: true,
-            joinVideoCallInstantly: true
+            videoEnabled: false
       ),
       tokenProvider: { result in
             result(.success(user.token))

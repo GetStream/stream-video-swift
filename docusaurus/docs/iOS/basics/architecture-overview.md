@@ -38,10 +38,7 @@ let streamVideo = StreamVideo(
     apiKey: "key1",
     user: user.userInfo,
     token: user.token,
-    videoConfig: VideoConfig(
-        persitingSocketConnection: true,
-        joinVideoCallInstantly: true
-    ),
+    videoConfig: VideoConfig(),
     tokenProvider: { result in
     	yourNetworkService.loadToken(completion: result)
     }
@@ -53,7 +50,7 @@ Here are parameters that the `StreamVideo` class expects:
 - `apiKey` - your Stream Video API key (note: it's different from chat)
 - `user` - the logged in user, represented by the `UserInfo` struct.
 - `token` - the user's token.
-- `videoConfig` - configuration for the type of calls. The `joinVideoCallInstantly` determines if you want to use the outgoing / incoming call screens (similar to social media apps), or jump directly to a call (similar to meeting based apps).
+- `videoConfig` - configuration for the type of calls.
 - `tokenProvider` - called when the token expires. Use it to load a new token from your networking service.
 
 The `StreamVideo` object should be kept alive throughout the app lifecycle. You can store it in your `App` or `AppDelegate`, or any other class whose lifecycle is tied to the one of the logged in user.
