@@ -181,25 +181,3 @@ public struct CallView<Factory: ViewFactory>: View {
         }
     }
 }
-
-@available(iOS 14.0, *)
-public struct CallParticipantsInfoView: View {
-    
-    private let padding: CGFloat = 16
-    
-    @ObservedObject var viewModel: CallViewModel
-    var availableSize: CGSize
-    
-    public var body: some View {
-        VStack {
-            CallParticipantsView(
-                viewModel: viewModel,
-                maxHeight: availableSize.height - padding
-            )
-            .padding()
-            .padding(.vertical, padding / 2)
-            
-            Spacer()
-        }
-    }
-}

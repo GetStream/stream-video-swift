@@ -24,6 +24,9 @@ open class CallViewModel: ObservableObject {
         didSet {
             if callingState == .idle {
                 edgeServer = nil
+                if !blockedUsers.isEmpty {
+                    blockedUsers = []
+                }
             }
             handleRingingEvents()
         }
@@ -60,6 +63,8 @@ open class CallViewModel: ObservableObject {
     @Published public var hideUIElements = false
     
     @Published public private(set) var edgeServer: EdgeServer?
+    
+    @Published public var blockedUsers = [User]()
     
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (_, value) in
@@ -353,6 +358,16 @@ open class CallViewModel: ObservableObject {
                     leaveCall()
                 } else if case .ended = callEvent {
                     leaveCall()
+                } else if case let .userBlocked(callEventInfo) = callEvent {
+                    if callEventInfo.user.id == streamVideo.user.id {
+                        leaveCall()
+                    } else {
+                        blockedUsers.append(callEventInfo.user)
+                    }
+                } else if case let .userUnblocked(callEventInfo) = callEvent {
+                    blockedUsers.removeAll { user in
+                        user.id == callEventInfo.user.id
+                    }
                 }
             }
         }

@@ -174,7 +174,7 @@ extension ViewFactory {
         availableSize: CGSize
     ) -> some View {
         if #available(iOS 14.0, *) {
-            return CallParticipantsInfoView(viewModel: viewModel, availableSize: availableSize)
+            return CallParticipantsInfoView(callViewModel: viewModel, availableSize: availableSize)
         } else {
             return EmptyView()
         }

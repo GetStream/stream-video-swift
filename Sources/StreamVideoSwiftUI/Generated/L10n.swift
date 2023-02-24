@@ -19,6 +19,8 @@ internal enum L10n {
     internal enum Participants {
       /// Add participants
       internal static var add: String { L10n.tr("Localizable", "call.participants.add") }
+      /// Blocked users
+      internal static var blocked: String { L10n.tr("Localizable", "call.participants.blocked") }
       /// Cancel
       internal static var cancelSearch: String { L10n.tr("Localizable", "call.participants.cancel-search") }
       /// Plural format key: "%#@participants@"

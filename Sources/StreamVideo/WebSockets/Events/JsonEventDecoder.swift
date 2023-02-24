@@ -16,13 +16,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .callCreated:
             let callCreated = try decoder.decode(CallCreated.self, from: data)
             let call = callCreated.call
-            let members = callCreated.members.compactMap { member in
-                User(
-                    id: member.userId,
-                    name: member.user.name,
-                    imageURL: URL(string: member.user.image ?? "")
-                )
-            }
+            let members = callCreated.members.compactMap(\.user.toUser)
             return IncomingCallEvent(
                 callCid: call.cid,
                 createdBy: call.createdBy.id,
@@ -34,6 +28,7 @@ struct JsonEventDecoder: AnyEventDecoder {
             let callId = callCanceled.callCid
             return CallEventInfo(
                 callId: callId,
+                user: callCanceled.user.toUser,
                 action: .cancel
             )
         case .callRejected:
@@ -41,6 +36,7 @@ struct JsonEventDecoder: AnyEventDecoder {
             let callId = callRejected.callCid
             return CallEventInfo(
                 callId: callId,
+                user: callRejected.user.toUser,
                 action: .reject
             )
         case .callAccepted:
@@ -48,6 +44,7 @@ struct JsonEventDecoder: AnyEventDecoder {
             let callId = callAccepted.callCid
             return CallEventInfo(
                 callId: callId,
+                user: callAccepted.user.toUser,
                 action: .accept
             )
         case .callEnded:
@@ -55,7 +52,24 @@ struct JsonEventDecoder: AnyEventDecoder {
             let callId = callEnded.callCid
             return CallEventInfo(
                 callId: callId,
+                user: callEnded.user.toUser,
                 action: .end
+            )
+        case .callBlocked:
+            let callBlocked = try decoder.decode(CallBlockedUser.self, from: data)
+            let callId = callBlocked.callCid
+            return CallEventInfo(
+                callId: callId,
+                user: User(id: callBlocked.userId),
+                action: .block
+            )
+        case .callUnblocked:
+            let callUnblocked = try decoder.decode(CallUnblockedUser.self, from: data)
+            let callId = callUnblocked.callCid
+            return CallEventInfo(
+                callId: callId,
+                user: User(id: callUnblocked.userId),
+                action: .unblock
             )
         case .permissionRequest:
             return try decoder.decode(CallPermissionRequest.self, from: data)
@@ -81,6 +95,16 @@ extension CallPermissionRequest: Event {}
 extension CallPermissionsUpdated: Event {}
 extension Custom: Event {}
 
+extension UserResponse {
+    var toUser: User {
+        User(
+            id: id,
+            name: name,
+            imageURL: URL(string: image ?? "")
+        )
+    }
+}
+
 class JsonEvent: Decodable {
     let type: EventType
 }
@@ -104,6 +128,8 @@ public extension EventType {
     static let callRejected: Self = "call.rejected"
     static let callAccepted: Self = "call.accepted"
     static let callEnded: Self = "call.ended"
+    static let callBlocked: Self = "call.blocked_user"
+    static let callUnblocked: Self = "call.unblocked_user"
     static let permissionRequest: Self = "call.permission_request"
     static let permissionsUpdated: Self = "call.permissions_updated"
 }

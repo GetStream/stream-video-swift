@@ -140,6 +140,9 @@ public class StreamVideo {
     }
     
     public func makePermissionsController() -> PermissionsController {
+        if let permissionsController = permissionsController {
+            return permissionsController
+        }
         let controller = PermissionsController(
             callCoordinatorController: callCoordinatorController,
             currentUser: user
@@ -155,6 +158,9 @@ public class StreamVideo {
     }
     
     public func makeEventsController() -> EventsController {
+        if let eventsController = eventsController {
+            return eventsController
+        }
         let controller = EventsController(
             callCoordinatorController: callCoordinatorController,
             currentUser: user

@@ -7,32 +7,70 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
+public struct CallParticipantsInfoView: View {
+    
+    private let padding: CGFloat = 16
+    
+    @StateObject var viewModel: CallParticipantsInfoViewModel
+    @ObservedObject var callViewModel: CallViewModel
+    var availableSize: CGSize
+    
+    public init(callViewModel: CallViewModel, availableSize: CGSize) {
+        self.callViewModel = callViewModel
+        self.availableSize = availableSize
+        _viewModel = StateObject(
+            wrappedValue: CallParticipantsInfoViewModel(
+                callId: callViewModel.call?.callId ?? "",
+                callType: callViewModel.call?.callType.name ?? ""
+            )
+        )
+    }
+    
+    public var body: some View {
+        VStack {
+            CallParticipantsView(
+                viewModel: viewModel,
+                callViewModel: callViewModel,
+                maxHeight: availableSize.height - padding
+            )
+            .padding()
+            .padding(.vertical, padding / 2)
+            
+            Spacer()
+        }
+    }
+}
+
+@available(iOS 14.0, *)
 struct CallParticipantsView: View {
     
-    @ObservedObject var viewModel: CallViewModel
+    @ObservedObject var viewModel: CallParticipantsInfoViewModel
+    @ObservedObject var callViewModel: CallViewModel
 
     var maxHeight: CGFloat
         
     var body: some View {
         CallParticipantsViewContainer(
+            viewModel: viewModel,
             participants: participants,
-            callSettings: viewModel.callSettings,
+            blockedUsers: callViewModel.blockedUsers,
+            callSettings: callViewModel.callSettings,
             maxHeight: maxHeight,
-            inviteParticipantsShown: $viewModel.inviteParticipantsShown,
+            inviteParticipantsShown: $callViewModel.inviteParticipantsShown,
             inviteTapped: {
-                viewModel.inviteParticipantsShown = true
+                callViewModel.inviteParticipantsShown = true
             },
             muteTapped: {
-                viewModel.toggleMicrophoneEnabled()
+                callViewModel.toggleMicrophoneEnabled()
             },
             closeTapped: {
-                viewModel.participantsShown = false
+                callViewModel.participantsShown = false
             }
         )
     }
     
     private var participants: [CallParticipant] {
-        viewModel.callParticipants
+        callViewModel.callParticipants
             .map(\.value)
             .sorted(by: { $0.name < $1.name })
     }
@@ -41,10 +79,13 @@ struct CallParticipantsView: View {
 @available(iOS 14.0, *)
 struct CallParticipantsViewContainer: View {
     
+    @ObservedObject var viewModel: CallParticipantsInfoViewModel
+    
     @Injected(\.colors) var colors
     @Injected(\.images) var images
         
     var participants: [CallParticipant]
+    var blockedUsers: [User]
     var callSettings: CallSettings
     var maxHeight: CGFloat
     @Binding var inviteParticipantsShown: Bool
@@ -60,8 +101,17 @@ struct CallParticipantsViewContainer: View {
                 ScrollView {
                     LazyVStack {
                         ForEach(participants) { participant in
-                            CallParticipantView(participant: participant)
-                                .id(participant.renderingId)
+                            CallParticipantView(
+                                participant: participant,
+                                menuActions: viewModel.menuActions(for: participant)
+                            )
+                            .id(participant.renderingId)
+                        }
+                        if !blockedUsers.isEmpty {
+                            BlockedUsersView(
+                                blockedUsers: blockedUsers,
+                                unblockActions: viewModel.unblockActions(for:)
+                            )
                         }
                     }
                     .padding()
@@ -82,7 +132,7 @@ struct CallParticipantsViewContainer: View {
                     ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
                     
                     ParticipantsButton(
-                        title: callSettings.audioOn ? L10n.Call.Participants.unmuteme : L10n.Call.Participants.muteme,
+                        title: callSettings.audioOn ? L10n.Call.Participants.muteme : L10n.Call.Participants.unmuteme,
                         primaryStyle: false,
                         onTapped: muteTapped
                     )
@@ -167,6 +217,40 @@ struct ParticipantsButton: View {
     }
 }
 
+struct BlockedUsersView: View {
+    
+    var blockedUsers: [User]
+    var unblockActions: (User) -> [CallParticipantMenuAction]
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(L10n.Call.Participants.blocked)
+                    .font(.headline)
+                    .multilineTextAlignment(.leading)
+                    .padding(.vertical, 8)
+                ForEach(blockedUsers) { blockedUser in
+                    Text(blockedUser.id)
+                        .contextMenu {
+                            ForEach(unblockActions(blockedUser)) { menuAction in
+                                Button {
+                                    menuAction.action(blockedUser.id)
+                                } label: {
+                                    HStack {
+                                        Image(systemName: menuAction.iconName)
+                                        Text(menuAction.title)
+                                        Spacer()
+                                    }
+                                }
+                            }
+                        }
+                }
+            }
+            Spacer()
+        }
+    }
+}
+
 struct CallParticipantView: View {
     
     @Injected(\.colors) var colors
@@ -176,6 +260,7 @@ struct CallParticipantView: View {
     private let imageSize: CGFloat = 48
     
     var participant: CallParticipant
+    var menuActions: [CallParticipantMenuAction]
     
     var body: some View {
         VStack(spacing: 4) {
@@ -204,7 +289,22 @@ struct CallParticipantView: View {
                         .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
                 }
             }
+            .padding(.all, 4)
+
             Divider()
+        }
+        .contextMenu {
+            ForEach(menuActions) { menuAction in
+                Button {
+                    menuAction.action(participant.userId)
+                } label: {
+                    HStack {
+                        Image(systemName: menuAction.iconName)
+                        Text(menuAction.title)
+                        Spacer()
+                    }
+                }
+            }
         }
     }
 }
