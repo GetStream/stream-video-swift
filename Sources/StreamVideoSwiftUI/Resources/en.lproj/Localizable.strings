@@ -10,6 +10,7 @@
 "call.participants.search" = "Search...";
 "call.participants.cancel-search" = "Cancel";
 "call.participants.on-platform" = "On the platform";
+"call.participants.blocked" = "Blocked users";
 
 "call.incoming.title" = "Incoming call";
 "call.outgoing.title" = "Calling";

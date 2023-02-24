@@ -16,6 +16,10 @@ public enum CallEvent: Sendable {
     case canceled(CallEventInfo)
     /// The call is ended.
     case ended(CallEventInfo)
+    /// A user was blocked.
+    case userBlocked(CallEventInfo)
+    /// A user was unblocked.
+    case userUnblocked(CallEventInfo)
 }
 
 enum CallEventAction: Sendable {
@@ -23,6 +27,8 @@ enum CallEventAction: Sendable {
     case reject
     case cancel
     case end
+    case block
+    case unblock
 }
 
 struct IncomingCallEvent: Event {
@@ -35,5 +41,6 @@ struct IncomingCallEvent: Event {
 /// Contains info about a call event.
 public struct CallEventInfo: Event, Sendable {
     let callId: String
+    let user: User
     let action: CallEventAction
 }

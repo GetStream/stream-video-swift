@@ -33,6 +33,10 @@ class CallsMiddleware: EventMiddleware {
                 callEvent = .canceled(event)
             case .end:
                 callEvent = .ended(event)
+            case .block:
+                callEvent = .userBlocked(event)
+            case .unblock:
+                callEvent = .userUnblocked(event)
             }
             onCallEvent?(callEvent)
         }
