@@ -16,7 +16,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .callCreated:
             let callCreated = try decoder.decode(CallCreated.self, from: data)
             let call = callCreated.call
-            let members = callCreated.members.compactMap(\.user.toUser)
+            let members = callCreated.members.compactMap { $0.user.toUser }
             return IncomingCallEvent(
                 callCid: call.cid,
                 createdBy: call.createdBy.id,
