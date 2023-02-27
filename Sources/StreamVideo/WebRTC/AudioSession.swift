@@ -21,6 +21,8 @@ actor AudioSession {
             try audioSession.setConfiguration(configuration, active: callSettings.audioOn)
             if callSettings.speakerOn {
                 configuration.categoryOptions.insert(.defaultToSpeaker)
+            } else {
+                configuration.categoryOptions.remove(.defaultToSpeaker)
             }
             try audioSession.overrideOutputAudioPort(callSettings.speakerOn ? .speaker : .none)
         } catch {

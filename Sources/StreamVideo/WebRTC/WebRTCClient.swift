@@ -284,6 +284,16 @@ class WebRTCClient: NSObject {
         localVideoTrack?.isEnabled = isEnabled
     }
     
+    func changeSpeakerState(isEnabled: Bool) async throws {
+        callSettings = CallSettings(
+            audioOn: callSettings.audioOn,
+            videoOn: callSettings.videoOn,
+            speakerOn: isEnabled,
+            cameraPosition: callSettings.cameraPosition
+        )
+        await audioSession.configure(callSettings: callSettings)
+    }
+    
     func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
         guard let participant = await state.callParticipants[participant.id],
               participant.showTrack != isVisible else {
