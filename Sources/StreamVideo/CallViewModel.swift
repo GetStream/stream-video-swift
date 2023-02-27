@@ -160,6 +160,22 @@ open class CallViewModel: ObservableObject {
         callController.changeCameraMode(position: next)
         callSettings = callSettings.withUpdatedCameraPosition(next)
     }
+    
+    /// Toggles the state of the speaker (on/off).
+    public func toggleSpeakerOn() {
+        guard let callController = callController else {
+            return
+        }
+        let next = !callSettings.speakerOn
+        Task {
+            try await callController.changeSpeakerState(isEnabled: next)
+            callSettings = CallSettings(
+                audioOn: callSettings.audioOn,
+                videoOn: callSettings.videoOn,
+                speakerOn: next
+            )
+        }
+    }
 
     /// Starts a call with the provided info.
     /// - Parameters:

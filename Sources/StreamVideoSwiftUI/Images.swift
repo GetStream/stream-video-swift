@@ -16,6 +16,8 @@ public class Images {
     public var videoTurnOff = Image(systemName: "video.slash.fill")
     public var micTurnOn = Image(systemName: "mic.fill")
     public var micTurnOff = Image(systemName: "mic.slash.fill")
+    public var speakerOn = Image(systemName: "speaker.wave.3.fill")
+    public var speakerOff = Image(systemName: "speaker.slash.fill")
     public var toggleCamera = Image(systemName: toggleCameraImageName)
     public var hangup = Image(systemName: "phone.down.circle.fill")
     public var acceptCall = Image(systemName: "phone.circle.fill")
