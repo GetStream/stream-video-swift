@@ -123,7 +123,8 @@ open class CallViewModel: ObservableObject {
                 callSettings = CallSettings(
                     audioOn: callSettings.audioOn,
                     videoOn: isEnabled,
-                    speakerOn: callSettings.speakerOn
+                    speakerOn: callSettings.speakerOn,
+                    audioOutputOn: callSettings.audioOutputOn
                 )
             } catch {
                 log.error("Error toggling camera")
@@ -143,7 +144,8 @@ open class CallViewModel: ObservableObject {
                 callSettings = CallSettings(
                     audioOn: isEnabled,
                     videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn
+                    speakerOn: callSettings.speakerOn,
+                    audioOutputOn: callSettings.audioOutputOn
                 )
             } catch {
                 log.error("Error toggling microphone")
@@ -161,19 +163,24 @@ open class CallViewModel: ObservableObject {
         callSettings = callSettings.withUpdatedCameraPosition(next)
     }
     
-    /// Toggles the state of the speaker (on/off).
-    public func toggleSpeakerOn() {
+    /// Enables or disables the audio output.
+    public func toggleAudioOutput() {
         guard let callController = callController else {
             return
         }
-        let next = !callSettings.speakerOn
         Task {
-            try await callController.changeSpeakerState(isEnabled: next)
-            callSettings = CallSettings(
-                audioOn: callSettings.audioOn,
-                videoOn: callSettings.videoOn,
-                speakerOn: next
-            )
+            do {
+                let isEnabled = !callSettings.audioOutputOn
+                try await callController.changeSoundState(isEnabled: isEnabled)
+                callSettings = CallSettings(
+                    audioOn: callSettings.audioOutputOn,
+                    videoOn: callSettings.videoOn,
+                    speakerOn: callSettings.speakerOn,
+                    audioOutputOn: isEnabled
+                )
+            } catch {
+                log.error("Error toggling audio output")
+            }
         }
     }
 
@@ -454,6 +461,7 @@ open class CallViewModel: ObservableObject {
                 audioOn: localParticipant.hasAudio,
                 videoOn: localParticipant.hasVideo,
                 speakerOn: previous.speakerOn,
+                audioOutputOn: previous.audioOutputOn,
                 cameraPosition: previous.cameraPosition
             )
         }

@@ -249,6 +249,7 @@ class WebRTCClient: NSObject {
                 audioOn: isEnabled,
                 videoOn: callSettings.videoOn,
                 speakerOn: callSettings.speakerOn,
+                audioOutputOn: callSettings.audioOutputOn,
                 cameraPosition: callSettings.cameraPosition
             )
             try await publishLocalTracks(configuration: configuration)
@@ -270,6 +271,7 @@ class WebRTCClient: NSObject {
                 audioOn: callSettings.audioOn,
                 videoOn: isEnabled,
                 speakerOn: callSettings.speakerOn,
+                audioOutputOn: callSettings.audioOutputOn,
                 cameraPosition: callSettings.cameraPosition
             )
             try await publishLocalTracks(configuration: configuration)
@@ -284,14 +286,8 @@ class WebRTCClient: NSObject {
         localVideoTrack?.isEnabled = isEnabled
     }
     
-    func changeSpeakerState(isEnabled: Bool) async throws {
-        callSettings = CallSettings(
-            audioOn: callSettings.audioOn,
-            videoOn: callSettings.videoOn,
-            speakerOn: isEnabled,
-            cameraPosition: callSettings.cameraPosition
-        )
-        await audioSession.configure(callSettings: callSettings)
+    func changeSoundState(isEnabled: Bool) async throws {
+        await audioSession.setAudioSessionEnabled(isEnabled)
     }
     
     func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
