@@ -382,14 +382,14 @@ open class CallViewModel: ObservableObject {
                 } else if case .ended = callEvent {
                     leaveCall()
                 } else if case let .userBlocked(callEventInfo) = callEvent {
-                    if callEventInfo.user.id == streamVideo.user.id {
+                    if callEventInfo.user?.id == streamVideo.user.id {
                         leaveCall()
-                    } else {
-                        blockedUsers.append(callEventInfo.user)
+                    } else if let user = callEventInfo.user {
+                        blockedUsers.append(user)
                     }
                 } else if case let .userUnblocked(callEventInfo) = callEvent {
                     blockedUsers.removeAll { user in
-                        user.id == callEventInfo.user.id
+                        user.id == callEventInfo.user?.id
                     }
                 }
             }

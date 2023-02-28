@@ -46,7 +46,7 @@ public struct CustomEvent {
     public let user: User
 }
 
-extension Custom {
+extension CustomVideoEvent {
     func toCustomEvent() -> CustomEvent {
         CustomEvent(
             callCid: callCid,

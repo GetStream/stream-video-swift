@@ -10,10 +10,10 @@ class PermissionsMiddleware: EventMiddleware {
     var onPermissionsUpdatedEvent: ((PermissionsUpdated) -> Void)?
     
     func handle(event: Event) -> Event? {
-        if let callPermissionRequest = event as? CallPermissionRequest {
+        if let callPermissionRequest = event as? PermissionRequestEvent {
             let permissionRequest = callPermissionRequest.toPermissionRequest()
             onPermissionRequestEvent?(permissionRequest)
-        } else if let callPermissionsUpdated = event as? CallPermissionsUpdated {
+        } else if let callPermissionsUpdated = event as? UpdatedCallPermissionsEvent {
             let permissionsUpdated = callPermissionsUpdated.toPermissionsUpdated()
             onPermissionsUpdatedEvent?(permissionsUpdated)
         }
@@ -36,7 +36,7 @@ public struct PermissionsUpdated: Event, Sendable {
     public let user: User
 }
 
-extension CallPermissionRequest {
+extension PermissionRequestEvent {
     
     func toPermissionRequest() -> PermissionRequest {
         var imageUrl: URL?
@@ -53,7 +53,7 @@ extension CallPermissionRequest {
     }
 }
 
-extension CallPermissionsUpdated {
+extension UpdatedCallPermissionsEvent {
     
     func toPermissionsUpdated() -> PermissionsUpdated {
         var imageUrl: URL?

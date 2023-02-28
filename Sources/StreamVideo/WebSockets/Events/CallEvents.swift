@@ -41,6 +41,6 @@ struct IncomingCallEvent: Event {
 /// Contains info about a call event.
 public struct CallEventInfo: Event, Sendable {
     let callId: String
-    let user: User
+    let user: User?
     let action: CallEventAction
 }
