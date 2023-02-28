@@ -10,8 +10,10 @@ public final class CallSettings: ObservableObject, Sendable {
     public let audioOn: Bool
     /// Whether the video is on for the current user.
     public let videoOn: Bool
-    /// Whether the sepaker is on for the current user.
+    /// Whether the speaker is on for the current user.
     public let speakerOn: Bool
+    /// Whether the audio output is on for the current user.
+    public let audioOutputOn: Bool
     /// The camera position for the current user.
     public let cameraPosition: CameraPosition
         
@@ -19,10 +21,12 @@ public final class CallSettings: ObservableObject, Sendable {
         audioOn: Bool = true,
         videoOn: Bool = true,
         speakerOn: Bool = true,
+        audioOutputOn: Bool = true,
         cameraPosition: CameraPosition = .front
     ) {
         self.audioOn = audioOn
         self.speakerOn = speakerOn
+        self.audioOutputOn = audioOutputOn
         self.cameraPosition = cameraPosition
         #if targetEnvironment(simulator)
         self.videoOn = false
@@ -40,6 +44,7 @@ public final class CallSettings: ObservableObject, Sendable {
             audioOn: audioOn,
             videoOn: videoOn,
             speakerOn: speakerOn,
+            audioOutputOn: audioOutputOn,
             cameraPosition: cameraPosition
         )
     }

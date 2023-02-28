@@ -125,11 +125,11 @@ public class CallController {
         try await webRTCClient.changeVideoState(isEnabled: isEnabled)
     }
     
-    /// Changes the speaker state for the current user.
-    /// - Parameter isEnabled: whether the speaker should be enabled.
-    public func changeSpeakerState(isEnabled: Bool) async throws {
+    /// Changes the availability of sound during the call.
+    /// - Parameter isEnabled: whether the sound should be enabled.
+    public func changeSoundState(isEnabled: Bool) async throws {
         let webRTCClient = try currentWebRTCClient()
-        try await webRTCClient.changeSpeakerState(isEnabled: isEnabled)
+        try await webRTCClient.changeSoundState(isEnabled: isEnabled)
     }
     
     /// Changes the camera position (front/back) for the current user.

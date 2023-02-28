@@ -13,6 +13,8 @@ actor AudioSession {
     ) {
         let audioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
         audioSession.lockForConfiguration()
+        audioSession.useManualAudio = true
+        audioSession.isAudioEnabled = true
 
         defer { audioSession.unlockForConfiguration() }
 
@@ -29,6 +31,15 @@ actor AudioSession {
             log.error("Error occured while configuring audio session \(error)")
         }
     }
+    
+    func setAudioSessionEnabled(_ enabled: Bool) {
+        let audioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
+        audioSession.lockForConfiguration()
+
+        defer { audioSession.unlockForConfiguration() }
+        audioSession.isAudioEnabled = enabled
+    }
+    
 }
 
 extension RTCAudioSessionConfiguration {
@@ -36,7 +47,7 @@ extension RTCAudioSessionConfiguration {
     static let `default`: RTCAudioSessionConfiguration = {
         let configuration = RTCAudioSessionConfiguration.webRTC()
         var categoryOptions: AVAudioSession.CategoryOptions = [.allowBluetooth, .allowBluetoothA2DP]
-        configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
+        configuration.mode = AVAudioSession.Mode.videoChat.rawValue
         configuration.category = AVAudioSession.Category.playAndRecord.rawValue
         configuration.categoryOptions = categoryOptions
         return configuration

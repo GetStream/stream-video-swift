@@ -170,7 +170,7 @@ public struct HangUpIconView: View {
     }
 }
 
-public struct SpeakerIconView: View {
+public struct AudioOutputIconView: View {
     
     @Injected(\.images) var images
     
@@ -185,13 +185,13 @@ public struct SpeakerIconView: View {
     public var body: some View {
         Button(
             action: {
-                viewModel.toggleSpeakerOn()
+                viewModel.toggleAudioOutput()
             },
             label: {
                 CallIconView(
-                    icon: (viewModel.callSettings.speakerOn ? images.speakerOn : images.speakerOff),
+                    icon: (viewModel.callSettings.audioOutputOn ? images.speakerOn : images.speakerOff),
                     size: size,
-                    iconStyle: (viewModel.callSettings.speakerOn ? .primary : .transparent)
+                    iconStyle: (viewModel.callSettings.audioOutputOn ? .primary : .transparent)
                 )
             }
         )
