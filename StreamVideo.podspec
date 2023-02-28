@@ -20,5 +20,5 @@ Pod::Spec.new do |spec|
   spec.exclude_files = ["Sources/StreamVideo/**/*_Tests.swift", "Sources/StreamVideo/**/*_Mock.swift"]
 
   spec.dependency("SwiftProtobuf", "~> 1.18.0")
-  spec.dependency("WebRTC-SDK", "104.5112.2")
+  spec.dependency("WebRTC-SDK", "104.5112.11")
 end
