@@ -9,7 +9,7 @@ class CustomEventsMiddleware: EventMiddleware {
     var onCustomEvent: ((CustomEvent) -> Void)?
     
     func handle(event: Event) -> Event? {
-        if let event = event as? Custom {
+        if let event = event as? CustomVideoEvent {
             let customEvent = event.toCustomEvent()
             onCustomEvent?(customEvent)
         }

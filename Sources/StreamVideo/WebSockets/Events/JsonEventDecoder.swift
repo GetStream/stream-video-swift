@@ -14,7 +14,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .healthCheck:
             return try decoder.decode(HealthCheck.self, from: data)
         case .callCreated:
-            let callCreated = try decoder.decode(CallCreated.self, from: data)
+            let callCreated = try decoder.decode(CallCreatedEvent.self, from: data)
             let call = callCreated.call
             let members = callCreated.members.compactMap { $0.user.toUser }
             return IncomingCallEvent(
@@ -24,7 +24,7 @@ struct JsonEventDecoder: AnyEventDecoder {
                 users: members
             )
         case .callCancelled:
-            let callCanceled = try decoder.decode(CallCancelled.self, from: data)
+            let callCanceled = try decoder.decode(CallCancelledEvent.self, from: data)
             let callId = callCanceled.callCid
             return CallEventInfo(
                 callId: callId,
@@ -32,7 +32,7 @@ struct JsonEventDecoder: AnyEventDecoder {
                 action: .cancel
             )
         case .callRejected:
-            let callRejected = try decoder.decode(CallRejected.self, from: data)
+            let callRejected = try decoder.decode(CallRejectedEvent.self, from: data)
             let callId = callRejected.callCid
             return CallEventInfo(
                 callId: callId,
@@ -40,7 +40,7 @@ struct JsonEventDecoder: AnyEventDecoder {
                 action: .reject
             )
         case .callAccepted:
-            let callAccepted = try decoder.decode(CallAccepted.self, from: data)
+            let callAccepted = try decoder.decode(CallAcceptedEvent.self, from: data)
             let callId = callAccepted.callCid
             return CallEventInfo(
                 callId: callId,
@@ -48,15 +48,15 @@ struct JsonEventDecoder: AnyEventDecoder {
                 action: .accept
             )
         case .callEnded:
-            let callEnded = try decoder.decode(CallEnded.self, from: data)
+            let callEnded = try decoder.decode(CallEndedEvent.self, from: data)
             let callId = callEnded.callCid
             return CallEventInfo(
                 callId: callId,
-                user: callEnded.user.toUser,
+                user: callEnded.user?.toUser,
                 action: .end
             )
         case .callBlocked:
-            let callBlocked = try decoder.decode(CallBlockedUser.self, from: data)
+            let callBlocked = try decoder.decode(BlockedUserEvent.self, from: data)
             let callId = callBlocked.callCid
             return CallEventInfo(
                 callId: callId,
@@ -64,7 +64,7 @@ struct JsonEventDecoder: AnyEventDecoder {
                 action: .block
             )
         case .callUnblocked:
-            let callUnblocked = try decoder.decode(CallUnblockedUser.self, from: data)
+            let callUnblocked = try decoder.decode(UnblockedUserEvent.self, from: data)
             let callId = callUnblocked.callCid
             return CallEventInfo(
                 callId: callId,
@@ -72,13 +72,13 @@ struct JsonEventDecoder: AnyEventDecoder {
                 action: .unblock
             )
         case .permissionRequest:
-            return try decoder.decode(CallPermissionRequest.self, from: data)
+            return try decoder.decode(PermissionRequestEvent.self, from: data)
         case .permissionsUpdated:
-            return try decoder.decode(CallPermissionsUpdated.self, from: data)
+            return try decoder.decode(UpdatedCallPermissionsEvent.self, from: data)
         default:
             do {
                 // Try to decode a custom event.
-                return try decoder.decode(Custom.self, from: data)
+                return try decoder.decode(CustomVideoEvent.self, from: data)
             } catch {
                 throw ClientError.UnsupportedEventType()
             }
@@ -86,14 +86,14 @@ struct JsonEventDecoder: AnyEventDecoder {
     }
 }
 
-extension CallCreated: Event {}
-extension CallCancelled: Event {}
-extension CallRejected: Event {}
-extension CallAccepted: Event {}
-extension CallEnded: Event {}
-extension CallPermissionRequest: Event {}
-extension CallPermissionsUpdated: Event {}
-extension Custom: Event {}
+extension CallCreatedEvent: Event {}
+extension CallCancelledEvent: Event {}
+extension CallRejectedEvent: Event {}
+extension CallAcceptedEvent: Event {}
+extension CallEndedEvent: Event {}
+extension PermissionRequestEvent: Event {}
+extension UpdatedCallPermissionsEvent: Event {}
+extension CustomVideoEvent: Event {}
 
 extension UserResponse {
     var toUser: User {

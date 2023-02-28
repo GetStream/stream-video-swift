@@ -70,7 +70,7 @@ struct UnblockUserRequestData {
     let unblockUserRequest: UnblockUserRequest
 }
 
-struct HealthCheck: HealthCheckEvent, Codable {
+struct HealthCheck: HealthChecks, Codable {
     let connection_id: String
 }
 
