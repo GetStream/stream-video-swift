@@ -12,6 +12,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     var participants: [CallParticipant]
     var availableSize: CGSize
+    var isPortrait: Bool
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
     
@@ -48,7 +49,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                     participant: participant,
                     participantCount: participants.count,
                     availableSize: size,
-                    ratio: 0.3
+                    ratio: ratio
                 )
             )
             .onAppear {
@@ -61,10 +62,23 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             }
         }
     }
+        
+    var ratio: CGFloat {
+        if isPortrait {
+            let width = availableSize.width / 2
+            let height = availableSize.height / 3
+            return width / height
+        } else {
+            let width = availableSize.width / 3
+            let height = availableSize.height / 2
+            return width / height
+        }
+    }
     
     private var size: CGSize {
         if #available(iOS 14.0, *) {
-            return CGSize(width: availableSize.width / 2, height: availableSize.height / 2)
+            let dividerWidth: CGFloat = isPortrait ? 2 : 3
+            return CGSize(width: availableSize.width / dividerWidth, height: availableSize.height / 2)
         } else {
             return CGSize(width: availableSize.width, height: availableSize.height / 2)
         }

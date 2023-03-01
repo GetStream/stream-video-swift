@@ -132,7 +132,7 @@ extension ViewFactory {
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,
-            viewModel: viewModel,
+            participants: viewModel.participants,
             availableSize: availableSize,
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
