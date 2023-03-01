@@ -14,8 +14,15 @@ open class CallViewModel: ObservableObject {
     
     @Published public var call: Call? {
         didSet {
-            participantUpdates = call?.$participants.receive(on: RunLoop.main).sink(receiveValue: { [weak self] participants in
-                self?.callParticipants = participants
+            participantUpdates = call?.$participants
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] participants in
+                    self?.callParticipants = participants
+            })
+            blockedUsersUpdates = call?.$blockedUsers
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] blockedUsers in
+                    self?.blockedUsers = blockedUsers
             })
         }
     }
@@ -24,9 +31,6 @@ open class CallViewModel: ObservableObject {
         didSet {
             if callingState == .idle {
                 edgeServer = nil
-                if !blockedUsers.isEmpty {
-                    blockedUsers = []
-                }
             }
             handleRingingEvents()
         }
@@ -76,6 +80,7 @@ open class CallViewModel: ObservableObject {
     public var videoOptions = VideoOptions()
             
     private var participantUpdates: AnyCancellable?
+    private var blockedUsersUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
     private var callController: CallController?
@@ -305,6 +310,8 @@ open class CallViewModel: ObservableObject {
         log.debug("Leaving call")
         participantUpdates?.cancel()
         participantUpdates = nil
+        blockedUsersUpdates?.cancel()
+        blockedUsersUpdates = nil
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
@@ -385,12 +392,11 @@ open class CallViewModel: ObservableObject {
                     if callEventInfo.user?.id == streamVideo.user.id {
                         leaveCall()
                     } else if let user = callEventInfo.user {
-                        blockedUsers.append(user)
+                        call?.add(blockedUser: user)
                     }
-                } else if case let .userUnblocked(callEventInfo) = callEvent {
-                    blockedUsers.removeAll { user in
-                        user.id == callEventInfo.user?.id
-                    }
+                } else if case let .userUnblocked(callEventInfo) = callEvent,
+                            let user = callEventInfo.user {
+                    call?.remove(blockedUser: user)
                 }
             }
         }

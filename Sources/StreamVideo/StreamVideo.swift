@@ -169,6 +169,9 @@ public class StreamVideo {
         customEventsMiddleware.onCustomEvent = { [weak self] event in
             self?.eventsController?.onCustomEvent?(event)
         }
+        customEventsMiddleware.onNewReaction = { [weak self] event in
+            self?.eventsController?.onNewReaction?(event)
+        }
         return controller
     }
     
@@ -316,7 +319,7 @@ extension StreamVideo: ConnectionStateDelegate {
             }
         case let .connected(healthCheckInfo: healtCheckInfo):
             if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
-                callCoordinatorController.update(connectionId: healthCheck.connection_id)
+                callCoordinatorController.update(connectionId: healthCheck.connectionId)
             }
         default:
             log.debug("Web socket connection state update \(state)")

@@ -178,7 +178,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.debug("Event received")
             let event = try eventDecoder.decode(from: messageData)
             log.debug("Event decoded: \(event)")
-            if let healthCheckEvent = event as? (any HealthChecks) {
+            if let healthCheckEvent = event as? (any HealthCheck) {
                 handle(healthCheckEvent: healthCheckEvent)
             } else {
                 eventsBatcher.append(event)
@@ -207,10 +207,10 @@ extension WebSocketClient: WebSocketEngineDelegate {
         }
     }
     
-    private func handle<Event: HealthChecks>(healthCheckEvent: Event) {
+    private func handle<Event: HealthCheck>(healthCheckEvent: Event) {
         log.debug("Handling healthcheck event")
         var healthCheckInfo = HealthCheckInfo()
-        if let healthCheckEvent = healthCheckEvent as? HealthCheck {
+        if let healthCheckEvent = healthCheckEvent as? HealthCheckEvent {
             healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
         } else if let healthCheckEvent = healthCheckEvent as? Stream_Video_Sfu_Event_HealthCheckResponse {
             healthCheckInfo = HealthCheckInfo(sfuHealthCheck: healthCheckEvent)

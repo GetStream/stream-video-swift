@@ -18,11 +18,11 @@ protocol WebSocketPingControllerDelegate: AnyObject {
 }
 
 struct HealthCheckInfo: Equatable {
-    var coordinatorHealthCheck: HealthCheck? = nil
+    var coordinatorHealthCheck: HealthCheckEvent? = nil
     var sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse? = nil
 }
 
-protocol HealthChecks: Event, Equatable {}
+protocol HealthCheck: Event, Equatable {}
 
 /// The controller manages ping and pong timers. It sends ping periodically to keep a web socket connection alive.
 /// After ping is sent, a pong waiting timer is started, and if pong does not come, a forced disconnect is called.
