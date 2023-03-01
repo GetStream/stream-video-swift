@@ -8,26 +8,63 @@ import SwiftUI
 public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
-    @ObservedObject var viewModel: CallViewModel
+    var participants: [CallParticipant]
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
+    @State private var orientation = UIDevice.current.orientation
+    
     public init(
         viewFactory: Factory,
-        viewModel: CallViewModel,
+        participants: [CallParticipant],
         availableSize: CGSize,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
-        _viewModel = ObservedObject(wrappedValue: viewModel)
+        self.participants = participants
         self.availableSize = availableSize
         self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
     
     public var body: some View {
+        ZStack {
+            if orientation.isPortrait || orientation == .unknown {
+                VideoParticipantsViewPortrait(
+                    viewFactory: viewFactory,
+                    participants: participants,
+                    availableSize: availableSize,
+                    onViewRendering: onViewRendering,
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
+            } else {
+                VideoParticipantsViewLandscape(
+                    viewFactory: viewFactory,
+                    participants: participants,
+                    availableSize: availableSize,
+                    onViewRendering: onViewRendering,
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
+            }
+        }
+        .edgesIgnoringSafeArea(participants.count > 1 ? .bottom : .all)
+        .onRotate { newOrientation in
+            orientation = newOrientation
+        }
+    }
+}
+
+struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
+    
+    var viewFactory: Factory
+    var participants: [CallParticipant]
+    var availableSize: CGSize
+    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    
+    var body: some View {
         ZStack {
             if participants.count <= 3 {
                 VerticalParticipantsView(
@@ -59,7 +96,8 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                 ParticipantsGridView(
                     viewFactory: viewFactory,
                     participants: participants,
-                    availableSize: availableSize
+                    availableSize: availableSize,
+                    isPortrait: true
                 ) { participant, view in
                     onViewRendering(view, participant)
                 } participantVisibilityChanged: { participant, isVisible in
@@ -67,11 +105,59 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                 }
             }
         }
-        .edgesIgnoringSafeArea(participants.count > 1 ? .bottom : .all)
     }
+}
+
+struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
     
-    var participants: [CallParticipant] {
-        viewModel.participants
+    var viewFactory: Factory
+    var participants: [CallParticipant]
+    var availableSize: CGSize
+    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    
+    var body: some View {
+        ZStack {
+            if participants.count <= 3 {
+                HorizontalParticipantsView(
+                    viewFactory: viewFactory,
+                    participants: participants,
+                    availableSize: availableSize,
+                    onViewUpdate: { participant, view in
+                        onViewRendering(view, participant)
+                    }
+                )
+            } else if participants.count == 4 {
+                TwoRowParticipantsView(
+                    viewFactory: viewFactory,
+                    firstRowParticipants: [participants[0], participants[1]],
+                    secondRowParticipants: [participants[2], participants[3]],
+                    availableSize: availableSize
+                ) { participant, view in
+                    onViewRendering(view, participant)
+                }
+            } else if participants.count == 5 {
+                TwoRowParticipantsView(
+                    viewFactory: viewFactory,
+                    firstRowParticipants: [participants[0], participants[1]],
+                    secondRowParticipants: [participants[2], participants[3], participants[4]],
+                    availableSize: availableSize
+                ) { participant, view in
+                    onViewRendering(view, participant)
+                }
+            } else {
+                ParticipantsGridView(
+                    viewFactory: viewFactory,
+                    participants: participants,
+                    availableSize: availableSize,
+                    isPortrait: false
+                ) { participant, view in
+                    onViewRendering(view, participant)
+                } participantVisibilityChanged: { participant, isVisible in
+                    onChangeTrackVisibility(participant, isVisible)
+                }
+            }
+        }
     }
 }
 
@@ -112,6 +198,41 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     }
 }
 
+struct TwoRowParticipantsView<Factory: ViewFactory>: View {
+    
+    @Injected(\.streamVideo) var streamVideo
+    
+    var viewFactory: Factory
+    var firstRowParticipants: [CallParticipant]
+    var secondRowParticipants: [CallParticipant]
+    var availableSize: CGSize
+    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    
+    var body: some View {
+        VStack(spacing: 0) {
+            HorizontalParticipantsView(
+                viewFactory: viewFactory,
+                participants: firstRowParticipants,
+                availableSize: size,
+                onViewUpdate: onViewUpdate
+            )
+            
+            HorizontalParticipantsView(
+                viewFactory: viewFactory,
+                participants: secondRowParticipants,
+                availableSize: size,
+                onViewUpdate: onViewUpdate
+            )
+        }
+        .frame(maxWidth: availableSize.width, maxHeight: .infinity)
+        .edgesIgnoringSafeArea(.all)
+    }
+    
+    private var size: CGSize {
+        CGSize(width: availableSize.width, height: availableSize.height / 2)
+    }
+}
+
 struct VerticalParticipantsView<Factory: ViewFactory>: View {
             
     var viewFactory: Factory
@@ -145,6 +266,47 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
     
     private var availableHeight: CGFloat {
         availableSize.height / CGFloat(participants.count)
+    }
+}
+
+
+struct HorizontalParticipantsView<Factory: ViewFactory>: View {
+            
+    var viewFactory: Factory
+    var participants: [CallParticipant]
+    var availableSize: CGSize
+    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    
+    var body: some View {
+        HStack(spacing: 0) {
+            ForEach(participants) { participant in
+                viewFactory.makeVideoParticipantView(
+                    participant: participant,
+                    availableSize: size,
+                    onViewUpdate: onViewUpdate
+                )
+                .modifier(
+                    viewFactory.makeVideoCallParticipantModifier(
+                        participant: participant,
+                        participantCount: participants.count,
+                        availableSize: size,
+                        ratio: ratio
+                    )
+                )
+            }
+        }
+    }
+    
+    private var size: CGSize {
+        CGSize(width: availableWidth, height: availableSize.height)
+    }
+    
+    private var ratio: CGFloat {
+        availableWidth / availableSize.height
+    }
+    
+    private var availableWidth: CGFloat {
+        availableSize.width / CGFloat(participants.count)
     }
 }
 
