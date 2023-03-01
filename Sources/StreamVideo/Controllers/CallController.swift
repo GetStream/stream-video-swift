@@ -193,7 +193,12 @@ public class CallController {
             connectOptions: connectOptions
         )
         let sessionId = webRTCClient?.sessionID ?? ""
-        let currentCall = Call.create(callId: callId, callType: callType, sessionId: sessionId)
+        let currentCall = Call.create(
+            callId: callId,
+            callType: callType,
+            sessionId: sessionId,
+            blockedUsers: edgeServer.callSettings.blockedUsers
+        )
         call = currentCall
         return currentCall
     }

@@ -90,6 +90,26 @@ final class CallCoordinatorController: @unchecked Sendable {
         _ = try await coordinatorClient.sendEvent(with: request)
     }
     
+    func sendReaction(
+        callId: String,
+        callType: CallType,
+        reactionType: String,
+        emojiCode: String?,
+        customData: [String: AnyCodable]? = nil
+    ) async throws {
+        let request = SendReactionRequest(
+            custom: customData,
+            emojiCode: emojiCode,
+            type: reactionType
+        )
+        let requestData = SendReactionRequestData(
+            id: callId,
+            type: callType.name,
+            sendReactionRequest: request
+        )
+        _ = try await coordinatorClient.sendReaction(with: requestData)
+    }
+    
     func addMembersToCall(with cid: String, memberIds: [String]) async throws {
         throw ClientError.Unexpected("Not implemented")
     }
@@ -204,7 +224,8 @@ final class CallCoordinatorController: @unchecked Sendable {
         }
         let callSettings = CallSettingsInfo(
             callCapabilities: response.call.ownCapabilities,
-            callSettings: response.call.settings
+            callSettings: response.call.settings,
+            blockedUsers: response.blockedUsers.map { $0.toUser } 
         )
         return EdgeServer(
             url: credentials.server.url,
@@ -227,6 +248,7 @@ public struct EdgeServer: Sendable {
 struct CallSettingsInfo: Sendable {
     let callCapabilities: [String]
     let callSettings: CallSettingsResponse
+    let blockedUsers: [User]
 }
 
 extension CallSettingsResponse: @unchecked Sendable {}

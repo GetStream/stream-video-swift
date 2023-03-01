@@ -12,7 +12,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         log.debug("received an event with type \(typeDto.type.rawValue)")
         switch typeDto.type {
         case .healthCheck:
-            return try decoder.decode(HealthCheck.self, from: data)
+            return try decoder.decode(HealthCheckEvent.self, from: data)
         case .callCreated:
             let callCreated = try decoder.decode(CallCreatedEvent.self, from: data)
             let call = callCreated.call
@@ -75,6 +75,8 @@ struct JsonEventDecoder: AnyEventDecoder {
             return try decoder.decode(PermissionRequestEvent.self, from: data)
         case .permissionsUpdated:
             return try decoder.decode(UpdatedCallPermissionsEvent.self, from: data)
+        case .callNewReaction:
+            return try decoder.decode(CallReactionEvent.self, from: data)
         default:
             do {
                 // Try to decode a custom event.
@@ -94,6 +96,8 @@ extension CallEndedEvent: Event {}
 extension PermissionRequestEvent: Event {}
 extension UpdatedCallPermissionsEvent: Event {}
 extension CustomVideoEvent: Event {}
+extension HealthCheckEvent: HealthCheck {}
+extension CallReactionEvent: Event {}
 
 extension UserResponse {
     var toUser: User {
@@ -132,6 +136,7 @@ public extension EventType {
     static let callUnblocked: Self = "call.unblocked_user"
     static let permissionRequest: Self = "call.permission_request"
     static let permissionsUpdated: Self = "call.permissions_updated"
+    static let callNewReaction: Self = "call.reaction_new"
 }
 
 extension ClientError {

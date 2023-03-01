@@ -13,7 +13,7 @@ import AnyCodable
 internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
 
     internal var createdAt: Date
-    internal var custom: [String: AnyCodable]
+    internal var custom: [String: AnyCodable]?
     internal var deletedAt: Date?
     internal var devices: [Device]
     internal var id: String

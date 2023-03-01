@@ -14,6 +14,7 @@ public class Call: ObservableObject, @unchecked Sendable {
             log.debug("Participants changed: \(participants)")
         }
     }
+    @Published public private(set) var blockedUsers: [User]
     
     public let callId: String
     public let callType: CallType
@@ -23,14 +24,15 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
-    static func create(callId: String, callType: CallType, sessionId: String) -> Call {
-        Call(callId: callId, callType: callType, sessionId: sessionId)
+    static func create(callId: String, callType: CallType, sessionId: String, blockedUsers: [User]) -> Call {
+        Call(callId: callId, callType: callType, sessionId: sessionId, blockedUsers: blockedUsers)
     }
     
-    private init(callId: String, callType: CallType, sessionId: String) {
+    private init(callId: String, callType: CallType, sessionId: String, blockedUsers: [User]) {
         self.callId = callId
         self.callType = callType
         self.sessionId = sessionId
+        self.blockedUsers = blockedUsers
     }
     
     /// Async stream that publishes participant events.
@@ -42,6 +44,17 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
         return events
     }
+    
+    public func add(blockedUser: User) {
+        blockedUsers.append(blockedUser)
+    }
+    
+    public func remove(blockedUser: User) {
+        blockedUsers.removeAll { user in
+            user.id == blockedUser.id
+        }
+    }
+    
 }
 
 enum CallEventType {

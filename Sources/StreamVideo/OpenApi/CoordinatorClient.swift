@@ -94,6 +94,13 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
+    func sendReaction(with request: SendReactionRequestData) async throws -> SendReactionResponse {
+        try await execute(
+            request: request.sendReactionRequest,
+            path: "/call/\(request.type)/\(request.id)/reaction"
+        )
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
