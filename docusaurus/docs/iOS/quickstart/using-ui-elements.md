@@ -2,9 +2,7 @@
 title: Using UI elements
 ---
 
-# Introduction
-
-# Adding Stream Video to your project
+## Introduction
 
 ## Project setup and Stream Video SDK installation
 
@@ -100,7 +98,7 @@ extension UserCredentials {
 
 With that, the initial setup is done and you can start with the functionality.
 
-# Add logic to determine current call state
+## Add logic to determine current call state
 
 The SDK is setup and now you want to be able to start and join calls and know when you receive calls. The `StreamVideoSwiftUI` SDK offers the `CallViewModel` that provides you with all necessary call-related logic.
 
@@ -133,7 +131,54 @@ You can see all states, that a call can be in and with that show UI that is suit
 
 In the next chapter, let's have a look how to properly fill the UI with real views.
 
-# Create and use the ViewFactory
+## Use views from StreamVideoSwiftUI
+
+Having only `Text` views is not going to win you an Apple Design award, so let's fill those up with more useful ones.
+
+Luckily, the `StreamVideoSwiftUI` package has a lot of built-in views that you can directly use. These views are internally also used when working with the `ViewFactory` ([see next chapter](#create-and-use-the-viewfactory)) but you can also directly call and use them inside of your apps.
+
+:::tip
+Since all our SDKs are open-source, you can also have a look at how this works. As an example, have a look at the [ViewFactory](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/ViewFactory.swift) to see how custom views are created and used.
+:::
+
+Continuing on the previous example, let's look at how to do this. For the case of an incoming call, let's use the component from the SDK to show a proper view for that, which is called `IncomingCallView`.
+
+Looking at the code for the view (can also be found [here](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/CallingViews/IncomingCallView.swift)) the view has the following signature:
+
+```swift
+IncomingCallView(
+    callInfo: IncomingCall,
+    onCallAccepted: @escaping (String) -> Void,
+    onCallRejected: @escaping (String) -> Void
+)
+```
+
+The `callInfo` object you get in the switch case (`.incoming(let callInfo)`) is of type `IncomingCall`. The other two parameters are closures and are called when the user accepts (`onCallAccepted`) or rejects (`onCallRejected`) the incoming call.
+
+The beauty of this is that you can now either use your own logic that handles these cases or you can again use the `callViewModel` to handle this. The best solution always depends on your use-case and we want to give you the freedom to freely choose while also providing sensible defaults.
+
+When using the `callViewModel` the code to integrate the `IncomingCallView` could look like this (only showing this specific case of the `switch` statement):
+
+```swift
+case .incoming(let callInfo):
+    IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
+        viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
+    }, onCallRejected: { _ in
+        viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+    })
+```
+
+There are many more of the built-in components that you can use. Feel free to explore the SDK or the documentation to find out which ones are available, here are a few examples:
+
+- `CallControlsView` ([see on GitHub](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/CallView/CallControlsView.swift))
+- `OutgoingCallView` ([see on GitHub](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/CallingViews/OutgoingCallView.swift))
+- `VideoParticipantsView` ([see on GitHub](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/CallView/VideoParticipantsView.swift))
+- `CallView` ([see on GitHub](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/CallView/CallView.swift))
+- `CallParticipantsInfoView` ([see on GitHub](https://github.com/GetStream/stream-video-swift/blob/main/Sources/StreamVideoSwiftUI/CallView/Participants/CallParticipantsInfoView.swift))
+
+There are many more, which are all used when the `ViewFactory` uses its default function calls. But what is the `ViewFactory`, you may ask. The next chapter will take a look at it in more detail.
+
+## Create and use the ViewFactory
 
 The `StreamVideoSwiftUI` SDK bases the creation of views on an object called `ViewFactory`. This is something you need to implement yourself. Luckily, it is easy as creating a new Swift file, calling it `MyViewFactory` (you can name it anything you like) and pasting the following code:
 
@@ -184,7 +229,7 @@ The goal is to offer you the most amount of flexibility while providing sensible
 
 Next, let's look at how to replace the default views in the `ViewFactory`.
 
-# Custom view injection into the ViewFactory
+## Custom view injection into the ViewFactory
 
 In some cases the built-in components are not suitable but more customization is required. For this the `StreamVideoSwiftUI` SDK offers an easy way to replace the default views from the `viewFactory`.
 
@@ -220,7 +265,7 @@ Why does that work? `ViewFactory` is just a `protocol` that has default implemen
 
 With that you have seen how to use your own implementations for views where you require more customization.
 
-# Summary
+## Summary
 
 In this guide you learned the different steps to take when using the built-in view components that the `StreamVideoSwiftUI` SDK has to offer. You learned to create your own implementation of the `ViewFactory` and how to use it.
 
