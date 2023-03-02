@@ -3,6 +3,7 @@
 //
 
 import SwiftUI
+import StreamVideo
 
 struct LoginView: View {
     
@@ -21,11 +22,11 @@ struct LoginView: View {
             Text("Select a user")
                 .font(.title)
                 .bold()
-            List(viewModel.userCredentials) { user in
+            List(viewModel.users) { user in
                 Button {
                     viewModel.login(user: user, completion: completion)
                 } label: {
-                    Text(user.userInfo.name)
+                    Text(user.name)
                         .accessibility(identifier: "userName")
                 }
                 .padding(.all, 8)
@@ -46,7 +47,7 @@ struct LoginView: View {
             viewModel.loading ? ProgressView() : nil
         )
         .sheet(isPresented: $addUserShown, onDismiss: {
-            viewModel.userCredentials = UserCredentials.builtInUsers
+            viewModel.users = User.builtInUsers
         }) {
             AddUserView()
         }

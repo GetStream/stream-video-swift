@@ -41,7 +41,7 @@ struct StreamVideoSwiftUIApp: App {
     
     private func handle(url: URL) {
         let queryParams = url.queryParameters
-        let users = UserCredentials.builtInUsers
+        let users = User.builtInUsers
         guard let userId = queryParams["user_id"],
               let callId = queryParams["call_id"] else {
             return
@@ -50,18 +50,29 @@ struct StreamVideoSwiftUIApp: App {
         if let user = user {
             appState.deeplinkCallId = callId
             appState.userState = .loggedIn
-            handleSelectedUser(user, callId: callId)
+            Task {
+                let token = try await TokenService.shared.fetchToken(for: user.id)
+                let credentials = UserCredentials(userInfo: user, token: token)
+                handleSelectedUser(credentials, callId: callId)
+            }
         }
     }
     
     private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
         let streamVideo = StreamVideo(
-            apiKey: "w6yaq5388uym",
+            apiKey: Config.apiKey,
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(),
             tokenProvider: { result in
-                result(.success(user.token))
+                Task {
+                    do {
+                        let token = try await TokenService.shared.fetchToken(for: user.id)
+                        result(.success(token))
+                    } catch {
+                        result(.failure(error))
+                    }
+                }
             }
         )
         appState.streamVideo = streamVideo

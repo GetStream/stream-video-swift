@@ -69,10 +69,8 @@
 		8442993A29422BEA0037232A /* BackportStateObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993929422BEA0037232A /* BackportStateObject.swift */; };
 		8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993B294232360037232A /* IncomingCallView_iOS13.swift */; };
 		844299412942394C0037232A /* VideoView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299402942394C0037232A /* VideoView_iOS13.swift */; };
-		844299432942484A0037232A /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* UserCredentials.swift */; };
-		844299442942484A0037232A /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* UserCredentials.swift */; };
-		84429946294248A20037232A /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429945294248A20037232A /* LoginView.swift */; };
-		84429948294248B50037232A /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429947294248B50037232A /* LoginViewModel.swift */; };
+		844299432942484A0037232A /* DemoUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* DemoUsers.swift */; };
+		844299442942484A0037232A /* DemoUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* DemoUsers.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -196,6 +194,12 @@
 		84B9A59529140D44004DE31A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59429140D44004DE31A /* NukeUI */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
+		84BD8FF429B0F208002CFBA0 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BD8FF329B0F208002CFBA0 /* HTTPClient.swift */; };
+		84BD8FF629B0F27F002CFBA0 /* TokenService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BD8FF529B0F27F002CFBA0 /* TokenService.swift */; };
+		84BD8FF729B0F964002CFBA0 /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
+		84BD8FF829B0F97B002CFBA0 /* TokenService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BD8FF529B0F27F002CFBA0 /* TokenService.swift */; };
+		84BD8FF929B0F97E002CFBA0 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BD8FF329B0F208002CFBA0 /* HTTPClient.swift */; };
+		84BD8FFB29B0FA5B002CFBA0 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429945294248A20037232A /* LoginView.swift */; };
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
 		84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C267C828F5980F00F0F673 /* ConnectOptions.swift */; };
 		84C619C629432E890051C513 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84C619C529432E890051C513 /* NukeUI */; };
@@ -501,9 +505,8 @@
 		8442993929422BEA0037232A /* BackportStateObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackportStateObject.swift; sourceTree = "<group>"; };
 		8442993B294232360037232A /* IncomingCallView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView_iOS13.swift; sourceTree = "<group>"; };
 		844299402942394C0037232A /* VideoView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView_iOS13.swift; sourceTree = "<group>"; };
-		844299422942484A0037232A /* UserCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCredentials.swift; sourceTree = "<group>"; };
+		844299422942484A0037232A /* DemoUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoUsers.swift; sourceTree = "<group>"; };
 		84429945294248A20037232A /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
-		84429947294248B50037232A /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -610,6 +613,8 @@
 		84B9A56C29112F39004DE31A /* EndpointConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointConfig.swift; sourceTree = "<group>"; };
 		84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
 		84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCMediaConstraints.swift; sourceTree = "<group>"; };
+		84BD8FF329B0F208002CFBA0 /* HTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient.swift; sourceTree = "<group>"; };
+		84BD8FF529B0F27F002CFBA0 /* TokenService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenService.swift; sourceTree = "<group>"; };
 		84C267C828F5980F00F0F673 /* ConnectOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectOptions.swift; sourceTree = "<group>"; };
 		84C2996B2876D93D0034B735 /* Call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		84C2996D2876E42D0034B735 /* StreamVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo.swift; sourceTree = "<group>"; };
@@ -957,7 +962,7 @@
 				84ED240C286C9515002A3186 /* CallView.swift */,
 				8456E6C5287EB55F004E180E /* AppState.swift */,
 				84093810288A90390089A35B /* HomeView.swift */,
-				844299422942484A0037232A /* UserCredentials.swift */,
+				844299422942484A0037232A /* DemoUsers.swift */,
 				8456E6C1287EB405004E180E /* LoginView.swift */,
 				8456E6C3287EB43A004E180E /* LoginViewModel.swift */,
 				84201792288AB699004964B3 /* AddUserView.swift */,
@@ -967,6 +972,8 @@
 				8468821228DFA448003BA9EE /* LocalStorage.swift */,
 				840A5A5729054F98006A1E4B /* MockUserListProvider.swift */,
 				845C573128DDC57A00D38FCC /* DemoAppUtils.swift */,
+				84BD8FF529B0F27F002CFBA0 /* TokenService.swift */,
+				84BD8FF329B0F208002CFBA0 /* HTTPClient.swift */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
 				842D8BD72865B37800801910 /* Preview Content */,
 				8228CD8C29128CA000F32136 /* Info.plist */,
@@ -1167,7 +1174,6 @@
 				84932269290919F10013C029 /* LoginViewController.swift */,
 				849322602908385C0013C029 /* HomeViewController.swift */,
 				84429945294248A20037232A /* LoginView.swift */,
-				84429947294248B50037232A /* LoginViewModel.swift */,
 				84E4F7912947476300DD4CE3 /* CallViewHelper.swift */,
 				849322572908378B0013C029 /* Assets.xcassets */,
 				849322592908378B0013C029 /* LaunchScreen.storyboard */,
@@ -1991,15 +1997,17 @@
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				84093811288A90390089A35B /* HomeView.swift in Sources */,
-				844299432942484A0037232A /* UserCredentials.swift in Sources */,
+				844299432942484A0037232A /* DemoUsers.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				840A5A5829054F98006A1E4B /* MockUserListProvider.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */,
+				84BD8FF429B0F208002CFBA0 /* HTTPClient.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
 				8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */,
 				8434C5222899572F0001490A /* CallService.swift in Sources */,
+				84BD8FF629B0F27F002CFBA0 /* TokenService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2009,15 +2017,17 @@
 			files = (
 				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
 				84932270290923960013C029 /* LocalStorage.swift in Sources */,
+				84BD8FF929B0F97E002CFBA0 /* HTTPClient.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
-				84429946294248A20037232A /* LoginView.swift in Sources */,
+				84BD8FF829B0F97B002CFBA0 /* TokenService.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
 				8493226F2909238F0013C029 /* AppState.swift in Sources */,
+				84BD8FFB29B0FA5B002CFBA0 /* LoginView.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
+				84BD8FF729B0F964002CFBA0 /* LoginViewModel.swift in Sources */,
 				8493226E2909235C0013C029 /* AddUserView.swift in Sources */,
-				84429948294248B50037232A /* LoginViewModel.swift in Sources */,
-				844299442942484A0037232A /* UserCredentials.swift in Sources */,
+				844299442942484A0037232A /* DemoUsers.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

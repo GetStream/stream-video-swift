@@ -38,11 +38,8 @@ struct AddUserView: View {
                     imageURL: nil,
                     extraData: [:]
                 )
-                if let token = try? UserToken(rawValue: token) {
-                    let user = UserCredentials(userInfo: userInfo, token: token)
-                    UserCredentials.builtInUsers.append(user)
-                    presentationMode.wrappedValue.dismiss()
-                }
+                User.builtInUsers.append(userInfo)
+                presentationMode.wrappedValue.dismiss()
             } label: {
                 Text("Add user")
                     .padding()

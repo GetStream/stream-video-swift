@@ -23,7 +23,7 @@ class HomeViewController: UIViewController {
     private var cancellables = Set<AnyCancellable>()
     
     lazy var participants: [User] = {
-        var participants = UserCredentials.builtInUsers.map { $0.userInfo }
+        var participants = User.builtInUsers
         participants.removeAll { userInfo in
             userInfo.id == streamVideo.user.id
         }

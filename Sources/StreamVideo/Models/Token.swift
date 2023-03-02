@@ -5,7 +5,7 @@
 import Foundation
 
 /// The type is designed to store the JWT and the user it is related to.
-public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral {
+public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral, Sendable {
     public let rawValue: String
     public let userId: String
     public let expiration: Date?
