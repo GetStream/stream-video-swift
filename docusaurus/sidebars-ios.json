@@ -14,8 +14,7 @@
       "Quickstart": [
         "quickstart/video-call",
         "quickstart/audio-room",
-        "quickstart/livestream",
-        "quickstart/using-ui-elements"
+        "quickstart/livestream"
       ],
       "Client": [
         "client/authentication-users",
@@ -34,6 +33,7 @@
         "features/recording",
         "features/chat-integration",
         "features/push-ringing",
+        "features/using-ui-elements",
         "features/interrupt-handling",
         "features/webhooks-sqs",
         "features/custom-data",
