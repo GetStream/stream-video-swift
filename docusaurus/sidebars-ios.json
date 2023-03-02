@@ -27,7 +27,8 @@
         "guides/sdk-size-impact",
         "guides/deep-linking",
         "guides/user-experience",
-        "guides/quickstart/video-call"
+        "guides/quickstart/video-call",
+        "guides/quickstart/using-ui-elements"
       ],
       "Video UI Components": [
         "ui/ui-overview",
