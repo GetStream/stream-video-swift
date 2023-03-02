@@ -10,9 +10,10 @@ TODO before launch:
 - Record demo videos to showcase what is built in this guide
 - Polish the intro with sample video and relevant explanation of it
 - find good way to address repeating installation and setup guide
+
 :::
 
-In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.m
+In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.
 
 The final result will look like this:
 
