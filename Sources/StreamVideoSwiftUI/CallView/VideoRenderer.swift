@@ -80,11 +80,13 @@ public struct VideoRendererView: UIViewRepresentable {
         let view = VideoRenderer(frame: .init(origin: .zero, size: size))
         view.videoContentMode = contentMode
         view.backgroundColor = UIColor.black
+        view.checkOrientation()
         handleRendering(view)
         return view
     }
     
     public func updateUIView(_ uiView: VideoRenderer, context: Context) {
+        uiView.checkOrientation()
         handleRendering(uiView)
     }
 }
@@ -94,6 +96,20 @@ public class VideoRenderer: RTCMTLVideoView {
     let queue = DispatchQueue(label: "video-track")
     
     weak var track: RTCVideoTrack?
+    
+    func checkOrientation() {
+        let deviceOrientation = UIDevice.current.orientation
+        let sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation
+        if deviceOrientation == .unknown {
+            if sceneOrientation == .landscapeRight {
+                self.rotationOverride = NSNumber(value: RTCVideoRotation._90.rawValue)
+            } else if sceneOrientation == .landscapeLeft {
+                self.rotationOverride = NSNumber(value: RTCVideoRotation._270.rawValue)
+            }
+        } else if self.rotationOverride != nil {
+            self.rotationOverride = nil
+        }
+    }
     
     public func add(track: RTCVideoTrack) {
         queue.sync {
