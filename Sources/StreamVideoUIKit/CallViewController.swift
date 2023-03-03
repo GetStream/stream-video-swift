@@ -34,11 +34,11 @@ open class CallViewController: UIViewController {
     
     open func makeVideoView<Factory: ViewFactory>(with viewFactory: Factory) -> UIView {
         if #available(iOS 14.0, *) {
-            let videoView = VideoView(viewFactory: viewFactory, viewModel: viewModel)
-            return VideoViewContainer(view: videoView, frame: view.frame)
+            let videoView = CallContainer(viewFactory: viewFactory, viewModel: viewModel)
+            return CallViewContainer(view: videoView, frame: view.frame)
         } else {
-            let videoView = VideoView_iOS13(viewFactory: viewFactory, viewModel: viewModel)
-            return VideoViewContainer(view: videoView, frame: view.frame)
+            let videoView = CallContainer_iOS13(viewFactory: viewFactory, viewModel: viewModel)
+            return CallViewContainer(view: videoView, frame: view.frame)
         }
     }
     
@@ -67,10 +67,10 @@ class PassthroughView: UIView {
     }
 }
 
-final class VideoViewContainer: UIView {
+final class CallViewContainer: UIView {
     
     @available(iOS 14.0, *)
-    init<Factory: ViewFactory>(view: VideoView<Factory>, frame: CGRect) {
+    init<Factory: ViewFactory>(view: CallContainer<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
         
@@ -81,7 +81,7 @@ final class VideoViewContainer: UIView {
     }
     
     @available(iOS, introduced: 13, obsoleted: 14)
-    init<Factory: ViewFactory>(view: VideoView_iOS13<Factory>, frame: CGRect) {
+    init<Factory: ViewFactory>(view: CallContainer_iOS13<Factory>, frame: CGRect) {
         let uiView = UIHostingController(rootView: view).view!
         uiView.backgroundColor = .clear
         

@@ -21,13 +21,13 @@ public struct VideoViewOverlay<RootView: View, Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             rootView
-            VideoView(viewFactory: viewFactory, viewModel: viewModel)
+            CallContainer(viewFactory: viewFactory, viewModel: viewModel)
         }
     }
 }
 
 @available(iOS 14.0, *)
-public struct VideoView<Factory: ViewFactory>: View {
+public struct CallContainer<Factory: ViewFactory>: View {
     
     @Injected(\.utils) var utils
     
