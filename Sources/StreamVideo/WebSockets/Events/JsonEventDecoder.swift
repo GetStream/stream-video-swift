@@ -77,6 +77,10 @@ struct JsonEventDecoder: AnyEventDecoder {
             return try decoder.decode(UpdatedCallPermissionsEvent.self, from: data)
         case .callNewReaction:
             return try decoder.decode(CallReactionEvent.self, from: data)
+        case .callRecordingStarted:
+            return try decoder.decode(CallRecordingStartedEvent.self, from: data)
+        case .callRecordingStopped:
+            return try decoder.decode(CallRecordingStoppedEvent.self, from: data)
         default:
             do {
                 // Try to decode a custom event.
@@ -98,6 +102,8 @@ extension UpdatedCallPermissionsEvent: Event {}
 extension CustomVideoEvent: Event {}
 extension HealthCheckEvent: HealthCheck {}
 extension CallReactionEvent: Event {}
+extension CallRecordingStartedEvent: Event {}
+extension CallRecordingStoppedEvent: Event {}
 
 extension UserResponse {
     var toUser: User {
@@ -137,6 +143,8 @@ public extension EventType {
     static let permissionRequest: Self = "call.permission_request"
     static let permissionsUpdated: Self = "call.permissions_updated"
     static let callNewReaction: Self = "call.reaction_new"
+    static let callRecordingStarted: Self = "call.recording_started"
+    static let callRecordingStopped: Self = "call.recording_stopped"
 }
 
 extension ClientError {

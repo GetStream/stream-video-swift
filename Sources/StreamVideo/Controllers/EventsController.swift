@@ -9,6 +9,10 @@ public class EventsController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
     
+    private var coordinatorClient: CoordinatorClient {
+        callCoordinatorController.coordinatorClient
+    }
+    
     var onCustomEvent: ((CustomEvent) -> Void)?
     var onNewReaction: ((CallReaction) -> Void)?
     
@@ -21,22 +25,30 @@ public class EventsController {
     }
     
     public func send(event: CustomEventRequest) async throws {
-        try await callCoordinatorController.sendEvent(
-            type: event.type,
-            callId: event.callId,
-            callType: event.callType,
-            customData: RawJSON.convert(extraData: event.extraData)
+        let sendEventRequest = SendEventRequest(
+            custom: RawJSON.convert(extraData: event.extraData),
+            type: event.type.rawValue
         )
+        let request = EventRequestData(
+            id: event.callId,
+            type: event.callType.name,
+            sendEventRequest: sendEventRequest
+        )
+        _ = try await coordinatorClient.sendEvent(with: request)
     }
     
     public func send(reaction: CallReactionRequest) async throws {
-        try await callCoordinatorController.sendReaction(
-            callId: reaction.callId,
-            callType: reaction.callType,
-            reactionType: reaction.reactionType,
+        let request = SendReactionRequest(
+            custom: RawJSON.convert(extraData: reaction.extraData),
             emojiCode: reaction.emojiCode,
-            customData: RawJSON.convert(extraData: reaction.extraData)
+            type: reaction.reactionType
         )
+        let requestData = SendReactionRequestData(
+            id: reaction.callId,
+            type: reaction.callType.name,
+            sendReactionRequest: request
+        )
+        _ = try await coordinatorClient.sendReaction(with: requestData)
     }
     
     public func customEvents() -> AsyncStream<CustomEvent> {

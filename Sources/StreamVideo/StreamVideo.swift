@@ -36,6 +36,7 @@ public class StreamVideo {
     private let callsMiddleware = CallsMiddleware()
     private let permissionsMiddleware = PermissionsMiddleware()
     private let customEventsMiddleware = CustomEventsMiddleware()
+    private let recordingEventsMiddleware = RecordingEventsMiddleware()
         
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -43,7 +44,8 @@ public class StreamVideo {
         let middlewares: [EventMiddleware] = [
             callsMiddleware,
             permissionsMiddleware,
-            customEventsMiddleware
+            customEventsMiddleware,
+            recordingEventsMiddleware
         ]
         center.add(middlewares: middlewares)
         return center
@@ -65,6 +67,7 @@ public class StreamVideo {
     private let environment: Environment
     private var permissionsController: PermissionsController?
     private var eventsController: EventsController?
+    private var recordingController: RecordingController?
     
     public convenience init(
         apiKey: String,
@@ -171,6 +174,21 @@ public class StreamVideo {
         }
         customEventsMiddleware.onNewReaction = { [weak self] event in
             self?.eventsController?.onNewReaction?(event)
+        }
+        return controller
+    }
+    
+    public func makeRecordingController() -> RecordingController {
+        if let recordingController = recordingController {
+            return recordingController
+        }
+        let controller = RecordingController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        recordingController = controller
+        recordingEventsMiddleware.onRecordingEvent = { [weak self] event in
+            self?.recordingController?.onRecordingEvent?(event)
         }
         return controller
     }

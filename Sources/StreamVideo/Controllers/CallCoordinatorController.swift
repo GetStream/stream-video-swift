@@ -90,26 +90,6 @@ final class CallCoordinatorController: @unchecked Sendable {
         _ = try await coordinatorClient.sendEvent(with: request)
     }
     
-    func sendReaction(
-        callId: String,
-        callType: CallType,
-        reactionType: String,
-        emojiCode: String?,
-        customData: [String: AnyCodable]? = nil
-    ) async throws {
-        let request = SendReactionRequest(
-            custom: customData,
-            emojiCode: emojiCode,
-            type: reactionType
-        )
-        let requestData = SendReactionRequestData(
-            id: callId,
-            type: callType.name,
-            sendReactionRequest: request
-        )
-        _ = try await coordinatorClient.sendReaction(with: requestData)
-    }
-    
     func addMembersToCall(with cid: String, memberIds: [String]) async throws {
         throw ClientError.Unexpected("Not implemented")
     }

@@ -101,6 +101,16 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
+    func startRecording(callId: String, callType: String) async throws {
+        let request = try makeRequest(for: "/call/\(callType)/\(callId)/start_recording")
+        _ = try await httpClient.execute(request: request)
+    }
+    
+    func stopRecording(callId: String, callType: String) async throws {
+        let request = try makeRequest(for: "/call/\(callType)/\(callId)/stop_recording")
+        _ = try await httpClient.execute(request: request)
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
