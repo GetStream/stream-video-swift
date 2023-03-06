@@ -5,11 +5,12 @@
 import XCTest
 
 public class ParticipantRobot {
-    private let videoBuddyUrl = URL(string: "http://localhost:5678/stream-video-buddy")!
+    private let videoBuddyUrlString = "http://localhost:5678/stream-video-buddy"
     private var screenSharingDuration: Int? = nil
     private var callRecordingDuration: Int? = nil
-    private var callDuration: Int? = 15
+    private var callDuration: Double? = 10
     private var userCount: Int = 1
+    private var messageCount: Int = 1
     
     public enum Options: String {
         case withCamera = "camera"
@@ -22,38 +23,51 @@ public class ParticipantRobot {
         case shareScreen = "screen-share"
         case recordCall = "record"
         case showWindow = "show-window"
+        case recordSession = "record-session"
+        case sendMessage = "message"
     }
     
     private enum Config: String {
         case callId = "call-id"
         case userCount = "user-count"
+        case messageCount = "message-count"
         case callDuration = "duration"
         case screenSharingDuration = "screen-sharing-duration"
         case callRecordingDuration = "recording-duration"
     }
 
+    @discardableResult
     func setScreenSharingDuration(_ duration: Int) -> Self {
         screenSharingDuration = duration
         return self
     }
     
+    @discardableResult
     func setCallRecordingDuration(_ duration: Int) -> Self {
         callRecordingDuration = duration
         return self
     }
     
-    func setCallDuration(_ duration: Int) -> Self {
+    @discardableResult
+    func setCallDuration(_ duration: Double) -> Self {
         callDuration = duration
         return self
     }
     
+    @discardableResult
     func setUserCount(_ count: Int) -> Self {
         userCount = count
         return self
     }
+    
+    @discardableResult
+    func setMessageCount(_ count: Int) -> Self {
+        messageCount = count
+        return self
+    }
 
-    func join(
-        callId: String,
+    func joinCall(
+        _ callId: String,
         options: [Options] = [],
         actions: [Actions] = [],
         async: Bool = true
@@ -61,6 +75,7 @@ public class ParticipantRobot {
         var params: [String: Any] = [:]
         params[Config.callId.rawValue] = callId
         params[Config.userCount.rawValue] = userCount
+        params[Config.messageCount.rawValue] = messageCount
         
         for option in options {
             params[option.rawValue] = true
@@ -86,20 +101,17 @@ public class ParticipantRobot {
     }
        
     private func invokeBuddy(with params: [String: Any], async: Bool) {
-        var request = URLRequest(url: videoBuddyUrl)
+        guard let apiUrl = URL(string: "\(videoBuddyUrlString)/?async=\(async)") else { return }
+        var request = URLRequest(url: apiUrl)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: params, options: [])
         
-        if async {
-            URLSession.shared.dataTask(with: request).resume()
-        } else {
-            let semaphore = DispatchSemaphore(value: 0)
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                semaphore.signal()
-            }
-            task.resume()
-            semaphore.wait()
+        let semaphore = DispatchSemaphore(value: 0)
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            semaphore.signal()
         }
+        task.resume()
+        semaphore.wait()
     }
 }
