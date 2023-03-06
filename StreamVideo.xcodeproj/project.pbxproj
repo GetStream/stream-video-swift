@@ -1825,7 +1825,7 @@
 					};
 					84F737EC287C13AC00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
-						LastSwiftMigration = 1330;
+						LastSwiftMigration = 1420;
 					};
 					84F737F3287C13AD00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
