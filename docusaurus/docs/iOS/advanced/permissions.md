@@ -11,11 +11,12 @@ The StreamVideo SDK has support for such features, with the usage of the `Permis
 ### Creating a PermissionsController
 
 The `PermissionsController` allows you to perform several permissions related actions:
+
 - check if a user has the capabilities to perform an action
-- ask for additional capabilities (e.g. to become a speaker in audio room)
+- ask for additional capabilities (for example to become a speaker in audio room)
 - listen to permissions-related events
 - granting and revoking permissions
-- perform a moderation action (e.g. muting a user)
+- perform a moderation action (for example muting a user)
 
 To create an instance of the `PermissionsController`, you should call `StreamVideo`'s method `makePermissionsController`:
 
@@ -23,11 +24,11 @@ To create an instance of the `PermissionsController`, you should call `StreamVid
 let permissionsController = streamVideo.makePermissionsController()
 ```
 
-#### Checking for capabilities 
+#### Checking for capabilities
 
-Every user has certain call capabiltities, depending on their role in the call. For actions that are beyond the scope of a regular member, you need to check if the user has the appropriate capability, before showing a UI to execute it.
+Every user has certain call capabilities, depending on their role in the call. For actions that are beyond the scope of a regular member, you need to check if the user has the appropriate capability, before showing a UI to execute it.
 
-To perform this check, you should use the `PermissionsController`'s `currentUserHasCapability` method. In this method, you pass the capability you want to check. 
+To perform this check, you should use the `PermissionsController`'s `currentUserHasCapability` method. In this method, you pass the capability you want to check.
 
 For example, if you want to check if the user has permissions to send audio, you can do it like this:
 
@@ -87,7 +88,7 @@ YourView()
 
 You can grant permissions by using the `grant(permissions: [Permission], for userId: String, callId: String, callType: String)` in the `PermissionsController`. Basically, you need to specify the new permissions that will be granted to the user that requested them:
 
-```swift 
+```swift
 Task {
 	try await permissionsController.grant(
         permissions: permissionRequest.permissions.compactMap { Permission(rawValue: $0) },

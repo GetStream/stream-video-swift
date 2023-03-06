@@ -53,13 +53,13 @@ private func subscribeToReactionEvents() {
 }
 ```
 
-The `handleReaction` method would be your own handling of the reaction. 
+The `handleReaction` method would be your own handling of the reaction.
 
 #### Sending custom events
 
 You can also send custom events for cases where you need something different than reactions. The steps are very similar to sending reactions above.
 
-For example, let's see how we can send some broadcasting event to all partcipiants in the call, like starting a game.
+For example, let's see how we can send some broadcasting event to all participants in the call, like starting a game.
 
 First, let's create a new event type:
 
@@ -111,8 +111,8 @@ private func subscribeToCustomEvents() {
             log.debug("received an event \(event)")
             if event.type == EventType.gameStarted.rawValue {
                 handleEvent(with: event.extraData, from: event.user)
-            }            
+            }
         }
-    }        
+    }
 }
 ```
