@@ -10,6 +10,7 @@ public class ParticipantRobot {
     private var callRecordingDuration: Int? = nil
     private var callDuration: Double? = 10
     private var userCount: Int = 1
+    private var messageCount: Int = 1
     
     public enum Options: String {
         case withCamera = "camera"
@@ -23,11 +24,13 @@ public class ParticipantRobot {
         case recordCall = "record"
         case showWindow = "show-window"
         case recordSession = "record-session"
+        case sendMessage = "message"
     }
     
     private enum Config: String {
         case callId = "call-id"
         case userCount = "user-count"
+        case messageCount = "message-count"
         case callDuration = "duration"
         case screenSharingDuration = "screen-sharing-duration"
         case callRecordingDuration = "recording-duration"
@@ -56,6 +59,12 @@ public class ParticipantRobot {
         userCount = count
         return self
     }
+    
+    @discardableResult
+    func setMessageCount(_ count: Int) -> Self {
+        messageCount = count
+        return self
+    }
 
     func joinCall(
         _ callId: String,
@@ -66,6 +75,7 @@ public class ParticipantRobot {
         var params: [String: Any] = [:]
         params[Config.callId.rawValue] = callId
         params[Config.userCount.rawValue] = userCount
+        params[Config.messageCount.rawValue] = messageCount
         
         for option in options {
             params[option.rawValue] = true
