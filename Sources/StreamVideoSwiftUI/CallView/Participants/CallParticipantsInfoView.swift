@@ -162,6 +162,7 @@ struct CallParticipantsViewContainer: View {
             })
         }
         .frame(height: inviteParticipantsShown ? maxHeight : popupHeight)
+        .navigationViewStyle(.stack)
         .modifier(ShadowViewModifier())
     }
     
