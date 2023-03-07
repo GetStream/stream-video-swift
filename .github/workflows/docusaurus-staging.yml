@@ -3,7 +3,9 @@ name: Publish Docusaurus to staging
 on:
   push:
     branches:
-      - fix-docusaurus-action
+      - main
+    paths:
+      - 'docusaurus/**'
 
 jobs:
   push_docusaurus:
