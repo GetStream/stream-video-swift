@@ -133,6 +133,7 @@ public class StreamVideo {
             tokenProvider: tokenProvider
         )
         currentCallController = controller
+        callsMiddleware.onCallUpdated = currentCallController?.update(callInfo:)
         return controller
     }
     

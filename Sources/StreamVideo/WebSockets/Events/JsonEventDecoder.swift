@@ -81,6 +81,8 @@ struct JsonEventDecoder: AnyEventDecoder {
             return try decoder.decode(CallRecordingStartedEvent.self, from: data)
         case .callRecordingStopped:
             return try decoder.decode(CallRecordingStoppedEvent.self, from: data)
+        case .callUpdated:
+            return try decoder.decode(CallUpdatedEvent.self, from: data)
         default:
             do {
                 // Try to decode a custom event.
@@ -104,6 +106,7 @@ extension HealthCheckEvent: HealthCheck {}
 extension CallReactionEvent: Event {}
 extension CallRecordingStartedEvent: Event {}
 extension CallRecordingStoppedEvent: Event {}
+extension CallUpdatedEvent: Event {}
 
 extension UserResponse {
     var toUser: User {
@@ -145,6 +148,7 @@ public extension EventType {
     static let callNewReaction: Self = "call.reaction_new"
     static let callRecordingStarted: Self = "call.recording_started"
     static let callRecordingStopped: Self = "call.recording_stopped"
+    static let callUpdated: Self = "call.updated"
 }
 
 extension ClientError {

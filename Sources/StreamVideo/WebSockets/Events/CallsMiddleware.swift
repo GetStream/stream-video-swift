@@ -7,6 +7,7 @@ import Foundation
 class CallsMiddleware: EventMiddleware {
     
     var onCallEvent: ((CallEvent) -> Void)?
+    var onCallUpdated: ((CallInfo) -> Void)?
     
     func handle(event: Event) -> Event? {
         if let incomingCallEvent = event as? IncomingCallEvent {
@@ -39,6 +40,14 @@ class CallsMiddleware: EventMiddleware {
                 callEvent = .userUnblocked(event)
             }
             onCallEvent?(callEvent)
+        } else if let event = event as? CallUpdatedEvent {
+            let blockedUsers = event.call.blockedUserIds.map { User(id: $0) }
+            let callInfo = CallInfo(
+                cId: event.call.cid,
+                backstage: event.call.backstage,
+                blockedUsers: blockedUsers
+            )
+            onCallUpdated?(callInfo)
         }
         
         return event

@@ -111,6 +111,16 @@ class CoordinatorClient: @unchecked Sendable {
         _ = try await httpClient.execute(request: request)
     }
     
+    func goLive(callId: String, callType: String) async throws -> GoLiveResponse {
+        let request = try makeRequest(for: "/call/\(callType)/\(callId)/go_live")
+        return try await execute(urlRequest: request)
+    }
+    
+    func stopLive(callId: String, callType: String) async throws -> StopLiveResponse {
+        let request = try makeRequest(for: "/call/\(callType)/\(callId)/stop_live")
+        return try await execute(urlRequest: request)
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken

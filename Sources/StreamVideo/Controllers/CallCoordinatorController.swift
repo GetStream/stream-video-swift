@@ -205,7 +205,11 @@ final class CallCoordinatorController: @unchecked Sendable {
         let callSettings = CallSettingsInfo(
             callCapabilities: response.call.ownCapabilities,
             callSettings: response.call.settings,
-            blockedUsers: response.blockedUsers.map { $0.toUser } 
+            callInfo: CallInfo(
+                cId: response.call.cid,
+                backstage: response.call.backstage,
+                blockedUsers: response.blockedUsers.map { $0.toUser }
+            )
         )
         return EdgeServer(
             url: credentials.server.url,
@@ -228,7 +232,7 @@ public struct EdgeServer: Sendable {
 struct CallSettingsInfo: Sendable {
     let callCapabilities: [String]
     let callSettings: CallSettingsResponse
-    let blockedUsers: [User]
+    let callInfo: CallInfo
 }
 
 extension CallSettingsResponse: @unchecked Sendable {}

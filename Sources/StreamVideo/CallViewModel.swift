@@ -19,10 +19,10 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] participants in
                     self?.callParticipants = participants
             })
-            blockedUsersUpdates = call?.$blockedUsers
+            callUpdates = call?.$callInfo
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] blockedUsers in
-                    self?.blockedUsers = blockedUsers
+                .sink(receiveValue: { [weak self] callInfo in
+                    self?.blockedUsers = callInfo.blockedUsers
             })
         }
     }
@@ -80,7 +80,7 @@ open class CallViewModel: ObservableObject {
     public var videoOptions = VideoOptions()
             
     private var participantUpdates: AnyCancellable?
-    private var blockedUsersUpdates: AnyCancellable?
+    private var callUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
     private var callController: CallController?
@@ -310,8 +310,8 @@ open class CallViewModel: ObservableObject {
         log.debug("Leaving call")
         participantUpdates?.cancel()
         participantUpdates = nil
-        blockedUsersUpdates?.cancel()
-        blockedUsersUpdates = nil
+        callUpdates?.cancel()
+        callUpdates = nil
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []

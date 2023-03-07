@@ -144,6 +144,20 @@ public class PermissionsController {
         _ = try await coordinatorClient.unblockUser(with: requestData)
     }
     
+    public func goLive(callId: String, callType: String) async throws {
+        guard currentUserHasCapability(.updateCall) else {
+            throw ClientError.MissingPermissions()
+        }
+        _ = try await coordinatorClient.goLive(callId: callId, callType: callType)
+    }
+    
+    public func stopLive(callId: String, callType: String) async throws {
+        guard currentUserHasCapability(.updateCall) else {
+            throw ClientError.MissingPermissions()
+        }
+        _ = try await coordinatorClient.stopLive(callId: callId, callType: callType)
+    }
+    
     public func permissionRequests() -> AsyncStream<PermissionRequest> {
         let requests = AsyncStream(PermissionRequest.self) { [weak self] continuation in
             self?.onPermissionRequestEvent = { event in

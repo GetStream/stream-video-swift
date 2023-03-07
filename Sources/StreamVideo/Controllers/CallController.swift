@@ -164,6 +164,14 @@ public class CallController {
         }
     }
     
+    func update(callInfo: CallInfo) {
+        if callInfo.cId == call?.cId {
+            call?.update(callInfo: callInfo)
+        } else {
+            log.warning("Received call info that doesn't match the active call")
+        }
+    }
+    
     // MARK: - private
     
     private func connectToEdge(
@@ -197,7 +205,7 @@ public class CallController {
             callId: callId,
             callType: callType,
             sessionId: sessionId,
-            blockedUsers: edgeServer.callSettings.blockedUsers
+            callInfo: edgeServer.callSettings.callInfo
         )
         call = currentCall
         return currentCall

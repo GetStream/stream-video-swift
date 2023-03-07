@@ -14,25 +14,29 @@ public class Call: ObservableObject, @unchecked Sendable {
             log.debug("Participants changed: \(participants)")
         }
     }
-    @Published public private(set) var blockedUsers: [User]
+    @Published public private(set) var callInfo: CallInfo
     
     public let callId: String
     public let callType: CallType
     public let sessionId: String
     
+    public var cId: String {
+        "\(callType.name):\(callId)"
+    }
+    
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
-    static func create(callId: String, callType: CallType, sessionId: String, blockedUsers: [User]) -> Call {
-        Call(callId: callId, callType: callType, sessionId: sessionId, blockedUsers: blockedUsers)
+    static func create(callId: String, callType: CallType, sessionId: String, callInfo: CallInfo) -> Call {
+        Call(callId: callId, callType: callType, sessionId: sessionId, callInfo: callInfo)
     }
     
-    private init(callId: String, callType: CallType, sessionId: String, blockedUsers: [User]) {
+    private init(callId: String, callType: CallType, sessionId: String, callInfo: CallInfo) {
         self.callId = callId
         self.callType = callType
         self.sessionId = sessionId
-        self.blockedUsers = blockedUsers
+        self.callInfo = callInfo
     }
     
     /// Async stream that publishes participant events.
@@ -46,15 +50,29 @@ public class Call: ObservableObject, @unchecked Sendable {
     }
     
     public func add(blockedUser: User) {
-        blockedUsers.append(blockedUser)
+        var blockedUsers = callInfo.blockedUsers
+        if !blockedUsers.contains(blockedUser) {
+            blockedUsers.append(blockedUser)
+            callInfo.blockedUsers = blockedUsers
+        }
     }
     
     public func remove(blockedUser: User) {
-        blockedUsers.removeAll { user in
+        callInfo.blockedUsers.removeAll { user in
             user.id == blockedUser.id
         }
     }
     
+    internal func update(callInfo: CallInfo) {
+        self.callInfo = callInfo
+    }
+    
+}
+
+public struct CallInfo: Sendable {
+    public let cId: String
+    public let backstage: Bool
+    public var blockedUsers: [User]
 }
 
 enum CallEventType {
