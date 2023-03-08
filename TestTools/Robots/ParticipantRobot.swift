@@ -22,9 +22,12 @@ public class ParticipantRobot {
     public enum Actions: String {
         case shareScreen = "screen-share"
         case recordCall = "record"
+        case sendMessage = "message"
+    }
+    
+    public enum DebugActions: String {
         case showWindow = "show-window"
         case recordSession = "record-session"
-        case sendMessage = "message"
     }
     
     private enum Config: String {
@@ -70,6 +73,7 @@ public class ParticipantRobot {
         _ callId: String,
         options: [Options] = [],
         actions: [Actions] = [],
+        debug: [DebugActions] = [],
         async: Bool = true
     ) {
         var params: [String: Any] = [:]
