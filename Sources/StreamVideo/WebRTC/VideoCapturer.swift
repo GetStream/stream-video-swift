@@ -10,7 +10,7 @@ class VideoCapturer {
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
-    private var videoFiltersHandler: VideoFiltersHandler?
+    private var videoCaptureHandler: StreamVideoCaptureHandler?
     
     init(
         videoSource: RTCVideoSource,
@@ -22,13 +22,9 @@ class VideoCapturer {
         #if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
         #else
-        if videoFilters.isEmpty {
-            videoCapturer = RTCCameraVideoCapturer(delegate: videoSource)
-        } else {
-            let filtersHandler = VideoFiltersHandler(source: videoSource, filters: videoFilters)
-            videoFiltersHandler = filtersHandler
-            videoCapturer = RTCCameraVideoCapturer(delegate: filtersHandler)
-        }
+        let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
+        videoCaptureHandler = handler
+        videoCapturer = RTCCameraVideoCapturer(delegate: handler)
         #endif
     }
     
@@ -77,6 +73,8 @@ class VideoCapturer {
                 fps: Int32(selectedFps)
             )
         }
+        
+        videoCaptureHandler?.currentCameraPosition = cameraPosition
 
         videoCapturer.startCapture(
             with: device,
@@ -86,7 +84,7 @@ class VideoCapturer {
     }
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
-        videoFiltersHandler?.selectedFilter = videoFilter
+        videoCaptureHandler?.selectedFilter = videoFilter
     }
     
     func stopCameraCapture() {
