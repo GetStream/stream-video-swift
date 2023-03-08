@@ -621,8 +621,19 @@ class WebRTCClient: NSObject {
             }
             if track == nil {
                 track = await state.tracks[participant.id]
-                if screenshareTrack == nil {
-                    screenshareTrack = await state.screensharingTracks[participant.id]
+            }
+            if screenshareTrack == nil {
+                screenshareTrack = await state.screensharingTracks[participant.id]
+            }
+            if participant.isScreensharing && screenshareTrack == nil {
+                screenshareTrack = subscriber?.findScreensharingTrack(
+                    for: participant.trackLookupPrefix
+                )
+                if screenshareTrack != nil {
+                    await state.add(
+                        screensharingTrack: screenshareTrack,
+                        id: participant.trackLookupPrefix ?? participant.id
+                    )
                 }
             }
             var updated: CallParticipant?

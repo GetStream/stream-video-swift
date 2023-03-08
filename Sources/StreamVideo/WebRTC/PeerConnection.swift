@@ -27,6 +27,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private(set) var transceiver: RTCRtpTransceiver?
     private var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
+    private var screensharingStreams = [RTCMediaStream]()
         
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
@@ -181,6 +182,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)")
+        if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
+            screensharingStreams.append(stream)
+        }
         onStreamAdded?(stream)
     }
     
@@ -221,6 +225,16 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
         log.debug("Data channel opened for \(type.rawValue)")
+    }
+    
+    func findScreensharingTrack(for trackLookupPrefix: String?) -> RTCVideoTrack? {
+        guard let trackLookupPrefix = trackLookupPrefix else { return nil }
+        for stream in screensharingStreams {
+            if stream.streamId.contains(trackLookupPrefix) {
+                return stream.videoTracks.first
+            }
+        }
+        return nil
     }
     
     // MARK: - private
