@@ -75,7 +75,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         case .landscapeLeft:
             rotation = currentCameraPosition == .front ? ._0 : ._180
         default:
-            rotation = ._0
+            rotation = ._90
         }
         let updatedFrame = RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
         return updatedFrame
