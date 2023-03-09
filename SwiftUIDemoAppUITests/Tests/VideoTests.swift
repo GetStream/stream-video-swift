@@ -101,7 +101,7 @@ final class VideoTests: StreamTestCase {
         }
         WHEN("participant joins the call and shares the screen for 3 seconds") {
             participantRobot
-                .setCallDuration(3)
+                .setScreenSharingDuration(3) 
                 .joinCall(callId, actions: [.shareScreen])
         }
         THEN("user observers participant's screen") {
