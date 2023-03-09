@@ -34,8 +34,8 @@ switch callViewModel.callingState {
         Text("Outgoing call")
     case .reconnecting:
         Text("Reconnecting")
-    case .waitingRoom(let waitingRoomInfo):
-        Text("In waiting room: \(waitingRoomInfo.callId)")
+    case .lobby(let lobbyInfo):
+        Text("In lobby: \(lobbyInfo.callId)")
     }
 ```
 
