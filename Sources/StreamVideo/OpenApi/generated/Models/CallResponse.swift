@@ -15,7 +15,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
 
     internal var backstage: Bool
     internal var blockedUserIds: [String]
-    internal var broadcastEgress: String
+    internal var broadcastEgress: String?
     /** The unique identifier for a call (<type>:<id>) */
     internal var cid: String
     /** Date/time of creation */

@@ -24,9 +24,6 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     let context: CIContext
     let colorSpace: CGColorSpace
     var selectedFilter: VideoFilter?
-    var orientation: UIDeviceOrientation {
-        UIDevice.current.orientation
-    }
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
     
@@ -36,9 +33,13 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
-        DispatchQueue.main.async {
-            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
-        }
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(updateRotation),
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+        )
+        updateRotation()
     }
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
@@ -50,12 +51,14 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             let outputImage = await filter(image: inputImage)
             CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
             self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
-            if orientation == .unknown {
-                let updatedFrame = adjustRotation(capturer, for: buffer, frame: frame)
-                self.source.capturer(capturer, didCapture: updatedFrame)
-            } else {
-                self.source.capturer(capturer, didCapture: frame)
-            }
+            let updatedFrame = adjustRotation(capturer, for: buffer, frame: frame)
+            self.source.capturer(capturer, didCapture: updatedFrame)
+        }
+    }
+    
+    @objc private func updateRotation() {
+        DispatchQueue.main.async {
+            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
     
@@ -84,5 +87,13 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     private func filter(image: CIImage) async -> CIImage {
         guard let selectedFilter = selectedFilter else { return image }
         return await selectedFilter.filter(image)
+    }
+    
+    deinit {
+       NotificationCenter.default.removeObserver(
+            self,
+            name: UIDevice.orientationDidChangeNotification,
+            object: nil
+       )
     }
 }
