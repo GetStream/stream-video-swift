@@ -5,8 +5,9 @@ title: Audio Room/ Spaces
 :::warning
 TODO before launch:
 
-- Add the permission system once implemented in the backend + SDK
-- Add features such as "Raise Hand" for listeners in a room
+- Make the tutorial shorter, it's very big
+- Update the tutorial not to use hardcoded tokens 
+- Update the UI section with "raise hand" features
 - Record demo videos to showcase what is built in this guide
 - Polish the intro with sample video and relevant explanation of it
 - find good way to address repeating installation and setup guide
@@ -513,18 +514,41 @@ class AudioRoomViewModel: ObservableObject {
 
    @Injected(\.streamVideo) var streamVideo
 
-   @Published var callViewModel = CallViewModel()
-
-   @Published var hosts = [CallParticipant]()
-   @Published var otherUsers = [CallParticipant]()
-   //TODO: only temporary until permissions done.
-   @Published var hasPermissionsToSpeak = false
-   @Published var isUserMuted = true
-   @Published var loading = true
-
-   private let audioRoom: AudioRoom
-   private var cancellables = Set<AnyCancellable>()
-
+       @Published var callViewModel = CallViewModel()
+    
+    @Published var hosts = [CallParticipant]()
+    @Published var otherUsers = [CallParticipant]()
+    
+    @Published var hasPermissionsToSpeak = false
+    @Published var isUserMuted = true
+    @Published var loading = true
+    @Published var permissionPopupShown = false
+    @Published var revokePermissionPopupShown = false
+    @Published var activeCallPermissions = [String: [String]]() {
+        didSet {
+            hasPermissionsToSpeak = activeCallPermissions[streamVideo.user.id]?.contains("send-audio") == true
+                || isCurrentUserHost
+        }
+    }
+    @Published var isCallLive = false
+    @Published var callEnded = false
+    var revokingParticipant: CallParticipant? {
+        didSet {
+            if revokingParticipant != nil {
+                revokePermissionPopupShown = true
+            }
+        }
+    }
+    
+    var permissionRequest: PermissionRequest? {
+        didSet {
+            permissionPopupShown = permissionRequest != nil
+        }
+    }
+    
+    private let audioRoom: AudioRoom
+    private var cancellables = Set<AnyCancellable>()
+    private var permissionsController: PermissionsController!
 }
 ```
 
@@ -536,12 +560,9 @@ As mentioned before you'll do a few steps in the initializer. Let's create helpe
 
 ```swift
 private func checkAudioSettings() {
-   // Only temporary, until permissions are implemented.
-   let hostIds = self.audioRoom.hosts.map { $0.id }
-   let isCurrentUserHost = hostIds.contains(streamVideo.user.id)
-   hasPermissionsToSpeak = isCurrentUserHost
-   isUserMuted = !isCurrentUserHost
-   callViewModel.callSettings = CallSettings(audioOn: isCurrentUserHost, videoOn: false)
+    hasPermissionsToSpeak = isCurrentUserHost
+    isUserMuted = !isCurrentUserHost
+    callViewModel.callSettings = CallSettings(audioOn: isCurrentUserHost, videoOn: false)
 }
 ```
 
@@ -549,59 +570,213 @@ Next, to keep the list of the participants of a call up-to-date you'll subscribe
 
 ```swift
 private func subscribeForParticipantChanges() {
-   callViewModel.$callParticipants.sink { [weak self] participants in
-      guard let self = self else { return }
-      let hostIds = self.audioRoom.hosts.map { $0.id }
-      self.hosts = participants.filter { (key, participant) in
-            hostIds.contains(participant.userId)
-      }
-      .map { $0.value }
-      .sorted(by: { $0.name < $1.name })
+    callViewModel.$callParticipants.sink { [weak self] participants in
+        guard let self = self else { return }
+        self.update(participants: participants)
+    }
+    .store(in: &cancellables)
+}
 
-      self.otherUsers = participants.filter { (key, participant) in
-         !hostIds.contains(participant.userId)
-      }
-      .map { $0.value }
-      .sorted(by: { $0.name < $1.name })
-   }
-   .store(in: &cancellables)
+private func update(participants: [String: CallParticipant]) {
+    var hostIds = self.audioRoom.hosts.map { $0.id }
+    self.hosts = participants.filter { (key, participant) in
+        hostIds.contains(participant.userId)
+    }
+    .map { $0.value }
+    .sorted(by: { $0.name < $1.name })
+    
+    for (userId, capabilities) in activeCallPermissions {
+        if capabilities.contains("send-audio"),
+            let participant = findUser(with: userId, in: participants) {
+            hosts.append(participant)
+            hostIds.append(userId)
+        }
+    }
+    
+    self.otherUsers = participants.filter { (key, participant) in
+        !hostIds.contains(participant.userId)
+    }
+    .map { $0.value }
+    .sorted(by: { $0.name < $1.name })
 }
 ```
 
-The remaining two functions are very straightforward, so you'll implement them together. First, you subscribe to audio changes with the `callSettings` object and update the `isUserMuted` object. Second, the `callingState` is observed and the `loading` state is updated.
+The next two functions are very straightforward, so you'll implement them together. First, you subscribe to audio changes with the `callSettings` object and update the `isUserMuted` object. Second, the `callingState` is observed and the `loading` state is updated.
 
 Here is the code:
 
 ```swift
 private func subscribeForAudioChanges() {
-   callViewModel.$callSettings.sink { [weak self] callSettings in
-      guard let self = self else { return }
-      self.isUserMuted = !callSettings.audioOn
-   }
-   .store(in: &cancellables)
+    callViewModel.$callSettings.sink { [weak self] callSettings in
+        guard let self = self else { return }
+        self.isUserMuted = !callSettings.audioOn
+    }
+    .store(in: &cancellables)
 }
 
 private func subscribeForCallStateChanges() {
-   callViewModel.$callingState.sink { [weak self] callState in
-      guard let self = self else { return }
-      self.loading = callState != .inCall
-   }
-   .store(in: &cancellables)
+    callViewModel.$callingState.sink { [weak self] callState in
+        guard let self = self else { return }
+        self.loading = callState != .inCall
+        if callState == .inCall {
+            self.isCallLive = self.callViewModel.call?.callInfo.backstage == false
+            self.subscribeForCallUpdates()
+        }
+    }
+    .store(in: &cancellables)
 }
 ```
+
+In audio rooms, usually you would need the hosts to be able to control who is able to speak and who should be only a listener. In order to do that, you will need to create a `PermissionsController`. Additionally, you will need to listen to permission requests and permission updates, so you can update your UI accordingly.
+
+Let's first add a method that will listen to permission requests. These are events triggered by user actions such as "raising a hand".
+
+```swift
+private func subscribeForPermissionsRequests() {
+    Task {
+        for await request in permissionsController.permissionRequests() {
+            self.permissionRequest = request
+        }
+    }
+}
+```
+
+In this method, we are subscribing to the `PermissionsController`'s async stream of requests. Whenever there's one, we store it and present an alert to the user, which we will check later on.
+
+Finally, we also need to handle permission updates - events that happen after the hosts have granted a permission based on a user request.
+
+```swift
+private func subscribeForPermissionUpdates() {
+    Task {
+        for await update in permissionsController.permissionUpdates() {
+            let userId = update.user.id
+            self.activeCallPermissions[userId] = update.ownCapabilities
+            if userId == streamVideo.user.id
+                && !update.ownCapabilities.contains("send-audio")
+                && callViewModel.callSettings.audioOn {
+                changeMuteState()
+            }
+            self.update(participants: callViewModel.callParticipants)
+        }
+    }
+}
+```
+
+In this method, we are subscribing to another async stream from the `PermissionsController`, which publishes permission updates. We store the updated permissions for the listeners, in the `activeCallPermissions` dictionary. We do this so we can move them from the listeners to the speakers section, and also to be able to easily revoke them if needed.
 
 With all these helpers in place, you can implement the `init` function of the `AudioRoomViewModel` that simply calls all the helpers you just created:
 
 ```swift
 init(audioRoom: AudioRoom) {
-   self.audioRoom = audioRoom
-   checkAudioSettings()
-   callViewModel.joinCall(callId: audioRoom.id)
-   subscribeForParticipantChanges()
-   subscribeForAudioChanges()
-   subscribeForCallStateChanges()
+    self.audioRoom = audioRoom
+    self.permissionsController = streamVideo.makePermissionsController()
+    checkAudioSettings()
+    callViewModel.startCall(
+        callId: audioRoom.id,
+        type: callType,
+        participants: audioRoom.hosts
+    )
+    subscribeForParticipantChanges()
+    subscribeForAudioChanges()
+    subscribeForCallStateChanges()
+    subscribeForPermissionsRequests()
+    subscribeForPermissionUpdates()
 }
 ```
+
+### Backstage
+
+When you create a call with the call type `audio_room`, by default, it goes to a backstage. Backstage means that only hosts or users with elevated permissions can join the call. In order to make it available for everyone, you will need to go live. 
+
+To do that, you should use the corresponding method from the `PermissionsController`:
+
+```swift
+func goLive() {
+    Task {
+        try await permissionsController.goLive(callId: audioRoom.id, callType: callType)
+    }
+}
+```
+
+With this, the call is live and anyone can join it. You can also go back to backstage (and remove all participants that are not hosts), by calling the method `stopLive` in the `PermissionsController`:
+
+```swift
+func stopLive() {
+    Task {
+        try await permissionsController.stopLive(callId: audioRoom.id, callType: callType)
+    }
+}
+```
+
+### Raising a hand
+
+Next, let's see how users can "raise their hand" to speak, which is basically asking for a permission to send audio:
+
+```swift
+func raiseHand() {
+    Task {
+        try await permissionsController.request(
+            permissions: [.sendAudio],
+            callId: audioRoom.id,
+            callType: callType
+        )
+    }
+}
+```
+
+When this method is called, a new permission request will be send to the users who can grant these permissions. We have already seen above how to listen to these requests, by calling the method `subscribeForPermissionsRequests`. Next, let's see how to handle these events. 
+
+After a request is stored in the view model, it automatically updates a variable that controls the presentation of an alert:
+
+```swift
+var permissionRequest: PermissionRequest? {
+    didSet {
+        permissionPopupShown = permissionRequest != nil
+    }
+}
+```
+
+Then, in our UI code, we can use this value to present an alert:
+
+```swift
+.alert(isPresented: $viewModel.permissionPopupShown) {
+    Alert(
+        title: Text("Permission request"),
+        message: Text("\(viewModel.permissionRequest?.user.name ?? "Someone") raised their hand to speak."),
+        primaryButton: .default(Text("Allow")) {
+            viewModel.grantUserPermissions()
+        },
+        secondaryButton: .cancel()
+    )
+}
+```
+
+The interesting part here is the `grantUserPermissions` call, which accepts the user's permission to send audio:
+
+```swift
+func grantUserPermissions() {
+    guard let permissionRequest else { return }
+    var callId = ""
+    var callType = ""
+    let idComponents = permissionRequest.callCid.components(separatedBy: ":")
+    if idComponents.count >= 2  {
+        callId = idComponents[1]
+        callType = idComponents[0]
+    } else {
+        return
+    }
+    Task {
+        try await permissionsController.grant(
+            permissions: permissionRequest.permissions.compactMap { Permission(rawValue: $0) },
+            for: permissionRequest.user.id,
+            callId: callId,
+            callType: callType
+        )
+    }
+}
+```
+
+When this method is called, a new permission update will be sent (which we are listening to by calling the `subscribeForPermissionUpdates`) and the capabilities of the user are updated.
 
 Lastly, you'll add two more functions that listen to user interactions and call functions of the `callViewModel` accordingly, namely one to leave a call and one to toggle the mute state of the current user. Add these two and you're done with the `AudioRoomViewModel`:
 
