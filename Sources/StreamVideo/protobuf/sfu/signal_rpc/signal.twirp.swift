@@ -10,7 +10,9 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
 	let apiKey: String
     let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_Signal_SignalServer", qos: .userInitiated)
 	let pathPrefix: String = "/stream.video.sfu.signal.SignalServer/"
-	init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
+    var httpConfig = HTTPConfig.default //TODO: move this
+    
+    init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
         self.httpClient = httpClient
 		self.hostname = hostname
 		self.token = token
@@ -50,15 +52,19 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         let responseData = try await httpClient.execute(request: urlRequest)
         let response = try Response.init(serializedData: responseData)
         if response.hasError {
-            //TODO: retries from config
-            if response.error.shouldRetry && retries < 5 {
+            if response.error.shouldRetry && retries < httpConfig.maxRetries {
+                let delay = httpConfig.retryStrategy.getDelayAfterTheFailure()
+                let delayNanoseconds = UInt64(delay * 1_000_000_000)
+                log.debug("Delaying retry for \(delay) seconds")
+                try await Task.sleep(nanoseconds: delayNanoseconds)
                 log.debug("Retrying request for path \(path)")
                 return try await execute(request: request, path: path, retries: retries + 1)
             } else {
-                //TODO: make this better
+                httpConfig.retryStrategy.resetConsecutiveFailures()
                 throw NSError(domain: "stream", code: response.error.code.rawValue)
             }
         }
+        httpConfig.retryStrategy.resetConsecutiveFailures()        
         return response
     }
 

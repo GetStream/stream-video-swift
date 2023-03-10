@@ -96,6 +96,7 @@
 		8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* LocalStorage.swift */; };
 		8468822428E1C685003BA9EE /* VoipNotificationsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468822328E1C685003BA9EE /* VoipNotificationsController.swift */; };
 		8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */; };
+		8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593329BB5CE200134EA0 /* HTTPConfig.swift */; };
 		846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8528AA696900147F6E /* ColorExtensions.swift */; };
 		846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */; };
 		846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */; };
@@ -539,6 +540,7 @@
 		8468821228DFA448003BA9EE /* LocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStorage.swift; sourceTree = "<group>"; };
 		8468822328E1C685003BA9EE /* VoipNotificationsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipNotificationsController.swift; sourceTree = "<group>"; };
 		8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalServer_Tests.swift; sourceTree = "<group>"; };
+		8469593329BB5CE200134EA0 /* HTTPConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPConfig.swift; sourceTree = "<group>"; };
 		846FBE8528AA696900147F6E /* ColorExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorExtensions.swift; sourceTree = "<group>"; };
 		846FBE8828AAD83C00147F6E /* InviteParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsView.swift; sourceTree = "<group>"; };
 		846FBE8A28AAD84A00147F6E /* InviteParticipantsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InviteParticipantsViewModel.swift; sourceTree = "<group>"; };
@@ -1267,6 +1269,7 @@
 				84A7E1782881922400526C98 /* HTTPClient.swift */,
 				84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */,
 				84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */,
+				8469593329BB5CE200134EA0 /* HTTPConfig.swift */,
 				84274F472884251600CF8794 /* InternetConnection.swift */,
 			);
 			path = HTTPClient;
@@ -2150,6 +2153,7 @@
 				84DC389829ADFCFD00946713 /* VideoSettingsRequest.swift in Sources */,
 				84A88202299E8C5200EA22ED /* EventsController.swift in Sources */,
 				8419479A2886EBD20007B36E /* UserConnectionProvider.swift in Sources */,
+				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				84A8B8912993D3AB003AA570 /* PermissionsMiddleware.swift in Sources */,
 				84AF64D7287C79610012A503 /* Token.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,

@@ -5,7 +5,12 @@
 @testable import StreamVideo
 import XCTest
 
-final class SignalServer_Tests: StreamVideoTestCase {
+final class SignalServer_Tests: XCTestCase {
+    
+    override func setUp() {
+        super.setUp()
+        LogConfig.level = .debug
+    }
 
     func test_signalServer_retryingRequest() async throws {
         // Given
