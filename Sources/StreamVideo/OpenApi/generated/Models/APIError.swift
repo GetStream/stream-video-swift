@@ -13,11 +13,11 @@ import AnyCodable
 internal struct APIError: Codable, JSONEncodable, Hashable {
 
     /** Response HTTP status code */
-    internal var statusCode: Double
+    internal var statusCode: Int
     /** API error code */
-    internal var code: Double
+    internal var code: Int
     /** Additional error-specific information */
-    internal var details: [Double]
+    internal var details: [Int]
     /** Request duration */
     internal var duration: String
     /** Additional error info */
@@ -27,7 +27,7 @@ internal struct APIError: Codable, JSONEncodable, Hashable {
     /** URL with additional information */
     internal var moreInfo: String
 
-    internal init(statusCode: Double, code: Double, details: [Double], duration: String, exceptionFields: [String: String]? = nil, message: String, moreInfo: String) {
+    internal init(statusCode: Int, code: Int, details: [Int], duration: String, exceptionFields: [String: String]? = nil, message: String, moreInfo: String) {
         self.statusCode = statusCode
         self.code = code
         self.details = details

@@ -12,10 +12,10 @@ import AnyCodable
 
 internal struct SortParamRequest: Codable, JSONEncodable, Hashable {
 
-    internal var direction: Double?
+    internal var direction: Int?
     internal var field: String?
 
-    internal init(direction: Double? = nil, field: String? = nil) {
+    internal init(direction: Int? = nil, field: String? = nil) {
         self.direction = direction
         self.field = field
     }

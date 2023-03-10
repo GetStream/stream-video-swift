@@ -15,7 +15,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
 
     internal var backstage: Bool
     internal var blockedUserIds: [String]
-    internal var broadcastEgress: String?
+    internal var broadcasting: Bool
     /** The unique identifier for a call (<type>:<id>) */
     internal var cid: String
     /** Date/time of creation */
@@ -29,20 +29,21 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     internal var id: String
     /** The capabilities of the current user */
     internal var ownCapabilities: [String]
-    internal var recordEgress: String
+    internal var recording: Bool
     internal var settings: CallSettingsResponse
     /** Date/time when the call will start */
     internal var startsAt: Date?
     internal var team: String
+    internal var transcribing: Bool
     /** The type of call */
     internal var type: String
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcastEgress: String, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ownCapabilities: [String], recordEgress: String, settings: CallSettingsResponse, startsAt: Date? = nil, team: String, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ownCapabilities: [String], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
-        self.broadcastEgress = broadcastEgress
+        self.broadcasting = broadcasting
         self.cid = cid
         self.createdAt = createdAt
         self.createdBy = createdBy
@@ -50,10 +51,11 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         self.endedAt = endedAt
         self.id = id
         self.ownCapabilities = ownCapabilities
-        self.recordEgress = recordEgress
+        self.recording = recording
         self.settings = settings
         self.startsAt = startsAt
         self.team = team
+        self.transcribing = transcribing
         self.type = type
         self.updatedAt = updatedAt
     }
@@ -61,7 +63,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case backstage
         case blockedUserIds = "blocked_user_ids"
-        case broadcastEgress = "broadcast_egress"
+        case broadcasting
         case cid
         case createdAt = "created_at"
         case createdBy = "created_by"
@@ -69,10 +71,11 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         case endedAt = "ended_at"
         case id
         case ownCapabilities = "own_capabilities"
-        case recordEgress = "record_egress"
+        case recording
         case settings
         case startsAt = "starts_at"
         case team
+        case transcribing
         case type
         case updatedAt = "updated_at"
     }
@@ -83,7 +86,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(backstage, forKey: .backstage)
         try container.encode(blockedUserIds, forKey: .blockedUserIds)
-        try container.encode(broadcastEgress, forKey: .broadcastEgress)
+        try container.encode(broadcasting, forKey: .broadcasting)
         try container.encode(cid, forKey: .cid)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(createdBy, forKey: .createdBy)
@@ -91,10 +94,11 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(endedAt, forKey: .endedAt)
         try container.encode(id, forKey: .id)
         try container.encode(ownCapabilities, forKey: .ownCapabilities)
-        try container.encode(recordEgress, forKey: .recordEgress)
+        try container.encode(recording, forKey: .recording)
         try container.encode(settings, forKey: .settings)
         try container.encodeIfPresent(startsAt, forKey: .startsAt)
         try container.encode(team, forKey: .team)
+        try container.encode(transcribing, forKey: .transcribing)
         try container.encode(type, forKey: .type)
         try container.encode(updatedAt, forKey: .updatedAt)
     }
