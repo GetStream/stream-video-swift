@@ -13,12 +13,12 @@ import AnyCodable
 internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
 
     internal var filterConditions: [String: AnyCodable]?
-    internal var limit: Double?
+    internal var limit: Int?
     internal var next: String?
     internal var prev: String?
     internal var sort: [SortParamRequest]
 
-    internal init(filterConditions: [String: AnyCodable]? = nil, limit: Double? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]) {
+    internal init(filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]) {
         self.filterConditions = filterConditions
         self.limit = limit
         self.next = next

@@ -12,14 +12,14 @@ import AnyCodable
 
 internal struct PaginationParamsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var idGt: Double?
-    internal var idGte: Double?
-    internal var idLt: Double?
-    internal var idLte: Double?
-    internal var limit: Double?
-    internal var offset: Double?
+    internal var idGt: Int?
+    internal var idGte: Int?
+    internal var idLt: Int?
+    internal var idLte: Int?
+    internal var limit: Int?
+    internal var offset: Int?
 
-    internal init(idGt: Double? = nil, idGte: Double? = nil, idLt: Double? = nil, idLte: Double? = nil, limit: Double? = nil, offset: Double? = nil) {
+    internal init(idGt: Int? = nil, idGte: Int? = nil, idLt: Int? = nil, idLte: Int? = nil, limit: Int? = nil, offset: Int? = nil) {
         self.idGt = idGt
         self.idGte = idGte
         self.idLt = idLt

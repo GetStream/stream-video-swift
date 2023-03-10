@@ -14,13 +14,13 @@ internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
 
     internal var filterConditions: [String: AnyCodable]
     internal var id: String?
-    internal var limit: Double?
+    internal var limit: Int?
     internal var next: String?
     internal var prev: String?
     internal var sort: [SortParamRequest]?
     internal var type: String
 
-    internal init(filterConditions: [String: AnyCodable], id: String? = nil, limit: Double? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
+    internal init(filterConditions: [String: AnyCodable], id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
         self.filterConditions = filterConditions
         self.id = id
         self.limit = limit
