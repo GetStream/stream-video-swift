@@ -13,7 +13,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
-    @State private var orientation = UIDevice.current.orientation
+    @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
     
     public init(
         viewFactory: Factory,
@@ -51,7 +51,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
         }
         .edgesIgnoringSafeArea(participants.count > 1 ? .bottom : .all)
         .onRotate { newOrientation in
-            orientation = newOrientation
+            orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
 }
