@@ -36,8 +36,13 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    @Published public var shouldShowError: Bool = false
-    public var latestError: Error?
+    public var error: Error? {
+        didSet {
+            errorAlertShown = error != nil
+        }
+    }
+    
+    @Published public var errorAlertShown = false
                         
     @Published public var participantsShown = false
     
@@ -244,6 +249,7 @@ open class CallViewModel: ObservableObject {
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
+                self.error = error
                 callingState = .idle
             }
         }
@@ -340,6 +346,7 @@ open class CallViewModel: ObservableObject {
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
+                self.error = error
                 callingState = .idle
             }
         }

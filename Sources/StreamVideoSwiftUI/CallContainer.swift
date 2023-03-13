@@ -57,6 +57,9 @@ public struct CallContainer<Factory: ViewFactory>: View {
                 viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)
             }
         }
+        .alert(isPresented: $viewModel.errorAlertShown, content: {
+            return Alert.defaultErrorAlert
+        })
         .overlay(overlayView)
         .onReceive(viewModel.$callingState) { _ in
             if viewModel.callingState == .idle || viewModel.callingState == .inCall {
