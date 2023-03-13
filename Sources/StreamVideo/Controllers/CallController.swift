@@ -8,6 +8,8 @@ import WebRTC
 /// Class that handles a particular call.
 public class CallController {
     
+    public var onCallUpdated: ((Call?) -> ())?
+    
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleParticipantsUpdated()
@@ -23,6 +25,7 @@ public class CallController {
     private let apiKey: String
     private let videoConfig: VideoConfig
     private let tokenProvider: UserTokenProvider
+    private var reconnectionDate: Date?
     
     init(
         callCoordinatorController: CallCoordinatorController,
@@ -191,6 +194,7 @@ public class CallController {
             videoConfig: videoConfig,
             tokenProvider: tokenProvider
         )
+        webRTCClient?.onSignalChannelDisconnect = handleSignalChannelDisconnect(source:)
         
         let connectOptions = ConnectOptions(
             iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
@@ -229,4 +233,43 @@ public class CallController {
             self?.call?.onParticipantEvent?(event)
         }
     }
+    
+    private func handleSignalChannelDisconnect(
+        source: WebSocketConnectionState.DisconnectionSource
+    ) {
+        guard let call = call, source != .userInitiated else { return }
+        log.debug("Retrying to connect to the call")
+        if reconnectionDate == nil {
+            reconnectionDate = Date()
+        }
+        let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
+        //TODO: add backoff here
+        if diff > 15 {
+            log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
+            handleReconnectionError()
+            reconnectionDate = nil
+            return
+        }
+        Task {
+            do {
+                self.call = try await joinCall(
+                    callType: call.callType,
+                    callId: call.callId,
+                    callSettings: webRTCClient?.callSettings ?? CallSettings(),
+                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
+                    participants: []
+                )
+                self.onCallUpdated?(self.call)
+            } catch {
+                self.handleReconnectionError()
+            }
+        }
+    }
+    
+    private func handleReconnectionError() {
+        log.error("Error while reconnecting to the call")
+        self.call = nil
+        self.onCallUpdated?(nil)
+    }
+    
 }

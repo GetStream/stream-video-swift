@@ -103,13 +103,13 @@ class WebRTCClient: NSObject {
     private var localAudioTrack: RTCAudioTrack?
     private let user: User
     private let callCid: String
-    private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 8
     private var connectOptions: ConnectOptions?
-    private var callSettings = CallSettings()
     private let callCoordinatorController: CallCoordinatorController
     private let videoConfig: VideoConfig
+    private(set) var callSettings = CallSettings()
+    private(set) var videoOptions = VideoOptions()
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onParticipantEvent: ((ParticipantEvent) -> Void)? {
@@ -117,6 +117,7 @@ class WebRTCClient: NSObject {
             sfuMiddleware.onParticipantEvent = onParticipantEvent
         }
     }
+    var onSignalChannelDisconnect: ((WebSocketConnectionState.DisconnectionSource) -> ())?
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -480,7 +481,7 @@ class WebRTCClient: NSObject {
         var wsURLString = "wss://\(host)/ws"
         if host.starts(with: "192.") || host.starts(with: "localhost") {
             // Temporary for localhost testing.
-            wsURLString = "ws://\(host):3031/ws"
+            wsURLString = "ws://\(host):\(sfuPort)/ws"
         }
         let wsURL = URL(string: wsURLString)
         return wsURL
@@ -499,6 +500,8 @@ class WebRTCClient: NSObject {
             connectURL: url,
             requiresAuth: false
         )
+        
+        webSocketClient.connectionStateDelegate = self
         
         webSocketClient.onConnect = { [weak self] in
             guard let self = self else { return }
@@ -659,3 +662,19 @@ class WebRTCClient: NSObject {
         }
     }
 }
+
+extension WebRTCClient: ConnectionStateDelegate {
+    func webSocketClient(_ client: WebSocketClient, didUpdateConnectionState state: WebSocketConnectionState) {
+        switch state {
+        case .disconnected(let source):
+            log.debug("Web socket disconnected")
+//            sfuPort = 3031
+            onSignalChannelDisconnect?(source)
+        default:
+            log.debug("Web socket connection state changed to \(state)")
+        }
+    }
+}
+
+//TODO: remove this.
+var sfuPort = 5031

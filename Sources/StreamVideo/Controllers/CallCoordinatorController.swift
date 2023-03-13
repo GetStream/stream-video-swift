@@ -212,7 +212,7 @@ final class CallCoordinatorController: @unchecked Sendable {
             )
         )
         return EdgeServer(
-            url: credentials.server.url,
+            url: "http://localhost:\(sfuPort)/twirp", //TODO: just for testing.
             token: credentials.token,
             iceServers: iceServers,
             callSettings: callSettings,
