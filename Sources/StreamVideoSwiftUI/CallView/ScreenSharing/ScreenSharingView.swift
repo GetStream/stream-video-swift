@@ -62,8 +62,7 @@ public struct ScreenSharingView: View {
                     .cornerRadius(8)
                 }
                 .padding()
-                
-                Spacer(minLength: thumbnailSize)
+                .padding(.bottom)
             }
         }
         .frame(
