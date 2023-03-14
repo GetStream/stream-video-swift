@@ -102,9 +102,7 @@ struct IncomingCallParticipantView: View {
     var body: some View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = participant.imageURL {
-                LazyImage(url: imageURL)
-                    .frame(width: size, height: size)
-                    .clipShape(Circle())
+                UserAvatar(imageURL: imageURL, size: size)
             } else {
                 let name = participant.name.isEmpty ? "Unknown" : participant.name
                 let title = String(name.uppercased().first!)

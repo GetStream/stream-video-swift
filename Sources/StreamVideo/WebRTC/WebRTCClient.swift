@@ -210,7 +210,7 @@ class WebRTCClient: NSObject {
         await state.update(connectionState: .disconnected(reason: .user))
     }
     
-    func startCapturingLocalVideo(renderer: RTCVideoRenderer, cameraPosition: AVCaptureDevice.Position) {
+    func startCapturingLocalVideo(cameraPosition: AVCaptureDevice.Position) {
         setCameraPosition(cameraPosition)
     }
     

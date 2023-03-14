@@ -154,7 +154,7 @@ public struct CallView<Factory: ViewFactory>: View {
             if let track = viewModel.localParticipant?.track {
                 view.add(track: track)
             } else {
-                viewModel.renderLocalVideo(renderer: view)
+                viewModel.startCapturingLocalVideo()
             }
         }
         .opacity(viewModel.localParticipant != nil ? 1 : 0)

@@ -279,10 +279,9 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    /// Renders the local video in the provided renderer.
-    /// - Parameter renderer: Any view (both UIKit and SwiftUI) implementing the `RTCVideoRenderer` protocol.
-    public func renderLocalVideo(renderer: RTCVideoRenderer) {
-        callController?.renderLocalVideo(renderer: renderer)
+    /// Starts capturing the local video.
+    public func startCapturingLocalVideo() {
+        callController?.startCapturingLocalVideo()
     }
     
     /// Changes the track visibility for a participant (not visible if they go off-screen).

@@ -97,6 +97,6 @@ You can also show/hide the camera during a call. This is done by calling the met
 
 You can mute/unmute the audio during a call, using the `toggleMicrophoneEnabled` method. The change will be published to the views via the `callSettings`.
 
-### Rendering local video
+### Capturing local video
 
-The view model also has support for rendering the current user's local video. To do this, you will need to call `renderLocalVideo(renderer: RTCVideoRenderer)`. The `RTCVideoRenderer` can be any view (both UIKit and SwiftUI) implementing the `RTCVideoRenderer` protocol.
+The view model also has support for explicitly asking to capture the current user's local video. To do this, you will need to call `startCapturingLocalVideo`.

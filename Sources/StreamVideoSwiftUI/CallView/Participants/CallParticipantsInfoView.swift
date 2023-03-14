@@ -267,9 +267,7 @@ struct CallParticipantView: View {
         VStack(spacing: 4) {
             HStack {
                 if #available(iOS 14.0, *) {
-                    LazyImage(url: participant.profileImageURL)
-                        .frame(width: imageSize, height: imageSize)
-                        .clipShape(Circle())
+                    UserAvatar(imageURL: participant.profileImageURL, size: imageSize)
                         .overlay(
                             participant.isOnline ?
                                 TopRightView {

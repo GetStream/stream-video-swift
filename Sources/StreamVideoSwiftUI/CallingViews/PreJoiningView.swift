@@ -148,9 +148,7 @@ struct CameraCheckView: View {
                         .cornerRadius(16)
 
                     if #available(iOS 14.0, *) {
-                        LazyImage(url: streamVideo.user.imageURL)
-                            .frame(width: 80, height: 80)
-                            .clipShape(Circle())
+                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
                     }
                 }
                 .opacity(callViewModel.callSettings.videoOn ? 0 : 1)
