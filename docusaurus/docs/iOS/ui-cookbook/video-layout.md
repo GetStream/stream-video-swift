@@ -16,7 +16,7 @@ Here's a screenshot of what we are going to build:
 
 ### Prerequisites
 
-This tutorial focuses solely on building a custom UI without going through the setup of our `StreamVideo` client, or authenticating users. Make sure to check our [sample project]("https://github.com/GetStream/stream-video-ios-examples/tree/main/UICookbook") and perform the required setup.
+This tutorial focuses solely on building a custom UI without going through the setup of our `StreamVideo` client, or authenticating users. Make sure to check our [sample project](https://github.com/GetStream/stream-video-ios-examples/tree/main/UICookbook) and perform the required setup.
 
 ### Starting a call
 
