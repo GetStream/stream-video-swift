@@ -123,9 +123,7 @@ struct VideoUserView: View {
     var body: some View {
         HStack {
             if #available(iOS 14.0, *) {
-                LazyImage(url: user.imageURL)
-                    .frame(width: avatarSize, height: avatarSize)
-                    .clipShape(Circle())
+                UserAvatar(imageURL: user.imageURL, size: avatarSize)
             }
             
             VStack(alignment: .leading, spacing: 4) {

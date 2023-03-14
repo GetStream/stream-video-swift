@@ -40,9 +40,7 @@ struct HomeView: View {
                     Button {
                         logoutAlertShown = true
                     } label: {
-                        LazyImage(url: streamVideo.user.imageURL)
-                            .frame(width: imageSize, height: imageSize)
-                            .clipShape(Circle())
+                        UserAvatar(imageURL: streamVideo.user.imageURL, size: imageSize)
                             .accessibilityIdentifier("userAvatar")
                     }
                     .padding()
@@ -138,9 +136,7 @@ struct HomeView: View {
                     }
                 } label: {
                     HStack {
-                        LazyImage(url: participant.imageURL)
-                            .frame(width: imageSize, height: imageSize)
-                            .clipShape(Circle())
+                        UserAvatar(imageURL: participant.imageURL, size: imageSize)
                         Text(participant.name)
                         Spacer()
                         if selectedParticipants.contains(participant) {
