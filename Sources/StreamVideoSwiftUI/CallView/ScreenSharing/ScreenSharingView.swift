@@ -52,7 +52,7 @@ public struct ScreenSharingView: View {
                             if let track = viewModel.localParticipant?.track {
                                 view.add(track: track)
                             } else {
-                                viewModel.renderLocalVideo(renderer: view)
+                                viewModel.startCapturingLocalVideo()
                             }
                         }
                         .adjustVideoFrame(to: thumbnailSize, ratio: 1)

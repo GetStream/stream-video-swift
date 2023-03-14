@@ -97,7 +97,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                 if let track = viewModel.localParticipant?.track {
                     view.add(track: track)
                 } else {
-                    viewModel.renderLocalVideo(renderer: view)
+                    viewModel.startCapturingLocalVideo()
                 }
             }
             VStack {
