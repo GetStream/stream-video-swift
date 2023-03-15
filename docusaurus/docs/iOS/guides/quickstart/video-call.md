@@ -135,6 +135,7 @@ struct ContentView: View {
                 resignFirstResponder()
                 callViewModel.startCall(
                     callId: callId,
+                    type: "default",
                     participants: [/* Your list of participants goes here. */]
                 )
             } label: {

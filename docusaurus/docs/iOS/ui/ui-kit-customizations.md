@@ -79,7 +79,7 @@ Finally, in your app, you can add the `CallViewController` with the following co
 ```swift
 @objc private func didTapStartButton() {
     let next = CallChatViewController.makeCallChatController(with: self.callViewModel)
-    next.startCall(callId: text, participants: selectedParticipants)
+    next.startCall(callId: text, type: "default", participants: selectedParticipants)
     CallViewHelper.shared.add(callView: next.view)
 }
 ```
