@@ -199,7 +199,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
     ///  - participants: list of participants that are part of the call.
-    public func startCall(callId: String, type: String? = nil, participants: [User], ring: Bool = false) {
+    public func startCall(callId: String, type: String, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
         ringingSupported = ring
         setupCallController(callId: callId, type: type)
@@ -212,13 +212,13 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
-    public func joinCall(callId: String, type: String? = nil) {
+    public func joinCall(callId: String, type: String) {
         setupCallController(callId: callId, type: type)
         let callType = callType(from: type)
         enterCall(callId: callId, callType: callType, participants: [])
     }
     
-    public func enterLobby(callId: String, type: String? = nil, participants: [User]) {
+    public func enterLobby(callId: String, type: String, participants: [User]) {
         let callType = callType(from: type)
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: participants)
         callingState = .lobby(lobbyInfo)
@@ -231,7 +231,7 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    public func joinCallFromLobby(callId: String, type: String? = nil, participants: [User]) throws {
+    public func joinCallFromLobby(callId: String, type: String, participants: [User]) throws {
         guard let edgeServer = edgeServer, let callController = callController else {
             throw ClientError.Unexpected("Edge server not available")
         }

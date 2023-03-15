@@ -16,17 +16,17 @@ The `CallViewModel` exposes a `@Published` `callingState` variable, that can be 
 
 ### Starting a call
 
-You can start a call using the method `startCall(callId: String, type: String? = nil, participants: [UserInfo])`, where the parameters are:
+You can start a call using the method `startCall(callId: String, type: String, participants: [UserInfo])`, where the parameters are:
 
 - `callId` - the id of the call. If you use the ringing functionality, this should be always a unique value.
-- `type` - optional call type. If you don't specify it, a default one would be set.
+- `type` - the call type.
 - `participants` - the list of participants in the call.
 
 Here's an example usage:
 
 ```swift
 Button {
-    viewModel.startCall(callId: callId, participants: selectedParticipants)
+    viewModel.startCall(callId: callId, type: "default", participants: selectedParticipants)
 } label: {
     Text("Start a call")
 }

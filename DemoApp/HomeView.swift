@@ -68,7 +68,7 @@ struct HomeView: View {
                     .transition(.opacity)
             } else {
                 Button {
-                    viewModel.joinCall(callId: callId)
+                    viewModel.joinCall(callId: callId, type: "default")
                 } label: {
                     Text("Join a call")
                         .padding()
@@ -165,9 +165,9 @@ struct HomeView: View {
             Button {
                 resignFirstResponder()
                 if callFlow == .lobby {
-                    viewModel.enterLobby(callId: callId, participants: selectedParticipants)
+                    viewModel.enterLobby(callId: callId, type: "default", participants: selectedParticipants)
                 } else {
-                    viewModel.startCall(callId: callId, participants: selectedParticipants, ring: callFlow == .ringEvents)
+                    viewModel.startCall(callId: callId, type: "default", participants: selectedParticipants, ring: callFlow == .ringEvents)
                 }
             } label: {
                 Text("Start a call")
