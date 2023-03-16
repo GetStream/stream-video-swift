@@ -24,6 +24,19 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] callInfo in
                     self?.blockedUsers = callInfo.blockedUsers
             })
+            reconnectionUpdates = call?.$reconnecting
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] reconnecting in
+                    if reconnecting {
+                        if self?.callingState != .reconnecting {
+                            self?.callingState = .reconnecting
+                        }
+                    } else {
+                        if self?.callingState != .inCall {
+                            self?.callingState = .inCall
+                        }
+                    }
+                })
         }
     }
     
@@ -86,6 +99,7 @@ open class CallViewModel: ObservableObject {
             
     private var participantUpdates: AnyCancellable?
     private var callUpdates: AnyCancellable?
+    private var reconnectionUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
     private var callController: CallController?
@@ -417,7 +431,7 @@ open class CallViewModel: ObservableObject {
     }
     
     private func updateCallStateIfNeeded() {
-        if !ringingSupported {
+        if !ringingSupported && callingState != .reconnecting {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1

@@ -220,7 +220,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   case participantNotFound // = 200
   case callNotFound // = 300
   case requestValidationFailed // = 400
+  case unauthenticated // = 401
   case permissionDenied // = 403
+  case tooManyRequests // = 429
   case internalServerError // = 500
   case UNRECOGNIZED(Int)
 
@@ -238,7 +240,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case 200: self = .participantNotFound
     case 300: self = .callNotFound
     case 400: self = .requestValidationFailed
+    case 401: self = .unauthenticated
     case 403: self = .permissionDenied
+    case 429: self = .tooManyRequests
     case 500: self = .internalServerError
     default: self = .UNRECOGNIZED(rawValue)
     }
@@ -254,7 +258,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case .participantNotFound: return 200
     case .callNotFound: return 300
     case .requestValidationFailed: return 400
+    case .unauthenticated: return 401
     case .permissionDenied: return 403
+    case .tooManyRequests: return 429
     case .internalServerError: return 500
     case .UNRECOGNIZED(let i): return i
     }
@@ -275,7 +281,9 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     .participantNotFound,
     .callNotFound,
     .requestValidationFailed,
+    .unauthenticated,
     .permissionDenied,
+    .tooManyRequests,
     .internalServerError,
   ]
 }
@@ -599,7 +607,9 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     200: .same(proto: "ERROR_CODE_PARTICIPANT_NOT_FOUND"),
     300: .same(proto: "ERROR_CODE_CALL_NOT_FOUND"),
     400: .same(proto: "ERROR_CODE_REQUEST_VALIDATION_FAILED"),
+    401: .same(proto: "ERROR_CODE_UNAUTHENTICATED"),
     403: .same(proto: "ERROR_CODE_PERMISSION_DENIED"),
+    429: .same(proto: "ERROR_CODE_TOO_MANY_REQUESTS"),
     500: .same(proto: "ERROR_CODE_INTERNAL_SERVER_ERROR"),
   ]
 }

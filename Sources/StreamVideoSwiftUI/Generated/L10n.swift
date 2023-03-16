@@ -21,6 +21,10 @@ internal enum L10n {
   }
 
   internal enum Call {
+    internal enum Current {
+      /// Trying to reconnect to the call
+      internal static var reconnecting: String { L10n.tr("Localizable", "call.current.reconnecting") }
+    }
     internal enum Incoming {
       /// Incoming call
       internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }

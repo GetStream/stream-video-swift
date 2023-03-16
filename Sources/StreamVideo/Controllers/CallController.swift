@@ -193,7 +193,7 @@ public class CallController {
             videoConfig: videoConfig,
             tokenProvider: tokenProvider
         )
-        webRTCClient?.onSignalChannelDisconnect = handleSignalChannelDisconnect(source:)
+        webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
         
         let connectOptions = ConnectOptions(
             iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
@@ -233,6 +233,22 @@ public class CallController {
         }
     }
     
+    private func handleSignalChannelConnectionStateChange(_ state: WebSocketConnectionState) {
+        switch state {
+        case .disconnected(let source):
+            log.debug("Signal channel disconnected")
+            handleSignalChannelDisconnect(source: source)
+        case .connected(healthCheckInfo: _):
+            log.debug("Signal channel connected")
+            if reconnectionDate != nil {
+                reconnectionDate = nil
+            }
+            call?.update(isReconnecting: false)
+        default:
+            log.debug("Signal connection state changed to \(state)")
+        }
+    }
+    
     private func handleSignalChannelDisconnect(
         source: WebSocketConnectionState.DisconnectionSource
     ) {
@@ -258,6 +274,7 @@ public class CallController {
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                     participants: []
                 )
+                self.call?.update(isReconnecting: true)
                 self.onCallUpdated?(self.call)
             } catch {
                 self.handleReconnectionError()

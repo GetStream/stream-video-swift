@@ -15,6 +15,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
     }
     @Published public private(set) var callInfo: CallInfo
+    @Published public private(set) var reconnecting = false
     
     public let callId: String
     public let callType: CallType
@@ -60,6 +61,12 @@ public class Call: ObservableObject, @unchecked Sendable {
     public func remove(blockedUser: User) {
         callInfo.blockedUsers.removeAll { user in
             user.id == blockedUser.id
+        }
+    }
+    
+    internal func update(isReconnecting: Bool) {
+        if isReconnecting != self.reconnecting {
+            self.reconnecting = isReconnecting
         }
     }
     

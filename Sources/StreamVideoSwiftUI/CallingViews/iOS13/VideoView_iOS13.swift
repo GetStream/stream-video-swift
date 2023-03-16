@@ -34,6 +34,8 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
                 }
             } else if case let .lobby(lobbyInfo) = viewModel.callingState {
                 viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)
+            } else if viewModel.callingState == .reconnecting {
+                viewFactory.makeReconnectionView(viewModel: viewModel)
             }
         }
         .alert(isPresented: $viewModel.errorAlertShown, content: {

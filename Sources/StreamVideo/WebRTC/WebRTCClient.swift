@@ -117,7 +117,7 @@ class WebRTCClient: NSObject {
             sfuMiddleware.onParticipantEvent = onParticipantEvent
         }
     }
-    var onSignalChannelDisconnect: ((WebSocketConnectionState.DisconnectionSource) -> ())?
+    var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -477,11 +477,14 @@ class WebRTCClient: NSObject {
     }
     
     private func webSocketURL(from hostname: String) -> URL? {
-        let host = URL(string: hostname)?.host ?? hostname
+        var host = URL(string: hostname)?.host ?? hostname
+        if host.contains("127.0.0.1") {
+            host = "localhost"
+        }
         var wsURLString = "wss://\(host)/ws"
         if host.starts(with: "192.") || host.starts(with: "localhost") {
             // Temporary for localhost testing.
-            wsURLString = "ws://\(host):\(sfuPort)/ws"
+            wsURLString = "ws://\(host):3031/ws"
         }
         let wsURL = URL(string: wsURLString)
         return wsURL
@@ -665,16 +668,6 @@ class WebRTCClient: NSObject {
 
 extension WebRTCClient: ConnectionStateDelegate {
     func webSocketClient(_ client: WebSocketClient, didUpdateConnectionState state: WebSocketConnectionState) {
-        switch state {
-        case .disconnected(let source):
-            log.debug("Web socket disconnected")
-//            sfuPort = 3031
-            onSignalChannelDisconnect?(source)
-        default:
-            log.debug("Web socket connection state changed to \(state)")
-        }
+        onSignalConnectionStateChange?(state)        
     }
 }
-
-//TODO: remove this.
-var sfuPort = 5031
