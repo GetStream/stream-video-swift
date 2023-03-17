@@ -129,8 +129,7 @@ public class StreamVideo {
             callId: callId,
             callType: callType,
             apiKey: apiKey.apiKeyString,
-            videoConfig: videoConfig,
-            tokenProvider: tokenProvider
+            videoConfig: videoConfig
         )
         currentCallController = controller
         callsMiddleware.onCallUpdated = currentCallController?.update(callInfo:)

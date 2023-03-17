@@ -15,6 +15,8 @@
 "call.incoming.title" = "Incoming call";
 "call.outgoing.title" = "Calling";
 
+"call.current.reconnecting" = "Trying to reconnect to the call";
+
 "waiting-room.title" = "Before Joining";
 "waiting-room.subtitle" = "Setup your audio and video";
 "waiting-room.join" = "Join Call";
@@ -22,3 +24,7 @@
 "waiting-room.number-of-participants" = "more people are in the call.";
 "waiting-room.connection-issues" = "It seems you are having issues with your internet connection.";
 "waiting-room.mic.not-working" = "Your microphone doesn't seem to be working. Make sure you have all permissions accepted.";
+
+"alert.error.title" = "Something went wrong.";
+"alert.error.message" = "The operation couldn't be completed.";
+"alert.actions.ok" = "Ok";

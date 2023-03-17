@@ -96,6 +96,13 @@ public protocol ViewFactory: AnyObject {
         viewModel: CallViewModel,
         lobbyInfo: LobbyInfo
     ) -> LobbyViewType
+    
+    associatedtype ReconnectionViewType: View
+    /// Creates the view shown when the call is reconnecting.
+    /// - Parameters:
+    ///  - viewModel: The view model used for the call.
+    /// - Returns: view shown in the reconnection slot.
+    func makeReconnectionView(viewModel: CallViewModel) -> ReconnectionViewType
 }
 
 extension ViewFactory {
@@ -211,6 +218,10 @@ extension ViewFactory {
                 callParticipants: lobbyInfo.participants
             )
         }
+    }
+    
+    public func makeReconnectionView(viewModel: CallViewModel) -> some View {
+        ReconnectionView(viewModel: viewModel, viewFactory: self)
     }
 }
 

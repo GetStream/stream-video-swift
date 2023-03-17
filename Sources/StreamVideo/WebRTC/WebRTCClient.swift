@@ -103,13 +103,13 @@ class WebRTCClient: NSObject {
     private var localAudioTrack: RTCAudioTrack?
     private let user: User
     private let callCid: String
-    private var videoOptions = VideoOptions()
     private let audioSession = AudioSession()
     private let participantsThreshold = 8
     private var connectOptions: ConnectOptions?
-    private var callSettings = CallSettings()
     private let callCoordinatorController: CallCoordinatorController
     private let videoConfig: VideoConfig
+    private(set) var callSettings = CallSettings()
+    private(set) var videoOptions = VideoOptions()
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onParticipantEvent: ((ParticipantEvent) -> Void)? {
@@ -117,6 +117,7 @@ class WebRTCClient: NSObject {
             sfuMiddleware.onParticipantEvent = onParticipantEvent
         }
     }
+    var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -144,8 +145,7 @@ class WebRTCClient: NSObject {
         token: String,
         callCid: String,
         callCoordinatorController: CallCoordinatorController,
-        videoConfig: VideoConfig,
-        tokenProvider: @escaping UserTokenProvider
+        videoConfig: VideoConfig
     ) {
         state = State()
         self.user = user
@@ -154,8 +154,7 @@ class WebRTCClient: NSObject {
         self.videoConfig = videoConfig
         self.callCoordinatorController = callCoordinatorController
         httpClient = URLSessionClient(
-            urlSession: StreamVideo.Environment.makeURLSession(),
-            tokenProvider: tokenProvider
+            urlSession: StreamVideo.Environment.makeURLSession()
         )
         
         signalService = Stream_Video_Sfu_Signal_SignalServer(
@@ -477,11 +476,7 @@ class WebRTCClient: NSObject {
     
     private func webSocketURL(from hostname: String) -> URL? {
         let host = URL(string: hostname)?.host ?? hostname
-        var wsURLString = "wss://\(host)/ws"
-        if host.starts(with: "192.") || host.starts(with: "localhost") {
-            // Temporary for localhost testing.
-            wsURLString = "ws://\(host):3031/ws"
-        }
+        let wsURLString = "wss://\(host)/ws"
         let wsURL = URL(string: wsURLString)
         return wsURL
     }
@@ -499,6 +494,8 @@ class WebRTCClient: NSObject {
             connectURL: url,
             requiresAuth: false
         )
+        
+        webSocketClient.connectionStateDelegate = self
         
         webSocketClient.onConnect = { [weak self] in
             guard let self = self else { return }
@@ -657,5 +654,11 @@ class WebRTCClient: NSObject {
                 await self.handleParticipantsUpdated()
             }
         }
+    }
+}
+
+extension WebRTCClient: ConnectionStateDelegate {
+    func webSocketClient(_ client: WebSocketClient, didUpdateConnectionState state: WebSocketConnectionState) {
+        onSignalConnectionStateChange?(state)        
     }
 }

@@ -24,6 +24,19 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] callInfo in
                     self?.blockedUsers = callInfo.blockedUsers
             })
+            reconnectionUpdates = call?.$reconnecting
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] reconnecting in
+                    if reconnecting {
+                        if self?.callingState != .reconnecting {
+                            self?.callingState = .reconnecting
+                        }
+                    } else {
+                        if self?.callingState != .inCall {
+                            self?.callingState = .inCall
+                        }
+                    }
+                })
         }
     }
     
@@ -36,8 +49,13 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    @Published public var shouldShowError: Bool = false
-    public var latestError: Error?
+    public var error: Error? {
+        didSet {
+            errorAlertShown = error != nil
+        }
+    }
+    
+    @Published public var errorAlertShown = false
                         
     @Published public var participantsShown = false
     
@@ -81,6 +99,7 @@ open class CallViewModel: ObservableObject {
             
     private var participantUpdates: AnyCancellable?
     private var callUpdates: AnyCancellable?
+    private var reconnectionUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
     private var callController: CallController?
@@ -197,7 +216,7 @@ open class CallViewModel: ObservableObject {
     public func startCall(callId: String, type: String, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
         ringingSupported = ring
-        callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
+        setupCallController(callId: callId, type: type)
         callingState = .outgoing
         let callType = callType(from: type)
         enterCall(callId: callId, callType: callType, participants: participants, ring: ring)
@@ -208,8 +227,8 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
     public func joinCall(callId: String, type: String) {
+        setupCallController(callId: callId, type: type)
         let callType = callType(from: type)
-        callController = streamVideo.makeCallController(callType: callType, callId: callId)
         enterCall(callId: callId, callType: callType, participants: [])
     }
     
@@ -217,7 +236,7 @@ open class CallViewModel: ObservableObject {
         let callType = callType(from: type)
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: participants)
         callingState = .lobby(lobbyInfo)
-        callController = streamVideo.makeCallController(callType: callType, callId: callId)
+        setupCallController(callId: callId, type: type)
         Task {
             self.edgeServer = try await callController?.selectEdgeServer(
                 videoOptions: VideoOptions(),
@@ -244,6 +263,7 @@ open class CallViewModel: ObservableObject {
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
+                self.error = error
                 callingState = .idle
             }
         }
@@ -255,7 +275,7 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     public func acceptCall(callId: String, type: String) {
         let callType = callType(from: type)
-        callController = streamVideo.makeCallController(callType: callType, callId: callId)
+        setupCallController(callId: callId, type: type)
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: callType)
             enterCall(callId: callId, callType: callType, participants: [])
@@ -339,6 +359,7 @@ open class CallViewModel: ObservableObject {
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
+                self.error = error
                 callingState = .idle
             }
         }
@@ -410,7 +431,7 @@ open class CallViewModel: ObservableObject {
     }
     
     private func updateCallStateIfNeeded() {
-        if !ringingSupported {
+        if !ringingSupported && callingState != .reconnecting {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1
@@ -423,6 +444,19 @@ open class CallViewModel: ObservableObject {
     @objc private func checkForOngoingCall() {
         if call == nil && callController?.call != nil {
             call = callController?.call
+        }
+    }
+    
+    private func setupCallController(callId: String, type: String?) {
+        callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
+        callController?.onCallUpdated = { [weak self] updatedCall in            
+            DispatchQueue.main.async {
+                guard let updatedCall = updatedCall else {
+                    self?.leaveCall()
+                    return
+                }
+                self?.save(call: updatedCall)
+            }
         }
     }
     

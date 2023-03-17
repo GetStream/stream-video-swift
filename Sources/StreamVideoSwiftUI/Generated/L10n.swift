@@ -7,7 +7,24 @@ import Foundation
 
 internal enum L10n {
 
+  internal enum Alert {
+    internal enum Actions {
+      /// Ok
+      internal static var ok: String { L10n.tr("Localizable", "alert.actions.ok") }
+    }
+    internal enum Error {
+      /// The operation couldn't be completed.
+      internal static var message: String { L10n.tr("Localizable", "alert.error.message") }
+      /// Something went wrong.
+      internal static var title: String { L10n.tr("Localizable", "alert.error.title") }
+    }
+  }
+
   internal enum Call {
+    internal enum Current {
+      /// Trying to reconnect to the call
+      internal static var reconnecting: String { L10n.tr("Localizable", "call.current.reconnecting") }
+    }
     internal enum Incoming {
       /// Incoming call
       internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }

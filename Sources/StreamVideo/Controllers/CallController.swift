@@ -8,6 +8,8 @@ import WebRTC
 /// Class that handles a particular call.
 public class CallController {
     
+    public var onCallUpdated: ((Call?) -> ())?
+    
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleParticipantsUpdated()
@@ -22,7 +24,8 @@ public class CallController {
     private let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoConfig: VideoConfig
-    private let tokenProvider: UserTokenProvider
+    private let sfuReconnectionTime: CGFloat = 30
+    private var reconnectionDate: Date?
     
     init(
         callCoordinatorController: CallCoordinatorController,
@@ -30,15 +33,13 @@ public class CallController {
         callId: String,
         callType: CallType,
         apiKey: String,
-        videoConfig: VideoConfig,
-        tokenProvider: @escaping UserTokenProvider
+        videoConfig: VideoConfig
     ) {
         self.user = user
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
         self.apiKey = apiKey
-        self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
     }
     
@@ -187,9 +188,9 @@ public class CallController {
             token: edgeServer.token,
             callCid: "\(callType.name):\(callId)",
             callCoordinatorController: callCoordinatorController,
-            videoConfig: videoConfig,
-            tokenProvider: tokenProvider
+            videoConfig: videoConfig
         )
+        webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
         
         let connectOptions = ConnectOptions(
             iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
@@ -228,4 +229,61 @@ public class CallController {
             self?.call?.onParticipantEvent?(event)
         }
     }
+    
+    private func handleSignalChannelConnectionStateChange(_ state: WebSocketConnectionState) {
+        switch state {
+        case .disconnected(let source):
+            log.debug("Signal channel disconnected")
+            handleSignalChannelDisconnect(source: source)
+        case .connected(healthCheckInfo: _):
+            log.debug("Signal channel connected")
+            if reconnectionDate != nil {
+                reconnectionDate = nil
+            }
+            call?.update(isReconnecting: false)
+        default:
+            log.debug("Signal connection state changed to \(state)")
+        }
+    }
+    
+    private func handleSignalChannelDisconnect(
+        source: WebSocketConnectionState.DisconnectionSource
+    ) {
+        guard let call = call, source != .userInitiated else { return }
+        if reconnectionDate == nil {
+            reconnectionDate = Date()
+        }
+        let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
+        if diff > sfuReconnectionTime {
+            log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
+            handleReconnectionError()
+            reconnectionDate = nil
+            return
+        }
+        Task {
+            do {
+                log.debug("Waiting to reconnect")
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                log.debug("Retrying to connect to the call")
+                self.call = try await joinCall(
+                    callType: call.callType,
+                    callId: call.callId,
+                    callSettings: webRTCClient?.callSettings ?? CallSettings(),
+                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
+                    participants: []
+                )
+                self.call?.update(isReconnecting: true)
+                self.onCallUpdated?(self.call)
+            } catch {
+                self.handleReconnectionError()
+            }
+        }
+    }
+    
+    private func handleReconnectionError() {
+        log.error("Error while reconnecting to the call")
+        self.call = nil
+        self.onCallUpdated?(nil)
+    }
+    
 }
