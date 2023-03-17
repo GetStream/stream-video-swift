@@ -1,8 +1,5 @@
 //
-//  ReconnectionView.swift
-//  StreamVideoSwiftUI
-//
-//  Created by Martin Mitrevski on 15.3.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI

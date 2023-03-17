@@ -37,5 +37,5 @@ struct TokenResponse: Codable {
 }
 
 struct Config {
-    static let apiKey = "892s22ypvt6m"
+    static let apiKey = "hd8szvscpxvd"
 }

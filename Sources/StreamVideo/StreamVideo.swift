@@ -24,7 +24,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: UserTokenProvider
-    private let endpointConfig: EndpointConfig = .localhostConfig
+    private let endpointConfig: EndpointConfig = .frankfurtStagingConfig
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
