@@ -145,8 +145,7 @@ class WebRTCClient: NSObject {
         token: String,
         callCid: String,
         callCoordinatorController: CallCoordinatorController,
-        videoConfig: VideoConfig,
-        tokenProvider: @escaping UserTokenProvider
+        videoConfig: VideoConfig
     ) {
         state = State()
         self.user = user
@@ -155,8 +154,7 @@ class WebRTCClient: NSObject {
         self.videoConfig = videoConfig
         self.callCoordinatorController = callCoordinatorController
         httpClient = URLSessionClient(
-            urlSession: StreamVideo.Environment.makeURLSession(),
-            tokenProvider: tokenProvider
+            urlSession: StreamVideo.Environment.makeURLSession()
         )
         
         signalService = Stream_Video_Sfu_Signal_SignalServer(

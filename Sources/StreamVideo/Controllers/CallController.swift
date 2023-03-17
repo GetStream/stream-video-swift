@@ -24,7 +24,7 @@ public class CallController {
     private let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoConfig: VideoConfig
-    private let tokenProvider: UserTokenProvider
+    private let sfuReconnectionTime: CGFloat = 30
     private var reconnectionDate: Date?
     
     init(
@@ -33,15 +33,13 @@ public class CallController {
         callId: String,
         callType: CallType,
         apiKey: String,
-        videoConfig: VideoConfig,
-        tokenProvider: @escaping UserTokenProvider
+        videoConfig: VideoConfig
     ) {
         self.user = user
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
         self.apiKey = apiKey
-        self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
     }
     
@@ -190,8 +188,7 @@ public class CallController {
             token: edgeServer.token,
             callCid: "\(callType.name):\(callId)",
             callCoordinatorController: callCoordinatorController,
-            videoConfig: videoConfig,
-            tokenProvider: tokenProvider
+            videoConfig: videoConfig
         )
         webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
         
@@ -253,13 +250,11 @@ public class CallController {
         source: WebSocketConnectionState.DisconnectionSource
     ) {
         guard let call = call, source != .userInitiated else { return }
-        log.debug("Retrying to connect to the call")
         if reconnectionDate == nil {
             reconnectionDate = Date()
         }
         let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
-        //TODO: add backoff here
-        if diff > 15 {
+        if diff > sfuReconnectionTime {
             log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
             handleReconnectionError()
             reconnectionDate = nil
@@ -267,6 +262,9 @@ public class CallController {
         }
         Task {
             do {
+                log.debug("Waiting to reconnect")
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                log.debug("Retrying to connect to the call")
                 self.call = try await joinCall(
                     callType: call.callType,
                     callId: call.callId,

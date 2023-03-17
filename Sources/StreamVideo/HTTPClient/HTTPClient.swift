@@ -16,7 +16,7 @@ protocol HTTPClient: Sendable {
 final class URLSessionClient: HTTPClient, @unchecked Sendable {
     
     private let urlSession: URLSession
-    private let tokenProvider: UserTokenProvider
+    private let tokenProvider: UserTokenProvider?
     private let updateQueue: DispatchQueue = .init(
         label: "io.getStream.video.URLSessionClient",
         qos: .userInitiated
@@ -25,7 +25,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
     
     init(
         urlSession: URLSession,
-        tokenProvider: @escaping UserTokenProvider
+        tokenProvider: UserTokenProvider? = nil
     ) {
         self.urlSession = urlSession
         self.tokenProvider = tokenProvider
@@ -36,7 +36,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
             let data = try await execute(request: request, isRetry: false)
             return data
         } catch {
-            if error is ClientError.InvalidToken {
+            if error is ClientError.InvalidToken && tokenProvider != nil {
                 log.debug("Refreshing user token")
                 let token = try await refreshToken()
                 if let onTokenUpdate = onTokenUpdate {
@@ -59,7 +59,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
     
     func refreshToken() async throws -> UserToken {
         try await withCheckedThrowingContinuation { continuation in
-            tokenProvider { result in
+            tokenProvider? { result in
                 switch result {
                 case let .success(token):
                     continuation.resume(returning: token)
