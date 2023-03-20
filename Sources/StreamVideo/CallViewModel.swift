@@ -24,6 +24,11 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] callInfo in
                     self?.blockedUsers = callInfo.blockedUsers
             })
+            recordingUpdates = call?.$recordingState
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] newState in
+                    self?.recordingState = newState
+            })
             reconnectionUpdates = call?.$reconnecting
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnecting in
@@ -88,6 +93,8 @@ open class CallViewModel: ObservableObject {
     
     @Published public var blockedUsers = [User]()
     
+    @Published public var recordingState: RecordingState = .noRecording
+    
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (_, value) in
             value.id == call?.sessionId
@@ -100,6 +107,7 @@ open class CallViewModel: ObservableObject {
     private var participantUpdates: AnyCancellable?
     private var callUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?
+    private var recordingUpdates: AnyCancellable?
     private var currentEventsTask: Task<Void, Never>?
     
     private var callController: CallController?
@@ -331,6 +339,10 @@ open class CallViewModel: ObservableObject {
         participantUpdates = nil
         callUpdates?.cancel()
         callUpdates = nil
+        reconnectionUpdates?.cancel()
+        reconnectionUpdates = nil
+        recordingUpdates?.cancel()
+        recordingUpdates = nil
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []

@@ -9,6 +9,7 @@ public class RecordingController {
     private let currentUser: User
     
     var onRecordingEvent: ((RecordingEvent) -> Void)?
+    var onRecordingRequestedEvent: ((RecordingEvent) -> Void)?
         
     private var coordinatorClient: CoordinatorClient {
         callCoordinatorController.coordinatorClient
@@ -23,7 +24,10 @@ public class RecordingController {
     }
     
     public func startRecording(callId: String, callType: CallType) async throws {
+        let callCid = "\(callType.name):\(callId)"
+        let recordingEvent = RecordingEvent(callCid: callCid, type: callType.name, action: .requested)
         try await coordinatorClient.startRecording(callId: callId, callType: callType.name)
+        onRecordingRequestedEvent?(recordingEvent)
     }
     
     public func stopRecording(callId: String, callType: CallType) async throws {
@@ -47,6 +51,20 @@ public struct RecordingEvent {
 }
 
 public enum RecordingEventAction {
+    case requested
     case started
     case stopped
+}
+
+extension RecordingEventAction {
+    var toState: RecordingState {
+        switch self {
+        case .requested:
+            return .requested
+        case .started:
+            return .recording
+        case .stopped:
+            return .noRecording
+        }
+    }
 }

@@ -187,8 +187,12 @@ public class StreamVideo {
             currentUser: user
         )
         recordingController = controller
+        recordingController?.onRecordingRequestedEvent = { [weak self] event in
+            self?.currentCallController?.updateCall(from: event)
+        }
         recordingEventsMiddleware.onRecordingEvent = { [weak self] event in
             self?.recordingController?.onRecordingEvent?(event)
+            self?.currentCallController?.updateCall(from: event)
         }
         return controller
     }

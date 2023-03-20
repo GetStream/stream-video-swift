@@ -172,6 +172,14 @@ public class CallController {
         }
     }
     
+    func updateCall(from recordingEvent: RecordingEvent) {
+        if recordingEvent.callCid == call?.cId {
+            call?.update(recordingState: recordingEvent.action.toState)
+        } else {
+            log.warning("Received recording event that doesn't match the active call")
+        }
+    }
+    
     // MARK: - private
     
     private func connectToEdge(
@@ -205,7 +213,8 @@ public class CallController {
             callId: callId,
             callType: callType,
             sessionId: sessionId,
-            callInfo: edgeServer.callSettings.callInfo
+            callInfo: edgeServer.callSettings.callInfo,
+            recordingState: edgeServer.callSettings.recording ? .recording : .noRecording
         )
         call = currentCall
         return currentCall

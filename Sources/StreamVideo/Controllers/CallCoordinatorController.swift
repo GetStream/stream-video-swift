@@ -209,7 +209,8 @@ final class CallCoordinatorController: @unchecked Sendable {
                 cId: response.call.cid,
                 backstage: response.call.backstage,
                 blockedUsers: response.blockedUsers.map { $0.toUser }
-            )
+            ),
+            recording: response.call.recording
         )
         return EdgeServer(
             url: credentials.server.url,
@@ -233,6 +234,7 @@ struct CallSettingsInfo: Sendable {
     let callCapabilities: [String]
     let callSettings: CallSettingsResponse
     let callInfo: CallInfo
+    let recording: Bool
 }
 
 extension CallSettingsResponse: @unchecked Sendable {}

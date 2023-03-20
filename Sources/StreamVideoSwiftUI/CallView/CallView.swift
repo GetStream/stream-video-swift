@@ -57,23 +57,28 @@ public struct CallView<Factory: ViewFactory>: View {
                             .accessibility(identifier: "participantEventLabel")
                     }
                 }
-                
+                                
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
-                        if #available(iOS 14, *) {
-                            HStack {
-                                Button {
-                                    withAnimation {
-                                        viewModel.isMinimized = true
-                                    }
-                                } label: {
-                                    Image(systemName: "chevron.left")
-                                        .foregroundColor(colors.textInverted)
-                                        .padding()
+                        HStack {
+                            Button {
+                                withAnimation {
+                                    viewModel.isMinimized = true
                                 }
-                                .accessibility(identifier: "minimizeCallView")
+                            } label: {
+                                Image(systemName: "chevron.left")
+                                    .foregroundColor(colors.textInverted)
+                                    .padding()
+                            }
+                            .accessibility(identifier: "minimizeCallView")
+                            
+                            if viewModel.recordingState == .recording {
+                                RecordingView()
+                            }
 
-                                Spacer()
+                            Spacer()
+                            
+                            if #available(iOS 14, *) {
                                 Button {
                                     viewModel.participantsShown.toggle()
                                 } label: {

@@ -16,6 +16,7 @@
 "call.outgoing.title" = "Calling";
 
 "call.current.reconnecting" = "Trying to reconnect to the call";
+"call.current.recording" = "Recording";
 
 "waiting-room.title" = "Before Joining";
 "waiting-room.subtitle" = "Setup your audio and video";

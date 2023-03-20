@@ -6,6 +6,7 @@ import Foundation
 import WebRTC
 
 class SfuMiddleware: EventMiddleware {
+    private let recordingUserId = "recording-egress"
     private let participantsThreshold: Int
     private let sessionID: String
     private let user: User
@@ -92,6 +93,10 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleParticipantJoined(_ event: Stream_Video_Sfu_Event_ParticipantJoined) async {
+        guard event.participant.userID != recordingUserId else {
+            log.debug("Recording user has joined the call")
+            return
+        }
         let callParticipants = await state.callParticipants
         let showTrack = (callParticipants.count + 1) < participantsThreshold
         let participant = event.participant.toCallParticipant(showTrack: showTrack)
@@ -107,6 +112,10 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
+        guard event.participant.userID != recordingUserId else {
+            log.debug("Recording user has left the call")
+            return
+        }
         let participant = event.participant.toCallParticipant()
         await state.removeCallParticipant(with: participant.id)
         await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
@@ -247,8 +256,10 @@ class SfuMiddleware: EventMiddleware {
         let showTrack = participants.count < participantsThreshold
         var temp = [String: CallParticipant]()
         for participant in participants {
-            let mapped = participant.toCallParticipant(showTrack: showTrack)
-            temp[mapped.id] = mapped
+            if participant.userID != recordingUserId {
+                let mapped = participant.toCallParticipant(showTrack: showTrack)
+                temp[mapped.id] = mapped
+            }
         }
         await state.update(callParticipants: temp)
     }

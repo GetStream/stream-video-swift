@@ -16,6 +16,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     }
     @Published public private(set) var callInfo: CallInfo
     @Published public private(set) var reconnecting = false
+    @Published public private(set) var recordingState: RecordingState
     
     public let callId: String
     public let callType: CallType
@@ -29,15 +30,34 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
-    static func create(callId: String, callType: CallType, sessionId: String, callInfo: CallInfo) -> Call {
-        Call(callId: callId, callType: callType, sessionId: sessionId, callInfo: callInfo)
+    static func create(
+        callId: String,
+        callType: CallType,
+        sessionId: String,
+        callInfo: CallInfo,
+        recordingState: RecordingState
+    ) -> Call {
+        Call(
+            callId: callId,
+            callType: callType,
+            sessionId: sessionId,
+            callInfo: callInfo,
+            recordingState: recordingState
+        )
     }
     
-    private init(callId: String, callType: CallType, sessionId: String, callInfo: CallInfo) {
+    private init(
+        callId: String,
+        callType: CallType,
+        sessionId: String,
+        callInfo: CallInfo,
+        recordingState: RecordingState
+    ) {
         self.callId = callId
         self.callType = callType
         self.sessionId = sessionId
         self.callInfo = callInfo
+        self.recordingState = recordingState
     }
     
     /// Async stream that publishes participant events.
@@ -72,6 +92,10 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     internal func update(callInfo: CallInfo) {
         self.callInfo = callInfo
+    }
+    
+    internal func update(recordingState: RecordingState) {
+        self.recordingState = recordingState
     }
     
 }
@@ -110,4 +134,10 @@ public enum ParticipantAction: Sendable {
             return "joined"
         }
     }
+}
+
+public enum RecordingState {
+    case noRecording
+    case requested
+    case recording
 }
