@@ -323,8 +323,7 @@ extension StreamVideo: ConnectionStateDelegate {
     ) {
         switch state {
         case let .disconnected(source):
-            // TODO: check for token-related error code.
-            if source.serverError != nil {
+            if let serverError = source.serverError, serverError.isInvalidTokenError {
                 Task {
                     do {
                         self.token = try await httpClient.refreshToken()

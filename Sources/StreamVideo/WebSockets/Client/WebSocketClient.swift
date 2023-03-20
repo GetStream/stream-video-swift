@@ -187,7 +187,8 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.info("Skipping unsupported event type", subsystems: .webSocket)
         } catch {
             // Check if the message contains an error object from the server
-            let webSocketError = ClientError.WebSocket()
+            let errorContainer = try? StreamJSONDecoder.default.decode(WebSocketErrorContainer.self, from: data)
+            let webSocketError = ClientError.WebSocket(with: errorContainer?.error)
             connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
         }
     }

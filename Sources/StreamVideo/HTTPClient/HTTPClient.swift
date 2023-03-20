@@ -79,23 +79,17 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                     return
                 }
                 if let response = response as? HTTPURLResponse {
-                    if response.statusCode == 403, !isRetry {
-                        log.debug("Access token expired")
-                        continuation.resume(throwing: ClientError.InvalidToken())
-                        return
-                    } else if response.statusCode >= 400 {
-                        let requestURLString = request.url?.absoluteString ?? ""
-                        let errorResponse = Self.errorResponse(from: data, response: response)
-                        if let errorResponse = errorResponse as? [String: Any],
-                           let meta = errorResponse["meta"] as? [String: Any],
-                           let code = meta["code"] as? String,
-                           code == "AUTH_TOKEN_EXPIRED", !isRetry {
-                            // Temporary handling until the backend is ready.
+                    if (response.statusCode == 401 || response.statusCode == 403) && !isRetry {
+                        let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
+                        if let code = errorResponse?["code"] as? Int, ClosedRange.tokenInvalidErrorCodes ~= code {
                             log.debug("Access token expired")
                             continuation.resume(throwing: ClientError.InvalidToken())
                             return
                         }
-                        log.debug("Error executing request \(requestURLString) \(errorResponse)")
+                    } else if response.statusCode >= 400 {
+                        let requestURLString = request.url?.absoluteString ?? ""
+                        let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
+                        log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))")
                         continuation.resume(throwing: ClientError.NetworkError(response.description))
                         return
                     }
