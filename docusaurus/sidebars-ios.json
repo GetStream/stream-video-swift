@@ -24,6 +24,7 @@
         "guides/call-viewmodel",
         "guides/call-events",
         "guides/call-state",
+        "guides/call-participants",
         "guides/sdk-size-impact",
         "guides/deep-linking",
         "guides/user-experience",
