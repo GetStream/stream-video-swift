@@ -36,20 +36,26 @@ After you call this method (or the other ones below), the `callingState` will ch
 
 ### Joining a call
 
-You can join an existing call using the method `joinCall(callId: String, type: String? = nil)`, where the parameters are:
+You can join an existing call using the method `joinCall(callId: String, type: String)`, where the parameters are:
 
 - `callId` - the id of the call. If you use the ringing functionality, this should be always a unique value.
-- `type` - optional call type. If you don't specify it, a default one would be set.
+- `type` - the type of the call.
 
 Here's an example usage:
 
 ```swift
 Button {
-    viewModel.joinCall(callId: callId)
+    viewModel.joinCall(callId: callId, type: "default")
 } label: {
     Text("Join a call")
 }
 ```
+
+### Entering the lobby
+
+If you want to display a lobby screen before the user joins the call, you should use the `enterLobby(callId: String, type: String, participants: [User])` method. This will change the calling state to `.lobby`. When that happens, you can either display your custom implementation of a lobby view, or use the one from the SDK.
+
+When the user decides to join the call, you should call the `joinCallFromLobby(callId: String, type: String, participants: [User])` method.
 
 ### Accepting a call
 
@@ -100,3 +106,22 @@ You can mute/unmute the audio during a call, using the `toggleMicrophoneEnabled`
 ### Capturing local video
 
 The view model also has support for explicitly asking to capture the current user's local video. To do this, you will need to call `startCapturingLocalVideo`.
+
+### Screensharing Session
+
+When there is a screensharing session in progress, it can be accessed via the `screensharingSession` published property in the view model.
+
+### Other properties
+
+Here are some other useful properties from the view model that you can use to build custom calling experiences:
+- `error` - optional, has a value if there was an error. You can use it to display more detailed error messages to users.
+- `errorAlertShown` - if the error has a value, it's true. You can use it to control the visibility of an alert presented to the user.
+- `participantsShown` - whether the list of participants is shown during the call.
+- `outgoingCallMembers` - list of the outgoing call members.
+- `participantEvent` - published variable that contains info about a participant event. It's reset to nil after 2 seconds.
+- `isMinimized` - whether the call is in minimized mode.
+- `localVideoPrimary` - `false` by default. It becomes `true` when the current user's local video is shown as a primary view.
+- `hideUIElements` - whether the UI elements, such as the call controls should be hidden (for example while screensharing).
+- `blockedUsers` - a list of the blocked users in the call.
+- `recordingState` - the current recording state of the call.
+- `localParticipant` - returns the local participant of the call.

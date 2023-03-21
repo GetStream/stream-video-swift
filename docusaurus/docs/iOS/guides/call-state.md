@@ -8,7 +8,7 @@ If you are using our `CallViewModel`, the state of the call is managed for you a
 
 The `CallingState` enumeration has the following possible values:
 - `idle` - There's no active call at the moment. In this case, your hosting view should be displayed.
-- `waitingRoom(WaitingRoomInfo)` - The user is in a waiting room before joining the call.
+- `lobby(LobbyInfo)` - The user is in the lobby before joining the call.
 - `incoming(IncomingCall)` - There's an incoming call, therefore an incoming call screen needs to be displayed.
 - `outgoing` - The user rings someone, therefore an outgoing call needs to be displayed.
 - `inCall` - The user is in a call.

@@ -56,9 +56,9 @@ struct CallParticipantsView: View {
             blockedUsers: callViewModel.blockedUsers,
             callSettings: callViewModel.callSettings,
             maxHeight: maxHeight,
-            inviteParticipantsShown: $callViewModel.inviteParticipantsShown,
+            inviteParticipantsShown: $viewModel.inviteParticipantsShown,
             inviteTapped: {
-                callViewModel.inviteParticipantsShown = true
+                viewModel.inviteParticipantsShown = true
             },
             muteTapped: {
                 callViewModel.toggleMicrophoneEnabled()

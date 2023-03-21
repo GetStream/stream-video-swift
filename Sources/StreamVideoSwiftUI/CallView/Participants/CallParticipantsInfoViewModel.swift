@@ -8,6 +8,8 @@ import SwiftUI
 class CallParticipantsInfoViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
+    
+    @Published var inviteParticipantsShown = false
         
     private lazy var permissionsController: PermissionsController = {
         streamVideo.makePermissionsController()

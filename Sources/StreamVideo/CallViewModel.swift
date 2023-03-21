@@ -12,6 +12,7 @@ open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     
+    /// Provides access to the current call.
     @Published public var call: Call? {
         didSet {
             participantUpdates = call?.$participants
@@ -45,6 +46,7 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
         didSet {
             if callingState == .idle {
@@ -54,20 +56,23 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    /// Optional, has a value if there was an error. You can use it to display more detailed error messages to the users.
     public var error: Error? {
         didSet {
             errorAlertShown = error != nil
         }
     }
     
+    /// If the `error` property has a value, it's true. You can use it to control the visibility of an alert presented to the user.
     @Published public var errorAlertShown = false
-                        
+       
+    /// Whether the list of participants is shown during the call.
     @Published public var participantsShown = false
-    
-    @Published public var inviteParticipantsShown = false
-    
+        
+    /// List of the outgoing call members.
     @Published public var outgoingCallMembers = [User]()
     
+    /// Dictionary of the call participants.
     @Published public var callParticipants = [String: CallParticipant]() {
         didSet {
             log.debug("Call participants updated")
@@ -77,24 +82,34 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    /// Contains info about a participant event. It's reset to nil after 2 seconds.
     @Published public var participantEvent: ParticipantEvent?
     
+    /// Provides information about the current call settings, such as the camera position and whether there's an audio and video turned on.
     @Published public var callSettings = CallSettings()
     
+    /// Whether the call is in minimized mode.
     @Published public var isMinimized = false
     
+    /// `false` by default. It becomes `true` when the current user's local video is shown as a primary view.
     @Published public var localVideoPrimary = false
     
+    /// Optional property about the ongoing screensharing session (if any).
     @Published public var screensharingSession: ScreensharingSession?
     
+    /// Whether the UI elements, such as the call controls should be hidden (for example while screensharing).
     @Published public var hideUIElements = false
     
+    /// The current edge server. Can be used in the lobby view.
     @Published public private(set) var edgeServer: EdgeServer?
     
+    /// A list of the blocked users in the call.
     @Published public var blockedUsers = [User]()
     
+    /// The current recording state of the call.
     @Published public var recordingState: RecordingState = .noRecording
     
+    /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (_, value) in
             value.id == call?.sessionId
@@ -144,6 +159,7 @@ open class CallViewModel: ObservableObject {
         callingState = .inCall
     }
 
+    /// Toggles the state of the camera (visible vs non-visible).
     public func toggleCameraEnabled() {
         guard let callController = callController else {
             return
@@ -185,7 +201,7 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    /// Toggles the state of the camera (visible vs non-visible).
+    /// Toggles the camera position (front vs back).
     public func toggleCameraPosition() {
         guard let callController = callController else {
             return
@@ -219,8 +235,9 @@ open class CallViewModel: ObservableObject {
     /// Starts a call with the provided info.
     /// - Parameters:
     ///  - callId: the id of the call.
-    ///  - type: optional type of a call. If not provided, the default would be used.
+    ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
+    ///  - ring: whether the call should ring.
     public func startCall(callId: String, type: String, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
         ringingSupported = ring
@@ -240,6 +257,11 @@ open class CallViewModel: ObservableObject {
         enterCall(callId: callId, callType: callType, participants: [])
     }
     
+    /// Enters into a lobby before joining a call.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - type: the type of the call.
+    ///  - participants: list of participants that are part of the call.
     public func enterLobby(callId: String, type: String, participants: [User]) {
         let callType = callType(from: type)
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: participants)
@@ -253,6 +275,11 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    /// Joins a call from the lobby. `enterLobby` needs to be called first.
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - type: the type of the call.
+    ///  - participants: list of participants that are part of the call.
     public func joinCallFromLobby(callId: String, type: String, participants: [User]) throws {
         guard let edgeServer = edgeServer, let callController = callController else {
             throw ClientError.Unexpected("Edge server not available")
@@ -326,6 +353,8 @@ open class CallViewModel: ObservableObject {
         leaveCall()
     }
     
+    /// Sets a video filter for the current call.
+    /// - Parameter videoFilter: the video filter to be set.
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
         callController?.setVideoFilter(videoFilter)
     }
