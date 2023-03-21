@@ -126,6 +126,10 @@ class SfuMiddleware: EventMiddleware {
             imageURL: participant.profileImageURL
         )
         log.debug("Participant \(participant.name) left the call")
+        postNotification(
+            with: CallNotification.participantLeft,
+            userInfo: ["id": participant.id]
+        )
         onParticipantEvent?(event)
     }
     

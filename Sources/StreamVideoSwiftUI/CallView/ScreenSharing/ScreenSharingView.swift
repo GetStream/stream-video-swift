@@ -74,7 +74,7 @@ public struct ScreenSharingView: View {
     
     private var screensharingView: some View {
         VideoRendererView(
-            id: screenSharing.participant.id,
+            id: "\(screenSharing.participant.id)-screenshare",
             size: videoSize,
             contentMode: .scaleAspectFit
         ) { view in

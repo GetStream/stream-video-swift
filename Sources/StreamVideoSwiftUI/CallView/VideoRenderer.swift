@@ -59,6 +59,8 @@ public struct VideoRendererView: UIViewRepresentable {
             
     public typealias UIViewType = VideoRenderer
     
+    @Injected(\.utils) var utils
+    
     var id: String
     var size: CGSize
     var contentMode: UIView.ContentMode
@@ -77,7 +79,7 @@ public struct VideoRendererView: UIViewRepresentable {
     }
 
     public func makeUIView(context: Context) -> VideoRenderer {
-        let view = VideoRenderer(frame: .init(origin: .zero, size: size))
+        let view = utils.videoRendererFactory.view(for: id, size: size)
         view.videoContentMode = contentMode
         view.backgroundColor = UIColor.black
         handleRendering(view)
@@ -99,6 +101,7 @@ public class VideoRenderer: RTCMTLVideoView {
         queue.sync {
             guard track.trackId != self.track?.trackId else { return }
             self.track?.remove(self)
+            self.track = nil
             log.debug("Adding track to the view")
             self.track = track
             track.add(self)

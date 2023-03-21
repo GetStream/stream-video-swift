@@ -133,8 +133,7 @@ open class CallViewModel: ObservableObject {
         callParticipants
             .filter { $0.value.id != call?.sessionId }
             .map(\.value)
-            .sorted(by: { $0.layoutPriority.rawValue < $1.layoutPriority.rawValue })
-            .sorted(by: { $0.name < $1.name })
+            .sorted(by: { $0.id < $1.id })
     }
     
     private var ringingSupported: Bool = false

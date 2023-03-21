@@ -182,13 +182,6 @@ public struct CallView<Factory: ViewFactory>: View {
         if let track = participant.track, participant.id != viewModel.call?.sessionId {
             log.debug("adding track to a view \(view)")
             view.add(track: track)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
-                let prev = participant.trackSize
-                if prev != view.bounds.size {
-                    let updated = participant.withUpdated(trackSize: view.bounds.size)
-                    viewModel.callParticipants[participant.id] = updated
-                }
-            }
         }
     }
 }

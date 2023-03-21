@@ -9,10 +9,11 @@ internal extension DispatchQueue {
     static let sdk = DispatchQueue(label: "StreamVideoSDK", qos: .userInitiated)
 }
 
-func postNotification(with name: String) {
-    NotificationCenter.default.post(name: NSNotification.Name(name), object: nil)
+func postNotification(with name: String, userInfo: [AnyHashable: Any] = [:]) {
+    NotificationCenter.default.post(name: NSNotification.Name(name), object: nil, userInfo: userInfo)
 }
 
 public enum CallNotification {
     public static let callEnded = "StreamVideo.Call.Ended"
+    public static let participantLeft = "StreamVideo.Call.ParticipantLeft"
 }
