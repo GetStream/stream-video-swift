@@ -209,11 +209,13 @@ class WebRTCClient: NSObject {
     }
     
     func startCapturingLocalVideo(cameraPosition: AVCaptureDevice.Position) {
-        setCameraPosition(cameraPosition)
+        setCameraPosition(cameraPosition) {
+            log.debug("Started capturing local video")
+        }
     }
     
-    func changeCameraMode(position: CameraPosition) {
-        setCameraPosition(position == .front ? .front : .back)
+    func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
+        setCameraPosition(position == .front ? .front : .back, completion: completion)
     }
     
     func setupUserMedia(callSettings: CallSettings) async {
@@ -381,9 +383,9 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
+    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()) {
         guard let capturer = videoCapturer else { return }
-        capturer.setCameraPosition(cameraPosition)
+        capturer.setCameraPosition(cameraPosition, completion: completion)
     }
     
     private func handleParticipantsUpdated() async {

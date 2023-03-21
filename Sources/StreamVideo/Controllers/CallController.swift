@@ -133,9 +133,11 @@ public class CallController {
     }
     
     /// Changes the camera position (front/back) for the current user.
-    /// - Parameter position: the new camera position.
-    public func changeCameraMode(position: CameraPosition) {
-        webRTCClient?.changeCameraMode(position: position)
+    /// - Parameters:
+    ///  - position: the new camera position.
+    ///  - completion: called when the camera position is changed.
+    public func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
+        webRTCClient?.changeCameraMode(position: position, completion: completion)
     }
     
     /// Changes the track visibility for a participant (not visible if they go off-screen).

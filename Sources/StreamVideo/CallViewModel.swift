@@ -206,8 +206,12 @@ open class CallViewModel: ObservableObject {
             return
         }
         let next = callSettings.cameraPosition.next()
-        callController.changeCameraMode(position: next)
-        callSettings = callSettings.withUpdatedCameraPosition(next)
+        callController.changeCameraMode(position: next) { [weak self] in
+            guard let self = self else { return }
+            DispatchQueue.main.async {
+                self.callSettings = self.callSettings.withUpdatedCameraPosition(next)
+            }
+        }
     }
     
     /// Enables or disables the audio output.

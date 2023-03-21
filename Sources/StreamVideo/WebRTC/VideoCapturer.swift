@@ -28,7 +28,7 @@ class VideoCapturer {
         #endif
     }
     
-    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) {
+    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()) {
         guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer else { return }
         
         let devices = RTCCameraVideoCapturer.captureDevices()
@@ -74,13 +74,14 @@ class VideoCapturer {
             )
         }
         
-        videoCaptureHandler?.currentCameraPosition = cameraPosition
-
         videoCapturer.startCapture(
             with: device,
             format: selectedFormat.format,
             fps: selectedFps
-        )
+        ) { [weak self] _ in
+            self?.videoCaptureHandler?.currentCameraPosition = cameraPosition
+            completion()
+        }
     }
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
