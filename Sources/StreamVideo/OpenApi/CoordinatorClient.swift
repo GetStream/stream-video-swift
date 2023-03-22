@@ -111,6 +111,14 @@ class CoordinatorClient: @unchecked Sendable {
         _ = try await httpClient.execute(request: request)
     }
     
+    func listRecordings(callId: String, callType: String, session: String) async throws -> ListRecordingsResponse {
+        let request = try makeRequest(
+            for: "/call/\(callType)/\(callId)/\(session)/recordings",
+            httpMethod: "GET"
+        )
+        return try await execute(urlRequest: request)
+    }
+    
     func goLive(callId: String, callType: String) async throws -> GoLiveResponse {
         let request = try makeRequest(for: "/call/\(callType)/\(callId)/go_live")
         return try await execute(urlRequest: request)
@@ -140,7 +148,7 @@ class CoordinatorClient: @unchecked Sendable {
         return response
     }
 
-    private func makeRequest(for path: String) throws -> URLRequest {
+    private func makeRequest(for path: String, httpMethod: String = "POST") throws -> URLRequest {
         guard !connectionId.isEmpty,
               let queryParams = "?api_key=\(apiKey)&user_id=\(userId)&connection_id=\(connectionId)"
               .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
@@ -156,7 +164,7 @@ class CoordinatorClient: @unchecked Sendable {
         request.setValue("jwt", forHTTPHeaderField: "stream-auth-type")
         request.setValue("stream-video-swift", forHTTPHeaderField: "X-Stream-Client")
         request.setValue(UUID().uuidString, forHTTPHeaderField: "x-client-request-id")
-        request.httpMethod = "POST"
+        request.httpMethod = httpMethod
         return request
     }
 }

@@ -73,3 +73,42 @@ func subscribeToRecordingEvents() {
     }
 }
 ```
+
+#### Search recordings
+
+You can search for recordings in a video call, using the `RecordingController`'s `listRecordings`:
+
+```swift
+func loadRecordings() {
+    Task {
+        self.recordings = try await recordingController.listRecordings(
+            callId: callId,
+            callType: callType,
+            session: callId
+        )
+    }
+}
+```
+
+This will return a list of recordings, that contains information about the filename, URL, as well as the start and end time. You can use the URL to present the recording in a player. Here's an example in SwiftUI:
+
+```swift
+import SwiftUI
+import StreamVideo
+import AVKit
+
+struct PlayerView: View {
+    
+    let recording: CallRecordingInfo
+    
+    var body: some View {
+        Group {
+            if let url = URL(string: recording.url) {
+                VideoPlayer(player: AVPlayer(url:  url))
+            } else {
+                Text("Video can't be loaded")
+            }
+        }
+    }
+}
+```

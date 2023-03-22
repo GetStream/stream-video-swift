@@ -34,6 +34,20 @@ public class RecordingController {
         try await coordinatorClient.stopRecording(callId: callId, callType: callType.name)
     }
     
+    public func listRecordings(
+        callId: String,
+        callType: String,
+        session: String
+    ) async throws -> [CallRecordingInfo] {
+        let recordingsResponse = try await coordinatorClient.listRecordings(
+            callId: callId,
+            callType: callType,
+            session: session
+        )
+        let recordings = recordingsResponse.recordings.map(\.toRecordingInfo)
+        return recordings
+    }
+    
     public func recordingEvents() -> AsyncStream<RecordingEvent> {
         let events = AsyncStream(RecordingEvent.self) { [weak self] continuation in
             self?.onRecordingEvent = { event in
@@ -66,5 +80,23 @@ extension RecordingEventAction {
         case .stopped:
             return .noRecording
         }
+    }
+}
+
+public struct CallRecordingInfo {
+    public let startTime: Date
+    public let endTime: Date
+    public let filename: String
+    public let url: String
+}
+
+extension CallRecording {
+    var toRecordingInfo: CallRecordingInfo {
+        CallRecordingInfo(
+            startTime: startTime,
+            endTime: endTime,
+            filename: filename,
+            url: url
+        )
     }
 }
