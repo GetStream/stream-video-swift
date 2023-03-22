@@ -9,13 +9,19 @@ public class PermissionsController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
     
+    /// Event that fires when a permission is requested.
     var onPermissionRequestEvent: ((PermissionRequest) -> Void)?
+    /// Event that fires when a permission is updated.
     var onPermissionsUpdatedEvent: ((PermissionsUpdated) -> Void)?
     
     private var coordinatorClient: CoordinatorClient {
         callCoordinatorController.coordinatorClient
     }
     
+    /// Initializes a new `PermissionsController` object.
+    /// - Parameters:
+    ///   - callCoordinatorController: The call coordinator controller.
+    ///   - currentUser: The current user.
     init(
         callCoordinatorController: CallCoordinatorController,
         currentUser: User
@@ -24,6 +30,9 @@ public class PermissionsController {
         self.currentUser = currentUser
     }
     
+    /// Checks if the current user can request permissions.
+    /// - Parameter permissions: The permissions to request.
+    /// - Returns: A Boolean value indicating if the current user can request the permissions.
     public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
         guard let callSettings = callCoordinatorController.currentCallSettings?.callSettings else {
             return false
@@ -43,6 +52,12 @@ public class PermissionsController {
         return true
     }
     
+    /// Requests permissions for a call.
+    /// - Parameters:
+    ///   - permissions: The permissions to request.
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     public func request(
         permissions: [Permission],
         callId: String,
@@ -62,6 +77,9 @@ public class PermissionsController {
         _ = try await coordinatorClient.requestPermission(with: permissionsRequest)
     }
     
+    /// Checks if the current user has a certain call capability.
+    /// - Parameter capability: The capability to check.
+    /// - Returns: A Boolean value indicating if the current user has the call capability.
     public func currentUserHasCapability(_ capability: CallCapability) -> Bool {
         let currentCallCapabilities = callCoordinatorController.currentCallSettings?.callCapabilities
         return currentCallCapabilities?.contains(
@@ -69,6 +87,13 @@ public class PermissionsController {
         ) == true
     }
     
+    /// Grants permissions to a user for a call.
+    /// - Parameters:
+    ///   - permissions: The permissions to grant.
+    ///   - userId: The ID of the user to grant permissions to.
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: An error if the operation fails.
     public func grant(
         permissions: [Permission],
         for userId: String,
@@ -84,6 +109,13 @@ public class PermissionsController {
         )
     }
     
+    /// Revokes permissions for a user in a call.
+    /// - Parameters:
+    ///   - permissions: The list of permissions to revoke.
+    ///   - userId: The ID of the user to revoke the permissions from.
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: error if the permission update fails.
     public func revoke(
         permissions: [Permission],
         for userId: String,
@@ -99,6 +131,12 @@ public class PermissionsController {
         )
     }
     
+    /// Mute users in a call.
+    /// - Parameters:
+    ///   - request: The mute request.
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: error if muting the users fails.
     public func muteUsers(
         with request: MuteRequest,
         callId: String,
@@ -119,11 +157,22 @@ public class PermissionsController {
         _ = try await coordinatorClient.muteUsers(with: requestData)
     }
     
+    /// Ends a call.
+    /// - Parameters:
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: error if ending the call fails.
     public func endCall(callId: String, callType: String) async throws {
         let endCallRequest = EndCallRequestData(id: callId, type: callType)
         _ = try await coordinatorClient.endCall(with: endCallRequest)
     }
     
+    /// Blocks a user in a call.
+    /// - Parameters:
+    ///   - userId: The ID of the user to block.
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: error if blocking the user fails.
     public func blockUser(with userId: String, callId: String, callType: String) async throws {
         let blockUserRequest = BlockUserRequest(userId: userId)
         let requestData = BlockUserRequestData(
@@ -134,6 +183,12 @@ public class PermissionsController {
         _ = try await coordinatorClient.blockUser(with: requestData)
     }
     
+    /// Unblocks a user in a call.
+    /// - Parameters:
+    ///   - userId: The ID of the user to unblock.
+    ///   - callId: The ID of the call.
+    ///   - callType: The type of the call.
+    /// - Throws: error if unblocking the user fails.
     public func unblockUser(with userId: String, callId: String, callType: String) async throws {
         let unblockUserRequest = UnblockUserRequest(userId: userId)
         let requestData = UnblockUserRequestData(
@@ -144,6 +199,11 @@ public class PermissionsController {
         _ = try await coordinatorClient.unblockUser(with: requestData)
     }
     
+    /// Starts a live call with the given call ID and call type.
+    /// - Parameters:
+    ///   - callId: The ID of the call to go live.
+    ///   - callType: The type of the call to go live.
+    /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
     public func goLive(callId: String, callType: String) async throws {
         guard currentUserHasCapability(.updateCall) else {
             throw ClientError.MissingPermissions()
@@ -151,6 +211,11 @@ public class PermissionsController {
         _ = try await coordinatorClient.goLive(callId: callId, callType: callType)
     }
     
+    /// Stops an ongoing live call with the given call ID and call type.
+    /// - Parameters:
+    ///   - callId: The ID of the call to stop.
+    ///   - callType: The type of the call to stop.
+    /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
     public func stopLive(callId: String, callType: String) async throws {
         guard currentUserHasCapability(.updateCall) else {
             throw ClientError.MissingPermissions()
@@ -158,6 +223,8 @@ public class PermissionsController {
         _ = try await coordinatorClient.stopLive(callId: callId, callType: callType)
     }
     
+    /// Returns an `AsyncStream` of `PermissionRequest` objects that represent the permission requests events.
+    /// - Returns: An `AsyncStream` of `PermissionRequest` objects.
     public func permissionRequests() -> AsyncStream<PermissionRequest> {
         let requests = AsyncStream(PermissionRequest.self) { [weak self] continuation in
             self?.onPermissionRequestEvent = { event in
@@ -169,6 +236,8 @@ public class PermissionsController {
         return requests
     }
     
+    /// Returns an `AsyncStream` of `PermissionsUpdated` objects that represent the permission updates events.
+    /// - Returns: An `AsyncStream` of `PermissionsUpdated` objects.
     public func permissionUpdates() -> AsyncStream<PermissionsUpdated> {
         let requests = AsyncStream(PermissionsUpdated.self) { [weak self] continuation in
             self?.onPermissionsUpdatedEvent = { event in

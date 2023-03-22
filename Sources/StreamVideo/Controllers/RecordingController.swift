@@ -23,6 +23,11 @@ public class RecordingController {
         self.currentUser = currentUser
     }
     
+    /// Starts recording a call with the specified call ID and call type.
+    /// - Parameters:
+    ///   - callId: The ID of the call to start recording.
+    ///   - callType: The type of the call to start recording.
+    /// - Throws: An error if the recording fails.
     public func startRecording(callId: String, callType: CallType) async throws {
         let callCid = "\(callType.name):\(callId)"
         let recordingEvent = RecordingEvent(callCid: callCid, type: callType.name, action: .requested)
@@ -30,10 +35,21 @@ public class RecordingController {
         onRecordingRequestedEvent?(recordingEvent)
     }
     
+    /// Stops recording a call with the specified call ID and call type.
+    /// - Parameters:
+    ///   - callId: The ID of the call to stop recording.
+    ///   - callType: The type of the call to stop recording.
+    /// - Throws: An error if stopping the recording fails.
     public func stopRecording(callId: String, callType: CallType) async throws {
         try await coordinatorClient.stopRecording(callId: callId, callType: callType.name)
     }
     
+    /// Lists recordings for a call with the specified call ID, call type, and session.
+    /// - Parameters:
+    ///   - callId: The ID of the call to list recordings for.
+    ///   - callType: The type of the call to list recordings for.
+    ///   - session: The session to list recordings for.
+    /// - Returns: An array of `CallRecordingInfo` objects representing the recordings for the specified call.
     public func listRecordings(
         callId: String,
         callType: String,
@@ -48,6 +64,8 @@ public class RecordingController {
         return recordings
     }
     
+    /// Creates an asynchronous stream of `RecordingEvent` objects.
+    /// - Returns: An `AsyncStream` of `RecordingEvent` objects.
     public func recordingEvents() -> AsyncStream<RecordingEvent> {
         let events = AsyncStream(RecordingEvent.self) { [weak self] continuation in
             self?.onRecordingEvent = { event in

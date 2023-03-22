@@ -13,9 +13,15 @@ public class EventsController {
         callCoordinatorController.coordinatorClient
     }
     
+    /// A closure that is called when a custom event is received.
     var onCustomEvent: ((CustomEvent) -> Void)?
+    /// A closure that is called when a new reaction is received.
     var onNewReaction: ((CallReaction) -> Void)?
     
+    /// Initializes a new instance of the controller.
+    /// - Parameters:
+    ///   - callCoordinatorController: The `CallCoordinatorController` instance that manages the call.
+    ///   - currentUser: The `User` model representing the current user.
     init(
         callCoordinatorController: CallCoordinatorController,
         currentUser: User
@@ -24,6 +30,9 @@ public class EventsController {
         self.currentUser = currentUser
     }
     
+    /// Sends a custom event to the call.
+    /// - Parameter event: The `CustomEventRequest` object representing the custom event to send.
+    /// - Throws: An error if the sending fails.
     public func send(event: CustomEventRequest) async throws {
         let sendEventRequest = SendEventRequest(
             custom: RawJSON.convert(extraData: event.extraData),
@@ -37,6 +46,9 @@ public class EventsController {
         _ = try await coordinatorClient.sendEvent(with: request)
     }
     
+    /// Sends a reaction to the call.
+    /// - Parameter reaction: The `CallReactionRequest` object representing the reaction to send.
+    /// - Throws: An error if the sending fails.
     public func send(reaction: CallReactionRequest) async throws {
         let request = SendReactionRequest(
             custom: RawJSON.convert(extraData: reaction.extraData),
@@ -51,6 +63,8 @@ public class EventsController {
         _ = try await coordinatorClient.sendReaction(with: requestData)
     }
     
+    /// Returns an asynchronous stream of custom events received during the call.
+    /// - Returns: An `AsyncStream` of `CustomEvent` objects.
     public func customEvents() -> AsyncStream<CustomEvent> {
         let requests = AsyncStream(CustomEvent.self) { [weak self] continuation in
             self?.onCustomEvent = { event in
@@ -60,6 +74,8 @@ public class EventsController {
         return requests
     }
     
+    /// Returns an asynchronous stream of reactions received during the call.
+    /// - Returns: An `AsyncStream` of `CallReaction` objects.
     public func reactions() -> AsyncStream<CallReaction> {
         let requests = AsyncStream(CallReaction.self) { [weak self] continuation in
             self?.onNewReaction = { event in
