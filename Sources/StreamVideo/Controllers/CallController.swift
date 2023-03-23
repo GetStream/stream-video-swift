@@ -77,6 +77,15 @@ public class CallController {
         )
     }
     
+    /// Joins a call on the specified `edgeServer` with the given `callType`, `callId`, `callSettings`, and `videoOptions`.
+    /// - Parameters:
+    ///   - edgeServer: The `EdgeServer` to join the call on.
+    ///   - callType: The `CallType` of the call.
+    ///   - callId: The unique identifier for the call.
+    ///   - callSettings: The settings to use for the call.
+    ///   - videoOptions: The `VideoOptions` for the call.
+    /// - Returns: A `Call` instance representing the joined call.
+    /// - Throws: An error if the call could not be joined.
     public func joinCall(
         on edgeServer: EdgeServer,
         callType: CallType,
@@ -93,6 +102,12 @@ public class CallController {
         )
     }
 
+    /// Selects an `EdgeServer` for a call with the specified `videoOptions` and `participants`.
+    /// - Parameters:
+    ///   - videoOptions: The `VideoOptions` for the call.
+    ///   - participants: An array of `User` instances representing the participants in the call.
+    /// - Returns: An `EdgeServer` instance representing the selected server.
+    /// - Throws: An error if an `EdgeServer` could not be selected.
     public func selectEdgeServer(
         videoOptions: VideoOptions,
         participants: [User]
@@ -148,11 +163,16 @@ public class CallController {
         await webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
+    /// Adds members with the specified `ids` to the current call.
+    /// - Parameter ids: An array of `String` values representing the member IDs to add.
+    /// - Throws: An error if the members could not be added to the call.
     public func addMembersToCall(ids: [String]) async throws {
         let callCid = "\(callType.name):\(callId)"
         try await callCoordinatorController.addMembersToCall(with: callCid, memberIds: ids)
     }
     
+    /// Sets a `videoFilter` for the current call.
+    /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
         webRTCClient?.setVideoFilter(videoFilter)
     }

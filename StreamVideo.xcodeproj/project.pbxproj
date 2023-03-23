@@ -152,6 +152,7 @@
 		8493227D29093A1A0013C029 /* MockHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* MockHTTPClient.swift */; };
 		8493227E29093A420013C029 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
 		8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493227F29093A9E0013C029 /* SnapshotTesting */; };
+		8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8A297AFCC80072A12D /* PreJoiningView.swift */; };
 		849EDA8D297AFD840072A12D /* Camera.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8C297AFD840072A12D /* Camera.swift */; };
@@ -592,6 +593,7 @@
 		84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
 		84932279290938440013C029 /* CallViewController_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController_Tests.swift; sourceTree = "<group>"; };
 		8493228129093B270013C029 /* StreamVideoUIKit.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideoUIKit.xctestplan; sourceTree = "<group>"; };
+		8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoCaptureHandler.swift; sourceTree = "<group>"; };
 		8498796728A15F0300D06F31 /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		849EDA8A297AFCC80072A12D /* PreJoiningView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreJoiningView.swift; sourceTree = "<group>"; };
 		849EDA8C297AFD840072A12D /* Camera.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Camera.swift; sourceTree = "<group>"; };
@@ -1617,6 +1619,7 @@
 				84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */,
 				8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */,
 				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
+				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
 				84F0867A29632DA30099907A /* VideoFilters.swift */,
 			);
 			path = WebRTC;
@@ -2130,6 +2133,7 @@
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */,
 				84A7E17428814D7400526C98 /* LatencyService.swift in Sources */,
+				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,
 				8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */,
 				8409465929AF4EEC007AF5BF /* SendReactionResponse.swift in Sources */,
 				8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */,

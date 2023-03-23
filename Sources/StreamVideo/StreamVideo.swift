@@ -13,7 +13,6 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo {
     
-    // Temporarly storing user in memory.
     public var user: User
     public let videoConfig: VideoConfig
     
@@ -69,6 +68,14 @@ public class StreamVideo {
     private var eventsController: EventsController?
     private var recordingController: RecordingController?
     
+    /// Initializes a new instance of `StreamVideo` with the specified parameters.
+    /// - Parameters:
+    ///   - apiKey: The API key.
+    ///   - user: The `User` who is logged in.
+    ///   - token: The `UserToken` used to authenticate the user.
+    ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - tokenProvider: A closure that refreshes a token when it expires.
+    /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
         apiKey: String,
         user: User,
@@ -142,6 +149,8 @@ public class StreamVideo {
         callCoordinatorController.makeVoipNotificationsController()
     }
     
+    /// Creates a permissions controller used for managing permissions.
+    /// - Returns: `PermissionsController`
     public func makePermissionsController() -> PermissionsController {
         if let permissionsController = permissionsController {
             return permissionsController
@@ -160,6 +169,8 @@ public class StreamVideo {
         return controller
     }
     
+    /// Creates an events controller used for managing events.
+    /// - Returns: `EventsController`
     public func makeEventsController() -> EventsController {
         if let eventsController = eventsController {
             return eventsController
@@ -178,6 +189,8 @@ public class StreamVideo {
         return controller
     }
     
+    /// Creates recording controller used for managing recordings.
+    /// - Returns: `RecordingController`
     public func makeRecordingController() -> RecordingController {
         if let recordingController = recordingController {
             return recordingController
@@ -259,6 +272,8 @@ public class StreamVideo {
             }
         }
     }
+    
+    // MARK: - private
     
     private func connectWebSocketClient() {
         let queryParams = endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)

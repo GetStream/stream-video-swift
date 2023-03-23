@@ -14,22 +14,38 @@ public class Call: ObservableObject, @unchecked Sendable {
             log.debug("Participants changed: \(participants)")
         }
     }
+    /// The call info published to the participants.
     @Published public private(set) var callInfo: CallInfo
+    /// Flag indicating if the call is reconnecting.
     @Published public private(set) var reconnecting = false
+    /// The call recording state.
     @Published public private(set) var recordingState: RecordingState
     
+    /// The call id.
     public let callId: String
+    /// The type of the call.
     public let callType: CallType
+    /// The id of the current session.
     public let sessionId: String
     
+    /// The unique identifier of the call, formatted as `callType.name:callId`.
     public var cId: String {
         "\(callType.name):\(callId)"
     }
     
+    /// The closure that handles the participant events.
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     private let syncQueue = DispatchQueue(label: "io.getstream.CallQueue", qos: .userInitiated)
     
+    /// Creates a new instance of the `Call` class.
+    /// - Parameters:
+    ///   - callId: The unique identifier of the call.
+    ///   - callType: The type of the call.
+    ///   - sessionId: The session identifier of the call.
+    ///   - callInfo: The call information published to the participants.
+    ///   - recordingState: The current state of the call recording.
+    /// - Returns: A new instance of the `Call` class.
     static func create(
         callId: String,
         callType: CallType,
@@ -70,6 +86,8 @@ public class Call: ObservableObject, @unchecked Sendable {
         return events
     }
     
+    /// Adds the given user to the list of blocked users for the call.
+    /// - Parameter blockedUser: The user to add to the list of blocked users.
     public func add(blockedUser: User) {
         var blockedUsers = callInfo.blockedUsers
         if !blockedUsers.contains(blockedUser) {
@@ -78,6 +96,8 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
     }
     
+    /// Removes the given user from the list of blocked users for the call.
+    /// - Parameter blockedUser: The user to remove from the list of blocked users.
     public func remove(blockedUser: User) {
         callInfo.blockedUsers.removeAll { user in
             user.id == blockedUser.id

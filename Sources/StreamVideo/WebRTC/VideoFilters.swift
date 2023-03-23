@@ -6,94 +6,23 @@ import Foundation
 import WebRTC
 
 public final class VideoFilter: @unchecked Sendable {
+    /// The ID of the video filter.
     public let id: String
+
+    /// The name of the video filter.
     public let name: String
+
+    /// Filter closure that takes a CIImage as input and returns a filtered CIImage as output.
     public var filter: (CIImage) async -> CIImage
-    
+
+    /// Initializes a new VideoFilter instance with the provided parameters.
+    /// - Parameters:
+    ///   - id: The ID of the video filter.
+    ///   - name: The name of the video filter.
+    ///   - filter: The filter closure that takes a CIImage as input and returns a filtered CIImage as output.
     public init(id: String, name: String, filter: @escaping (CIImage) async -> CIImage) {
         self.id = id
         self.name = name
         self.filter = filter
-    }
-}
-
-class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
-    
-    let source: RTCVideoSource
-    let filters: [VideoFilter]
-    let context: CIContext
-    let colorSpace: CGColorSpace
-    var selectedFilter: VideoFilter?
-    var sceneOrientation: UIInterfaceOrientation = .unknown
-    var currentCameraPosition: AVCaptureDevice.Position = .front
-    
-    init(source: RTCVideoSource, filters: [VideoFilter]) {
-        self.source = source
-        self.filters = filters
-        context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
-        colorSpace = CGColorSpaceCreateDeviceRGB()
-        super.init()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateRotation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
-        updateRotation()
-    }
-    
-    func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
-        guard let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer else { return }
-        Task {
-            let imageBuffer = buffer.pixelBuffer
-            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-            let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
-            let outputImage = await filter(image: inputImage)
-            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-            self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
-            let updatedFrame = adjustRotation(capturer, for: buffer, frame: frame)
-            self.source.capturer(capturer, didCapture: updatedFrame)
-        }
-    }
-    
-    @objc private func updateRotation() {
-        DispatchQueue.main.async {
-            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
-        }
-    }
-    
-    private func adjustRotation(
-        _ capturer: RTCVideoCapturer,
-        for buffer: RTCCVPixelBuffer,
-        frame: RTCVideoFrame
-    ) -> RTCVideoFrame {
-        var rotation = RTCVideoRotation._0
-        switch sceneOrientation {
-        case .portrait:
-            rotation = ._90
-        case .portraitUpsideDown:
-            rotation = ._270
-        case .landscapeRight:
-            rotation = currentCameraPosition == .front ? ._180 : ._0
-        case .landscapeLeft:
-            rotation = currentCameraPosition == .front ? ._0 : ._180
-        default:
-            rotation = ._90
-        }
-        let updatedFrame = RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
-        return updatedFrame
-    }
-    
-    private func filter(image: CIImage) async -> CIImage {
-        guard let selectedFilter = selectedFilter else { return image }
-        return await selectedFilter.filter(image)
-    }
-    
-    deinit {
-       NotificationCenter.default.removeObserver(
-            self,
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-       )
     }
 }
