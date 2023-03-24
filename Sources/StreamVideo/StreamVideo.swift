@@ -299,23 +299,34 @@ public class StreamVideo {
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onConnect = { [weak self] in
             guard let self = self else { return }
-            let userDetails = UserDetailsPayload(
+//            let userDetails = UserDetailsPayload(
+//                id: self.user.id,
+//                // TODO: revert this when fixed on the backend.
+////                name: self.user.name,
+////                image: self.user.imageURL?.absoluteString,
+////                Custom: RawJSON.convert(extraData: self.user.extraData)
+//                Custom: [
+//                    "name": AnyCodable(self.user.name),
+//                    "image": AnyCodable(self.user.imageURL?.absoluteString)
+//                ]
+//            )
+//            let connectRequest = ConnectRequestData(
+//                token: self.token.rawValue,
+//                user_details: userDetails
+//            )
+            
+            let connectUserRequest = ConnectUserDetailsRequest(
+                custom: RawJSON.convert(extraData: self.user.extraData),
                 id: self.user.id,
-                // TODO: revert this when fixed on the backend.
-//                name: self.user.name,
-//                image: self.user.imageURL?.absoluteString,
-//                Custom: RawJSON.convert(extraData: self.user.extraData)
-                Custom: [
-                    "name": AnyCodable(self.user.name),
-                    "image": AnyCodable(self.user.imageURL?.absoluteString)
-                ]
+                image: self.user.imageURL?.absoluteString,
+                name: self.user.name
             )
-            let connectRequest = ConnectRequestData(
+            let authRequest = WSAuthMessageRequest(
                 token: self.token.rawValue,
-                user_details: userDetails
+                userDetails: connectUserRequest
             )
 
-            webSocketClient.engine?.send(jsonMessage: connectRequest)
+            webSocketClient.engine?.send(jsonMessage: authRequest)
         }
         
         return webSocketClient

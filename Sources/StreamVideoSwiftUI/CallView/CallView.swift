@@ -78,7 +78,35 @@ public struct CallView<Factory: ViewFactory>: View {
 
                             Spacer()
                             
+                            
                             if #available(iOS 14, *) {
+                                Menu {
+                                    Button {
+                                        withAnimation {
+                                            viewModel.participantsLayout = .grid
+                                        }
+                                    } label: {
+                                        Text("Grid")
+                                    }
+                                    Button {
+                                        withAnimation {
+                                            viewModel.participantsLayout = .fullScreen
+                                        }
+                                    } label: {
+                                        Text("Full Screen")
+                                    }
+                                    Button {
+                                        withAnimation {
+                                            viewModel.participantsLayout = .spotlight
+                                        }
+                                    } label: {
+                                        Text("Spotlight")
+                                    }
+                                } label: {
+                                    Label("View", image: "circle.grid.2x2.fill")
+                                        .foregroundColor(.white)
+                                }
+                                
                                 Button {
                                     viewModel.participantsShown.toggle()
                                 } label: {

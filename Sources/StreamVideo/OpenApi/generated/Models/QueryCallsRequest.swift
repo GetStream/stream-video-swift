@@ -12,37 +12,45 @@ import AnyCodable
 
 internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
 
+    internal var connectionId: String?
     internal var filterConditions: [String: AnyCodable]?
     internal var limit: Int?
     internal var next: String?
     internal var prev: String?
     internal var sort: [SortParamRequest]
+    internal var watch: Bool?
 
-    internal init(filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]) {
+    internal init(connectionId: String? = nil, filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
+        self.connectionId = connectionId
         self.filterConditions = filterConditions
         self.limit = limit
         self.next = next
         self.prev = prev
         self.sort = sort
+        self.watch = watch
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
+        case connectionId = "connection_id"
         case filterConditions = "filter_conditions"
         case limit
         case next
         case prev
         case sort
+        case watch
     }
 
     // Encodable protocol methods
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(connectionId, forKey: .connectionId)
         try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
         try container.encodeIfPresent(limit, forKey: .limit)
         try container.encodeIfPresent(next, forKey: .next)
         try container.encodeIfPresent(prev, forKey: .prev)
         try container.encode(sort, forKey: .sort)
+        try container.encodeIfPresent(watch, forKey: .watch)
     }
 }
 

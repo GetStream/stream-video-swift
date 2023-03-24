@@ -13,13 +13,19 @@ import AnyCodable
 internal struct AudioSettings: Codable, JSONEncodable, Hashable {
 
     internal var accessRequestEnabled: Bool
+    internal var opusDtxEnabled: Bool
+    internal var redundantCodingEnabled: Bool
 
-    internal init(accessRequestEnabled: Bool) {
+    internal init(accessRequestEnabled: Bool, opusDtxEnabled: Bool, redundantCodingEnabled: Bool) {
         self.accessRequestEnabled = accessRequestEnabled
+        self.opusDtxEnabled = opusDtxEnabled
+        self.redundantCodingEnabled = redundantCodingEnabled
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
+        case opusDtxEnabled = "opus_dtx_enabled"
+        case redundantCodingEnabled = "redundant_coding_enabled"
     }
 
     // Encodable protocol methods
@@ -27,6 +33,8 @@ internal struct AudioSettings: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
+        try container.encode(redundantCodingEnabled, forKey: .redundantCodingEnabled)
     }
 }
 

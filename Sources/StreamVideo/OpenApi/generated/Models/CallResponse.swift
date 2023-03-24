@@ -28,7 +28,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Call ID */
     internal var id: String
     /** The capabilities of the current user */
-    internal var ownCapabilities: [String]
+    internal var ownCapabilities: [OwnCapability]
     internal var recording: Bool
     internal var settings: CallSettingsResponse
     /** Date/time when the call will start */
@@ -40,7 +40,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ownCapabilities: [String], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.broadcasting = broadcasting

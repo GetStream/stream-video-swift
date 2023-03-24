@@ -269,24 +269,19 @@ struct CallParticipantView: View {
                 if #available(iOS 14.0, *) {
                     UserAvatar(imageURL: participant.profileImageURL, size: imageSize)
                         .overlay(
-                            participant.isOnline ?
-                                TopRightView {
-                                    OnlineIndicatorView(indicatorSize: imageSize * 0.3)
-                                }
-                                .offset(x: 3, y: -1)
-                                : nil
+                            TopRightView {
+                                OnlineIndicatorView(indicatorSize: imageSize * 0.3)
+                            }
                         )
                 }
                 Text(participant.name)
                     .font(fonts.bodyBold)
                 Spacer()
-                if participant.isOnline {
-                    (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-                        .foregroundColor(participant.hasAudio ? colors.text : colors.accentRed)
+                (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+                    .foregroundColor(participant.hasAudio ? colors.text : colors.accentRed)
 
-                    (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
-                        .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
-                }
+                (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
+                    .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
             }
             .padding(.all, 4)
 
@@ -311,6 +306,6 @@ struct CallParticipantView: View {
 extension CallParticipant {
     
     var renderingId: String {
-        "\(trackLookupPrefix ?? id)-\(isOnline)-\(hasAudio)-\(shouldDisplayTrack)"
+        "\(trackLookupPrefix ?? id)-\(hasAudio)-\(shouldDisplayTrack)"
     }
 }

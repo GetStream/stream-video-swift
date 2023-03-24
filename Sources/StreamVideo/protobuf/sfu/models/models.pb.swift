@@ -347,6 +347,8 @@ struct Stream_Video_Sfu_Models_Participant {
   /// Clears the value of `custom`. Subsequent reads from it will return its default value.
   mutating func clearCustom() {self._custom = nil}
 
+  var roles: [String] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -465,6 +467,13 @@ struct Stream_Video_Sfu_Models_TrackInfo {
 
   var mid: String = String()
 
+  /// for audio tracks
+  var dtx: Bool = false
+
+  var stereo: Bool = false
+
+  var red: Bool = false
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -540,6 +549,22 @@ struct Stream_Video_Sfu_Models_Error {
   init() {}
 }
 
+struct Stream_Video_Sfu_Models_ClientDetails {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var version: Int32 = 0
+
+  var os: String = String()
+
+  var browser: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Models_PeerType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
@@ -556,6 +581,7 @@ extension Stream_Video_Sfu_Models_ICETrickle: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackInfo: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Error: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_ClientDetails: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -661,6 +687,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
     10: .same(proto: "name"),
     11: .same(proto: "image"),
     12: .same(proto: "custom"),
+    13: .same(proto: "roles"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -681,6 +708,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
       case 10: try { try decoder.decodeSingularStringField(value: &self.name) }()
       case 11: try { try decoder.decodeSingularStringField(value: &self.image) }()
       case 12: try { try decoder.decodeSingularMessageField(value: &self._custom) }()
+      case 13: try { try decoder.decodeRepeatedStringField(value: &self.roles) }()
       default: break
       }
     }
@@ -727,6 +755,9 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
     try { if let v = self._custom {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 12)
     } }()
+    if !self.roles.isEmpty {
+      try visitor.visitRepeatedStringField(value: self.roles, fieldNumber: 13)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -743,6 +774,7 @@ extension Stream_Video_Sfu_Models_Participant: SwiftProtobuf.Message, SwiftProto
     if lhs.name != rhs.name {return false}
     if lhs.image != rhs.image {return false}
     if lhs._custom != rhs._custom {return false}
+    if lhs.roles != rhs.roles {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -997,6 +1029,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     2: .standard(proto: "track_type"),
     5: .same(proto: "layers"),
     6: .same(proto: "mid"),
+    7: .same(proto: "dtx"),
+    8: .same(proto: "stereo"),
+    9: .same(proto: "red"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1009,6 +1044,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
       case 2: try { try decoder.decodeSingularEnumField(value: &self.trackType) }()
       case 5: try { try decoder.decodeRepeatedMessageField(value: &self.layers) }()
       case 6: try { try decoder.decodeSingularStringField(value: &self.mid) }()
+      case 7: try { try decoder.decodeSingularBoolField(value: &self.dtx) }()
+      case 8: try { try decoder.decodeSingularBoolField(value: &self.stereo) }()
+      case 9: try { try decoder.decodeSingularBoolField(value: &self.red) }()
       default: break
       }
     }
@@ -1027,6 +1065,15 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if !self.mid.isEmpty {
       try visitor.visitSingularStringField(value: self.mid, fieldNumber: 6)
     }
+    if self.dtx != false {
+      try visitor.visitSingularBoolField(value: self.dtx, fieldNumber: 7)
+    }
+    if self.stereo != false {
+      try visitor.visitSingularBoolField(value: self.stereo, fieldNumber: 8)
+    }
+    if self.red != false {
+      try visitor.visitSingularBoolField(value: self.red, fieldNumber: 9)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1035,6 +1082,9 @@ extension Stream_Video_Sfu_Models_TrackInfo: SwiftProtobuf.Message, SwiftProtobu
     if lhs.trackType != rhs.trackType {return false}
     if lhs.layers != rhs.layers {return false}
     if lhs.mid != rhs.mid {return false}
+    if lhs.dtx != rhs.dtx {return false}
+    if lhs.stereo != rhs.stereo {return false}
+    if lhs.red != rhs.red {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1151,6 +1201,50 @@ extension Stream_Video_Sfu_Models_Error: SwiftProtobuf.Message, SwiftProtobuf._M
     if lhs.code != rhs.code {return false}
     if lhs.message != rhs.message {return false}
     if lhs.shouldRetry != rhs.shouldRetry {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ClientDetails"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "version"),
+    2: .same(proto: "os"),
+    3: .same(proto: "browser"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularInt32Field(value: &self.version) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.os) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.browser) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.version != 0 {
+      try visitor.visitSingularInt32Field(value: self.version, fieldNumber: 1)
+    }
+    if !self.os.isEmpty {
+      try visitor.visitSingularStringField(value: self.os, fieldNumber: 2)
+    }
+    if !self.browser.isEmpty {
+      try visitor.visitSingularStringField(value: self.browser, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_ClientDetails, rhs: Stream_Video_Sfu_Models_ClientDetails) -> Bool {
+    if lhs.version != rhs.version {return false}
+    if lhs.os != rhs.os {return false}
+    if lhs.browser != rhs.browser {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

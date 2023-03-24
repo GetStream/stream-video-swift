@@ -109,6 +109,19 @@ open class CallViewModel: ObservableObject {
     /// The current recording state of the call.
     @Published public var recordingState: RecordingState = .noRecording
     
+    @Published public var participantsLayout: ParticipantsLayout
+    
+    @Published public var pinnedParticipant: CallParticipant? {
+        didSet {
+            //TODO: check if automatic handling
+            if pinnedParticipant != nil && participantsLayout == .grid {
+                participantsLayout = .fullScreen
+            } else if pinnedParticipant == nil && participantsLayout == .fullScreen {
+                participantsLayout = .grid
+            }
+        }
+    }
+    
     /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (_, value) in
@@ -138,7 +151,11 @@ open class CallViewModel: ObservableObject {
     
     private var ringingSupported: Bool = false
     
-    public init(listenToRingingEvents: Bool = false) {
+    public init(
+        listenToRingingEvents: Bool = false,
+        participantsLayout: ParticipantsLayout = .grid
+    ) {
+        self.participantsLayout = participantsLayout
         ringingSupported = listenToRingingEvents
         if !streamVideo.videoConfig.videoEnabled {
             callSettings = CallSettings(speakerOn: false)
@@ -576,4 +593,10 @@ public struct LobbyInfo: Equatable {
 public struct ScreensharingSession {
     public let track: RTCVideoTrack?
     public let participant: CallParticipant
+}
+
+public enum ParticipantsLayout {
+    case grid
+    case spotlight
+    case fullScreen
 }

@@ -27,19 +27,6 @@ struct EndCallRequestData {
     let type: String
 }
 
-struct ConnectRequestData: Codable {
-    let token: String
-    let user_details: UserDetailsPayload
-}
-
-struct UserDetailsPayload: Codable {
-    let id: String
-    // TODO: revert this when fixed on the backend.
-//    let name: String
-//    let image: String?
-    let Custom: [String: AnyCodable]
-}
-
 struct RequestPermissionsRequestData {
     let id: String
     let type: String

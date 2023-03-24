@@ -52,6 +52,7 @@ public protocol ViewFactory: AnyObject {
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         participantCount: Int,
+        pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
         ratio: CGFloat
     ) -> ParticipantViewModifierType
@@ -139,7 +140,7 @@ extension ViewFactory {
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,
-            participants: viewModel.participants,
+            viewModel: viewModel,
             availableSize: availableSize,
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
@@ -161,11 +162,13 @@ extension ViewFactory {
     public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         participantCount: Int,
+        pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
         ratio: CGFloat
     ) -> some ViewModifier {
         VideoCallParticipantModifier(
             participant: participant,
+            pinnedParticipant: pinnedParticipant,
             participantCount: participantCount,
             availableSize: availableSize,
             ratio: ratio

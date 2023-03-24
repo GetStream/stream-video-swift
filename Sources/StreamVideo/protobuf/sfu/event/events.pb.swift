@@ -381,9 +381,22 @@ struct Stream_Video_Sfu_Event_JoinRequest {
   /// dumb SDP that allow us to extract subscriber's decode codecs
   var subscriberSdp: String = String()
 
+  /// TODO: we should know if this is going to be
+  /// - publishing and subscribing, or just subscribing for future routing
+  var clientDetails: Stream_Video_Sfu_Models_ClientDetails {
+    get {return _clientDetails ?? Stream_Video_Sfu_Models_ClientDetails()}
+    set {_clientDetails = newValue}
+  }
+  /// Returns true if `clientDetails` has been explicitly set.
+  var hasClientDetails: Bool {return self._clientDetails != nil}
+  /// Clears the value of `clientDetails`. Subsequent reads from it will return its default value.
+  mutating func clearClientDetails() {self._clientDetails = nil}
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
+
+  fileprivate var _clientDetails: Stream_Video_Sfu_Models_ClientDetails? = nil
 }
 
 struct Stream_Video_Sfu_Event_JoinResponse {
@@ -1343,6 +1356,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     1: .same(proto: "token"),
     2: .standard(proto: "session_id"),
     3: .standard(proto: "subscriber_sdp"),
+    4: .standard(proto: "client_details"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1354,12 +1368,17 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       case 1: try { try decoder.decodeSingularStringField(value: &self.token) }()
       case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
       case 3: try { try decoder.decodeSingularStringField(value: &self.subscriberSdp) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._clientDetails) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.token.isEmpty {
       try visitor.visitSingularStringField(value: self.token, fieldNumber: 1)
     }
@@ -1369,6 +1388,9 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     if !self.subscriberSdp.isEmpty {
       try visitor.visitSingularStringField(value: self.subscriberSdp, fieldNumber: 3)
     }
+    try { if let v = self._clientDetails {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1376,6 +1398,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     if lhs.token != rhs.token {return false}
     if lhs.sessionID != rhs.sessionID {return false}
     if lhs.subscriberSdp != rhs.subscriberSdp {return false}
+    if lhs._clientDetails != rhs._clientDetails {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
