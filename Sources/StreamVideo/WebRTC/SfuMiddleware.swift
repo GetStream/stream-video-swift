@@ -69,6 +69,8 @@ class SfuMiddleware: EventMiddleware {
                 await handleConnectionQualityChangedEvent(event)
             } else if let event = event as? Stream_Video_Sfu_Event_AudioLevelChanged {
                 await handleAudioLevelsChanged(event)
+            } else if let event = event as? Stream_Video_Sfu_Event_DominantSpeakerChanged {
+                await handleDominantSpeakerChanged(event)
             }
         }
         return event
@@ -266,5 +268,18 @@ class SfuMiddleware: EventMiddleware {
             }
         }
         await state.update(callParticipants: temp)
+    }
+    
+    private func handleDominantSpeakerChanged(_ event: Stream_Video_Sfu_Event_DominantSpeakerChanged) async {
+        let participants = await state.callParticipants
+        for (key, participant) in participants {
+            if event.sessionID == key {
+                let updated = participant.withUpdated(dominantSpeaker: true)
+                await state.update(callParticipant: updated)
+            } else if participant.isDominantSpeaker {
+                let updated = participant.withUpdated(dominantSpeaker: false)
+                await state.update(callParticipant: updated)
+            }
+        }
     }
 }

@@ -42,16 +42,33 @@ public protocol ViewFactory: AnyObject {
     ) -> ParticipantsViewType
     
     associatedtype ParticipantViewType: View = VideoCallParticipantView
+    /// Creates a view for a video call participant with the specified parameters.
+    /// - Parameters:
+    ///  - participant: The participant to display.
+    ///  - availableSize: The available size for the participant's video view.
+    ///  - contentMode: The content mode for the participant's video view.
+    ///  - onViewUpdate: A closure to be called whenever the participant's video view is updated.
+    /// - Returns: A view for the specified video call participant.
     func makeVideoParticipantView(
         participant: CallParticipant,
         availableSize: CGSize,
+        contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> ParticipantViewType
     
     associatedtype ParticipantViewModifierType: ViewModifier = VideoCallParticipantModifier
+    /// Creates a view modifier that can be used to modify the appearance of the video call participant view.
+    /// - Parameters:
+    ///  - participant: The participant to modify.
+    ///  - participantCount: The total number of participants in the call.
+    ///  - pinnedParticipant: A binding to the participant that is currently pinned in the call.
+    ///  - availableSize: The available size for the participant's video.
+    ///  - ratio: The aspect ratio of the participant's video.
+    /// - Returns: A view modifier that modifies the appearance of the video call participant.
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         participantCount: Int,
+        pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
         ratio: CGFloat
     ) -> ParticipantViewModifierType
@@ -61,14 +78,20 @@ public protocol ViewFactory: AnyObject {
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
+    
+    associatedtype CallTopViewType: View = CallTopView
+    /// Creates a view displayed at the top of the call view.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in thetop  call view slot.
+    func makeCallTopView(viewModel: CallViewModel) -> CallTopViewType
         
     associatedtype CallParticipantsListViewType: View
-    /// Creates a view in the top trailing section of the call view.
+    /// Creates a view that shows a list of the participants in the call.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
     ///  - availableSize: The size available to display the view.
     /// - Returns: view shown in the participants list slot.
-    func makeTrailingTopView(
+    func makeParticipantsListView(
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> CallParticipantsListViewType
@@ -139,7 +162,7 @@ extension ViewFactory {
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,
-            participants: viewModel.participants,
+            viewModel: viewModel,
             availableSize: availableSize,
             onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
@@ -149,11 +172,13 @@ extension ViewFactory {
     public func makeVideoParticipantView(
         participant: CallParticipant,
         availableSize: CGSize,
+        contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> some View {
         VideoCallParticipantView(
             participant: participant,
             availableSize: availableSize,
+            contentMode: contentMode,
             onViewUpdate: onViewUpdate
         )
     }
@@ -161,11 +186,13 @@ extension ViewFactory {
     public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         participantCount: Int,
+        pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
         ratio: CGFloat
     ) -> some ViewModifier {
         VideoCallParticipantModifier(
             participant: participant,
+            pinnedParticipant: pinnedParticipant,
             participantCount: participantCount,
             availableSize: availableSize,
             ratio: ratio
@@ -176,7 +203,11 @@ extension ViewFactory {
         CallView(viewFactory: self, viewModel: viewModel)
     }
     
-    public func makeTrailingTopView(
+    public func makeCallTopView(viewModel: CallViewModel) -> some View {
+        CallTopView(viewModel: viewModel)
+    }
+    
+    public func makeParticipantsListView(
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> some View {

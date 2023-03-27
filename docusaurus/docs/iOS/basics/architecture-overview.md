@@ -47,8 +47,8 @@ let streamVideo = StreamVideo(
 
 Here are parameters that the `StreamVideo` class expects:
 
-- `apiKey` - your Stream Video API key (note: it's different from chat)
-- `user` - the logged in user, represented by the `UserInfo` struct.
+- `apiKey` - your Stream Video API key
+- `user` - the logged in user, represented by the `User` struct.
 - `token` - the user's token.
 - `videoConfig` - configuration for the type of calls.
 - `tokenProvider` - called when the token expires. Use it to load a new token from your networking service.

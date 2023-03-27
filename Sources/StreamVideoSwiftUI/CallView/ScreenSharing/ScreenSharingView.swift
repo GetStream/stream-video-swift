@@ -37,7 +37,8 @@ public struct ScreenSharingView: View {
                         ForEach(viewModel.participants) { participant in
                             VideoCallParticipantView(
                                 participant: participant,
-                                availableSize: .init(width: thumbnailSize, height: thumbnailSize)
+                                availableSize: .init(width: thumbnailSize, height: thumbnailSize),
+                                contentMode: .scaleAspectFill
                             ) { participant, view in
                                 if let track = participant.track {
                                     view.add(track: track)

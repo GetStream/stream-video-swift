@@ -22,10 +22,22 @@ internal enum L10n {
 
   internal enum Call {
     internal enum Current {
+      /// Full Screen
+      internal static var layoutFullScreen: String { L10n.tr("Localizable", "call.current.layout-full-screen") }
+      /// Grid
+      internal static var layoutGrid: String { L10n.tr("Localizable", "call.current.layout-grid") }
+      /// Spotlight
+      internal static var layoutSpotlight: String { L10n.tr("Localizable", "call.current.layout-spotlight") }
+      /// View
+      internal static var layoutView: String { L10n.tr("Localizable", "call.current.layout-view") }
+      /// Pin user
+      internal static var pinUser: String { L10n.tr("Localizable", "call.current.pin-user") }
       /// Trying to reconnect to the call
       internal static var reconnecting: String { L10n.tr("Localizable", "call.current.reconnecting") }
       /// Recording
       internal static var recording: String { L10n.tr("Localizable", "call.current.recording") }
+      /// Unpin user
+      internal static var unpinUser: String { L10n.tr("Localizable", "call.current.unpin-user") }
     }
     internal enum Incoming {
       /// Incoming call

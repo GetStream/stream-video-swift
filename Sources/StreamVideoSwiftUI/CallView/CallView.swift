@@ -60,38 +60,9 @@ public struct CallView<Factory: ViewFactory>: View {
                                 
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
-                        HStack {
-                            Button {
-                                withAnimation {
-                                    viewModel.isMinimized = true
-                                }
-                            } label: {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(colors.textInverted)
-                                    .padding()
-                            }
-                            .accessibility(identifier: "minimizeCallView")
-                            
-                            if viewModel.recordingState == .recording {
-                                RecordingView()
-                            }
-
-                            Spacer()
-                            
-                            if #available(iOS 14, *) {
-                                Button {
-                                    viewModel.participantsShown.toggle()
-                                } label: {
-                                    images.participants
-                                        .padding(.horizontal)
-                                        .padding(.horizontal, 2)
-                                        .foregroundColor(.white)
-                                }
-                                .accessibility(identifier: "participantMenu")
-                            }
-                        }
+                        viewFactory.makeCallTopView(viewModel: viewModel)
                         
-                        if viewModel.screensharingSession == nil {
+                        if viewModel.screensharingSession == nil, viewModel.participantsLayout == .grid {
                             CornerDragableView(
                                 content: contentDragableView(size: reader.size),
                                 proxy: reader
@@ -107,7 +78,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 .opacity(viewModel.hideUIElements ? 0 : 1)
                 
                 if viewModel.participantsShown {
-                    viewFactory.makeTrailingTopView(
+                    viewFactory.makeParticipantsListView(
                         viewModel: viewModel,
                         availableSize: reader.size
                     )
@@ -116,6 +87,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
             }
         }
+        .background(Color(colors.callBackground))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
@@ -141,7 +113,8 @@ public struct CallView<Factory: ViewFactory>: View {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
-                    availableSize: size
+                    availableSize: size,
+                    contentMode: .scaleAspectFill
                 ) { participant, view in
                     if let track = participant.track {
                         view.add(track: track)
@@ -179,7 +152,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
     
     private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
-        if let track = participant.track, participant.id != viewModel.call?.sessionId {
+        if let track = participant.track {
             log.debug("adding track to a view \(view)")
             view.add(track: track)
         }

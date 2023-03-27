@@ -27,7 +27,7 @@ public struct LocalVideoView: View {
             
     public var body: some View {
         GeometryReader { reader in
-            VideoRendererView(id: streamVideo.user.id, size: reader.size) { view in
+            VideoRendererView(id: "\(streamVideo.user.id)-local", size: reader.size) { view in
                 onLocalVideoUpdate(view)
             }
             .rotation3DEffect(

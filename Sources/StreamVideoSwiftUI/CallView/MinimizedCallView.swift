@@ -33,7 +33,8 @@ public struct MinimizedCallView: View {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
-                    availableSize: proxy.size
+                    availableSize: proxy.size,
+                    contentMode: .scaleAspectFill
                 ) { participant, view in
                     if let track = participant.track {
                         view.add(track: track)

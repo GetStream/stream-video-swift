@@ -203,7 +203,7 @@ final class CallCoordinatorController: @unchecked Sendable {
             }
         }
         let callSettings = CallSettingsInfo(
-            callCapabilities: response.call.ownCapabilities,
+            callCapabilities: response.call.ownCapabilities.map(\.rawValue),
             callSettings: response.call.settings,
             callInfo: CallInfo(
                 cId: response.call.cid,

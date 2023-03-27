@@ -14,12 +14,12 @@ internal struct UpdatedCallPermissionsEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
-    /** The updated list of capabilities the user has in the call */
-    internal var ownCapabilities: [String]
+    /** The capabilities of the current user */
+    internal var ownCapabilities: [OwnCapability]
     internal var type: String
     internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, ownCapabilities: [String], type: String, user: UserResponse) {
+    internal init(callCid: String, createdAt: Date, ownCapabilities: [OwnCapability], type: String, user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.ownCapabilities = ownCapabilities

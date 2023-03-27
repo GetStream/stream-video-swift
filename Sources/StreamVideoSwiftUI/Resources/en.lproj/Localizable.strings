@@ -17,6 +17,12 @@
 
 "call.current.reconnecting" = "Trying to reconnect to the call";
 "call.current.recording" = "Recording";
+"call.current.layout-grid" = "Grid";
+"call.current.layout-spotlight" = "Spotlight";
+"call.current.layout-full-screen" = "Full Screen";
+"call.current.layout-view" = "View";
+"call.current.pin-user" = "Pin user";
+"call.current.unpin-user" = "Unpin user";
 
 "waiting-room.title" = "Before Joining";
 "waiting-room.subtitle" = "Setup your audio and video";

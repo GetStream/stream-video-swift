@@ -62,7 +62,7 @@ extension UpdatedCallPermissionsEvent {
         }
         return PermissionsUpdated(
             callCid: callCid,
-            ownCapabilities: ownCapabilities,
+            ownCapabilities: ownCapabilities.map(\.rawValue),
             type: type,
             user: User(id: user.id, name: user.name ?? user.id, imageURL: imageUrl)
         )

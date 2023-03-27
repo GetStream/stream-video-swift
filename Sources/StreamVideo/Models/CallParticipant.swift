@@ -11,17 +11,14 @@ public struct CallParticipant: Identifiable, Sendable {
     public var id: String
     /// The user's id. This is not necessarily unique, since a user can join from multiple devices.
     public let userId: String
-    // TODO: maybe remove it.
-    /// The user's role in the call.
-    public let role: String
+    /// The user's roles in the call.
+    public let roles: [String]
     /// The user's name.
     public let name: String
     /// The user's profile image url.
     public let profileImageURL: URL?
     /// The id of the track that's connected to the participant.
     public var trackLookupPrefix: String?
-    /// Returns whether the participant is online.
-    public var isOnline: Bool
     /// Returns whether the participant has video.
     public var hasVideo: Bool
     /// Returns whether the participant has audio.
@@ -40,6 +37,8 @@ public struct CallParticipant: Identifiable, Sendable {
     public var layoutPriority: LayoutPriority
     /// Returns whether the participant is speaking.
     public var isSpeaking: Bool
+    /// Returns whether the participant is a dominant speaker.
+    public var isDominantSpeaker: Bool
     /// Returns whether the participant is speaking.
     public var sessionId: String
     /// Returns the session id of the participant.
@@ -50,11 +49,10 @@ public struct CallParticipant: Identifiable, Sendable {
     public init(
         id: String,
         userId: String,
-        role: String,
+        roles: [String],
         name: String,
         profileImageURL: URL?,
         trackLookupPrefix: String?,
-        isOnline: Bool,
         hasVideo: Bool,
         hasAudio: Bool,
         isScreenSharing: Bool,
@@ -64,17 +62,17 @@ public struct CallParticipant: Identifiable, Sendable {
         screenshareTrack: RTCVideoTrack? = nil,
         layoutPriority: LayoutPriority = .normal,
         isSpeaking: Bool = false,
+        isDominantSpeaker: Bool,
         sessionId: String,
         connectionQuality: ConnectionQuality,
         joinedAt: Date
     ) {
         self.id = id
         self.userId = userId
-        self.role = role
+        self.roles = roles
         self.name = name
         self.profileImageURL = profileImageURL
         self.trackLookupPrefix = trackLookupPrefix
-        self.isOnline = isOnline
         self.hasVideo = hasVideo
         self.hasAudio = hasAudio
         self.showTrack = showTrack
@@ -82,6 +80,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.trackSize = trackSize
         self.layoutPriority = layoutPriority
         self.isSpeaking = isSpeaking
+        self.isDominantSpeaker = isDominantSpeaker
         self.sessionId = sessionId
         self.screenshareTrack = screenshareTrack
         self.connectionQuality = connectionQuality
@@ -98,11 +97,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -112,6 +110,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -122,11 +121,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -136,6 +134,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -146,11 +145,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -160,6 +158,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screensharingTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -170,11 +169,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: audio,
             isScreenSharing: isScreensharing,
@@ -184,6 +182,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -194,11 +193,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: video,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -208,6 +206,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -218,11 +217,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: screensharing,
@@ -232,6 +230,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -242,11 +241,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -256,6 +254,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -269,11 +268,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -283,6 +281,31 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt
+        )
+    }
+    
+    func withUpdated(dominantSpeaker: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            layoutPriority: layoutPriority,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: dominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -293,11 +316,10 @@ public struct CallParticipant: Identifiable, Sendable {
         CallParticipant(
             id: id,
             userId: userId,
-            role: role,
+            roles: roles,
             name: name,
             profileImageURL: profileImageURL,
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: isOnline,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreensharing,
@@ -307,6 +329,7 @@ public struct CallParticipant: Identifiable, Sendable {
             screenshareTrack: screenshareTrack,
             layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt
@@ -338,15 +361,15 @@ extension User {
         CallParticipant(
             id: id,
             userId: id,
-            role: "",
+            roles: [],
             name: name.isEmpty ? id : name,
             profileImageURL: imageURL,
             trackLookupPrefix: nil,
-            isOnline: false,
             hasVideo: false,
             hasAudio: false,
             isScreenSharing: false,
             showTrack: false,
+            isDominantSpeaker: false,
             sessionId: "",
             connectionQuality: .unknown,
             joinedAt: Date()
@@ -360,15 +383,16 @@ extension Stream_Video_Sfu_Models_Participant {
         CallParticipant(
             id: sessionID,
             userId: userID,
-            role: "", // TODO: should be exposed by the SFU.
+            roles: roles,
             name: name,
             profileImageURL: URL(string: image),
             trackLookupPrefix: trackLookupPrefix,
-            isOnline: true, // TODO: handle this
             hasVideo: publishedTracks.contains(where: { $0 == .video }),
             hasAudio: publishedTracks.contains(where: { $0 == .audio }),
             isScreenSharing: publishedTracks.contains(where: { $0 == .screenShare }),
             showTrack: showTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionID,
             connectionQuality: connectionQuality.mapped,
             joinedAt: joinedAt.date

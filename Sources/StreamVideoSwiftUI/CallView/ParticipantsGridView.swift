@@ -11,6 +11,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
     var participants: [CallParticipant]
+    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var isPortrait: Bool
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
@@ -42,12 +43,14 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 availableSize: size,
+                contentMode: .scaleAspectFill,
                 onViewUpdate: onViewUpdate
             )
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
                     participantCount: participants.count,
+                    pinnedParticipant: $pinnedParticipant,
                     availableSize: size,
                     ratio: ratio
                 )

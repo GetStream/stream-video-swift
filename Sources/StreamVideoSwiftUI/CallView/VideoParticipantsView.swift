@@ -8,7 +8,7 @@ import SwiftUI
 public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
-    var participants: [CallParticipant]
+    @ObservedObject var viewModel: CallViewModel
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -17,13 +17,13 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     public init(
         viewFactory: Factory,
-        participants: [CallParticipant],
+        viewModel: CallViewModel,
         availableSize: CGSize,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
-        self.participants = participants
+        self.viewModel = viewModel
         self.availableSize = availableSize
         self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
@@ -31,299 +31,69 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     public var body: some View {
         ZStack {
-            if orientation.isPortrait || orientation == .unknown {
-                VideoParticipantsViewPortrait(
+            if viewModel.participantsLayout == .fullScreen, let fullScreenParticipant {
+                ParticipantsFullScreenLayout(
                     viewFactory: viewFactory,
-                    participants: participants,
-                    availableSize: availableSize,
+                    participant: fullScreenParticipant,
+                    size: availableSize,
+                    pinnedParticipant: $viewModel.pinnedParticipant,
+                    onViewRendering: onViewRendering,
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
+            } else if viewModel.participantsLayout == .spotlight, let fullScreenParticipant {
+                ParticipantsSpotlightLayout(
+                    viewFactory: viewFactory,
+                    participant: fullScreenParticipant,
+                    participants: viewModel.participants,
+                    size: availableSize,
+                    pinnedParticipant: $viewModel.pinnedParticipant,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
-                VideoParticipantsViewLandscape(
+                ParticipantsGridLayout(
                     viewFactory: viewFactory,
-                    participants: participants,
+                    participants: viewModel.participants,
+                    pinnedParticipant: $viewModel.pinnedParticipant,
                     availableSize: availableSize,
+                    orientation: orientation,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             }
         }
-        .edgesIgnoringSafeArea(participants.count > 1 ? .bottom : .all)
         .onRotate { newOrientation in
             orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
-}
-
-struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
     
-    var viewFactory: Factory
-    var participants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
-    var body: some View {
-        ZStack {
-            if participants.count <= 3 {
-                VerticalParticipantsView(
-                    viewFactory: viewFactory,
-                    participants: participants,
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
-            } else if participants.count == 4 {
-                TwoColumnParticipantsView(
-                    viewFactory: viewFactory,
-                    leftColumnParticipants: [participants[0], participants[2]],
-                    rightColumnParticipants: [participants[1], participants[3]],
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
-            } else if participants.count == 5 {
-                TwoColumnParticipantsView(
-                    viewFactory: viewFactory,
-                    leftColumnParticipants: [participants[0], participants[2]],
-                    rightColumnParticipants: [participants[1], participants[3], participants[4]],
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
-            } else {
-                ParticipantsGridView(
-                    viewFactory: viewFactory,
-                    participants: participants,
-                    availableSize: availableSize,
-                    isPortrait: true
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                } participantVisibilityChanged: { participant, isVisible in
-                    onChangeTrackVisibility(participant, isVisible)
-                }
-            }
-        }
-    }
-}
-
-struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
-    
-    var viewFactory: Factory
-    var participants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
-    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
-    var body: some View {
-        ZStack {
-            if participants.count <= 3 {
-                HorizontalParticipantsView(
-                    viewFactory: viewFactory,
-                    participants: participants,
-                    availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    }
-                )
-            } else if participants.count == 4 {
-                TwoRowParticipantsView(
-                    viewFactory: viewFactory,
-                    firstRowParticipants: [participants[0], participants[1]],
-                    secondRowParticipants: [participants[2], participants[3]],
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
-            } else if participants.count == 5 {
-                TwoRowParticipantsView(
-                    viewFactory: viewFactory,
-                    firstRowParticipants: [participants[0], participants[1]],
-                    secondRowParticipants: [participants[2], participants[3], participants[4]],
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
-            } else {
-                ParticipantsGridView(
-                    viewFactory: viewFactory,
-                    participants: participants,
-                    availableSize: availableSize,
-                    isPortrait: false
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                } participantVisibilityChanged: { participant, isVisible in
-                    onChangeTrackVisibility(participant, isVisible)
-                }
-            }
-        }
-    }
-}
-
-struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
-    
-    @Injected(\.streamVideo) var streamVideo
-    
-    var viewFactory: Factory
-    var leftColumnParticipants: [CallParticipant]
-    var rightColumnParticipants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
-    
-    var body: some View {
-        HStack(spacing: 0) {
-            VerticalParticipantsView(
-                viewFactory: viewFactory,
-                participants: leftColumnParticipants,
-                availableSize: size,
-                onViewUpdate: onViewUpdate
-            )
-            .adjustVideoFrame(to: size.width)
-            
-            VerticalParticipantsView(
-                viewFactory: viewFactory,
-                participants: rightColumnParticipants,
-                availableSize: size,
-                onViewUpdate: onViewUpdate
-            )
-            .adjustVideoFrame(to: size.width)
-        }
-        .frame(maxWidth: availableSize.width, maxHeight: .infinity)
-        .edgesIgnoringSafeArea(.all)
-    }
-    
-    private var size: CGSize {
-        CGSize(width: availableSize.width / 2, height: availableSize.height)
-    }
-}
-
-struct TwoRowParticipantsView<Factory: ViewFactory>: View {
-    
-    @Injected(\.streamVideo) var streamVideo
-    
-    var viewFactory: Factory
-    var firstRowParticipants: [CallParticipant]
-    var secondRowParticipants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            HorizontalParticipantsView(
-                viewFactory: viewFactory,
-                participants: firstRowParticipants,
-                availableSize: size,
-                onViewUpdate: onViewUpdate
-            )
-            
-            HorizontalParticipantsView(
-                viewFactory: viewFactory,
-                participants: secondRowParticipants,
-                availableSize: size,
-                onViewUpdate: onViewUpdate
-            )
-        }
-        .frame(maxWidth: availableSize.width, maxHeight: .infinity)
-        .edgesIgnoringSafeArea(.all)
-    }
-    
-    private var size: CGSize {
-        CGSize(width: availableSize.width, height: availableSize.height / 2)
-    }
-}
-
-struct VerticalParticipantsView<Factory: ViewFactory>: View {
-            
-    var viewFactory: Factory
-    var participants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
-    
-    var body: some View {
-        VStack(spacing: 0) {
-            ForEach(participants) { participant in
-                viewFactory.makeVideoParticipantView(
-                    participant: participant,
-                    availableSize: availableSize,
-                    onViewUpdate: onViewUpdate
-                )
-                .modifier(
-                    viewFactory.makeVideoCallParticipantModifier(
-                        participant: participant,
-                        participantCount: participants.count,
-                        availableSize: availableSize,
-                        ratio: ratio
-                    )
-                )
-            }
-        }
-    }
-    
-    private var ratio: CGFloat {
-        availableSize.width / availableHeight
-    }
-    
-    private var availableHeight: CGFloat {
-        availableSize.height / CGFloat(participants.count)
-    }
-}
-
-
-struct HorizontalParticipantsView<Factory: ViewFactory>: View {
-            
-    var viewFactory: Factory
-    var participants: [CallParticipant]
-    var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
-    
-    var body: some View {
-        HStack(spacing: 0) {
-            ForEach(participants) { participant in
-                viewFactory.makeVideoParticipantView(
-                    participant: participant,
-                    availableSize: size,
-                    onViewUpdate: onViewUpdate
-                )
-                .modifier(
-                    viewFactory.makeVideoCallParticipantModifier(
-                        participant: participant,
-                        participantCount: participants.count,
-                        availableSize: size,
-                        ratio: ratio
-                    )
-                )
-            }
-        }
-    }
-    
-    private var size: CGSize {
-        CGSize(width: availableWidth, height: availableSize.height)
-    }
-    
-    private var ratio: CGFloat {
-        availableWidth / availableSize.height
-    }
-    
-    private var availableWidth: CGFloat {
-        availableSize.width / CGFloat(participants.count)
+    //TODO: move this away from here
+    var fullScreenParticipant: CallParticipant? {
+        viewModel.pinnedParticipant ?? viewModel.callParticipants.first(where: { (_, value) in
+            value.isDominantSpeaker
+        }).map(\.value) ?? viewModel.participants.first
     }
 }
 
 public struct VideoCallParticipantModifier: ViewModifier {
             
+    @State var popoverShown = false
+    
     var participant: CallParticipant
+    @Binding var pinnedParticipant: CallParticipant?
     var participantCount: Int
     var availableSize: CGSize
     var ratio: CGFloat
     
     public init(
         participant: CallParticipant,
+        pinnedParticipant: Binding<CallParticipant?>,
         participantCount: Int,
         availableSize: CGSize,
         ratio: CGFloat
     ) {
         self.participant = participant
+        _pinnedParticipant = pinnedParticipant
         self.participantCount = participantCount
         self.availableSize = availableSize
         self.ratio = ratio
@@ -336,7 +106,10 @@ public struct VideoCallParticipantModifier: ViewModifier {
                 ZStack {
                     BottomView(content: {
                         HStack {
-                            AudioIndicatorView(participant: participant)
+                            ParticipantInfoView(
+                                participant: participant,
+                                isPinned: participant.id == pinnedParticipant?.id
+                            )
                             Spacer()
                             ConnectionQualityIndicator(
                                 connectionQuality: participant.connectionQuality
@@ -350,8 +123,33 @@ public struct VideoCallParticipantModifier: ViewModifier {
                         Rectangle()
                             .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
                     }
+                    
+                    if popoverShown {
+                        Button {
+                            if participant.id == pinnedParticipant?.id {
+                                self.pinnedParticipant = nil
+                            } else {
+                                self.pinnedParticipant = participant
+                            }
+                            popoverShown = false
+                        } label: {
+                            Text(participant.id == pinnedParticipant?.id ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
+                                .padding(.horizontal)
+                                .foregroundColor(.primary)
+                        }
+                        .padding()
+                        .modifier(ShadowViewModifier())
+                    }
                 }
             )
+            .onTapGesture(count: 2, perform: {
+                popoverShown = true
+            })
+            .onTapGesture(count: 1) {
+                if popoverShown {
+                    popoverShown = false
+                }
+            }
     }
 }
 
@@ -362,20 +160,27 @@ public struct VideoCallParticipantView: View {
         
     let participant: CallParticipant
     var availableSize: CGSize
+    var contentMode: UIView.ContentMode
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     public init(
         participant: CallParticipant,
         availableSize: CGSize,
+        contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) {
         self.participant = participant
         self.availableSize = availableSize
+        self.contentMode = contentMode
         self.onViewUpdate = onViewUpdate
     }
     
     public var body: some View {
-        VideoRendererView(id: participant.id, size: availableSize) { view in
+        VideoRendererView(
+            id: participant.id,
+            size: availableSize,
+            contentMode: contentMode
+        ) { view in
             onViewUpdate(participant, view)
         }
         .opacity(showVideo ? 1 : 0)
@@ -397,15 +202,21 @@ public struct VideoCallParticipantView: View {
     }
 }
 
-struct AudioIndicatorView: View {
+struct ParticipantInfoView: View {
     
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
     
     var participant: CallParticipant
+    var isPinned: Bool
     
     var body: some View {
         HStack(spacing: 2) {
+            if isPinned {
+                Image(systemName: "pin.fill")
+                    .foregroundColor(.white)
+                    .padding(.leading, 8)
+            }
             Text(participant.name)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
