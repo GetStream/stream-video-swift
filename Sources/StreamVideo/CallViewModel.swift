@@ -109,11 +109,14 @@ open class CallViewModel: ObservableObject {
     /// The current recording state of the call.
     @Published public var recordingState: RecordingState = .noRecording
     
-    @Published public var participantsLayout: ParticipantsLayout
+    /// The participants layout.
+    @Published public private(set) var participantsLayout: ParticipantsLayout
     
     @Published public var pinnedParticipant: CallParticipant? {
         didSet {
-            //TODO: check if automatic handling
+            if !automaticLayoutHandling {
+                return
+            }
             if pinnedParticipant != nil && participantsLayout == .grid {
                 participantsLayout = .fullScreen
             } else if pinnedParticipant == nil && participantsLayout == .fullScreen {
@@ -150,6 +153,8 @@ open class CallViewModel: ObservableObject {
     }
     
     private var ringingSupported: Bool = false
+    
+    private var automaticLayoutHandling = true
     
     public init(
         listenToRingingEvents: Bool = false,
@@ -379,6 +384,13 @@ open class CallViewModel: ObservableObject {
         callController?.setVideoFilter(videoFilter)
     }
     
+    /// Updates the participants layout.
+    /// - Parameter participantsLayout: the new participants layout.
+    public func update(participantsLayout: ParticipantsLayout) {
+        self.automaticLayoutHandling = true
+        self.participantsLayout = participantsLayout
+    }
+    
     // MARK: - private
     
     /// Leaves the current call.
@@ -388,6 +400,7 @@ open class CallViewModel: ObservableObject {
         participantUpdates = nil
         callUpdates?.cancel()
         callUpdates = nil
+        automaticLayoutHandling = false
         reconnectionUpdates?.cancel()
         reconnectionUpdates = nil
         recordingUpdates?.cancel()

@@ -15,18 +15,24 @@ struct LayoutMenuView: View {
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutGrid,
                 layout: .grid,
-                selectedLayout: $viewModel.participantsLayout
-            )
+                selectedLayout: viewModel.participantsLayout
+            ) { layout in
+                viewModel.update(participantsLayout: layout)
+            }
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutFullScreen,
                 layout: .fullScreen,
-                selectedLayout: $viewModel.participantsLayout
-            )
+                selectedLayout: viewModel.participantsLayout
+            ) { layout in
+                viewModel.update(participantsLayout: layout)
+            }
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutSpotlight,
                 layout: .spotlight,
-                selectedLayout: $viewModel.participantsLayout
-            )
+                selectedLayout: viewModel.participantsLayout
+            ) { layout in
+                viewModel.update(participantsLayout: layout)
+            }
         } label: {
             Label(L10n.Call.Current.layoutView, systemImage: "circle.grid.2x2.fill")
                 .foregroundColor(.white)
@@ -39,12 +45,13 @@ struct LayoutMenuItem: View {
     
     var title: String
     var layout: ParticipantsLayout
-    @Binding var selectedLayout: ParticipantsLayout
+    var selectedLayout: ParticipantsLayout
+    var selectLayout: (ParticipantsLayout) -> ()
     
     var body: some View {
         Button {
             withAnimation {
-                selectedLayout = layout
+                selectLayout(layout)
             }
         } label: {
             HStack {
