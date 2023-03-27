@@ -80,32 +80,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             
                             
                             if #available(iOS 14, *) {
-                                Menu {
-                                    Button {
-                                        withAnimation {
-                                            viewModel.participantsLayout = .grid
-                                        }
-                                    } label: {
-                                        Text("Grid")
-                                    }
-                                    Button {
-                                        withAnimation {
-                                            viewModel.participantsLayout = .fullScreen
-                                        }
-                                    } label: {
-                                        Text("Full Screen")
-                                    }
-                                    Button {
-                                        withAnimation {
-                                            viewModel.participantsLayout = .spotlight
-                                        }
-                                    } label: {
-                                        Text("Spotlight")
-                                    }
-                                } label: {
-                                    Label("View", image: "circle.grid.2x2.fill")
-                                        .foregroundColor(.white)
-                                }
+                                LayoutMenuView(viewModel: viewModel)
                                 
                                 Button {
                                     viewModel.participantsShown.toggle()
@@ -119,7 +94,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             }
                         }
                         
-                        if viewModel.screensharingSession == nil {
+                        if viewModel.screensharingSession == nil, viewModel.participantsLayout == .grid {
                             CornerDragableView(
                                 content: contentDragableView(size: reader.size),
                                 proxy: reader
@@ -169,7 +144,8 @@ public struct CallView<Factory: ViewFactory>: View {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
-                    availableSize: size
+                    availableSize: size,
+                    contentMode: .scaleAspectFill
                 ) { participant, view in
                     if let track = participant.track {
                         view.add(track: track)
@@ -207,7 +183,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
     
     private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
-        if let track = participant.track, participant.id != viewModel.call?.sessionId {
+        if let track = participant.track {
             log.debug("adding track to a view \(view)")
             view.add(track: track)
         }

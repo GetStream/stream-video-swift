@@ -43,6 +43,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 availableSize: size,
+                contentMode: .scaleAspectFill,
                 onViewUpdate: onViewUpdate
             )
             .modifier(

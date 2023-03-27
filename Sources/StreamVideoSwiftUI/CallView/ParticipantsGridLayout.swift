@@ -267,6 +267,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                 viewFactory.makeVideoParticipantView(
                     participant: participant,
                     availableSize: availableSize,
+                    contentMode: .scaleAspectFill,
                     onViewUpdate: onViewUpdate
                 )
                 .modifier(
@@ -306,6 +307,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                 viewFactory.makeVideoParticipantView(
                     participant: participant,
                     availableSize: size,
+                    contentMode: .scaleAspectFill,
                     onViewUpdate: onViewUpdate
                 )
                 .modifier(

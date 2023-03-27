@@ -23,6 +23,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 availableSize: availableSize,
+                contentMode: .scaleAspectFit,
                 onViewUpdate: { participant, view in
                     onViewRendering(view, participant)
                 }
@@ -46,7 +47,8 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                     ForEach(participants) { participant in
                         VideoCallParticipantView(
                             participant: participant,
-                            availableSize: .init(width: thumbnailSize, height: thumbnailSize)
+                            availableSize: .init(width: thumbnailSize, height: thumbnailSize),
+                            contentMode: .scaleAspectFill
                         ) { participant, view in
                             if let track = participant.track {
                                 view.add(track: track)

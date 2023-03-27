@@ -19,6 +19,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
         viewFactory.makeVideoParticipantView(
             participant: participant,
             availableSize: size,
+            contentMode: .scaleAspectFit,
             onViewUpdate: { participant, view in
                 onViewRendering(view, participant)
             }

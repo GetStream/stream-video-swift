@@ -42,13 +42,29 @@ public protocol ViewFactory: AnyObject {
     ) -> ParticipantsViewType
     
     associatedtype ParticipantViewType: View = VideoCallParticipantView
+    /// Creates a view for a video call participant with the specified parameters.
+    /// - Parameters:
+    ///  - participant: The participant to display.
+    ///  - availableSize: The available size for the participant's video view.
+    ///  - contentMode: The content mode for the participant's video view.
+    ///  - onViewUpdate: A closure to be called whenever the participant's video view is updated.
+    /// - Returns: A view for the specified video call participant.
     func makeVideoParticipantView(
         participant: CallParticipant,
         availableSize: CGSize,
+        contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> ParticipantViewType
     
     associatedtype ParticipantViewModifierType: ViewModifier = VideoCallParticipantModifier
+    /// Creates a view modifier that can be used to modify the appearance of the video call participant view.
+    /// - Parameters:
+    ///  - participant: The participant to modify.
+    ///  - participantCount: The total number of participants in the call.
+    ///  - pinnedParticipant: A binding to the participant that is currently pinned in the call.
+    ///  - availableSize: The available size for the participant's video.
+    ///  - ratio: The aspect ratio of the participant's video.
+    /// - Returns: A view modifier that modifies the appearance of the video call participant.
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         participantCount: Int,
@@ -150,11 +166,13 @@ extension ViewFactory {
     public func makeVideoParticipantView(
         participant: CallParticipant,
         availableSize: CGSize,
+        contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> some View {
         VideoCallParticipantView(
             participant: participant,
             availableSize: availableSize,
+            contentMode: contentMode,
             onViewUpdate: onViewUpdate
         )
     }

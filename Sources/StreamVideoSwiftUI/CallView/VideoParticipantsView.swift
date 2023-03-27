@@ -137,20 +137,27 @@ public struct VideoCallParticipantView: View {
         
     let participant: CallParticipant
     var availableSize: CGSize
+    var contentMode: UIView.ContentMode
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     public init(
         participant: CallParticipant,
         availableSize: CGSize,
+        contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) {
         self.participant = participant
         self.availableSize = availableSize
+        self.contentMode = contentMode
         self.onViewUpdate = onViewUpdate
     }
     
     public var body: some View {
-        VideoRendererView(id: participant.id, size: availableSize) { view in
+        VideoRendererView(
+            id: participant.id,
+            size: availableSize,
+            contentMode: contentMode
+        ) { view in
             onViewUpdate(participant, view)
         }
         .opacity(showVideo ? 1 : 0)
