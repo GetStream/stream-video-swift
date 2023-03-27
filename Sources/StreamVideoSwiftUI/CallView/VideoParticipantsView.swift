@@ -106,7 +106,10 @@ public struct VideoCallParticipantModifier: ViewModifier {
                 ZStack {
                     BottomView(content: {
                         HStack {
-                            AudioIndicatorView(participant: participant)
+                            ParticipantInfoView(
+                                participant: participant,
+                                isPinned: participant.id == pinnedParticipant?.id
+                            )
                             Spacer()
                             ConnectionQualityIndicator(
                                 connectionQuality: participant.connectionQuality
@@ -120,24 +123,32 @@ public struct VideoCallParticipantModifier: ViewModifier {
                         Rectangle()
                             .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
                     }
+                    
+                    if popoverShown {
+                        Button {
+                            if participant.id == pinnedParticipant?.id {
+                                self.pinnedParticipant = nil
+                            } else {
+                                self.pinnedParticipant = participant
+                            }
+                            popoverShown = false
+                        } label: {
+                            Text(participant.id == pinnedParticipant?.id ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
+                                .padding(.horizontal)
+                                .foregroundColor(.primary)
+                        }
+                        .padding()
+                        .modifier(ShadowViewModifier())
+                    }
                 }
             )
             .onTapGesture(count: 2, perform: {
                 popoverShown = true
             })
-            .popover(isPresented: $popoverShown) {
-                Button {
-                    if participant.id == pinnedParticipant?.id {
-                        self.pinnedParticipant = nil
-                    } else {
-                        self.pinnedParticipant = participant
-                    }
-                } label: {
-                    Text(participant.id == pinnedParticipant?.id ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
-                        .padding(.horizontal)
-                        .foregroundColor(.primary)
+            .onTapGesture(count: 1) {
+                if popoverShown {
+                    popoverShown = false
                 }
-
             }
     }
 }
@@ -191,15 +202,21 @@ public struct VideoCallParticipantView: View {
     }
 }
 
-struct AudioIndicatorView: View {
+struct ParticipantInfoView: View {
     
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
     
     var participant: CallParticipant
+    var isPinned: Bool
     
     var body: some View {
         HStack(spacing: 2) {
+            if isPinned {
+                Image(systemName: "pin.fill")
+                    .foregroundColor(.white)
+                    .padding(.leading, 8)
+            }
             Text(participant.name)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)

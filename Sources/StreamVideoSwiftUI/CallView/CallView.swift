@@ -119,6 +119,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
             }
         }
+        .background(Color(colors.callBackground))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
             UIApplication.shared.isIdleTimerDisabled = true
