@@ -110,7 +110,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 .opacity(viewModel.hideUIElements ? 0 : 1)
                 
                 if viewModel.participantsShown {
-                    viewFactory.makeTrailingTopView(
+                    viewFactory.makeParticipantsListView(
                         viewModel: viewModel,
                         availableSize: reader.size
                     )

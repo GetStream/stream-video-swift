@@ -80,12 +80,12 @@ public protocol ViewFactory: AnyObject {
     func makeCallView(viewModel: CallViewModel) -> CallViewType
         
     associatedtype CallParticipantsListViewType: View
-    /// Creates a view in the top trailing section of the call view.
+    /// Creates a view that shows a list of the participants in the call.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
     ///  - availableSize: The size available to display the view.
     /// - Returns: view shown in the participants list slot.
-    func makeTrailingTopView(
+    func makeParticipantsListView(
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> CallParticipantsListViewType
@@ -197,7 +197,7 @@ extension ViewFactory {
         CallView(viewFactory: self, viewModel: viewModel)
     }
     
-    public func makeTrailingTopView(
+    public func makeParticipantsListView(
         viewModel: CallViewModel,
         availableSize: CGSize
     ) -> some View {
