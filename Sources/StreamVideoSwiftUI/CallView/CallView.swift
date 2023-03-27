@@ -60,39 +60,7 @@ public struct CallView<Factory: ViewFactory>: View {
                                 
                 TopRightView {
                     VStack(alignment: .trailing, spacing: padding) {
-                        HStack {
-                            Button {
-                                withAnimation {
-                                    viewModel.isMinimized = true
-                                }
-                            } label: {
-                                Image(systemName: "chevron.left")
-                                    .foregroundColor(colors.textInverted)
-                                    .padding()
-                            }
-                            .accessibility(identifier: "minimizeCallView")
-                            
-                            if viewModel.recordingState == .recording {
-                                RecordingView()
-                            }
-
-                            Spacer()
-                            
-                            
-                            if #available(iOS 14, *) {
-                                LayoutMenuView(viewModel: viewModel)
-                                
-                                Button {
-                                    viewModel.participantsShown.toggle()
-                                } label: {
-                                    images.participants
-                                        .padding(.horizontal)
-                                        .padding(.horizontal, 2)
-                                        .foregroundColor(.white)
-                                }
-                                .accessibility(identifier: "participantMenu")
-                            }
-                        }
+                        viewFactory.makeCallTopView(viewModel: viewModel)
                         
                         if viewModel.screensharingSession == nil, viewModel.participantsLayout == .grid {
                             CornerDragableView(

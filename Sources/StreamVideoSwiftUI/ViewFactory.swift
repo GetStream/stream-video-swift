@@ -78,6 +78,12 @@ public protocol ViewFactory: AnyObject {
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
+    
+    associatedtype CallTopViewType: View = CallTopView
+    /// Creates a view displayed at the top of the call view.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in thetop  call view slot.
+    func makeCallTopView(viewModel: CallViewModel) -> CallTopViewType
         
     associatedtype CallParticipantsListViewType: View
     /// Creates a view that shows a list of the participants in the call.
@@ -195,6 +201,10 @@ extension ViewFactory {
     
     public func makeCallView(viewModel: CallViewModel) -> some View {
         CallView(viewFactory: self, viewModel: viewModel)
+    }
+    
+    public func makeCallTopView(viewModel: CallViewModel) -> some View {
+        CallTopView(viewModel: viewModel)
     }
     
     public func makeParticipantsListView(
