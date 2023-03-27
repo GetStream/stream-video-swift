@@ -77,6 +77,8 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
 
 public struct VideoCallParticipantModifier: ViewModifier {
             
+    @State var popoverShown = false
+    
     var participant: CallParticipant
     @Binding var pinnedParticipant: CallParticipant?
     var participantCount: Int
@@ -121,12 +123,22 @@ public struct VideoCallParticipantModifier: ViewModifier {
                 }
             )
             .onTapGesture(count: 2, perform: {
-                if participant.id == pinnedParticipant?.id {
-                    self.pinnedParticipant = nil
-                } else {
-                    self.pinnedParticipant = participant
-                }
+                popoverShown = true
             })
+            .popover(isPresented: $popoverShown) {
+                Button {
+                    if participant.id == pinnedParticipant?.id {
+                        self.pinnedParticipant = nil
+                    } else {
+                        self.pinnedParticipant = participant
+                    }
+                } label: {
+                    Text(participant.id == pinnedParticipant?.id ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
+                        .padding(.horizontal)
+                        .foregroundColor(.primary)
+                }
+
+            }
     }
 }
 
