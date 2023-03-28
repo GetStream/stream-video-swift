@@ -31,6 +31,4 @@ internal enum OwnCapability: String, Codable, CaseIterable {
     case updateCall = "update-call"
     case updateCallPermissions = "update-call-permissions"
     case updateCallSettings = "update-call-settings"
-    case startTranscription = "start-transcription-call"
-    case stopTranscription = "stop-transcription-call"
 }

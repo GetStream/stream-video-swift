@@ -14,7 +14,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let participants = [User(id: "test1"), User(id: "test2")]
         
         // When
-        callViewModel.startCall(callId: "test", type: "default", participants: participants)
+        callViewModel.startCall(callId: "test", type: .default, participants: participants)
         
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)

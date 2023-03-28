@@ -238,14 +238,14 @@ extension ViewFactory {
             return LobbyView(
                 callViewModel: viewModel,
                 callId: lobbyInfo.callId,
-                callType: lobbyInfo.callType.name,
+                callType: lobbyInfo.callType,
                 callParticipants: lobbyInfo.participants
             )
         } else {
             return LobbyView_iOS13(
                 callViewModel: viewModel,
                 callId: lobbyInfo.callId,
-                callType: lobbyInfo.callType.name,
+                callType: lobbyInfo.callType,
                 callParticipants: lobbyInfo.participants
             )
         }

@@ -14,6 +14,7 @@ internal struct GetOrCreateCallRequest: Codable, JSONEncodable, Hashable {
 
     internal var data: CallRequest?
     internal var members: PaginationParamsRequest?
+    /** if provided it overrides the default ring setting for this call */
     internal var ring: Bool?
 
     internal init(data: CallRequest? = nil, members: PaginationParamsRequest? = nil, ring: Bool? = nil) {

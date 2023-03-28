@@ -12,11 +12,24 @@ import AnyCodable
 
 internal struct RecordSettingsRequest: Codable, JSONEncodable, Hashable {
 
+    internal enum Mode: String, Codable, CaseIterable {
+        case available = "available"
+        case disabled = "disabled"
+        case autoOn = "auto-on"
+    }
+    internal enum Quality: String, Codable, CaseIterable {
+        case audioOnly = "audio-only"
+        case _360p = "360p"
+        case _480p = "480p"
+        case _720p = "720p"
+        case _1080p = "1080p"
+        case _1440p = "1440p"
+    }
     internal var audioOnly: Bool?
-    internal var mode: String?
-    internal var quality: String?
+    internal var mode: Mode?
+    internal var quality: Quality?
 
-    internal init(audioOnly: Bool? = nil, mode: String? = nil, quality: String? = nil) {
+    internal init(audioOnly: Bool? = nil, mode: Mode? = nil, quality: Quality? = nil) {
         self.audioOnly = audioOnly
         self.mode = mode
         self.quality = quality

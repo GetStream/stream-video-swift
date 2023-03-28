@@ -10,6 +10,7 @@ The `CallingState` enumeration has the following possible values:
 - `idle` - There's no active call at the moment. In this case, your hosting view should be displayed.
 - `lobby(LobbyInfo)` - The user is in the lobby before joining the call.
 - `incoming(IncomingCall)` - There's an incoming call, therefore an incoming call screen needs to be displayed.
+- `joining` - The user is joining a call.
 - `outgoing` - The user rings someone, therefore an outgoing call needs to be displayed.
 - `inCall` - The user is in a call.
 - `reconnecting` - The user dropped the connection and now they are trying to reconnect.

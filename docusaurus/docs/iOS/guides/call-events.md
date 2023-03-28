@@ -23,15 +23,15 @@ Accepting a call can be done by calling the `acceptCall(callId: String, callType
 Here's an example implementation from our `CallViewModel`:
 
 ```swift
-public func acceptCall(callId: String, type: String) {
-    callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
+public func acceptCall(callId: String, type: CallType) {
+    callController = streamVideo.makeCallController(callType: type, callId: callId)
     Task {
-        try await streamVideo.acceptCall(callId: callId, callType: callType(from: type))
+        try await streamVideo.acceptCall(callId: callId, callType: type)
         enterCall(callId: callId, participantIds: participants.map(\.id))
     }
 }
 
-private func enterCall(callId: String, participantIds: [String]) {
+private func enterCall(callId: String, callType: CallType, participants: [User], ring: Bool = false) {
     guard let callController = callController else {
         return
     }
@@ -39,21 +39,18 @@ private func enterCall(callId: String, participantIds: [String]) {
     Task {
         do {
             log.debug("Starting call")
-            let callType = CallType.default
-            let options = VideoOptions()
             let call: Call = try await callController.joinCall(
                 callType: callType,
                 callId: callId,
                 callSettings: callSettings,
-                videoOptions: options,
-                participantIds: participantIds
+                videoOptions: videoOptions,
+                participants: participants,
+                ring: ring
             )
-            self.call = call
-            self.updateCallStateIfNeeded()
-            listenForParticipantEvents()
-            log.debug("Started call")
+            save(call: call, ring: ring)
         } catch {
             log.error("Error starting a call \(error.localizedDescription)")
+            self.error = error
             callingState = .idle
         }
     }
@@ -62,12 +59,12 @@ private func enterCall(callId: String, participantIds: [String]) {
 
 #### Rejecting a call
 
-In order to reject a call, you should call `StreamVideo`'s `rejectCall(callId: String, type: String)` method. This will trigger the `rejected` call event to all involved participants, and you should use this to hide the incoming / outgoing call screens.
+In order to reject a call, you should call `StreamVideo`'s `rejectCall(callId: String, type: CallType)` method. This will trigger the `rejected` call event to all involved participants, and you should use this to hide the incoming / outgoing call screens.
 
 ```swift
-public func rejectCall(callId: String, type: String) {
+public func rejectCall(callId: String, type: CallType) {
     Task {
-        try await streamVideo.rejectCall(callId: callId, callType: callType(from: type))
+        try await streamVideo.rejectCall(callId: callId, callType: type)
     }
 }
 ```

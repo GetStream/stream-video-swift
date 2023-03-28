@@ -12,22 +12,34 @@ import AnyCodable
 
 internal struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
 
+    internal var audio: AudioSettingsRequest?
+    internal var backstage: BackstageSettingsRequest?
     internal var geofencing: GeofenceSettingsRequest?
     internal var recording: RecordSettingsRequest?
+    internal var ring: RingSettingsRequest?
     internal var screensharing: ScreensharingSettingsRequest?
+    internal var transcription: TranscriptionSettingsRequest?
     internal var video: VideoSettingsRequest?
 
-    internal init(geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
+    internal init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
+        self.audio = audio
+        self.backstage = backstage
         self.geofencing = geofencing
         self.recording = recording
+        self.ring = ring
         self.screensharing = screensharing
+        self.transcription = transcription
         self.video = video
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
+        case audio
+        case backstage
         case geofencing
         case recording
+        case ring
         case screensharing
+        case transcription
         case video
     }
 
@@ -35,9 +47,13 @@ internal struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encodeIfPresent(audio, forKey: .audio)
+        try container.encodeIfPresent(backstage, forKey: .backstage)
         try container.encodeIfPresent(geofencing, forKey: .geofencing)
         try container.encodeIfPresent(recording, forKey: .recording)
+        try container.encodeIfPresent(ring, forKey: .ring)
         try container.encodeIfPresent(screensharing, forKey: .screensharing)
+        try container.encodeIfPresent(transcription, forKey: .transcription)
         try container.encodeIfPresent(video, forKey: .video)
     }
 }

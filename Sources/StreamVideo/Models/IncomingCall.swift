@@ -13,7 +13,7 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     
     public let id: String
     public let callerId: String
-    public let type: String
+    public let type: CallType
     public let participants: [CallParticipant]
     
     public init(
@@ -24,7 +24,7 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     ) {
         self.id = id
         self.callerId = callerId
-        self.type = type
+        self.type = CallType(name: type)
         self.participants = participants
     }
 }

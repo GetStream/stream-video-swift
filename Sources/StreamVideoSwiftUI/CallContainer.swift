@@ -74,7 +74,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     private var overlayView: some View {
         if case let .incoming(callInfo) = viewModel.callingState {
             viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
-        } else if viewModel.callingState == .outgoing {
+        } else if (viewModel.callingState == .outgoing || viewModel.callingState == .joining) {
             viewFactory.makeOutgoingCallView(viewModel: viewModel)
         } else {
             EmptyView()
@@ -83,7 +83,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     
     private var shouldShowCallView: Bool {
         switch viewModel.callingState {
-        case .outgoing, .incoming(_), .inCall:
+        case .outgoing, .incoming(_), .inCall, .joining:
             return true
         default:
             return false

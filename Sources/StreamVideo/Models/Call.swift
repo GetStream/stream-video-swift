@@ -28,6 +28,11 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// The id of the current session.
     public let sessionId: String
     
+    /// Whether ringing is enabled for the call.
+    public let ringingEnabled: Bool
+    /// The ringing timeout.
+    public let ringingTimeout: Int
+    
     /// The unique identifier of the call, formatted as `callType.name:callId`.
     public var cId: String {
         "\(callType.name):\(callId)"
@@ -43,21 +48,21 @@ public class Call: ObservableObject, @unchecked Sendable {
     ///   - callId: The unique identifier of the call.
     ///   - callType: The type of the call.
     ///   - sessionId: The session identifier of the call.
-    ///   - callInfo: The call information published to the participants.
+    ///   - callSettingsInfo: The call information published to the participants.
     ///   - recordingState: The current state of the call recording.
     /// - Returns: A new instance of the `Call` class.
     static func create(
         callId: String,
         callType: CallType,
         sessionId: String,
-        callInfo: CallInfo,
+        callSettingsInfo: CallSettingsInfo,
         recordingState: RecordingState
     ) -> Call {
         Call(
             callId: callId,
             callType: callType,
             sessionId: sessionId,
-            callInfo: callInfo,
+            callSettingsInfo: callSettingsInfo,
             recordingState: recordingState
         )
     }
@@ -66,14 +71,17 @@ public class Call: ObservableObject, @unchecked Sendable {
         callId: String,
         callType: CallType,
         sessionId: String,
-        callInfo: CallInfo,
+        callSettingsInfo: CallSettingsInfo,
         recordingState: RecordingState
     ) {
         self.callId = callId
         self.callType = callType
         self.sessionId = sessionId
-        self.callInfo = callInfo
+        self.callInfo = callSettingsInfo.callInfo
         self.recordingState = recordingState
+        let ringSettings = callSettingsInfo.callSettings.ring
+        self.ringingEnabled = ringSettings.enabled
+        self.ringingTimeout = ringSettings.autoCancelTimeoutMs
     }
     
     /// Async stream that publishes participant events.

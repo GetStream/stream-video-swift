@@ -149,19 +149,15 @@ open class CallViewModel: ObservableObject {
         callParticipants
             .filter { $0.value.id != call?.sessionId }
             .map(\.value)
-            .sorted(using: call?.callType.sortComparators ?? CallType.defaultComparators)
+            .sorted(using: call?.callType.sortComparators ?? defaultComparators)
     }
-    
-    private var ringingSupported: Bool = false
-    
+        
     private var automaticLayoutHandling = true
     
     public init(
-        listenToRingingEvents: Bool = false,
         participantsLayout: ParticipantsLayout = .grid
     ) {
         self.participantsLayout = participantsLayout
-        ringingSupported = listenToRingingEvents
         if !streamVideo.videoConfig.videoEnabled {
             callSettings = CallSettings(speakerOn: false)
         }
@@ -263,23 +259,21 @@ open class CallViewModel: ObservableObject {
     ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callId: String, type: String, participants: [User], ring: Bool = false) {
+    public func startCall(callId: String, type: CallType, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
-        ringingSupported = ring
         setupCallController(callId: callId, type: type)
-        callingState = .outgoing
-        let callType = callType(from: type)
-        enterCall(callId: callId, callType: callType, participants: participants, ring: ring)
+        callingState = ring ? .outgoing : .joining
+        enterCall(callId: callId, callType: type, participants: participants, ring: ring)
     }
     
     /// Joins an existing call with the provided info.
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
-    public func joinCall(callId: String, type: String) {
+    public func joinCall(callId: String, type: CallType) {
         setupCallController(callId: callId, type: type)
-        let callType = callType(from: type)
-        enterCall(callId: callId, callType: callType, participants: [])
+        callingState = .joining
+        enterCall(callId: callId, callType: type, participants: [])
     }
     
     /// Enters into a lobby before joining a call.
@@ -287,9 +281,8 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
-    public func enterLobby(callId: String, type: String, participants: [User]) {
-        let callType = callType(from: type)
-        let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: participants)
+    public func enterLobby(callId: String, type: CallType, participants: [User]) {
+        let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: participants)
         callingState = .lobby(lobbyInfo)
         setupCallController(callId: callId, type: type)
         Task {
@@ -305,7 +298,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
-    public func joinCallFromLobby(callId: String, type: String, participants: [User]) throws {
+    public func joinCallFromLobby(callId: String, type: CallType, participants: [User]) throws {
         guard let edgeServer = edgeServer, let callController = callController else {
             throw ClientError.Unexpected("Edge server not available")
         }
@@ -315,7 +308,7 @@ open class CallViewModel: ObservableObject {
                 log.debug("Starting call")
                 let call: Call = try await callController.joinCall(
                     on: edgeServer,
-                    callType: callType(from: type),
+                    callType: type,
                     callId: callId,
                     callSettings: callSettings,
                     videoOptions: VideoOptions()
@@ -333,12 +326,11 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func acceptCall(callId: String, type: String) {
-        let callType = callType(from: type)
+    public func acceptCall(callId: String, type: CallType) {
         setupCallController(callId: callId, type: type)
         Task {
-            try await streamVideo.acceptCall(callId: callId, callType: callType)
-            enterCall(callId: callId, callType: callType, participants: [])
+            try await streamVideo.acceptCall(callId: callId, callType: type)
+            enterCall(callId: callId, callType: type, participants: [])
         }
     }
     
@@ -346,9 +338,9 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func rejectCall(callId: String, type: String) {
+    public func rejectCall(callId: String, type: CallType) {
         Task {
-            try await streamVideo.rejectCall(callId: callId, callType: callType(from: type))
+            try await streamVideo.rejectCall(callId: callId, callType: type)
             self.callingState = .idle
         }
     }
@@ -430,7 +422,7 @@ open class CallViewModel: ObservableObject {
                     participants: participants,
                     ring: ring
                 )
-                save(call: call)
+                save(call: call, ring: ring)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
                 self.error = error
@@ -439,15 +431,17 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func save(call: Call) {
+    private func save(call: Call, ring: Bool = false) {
         self.call = call
-        updateCallStateIfNeeded()
+        updateCallStateIfNeeded(ring: ring)
         listenForParticipantEvents()
         log.debug("Started call")
     }
     
     private func handleRingingEvents() {
-        let ringingTimeout = streamVideo.videoConfig.ringingTimeout
+        let ringingTimeoutMs = call?.ringingTimeout ?? 0
+        let ringingTimeout = TimeInterval(ringingTimeoutMs / 1000)
+        let ringingSupported = call?.ringingEnabled ?? false
         guard ringingSupported, ringingTimeout > 0 else { return }
         if callingState == .outgoing {
             ringingTimer = Foundation.Timer.scheduledTimer(
@@ -469,6 +463,7 @@ open class CallViewModel: ObservableObject {
     private func subscribeToCallEvents() {
         Task {
             for await callEvent in streamVideo.callEvents() {
+                let ringingSupported = call?.ringingEnabled ?? false
                 if case let .incoming(incomingCall) = callEvent,
                    ringingSupported,
                    incomingCall.callerId != streamVideo.user.id {
@@ -496,16 +491,8 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func callType(from: String?) -> CallType {
-        var type: CallType = .default
-        if let from = from {
-            type = CallType(name: from)
-        }
-        return type
-    }
-    
-    private func updateCallStateIfNeeded() {
-        if !ringingSupported && callingState != .reconnecting {
+    private func updateCallStateIfNeeded(ring: Bool = false) {
+        if !ring && callingState != .reconnecting {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1
@@ -521,8 +508,8 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func setupCallController(callId: String, type: String?) {
-        callController = streamVideo.makeCallController(callType: callType(from: type), callId: callId)
+    private func setupCallController(callId: String, type: CallType) {
+        callController = streamVideo.makeCallController(callType: type, callId: callId)
         callController?.onCallUpdated = { [weak self] updatedCall in            
             DispatchQueue.main.async {
                 guard let updatedCall = updatedCall else {
@@ -591,6 +578,8 @@ public enum CallingState: Equatable {
     case incoming(IncomingCall)
     /// There's an outgoing call.
     case outgoing
+    /// The user is joining a call.
+    case joining
     /// The user is in a call.
     case inCall
     /// The user is trying to reconnect to a call.

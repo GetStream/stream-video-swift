@@ -6,6 +6,14 @@ import Foundation
 
 public typealias Comparator<Value> = (Value, Value) -> ComparisonResult
 
+public let defaultComparators: [Comparator<CallParticipant>] = [
+    screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
+]
+
+public let livestreamComparators: [Comparator<CallParticipant>] = [
+    dominantSpeaker, isSpeaking, publishingVideo, publishingAudio, roles, userId
+]
+
 public var screensharing: Comparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.isScreensharing)
 }
@@ -24,6 +32,20 @@ public var publishingVideo: Comparator<CallParticipant> = { (p1, p2) in
 
 public var publishingAudio: Comparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.hasAudio)
+}
+
+public var roles: Comparator<CallParticipant> = { (p1, p2) in
+    if p1.roles == p2.roles { return .orderedSame }
+    let prioRoles = ["admin", "host", "speaker"]
+    for role in prioRoles {
+        if p1.roles.contains(role) && !p2.roles.contains(role) {
+            return .orderedDescending
+        }
+        if p2.roles.contains(role) && !p1.roles.contains(role) {
+            return .orderedAscending
+        }
+    }
+    return .orderedSame
 }
 
 public var userId: Comparator<CallParticipant> = { (p1, p2) in

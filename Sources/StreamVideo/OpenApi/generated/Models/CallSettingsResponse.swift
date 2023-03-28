@@ -17,16 +17,20 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
     internal var broadcasting: BroadcastSettings
     internal var geofencing: GeofenceSettings
     internal var recording: RecordSettings
+    internal var ring: RingSettings
     internal var screensharing: ScreensharingSettings
+    internal var transcription: TranscriptionSettings
     internal var video: VideoSettings
 
-    internal init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettings, geofencing: GeofenceSettings, recording: RecordSettings, screensharing: ScreensharingSettings, video: VideoSettings) {
+    internal init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettings, geofencing: GeofenceSettings, recording: RecordSettings, ring: RingSettings, screensharing: ScreensharingSettings, transcription: TranscriptionSettings, video: VideoSettings) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
         self.geofencing = geofencing
         self.recording = recording
+        self.ring = ring
         self.screensharing = screensharing
+        self.transcription = transcription
         self.video = video
     }
 
@@ -36,7 +40,9 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         case broadcasting
         case geofencing
         case recording
+        case ring
         case screensharing
+        case transcription
         case video
     }
 
@@ -49,7 +55,9 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         try container.encode(broadcasting, forKey: .broadcasting)
         try container.encode(geofencing, forKey: .geofencing)
         try container.encode(recording, forKey: .recording)
+        try container.encode(ring, forKey: .ring)
         try container.encode(screensharing, forKey: .screensharing)
+        try container.encode(transcription, forKey: .transcription)
         try container.encode(video, forKey: .video)
     }
 }

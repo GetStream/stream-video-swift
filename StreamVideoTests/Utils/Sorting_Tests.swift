@@ -94,6 +94,22 @@ final class Sorting_Tests: XCTestCase {
         XCTAssertEqual(sorted4.map(\.userId), ["123", "345", "234"])
     }
     
+    func testSortingRoles() {
+        // Given
+        let participant1 = makeCallParticipant(id: "1", roles: ["user"])
+        let participant2 = makeCallParticipant(id: "2", roles: ["speaker", "host"])
+        let participant3 = makeCallParticipant(id: "3", roles: ["admin", "host"])
+        let participant4 = makeCallParticipant(id: "4", roles: ["speaker"])
+        let participant5 = makeCallParticipant(id: "5")
+        let participants = [participant1, participant2, participant3, participant4, participant5]
+        
+        // When
+        let sorted = participants.sorted(using: [roles, userId])
+        
+        // Then
+        XCTAssertEqual(sorted.map(\.id), ["3", "2", "4", "5", "1"])
+    }
+    
     private func makeCallParticipant(
         id: String,
         name: String = "",

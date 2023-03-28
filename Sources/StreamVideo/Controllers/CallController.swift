@@ -235,7 +235,7 @@ public class CallController {
             callId: callId,
             callType: callType,
             sessionId: sessionId,
-            callInfo: edgeServer.callSettings.callInfo,
+            callSettingsInfo: edgeServer.callSettings,
             recordingState: edgeServer.callSettings.recording ? .recording : .noRecording
         )
         call = currentCall
