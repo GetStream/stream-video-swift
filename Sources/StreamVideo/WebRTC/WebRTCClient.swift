@@ -499,7 +499,7 @@ class WebRTCClient: NSObject {
         
         webSocketClient.connectionStateDelegate = self
         
-        webSocketClient.onConnect = { [weak self] in
+        webSocketClient.onWSConnectionEstablished = { [weak self] in
             guard let self = self else { return }
             Task {
                 try await self.handleSocketConnected()

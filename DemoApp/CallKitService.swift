@@ -4,9 +4,9 @@
 
 import Foundation
 @preconcurrency import CallKit
-@preconcurrency import StreamVideo
+import StreamVideo
 
-class CallKitService: NSObject, CXProviderDelegate {
+class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     @Injected(\.streamVideo) var streamVideo
         
@@ -80,34 +80,39 @@ class CallKitService: NSObject, CXProviderDelegate {
             return
         }
         if !callId.isEmpty {
-            if AppState.shared.streamVideo == nil {
-                let streamVideo = StreamVideo(
-                    apiKey: "key1",
-                    user: currentUser.userInfo,
-                    token: currentUser.token,
-                    videoConfig: VideoConfig(),
-                    tokenProvider: { result in
-                        result(.success(currentUser.token))
-                    }
-                )
-                AppState.shared.streamVideo = streamVideo
-            }
-            let callType: CallType = .init(name: callType)
-            let callController = streamVideo.makeCallController(callType: callType, callId: callId)
             Task {
-                _ = try await callController.joinCall(
-                    callType: callType,
-                    callId: callId,
-                    callSettings: CallSettings(),
-                    videoOptions: VideoOptions(),
-                    participants: [],
-                    ring: false
-                )
                 await MainActor.run {
-                    AppState.shared.activeCallController = callController
-                    action.fulfill()
+                    if AppState.shared.streamVideo == nil {
+                        let streamVideo = StreamVideo(
+                            apiKey: "key1",
+                            user: currentUser.userInfo,
+                            token: currentUser.token,
+                            videoConfig: VideoConfig(),
+                            tokenProvider: { result in
+                                result(.success(currentUser.token))
+                            }
+                        )
+                        AppState.shared.streamVideo = streamVideo
+                    }
+                    let callType: CallType = .init(name: callType)
+                    let callController = streamVideo.makeCallController(callType: callType, callId: callId)
+                    Task {
+                        _ = try await callController.joinCall(
+                            callType: callType,
+                            callId: callId,
+                            callSettings: CallSettings(),
+                            videoOptions: VideoOptions(),
+                            participants: [],
+                            ring: false
+                        )
+                        await MainActor.run {
+                            AppState.shared.activeCallController = callController
+                            action.fulfill()
+                        }
+                    }
                 }
             }
+
         }
     }
     

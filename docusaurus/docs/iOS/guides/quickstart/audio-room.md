@@ -88,6 +88,13 @@ class AppState: ObservableObject {
             }
         )
         self.streamVideo = streamVideo
+        connectUser()
+    }
+
+    private func connectUser() {
+        Task {
+          try await streamVideo?.connect()
+        }
     }
 }
 ```

@@ -33,6 +33,8 @@ struct HomeView: View {
     @State var incomingCallInfo: IncomingCall?
     @State var logoutAlertShown = false
     
+    @ObservedObject var appState = AppState.shared
+    
     var body: some View {
         VStack {
             ZStack {
@@ -50,6 +52,11 @@ struct HomeView: View {
                 Text("Call details")
                     .font(.title)
                     .padding()
+                
+                HStack {
+                    Spacer()
+                    appState.loading ? ProgressView().padding() : nil
+                }
             }
             
             Picker("Call action", selection: $callAction) {

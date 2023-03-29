@@ -43,6 +43,16 @@ let streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
 
 It's important to initialize the client early in your app's lifecycle, and as soon as your user is logged in. If you try to display a view without the `StreamVideoUI` object being created, you will receive a crash.
 
+When the object is created, you should connect the user to our backend.
+
+```swift
+private func connectUser() {
+    Task {
+        try await streamVideo?.connect()
+    }
+}
+```
+
 ## Customization options
 
 ### Appearance

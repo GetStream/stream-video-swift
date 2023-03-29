@@ -40,7 +40,7 @@ class FiltersService: ObservableObject {
 }
 ```
 
-Next, you need to pass the supported filters to the `StreamVideo` object, via its `VideoConfig`:
+Next, you need to pass the supported filters to the `StreamVideo` object, via its `VideoConfig` and connect the user:
 
 ```swift
 let streamVideo = StreamVideo(
@@ -57,6 +57,13 @@ let streamVideo = StreamVideo(
         // https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/StreamWrapper.swift
     }
 )
+connectUser()
+
+private func connectUser() {
+    Task {
+        try await streamVideo?.connect()
+    }
+}
 ```
 
 Now, let's enable the filter selection in the user interface. One option is to include the filters in the call controls shown at the bottom of the call view. For this, the first step is to override the `makeCallControlsView` function in your custom implementation of the `ViewFactory`:

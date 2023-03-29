@@ -39,3 +39,13 @@ let streamVideo = StreamVideo(
 ```
 
 Note the `fetchToken` method. In this method, you will need to provide your own implementation, that will load a new token for the current user. As soon as you provide the token in the `result`, the SDK will be notified about the new token and retry the failed request.
+
+When the object is created, you should connect the user to our backend. This can be done whenever you plan on using the video features.
+
+```swift
+private func connectUser() {
+    Task {
+        try await streamVideo?.connect()
+    }
+}
+```

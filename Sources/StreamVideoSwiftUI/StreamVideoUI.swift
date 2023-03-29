@@ -59,6 +59,11 @@ public class StreamVideoUI {
         AppearanceKey.currentValue = appearance
         UtilsKey.currentValue = utils
     }
+    
+    /// Connects the current user.
+    public func connect() async throws {
+        try await streamVideo.connect()
+    }
 }
 
 extension InjectedValues {

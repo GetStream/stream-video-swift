@@ -13,7 +13,7 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo {
     
-    public var user: User
+    public let user: User
     public let videoConfig: VideoConfig
     
     var token: UserToken {
@@ -121,7 +121,11 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
-        connectWebSocketClient()
+    }
+    
+    /// Connects the current user.
+    public func connect() async throws {
+        try await connectWebSocketClient()
     }
     
     /// Creates a call controller, used for establishing and managing a call.
@@ -275,11 +279,33 @@ public class StreamVideo {
     
     // MARK: - private
     
-    private func connectWebSocketClient() {
+    private func connectWebSocketClient() async throws {
         let queryParams = endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
         if let connectURL = try? URL(string: endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
+        } else {
+            throw ClientError.Unknown()
+        }
+        var connected = false
+        var timeout = false
+        let control = DefaultTimer.schedule(timeInterval: 15, queue: .sdk) {
+            timeout = true
+        }
+        log.debug("Listening for WS connection")
+        webSocketClient?.onConnected = {
+            control.cancel()
+            connected = true
+            log.debug("WS connected")
+        }
+
+        while (!connected && !timeout) {
+            try await Task.sleep(nanoseconds: 100_000)
+        }
+        
+        if timeout {
+            log.debug("Timeout while waiting for WS connection opening")
+            throw ClientError.NetworkError()
         }
     }
     
@@ -297,7 +323,7 @@ public class StreamVideo {
         )
         
         webSocketClient.connectionStateDelegate = self
-        webSocketClient.onConnect = { [weak self] in
+        webSocketClient.onWSConnectionEstablished = { [weak self] in
             guard let self = self else { return }
             
             let connectUserRequest = ConnectUserDetailsRequest(

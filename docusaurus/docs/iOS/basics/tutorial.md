@@ -86,6 +86,13 @@ struct VideoDemoSwiftUIApp: App {
                 result(.success(userCredentials.token))
             }
         )
+        connectUser()
+    }
+
+    private func connectUser() {
+        Task {
+            try await streamVideo?.connect()
+        }
     }
 
     var body: some Scene {

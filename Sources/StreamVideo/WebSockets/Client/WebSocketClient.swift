@@ -71,7 +71,8 @@ class WebSocketClient {
         return engine
     }
         
-    var onConnect: (() -> Void)?
+    var onWSConnectionEstablished: (() -> Void)?
+    var onConnected: (() -> Void)?
     
     init(
         sessionConfiguration: URLSessionConfiguration,
@@ -169,7 +170,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
     func webSocketDidConnect() {
         log.debug("Web socket connection established")
         connectionState = .authenticating
-        onConnect?()
+        onWSConnectionEstablished?()
     }
     
     func webSocketDidReceiveMessage(_ data: Data) {
@@ -218,6 +219,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         }
         if connectionState == .authenticating {
             connectionState = .connected(healthCheckInfo: healthCheckInfo)
+            onConnected?()
         }
         eventNotificationCenter.process(healthCheckEvent, postNotification: false) { [weak self] in
             self?.engineQueue.async { [weak self] in
