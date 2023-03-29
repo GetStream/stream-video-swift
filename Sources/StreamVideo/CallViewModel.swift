@@ -156,7 +156,13 @@ open class CallViewModel: ObservableObject {
     
     public var participants: [CallParticipant] {
         callParticipants
-            .filter { $0.value.id != call?.sessionId }
+            .filter {
+                if participantsLayout == .grid {
+                    return $0.value.id != call?.sessionId
+                } else {
+                    return true
+                }
+            }
             .map(\.value)
             .sorted(using: call?.callType.sortComparators ?? defaultComparators)
     }
