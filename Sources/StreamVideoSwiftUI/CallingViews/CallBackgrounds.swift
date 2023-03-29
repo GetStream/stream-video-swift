@@ -18,14 +18,18 @@ struct CallingScreenBackground: View {
 }
 
 struct FallbackBackground: View {
-    
-    @Injected(\.images) var images
-    
+        
     var body: some View {
-        images.incomingCallBackground
-            .resizable()
-            .aspectRatio(contentMode: .fill)
-            .edgesIgnoringSafeArea(.all)
+        LinearGradient(
+            colors: [
+                Color(red: 60/255, green: 64/255, blue: 72/255),
+                Color(red: 30/255, green: 33/255, blue: 36/255)
+            ],
+            startPoint: .top,
+            endPoint: .bottom
+        )
+        .aspectRatio(contentMode: .fill)
+        .edgesIgnoringSafeArea(.all)
     }
 }
 

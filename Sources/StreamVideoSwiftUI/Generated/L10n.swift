@@ -43,6 +43,10 @@ internal enum L10n {
       /// Incoming call
       internal static var title: String { L10n.tr("Localizable", "call.incoming.title") }
     }
+    internal enum Joining {
+      /// Joining
+      internal static var title: String { L10n.tr("Localizable", "call.joining.title") }
+    }
     internal enum Outgoing {
       /// Calling
       internal static var title: String { L10n.tr("Localizable", "call.outgoing.title") }

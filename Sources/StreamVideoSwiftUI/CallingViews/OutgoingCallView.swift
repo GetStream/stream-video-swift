@@ -21,38 +21,9 @@ public struct OutgoingCallView: View {
     }
     
     public var body: some View {
-        ZStack {
-            VStack(spacing: 16) {
-                Spacer()
-                
-                if viewModel.outgoingCallMembers.count > 1 {
-                    CallingGroupView(
-                        participants: viewModel.outgoingCallMembers
-                    )
-                } else {
-                    AnimatingParticipantView(
-                        participant: viewModel.outgoingCallMembers.first
-                    )
-                }
-                
-                CallingParticipantsView(
-                    participants: viewModel.outgoingCallMembers
-                )
-                .padding()
-                
-                HStack(alignment: .firstTextBaseline, spacing: 2) {
-                    Text(L10n.Call.Outgoing.title)
-                        .applyCallingStyle()
-                    CallingIndicator()
-                }
-
-                Spacer()
-                       
-                CallControlsView(viewModel: viewModel)
-            }
-        }
-        .background(
-            OutgoingCallBackground(viewModel: viewModel)
+        CallConnectingView(
+            viewModel: viewModel,
+            title: L10n.Call.Outgoing.title
         )
         .onAppear {
             if streamVideo.videoConfig.playSounds {

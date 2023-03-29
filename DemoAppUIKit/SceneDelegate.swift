@@ -48,6 +48,9 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             }
         )
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+        Task {
+            try await streamVideo.connect()
+        }
     }
 
 }

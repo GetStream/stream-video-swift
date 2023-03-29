@@ -118,10 +118,7 @@ struct IncomingCallViewContent: View {
             .padding()
         }
         .background(
-            images.incomingCallBackground
-                .resizable()
-                .aspectRatio(contentMode: .fill)
-                .edgesIgnoringSafeArea(.all)
+            FallbackBackground()
         )
         .onAppear {
             if streamVideo.videoConfig.playSounds {

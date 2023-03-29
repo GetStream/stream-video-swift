@@ -146,6 +146,8 @@
 		8490032529D308A000AD9BB4 /* GetCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031E29D308A000AD9BB4 /* GetCallResponse.swift */; };
 		8490032629D308A000AD9BB4 /* TranscriptionSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031F29D308A000AD9BB4 /* TranscriptionSettings.swift */; };
 		8490032729D308A000AD9BB4 /* TranscriptionSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032029D308A000AD9BB4 /* TranscriptionSettingsRequest.swift */; };
+		8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032A29D4769700AD9BB4 /* CallConnectingView.swift */; };
+		8490032D29D4774500AD9BB4 /* JoiningCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032C29D4774500AD9BB4 /* JoiningCallView.swift */; };
 		8490DD1F298D39D9007E53D2 /* JsonEventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD1E298D39D9007E53D2 /* JsonEventDecoder.swift */; };
 		8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD20298D4ADF007E53D2 /* StreamJsonDecoder.swift */; };
 		8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD22298D5330007E53D2 /* Data+Gzip.swift */; };
@@ -616,6 +618,8 @@
 		8490031E29D308A000AD9BB4 /* GetCallResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCallResponse.swift; sourceTree = "<group>"; };
 		8490031F29D308A000AD9BB4 /* TranscriptionSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranscriptionSettings.swift; sourceTree = "<group>"; };
 		8490032029D308A000AD9BB4 /* TranscriptionSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranscriptionSettingsRequest.swift; sourceTree = "<group>"; };
+		8490032A29D4769700AD9BB4 /* CallConnectingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConnectingView.swift; sourceTree = "<group>"; };
+		8490032C29D4774500AD9BB4 /* JoiningCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoiningCallView.swift; sourceTree = "<group>"; };
 		8490DD1E298D39D9007E53D2 /* JsonEventDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonEventDecoder.swift; sourceTree = "<group>"; };
 		8490DD20298D4ADF007E53D2 /* StreamJsonDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamJsonDecoder.swift; sourceTree = "<group>"; };
 		8490DD22298D5330007E53D2 /* Data+Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Gzip.swift"; sourceTree = "<group>"; };
@@ -1207,6 +1211,7 @@
 				8458872928A3F935002A81BF /* OutgoingCallView.swift */,
 				842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */,
 				842C7EB728A2916700C2AB7F /* IncomingCallViewModel.swift */,
+				8490032C29D4774500AD9BB4 /* JoiningCallView.swift */,
 				842C7EB928A2A85C00C2AB7F /* CallingGroupView.swift */,
 				842C7EBB28A2A86700C2AB7F /* CallingParticipantView.swift */,
 				8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */,
@@ -1216,6 +1221,7 @@
 				849EDA8E297AFE1C0072A12D /* PreJoiningViewModel.swift */,
 				84B57D32297F278500E4E709 /* MicrophoneChecker.swift */,
 				84B57D36297F406400E4E709 /* MicrophoneCheckView.swift */,
+				8490032A29D4769700AD9BB4 /* CallConnectingView.swift */,
 			);
 			path = CallingViews;
 			sourceTree = "<group>";
@@ -2413,6 +2419,7 @@
 				849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */,
 				848A73C229269E7D0089AA6E /* CornerDragableView.swift in Sources */,
 				84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */,
+				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
 				8415D3E3290BC882006E53CB /* Sounds.swift in Sources */,
@@ -2453,6 +2460,7 @@
 				84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */,
 				840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */,
 				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
+				8490032D29D4774500AD9BB4 /* JoiningCallView.swift in Sources */,
 				847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */,
 				84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,

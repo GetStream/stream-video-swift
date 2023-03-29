@@ -74,8 +74,10 @@ public struct CallContainer<Factory: ViewFactory>: View {
     private var overlayView: some View {
         if case let .incoming(callInfo) = viewModel.callingState {
             viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
-        } else if (viewModel.callingState == .outgoing || viewModel.callingState == .joining) {
+        } else if viewModel.callingState == .outgoing {
             viewFactory.makeOutgoingCallView(viewModel: viewModel)
+        } else if viewModel.callingState == .joining {
+            viewFactory.makeJoiningCallView(viewModel: viewModel)
         } else {
             EmptyView()
         }
