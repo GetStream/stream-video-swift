@@ -55,6 +55,16 @@ Here are parameters that the `StreamVideo` class expects:
 
 The `StreamVideo` object should be kept alive throughout the app lifecycle. You can store it in your `App` or `AppDelegate`, or any other class whose lifecycle is tied to the one of the logged in user.
 
+When the object is created, you should connect the user to our backend. This can be done whenever you plan on using the video features.
+
+```swift
+private func connectUser() {
+    Task {
+        try await streamVideo?.connect()
+    }
+}
+```
+
 ### CallController
 
 The `CallController` class deals with a particular call. It's created before the call is started, and it should be deallocated when the call ends.
