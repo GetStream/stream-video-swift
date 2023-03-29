@@ -31,20 +31,20 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     public var body: some View {
         ZStack {
-            if viewModel.participantsLayout == .fullScreen, let fullScreenParticipant {
+            if viewModel.participantsLayout == .fullScreen, let first = viewModel.participants.first {
                 ParticipantsFullScreenLayout(
                     viewFactory: viewFactory,
-                    participant: fullScreenParticipant,
+                    participant: first,
                     size: availableSize,
                     pinnedParticipant: $viewModel.pinnedParticipant,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
-            } else if viewModel.participantsLayout == .spotlight, let fullScreenParticipant {
+            } else if viewModel.participantsLayout == .spotlight, let first = viewModel.participants.first {
                 ParticipantsSpotlightLayout(
                     viewFactory: viewFactory,
-                    participant: fullScreenParticipant,
-                    participants: viewModel.participants,
+                    participant: first,
+                    participants: Array(viewModel.participants.dropFirst()),
                     size: availableSize,
                     pinnedParticipant: $viewModel.pinnedParticipant,
                     onViewRendering: onViewRendering,
@@ -65,13 +65,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
         .onRotate { newOrientation in
             orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
-    }
-    
-    //TODO: move this away from here
-    var fullScreenParticipant: CallParticipant? {
-        viewModel.pinnedParticipant ?? viewModel.callParticipants.first(where: { (_, value) in
-            value.isDominantSpeaker
-        }).map(\.value) ?? viewModel.participants.first
     }
 }
 
@@ -215,7 +208,7 @@ struct ParticipantInfoView: View {
             if isPinned {
                 Image(systemName: "pin.fill")
                     .foregroundColor(.white)
-                    .padding(.leading, 8)
+                    .padding(.trailing, 4)
             }
             Text(participant.name)
                 .foregroundColor(.white)

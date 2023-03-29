@@ -245,10 +245,7 @@ class SfuMiddleware: EventMiddleware {
         for level in event.audioLevels {
             let participant = participants[level.sessionID]
             if participant?.isSpeaking != level.isSpeaking {
-                if let updated = participant?.withUpdated(
-                    layoutPriority: .normal,
-                    isSpeaking: level.isSpeaking
-                ) {
+                if let updated = participant?.withUpdated(isSpeaking: level.isSpeaking) {
                     await state.update(callParticipant: updated)
                 }
             }

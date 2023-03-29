@@ -7,12 +7,16 @@ import Foundation
 public typealias Comparator<Value> = (Value, Value) -> ComparisonResult
 
 public let defaultComparators: [Comparator<CallParticipant>] = [
-    screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
+    pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
 ]
 
 public let livestreamComparators: [Comparator<CallParticipant>] = [
     dominantSpeaker, isSpeaking, publishingVideo, publishingAudio, roles, userId
 ]
+
+public var pinned: Comparator<CallParticipant> = { (p1, p2) in
+    booleanComparison(first: p1, second: p2, \.isPinned)
+}
 
 public var screensharing: Comparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.isScreensharing)
@@ -68,9 +72,6 @@ extension Sequence {
                 }
             }
 
-            // If no descriptor was able to determine the sort
-            // order, we'll default to false (similar to when
-            // using the '<' operator with the built-in API):
             return false
         }
     }

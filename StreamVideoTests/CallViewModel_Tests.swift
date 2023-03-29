@@ -18,6 +18,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
-        XCTAssert(callViewModel.callingState == .outgoing)
+        XCTAssert(callViewModel.callingState == .joining)
     }
 }

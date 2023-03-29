@@ -134,12 +134,13 @@ final class Sorting_Tests: XCTestCase {
             track: nil,
             trackSize: .zero,
             screenshareTrack: nil,
-            layoutPriority: .normal,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: id,
             connectionQuality: .unknown,
-            joinedAt: Date())
+            joinedAt: Date(),
+            isPinned: false
+        )
         return participant
     }
     

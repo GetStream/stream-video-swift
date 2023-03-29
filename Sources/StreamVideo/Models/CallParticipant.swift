@@ -33,8 +33,6 @@ public struct CallParticipant: Identifiable, Sendable {
     public var screenshareTrack: RTCVideoTrack?
     /// Returns whether the track should be shown.
     public var showTrack: Bool
-    /// Determines the layout priority of the participant.
-    public var layoutPriority: LayoutPriority
     /// Returns whether the participant is speaking.
     public var isSpeaking: Bool
     /// Returns whether the participant is a dominant speaker.
@@ -45,6 +43,8 @@ public struct CallParticipant: Identifiable, Sendable {
     public var connectionQuality: ConnectionQuality
     /// Returns the date when the user joined the call.
     public var joinedAt: Date
+    /// Returns whether the user is pinned.
+    public var isPinned: Bool
     
     public init(
         id: String,
@@ -60,12 +60,12 @@ public struct CallParticipant: Identifiable, Sendable {
         track: RTCVideoTrack? = nil,
         trackSize: CGSize = CGSize(width: 1024, height: 720),
         screenshareTrack: RTCVideoTrack? = nil,
-        layoutPriority: LayoutPriority = .normal,
         isSpeaking: Bool = false,
         isDominantSpeaker: Bool,
         sessionId: String,
         connectionQuality: ConnectionQuality,
-        joinedAt: Date
+        joinedAt: Date,
+        isPinned: Bool
     ) {
         self.id = id
         self.userId = userId
@@ -78,7 +78,6 @@ public struct CallParticipant: Identifiable, Sendable {
         self.showTrack = showTrack
         self.track = track
         self.trackSize = trackSize
-        self.layoutPriority = layoutPriority
         self.isSpeaking = isSpeaking
         self.isDominantSpeaker = isDominantSpeaker
         self.sessionId = sessionId
@@ -86,6 +85,7 @@ public struct CallParticipant: Identifiable, Sendable {
         self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
         self.joinedAt = joinedAt
+        self.isPinned = isPinned
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -108,12 +108,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
     
@@ -132,12 +132,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
     
@@ -156,12 +156,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screensharingTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
     
@@ -180,12 +180,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
 
@@ -204,12 +204,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
     
@@ -228,12 +228,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
 
@@ -252,19 +252,16 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
 
-    func withUpdated(
-        layoutPriority: LayoutPriority,
-        isSpeaking: Bool
-    ) -> CallParticipant {
+    func withUpdated(isSpeaking: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -279,12 +276,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
     
@@ -303,12 +300,12 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: dominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
     
@@ -327,20 +324,38 @@ public struct CallParticipant: Identifiable, Sendable {
             track: track,
             trackSize: trackSize,
             screenshareTrack: screenshareTrack,
-            layoutPriority: layoutPriority,
             isSpeaking: isSpeaking,
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionId,
             connectionQuality: connectionQuality,
-            joinedAt: joinedAt
+            joinedAt: joinedAt,
+            isPinned: isPinned
         )
     }
-}
-
-public enum LayoutPriority: Int, Sendable {
-    case high = 1
-    case normal = 5
-    case low = 10
+    
+    func withUpdated(pinState: Bool) -> CallParticipant {
+        CallParticipant(
+            id: id,
+            userId: userId,
+            roles: roles,
+            name: name,
+            profileImageURL: profileImageURL,
+            trackLookupPrefix: trackLookupPrefix,
+            hasVideo: hasVideo,
+            hasAudio: hasAudio,
+            isScreenSharing: isScreensharing,
+            showTrack: showTrack,
+            track: track,
+            trackSize: trackSize,
+            screenshareTrack: screenshareTrack,
+            isSpeaking: isSpeaking,
+            isDominantSpeaker: isDominantSpeaker,
+            sessionId: sessionId,
+            connectionQuality: connectionQuality,
+            joinedAt: joinedAt,
+            isPinned: pinState
+        )
+    }
 }
 
 extension CallParticipant {
@@ -372,7 +387,8 @@ extension User {
             isDominantSpeaker: false,
             sessionId: "",
             connectionQuality: .unknown,
-            joinedAt: Date()
+            joinedAt: Date(),
+            isPinned: false
         )
     }
 }
@@ -395,7 +411,8 @@ extension Stream_Video_Sfu_Models_Participant {
             isDominantSpeaker: isDominantSpeaker,
             sessionId: sessionID,
             connectionQuality: connectionQuality.mapped,
-            joinedAt: joinedAt.date
+            joinedAt: joinedAt.date,
+            isPinned: false
         )
     }
 }

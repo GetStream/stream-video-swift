@@ -19,11 +19,11 @@ You can use this property to filter participants, based on their properties. Her
 - `trackSize`: `CGSize` - Returns the size of the track for the participant.
 - `screenshareTrack`: `RTCVideoTrack?` - Returns the screensharing track for the participant.
 - `showTrack`: `Bool` - Returns whether the track should be shown.
-- `layoutPriority`: `LayoutPriority` - Determines the layout priority of the participant.
 - `isSpeaking`: `Bool` - Returns whether the participant is speaking.
 - `sessionId`: `String` - Returns the session id of the participant.
 - `connectionQuality`: `ConnectionQuality` - Returns the connection quality of the participant.
 - `joinedAt`: `Date` - Returns the date when the user joined the call.
+- `isPinned`: `Bool` - Returns whether the current user is pinned.
 
 These properties can be used to do custom filtering of the participants. For example, if you want to get the first user who is speaking, you can do the following:
 

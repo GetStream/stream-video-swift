@@ -75,6 +75,9 @@ open class CallViewModel: ObservableObject {
     /// Dictionary of the call participants.
     @Published public var callParticipants = [String: CallParticipant]() {
         didSet {
+            if let id = pinnedParticipant?.id, callParticipants[id]?.isPinned == false {
+                callParticipants[id] = callParticipants[id]?.withUpdated(pinState: true)
+            }
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkForScreensharingSession()
@@ -114,12 +117,18 @@ open class CallViewModel: ObservableObject {
     
     @Published public var pinnedParticipant: CallParticipant? {
         didSet {
+            if let id = pinnedParticipant?.id, callParticipants[id]?.isPinned == false {
+                callParticipants[id] = callParticipants[id]?.withUpdated(pinState: true)
+            }
+            if let id = oldValue?.id, callParticipants[id]?.isPinned == true {
+                callParticipants[id] = callParticipants[id]?.withUpdated(pinState: false)
+            }
             if !automaticLayoutHandling {
                 return
             }
             if pinnedParticipant != nil && participantsLayout == .grid {
-                participantsLayout = .fullScreen
-            } else if pinnedParticipant == nil && participantsLayout == .fullScreen {
+                participantsLayout = .spotlight
+            } else if pinnedParticipant == nil && participantsLayout == .spotlight {
                 participantsLayout = .grid
             }
         }
