@@ -73,7 +73,8 @@ public class CallController {
             callType: callType,
             callId: callId,
             callSettings: callSettings,
-            videoOptions: videoOptions
+            videoOptions: videoOptions,
+            ring: ring
         )
     }
     
@@ -98,7 +99,8 @@ public class CallController {
             callType: callType,
             callId: callId,
             callSettings: callSettings,
-            videoOptions: videoOptions
+            videoOptions: videoOptions,
+            ring: false
         )
     }
 
@@ -209,7 +211,8 @@ public class CallController {
         callType: CallType,
         callId: String,
         callSettings: CallSettings,
-        videoOptions: VideoOptions
+        videoOptions: VideoOptions,
+        ring: Bool
     ) async throws -> Call {
         webRTCClient = WebRTCClient(
             user: user,

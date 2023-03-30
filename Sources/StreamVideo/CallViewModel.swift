@@ -38,7 +38,7 @@ open class CallViewModel: ObservableObject {
                             self?.callingState = .reconnecting
                         }
                     } else {
-                        if self?.callingState != .inCall {
+                        if self?.callingState != .inCall && self?.callingState != .outgoing {
                             self?.callingState = .inCall
                         }
                     }
@@ -437,7 +437,7 @@ open class CallViewModel: ObservableObject {
                     participants: participants,
                     ring: ring
                 )
-                save(call: call, ring: ring)
+                save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
                 self.error = error
@@ -446,18 +446,17 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func save(call: Call, ring: Bool = false) {
+    private func save(call: Call) {
         self.call = call
-        updateCallStateIfNeeded(ring: ring)
+        updateCallStateIfNeeded()
         listenForParticipantEvents()
         log.debug("Started call")
     }
     
     private func handleRingingEvents() {
-        let ringingTimeoutMs = call?.ringingTimeout ?? 0
+        let ringingTimeoutMs = call?.ringingTimeout ?? 15000
         let ringingTimeout = TimeInterval(ringingTimeoutMs / 1000)
-        let ringingSupported = call?.ringingEnabled ?? false
-        guard ringingSupported, ringingTimeout > 0 else { return }
+        guard ringingTimeout > 0 else { return }
         if callingState == .outgoing {
             ringingTimer = Foundation.Timer.scheduledTimer(
                 withTimeInterval: ringingTimeout,
@@ -478,17 +477,16 @@ open class CallViewModel: ObservableObject {
     private func subscribeToCallEvents() {
         Task {
             for await callEvent in streamVideo.callEvents() {
-                let ringingSupported = call?.ringingEnabled ?? false
                 if case let .incoming(incomingCall) = callEvent,
-                   ringingSupported,
                    incomingCall.callerId != streamVideo.user.id {
                     // TODO: implement holding a call.
                     if callingState == .idle {
                         callingState = .incoming(incomingCall)
                     }
-                } else if case .rejected = callEvent, ringingSupported {
+                } else if case .rejected = callEvent,
+                    outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count == 1 {
                     leaveCall()
-                } else if case .canceled = callEvent, callParticipants.count < 2, ringingSupported {
+                } else if case .canceled = callEvent {
                     leaveCall()
                 } else if case .ended = callEvent {
                     leaveCall()
@@ -506,8 +504,14 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func updateCallStateIfNeeded(ring: Bool = false) {
-        if !ring && callingState != .reconnecting {
+    private func updateCallStateIfNeeded() {
+        if callingState == .outgoing {
+            if callParticipants.count > 1 {
+                callingState = .inCall
+            }
+            return
+        }
+        if callingState != .reconnecting {
             callingState = .inCall
         } else {
             let shouldGoInCall = callParticipants.count > 1

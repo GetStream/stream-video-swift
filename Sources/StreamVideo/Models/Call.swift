@@ -28,8 +28,6 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// The id of the current session.
     public let sessionId: String
     
-    /// Whether ringing is enabled for the call.
-    public let ringingEnabled: Bool
     /// The ringing timeout.
     public let ringingTimeout: Int
     
@@ -80,7 +78,6 @@ public class Call: ObservableObject, @unchecked Sendable {
         self.callInfo = callSettingsInfo.callInfo
         self.recordingState = recordingState
         let ringSettings = callSettingsInfo.callSettings.ring
-        self.ringingEnabled = ringSettings.enabled
         self.ringingTimeout = ringSettings.autoCancelTimeoutMs
     }
     

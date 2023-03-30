@@ -10,7 +10,7 @@ class CallsMiddleware: EventMiddleware {
     var onCallUpdated: ((CallInfo) -> Void)?
     
     func handle(event: Event) -> Event? {
-        if let incomingCallEvent = event as? IncomingCallEvent {
+        if let incomingCallEvent = event as? IncomingCallEvent, incomingCallEvent.ringing {
             log.debug("Received call created \(incomingCallEvent)")
             let cId = incomingCallEvent.callCid
             let id = cId.components(separatedBy: ":").last ?? cId

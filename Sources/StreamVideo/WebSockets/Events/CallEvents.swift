@@ -36,6 +36,7 @@ struct IncomingCallEvent: Event {
     let createdBy: String
     let type: String
     let users: [User]
+    let ringing: Bool
 }
 
 /// Contains info about a call event.

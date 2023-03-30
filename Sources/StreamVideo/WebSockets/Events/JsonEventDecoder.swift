@@ -21,7 +21,8 @@ struct JsonEventDecoder: AnyEventDecoder {
                 callCid: call.cid,
                 createdBy: call.createdBy.id,
                 type: call.type,
-                users: members
+                users: members,
+                ringing: callCreated.ringing
             )
         case .callCancelled:
             let callCanceled = try decoder.decode(CallCancelledEvent.self, from: data)
