@@ -73,6 +73,9 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                                 view.add(track: track)
                             }
                         }
+                        .onAppear {
+                            onChangeTrackVisibility(participant, true)
+                        }
                         .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                         .cornerRadius(8)
                         .accessibility(identifier: "spotlightParticipantView")

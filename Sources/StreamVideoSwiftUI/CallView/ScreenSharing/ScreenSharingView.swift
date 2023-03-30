@@ -47,6 +47,9 @@ public struct ScreenSharingView: View {
                             .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                             .cornerRadius(8)
                             .accessibility(identifier: "screenSharingParticipantView")
+                            .onAppear {
+                                viewModel.changeTrackVisbility(for: participant, isVisible: true)
+                            }
                         }
                         
                         LocalVideoView(callSettings: viewModel.callSettings) { view in

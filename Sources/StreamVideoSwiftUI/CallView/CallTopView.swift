@@ -38,6 +38,7 @@ public struct CallTopView: View {
             
             if #available(iOS 14, *) {
                 LayoutMenuView(viewModel: viewModel)
+                    .opacity(viewModel.screensharingSession != nil ? 0 : 1)
                 
                 Button {
                     viewModel.participantsShown.toggle()
