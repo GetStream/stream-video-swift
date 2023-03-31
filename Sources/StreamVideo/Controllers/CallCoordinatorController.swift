@@ -6,7 +6,7 @@ import Foundation
 import WebRTC
 
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
-final class CallCoordinatorController: @unchecked Sendable {
+class CallCoordinatorController: @unchecked Sendable {
     
     let coordinatorClient: CoordinatorClient
     private(set) var currentCallSettings: CallSettingsInfo?

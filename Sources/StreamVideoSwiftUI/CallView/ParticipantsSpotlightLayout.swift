@@ -39,14 +39,19 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     
     public var body: some View {
         VStack {
-            viewFactory.makeVideoParticipantView(
+            VideoCallParticipantView(
                 participant: participant,
-                availableSize: availableSize,
-                contentMode: .scaleAspectFit,
-                onViewUpdate: { participant, view in
-                    onViewRendering(view, participant)
+                id: "\(participant.id)-spotlight",
+                availableSize: .init(width: thumbnailSize, height: thumbnailSize),
+                contentMode: .scaleAspectFill
+            ) { participant, view in
+                if let track = participant.track {
+                    view.add(track: track)
                 }
-            )
+            }
+            .onAppear {
+                onChangeTrackVisibility(participant, true)
+            }
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
@@ -62,7 +67,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             }
             
             ScrollView(.horizontal) {
-                HStack {
+                HorizontalContainer {
                     ForEach(participants) { participant in
                         VideoCallParticipantView(
                             participant: participant,

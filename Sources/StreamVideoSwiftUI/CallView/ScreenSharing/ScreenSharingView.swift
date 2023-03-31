@@ -33,7 +33,7 @@ public struct ScreenSharingView: View {
             
             if !viewModel.hideUIElements {
                 ScrollView(.horizontal) {
-                    HStack {
+                    HorizontalContainer {
                         ForEach(viewModel.participants) { participant in
                             VideoCallParticipantView(
                                 participant: participant,
@@ -107,4 +107,18 @@ public struct ScreenSharingView: View {
             return availableSize
         }
     }
+}
+
+struct HorizontalContainer<Content: View>: View {
+    
+    @ViewBuilder var content: () -> Content
+    
+    var body: some View {
+        if #available(iOS 14.0, *) {
+            LazyHStack(content: content)
+        } else {
+            HStack(content: content)
+        }
+    }
+    
 }

@@ -15,6 +15,24 @@ extension StreamVideo {
             )
         }
         
+        var callControllerBuilder: (
+            _ callCoordinatorController: CallCoordinatorController,
+            _ user: User,
+            _ callId: String,
+            _ callType: CallType,
+            _ apiKey: String,
+            _ videoConfig: VideoConfig
+        ) -> CallController = {
+            CallController(
+                callCoordinatorController: $0,
+                user: $1,
+                callId: $2,
+                callType: $3,
+                apiKey: $4,
+                videoConfig: $5
+            )
+        }
+        
         var callCoordinatorControllerBuilder: (
             _ httpClient: HTTPClient,
             _ user: User,

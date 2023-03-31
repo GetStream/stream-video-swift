@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 
-final class MockHTTPClient: @unchecked Sendable, HTTPClient {
+final class HTTPClient_Mock: @unchecked Sendable, HTTPClient {
     
     var dataResponses = [Data]()
     var requestCounter = 0

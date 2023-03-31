@@ -148,17 +148,20 @@
 		8490032729D308A000AD9BB4 /* TranscriptionSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032029D308A000AD9BB4 /* TranscriptionSettingsRequest.swift */; };
 		8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032A29D4769700AD9BB4 /* CallConnectingView.swift */; };
 		8490032D29D4774500AD9BB4 /* JoiningCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032C29D4774500AD9BB4 /* JoiningCallView.swift */; };
+		8490032F29D6D00C00AD9BB4 /* CallController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032E29D6D00C00AD9BB4 /* CallController_Mock.swift */; };
+		8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490033029D6D2BF00AD9BB4 /* MockResponseBuilder.swift */; };
+		8490033329D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490033229D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift */; };
 		8490DD1F298D39D9007E53D2 /* JsonEventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD1E298D39D9007E53D2 /* JsonEventDecoder.swift */; };
 		8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD20298D4ADF007E53D2 /* StreamJsonDecoder.swift */; };
 		8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490DD22298D5330007E53D2 /* Data+Gzip.swift */; };
 		8492B871290801DC00006649 /* CallViewModel_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B870290801DC00006649 /* CallViewModel_Tests.swift */; };
 		8492B875290808AE00006649 /* StreamVideoEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B874290808AE00006649 /* StreamVideoEnvironment.swift */; };
-		8492B87829081D1600006649 /* MockHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* MockHTTPClient.swift */; };
-		8492B87A29081E6600006649 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
+		8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
+		8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
 		8493223729082E620013C029 /* OutgoingCallView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223629082E620013C029 /* OutgoingCallView_Tests.swift */; };
 		8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */; };
-		8493223C29082F0F0013C029 /* MockHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* MockHTTPClient.swift */; };
-		8493223D29082F0F0013C029 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
+		8493223C29082F0F0013C029 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
+		8493223D29082F0F0013C029 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
 		84932240290830390013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493223F290830390013C029 /* SnapshotTesting */; };
 		84932243290830F80013C029 /* ViewFrameUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932242290830F80013C029 /* ViewFrameUtils.swift */; };
 		8493224F2908378A0013C029 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493224E2908378A0013C029 /* AppDelegate.swift */; };
@@ -176,8 +179,8 @@
 		8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932279290938440013C029 /* CallViewController_Tests.swift */; };
 		8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */; };
 		8493227C290939590013C029 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493226229083BF20013C029 /* CallViewController.swift */; };
-		8493227D29093A1A0013C029 /* MockHTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* MockHTTPClient.swift */; };
-		8493227E29093A420013C029 /* MockStreamVideo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* MockStreamVideo.swift */; };
+		8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
+		8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
 		8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493227F29093A9E0013C029 /* SnapshotTesting */; };
 		8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
@@ -620,14 +623,17 @@
 		8490032029D308A000AD9BB4 /* TranscriptionSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TranscriptionSettingsRequest.swift; sourceTree = "<group>"; };
 		8490032A29D4769700AD9BB4 /* CallConnectingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallConnectingView.swift; sourceTree = "<group>"; };
 		8490032C29D4774500AD9BB4 /* JoiningCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoiningCallView.swift; sourceTree = "<group>"; };
+		8490032E29D6D00C00AD9BB4 /* CallController_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallController_Mock.swift; sourceTree = "<group>"; };
+		8490033029D6D2BF00AD9BB4 /* MockResponseBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockResponseBuilder.swift; sourceTree = "<group>"; };
+		8490033229D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCoordinatorController_Mock.swift; sourceTree = "<group>"; };
 		8490DD1E298D39D9007E53D2 /* JsonEventDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JsonEventDecoder.swift; sourceTree = "<group>"; };
 		8490DD20298D4ADF007E53D2 /* StreamJsonDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamJsonDecoder.swift; sourceTree = "<group>"; };
 		8490DD22298D5330007E53D2 /* Data+Gzip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Data+Gzip.swift"; sourceTree = "<group>"; };
 		8492B870290801DC00006649 /* CallViewModel_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewModel_Tests.swift; sourceTree = "<group>"; };
 		8492B8722908024800006649 /* StreamVideoTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoTestCase.swift; sourceTree = "<group>"; };
 		8492B874290808AE00006649 /* StreamVideoEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoEnvironment.swift; sourceTree = "<group>"; };
-		8492B87729081D1600006649 /* MockHTTPClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockHTTPClient.swift; sourceTree = "<group>"; };
-		8492B87929081E6600006649 /* MockStreamVideo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockStreamVideo.swift; sourceTree = "<group>"; };
+		8492B87729081D1600006649 /* HTTPClient_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient_Mock.swift; sourceTree = "<group>"; };
+		8492B87929081E6600006649 /* StreamVideo_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo_Mock.swift; sourceTree = "<group>"; };
 		8493223629082E620013C029 /* OutgoingCallView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView_Tests.swift; sourceTree = "<group>"; };
 		8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUITestCase.swift; sourceTree = "<group>"; };
 		84932242290830F80013C029 /* ViewFrameUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFrameUtils.swift; sourceTree = "<group>"; };
@@ -1259,8 +1265,11 @@
 		8492B87629081CE700006649 /* Mock */ = {
 			isa = PBXGroup;
 			children = (
-				8492B87729081D1600006649 /* MockHTTPClient.swift */,
-				8492B87929081E6600006649 /* MockStreamVideo.swift */,
+				8492B87729081D1600006649 /* HTTPClient_Mock.swift */,
+				8492B87929081E6600006649 /* StreamVideo_Mock.swift */,
+				8490032E29D6D00C00AD9BB4 /* CallController_Mock.swift */,
+				8490033229D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift */,
+				8490033029D6D2BF00AD9BB4 /* MockResponseBuilder.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -2391,9 +2400,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
+				8490033329D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift in Sources */,
 				8492B871290801DC00006649 /* CallViewModel_Tests.swift in Sources */,
-				8492B87A29081E6600006649 /* MockStreamVideo.swift in Sources */,
-				8492B87829081D1600006649 /* MockHTTPClient.swift in Sources */,
+				8490032F29D6D00C00AD9BB4 /* CallController_Mock.swift in Sources */,
+				8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */,
+				8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */,
+				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
 			);
@@ -2477,8 +2489,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8493223C29082F0F0013C029 /* MockHTTPClient.swift in Sources */,
-				8493223D29082F0F0013C029 /* MockStreamVideo.swift in Sources */,
+				8493223C29082F0F0013C029 /* HTTPClient_Mock.swift in Sources */,
+				8493223D29082F0F0013C029 /* StreamVideo_Mock.swift in Sources */,
 				84932243290830F80013C029 /* ViewFrameUtils.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
 				8493223729082E620013C029 /* OutgoingCallView_Tests.swift in Sources */,
@@ -2501,9 +2513,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */,
-				8493227E29093A420013C029 /* MockStreamVideo.swift in Sources */,
+				8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */,
 				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
-				8493227D29093A1A0013C029 /* MockHTTPClient.swift in Sources */,
+				8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

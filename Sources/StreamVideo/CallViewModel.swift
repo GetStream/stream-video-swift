@@ -154,6 +154,8 @@ open class CallViewModel: ObservableObject {
     
     private var ringingTimer: Foundation.Timer?
     
+    private var callRejectionEvents = [String: Int]()
+    
     public var participants: [CallParticipant] {
         callParticipants
             .filter {
@@ -377,11 +379,6 @@ open class CallViewModel: ObservableObject {
     
     /// Hangs up from the active call.
     public func hangUp() {
-        if let call = call, callingState != .inCall {
-            Task {
-                try await streamVideo.cancelCall(callId: call.callId, callType: call.callType)
-            }
-        }
         leaveCall()
     }
     
@@ -394,7 +391,7 @@ open class CallViewModel: ObservableObject {
     /// Updates the participants layout.
     /// - Parameter participantsLayout: the new participants layout.
     public func update(participantsLayout: ParticipantsLayout) {
-        self.automaticLayoutHandling = true
+        self.automaticLayoutHandling = false
         self.participantsLayout = participantsLayout
     }
     
@@ -407,7 +404,7 @@ open class CallViewModel: ObservableObject {
         participantUpdates = nil
         callUpdates?.cancel()
         callUpdates = nil
-        automaticLayoutHandling = false
+        automaticLayoutHandling = true
         reconnectionUpdates?.cancel()
         reconnectionUpdates = nil
         recordingUpdates?.cancel()
@@ -415,6 +412,7 @@ open class CallViewModel: ObservableObject {
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
+        callRejectionEvents = [:]
         streamVideo.leaveCall()
         currentEventsTask?.cancel()
         callingState = .idle
@@ -483,9 +481,8 @@ open class CallViewModel: ObservableObject {
                     if callingState == .idle {
                         callingState = .incoming(incomingCall)
                     }
-                } else if case .rejected = callEvent,
-                    outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count == 1 {
-                    leaveCall()
+                } else if case .rejected = callEvent {
+                    handleRejectedEvent(callEvent)
                 } else if case .canceled = callEvent {
                     leaveCall()
                 } else if case .ended = callEvent {
@@ -500,6 +497,17 @@ open class CallViewModel: ObservableObject {
                             let user = callEventInfo.user {
                     call?.remove(blockedUser: user)
                 }
+            }
+        }
+    }
+    
+    private func handleRejectedEvent(_ callEvent: CallEvent) {
+        if case let .rejected(eventInfo) = callEvent {
+            let eventCount = (callRejectionEvents[eventInfo.callId] ?? 0) + 1
+            callRejectionEvents[eventInfo.callId] = eventCount
+            let outgoingMembersCount = outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count
+            if eventCount == outgoingMembersCount {
+                leaveCall()
             }
         }
     }

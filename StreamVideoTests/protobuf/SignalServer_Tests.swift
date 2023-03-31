@@ -15,7 +15,7 @@ final class SignalServer_Tests: XCTestCase {
     func test_signalServer_retryingRequest() async throws {
         // Given
         let responses = generateRetryResponses(10)
-        let httpClient = MockHTTPClient()
+        let httpClient = HTTPClient_Mock()
         httpClient.dataResponses = responses
         let signalServer = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,
@@ -37,7 +37,7 @@ final class SignalServer_Tests: XCTestCase {
         // Given
         var responses = generateRetryResponses(2)
         responses.append(response(shouldRetry: false))
-        let httpClient = MockHTTPClient()
+        let httpClient = HTTPClient_Mock()
         httpClient.dataResponses = responses
         let signalServer = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,

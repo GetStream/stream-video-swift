@@ -152,17 +152,20 @@ public struct VideoCallParticipantView: View {
     @Injected(\.streamVideo) var streamVideo
         
     let participant: CallParticipant
+    var id: String
     var availableSize: CGSize
     var contentMode: UIView.ContentMode
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     public init(
         participant: CallParticipant,
+        id: String? = nil,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) {
         self.participant = participant
+        self.id = id ?? participant.id
         self.availableSize = availableSize
         self.contentMode = contentMode
         self.onViewUpdate = onViewUpdate
@@ -170,7 +173,7 @@ public struct VideoCallParticipantView: View {
     
     public var body: some View {
         VideoRendererView(
-            id: participant.id,
+            id: id,
             size: availableSize,
             contentMode: contentMode
         ) { view in

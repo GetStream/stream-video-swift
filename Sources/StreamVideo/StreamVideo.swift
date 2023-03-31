@@ -134,13 +134,13 @@ public class StreamVideo {
     ///    - callId: the id of the call.
     /// - Returns: `CallController`
     public func makeCallController(callType: CallType, callId: String) -> CallController {
-        let controller = CallController(
-            callCoordinatorController: callCoordinatorController,
-            user: user,
-            callId: callId,
-            callType: callType,
-            apiKey: apiKey.apiKeyString,
-            videoConfig: videoConfig
+        let controller = environment.callControllerBuilder(
+            callCoordinatorController,
+            user,
+            callId,
+            callType,
+            apiKey.apiKeyString,
+            videoConfig
         )
         currentCallController = controller
         callsMiddleware.onCallUpdated = currentCallController?.update(callInfo:)
