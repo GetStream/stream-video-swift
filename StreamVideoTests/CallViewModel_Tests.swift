@@ -257,6 +257,71 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         try await XCTAssertWithDelay(callViewModel.callingState == .inCall)
     }
     
+    func test_enterLobby_leaveCall() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.enterLobby(callId: callId, type: callType, participants: participants)
+        
+        // Then
+        guard case let .lobby(lobbyInfo) = callViewModel.callingState else {
+            XCTFail()
+            return
+        }
+        XCTAssert(lobbyInfo.callId == callId)
+        XCTAssert(lobbyInfo.callType == callType)
+        XCTAssert(lobbyInfo.participants == participants)
+        
+        // When
+        try await waitForCallEvent()
+        callViewModel.hangUp()
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle)
+    }
+    
+    // MARK: - Toggle media state
+    
+    func test_callSettings_toggleCamera() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        callViewModel.toggleCameraEnabled()
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.callSettings.videoOn == false)
+    }
+    
+    func test_callSettings_toggleAudio() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        callViewModel.toggleMicrophoneEnabled()
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.callSettings.audioOn == false)
+    }
+    
+    func test_callSettings_toggleCameraPosition() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        callViewModel.toggleCameraPosition()
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.callSettings.cameraPosition == .back)
+    }
+    
     // MARK: - private
     
     private func waitForCallEvent() async throws {

@@ -29,6 +29,14 @@ class CallController_Mock: CallController {
         )
     }
     
+    override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
+    
+    override func changeVideoState(isEnabled: Bool) async throws { /* no op */ }
+    
+    override func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
+        completion()
+    }
+    
     override func selectEdgeServer(
         videoOptions: VideoOptions,
         participants: [User]
