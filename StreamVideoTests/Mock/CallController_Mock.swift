@@ -7,6 +7,16 @@
 class CallController_Mock: CallController {
     
     let mockResponseBuilder = MockResponseBuilder()
+            
+    internal lazy var webRTCClient = WebRTCClient(
+        user: StreamVideo.mockUser,
+        apiKey: "key1",
+        hostname: "localhost",
+        token: StreamVideo.mockToken.rawValue,
+        callCid: "default:test",
+        callCoordinatorController: callCoordinatorController,
+        videoConfig: VideoConfig()
+    )
     
     override func joinCall(
         callType: CallType,
@@ -20,13 +30,18 @@ class CallController_Mock: CallController {
             callId: callId,
             callType: callType
         )
-        return Call.create(
+        let call = Call.create(
             callId: callId,
             callType: callType,
             sessionId: UUID().uuidString,
             callSettingsInfo: callSettingsInfo,
             recordingState: .noRecording
         )
+        self.call = call
+        webRTCClient.onParticipantsUpdated = { [weak self] participants in
+            self?.call?.participants = participants
+        }
+        return call
     }
     
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }

@@ -322,6 +322,121 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         try await XCTAssertWithDelay(callViewModel.callSettings.cameraPosition == .back)
     }
     
+    // MARK: - Events
+    
+    func test_inCall_participantEvents() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        let event = ParticipantEvent(id: "test", action: .join, user: "test", imageURL: nil)
+        callViewModel.call?.onParticipantEvent?(event)
+        try await waitForCallEvent()
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.participantEvent != nil)
+        try await Task.sleep(nanoseconds: 2_500_000_000)
+        try await XCTAssertWithDelay(callViewModel.participantEvent == nil)
+    }
+    
+    func test_inCall_participantJoinedAndLeft() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
+        participantJoined.callCid = callCid
+        var participant = Stream_Video_Sfu_Models_Participant()
+        participant.userID = secondUser.id
+        participant.sessionID = UUID().uuidString
+        participantJoined.participant = participant
+        let controller = streamVideo?.currentCallController as! CallController_Mock
+        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.participants.map(\.userId).contains(secondUser.id))
+        
+        // When
+        var participantLeft = Stream_Video_Sfu_Event_ParticipantLeft()
+        participantLeft.callCid = callCid
+        participantLeft.participant = participant
+        controller.webRTCClient.eventNotificationCenter.process(participantLeft)
+        
+        // Then
+        try await XCTAssertWithDelay(callViewModel.participants.count == 0)
+    }
+    
+    func test_inCall_changeTrackVisibility() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
+        participantJoined.callCid = callCid
+        var participant = Stream_Video_Sfu_Models_Participant()
+        participant.userID = secondUser.id
+        participant.sessionID = UUID().uuidString
+        participantJoined.participant = participant
+        let controller = streamVideo?.currentCallController as! CallController_Mock
+        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        let callParticipant = participant.toCallParticipant(showTrack: false)
+        callViewModel.changeTrackVisbility(for: callParticipant, isVisible: true)
+
+        // Then
+        try await XCTAssertWithDelay(callViewModel.participants.first?.showTrack == true)
+    }
+    
+    func test_pinParticipant_layoutChange() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
+        participantJoined.callCid = callCid
+        var participant = Stream_Video_Sfu_Models_Participant()
+        participant.userID = secondUser.id
+        participant.sessionID = UUID().uuidString
+        participantJoined.participant = participant
+        let controller = streamVideo?.currentCallController as! CallController_Mock
+        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        let callParticipant = participant.toCallParticipant(showTrack: false)
+        callViewModel.pinnedParticipant = callParticipant
+        
+        // Then
+        XCTAssert(callViewModel.participantsLayout == .spotlight)
+    }
+    
+    func test_pinParticipant_manualLayoutChange() async throws {
+        // Given
+        let callViewModel = CallViewModel()
+        
+        // When
+        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        try await waitForCallEvent()
+        var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
+        participantJoined.callCid = callCid
+        var participant = Stream_Video_Sfu_Models_Participant()
+        participant.userID = secondUser.id
+        participant.sessionID = UUID().uuidString
+        participantJoined.participant = participant
+        let controller = streamVideo?.currentCallController as! CallController_Mock
+        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        callViewModel.update(participantsLayout: .fullScreen)
+        let callParticipant = participant.toCallParticipant(showTrack: false)
+        callViewModel.pinnedParticipant = callParticipant
+        
+        // Then
+        XCTAssert(callViewModel.participantsLayout == .fullScreen)
+    }
+    
     // MARK: - private
     
     private func waitForCallEvent() async throws {

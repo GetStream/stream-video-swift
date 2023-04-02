@@ -17,11 +17,11 @@ public class CallController {
         }
     }
 
-    private(set) var call: Call?
+    var call: Call?
     private let user: User
     private let callId: String
     private let callType: CallType
-    private let callCoordinatorController: CallCoordinatorController
+    internal let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat = 30
