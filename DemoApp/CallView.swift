@@ -22,11 +22,5 @@ struct CallView: View {
     var body: some View {
         HomeView(viewModel: viewModel)
             .modifier(CallModifier(viewModel: viewModel))
-            .onReceive(appState.$activeCallController) { callController in
-                if let callController = callController {
-                    viewModel.setCallController(callController)
-                    appState.activeCallController = nil
-                }
-            }
     }
 }

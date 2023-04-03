@@ -30,13 +30,15 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] newState in
                     self?.recordingState = newState
             })
-            reconnectionUpdates = call?.$reconnecting
+            reconnectionUpdates = call?.$reconnectionStatus
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] reconnecting in
-                    if reconnecting {
+                .sink(receiveValue: { [weak self] reconnectionStatus in
+                    if reconnectionStatus == .reconnecting {
                         if self?.callingState != .reconnecting {
                             self?.callingState = .reconnecting
                         }
+                    } else if reconnectionStatus == .disconnected {
+                        self?.leaveCall()
                     } else {
                         if self?.callingState != .inCall && self?.callingState != .outgoing {
                             self?.callingState = .inCall
@@ -176,19 +178,7 @@ open class CallViewModel: ObservableObject {
         if !streamVideo.videoConfig.videoEnabled {
             callSettings = CallSettings(speakerOn: false)
         }
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(checkForOngoingCall),
-            name: UIApplication.willEnterForegroundNotification,
-            object: nil
-        )
         subscribeToCallEvents()
-    }
-    
-    public func setCallController(_ callController: CallController) {
-//        self.callController = callController
-//        call = callController.call
-//        callingState = .inCall
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -289,13 +279,10 @@ open class CallViewModel: ObservableObject {
     public func enterLobby(callId: String, type: CallType, participants: [User]) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: participants)
         callingState = .lobby(lobbyInfo)
-        setupCallController(callId: callId, type: type)
-//        Task {
-//            self.edgeServer = try await callController?.selectEdgeServer(
-//                videoOptions: VideoOptions(),
-//                participants: participants
-//            )
-//        }
+        Task {
+            let call = streamVideo.makeCall(callType: type, callId: callId, members: participants)
+            self.edgeServer = try await call.selectEdgeServer(participants: participants)
+        }
     }
     
     /// Joins a call from the lobby. `enterLobby` needs to be called first.
@@ -312,15 +299,8 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = streamVideo.makeCall(callType: type, callId: callId, members: participants)
-                //TODO: expose this
-//                let call: CallDTO = try await callController.joinCall(
-//                    on: edgeServer,
-//                    callType: type,
-//                    callId: callId,
-//                    callSettings: callSettings,
-//                    videoOptions: VideoOptions()
-//                )
-//                save(call: call)
+                try await call.joinCall(on: edgeServer)
+                save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
                 self.error = error
@@ -334,7 +314,6 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
     public func acceptCall(callId: String, type: CallType) {
-        setupCallController(callId: callId, type: type)
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: type)
             enterCall(callId: callId, callType: type, participants: [])
@@ -506,26 +485,6 @@ open class CallViewModel: ObservableObject {
                 callingState = .inCall
             }
         }
-    }
-    
-    @objc private func checkForOngoingCall() {
-//        if call == nil && callController?.call != nil {
-//            call = callController?.call
-//        }
-    }
-    
-    private func setupCallController(callId: String, type: CallType) {
-//        callController = streamVideo.makeCallController(callType: type, callId: callId)
-        //TODO: check why this is needed
-//        callController?.onCallUpdated = { [weak self] updatedCall in
-//            DispatchQueue.main.async {
-//                guard let updatedCall = updatedCall else {
-//                    self?.leaveCall()
-//                    return
-//                }
-//                self?.save(call: updatedCall)
-//            }
-//        }
     }
     
     private func listenForParticipantEvents() {

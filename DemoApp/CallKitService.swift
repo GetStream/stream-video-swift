@@ -106,7 +106,6 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                             ring: false
                         )
                         await MainActor.run {
-                            AppState.shared.activeCallController = callController
                             action.fulfill()
                         }
                     }

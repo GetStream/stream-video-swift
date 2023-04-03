@@ -14,8 +14,8 @@ public class Call: ObservableObject, @unchecked Sendable {
     }
     /// The call info published to the participants.
     @Published public private(set) var callInfo: CallInfo?
-    /// Flag indicating if the call is reconnecting.
-    @Published public private(set) var reconnecting = false
+    /// Indicates the reconnection status..
+    @Published public private(set) var reconnectionStatus = ReconnectionStatus.connected
     /// The call recording state.
     @Published public private(set) var recordingState: RecordingState = .noRecording
     
@@ -57,6 +57,36 @@ public class Call: ObservableObject, @unchecked Sendable {
             videoOptions: VideoOptions(), //TODO: update
             participants: members,
             ring: ring
+        )
+    }
+    
+    /// Joins a call on the specified `edgeServer`.
+    /// - Parameters:
+    ///   - edgeServer: The `EdgeServer` to join the call on.
+    /// - Throws: An error if the call could not be joined.
+    public func joinCall(
+        on edgeServer: EdgeServer
+    ) async throws {
+        try await callController.joinCall(
+            on: edgeServer,
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(), //TODO:
+            videoOptions: VideoOptions() //TODO:
+        )
+    }
+
+    /// Selects an `EdgeServer` for a call with the specified `participants`.
+    /// - Parameters:
+    ///   - participants: An array of `User` instances representing the participants in the call.
+    /// - Returns: An `EdgeServer` instance representing the selected server.
+    /// - Throws: An error if an `EdgeServer` could not be selected.
+    public func selectEdgeServer(
+        participants: [User]
+    ) async throws -> EdgeServer {
+        try await callController.selectEdgeServer(
+            videoOptions: VideoOptions(),
+            participants: participants
         )
     }
     
@@ -140,9 +170,9 @@ public class Call: ObservableObject, @unchecked Sendable {
         callController.setVideoFilter(videoFilter)
     }
     
-    internal func update(isReconnecting: Bool) {
-        if isReconnecting != self.reconnecting {
-            self.reconnecting = isReconnecting
+    internal func update(reconnectionStatus: ReconnectionStatus) {
+        if reconnectionStatus != self.reconnectionStatus {
+            self.reconnectionStatus = reconnectionStatus
         }
     }
     
@@ -154,4 +184,10 @@ public class Call: ObservableObject, @unchecked Sendable {
         self.recordingState = recordingState
     }
     
+}
+
+public enum ReconnectionStatus {
+    case connected
+    case reconnecting
+    case disconnected
 }

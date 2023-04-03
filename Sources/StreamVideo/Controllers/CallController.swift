@@ -7,9 +7,7 @@ import WebRTC
 
 /// Class that handles a particular call.
 public class CallController {
-    
-    public var onCallUpdated: ((Call?) -> ())?
-    
+        
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleParticipantsUpdated()
@@ -266,7 +264,7 @@ public class CallController {
             if reconnectionDate != nil {
                 reconnectionDate = nil
             }
-            call?.update(isReconnecting: false)
+            call?.update(reconnectionStatus: .connected)
         default:
             log.debug("Signal connection state changed to \(state)")
         }
@@ -298,8 +296,7 @@ public class CallController {
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                     participants: []
                 )
-                self.call?.update(isReconnecting: true)
-                self.onCallUpdated?(self.call)
+                self.call?.update(reconnectionStatus: .reconnecting)
             } catch {
                 self.handleReconnectionError()
             }
@@ -308,8 +305,7 @@ public class CallController {
     
     private func handleReconnectionError() {
         log.error("Error while reconnecting to the call")
-        self.call = nil
-        self.onCallUpdated?(nil)
+        self.call?.update(reconnectionStatus: .disconnected)
     }
     
 }

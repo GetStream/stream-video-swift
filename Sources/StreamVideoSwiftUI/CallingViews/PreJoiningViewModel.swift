@@ -56,6 +56,11 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         }
     }
     
+    func stopLatencyChecks() {
+        timer?.invalidate()
+        timer = nil
+    }
+    
     public func startCamera(front: Bool) {
         if #available(iOS 14, *) {
             Task {
@@ -123,8 +128,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     }
     
     deinit {
-        timer?.invalidate()
-        timer = nil
+        stopLatencyChecks()
     }
 }
 
