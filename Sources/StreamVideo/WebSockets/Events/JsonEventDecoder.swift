@@ -11,7 +11,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         let typeDto = try decoder.decode(JsonEvent.self, from: data)
         log.debug("received an event with type \(typeDto.type.rawValue)")
         switch typeDto.type {
-        case .healthCheck:
+        case .healthCheck, .wsConnected:
             return try decoder.decode(HealthCheckEvent.self, from: data)
         case .callCreated:
             let callCreated = try decoder.decode(CallCreatedEvent.self, from: data)
@@ -23,14 +23,6 @@ struct JsonEventDecoder: AnyEventDecoder {
                 type: call.type,
                 users: members,
                 ringing: callCreated.ringing
-            )
-        case .callCancelled:
-            let callCanceled = try decoder.decode(CallCancelledEvent.self, from: data)
-            let callId = callCanceled.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: callCanceled.user.toUser,
-                action: .cancel
             )
         case .callRejected:
             let callRejected = try decoder.decode(CallRejectedEvent.self, from: data)
@@ -61,7 +53,7 @@ struct JsonEventDecoder: AnyEventDecoder {
             let callId = callBlocked.callCid
             return CallEventInfo(
                 callId: callId,
-                user: User(id: callBlocked.userId),
+                user: User(id: callBlocked.user.id),
                 action: .block
             )
         case .callUnblocked:
@@ -69,7 +61,7 @@ struct JsonEventDecoder: AnyEventDecoder {
             let callId = callUnblocked.callCid
             return CallEventInfo(
                 callId: callId,
-                user: User(id: callUnblocked.userId),
+                user: User(id: callUnblocked.user.id),
                 action: .unblock
             )
         case .permissionRequest:
@@ -96,7 +88,6 @@ struct JsonEventDecoder: AnyEventDecoder {
 }
 
 extension CallCreatedEvent: Event {}
-extension CallCancelledEvent: Event {}
 extension CallRejectedEvent: Event {}
 extension CallAcceptedEvent: Event {}
 extension CallEndedEvent: Event {}
@@ -137,8 +128,8 @@ public struct EventType: RawRepresentable, Codable, Hashable, ExpressibleByStrin
 
 public extension EventType {
     static let healthCheck: Self = "health.check"
+    static let wsConnected: Self = "connection.ok"
     static let callCreated: Self = "call.created"
-    static let callCancelled: Self = "call.cancelled"
     static let callRejected: Self = "call.rejected"
     static let callAccepted: Self = "call.accepted"
     static let callEnded: Self = "call.ended"

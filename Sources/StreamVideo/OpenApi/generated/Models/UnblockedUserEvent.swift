@@ -17,21 +17,20 @@ internal struct UnblockedUserEvent: Codable, JSONEncodable, Hashable {
     internal var createdAt: Date
     /** The type of event: \"call.unblocked_user\" in this case */
     internal var type: String
-    /** The ID of the user that was unblocked */
-    internal var userId: String
+    internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, type: String, userId: String) {
+    internal init(callCid: String, createdAt: Date, type: String, user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type
-        self.userId = userId
+        self.user = user
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case type
-        case userId = "user_id"
+        case user
     }
 
     // Encodable protocol methods
@@ -41,7 +40,7 @@ internal struct UnblockedUserEvent: Codable, JSONEncodable, Hashable {
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(type, forKey: .type)
-        try container.encode(userId, forKey: .userId)
+        try container.encode(user, forKey: .user)
     }
 }
 

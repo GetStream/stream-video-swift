@@ -14,7 +14,6 @@ import AnyCodable
 enum WSEvent: Codable, JSONEncodable, Hashable {
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
-    case typeCallCancelledEvent(CallCancelledEvent)
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallEndedEvent(CallEndedEvent)
     case typeCallReactionEvent(CallReactionEvent)
@@ -27,6 +26,7 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
     case typePermissionRequestEvent(PermissionRequestEvent)
     case typeUnblockedUserEvent(UnblockedUserEvent)
     case typeUpdatedCallPermissionsEvent(UpdatedCallPermissionsEvent)
+    case typeWSConnectedEvent(WSConnectedEvent)
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
@@ -34,8 +34,6 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
         case .typeBlockedUserEvent(let value):
             try container.encode(value)
         case .typeCallAcceptedEvent(let value):
-            try container.encode(value)
-        case .typeCallCancelledEvent(let value):
             try container.encode(value)
         case .typeCallCreatedEvent(let value):
             try container.encode(value)
@@ -61,6 +59,8 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeUpdatedCallPermissionsEvent(let value):
             try container.encode(value)
+        case .typeWSConnectedEvent(let value):
+            try container.encode(value)
         }
     }
 
@@ -70,8 +70,6 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
             self = .typeBlockedUserEvent(value)
         } else if let value = try? container.decode(CallAcceptedEvent.self) {
             self = .typeCallAcceptedEvent(value)
-        } else if let value = try? container.decode(CallCancelledEvent.self) {
-            self = .typeCallCancelledEvent(value)
         } else if let value = try? container.decode(CallCreatedEvent.self) {
             self = .typeCallCreatedEvent(value)
         } else if let value = try? container.decode(CallEndedEvent.self) {
@@ -96,6 +94,8 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
             self = .typeUnblockedUserEvent(value)
         } else if let value = try? container.decode(UpdatedCallPermissionsEvent.self) {
             self = .typeUpdatedCallPermissionsEvent(value)
+        } else if let value = try? container.decode(WSConnectedEvent.self) {
+            self = .typeWSConnectedEvent(value)
         } else {
             throw DecodingError.typeMismatch(Self.Type.self, .init(codingPath: decoder.codingPath, debugDescription: "Unable to decode instance of WSEvent"))
         }

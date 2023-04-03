@@ -129,6 +129,7 @@
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
 		8479F83429C09EF1009ECE37 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479F83329C09EF1009ECE37 /* UserAvatar.swift */; };
 		847BE09A29DAC2F100B55D21 /* WSEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09929DAC2F100B55D21 /* WSEvent.swift */; };
+		847BE09E29DB097500B55D21 /* WSConnectedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09D29DB097500B55D21 /* WSConnectedEvent.swift */; };
 		847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D001F29C8AB1E00DD0A50 /* RecordingView.swift */; };
 		848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73BF2926314F0089AA6E /* MinimizedCallView.swift */; };
 		848A73C229269E7D0089AA6E /* CornerDragableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73C129269E7D0089AA6E /* CornerDragableView.swift */; };
@@ -278,7 +279,6 @@
 		84DC38A329ADFCFD00946713 /* MuteUsersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385229ADFCFC00946713 /* MuteUsersResponse.swift */; };
 		84DC38A429ADFCFD00946713 /* BackstageSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385329ADFCFC00946713 /* BackstageSettings.swift */; };
 		84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385429ADFCFC00946713 /* SFUResponse.swift */; };
-		84DC38A629ADFCFD00946713 /* CallCancelledEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385529ADFCFC00946713 /* CallCancelledEvent.swift */; };
 		84DC38A729ADFCFD00946713 /* GoLiveResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385629ADFCFC00946713 /* GoLiveResponse.swift */; };
 		84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385729ADFCFC00946713 /* QueryCallsResponse.swift */; };
 		84DC38A929ADFCFD00946713 /* CallUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC385829ADFCFC00946713 /* CallUpdatedEvent.swift */; };
@@ -609,6 +609,7 @@
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
 		8479F83329C09EF1009ECE37 /* UserAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAvatar.swift; sourceTree = "<group>"; };
 		847BE09929DAC2F100B55D21 /* WSEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WSEvent.swift; sourceTree = "<group>"; };
+		847BE09D29DB097500B55D21 /* WSConnectedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WSConnectedEvent.swift; sourceTree = "<group>"; };
 		847D001F29C8AB1E00DD0A50 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		848A73BF2926314F0089AA6E /* MinimizedCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimizedCallView.swift; sourceTree = "<group>"; };
 		848A73C129269E7D0089AA6E /* CornerDragableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerDragableView.swift; sourceTree = "<group>"; };
@@ -742,7 +743,6 @@
 		84DC385229ADFCFC00946713 /* MuteUsersResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = MuteUsersResponse.swift; sourceTree = "<group>"; };
 		84DC385329ADFCFC00946713 /* BackstageSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackstageSettings.swift; sourceTree = "<group>"; };
 		84DC385429ADFCFC00946713 /* SFUResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SFUResponse.swift; sourceTree = "<group>"; };
-		84DC385529ADFCFC00946713 /* CallCancelledEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallCancelledEvent.swift; sourceTree = "<group>"; };
 		84DC385629ADFCFC00946713 /* GoLiveResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GoLiveResponse.swift; sourceTree = "<group>"; };
 		84DC385729ADFCFC00946713 /* QueryCallsResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = QueryCallsResponse.swift; sourceTree = "<group>"; };
 		84DC385829ADFCFC00946713 /* CallUpdatedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallUpdatedEvent.swift; sourceTree = "<group>"; };
@@ -1448,6 +1448,7 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				847BE09D29DB097500B55D21 /* WSConnectedEvent.swift */,
 				847BE09929DAC2F100B55D21 /* WSEvent.swift */,
 				8490031B29D308A000AD9BB4 /* AudioSettingsRequest.swift */,
 				8490031C29D308A000AD9BB4 /* BackstageSettingsRequest.swift */,
@@ -1497,7 +1498,6 @@
 				84DC385229ADFCFC00946713 /* MuteUsersResponse.swift */,
 				84DC385329ADFCFC00946713 /* BackstageSettings.swift */,
 				84DC385429ADFCFC00946713 /* SFUResponse.swift */,
-				84DC385529ADFCFC00946713 /* CallCancelledEvent.swift */,
 				84DC385629ADFCFC00946713 /* GoLiveResponse.swift */,
 				84DC385729ADFCFC00946713 /* QueryCallsResponse.swift */,
 				84DC385829ADFCFC00946713 /* CallUpdatedEvent.swift */,
@@ -2261,6 +2261,7 @@
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
 				84A737D128F4716E001A6769 /* events.pb.swift in Sources */,
+				847BE09E29DB097500B55D21 /* WSConnectedEvent.swift in Sources */,
 				84DC389929ADFCFD00946713 /* GetCallEdgeServerResponse.swift in Sources */,
 				84DC38C129ADFCFD00946713 /* CallRequest.swift in Sources */,
 				84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */,
@@ -2323,7 +2324,6 @@
 				8490032729D308A000AD9BB4 /* TranscriptionSettingsRequest.swift in Sources */,
 				84DC38D029ADFCFD00946713 /* OwnUserResponse.swift in Sources */,
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
-				84DC38A629ADFCFD00946713 /* CallCancelledEvent.swift in Sources */,
 				84DC38D629ADFCFD00946713 /* GeofenceSettingsRequest.swift in Sources */,
 				84DC38BB29ADFCFD00946713 /* UnblockUserRequest.swift in Sources */,
 				84DC38A229ADFCFD00946713 /* UnblockedUserEvent.swift in Sources */,

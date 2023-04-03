@@ -237,18 +237,6 @@ public class StreamVideo {
             callType: callType
         )
     }
-    
-    /// Cancels the call with the provided call id and type.
-    /// - Parameters:
-    ///  - callId: the id of the call.
-    ///  - callType: the type of the call.
-    public func cancelCall(callId: String, callType: CallType) async throws {
-        try await callCoordinatorController.sendEvent(
-            type: .callCancelled,
-            callId: callId,
-            callType: callType
-        )
-    }
 
     /// Leaves the current call. It clears all call-related state.
     public func leaveCall() {
