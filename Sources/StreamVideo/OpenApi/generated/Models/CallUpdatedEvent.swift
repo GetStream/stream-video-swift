@@ -10,12 +10,15 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current. */
 internal struct CallUpdatedEvent: Codable, JSONEncodable, Hashable {
 
     internal var call: CallResponse
     internal var callCid: String
+    /** The capabilities by role for this call */
     internal var capabilitiesByRole: [String: [String]]
     internal var createdAt: Date
+    /** The type of event: \"call.ended\" in this case */
     internal var type: String
 
     internal init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date, type: String) {
