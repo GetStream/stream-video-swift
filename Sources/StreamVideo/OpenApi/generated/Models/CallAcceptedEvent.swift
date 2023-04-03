@@ -10,6 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call. */
 internal struct CallAcceptedEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String

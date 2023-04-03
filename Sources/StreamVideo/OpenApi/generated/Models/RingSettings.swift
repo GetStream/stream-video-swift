@@ -14,18 +14,15 @@ internal struct RingSettings: Codable, JSONEncodable, Hashable {
 
     internal var autoCancelTimeoutMs: Int
     internal var autoRejectTimeoutMs: Int
-    internal var enabled: Bool
 
-    internal init(autoCancelTimeoutMs: Int, autoRejectTimeoutMs: Int, enabled: Bool) {
+    internal init(autoCancelTimeoutMs: Int, autoRejectTimeoutMs: Int) {
         self.autoCancelTimeoutMs = autoCancelTimeoutMs
         self.autoRejectTimeoutMs = autoRejectTimeoutMs
-        self.enabled = enabled
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
         case autoRejectTimeoutMs = "auto_reject_timeout_ms"
-        case enabled
     }
 
     // Encodable protocol methods
@@ -34,7 +31,6 @@ internal struct RingSettings: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(autoCancelTimeoutMs, forKey: .autoCancelTimeoutMs)
         try container.encode(autoRejectTimeoutMs, forKey: .autoRejectTimeoutMs)
-        try container.encode(enabled, forKey: .enabled)
     }
 }
 

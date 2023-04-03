@@ -10,10 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when the user initiating a call cancels it. Clients receiving this event  should dismiss the call screen and consider the call as cancelled by the caller */
 internal struct CallCancelledEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
+    /** The type of event: \"call.cancelled\" in this case */
     internal var type: String
     internal var user: UserResponse
 

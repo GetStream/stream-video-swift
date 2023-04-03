@@ -10,12 +10,14 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly */
 internal struct UpdatedCallPermissionsEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
     /** The capabilities of the current user */
     internal var ownCapabilities: [OwnCapability]
+    /** The type of event: \"call.permissions_updated\" in this case */
     internal var type: String
     internal var user: UserResponse
 

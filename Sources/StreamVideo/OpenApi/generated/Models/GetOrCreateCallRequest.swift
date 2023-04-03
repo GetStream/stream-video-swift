@@ -13,19 +13,19 @@ import AnyCodable
 internal struct GetOrCreateCallRequest: Codable, JSONEncodable, Hashable {
 
     internal var data: CallRequest?
-    internal var members: PaginationParamsRequest?
+    internal var membersLimit: Int?
     /** if provided it overrides the default ring setting for this call */
     internal var ring: Bool?
 
-    internal init(data: CallRequest? = nil, members: PaginationParamsRequest? = nil, ring: Bool? = nil) {
+    internal init(data: CallRequest? = nil, membersLimit: Int? = nil, ring: Bool? = nil) {
         self.data = data
-        self.members = members
+        self.membersLimit = membersLimit
         self.ring = ring
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case data
-        case members
+        case membersLimit = "members_limit"
         case ring
     }
 
@@ -34,7 +34,7 @@ internal struct GetOrCreateCallRequest: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(data, forKey: .data)
-        try container.encodeIfPresent(members, forKey: .members)
+        try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
         try container.encodeIfPresent(ring, forKey: .ring)
     }
 }

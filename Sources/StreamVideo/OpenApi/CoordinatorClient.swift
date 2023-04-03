@@ -31,7 +31,7 @@ class CoordinatorClient: @unchecked Sendable {
     
     func joinCall(with request: JoinCallRequestData) async throws -> JoinCallResponse {
         try await execute(
-            request: request.getOrCreateCallRequest,
+            request: request.joinCallRequest,
             path: "/join_call/\(request.type)/\(request.id)"
         )
     }
@@ -144,8 +144,14 @@ class CoordinatorClient: @unchecked Sendable {
     
     private func execute<Response: Codable>(urlRequest: URLRequest) async throws -> Response {
         let responseData = try await httpClient.execute(request: urlRequest)
-        let response = try JSONDecoder.default.decode(Response.self, from: responseData)
-        return response
+        do {
+            let response = try JSONDecoder.default.decode(Response.self, from: responseData)
+            return response
+        } catch {
+            log.error("Error decoding response \(error.localizedDescription)")
+            throw error
+        }
+
     }
 
     private func makeRequest(for path: String, httpMethod: String = "POST") throws -> URLRequest {

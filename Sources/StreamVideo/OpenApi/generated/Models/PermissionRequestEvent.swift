@@ -10,12 +10,14 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user */
 internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
     /** The list of permissions requested by the user */
     internal var permissions: [String]
+    /** The type of event: \"call.permission_request\" in this case */
     internal var type: String
     internal var user: UserResponse
 

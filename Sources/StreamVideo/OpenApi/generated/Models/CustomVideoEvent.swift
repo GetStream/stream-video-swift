@@ -10,12 +10,14 @@ import Foundation
 import AnyCodable
 #endif
 
+/** A custom event, this event is used to send custom events to other participants in the call. */
 internal struct CustomVideoEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
     /** Custom data for this object */
     internal var custom: [String: AnyCodable]
+    /** The type of event (custom value in this case) */
     internal var type: String
     internal var user: UserResponse
 

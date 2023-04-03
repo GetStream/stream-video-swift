@@ -10,10 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when call recording has stopped */
 internal struct CallRecordingStoppedEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
+    /** The type of event: \"call.recording_stopped\" in this case */
     internal var type: String
 
     internal init(callCid: String, createdAt: Date, type: String) {

@@ -7,7 +7,7 @@ import Foundation
 struct JoinCallRequestData {
     let id: String
     let type: String
-    let getOrCreateCallRequest: GetOrCreateCallRequest
+    let joinCallRequest: JoinCallRequest
 }
 
 struct SelectEdgeServerRequestData {

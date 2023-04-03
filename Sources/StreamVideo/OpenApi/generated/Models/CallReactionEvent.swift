@@ -10,11 +10,13 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen */
 internal struct CallReactionEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
     internal var reaction: ReactionResponse
+    /** The type of event: \"call.reaction_new\" in this case */
     internal var type: String
 
     internal init(callCid: String, createdAt: Date, reaction: ReactionResponse, type: String) {

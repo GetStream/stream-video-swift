@@ -150,16 +150,11 @@ class CallCoordinatorController: @unchecked Sendable {
             settingsOverride: nil,
             team: nil // TODO:
         )
-        let paginationParamsRequest = PaginationParamsRequest()
-        let getOrCreateCallRequest = GetOrCreateCallRequest(
-            data: callRequest,
-            members: paginationParamsRequest,
-            ring: ring
-        )
+        let joinCall = JoinCallRequest(create: true, data: callRequest, ring: ring)
         let joinCallRequest = JoinCallRequestData(
             id: callId,
             type: type,
-            getOrCreateCallRequest: getOrCreateCallRequest
+            joinCallRequest: joinCall
         )
         let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
