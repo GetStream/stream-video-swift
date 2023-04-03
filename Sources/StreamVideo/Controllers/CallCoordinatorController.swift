@@ -150,10 +150,8 @@ class CallCoordinatorController: @unchecked Sendable {
             settingsOverride: nil,
             team: nil // TODO:
         )
-        let paginationParamsRequest = PaginationParamsRequest()
         let getOrCreateCallRequest = GetOrCreateCallRequest(
             data: callRequest,
-            members: paginationParamsRequest,
             ring: ring
         )
         let joinCallRequest = JoinCallRequestData(

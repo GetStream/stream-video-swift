@@ -147,6 +147,11 @@ public class StreamVideo {
         return controller
     }
     
+    public func makeCall(callType: CallType, callId: String, members: [User]) -> Call {
+        let callController = makeCallController(callType: callType, callId: callId)
+        return Call(callId: callId, callType: callType, callController: callController, members: members)
+    }
+    
     /// Creates a call controller used for voip notifications.
     /// - Returns: `VoipNotificationsController`
     public func makeVoipNotificationsController() -> VoipNotificationsController {

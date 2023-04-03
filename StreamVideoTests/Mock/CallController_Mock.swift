@@ -25,12 +25,12 @@ class CallController_Mock: CallController {
         videoOptions: VideoOptions,
         participants: [User],
         ring: Bool = false
-    ) async throws -> Call {
+    ) async throws -> CallDTO {
         let callSettingsInfo = makeCallSettingsInfo(
             callId: callId,
             callType: callType
         )
-        let call = Call.create(
+        let call = CallDTO.create(
             callId: callId,
             callType: callType,
             sessionId: UUID().uuidString,

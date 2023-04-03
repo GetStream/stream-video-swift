@@ -6,7 +6,7 @@ import AVFoundation
 import SwiftUI
 
 /// Represents a call that's in progress.
-public class Call: ObservableObject, @unchecked Sendable {
+public class CallDTO: ObservableObject, @unchecked Sendable {
             
     /// The current participants dictionary.
     @Published public internal(set) var participants = [String: CallParticipant]() {
@@ -55,8 +55,8 @@ public class Call: ObservableObject, @unchecked Sendable {
         sessionId: String,
         callSettingsInfo: CallSettingsInfo,
         recordingState: RecordingState
-    ) -> Call {
-        Call(
+    ) -> CallDTO {
+        CallDTO(
             callId: callId,
             callType: callType,
             sessionId: sessionId,
