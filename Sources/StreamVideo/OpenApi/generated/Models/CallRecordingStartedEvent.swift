@@ -10,10 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when call recording has started */
 internal struct CallRecordingStartedEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
+    /** The type of event: \"call.recording_started\" in this case */
     internal var type: String
 
     internal init(callCid: String, createdAt: Date, type: String) {

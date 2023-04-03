@@ -12,25 +12,27 @@ import AnyCodable
 
 internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
 
-    internal var connectionId: String?
+    /** if true the call will be created if it doesn't exist */
+    internal var create: Bool?
     internal var data: CallRequest?
     internal var datacenterHintedId: String?
-    internal var members: PaginationParamsRequest?
+    internal var membersLimit: Int?
+    /** if true and the call is created, the notification will include ring=true */
     internal var ring: Bool?
 
-    internal init(connectionId: String? = nil, data: CallRequest? = nil, datacenterHintedId: String? = nil, members: PaginationParamsRequest? = nil, ring: Bool? = nil) {
-        self.connectionId = connectionId
+    internal init(create: Bool? = nil, data: CallRequest? = nil, datacenterHintedId: String? = nil, membersLimit: Int? = nil, ring: Bool? = nil) {
+        self.create = create
         self.data = data
         self.datacenterHintedId = datacenterHintedId
-        self.members = members
+        self.membersLimit = membersLimit
         self.ring = ring
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
-        case connectionId = "connection_id"
+        case create
         case data
         case datacenterHintedId = "datacenter_hinted_id"
-        case members
+        case membersLimit = "members_limit"
         case ring
     }
 
@@ -38,10 +40,10 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(connectionId, forKey: .connectionId)
+        try container.encodeIfPresent(create, forKey: .create)
         try container.encodeIfPresent(data, forKey: .data)
         try container.encodeIfPresent(datacenterHintedId, forKey: .datacenterHintedId)
-        try container.encodeIfPresent(members, forKey: .members)
+        try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
         try container.encodeIfPresent(ring, forKey: .ring)
     }
 }

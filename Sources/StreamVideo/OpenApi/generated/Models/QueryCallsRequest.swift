@@ -12,7 +12,6 @@ import AnyCodable
 
 internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var connectionId: String?
     internal var filterConditions: [String: AnyCodable]?
     internal var limit: Int?
     internal var next: String?
@@ -20,8 +19,7 @@ internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
     internal var sort: [SortParamRequest]
     internal var watch: Bool?
 
-    internal init(connectionId: String? = nil, filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
-        self.connectionId = connectionId
+    internal init(filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
         self.filterConditions = filterConditions
         self.limit = limit
         self.next = next
@@ -31,7 +29,6 @@ internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
-        case connectionId = "connection_id"
         case filterConditions = "filter_conditions"
         case limit
         case next
@@ -44,7 +41,6 @@ internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(connectionId, forKey: .connectionId)
         try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
         try container.encodeIfPresent(limit, forKey: .limit)
         try container.encodeIfPresent(next, forKey: .next)

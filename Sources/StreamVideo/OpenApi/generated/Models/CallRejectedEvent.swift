@@ -10,10 +10,12 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent when a user rejects a ringing call. Clients receiving this event should dismiss  the call screen unless the call includes more users. */
 internal struct CallRejectedEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
+    /** The type of event: \"call.rejected\" in this case */
     internal var type: String
     internal var user: UserResponse
 

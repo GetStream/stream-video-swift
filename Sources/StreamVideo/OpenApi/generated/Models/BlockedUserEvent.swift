@@ -10,11 +10,14 @@ import Foundation
 import AnyCodable
 #endif
 
+/** This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.  If the user is the current user, the client should leave the call screen as well */
 internal struct BlockedUserEvent: Codable, JSONEncodable, Hashable {
 
     internal var callCid: String
     internal var createdAt: Date
+    /** The type of event: \"call.blocked_user\" in this case */
     internal var type: String
+    /** The ID of the user that got blocked */
     internal var userId: String
 
     internal init(callCid: String, createdAt: Date, type: String, userId: String) {
