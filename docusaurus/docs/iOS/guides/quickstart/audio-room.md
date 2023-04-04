@@ -555,7 +555,15 @@ class AudioRoomViewModel: ObservableObject {
     
     private let audioRoom: AudioRoom
     private var cancellables = Set<AnyCancellable>()
-    private var permissionsController: PermissionsController!
+    private var call: Call {
+        get throws {
+            if let call = callViewModel.call {
+                return call
+            } else {
+                throw ClientError.Unknown()
+            }
+        }
+    }
 }
 ```
 
@@ -626,36 +634,38 @@ private func subscribeForCallStateChanges() {
         guard let self = self else { return }
         self.loading = callState != .inCall
         if callState == .inCall {
-            self.isCallLive = self.callViewModel.call?.callInfo.backstage == false
+            self.isCallLive = self.callViewModel.call?.callInfo?.backstage == false
             self.subscribeForCallUpdates()
+            self.subscribeForPermissionsRequests()
+            self.subscribeForPermissionUpdates()
         }
     }
     .store(in: &cancellables)
 }
 ```
 
-In audio rooms, usually you would need the hosts to be able to control who is able to speak and who should be only a listener. In order to do that, you will need to create a `PermissionsController`. Additionally, you will need to listen to permission requests and permission updates, so you can update your UI accordingly.
+In audio rooms, usually you would need the hosts to be able to control who is able to speak and who should be only a listener. In order to do that, you will need to use the `Call`'s permission features. Additionally, you will need to listen to permission requests and permission updates, so you can update your UI accordingly.
 
 Let's first add a method that will listen to permission requests. These are events triggered by user actions such as "raising a hand".
 
 ```swift
 private func subscribeForPermissionsRequests() {
     Task {
-        for await request in permissionsController.permissionRequests() {
+        for await request in try call.permissionRequests() {
             self.permissionRequest = request
         }
     }
 }
 ```
 
-In this method, we are subscribing to the `PermissionsController`'s async stream of requests. Whenever there's one, we store it and present an alert to the user, which we will check later on.
+In this method, we are subscribing to the `Call`'s async stream of permission requests. Whenever there's one, we store it and present an alert to the user, which we will check later on.
 
 Finally, we also need to handle permission updates - events that happen after the hosts have granted a permission based on a user request.
 
 ```swift
 private func subscribeForPermissionUpdates() {
     Task {
-        for await update in permissionsController.permissionUpdates() {
+        for await update in try call.permissionUpdates() {
             let userId = update.user.id
             self.activeCallPermissions[userId] = update.ownCapabilities
             if userId == streamVideo.user.id
@@ -669,14 +679,13 @@ private func subscribeForPermissionUpdates() {
 }
 ```
 
-In this method, we are subscribing to another async stream from the `PermissionsController`, which publishes permission updates. We store the updated permissions for the listeners, in the `activeCallPermissions` dictionary. We do this so we can move them from the listeners to the speakers section, and also to be able to easily revoke them if needed.
+In this method, we are subscribing to another async stream from the `Call`, which publishes permission updates. We store the updated permissions for the listeners, in the `activeCallPermissions` dictionary. We do this so we can move them from the listeners to the speakers section, and also to be able to easily revoke them if needed.
 
 With all these helpers in place, you can implement the `init` function of the `AudioRoomViewModel` that simply calls all the helpers you just created:
 
 ```swift
 init(audioRoom: AudioRoom) {
     self.audioRoom = audioRoom
-    self.permissionsController = streamVideo.makePermissionsController()
     checkAudioSettings()
     callViewModel.startCall(
         callId: audioRoom.id,
@@ -686,8 +695,6 @@ init(audioRoom: AudioRoom) {
     subscribeForParticipantChanges()
     subscribeForAudioChanges()
     subscribeForCallStateChanges()
-    subscribeForPermissionsRequests()
-    subscribeForPermissionUpdates()
 }
 ```
 
@@ -695,22 +702,22 @@ init(audioRoom: AudioRoom) {
 
 When you create a call with the call type `audio_room`, by default, it goes to a backstage. Backstage means that only hosts or users with elevated permissions can join the call. In order to make it available for everyone, you will need to go live. 
 
-To do that, you should use the corresponding method from the `PermissionsController`:
+To do that, you should use the corresponding method from the `Call`:
 
 ```swift
 func goLive() {
     Task {
-        try await permissionsController.goLive(callId: audioRoom.id, callType: callType)
+        try await call.goLive()
     }
 }
 ```
 
-With this, the call is live and anyone can join it. You can also go back to backstage (and remove all participants that are not hosts), by calling the method `stopLive` in the `PermissionsController`:
+With this, the call is live and anyone can join it. You can also go back to backstage (and remove all participants that are not hosts), by calling the method `stopLive` in the `Call` object:
 
 ```swift
 func stopLive() {
     Task {
-        try await permissionsController.stopLive(callId: audioRoom.id, callType: callType)
+        try await call.stopLive()
     }
 }
 ```
@@ -722,10 +729,8 @@ Next, let's see how users can "raise their hand" to speak, which is basically as
 ```swift
 func raiseHand() {
     Task {
-        try await permissionsController.request(
-            permissions: [.sendAudio],
-            callId: audioRoom.id,
-            callType: callType
+        try await call.request(
+            permissions: [.sendAudio]
         )
     }
 }
@@ -763,21 +768,10 @@ The interesting part here is the `grantUserPermissions` call, which accepts the 
 ```swift
 func grantUserPermissions() {
     guard let permissionRequest else { return }
-    var callId = ""
-    var callType = ""
-    let idComponents = permissionRequest.callCid.components(separatedBy: ":")
-    if idComponents.count >= 2  {
-        callId = idComponents[1]
-        callType = idComponents[0]
-    } else {
-        return
-    }
     Task {
-        try await permissionsController.grant(
+        try await call.grant(
             permissions: permissionRequest.permissions.compactMap { Permission(rawValue: $0) },
-            for: permissionRequest.user.id,
-            callId: callId,
-            callType: callType
+            for: permissionRequest.user.id
         )
     }
 }

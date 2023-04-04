@@ -32,7 +32,7 @@ extension CallType {
     /// The development call type.
     public static let development = CallType(name: "development")
     /// The audio room call type.
-    public static let audioRoom = CallType(name: "audio-room", sortComparators: livestreamComparators)
+    public static let audioRoom = CallType(name: "audio_room", sortComparators: livestreamComparators)
     /// The livestream call type.
     public static let livestream = CallType(name: "livestream", sortComparators: livestreamComparators)
 }

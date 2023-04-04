@@ -180,7 +180,7 @@ struct CustomCallControlsView: View {
 }
 ```
 
-In this example, we are building a custom call controls view, using buttons from the SDK, for muting video/audio, toggling camera and hanging up. You can easily add your own UI elements in the `HStack` above. You can use the `CallViewModel` for the standard call-related actions, or create an `EventsController` for custom events and reactions (as described [here](../advanced/custom-events.md)), or a `PermissionsController` for permissions related actions (as described [here](../advanced/permissions.md)).
+In this example, we are building a custom call controls view, using buttons from the SDK, for muting video/audio, toggling camera and hanging up. You can easily add your own UI elements in the `HStack` above. You can use the `CallViewModel` for the standard call-related actions, or use the `Call` object directly for custom events and reactions (as described [here](../advanced/custom-events.md)), and for permissions related actions (as described [here](../advanced/permissions.md)).
 
 #### Horizontally scrollable list
 

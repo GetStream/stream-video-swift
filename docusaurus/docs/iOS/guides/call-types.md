@@ -16,7 +16,7 @@ The `default` call type can be used for different video-calling apps, such as 1-
 
 #### Audio Room
 
-The `audio-room` call type is suitable for apps like Clubhouse or Twitter Spaces. It has pre-configured workflow around requesting permissions to speak for regular listeners. Backstage is enabled, and new calls are going to the backstage mode when created. You will need to explicitly call the `goLive` method to make the call active for all participants.
+The `audio_room` call type is suitable for apps like Clubhouse or Twitter Spaces. It has pre-configured workflow around requesting permissions to speak for regular listeners. Backstage is enabled, and new calls are going to the backstage mode when created. You will need to explicitly call the `goLive` method to make the call active for all participants.
 
 You can find a guide on how to handle this [here](./quickstart/audio-room.md).
 
@@ -33,7 +33,7 @@ The `StreamVideo` SDK comes with preconfigured functions that allow you to apply
 When a call type is created, you can optionally specify the sorting comparators:
 
 ```swift
-let audioRoom = CallType(name: "audio-room", sortComparators: livestreamComparators)
+let audioRoom = CallType(name: "audio_room", sortComparators: livestreamComparators)
 ```
 
 If you don't specify anything, the default sort comparators would be used. These are Swift functions that given two participants, return `ComparisonResult`.
