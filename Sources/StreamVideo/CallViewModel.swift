@@ -299,7 +299,7 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = streamVideo.makeCall(callType: type, callId: callId, members: participants)
-                try await call.joinCall(on: edgeServer)
+                try await call.joinCall(on: edgeServer, callSettings: callSettings)
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
@@ -378,11 +378,11 @@ open class CallViewModel: ObservableObject {
         reconnectionUpdates = nil
         recordingUpdates?.cancel()
         recordingUpdates = nil
+        call?.leave()
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
         callRejectionEvents = [:]
-        streamVideo.leaveCall()
         currentEventsTask?.cancel()
         callingState = .idle
         isMinimized = false
@@ -393,7 +393,7 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = streamVideo.makeCall(callType: callType, callId: callId, members: participants)
-                try await call.join(ring: ring)
+                try await call.join(ring: ring, callSettings: callSettings)
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")

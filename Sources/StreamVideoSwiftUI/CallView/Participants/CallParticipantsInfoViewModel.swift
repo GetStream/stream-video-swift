@@ -10,10 +10,6 @@ class CallParticipantsInfoViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     
     @Published var inviteParticipantsShown = false
-        
-    private lazy var permissionsController: PermissionsController = {
-        streamVideo.makePermissionsController()
-    }()
     
     private lazy var muteAudioAction = CallParticipantMenuAction(
         id: "mute-audio-user",
@@ -38,7 +34,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
     private lazy var unblockAction = CallParticipantMenuAction(
         id: "unblock-user",
         title: "Unblock user",
-        requiredCapability: .muteUsers, // TODO: check capability
+        requiredCapability: .blockUsers,
         iconName: "person.badge.plus",
         action: unblock(userId:),
         confirmationPopup: nil,
@@ -48,25 +44,23 @@ class CallParticipantsInfoViewModel: ObservableObject {
     private lazy var blockAction = CallParticipantMenuAction(
         id: "block-user",
         title: "Block user",
-        requiredCapability: .muteUsers, // TODO: check capability
+        requiredCapability: .blockUsers,
         iconName: "person.badge.minus",
         action: block(userId:),
         confirmationPopup: nil,
         isDestructive: false
     )
     
-    private let callId: String
-    private let callType: String
-        
-    init(callId: String, callType: String) {
-        self.callId = callId
-        self.callType = callType
+    private var call: Call?
+            
+    init(call: Call?) {
+        self.call = call
     }
     
     func menuActions(for participant: CallParticipant) -> [CallParticipantMenuAction] {
+        guard let call else { return [] }
         var actions = [CallParticipantMenuAction]()
-        // TODO: check if this capability is enough for blocking users.
-        guard permissionsController.currentUserHasCapability(.muteUsers) else { return actions }
+        guard call.currentUserHasCapability(.blockUsers) else { return actions }
         if participant.hasAudio {
             actions.append(muteAudioAction)
         }
@@ -79,7 +73,8 @@ class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     func unblockActions(for user: User) -> [CallParticipantMenuAction] {
-        if permissionsController.currentUserHasCapability(.muteUsers) {
+        guard let call else { return [] }
+        if call.currentUserHasCapability(.blockUsers) {
             return [unblockAction]
         } else {
             return []
@@ -109,32 +104,23 @@ class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     private func block(userId: String) {
+        guard let call else { return }
         Task {
-            try await permissionsController.blockUser(
-                with: userId,
-                callId: callId,
-                callType: callType
-            )
+            try await call.blockUser(with: userId)
         }
     }
     
     private func unblock(userId: String) {
+        guard let call else { return }
         Task {
-            try await permissionsController.unblockUser(
-                with: userId,
-                callId: callId,
-                callType: callType
-            )
+            try await call.unblockUser(with: userId)
         }
     }
     
     private func execute(muteRequest: MuteRequest) {
+        guard let call else { return }
         Task {
-            try await permissionsController.muteUsers(
-                with: muteRequest,
-                callId: callId,
-                callType: callType
-            )
+            try await call.muteUsers(with: muteRequest)
         }
     }
 }

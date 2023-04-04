@@ -34,27 +34,42 @@ public class Call: ObservableObject, @unchecked Sendable {
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
     private let callController: CallController
+    private let recordingController: RecordingController
+    private let eventsController: EventsController
+    private let permissionsController: PermissionsController
     private let members: [User]
+    private let videoOptions: VideoOptions
     
     internal init(
         callId: String,
         callType: CallType,
         callController: CallController,
-        members: [User]
+        recordingController: RecordingController,
+        eventsController: EventsController,
+        permissionsController: PermissionsController,
+        members: [User],
+        videoOptions: VideoOptions
     ) {
         self.callId = callId
         self.callType = callType
         self.callController = callController
+        self.recordingController = recordingController
+        self.eventsController = eventsController
+        self.permissionsController = permissionsController
         self.members = members
+        self.videoOptions = videoOptions
         self.callController.call = self
     }
     
-    public func join(ring: Bool = false) async throws {
+    public func join(
+        ring: Bool = false,
+        callSettings: CallSettings = CallSettings()
+    ) async throws {
         try await callController.joinCall(
             callType: callType,
             callId: callId,
-            callSettings: CallSettings(), //TODO: update
-            videoOptions: VideoOptions(), //TODO: update
+            callSettings: callSettings,
+            videoOptions: videoOptions,
             participants: members,
             ring: ring
         )
@@ -65,14 +80,15 @@ public class Call: ObservableObject, @unchecked Sendable {
     ///   - edgeServer: The `EdgeServer` to join the call on.
     /// - Throws: An error if the call could not be joined.
     public func joinCall(
-        on edgeServer: EdgeServer
+        on edgeServer: EdgeServer,
+        callSettings: CallSettings = CallSettings()
     ) async throws {
         try await callController.joinCall(
             on: edgeServer,
             callType: callType,
             callId: callId,
-            callSettings: CallSettings(), //TODO:
-            videoOptions: VideoOptions() //TODO:
+            callSettings: callSettings,
+            videoOptions: videoOptions
         )
     }
 
@@ -169,6 +185,186 @@ public class Call: ObservableObject, @unchecked Sendable {
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
         callController.setVideoFilter(videoFilter)
     }
+    
+    public func leave() {
+        postNotification(with: CallNotification.callEnded)
+        callController.cleanUp()
+    }
+    
+    //MARK: - Permissions
+    
+    /// Checks if the current user can request permissions.
+    /// - Parameter permissions: The permissions to request.
+    /// - Returns: A Boolean value indicating if the current user can request the permissions.
+    public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
+        permissionsController.currentUserCanRequestPermissions(permissions)
+    }
+    
+    /// Requests permissions for a call.
+    /// - Parameters:
+    ///   - permissions: The permissions to request.
+    /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
+    public func request(permissions: [Permission]) async throws {
+        try await permissionsController.request(permissions: permissions, callId: callId, callType: callType.name)
+    }
+    
+    /// Checks if the current user has a certain call capability.
+    /// - Parameter capability: The capability to check.
+    /// - Returns: A Boolean value indicating if the current user has the call capability.
+    public func currentUserHasCapability(_ capability: CallCapability) -> Bool {
+        permissionsController.currentUserHasCapability(capability)
+    }
+    
+    /// Grants permissions to a user for a call.
+    /// - Parameters:
+    ///   - permissions: The permissions to grant.
+    ///   - userId: The ID of the user to grant permissions to.
+    /// - Throws: An error if the operation fails.
+    public func grant(
+        permissions: [Permission],
+        for userId: String
+    ) async throws {
+        try await permissionsController.grant(
+            permissions: permissions,
+            for: userId,
+            callId: callId,
+            callType: callType.name
+        )
+    }
+    
+    /// Revokes permissions for a user in a call.
+    /// - Parameters:
+    ///   - permissions: The list of permissions to revoke.
+    ///   - userId: The ID of the user to revoke the permissions from.
+    /// - Throws: error if the permission update fails.
+    public func revoke(
+        permissions: [Permission],
+        for userId: String
+    ) async throws {
+        try await permissionsController.revoke(
+            permissions: permissions,
+            for: userId,
+            callId: callId,
+            callType: callType.name
+        )
+    }
+    
+    /// Mute users in a call.
+    /// - Parameters:
+    ///   - request: The mute request.
+    /// - Throws: error if muting the users fails.
+    public func muteUsers(
+        with request: MuteRequest
+    ) async throws {
+        try await permissionsController.muteUsers(
+            with: request,
+            callId: callId,
+            callType: callType.name
+        )
+    }
+    
+    /// Ends a call.
+    /// - Throws: error if ending the call fails.
+    public func end() async throws {
+        try await permissionsController.endCall(callId: callId, callType: callType.name)
+    }
+    
+    /// Blocks a user in a call.
+    /// - Parameters:
+    ///   - userId: The ID of the user to block.
+    /// - Throws: error if blocking the user fails.
+    public func blockUser(with userId: String) async throws {
+        try await permissionsController.blockUser(with: userId, callId: callId, callType: callType.name)
+    }
+    
+    /// Unblocks a user in a call.
+    /// - Parameters:
+    ///   - userId: The ID of the user to unblock.
+    /// - Throws: error if unblocking the user fails.
+    public func unblockUser(with userId: String) async throws {
+        try await permissionsController.unblockUser(with: userId, callId: callId, callType: callType.name)
+    }
+    
+    /// Starts a live call.
+    /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
+    public func goLive() async throws {
+        try await permissionsController.goLive(callId: callId, callType: callType.name)
+    }
+    
+    /// Stops an ongoing live call.
+    /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
+    public func stopLive() async throws {
+        try await permissionsController.stopLive(callId: callId, callType: callType.name)
+    }
+    
+    /// Returns an `AsyncStream` of `PermissionRequest` objects that represent the permission requests events.
+    /// - Returns: An `AsyncStream` of `PermissionRequest` objects.
+    public func permissionRequests() -> AsyncStream<PermissionRequest> {
+        permissionsController.permissionRequests()
+    }
+    
+    /// Returns an `AsyncStream` of `PermissionsUpdated` objects that represent the permission updates events.
+    /// - Returns: An `AsyncStream` of `PermissionsUpdated` objects.
+    public func permissionUpdates() -> AsyncStream<PermissionsUpdated> {
+        permissionsController.permissionUpdates()
+    }
+    
+    
+    //MARK: - Recording
+    
+    // Starts recording for the call.
+    public func startRecording() async throws {
+        try await recordingController.startRecording(callId: callId, callType: callType)
+    }
+    
+    /// Stops recording a call.
+    public func stopRecording() async throws {
+        try await recordingController.stopRecording(callId: callId, callType: callType)
+    }
+    
+    /// Lists recordings for the call.
+    public func listRecordings() async throws -> [CallRecordingInfo] {
+        try await recordingController.listRecordings(
+            callId: callId,
+            callType: callType.name,
+            session: callId
+        )
+    }
+    
+    /// Creates an asynchronous stream of `RecordingEvent` objects.
+    public func recordingEvents() -> AsyncStream<RecordingEvent> {
+        recordingController.recordingEvents()
+    }
+    
+    //MARK: - Events
+    
+    /// Sends a custom event to the call.
+    /// - Parameter event: The `CustomEventRequest` object representing the custom event to send.
+    /// - Throws: An error if the sending fails.
+    public func send(event: CustomEventRequest) async throws {
+        try await eventsController.send(event: event)
+    }
+    
+    /// Sends a reaction to the call.
+    /// - Parameter reaction: The `CallReactionRequest` object representing the reaction to send.
+    /// - Throws: An error if the sending fails.
+    public func send(reaction: CallReactionRequest) async throws {
+        try await eventsController.send(reaction: reaction)
+    }
+    
+    /// Returns an asynchronous stream of custom events received during the call.
+    /// - Returns: An `AsyncStream` of `CustomEvent` objects.
+    public func customEvents() -> AsyncStream<CustomEvent> {
+        eventsController.customEvents()
+    }
+    
+    /// Returns an asynchronous stream of reactions received during the call.
+    /// - Returns: An `AsyncStream` of `CallReaction` objects.
+    public func reactions() -> AsyncStream<CallReaction> {
+        eventsController.reactions()
+    }
+    
+    //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
         if reconnectionStatus != self.reconnectionStatus {

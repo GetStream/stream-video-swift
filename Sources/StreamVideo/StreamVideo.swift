@@ -61,12 +61,8 @@ public class StreamVideo {
     private let apiKey: APIKey
     private let latencyService: LatencyService
     
-    public private(set) var currentCallController: CallController?
     private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
-    private var permissionsController: PermissionsController?
-    private var eventsController: EventsController?
-    private var recordingController: RecordingController?
     
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -128,95 +124,31 @@ public class StreamVideo {
         try await connectWebSocketClient()
     }
     
-    /// Creates a call controller, used for establishing and managing a call.
-    /// - Parameters:
-    ///    - callType: the type of the call.
-    ///    - callId: the id of the call.
-    /// - Returns: `CallController`
-    public func makeCallController(callType: CallType, callId: String) -> CallController {
-        let controller = environment.callControllerBuilder(
-            callCoordinatorController,
-            user,
-            callId,
-            callType,
-            apiKey.apiKeyString,
-            videoConfig
-        )
-        currentCallController = controller
-        callsMiddleware.onCallUpdated = currentCallController?.update(callInfo:)
-        return controller
-    }
-    
-    public func makeCall(callType: CallType, callId: String, members: [User]) -> Call {
+    public func makeCall(
+        callType: CallType,
+        callId: String,
+        members: [User] = []
+    ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
-        return Call(callId: callId, callType: callType, callController: callController, members: members)
+        let recordingController = makeRecordingController(with: callController)
+        let eventsController = makeEventsController()
+        let permissionsController = makePermissionsController()
+        return Call(
+            callId: callId,
+            callType: callType,
+            callController: callController,
+            recordingController: recordingController,
+            eventsController: eventsController,
+            permissionsController: permissionsController,
+            members: members,
+            videoOptions: VideoOptions()
+        )
     }
     
     /// Creates a call controller used for voip notifications.
     /// - Returns: `VoipNotificationsController`
     public func makeVoipNotificationsController() -> VoipNotificationsController {
         callCoordinatorController.makeVoipNotificationsController()
-    }
-    
-    /// Creates a permissions controller used for managing permissions.
-    /// - Returns: `PermissionsController`
-    public func makePermissionsController() -> PermissionsController {
-        if let permissionsController = permissionsController {
-            return permissionsController
-        }
-        let controller = PermissionsController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user
-        )
-        permissionsController = controller
-        permissionsMiddleware.onPermissionRequestEvent = { [weak self] request in
-            self?.permissionsController?.onPermissionRequestEvent?(request)
-        }
-        permissionsMiddleware.onPermissionsUpdatedEvent = { [weak self] request in
-            self?.permissionsController?.onPermissionsUpdatedEvent?(request)
-        }
-        return controller
-    }
-    
-    /// Creates an events controller used for managing events.
-    /// - Returns: `EventsController`
-    public func makeEventsController() -> EventsController {
-        if let eventsController = eventsController {
-            return eventsController
-        }
-        let controller = EventsController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user
-        )
-        eventsController = controller
-        customEventsMiddleware.onCustomEvent = { [weak self] event in
-            self?.eventsController?.onCustomEvent?(event)
-        }
-        customEventsMiddleware.onNewReaction = { [weak self] event in
-            self?.eventsController?.onNewReaction?(event)
-        }
-        return controller
-    }
-    
-    /// Creates recording controller used for managing recordings.
-    /// - Returns: `RecordingController`
-    public func makeRecordingController() -> RecordingController {
-        if let recordingController = recordingController {
-            return recordingController
-        }
-        let controller = RecordingController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user
-        )
-        recordingController = controller
-        recordingController?.onRecordingRequestedEvent = { [weak self] event in
-            self?.currentCallController?.updateCall(from: event)
-        }
-        recordingEventsMiddleware.onRecordingEvent = { [weak self] event in
-            self?.recordingController?.onRecordingEvent?(event)
-            self?.currentCallController?.updateCall(from: event)
-        }
-        return controller
     }
     
     /// Accepts the call with the provided call id and type.
@@ -242,13 +174,6 @@ public class StreamVideo {
             callType: callType
         )
     }
-
-    /// Leaves the current call. It clears all call-related state.
-    public func leaveCall() {
-        postNotification(with: CallNotification.callEnded)
-        currentCallController?.cleanUp()
-        currentCallController = nil
-    }
         
     /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
     public func callEvents() -> AsyncStream<CallEvent> {
@@ -262,8 +187,6 @@ public class StreamVideo {
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
         await withCheckedContinuation { continuation in
-            currentCallController?.cleanUp()
-            currentCallController = nil
             webSocketClient?.disconnect {
                 continuation.resume(returning: ())
             }
@@ -271,6 +194,73 @@ public class StreamVideo {
     }
     
     // MARK: - private
+    
+    /// Creates a permissions controller used for managing permissions.
+    /// - Returns: `PermissionsController`
+    private func makePermissionsController() -> PermissionsController {
+        let controller = PermissionsController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        permissionsMiddleware.onPermissionRequestEvent = { request in
+            controller.onPermissionRequestEvent?(request)
+        }
+        permissionsMiddleware.onPermissionsUpdatedEvent = { request in
+            controller.onPermissionsUpdatedEvent?(request)
+        }
+        return controller
+    }
+    
+    /// Creates recording controller used for managing recordings.
+    /// - Returns: `RecordingController`
+    private func makeRecordingController(with callController: CallController) -> RecordingController {
+        let controller = RecordingController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        controller.onRecordingRequestedEvent = { event in
+            callController.updateCall(from: event)
+        }
+        recordingEventsMiddleware.onRecordingEvent = { event in
+            controller.onRecordingEvent?(event)
+            callController.updateCall(from: event)
+        }
+        return controller
+    }
+    
+    /// Creates an events controller used for managing events.
+    /// - Returns: `EventsController`
+    private func makeEventsController() -> EventsController {
+        let controller = EventsController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user
+        )
+        customEventsMiddleware.onCustomEvent = { event in
+            controller.onCustomEvent?(event)
+        }
+        customEventsMiddleware.onNewReaction = { event in
+            controller.onNewReaction?(event)
+        }
+        return controller
+    }
+    
+    /// Creates a call controller, used for establishing and managing a call.
+    /// - Parameters:
+    ///    - callType: the type of the call.
+    ///    - callId: the id of the call.
+    /// - Returns: `CallController`
+    private func makeCallController(callType: CallType, callId: String) -> CallController {
+        let controller = environment.callControllerBuilder(
+            callCoordinatorController,
+            user,
+            callId,
+            callType,
+            apiKey.apiKeyString,
+            videoConfig
+        )
+        callsMiddleware.onCallUpdated = controller.update(callInfo:)
+        return controller
+    }
     
     private func connectWebSocketClient() async throws {
         let queryParams = endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)

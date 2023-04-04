@@ -20,8 +20,7 @@ public struct CallParticipantsInfoView: View {
         self.availableSize = availableSize
         _viewModel = StateObject(
             wrappedValue: CallParticipantsInfoViewModel(
-                callId: callViewModel.call?.callId ?? "",
-                callType: callViewModel.call?.callType.name ?? ""
+                call: callViewModel.call
             )
         )
     }
@@ -53,6 +52,7 @@ struct CallParticipantsView: View {
         CallParticipantsViewContainer(
             viewModel: viewModel,
             participants: participants,
+            call: callViewModel.call,
             blockedUsers: callViewModel.blockedUsers,
             callSettings: callViewModel.callSettings,
             maxHeight: maxHeight,
@@ -85,6 +85,7 @@ struct CallParticipantsViewContainer: View {
     @Injected(\.images) var images
         
     var participants: [CallParticipant]
+    var call: Call?
     var blockedUsers: [User]
     var callSettings: CallSettings
     var maxHeight: CGFloat
@@ -142,7 +143,8 @@ struct CallParticipantsViewContainer: View {
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
                         inviteParticipantsShown: $inviteParticipantsShown,
-                        currentParticipants: participants
+                        currentParticipants: participants,
+                        call: call
                     )
                 } label: {
                     EmptyView()

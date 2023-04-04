@@ -24,6 +24,7 @@ class InviteParticipantsViewModel: ObservableObject {
     private var loading = false
     
     private var currentParticipantIds: [String]
+    private var call: Call?
     
     var filteredUsers: [User] {
         let displayUsers = allUsers.filter { !currentParticipantIds.contains($0.id) }
@@ -37,15 +38,16 @@ class InviteParticipantsViewModel: ObservableObject {
         }
     }
         
-    init(currentParticipants: [CallParticipant]) {
+    init(currentParticipants: [CallParticipant], call: Call?) {
         currentParticipantIds = currentParticipants.map(\.userId)
+        self.call = call
         loadNextUsers()
     }
     
     func inviteUsersTapped() {
-        guard let controller = streamVideo.currentCallController else { return }
+        guard let call else { return }
         Task {
-            try await controller.addMembersToCall(ids: selectedUsers.map(\.id))
+            try await call.addMembersToCall(ids: selectedUsers.map(\.id))
             withAnimation {
                 allUsers = allUsers.filter { !selectedUsers.contains($0) }
                 selectedUsers = []
@@ -73,11 +75,6 @@ class InviteParticipantsViewModel: ObservableObject {
     
     func isSelected(user: User) -> Bool {
         selectedUsers.contains(user)
-    }
-    
-    func onlineInfo(for user: User) -> String {
-        // TODO: provide implementation
-        ""
     }
     
     private func loadNextUsers() {
