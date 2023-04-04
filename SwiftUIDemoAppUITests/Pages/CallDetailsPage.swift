@@ -8,10 +8,15 @@ enum CallDetailsPage {
     
     static var userAvatar: XCUIElement { app.buttons["userAvatar"] }
     static var startCallButton: XCUIElement { app.buttons["startCall"] }
+    static var startCallTab: XCUIElement { app.buttons["Start a call"] }
     static var joinCallButton: XCUIElement { app.buttons["joinCall"] }
+    static var joinCallTab: XCUIElement { app.buttons["Join a call"] }
     static var callIdInputField: XCUIElement { app.textFields["callId"] }
     static var ringEventsToggle: XCUIElement { app.buttons["Ring events"] }
-    static var lobbyToggle: XCUIElement { app.buttons["Lobby"] }
-    static var joinImmediatelyToggle: XCUIElement { app.buttons["Join immediately"] }
-    
+    static var lobbyTab: XCUIElement { app.buttons["Lobby"] }
+    static var joinImmediatelyTab: XCUIElement { app.buttons["Join immediately"] }
+    static var ringEventsTab: XCUIElement { app.buttons["Ring events"] }
+    static var signOutButton: XCUIElement { app.alerts.buttons["Sign out"] }
+    static var participantList: XCUIElement { app.collectionViews["participantList"] }
+    static var participants: XCUIElementQuery { participantList.buttons }
 }

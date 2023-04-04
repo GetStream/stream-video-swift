@@ -36,6 +36,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             }
         }
         .edgesIgnoringSafeArea(.all)
+        .accessibility(identifier: "gridScrollView")
     }
     
     private var participantsContent: some View {

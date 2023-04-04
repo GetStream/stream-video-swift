@@ -30,10 +30,12 @@ struct CallConnectingView: View {
                     CallingGroupView(
                         participants: viewModel.outgoingCallMembers
                     )
+                    .accessibility(identifier: "callConnectingGroupView")
                 } else if viewModel.outgoingCallMembers.count > 0 {
                     AnimatingParticipantView(
                         participant: viewModel.outgoingCallMembers.first
                     )
+                    .accessibility(identifier: "callConnectingParticipantView")
                 }
                 
                 CallingParticipantsView(
@@ -44,6 +46,7 @@ struct CallConnectingView: View {
                 HStack(alignment: .firstTextBaseline, spacing: 2) {
                     Text(title)
                         .applyCallingStyle()
+                        .accessibility(identifier: "callConnectingView")
                     CallingIndicator()
                 }
                 

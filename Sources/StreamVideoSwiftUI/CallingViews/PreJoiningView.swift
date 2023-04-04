@@ -143,6 +143,8 @@ struct CameraCheckView: View {
                     .aspectRatio(contentMode: .fill)
                     .frame(width: availableSize.width - 32, height: availableSize.height / 2)
                     .cornerRadius(16)
+                    .accessibility(identifier: "cameraCheckView")
+                    .streamAccessibility(value: "1")
             } else {
                 ZStack {
                     Rectangle()
@@ -152,6 +154,8 @@ struct CameraCheckView: View {
 
                     if #available(iOS 14.0, *) {
                         UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
+                            .accessibility(identifier: "cameraCheckView")
+                            .streamAccessibility(value: "0")
                     }
                 }
                 .opacity(callViewModel.callSettings.videoOn ? 0 : 1)
@@ -167,6 +171,7 @@ struct CameraCheckView: View {
                         microphoneOn: callViewModel.callSettings.audioOn,
                         hasDecibelValues: microphoneChecker.hasDecibelValues
                     )
+                    .accessibility(identifier: "microphoneCheckView")
                     Spacer()
                     ConnectionQualityIndicator(connectionQuality: viewModel.connectionQuality)
                 }
@@ -189,12 +194,15 @@ struct JoinCallView: View {
         VStack(spacing: 16) {
             Text("\(L10n.WaitingRoom.description) \(otherParticipantsCount) \(L10n.WaitingRoom.numberOfParticipants)")
                 .font(.headline)
+                .accessibility(identifier: "otherParticipantsCount")
+                .streamAccessibility(value: "\(otherParticipantsCount)")
             
             Button {
                 callViewModel.startCall(callId: callId, type: callType, participants: callParticipants)
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()
+                    .accessibility(identifier: "joinCall")
             }
             .frame(height: 50)
             .frame(maxWidth: .infinity)
@@ -240,6 +248,8 @@ struct CallSettingsView: View {
                     size: iconSize,
                     iconStyle: (callViewModel.callSettings.audioOn ? .primary : .transparent)
                 )
+                .accessibility(identifier: "microphoneToggle")
+                .streamAccessibility(value: callViewModel.callSettings.audioOn ? "1" : "0")
             }
 
             Button {
@@ -255,6 +265,8 @@ struct CallSettingsView: View {
                     size: iconSize,
                     iconStyle: (callViewModel.callSettings.videoOn ? .primary : .transparent)
                 )
+                .accessibility(identifier: "cameraToggle")
+                .streamAccessibility(value: callViewModel.callSettings.videoOn ? "1" : "0")
             }
         }
         .padding()

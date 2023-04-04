@@ -91,6 +91,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             }
             .padding()
             .padding(.bottom)
+            .accessibility(identifier: "spotlightScrollView")
         }
 
     }

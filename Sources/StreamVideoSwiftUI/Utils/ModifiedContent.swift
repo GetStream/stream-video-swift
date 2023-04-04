@@ -4,8 +4,9 @@
 
 import SwiftUI
 
-extension ModifiedContent where Modifier == AccessibilityAttachmentModifier {
-    public func streamAccessibility(value: String) -> ModifiedContent<Content, Modifier> {
+extension View {
+
+    public func streamAccessibility(value: String) -> ModifiedContent<Self, AccessibilityAttachmentModifier> {
         #if DEBUG
         return self.accessibility(value: Text(value))
         #else

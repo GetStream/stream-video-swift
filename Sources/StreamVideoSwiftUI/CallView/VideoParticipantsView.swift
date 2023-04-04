@@ -181,6 +181,8 @@ public struct VideoCallParticipantView: View {
         }
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(.all)
+        .accessibility(identifier: "callParticipantView")
+        .streamAccessibility(value: showVideo ? "1" : "0")
         .overlay(
             CallParticipantImageView(
                 id: participant.id,
@@ -190,7 +192,6 @@ public struct VideoCallParticipantView: View {
             .frame(width: availableSize.width)
             .opacity(showVideo ? 0 : 1)
         )
-        .accessibility(identifier: showVideo ? "CallParticipantVideoView" : "CallParticipantImageView")
     }
     
     private var showVideo: Bool {
@@ -223,7 +224,8 @@ struct ParticipantInfoView: View {
             (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
                 .foregroundColor(.white)
                 .padding(.all, 4)
-                .accessibility(identifier: participant.hasAudio ? "participantMicIsOn" : "participantMicIsOff")
+                .accessibility(identifier: "participantMic")
+                .streamAccessibility(value: participant.hasAudio ? "1" : "0")
         }
         .padding(.all, 2)
         .padding(.horizontal, 4)
