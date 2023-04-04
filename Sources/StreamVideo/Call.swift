@@ -33,7 +33,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// The closure that handles the participant events.
     var onParticipantEvent: ((ParticipantEvent) -> Void)?
     
-    private let callController: CallController
+    internal let callController: CallController
     private let recordingController: RecordingController
     private let eventsController: EventsController
     private let permissionsController: PermissionsController

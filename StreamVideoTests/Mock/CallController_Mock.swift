@@ -25,23 +25,10 @@ class CallController_Mock: CallController {
         videoOptions: VideoOptions,
         participants: [User],
         ring: Bool = false
-    ) async throws -> CallDTO {
-        let callSettingsInfo = makeCallSettingsInfo(
-            callId: callId,
-            callType: callType
-        )
-        let call = CallDTO.create(
-            callId: callId,
-            callType: callType,
-            sessionId: UUID().uuidString,
-            callSettingsInfo: callSettingsInfo,
-            recordingState: .noRecording
-        )
-        self.call = call
+    ) async throws {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
             self?.call?.participants = participants
         }
-        return call
     }
     
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
