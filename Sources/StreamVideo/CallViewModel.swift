@@ -299,7 +299,7 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = streamVideo.makeCall(callType: type, callId: callId, members: participants)
-                try await call.joinCall(on: edgeServer, callSettings: callSettings)
+                try await call.join(on: edgeServer, callSettings: callSettings)
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")

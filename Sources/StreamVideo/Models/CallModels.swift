@@ -5,9 +5,14 @@
 import AVFoundation
 import SwiftUI
 
+
+/// Provides info about the call.
 public struct CallInfo: Sendable {
+    /// The call cId, consisting of the call type and id.
     public let cId: String
+    /// Whether the call is in backstage.
     public let backstage: Bool
+    /// Array of blocked users.
     public var blockedUsers: [User]
 }
 

@@ -20,7 +20,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     @Published public private(set) var recordingState: RecordingState = .noRecording
     
     /// The id of the current session.
-    public var sessionId: String = "" //TODO: check
+    var sessionId: String = ""
     
     public let callId: String
     public let callType: CallType
@@ -79,7 +79,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// - Parameters:
     ///   - edgeServer: The `EdgeServer` to join the call on.
     /// - Throws: An error if the call could not be joined.
-    public func joinCall(
+    public func join(
         on edgeServer: EdgeServer,
         callSettings: CallSettings = CallSettings()
     ) async throws {
@@ -186,6 +186,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         callController.setVideoFilter(videoFilter)
     }
     
+    /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
         callController.cleanUp()
@@ -309,10 +310,9 @@ public class Call: ObservableObject, @unchecked Sendable {
         permissionsController.permissionUpdates()
     }
     
-    
     //MARK: - Recording
     
-    // Starts recording for the call.
+    /// Starts recording for the call.
     public func startRecording() async throws {
         try await recordingController.startRecording(callId: callId, callType: callType)
     }
