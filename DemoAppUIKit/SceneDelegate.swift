@@ -40,6 +40,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
                 Task {
                     do {
                         let token = try await TokenService.shared.fetchToken(for: user.id)
+                        UnsecureUserRepository.shared.save(token: token.rawValue)
                         result(.success(token))
                     } catch {
                         result(.failure(error))

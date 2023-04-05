@@ -68,6 +68,7 @@ struct StreamVideoSwiftUIApp: App {
                 Task {
                     do {
                         let token = try await TokenService.shared.fetchToken(for: user.id)
+                        userRepository.save(token: token.rawValue)
                         result(.success(token))
                     } catch {
                         result(.failure(error))

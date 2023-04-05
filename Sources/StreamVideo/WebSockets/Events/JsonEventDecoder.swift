@@ -8,13 +8,24 @@ struct JsonEventDecoder: AnyEventDecoder {
     
     func decode(from data: Data) throws -> Event {
         let decoder = JSONDecoder.stream
-        let typeDto = try decoder.decode(JsonEvent.self, from: data)
-        log.debug("received an event with type \(typeDto.type.rawValue)")
-        switch typeDto.type {
-        case .healthCheck, .wsConnected:
-            return try decoder.decode(HealthCheckEvent.self, from: data)
-        case .callCreated:
-            let callCreated = try decoder.decode(CallCreatedEvent.self, from: data)
+        let event = try decoder.decode(WSEvent.self, from: data)
+        
+        switch event {
+        case .typeBlockedUserEvent(let callBlocked):
+            let callId = callBlocked.callCid
+            return CallEventInfo(
+                callId: callId,
+                user: User(id: callBlocked.user.id),
+                action: .block
+            )
+        case .typeCallAcceptedEvent(let callAccepted):
+            let callId = callAccepted.callCid
+            return CallEventInfo(
+                callId: callId,
+                user: callAccepted.user.toUser,
+                action: .accept
+            )
+        case .typeCallCreatedEvent(let callCreated):
             let call = callCreated.call
             let members = callCreated.members.compactMap { $0.user.toUser }
             return IncomingCallEvent(
@@ -24,65 +35,53 @@ struct JsonEventDecoder: AnyEventDecoder {
                 users: members,
                 ringing: callCreated.ringing
             )
-        case .callRejected:
-            let callRejected = try decoder.decode(CallRejectedEvent.self, from: data)
-            let callId = callRejected.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: callRejected.user.toUser,
-                action: .reject
-            )
-        case .callAccepted:
-            let callAccepted = try decoder.decode(CallAcceptedEvent.self, from: data)
-            let callId = callAccepted.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: callAccepted.user.toUser,
-                action: .accept
-            )
-        case .callEnded:
-            let callEnded = try decoder.decode(CallEndedEvent.self, from: data)
+        case .typeCallEndedEvent(let callEnded):
             let callId = callEnded.callCid
             return CallEventInfo(
                 callId: callId,
                 user: callEnded.user?.toUser,
                 action: .end
             )
-        case .callBlocked:
-            let callBlocked = try decoder.decode(BlockedUserEvent.self, from: data)
-            let callId = callBlocked.callCid
+        case .typeCallMemberAddedEvent(let value):
+            return value
+        case .typeCallMemberRemovedEvent(let value):
+            return value
+        case .typeCallMemberUpdatedEvent(let value):
+            return value
+        case .typeCallMemberUpdatedPermissionEvent(let value):
+            return value
+        case .typeCallReactionEvent(let value):
+            return value
+        case .typeCallRecordingStartedEvent(let value):
+            return value
+        case .typeCallRecordingStoppedEvent(let value):
+            return value
+        case .typeCallRejectedEvent(let callRejected):
+            let callId = callRejected.callCid
             return CallEventInfo(
                 callId: callId,
-                user: User(id: callBlocked.user.id),
-                action: .block
+                user: callRejected.user.toUser,
+                action: .reject
             )
-        case .callUnblocked:
-            let callUnblocked = try decoder.decode(UnblockedUserEvent.self, from: data)
+        case .typeCallUpdatedEvent(let value):
+            return value
+        case .typeCustomVideoEvent(let value):
+            return value
+        case .typeHealthCheckEvent(let value):
+            return value
+        case .typePermissionRequestEvent(let value):
+            return value
+        case .typeUnblockedUserEvent(let callUnblocked):
             let callId = callUnblocked.callCid
             return CallEventInfo(
                 callId: callId,
                 user: User(id: callUnblocked.user.id),
                 action: .unblock
             )
-        case .permissionRequest:
-            return try decoder.decode(PermissionRequestEvent.self, from: data)
-        case .permissionsUpdated:
-            return try decoder.decode(UpdatedCallPermissionsEvent.self, from: data)
-        case .callNewReaction:
-            return try decoder.decode(CallReactionEvent.self, from: data)
-        case .callRecordingStarted:
-            return try decoder.decode(CallRecordingStartedEvent.self, from: data)
-        case .callRecordingStopped:
-            return try decoder.decode(CallRecordingStoppedEvent.self, from: data)
-        case .callUpdated:
-            return try decoder.decode(CallUpdatedEvent.self, from: data)
-        default:
-            do {
-                // Try to decode a custom event.
-                return try decoder.decode(CustomVideoEvent.self, from: data)
-            } catch {
-                throw ClientError.UnsupportedEventType()
-            }
+        case .typeUpdatedCallPermissionsEvent(let value):
+            return value
+        case .typeWSConnectedEvent(let value):
+            return value
         }
     }
 }
@@ -99,6 +98,14 @@ extension CallReactionEvent: Event {}
 extension CallRecordingStartedEvent: Event {}
 extension CallRecordingStoppedEvent: Event {}
 extension CallUpdatedEvent: Event {}
+extension BlockedUserEvent: Event {}
+extension CallMemberAddedEvent: Event {}
+extension CallMemberRemovedEvent: Event {}
+extension CallMemberUpdatedPermissionEvent: Event {}
+extension CallMemberUpdatedEvent: Event {}
+extension UnblockedUserEvent: Event {}
+extension WSConnectedEvent: HealthCheck {}
+extension WSEvent: Event {}
 
 extension UserResponse {
     var toUser: User {
@@ -108,10 +115,6 @@ extension UserResponse {
             imageURL: URL(string: image ?? "")
         )
     }
-}
-
-class JsonEvent: Decodable {
-    let type: EventType
 }
 
 public struct EventType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
@@ -127,20 +130,8 @@ public struct EventType: RawRepresentable, Codable, Hashable, ExpressibleByStrin
 }
 
 public extension EventType {
-    static let healthCheck: Self = "health.check"
-    static let wsConnected: Self = "connection.ok"
-    static let callCreated: Self = "call.created"
     static let callRejected: Self = "call.rejected"
     static let callAccepted: Self = "call.accepted"
-    static let callEnded: Self = "call.ended"
-    static let callBlocked: Self = "call.blocked_user"
-    static let callUnblocked: Self = "call.unblocked_user"
-    static let permissionRequest: Self = "call.permission_request"
-    static let permissionsUpdated: Self = "call.permissions_updated"
-    static let callNewReaction: Self = "call.reaction_new"
-    static let callRecordingStarted: Self = "call.recording_started"
-    static let callRecordingStopped: Self = "call.recording_stopped"
-    static let callUpdated: Self = "call.updated"
 }
 
 extension ClientError {

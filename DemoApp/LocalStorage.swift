@@ -9,6 +9,8 @@ protocol UserRepository {
     
     func save(user: UserCredentials)
     
+    func save(token: String)
+    
     func loadCurrentUser() -> UserCredentials?
     
     func removeCurrentUser()
@@ -39,8 +41,12 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler {
         let encoder = JSONEncoder()
         if let encoded = try? encoder.encode(user.userInfo) {
             defaults.set(encoded, forKey: userKey)
-            defaults.set(user.token.rawValue, forKey: tokenKey)
+            save(token: user.token.rawValue)
         }
+    }
+    
+    func save(token: String) {
+        defaults.set(token, forKey: tokenKey)
     }
     
     func loadCurrentUser() -> UserCredentials? {
