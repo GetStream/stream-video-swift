@@ -11,11 +11,15 @@ import AnyCodable
 #endif
 
 /** The discriminator object for all websocket events, you should use this to map event payloads to their own type */
-enum WSEvent: Codable, JSONEncodable, Hashable {
+internal enum WSEvent: Codable, JSONEncodable, Hashable {
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallEndedEvent(CallEndedEvent)
+    case typeCallMemberAddedEvent(CallMemberAddedEvent)
+    case typeCallMemberRemovedEvent(CallMemberRemovedEvent)
+    case typeCallMemberUpdatedEvent(CallMemberUpdatedEvent)
+    case typeCallMemberUpdatedPermissionEvent(CallMemberUpdatedPermissionEvent)
     case typeCallReactionEvent(CallReactionEvent)
     case typeCallRecordingStartedEvent(CallRecordingStartedEvent)
     case typeCallRecordingStoppedEvent(CallRecordingStoppedEvent)
@@ -38,6 +42,14 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
         case .typeCallCreatedEvent(let value):
             try container.encode(value)
         case .typeCallEndedEvent(let value):
+            try container.encode(value)
+        case .typeCallMemberAddedEvent(let value):
+            try container.encode(value)
+        case .typeCallMemberRemovedEvent(let value):
+            try container.encode(value)
+        case .typeCallMemberUpdatedEvent(let value):
+            try container.encode(value)
+        case .typeCallMemberUpdatedPermissionEvent(let value):
             try container.encode(value)
         case .typeCallReactionEvent(let value):
             try container.encode(value)
@@ -74,6 +86,14 @@ enum WSEvent: Codable, JSONEncodable, Hashable {
             self = .typeCallCreatedEvent(value)
         } else if let value = try? container.decode(CallEndedEvent.self) {
             self = .typeCallEndedEvent(value)
+        } else if let value = try? container.decode(CallMemberAddedEvent.self) {
+            self = .typeCallMemberAddedEvent(value)
+        } else if let value = try? container.decode(CallMemberRemovedEvent.self) {
+            self = .typeCallMemberRemovedEvent(value)
+        } else if let value = try? container.decode(CallMemberUpdatedEvent.self) {
+            self = .typeCallMemberUpdatedEvent(value)
+        } else if let value = try? container.decode(CallMemberUpdatedPermissionEvent.self) {
+            self = .typeCallMemberUpdatedPermissionEvent(value)
         } else if let value = try? container.decode(CallReactionEvent.self) {
             self = .typeCallReactionEvent(value)
         } else if let value = try? container.decode(CallRecordingStartedEvent.self) {

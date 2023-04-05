@@ -21,6 +21,7 @@ internal enum OwnCapability: String, Codable, CaseIterable {
     case joinEndedCall = "join-ended-call"
     case muteUsers = "mute-users"
     case readCall = "read-call"
+    case removeCallMember = "remove-call-member"
     case screenshare = "screenshare"
     case sendAudio = "send-audio"
     case sendVideo = "send-video"
@@ -29,6 +30,7 @@ internal enum OwnCapability: String, Codable, CaseIterable {
     case stopBroadcastCall = "stop-broadcast-call"
     case stopRecordCall = "stop-record-call"
     case updateCall = "update-call"
+    case updateCallMember = "update-call-member"
     case updateCallPermissions = "update-call-permissions"
     case updateCallSettings = "update-call-settings"
 }

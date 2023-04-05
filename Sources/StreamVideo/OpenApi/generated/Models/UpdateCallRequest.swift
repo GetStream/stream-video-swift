@@ -12,7 +12,7 @@ import AnyCodable
 
 internal struct UpdateCallRequest: Codable, JSONEncodable, Hashable {
 
-    /** call custom data */
+    /** Custom data for this object */
     internal var custom: [String: AnyCodable]?
     internal var settingsOverride: CallSettingsRequest?
 
