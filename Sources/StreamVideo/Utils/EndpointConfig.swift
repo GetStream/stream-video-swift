@@ -10,6 +10,11 @@ struct EndpointConfig {
 }
 
 extension EndpointConfig {
+    static let production = EndpointConfig(
+        hostname: "https://video.stream-io-api.com/",
+        wsEndpoint: "wss://video.stream-io-api.com/video/connect"
+    )
+    
     static let localhostConfig = EndpointConfig(
         hostname: "http://localhost:3030/",
         wsEndpoint: "ws://localhost:8800/video/connect"

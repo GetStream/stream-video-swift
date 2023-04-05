@@ -272,7 +272,7 @@ public class StreamVideo {
         }
         var connected = false
         var timeout = false
-        let control = DefaultTimer.schedule(timeInterval: 15, queue: .sdk) {
+        let control = DefaultTimer.schedule(timeInterval: 30, queue: .sdk) {
             timeout = true
         }
         log.debug("Listening for WS connection")

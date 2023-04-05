@@ -4,6 +4,7 @@
 
 import Foundation
 
+/// Observable object that provides info about the call state, as well as methods for updating it.
 public class Call: ObservableObject, @unchecked Sendable {
     
     /// The current participants dictionary.
@@ -22,7 +23,9 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// The id of the current session.
     var sessionId: String = ""
     
+    /// The call id.
     public let callId: String
+    /// The call type.
     public let callType: CallType
     
     /// The unique identifier of the call, formatted as `callType.name:callId`.
@@ -61,6 +64,11 @@ public class Call: ObservableObject, @unchecked Sendable {
         self.callController.call = self
     }
     
+    /// Joins the current call.
+    /// - Parameters:
+    ///  - ring: whether the call should ring, `false` by default.
+    ///  - callSettings: optional call settings.
+    /// - Throws: An error if the call could not be joined.
     public func join(
         ring: Bool = false,
         callSettings: CallSettings = CallSettings()
