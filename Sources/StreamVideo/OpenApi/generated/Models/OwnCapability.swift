@@ -27,10 +27,23 @@ internal enum OwnCapability: String, Codable, CaseIterable {
     case sendVideo = "send-video"
     case startBroadcastCall = "start-broadcast-call"
     case startRecordCall = "start-record-call"
+    case startTranscriptionCall = "start-transcription-call"
     case stopBroadcastCall = "stop-broadcast-call"
     case stopRecordCall = "stop-record-call"
+    case stopTranscriptionCall = "stop-transcription-call"
     case updateCall = "update-call"
     case updateCallMember = "update-call-member"
     case updateCallPermissions = "update-call-permissions"
     case updateCallSettings = "update-call-settings"
+    case unknown = "unknown"
+    
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.singleValueContainer()
+        if let string = try? container.decode(String.self),
+            let value = OwnCapability(rawValue: string) {
+            self = value
+        } else {
+            self = .unknown
+        }
+    }
 }

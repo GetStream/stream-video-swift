@@ -33,14 +33,14 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     internal var settings: CallSettingsResponse
     /** Date/time when the call will start */
     internal var startsAt: Date?
-    internal var team: String
+    internal var team: String?
     internal var transcribing: Bool
     /** The type of call */
     internal var type: String
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.broadcasting = broadcasting
@@ -97,7 +97,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(recording, forKey: .recording)
         try container.encode(settings, forKey: .settings)
         try container.encodeIfPresent(startsAt, forKey: .startsAt)
-        try container.encode(team, forKey: .team)
+        try container.encodeIfPresent(team, forKey: .team)
         try container.encode(transcribing, forKey: .transcribing)
         try container.encode(type, forKey: .type)
         try container.encode(updatedAt, forKey: .updatedAt)

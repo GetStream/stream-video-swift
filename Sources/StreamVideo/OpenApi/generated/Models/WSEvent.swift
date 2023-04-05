@@ -11,6 +11,10 @@ import AnyCodable
 #endif
 
 /** The discriminator object for all websocket events, you should use this to map event payloads to their own type */
+internal class WSEventMapping: Decodable {
+    let type: String
+}
+
 internal enum WSEvent: Codable, JSONEncodable, Hashable {
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
@@ -78,47 +82,68 @@ internal enum WSEvent: Codable, JSONEncodable, Hashable {
 
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let value = try? container.decode(BlockedUserEvent.self) {
-            self = .typeBlockedUserEvent(value)
-        } else if let value = try? container.decode(CallAcceptedEvent.self) {
+        let dto = try container.decode(WSEventMapping.self)
+        if dto.type == "call.accepted" {
+            let value = try container.decode(CallAcceptedEvent.self)
             self = .typeCallAcceptedEvent(value)
-        } else if let value = try? container.decode(CallCreatedEvent.self) {
+        } else if dto.type == "call.blocked_user" {
+            let value = try container.decode(BlockedUserEvent.self)
+            self = .typeBlockedUserEvent(value)
+        } else if dto.type == "call.created" {
+            let value = try container.decode(CallCreatedEvent.self)
             self = .typeCallCreatedEvent(value)
-        } else if let value = try? container.decode(CallEndedEvent.self) {
+        } else if dto.type == "call.ended" {
+            let value = try container.decode(CallEndedEvent.self)
             self = .typeCallEndedEvent(value)
-        } else if let value = try? container.decode(CallMemberAddedEvent.self) {
+        } else if dto.type == "call.member_added" {
+            let value = try container.decode(CallMemberAddedEvent.self)
             self = .typeCallMemberAddedEvent(value)
-        } else if let value = try? container.decode(CallMemberRemovedEvent.self) {
+        } else if dto.type == "call.member_removed" {
+            let value = try container.decode(CallMemberRemovedEvent.self)
             self = .typeCallMemberRemovedEvent(value)
-        } else if let value = try? container.decode(CallMemberUpdatedEvent.self) {
+        } else if dto.type == "call.member_updated" {
+            let value = try container.decode(CallMemberUpdatedEvent.self)
             self = .typeCallMemberUpdatedEvent(value)
-        } else if let value = try? container.decode(CallMemberUpdatedPermissionEvent.self) {
-            self = .typeCallMemberUpdatedPermissionEvent(value)
-        } else if let value = try? container.decode(CallReactionEvent.self) {
-            self = .typeCallReactionEvent(value)
-        } else if let value = try? container.decode(CallRecordingStartedEvent.self) {
-            self = .typeCallRecordingStartedEvent(value)
-        } else if let value = try? container.decode(CallRecordingStoppedEvent.self) {
-            self = .typeCallRecordingStoppedEvent(value)
-        } else if let value = try? container.decode(CallRejectedEvent.self) {
-            self = .typeCallRejectedEvent(value)
-        } else if let value = try? container.decode(CallUpdatedEvent.self) {
-            self = .typeCallUpdatedEvent(value)
-        } else if let value = try? container.decode(CustomVideoEvent.self) {
-            self = .typeCustomVideoEvent(value)
-        } else if let value = try? container.decode(HealthCheckEvent.self) {
-            self = .typeHealthCheckEvent(value)
-        } else if let value = try? container.decode(PermissionRequestEvent.self) {
+        } else if dto.type == "call.permission_request" {
+            let value = try container.decode(PermissionRequestEvent.self)
             self = .typePermissionRequestEvent(value)
-        } else if let value = try? container.decode(UnblockedUserEvent.self) {
-            self = .typeUnblockedUserEvent(value)
-        } else if let value = try? container.decode(UpdatedCallPermissionsEvent.self) {
+        } else if dto.type == "call.permissions_updated" {
+            let value = try container.decode(UpdatedCallPermissionsEvent.self)
             self = .typeUpdatedCallPermissionsEvent(value)
-        } else if let value = try? container.decode(WSConnectedEvent.self) {
+        } else if dto.type == "call.reaction_new" {
+            let value = try container.decode(CallReactionEvent.self)
+            self = .typeCallReactionEvent(value)
+        } else if dto.type == "call.recording_started" {
+            let value = try container.decode(CallRecordingStartedEvent.self)
+            self = .typeCallRecordingStartedEvent(value)
+        } else if dto.type == "call.recording_stopped" {
+            let value = try container.decode(CallRecordingStoppedEvent.self)
+            self = .typeCallRecordingStoppedEvent(value)
+        } else if dto.type == "call.rejected" {
+            let value = try container.decode(CallRejectedEvent.self)
+            self = .typeCallRejectedEvent(value)
+        } else if dto.type == "call.unblocked_user" {
+            let value = try container.decode(UnblockedUserEvent.self)
+            self = .typeUnblockedUserEvent(value)
+        } else if dto.type == "call.updated" {
+            let value = try container.decode(CallUpdatedEvent.self)
+            self = .typeCallUpdatedEvent(value)
+        } else if dto.type == "call.updated_permission" {
+            let value = try container.decode(CallMemberUpdatedPermissionEvent.self)
+            self = .typeCallMemberUpdatedPermissionEvent(value)
+        } else if dto.type == "connection.ok" {
+            let value = try container.decode(WSConnectedEvent.self)
             self = .typeWSConnectedEvent(value)
+        } else if dto.type == "custom" {
+            let value = try container.decode(CustomVideoEvent.self)
+            self = .typeCustomVideoEvent(value)
+        } else if dto.type == "health.check" {
+            let value = try container.decode(HealthCheckEvent.self)
+            self = .typeHealthCheckEvent(value)
         } else {
             throw DecodingError.typeMismatch(Self.Type.self, .init(codingPath: decoder.codingPath, debugDescription: "Unable to decode instance of WSEvent"))
         }
     }
+
 }
 
