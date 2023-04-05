@@ -2,17 +2,11 @@
 title: Recording Calls
 ---
 
-### RecordingController
+### Call's recording features
 
 In some cases, you want to be able to record a meeting and share the recording with the participants later on. The StreamVideo SDK has support for this use-case.
 
-In order to support this feature, you will need to create a new `RecordingController`, using the `StreamVideo` object:
-
-```swift
-private lazy var recordingController: RecordingController = {
-    streamVideo.makeRecordingController()
-}()
-```
+In order to support this feature, you will need to use the `Call`'s recording features, available after you join a call.
 
 #### Recording state
 
@@ -25,15 +19,12 @@ If you are not using our `CallViewModel`, you can also listen to this state via 
 
 #### Start a recording
 
-To start a recording, you need to call the `startRecording` method of the controller, by passing the `callId` and the `callType`:
+To start a recording, you need to call the `startRecording` method of the call:
 
 ```swift
-func startRecording(callId: String, callType: CallType) {
+func startRecording() {
     Task {
-        try await recordingController.startRecording(
-            callId: callId,
-            callType: callType
-        )
+        try await call.startRecording()
     }
 }
 ``` 
@@ -44,15 +35,12 @@ After the recording is started, the `recordingState` changes to `recording`.
 
 #### Stop a recording
 
-To stop a recording, you need to call the `stopRecording` method of the controller, by passing the `callId` and the `callType`:
+To stop a recording, you need to call the `stopRecording` method of the `Call`:
 
 ```swift
-func stopRecording(callId: String, callType: CallType) {
+func stopRecording() {
     Task {
-        try await recordingController.stopRecording(
-            callId: callId,
-            callType: callType
-        )
+        try await call.stopRecording()
     }
 }
 ```
@@ -66,7 +54,7 @@ You can listen to the recording events and show visual indications to the users 
 ```swift
 func subscribeToRecordingEvents() {
     Task {
-        for await event in recordingController.recordingEvents() {
+        for await event in call.recordingEvents() {
             log.debug("received an event \(event)")
             /* handle recording event */
         }
@@ -76,16 +64,12 @@ func subscribeToRecordingEvents() {
 
 #### Search recordings
 
-You can search for recordings in a video call, using the `RecordingController`'s `listRecordings`:
+You can search for recordings in a video call, using the `Call`'s `listRecordings` method:
 
 ```swift
 func loadRecordings() {
     Task {
-        self.recordings = try await recordingController.listRecordings(
-            callId: callId,
-            callType: callType,
-            session: callId
-        )
+        self.recordings = try await call.listRecordings()
     }
 }
 ```

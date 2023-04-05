@@ -12,6 +12,7 @@ import AnyCodable
 
 internal struct SendReactionRequest: Codable, JSONEncodable, Hashable {
 
+    static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
     internal var custom: [String: AnyCodable]?
     internal var emojiCode: String?
     internal var type: String

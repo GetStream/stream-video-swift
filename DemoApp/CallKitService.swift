@@ -13,6 +13,8 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     var callId: String = ""
     var callType: String = ""
     
+    private var call: Call?
+    
     private var callKitId: UUID?
     private let callController = CXCallController()
     
@@ -84,7 +86,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 await MainActor.run {
                     if AppState.shared.streamVideo == nil {
                         let streamVideo = StreamVideo(
-                            apiKey: "key1",
+                            apiKey: Config.apiKey,
                             user: currentUser.userInfo,
                             token: currentUser.token,
                             videoConfig: VideoConfig(),
@@ -95,18 +97,10 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         AppState.shared.streamVideo = streamVideo
                     }
                     let callType: CallType = .init(name: callType)
-                    let callController = streamVideo.makeCallController(callType: callType, callId: callId)
+                    self.call = streamVideo.makeCall(callType: callType, callId: callId)
                     Task {
-                        _ = try await callController.joinCall(
-                            callType: callType,
-                            callId: callId,
-                            callSettings: CallSettings(),
-                            videoOptions: VideoOptions(),
-                            participants: [],
-                            ring: false
-                        )
+                        try await call?.join()
                         await MainActor.run {
-                            AppState.shared.activeCallController = callController
                             action.fulfill()
                         }
                     }
@@ -118,7 +112,8 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         callKitId = nil
-        streamVideo.leaveCall()
+        call?.leave()
+        call = nil
         action.fulfill()
     }
     

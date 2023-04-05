@@ -26,7 +26,7 @@ The low-level client is used for establishing audio and video calls. It integrat
 Here are the most important components that the low-level client provides:
 
 - `StreamVideo` - the main SDK object.
-- `CallController` - controller that deals with a particular call.
+- `Call` - observable object that provides info about the call state, as well as methods for updating it.
 - `CallViewModel` - stateful ViewModel that contains presentation logic.
 
 ### StreamVideo
@@ -65,15 +65,15 @@ private func connectUser() {
 }
 ```
 
-### CallController
+### Call
 
-The `CallController` class deals with a particular call. It's created before the call is started, and it should be deallocated when the call ends.
+The `Call` observable class provides all the information about the call, such as its participants, whether the call is being recorded, etc. It also provides methods to perform standard actions available during a call, such as muting/unmuting users, sending reactions, changing the camera input, granting permissions, recording, etc.
 
-If you want to build your own presentation layer around video calls (ViewModel / Presenter), you should use this class. It provides access to call related actions, such as muting audio/video, changing the camera input, hanging up, etc.
+If you want to build your own presentation layer around video calls (ViewModel / Presenter), you should listen to the updates of this class.
 
-When a call starts, the call controller communicates with our backend infrastructure, to find the best Selective Forwarding Unit (SFU) to host the call, based on the locations of the participants. It then establishes the connection with that SFU and provides updates on all events related to a call.
+When a call starts, the iOS SDK communicates with our backend infrastructure, to find the best Selective Forwarding Unit (SFU) to host the call, based on the locations of the participants. It then establishes the connection with that SFU and provides updates on all events related to a call.
 
-You can create a new call controller via the `StreamVideo`'s method `func makeCallController(callType: CallType, callId: String)`.
+You can create a new `Call` via the `StreamVideo`'s method `func makeCall(callType: CallType, callId: String, members: [User])`.
 
 ### CallViewModel
 

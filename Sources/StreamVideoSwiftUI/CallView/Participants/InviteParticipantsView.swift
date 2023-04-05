@@ -15,11 +15,13 @@ struct InviteParticipantsView: View {
     
     init(
         inviteParticipantsShown: Binding<Bool>,
-        currentParticipants: [CallParticipant]
+        currentParticipants: [CallParticipant],
+        call: Call?
     ) {
         _viewModel = StateObject(
             wrappedValue: InviteParticipantsViewModel(
-                currentParticipants: currentParticipants
+                currentParticipants: currentParticipants,
+                call: call
             )
         )
         _inviteParticipantsShown = inviteParticipantsShown
@@ -50,7 +52,6 @@ struct InviteParticipantsView: View {
                 } label: {
                     VideoUserView(
                         user: user,
-                        onlineText: viewModel.onlineInfo(for: user),
                         isSelected: viewModel.isSelected(user: user)
                     )
                 }
@@ -117,7 +118,6 @@ struct VideoUserView: View {
     private let avatarSize: CGFloat = 56
     
     var user: User
-    var onlineText: String
     var isSelected: Bool
     
     var body: some View {
@@ -126,14 +126,10 @@ struct VideoUserView: View {
                 UserAvatar(imageURL: user.imageURL, size: avatarSize)
             }
             
-            VStack(alignment: .leading, spacing: 4) {
-                Text(user.name)
-                    .lineLimit(1)
-                    .font(fonts.bodyBold)
-                Text(onlineText)
-                    .font(fonts.footnote)
-                    .foregroundColor(Color(colors.textLowEmphasis))
-            }
+            Text(user.name)
+                .lineLimit(1)
+                .font(fonts.bodyBold)
+
             Spacer()
             
             if isSelected {

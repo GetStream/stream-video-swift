@@ -12,6 +12,7 @@ import AnyCodable
 
 internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
 
+    static let membersLimitRule = NumericRule<Int>(minimum: nil, exclusiveMinimum: false, maximum: 100, exclusiveMaximum: false, multipleOf: nil)
     /** if true the call will be created if it doesn't exist */
     internal var create: Bool?
     internal var data: CallRequest?

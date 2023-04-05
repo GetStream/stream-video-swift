@@ -7,9 +7,7 @@ import WebRTC
 
 /// Class that handles a particular call.
 public class CallController {
-    
-    public var onCallUpdated: ((Call?) -> ())?
-    
+        
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleParticipantsUpdated()
@@ -17,7 +15,7 @@ public class CallController {
         }
     }
 
-    var call: Call?
+    weak var call: Call?
     private let user: User
     private let callId: String
     private let callType: CallType
@@ -59,7 +57,7 @@ public class CallController {
         videoOptions: VideoOptions,
         participants: [User],
         ring: Bool = false
-    ) async throws -> Call {
+    ) async throws {
         let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
@@ -68,7 +66,7 @@ public class CallController {
             ring: ring
         )
         
-        return try await connectToEdge(
+        try await connectToEdge(
             edgeServer,
             callType: callType,
             callId: callId,
@@ -85,7 +83,6 @@ public class CallController {
     ///   - callId: The unique identifier for the call.
     ///   - callSettings: The settings to use for the call.
     ///   - videoOptions: The `VideoOptions` for the call.
-    /// - Returns: A `Call` instance representing the joined call.
     /// - Throws: An error if the call could not be joined.
     public func joinCall(
         on edgeServer: EdgeServer,
@@ -93,7 +90,7 @@ public class CallController {
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions
-    ) async throws -> Call {
+    ) async throws {
         try await connectToEdge(
             edgeServer,
             callType: callType,
@@ -213,7 +210,7 @@ public class CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         ring: Bool
-    ) async throws -> Call {
+    ) async throws {
         webRTCClient = WebRTCClient(
             user: user,
             apiKey: apiKey,
@@ -234,15 +231,8 @@ public class CallController {
             connectOptions: connectOptions
         )
         let sessionId = webRTCClient?.sessionID ?? ""
-        let currentCall = Call.create(
-            callId: callId,
-            callType: callType,
-            sessionId: sessionId,
-            callSettingsInfo: edgeServer.callSettings,
-            recordingState: edgeServer.callSettings.recording ? .recording : .noRecording
-        )
-        call = currentCall
-        return currentCall
+        call?.sessionId = sessionId
+        call?.update(recordingState: edgeServer.callSettings.recording ? .recording : .noRecording)
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
@@ -274,7 +264,7 @@ public class CallController {
             if reconnectionDate != nil {
                 reconnectionDate = nil
             }
-            call?.update(isReconnecting: false)
+            call?.update(reconnectionStatus: .connected)
         default:
             log.debug("Signal connection state changed to \(state)")
         }
@@ -299,15 +289,14 @@ public class CallController {
                 log.debug("Waiting to reconnect")
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 log.debug("Retrying to connect to the call")
-                self.call = try await joinCall(
+                try await joinCall(
                     callType: call.callType,
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                     participants: []
                 )
-                self.call?.update(isReconnecting: true)
-                self.onCallUpdated?(self.call)
+                self.call?.update(reconnectionStatus: .reconnecting)
             } catch {
                 self.handleReconnectionError()
             }
@@ -316,8 +305,7 @@ public class CallController {
     
     private func handleReconnectionError() {
         log.error("Error while reconnecting to the call")
-        self.call = nil
-        self.onCallUpdated?(nil)
+        self.call?.update(reconnectionStatus: .disconnected)
     }
     
 }

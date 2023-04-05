@@ -25,8 +25,7 @@ class MockResponseBuilder {
         )
         let ringSettings = RingSettings(
             autoCancelTimeoutMs: 15000,
-            autoRejectTimeoutMs: 15000,
-            enabled: true
+            autoRejectTimeoutMs: 15000
         )
         let screensharingSettings = ScreensharingSettings(
             accessRequestEnabled: true,

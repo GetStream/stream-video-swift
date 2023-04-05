@@ -12,6 +12,9 @@ import AnyCodable
 
 internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
 
+    static let idRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
+    static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
+    static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
     internal var filterConditions: [String: AnyCodable]
     internal var id: String?
     internal var limit: Int?

@@ -8,17 +8,13 @@ In some cases, you might want to send custom events during a call. For example, 
 
 The StreamVideo SDK has support for sending both custom events and reactions and listening to them.
 
-### EventsController
+### Call's event features
 
-In order to send custom events, you should create an instance of the `EventsController`, using the `StreamVideo` object:
-
-```swift
-let eventsController = streamVideo.makeEventsController()
-```
+In order to send custom events, you should use the event based features from the `Call` object, which are available as soon as you join a call.
 
 #### Sending call reactions
 
-In order to send call reactions, you need to create a `CallReactionRequest`, where you need to provide the call information, as well as the reaction data. Then, you can send the request to our backend using the `EventsController`'s `send(reaction:)` method:
+In order to send call reactions, you need to create a `CallReactionRequest`, where you need to provide the call information, as well as the reaction data. Then, you can send the request to our backend using the `Call`'s `send(reaction:)` method:
 
 ```swift
 let reactionRequest = CallReactionRequest(
@@ -33,19 +29,19 @@ let reactionRequest = CallReactionRequest(
         "isReverted": .bool(false)
     ]
 )
-try await eventsController.send(reaction: reactionRequest)
+try await call.send(reaction: reactionRequest)
 ```
 
 Note that in the `extraData` dictionary, you can provide additional information to help you handle the reaction better. For example, you can pass a duration, to control how long the reaction is displayed on the screen, or sound filenames that can be played while the reaction is shown. Additionally, you can use boolean flags like for example `isReverted`, to check whether the user is sending the reaction, or wants it reverted.
 
 #### Listening to reaction events
 
-The reaction events are available via the `reactions` async stream in the `EventsController`. Here's an example how to listen to the events:
+The reaction events are available via the `reactions` async stream in the `Call` object. Here's an example how to listen to the events:
 
 ```swift
 private func subscribeToReactionEvents() {
     Task {
-        for await event in eventsController.reactions() {
+        for await event in call.reactions() {
             log.debug("received an event \(event)")
             handleReaction(with: event.extraData, from: event.user)
         }
@@ -78,7 +74,7 @@ struct GameEvent: Identifiable, Codable {
 }
 ```
 
-Next, let's see how we can send the event, using the `EventsController`'s method `send(event:)`:
+Next, let's see how we can send the event, using the `Call`'s method `send(event:)`:
 
 ```swift
 func send(event: GameEvent) {
@@ -93,7 +89,7 @@ func send(event: GameEvent) {
                 "name": .string(event.name)
             ]
         )
-        try await eventsController.send(event: customEvent)
+        try await call.send(event: customEvent)
     }
 }
 ```
@@ -102,12 +98,12 @@ In the code above, we are creating a `CustomEventRequest`, with the call id and 
 
 #### Listening to custom events
 
-You can listen to custom events using the `customEvents()` async stream in the `EventsController`:
+You can listen to custom events using the `customEvents()` async stream in the `Call`:
 
 ```swift
 private func subscribeToCustomEvents() {
     Task {
-        for await event in eventsController.customEvents() {
+        for await event in call.customEvents() {
             log.debug("received an event \(event)")
             if event.type == EventType.gameStarted.rawValue {
                 handleEvent(with: event.extraData, from: event.user)

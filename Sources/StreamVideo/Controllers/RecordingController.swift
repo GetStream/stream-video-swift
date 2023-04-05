@@ -4,7 +4,7 @@
 
 import Foundation
 
-public class RecordingController {
+class RecordingController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
     
@@ -28,7 +28,7 @@ public class RecordingController {
     ///   - callId: The ID of the call to start recording.
     ///   - callType: The type of the call to start recording.
     /// - Throws: An error if the recording fails.
-    public func startRecording(callId: String, callType: CallType) async throws {
+    func startRecording(callId: String, callType: CallType) async throws {
         let callCid = "\(callType.name):\(callId)"
         let recordingEvent = RecordingEvent(callCid: callCid, type: callType.name, action: .requested)
         try await coordinatorClient.startRecording(callId: callId, callType: callType.name)
@@ -40,7 +40,7 @@ public class RecordingController {
     ///   - callId: The ID of the call to stop recording.
     ///   - callType: The type of the call to stop recording.
     /// - Throws: An error if stopping the recording fails.
-    public func stopRecording(callId: String, callType: CallType) async throws {
+    func stopRecording(callId: String, callType: CallType) async throws {
         try await coordinatorClient.stopRecording(callId: callId, callType: callType.name)
     }
     
@@ -50,7 +50,7 @@ public class RecordingController {
     ///   - callType: The type of the call to list recordings for.
     ///   - session: The session to list recordings for.
     /// - Returns: An array of `CallRecordingInfo` objects representing the recordings for the specified call.
-    public func listRecordings(
+    func listRecordings(
         callId: String,
         callType: String,
         session: String
@@ -66,7 +66,7 @@ public class RecordingController {
     
     /// Creates an asynchronous stream of `RecordingEvent` objects.
     /// - Returns: An `AsyncStream` of `RecordingEvent` objects.
-    public func recordingEvents() -> AsyncStream<RecordingEvent> {
+    func recordingEvents() -> AsyncStream<RecordingEvent> {
         let events = AsyncStream(RecordingEvent.self) { [weak self] continuation in
             self?.onRecordingEvent = { event in
                 continuation.yield(event)

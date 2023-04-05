@@ -12,6 +12,7 @@ import AnyCodable
 
 internal struct MemberRequest: Codable, JSONEncodable, Hashable {
 
+    static let userIdRule = StringRule(minLength: 1, maxLength: nil, pattern: nil)
     /** Custom data for this object */
     internal var custom: [String: AnyCodable]?
     internal var role: String?

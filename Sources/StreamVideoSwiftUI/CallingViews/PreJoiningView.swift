@@ -118,6 +118,9 @@ struct LobbyContentView: View {
         .onAppear {
             viewModel.startCamera(front: true)
         }
+        .onDisappear {
+            viewModel.stopLatencyChecks()
+        }
     }
 }
 

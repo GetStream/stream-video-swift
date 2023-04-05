@@ -4,7 +4,7 @@
 
 import Foundation
 
-public class EventsController {
+class EventsController {
     
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
@@ -33,7 +33,7 @@ public class EventsController {
     /// Sends a custom event to the call.
     /// - Parameter event: The `CustomEventRequest` object representing the custom event to send.
     /// - Throws: An error if the sending fails.
-    public func send(event: CustomEventRequest) async throws {
+    func send(event: CustomEventRequest) async throws {
         let sendEventRequest = SendEventRequest(
             custom: RawJSON.convert(extraData: event.extraData),
             type: event.type.rawValue
@@ -49,7 +49,7 @@ public class EventsController {
     /// Sends a reaction to the call.
     /// - Parameter reaction: The `CallReactionRequest` object representing the reaction to send.
     /// - Throws: An error if the sending fails.
-    public func send(reaction: CallReactionRequest) async throws {
+    func send(reaction: CallReactionRequest) async throws {
         let request = SendReactionRequest(
             custom: RawJSON.convert(extraData: reaction.extraData),
             emojiCode: reaction.emojiCode,
@@ -65,7 +65,7 @@ public class EventsController {
     
     /// Returns an asynchronous stream of custom events received during the call.
     /// - Returns: An `AsyncStream` of `CustomEvent` objects.
-    public func customEvents() -> AsyncStream<CustomEvent> {
+    func customEvents() -> AsyncStream<CustomEvent> {
         let requests = AsyncStream(CustomEvent.self) { [weak self] continuation in
             self?.onCustomEvent = { event in
                 continuation.yield(event)
@@ -76,7 +76,7 @@ public class EventsController {
     
     /// Returns an asynchronous stream of reactions received during the call.
     /// - Returns: An `AsyncStream` of `CallReaction` objects.
-    public func reactions() -> AsyncStream<CallReaction> {
+    func reactions() -> AsyncStream<CallReaction> {
         let requests = AsyncStream(CallReaction.self) { [weak self] continuation in
             self?.onNewReaction = { event in
                 continuation.yield(event)

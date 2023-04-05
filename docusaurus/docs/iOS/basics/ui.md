@@ -10,7 +10,7 @@ Let's explore the different possibilities and how they would impact your app and
 
 ## Using only the low-level client
 
-If your app needs a completely custom UI and calling flow, you can use only our low-level client that implements the WebRTC protocol and communicates with our backend services. If you go with this approach, you can either use our stateful `CallViewModel` that allows you to observe the call state (list of participants, camera & microphone state, etc), or use our lower level `CallController` and implement your own stateful objects.
+If your app needs a completely custom UI and calling flow, you can use only our low-level client that implements the WebRTC protocol and communicates with our backend services. If you go with this approach, you can either use our stateful `CallViewModel` that allows you to observe the call state (list of participants, camera & microphone state, etc), or use our lower level observable `Call` object and implement your own presentation objects.
 
 Additionally, if you go with this approach, you can still use some components from our UI SDKs (if they fit your use-case), to facilitate your development. We have several examples for this in our cookbook. //TODO: figure out the correct link here, after the reorg.
 

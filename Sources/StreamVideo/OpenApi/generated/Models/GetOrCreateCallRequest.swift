@@ -12,6 +12,7 @@ import AnyCodable
 
 internal struct GetOrCreateCallRequest: Codable, JSONEncodable, Hashable {
 
+    static let membersLimitRule = NumericRule<Int>(minimum: nil, exclusiveMinimum: false, maximum: 100, exclusiveMaximum: false, multipleOf: nil)
     internal var data: CallRequest?
     internal var membersLimit: Int?
     /** if provided it overrides the default ring setting for this call */

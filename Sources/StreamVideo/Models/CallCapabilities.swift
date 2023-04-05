@@ -15,6 +15,9 @@ public struct CallCapability: RawRepresentable, ExpressibleByStringLiteral, Hash
         rawValue = value
     }
 
+    public static let blockUsers: Self = "block-users"
+    public static let createReaction = "create-reaction"
+    public static let joinBackstage = "join-backstage"
     public static let joinCall: Self = "join-call"
     public static let readCall: Self = "read-call"
     public static let createCall: Self = "create-call"
@@ -26,6 +29,8 @@ public struct CallCapability: RawRepresentable, ExpressibleByStringLiteral, Hash
     public static let sendAudio: Self = "send-audio"
     public static let startRecordCall: Self = "start-record-call"
     public static let stopRecordCall: Self = "stop-record-call"
+    public static let startBroadcastCall = "start-broadcast-call"
+    public static let stopBroadcastCall = "stop-broadcast-call"
     public static let endCall: Self = "end-call"
     public static let muteUsers: Self = "mute-users"
     public static let updateCallPermissions: Self = "update-call-permissions"

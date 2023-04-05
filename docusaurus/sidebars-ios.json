@@ -42,8 +42,7 @@
       "Client": [
         "client/overview",
         "client/stream-video",
-        "client/call-viewmodel",
-        "client/call-controller"
+        "client/call-viewmodel"
       ],
       "Advanced Guides": [
         "advanced/screensharing",

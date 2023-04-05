@@ -12,6 +12,7 @@ import AnyCodable
 
 internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
 
+    static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
     internal var filterConditions: [String: AnyCodable]?
     internal var limit: Int?
     internal var next: String?
