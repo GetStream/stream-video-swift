@@ -108,6 +108,7 @@ class WebRTCClient: NSObject {
     private var connectOptions: ConnectOptions?
     private let callCoordinatorController: CallCoordinatorController
     private let videoConfig: VideoConfig
+    private let audioSettings: AudioSettings
     private(set) var callSettings = CallSettings()
     private(set) var videoOptions = VideoOptions()
     
@@ -145,12 +146,14 @@ class WebRTCClient: NSObject {
         token: String,
         callCid: String,
         callCoordinatorController: CallCoordinatorController,
-        videoConfig: VideoConfig
+        videoConfig: VideoConfig,
+        audioSettings: AudioSettings
     ) {
         state = State()
         self.user = user
         self.token = token
         self.callCid = callCid
+        self.audioSettings = audioSettings
         self.videoConfig = videoConfig
         self.callCoordinatorController = callCoordinatorController
         httpClient = URLSessionClient(
@@ -408,13 +411,23 @@ class WebRTCClient: NSObject {
     }
         
     private func negotiate(peerConnection: PeerConnection?) async throws {
+        guard let peerConnection else { return }
         log.debug("Negotiating peer connection")
-        let offer = try await peerConnection?.createOffer()
+        let initialOffer = try await peerConnection.createOffer()
         log.debug("Setting local description for peer connection")
-        try await peerConnection?.setLocalDescription(offer)
+        var updatedSdp = initialOffer.sdp
+        if audioSettings.opusDtxEnabled {
+            log.debug("Setting Opus DTX for the audio")
+            updatedSdp = initialOffer.sdp.replacingOccurrences(
+                of: "useinbandfec=1",
+                with: "useinbandfec=1;usedtx=1"
+            )
+        }
+        let offer = RTCSessionDescription(type: initialOffer.type, sdp: updatedSdp)
+        try await peerConnection.setLocalDescription(offer)
         let sdp: String
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
-        request.sdp = offer?.sdp ?? ""
+        request.sdp = offer.sdp
         request.sessionID = sessionID
         var tracks = [Stream_Video_Sfu_Models_TrackInfo]()
         if callSettings.videoOn {
@@ -446,7 +459,7 @@ class WebRTCClient: NSObject {
         let response = try await signalService.setPublisher(setPublisherRequest: request)
         sdp = response.sdp
         log.debug("Setting remote description")
-        try await peerConnection?.setRemoteDescription(sdp, type: .answer)
+        try await peerConnection.setRemoteDescription(sdp, type: .answer)
     }
     
     private func makeAudioTrack() async -> RTCAudioTrack {
