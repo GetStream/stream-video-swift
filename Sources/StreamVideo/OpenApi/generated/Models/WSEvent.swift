@@ -144,4 +144,6 @@ internal enum WSEvent: Codable, JSONEncodable, Hashable {
             throw DecodingError.typeMismatch(Self.Type.self, .init(codingPath: decoder.codingPath, debugDescription: "Unable to decode instance of WSEvent"))
         }
     }
+
 }
+

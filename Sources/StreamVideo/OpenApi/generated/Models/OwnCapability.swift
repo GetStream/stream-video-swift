@@ -35,12 +35,12 @@ internal enum OwnCapability: String, Codable, CaseIterable {
     case updateCallMember = "update-call-member"
     case updateCallPermissions = "update-call-permissions"
     case updateCallSettings = "update-call-settings"
-    case unknown = "unknown"
-    
+    case unknown = "_unknown"
+
     public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
-        if let string = try? container.decode(String.self),
-            let value = OwnCapability(rawValue: string) {
+        if let decodedValue = try? container.decode(String.self),
+            let value = OwnCapability(rawValue: decodedValue) {
             self = value
         } else {
             self = .unknown
