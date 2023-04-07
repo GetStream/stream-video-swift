@@ -105,6 +105,8 @@
 		8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593529BB6B4E00134EA0 /* EdgeResponse.swift */; };
 		8469593829BB6B4E00134EA0 /* GetEdgesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593629BB6B4E00134EA0 /* GetEdgesResponse.swift */; };
 		8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593D29BF214700134EA0 /* ViewExtensions.swift */; };
+		846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CD29E056C40084C264 /* StringExtensions.swift */; };
+		846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */; };
 		846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846E4AE329CDE0B0003733AB /* OwnCapability.swift */; };
 		846E4AEF29CDEA66003733AB /* WSAuthMessageRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846E4AE529CDEA65003733AB /* WSAuthMessageRequest.swift */; };
 		846E4AF029CDEA66003733AB /* DeviceFieldsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846E4AE629CDEA65003733AB /* DeviceFieldsRequest.swift */; };
@@ -594,6 +596,8 @@
 		8469593529BB6B4E00134EA0 /* EdgeResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EdgeResponse.swift; sourceTree = "<group>"; };
 		8469593629BB6B4E00134EA0 /* GetEdgesResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetEdgesResponse.swift; sourceTree = "<group>"; };
 		8469593D29BF214700134EA0 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
+		846A06CD29E056C40084C264 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
+		846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions_Tests.swift; sourceTree = "<group>"; };
 		846E4AE329CDE0B0003733AB /* OwnCapability.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = OwnCapability.swift; sourceTree = "<group>"; };
 		846E4AE529CDEA65003733AB /* WSAuthMessageRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WSAuthMessageRequest.swift; sourceTree = "<group>"; };
 		846E4AE629CDEA65003733AB /* DeviceFieldsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DeviceFieldsRequest.swift; sourceTree = "<group>"; };
@@ -1272,6 +1276,7 @@
 			isa = PBXGroup;
 			children = (
 				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
+				846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1438,6 +1443,7 @@
 				8268615F290A7556005BFFED /* SystemEnvironment.swift */,
 				8490DD22298D5330007E53D2 /* Data+Gzip.swift */,
 				846E4B0029D2D372003733AB /* Sorting.swift */,
+				846A06CD29E056C40084C264 /* StringExtensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2237,6 +2243,7 @@
 				846E4AF129CDEA66003733AB /* CallTypeResponse.swift in Sources */,
 				843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */,
 				8490032129D308A000AD9BB4 /* RingSettingsRequest.swift in Sources */,
+				846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */,
 				8409465629AF4EEC007AF5BF /* CallReactionEvent.swift in Sources */,
 				84DC38D329ADFCFD00946713 /* CallEndedEvent.swift in Sources */,
 				84A737D028F4716E001A6769 /* models.pb.swift in Sources */,
@@ -2427,6 +2434,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */,
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
 				8490033329D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift in Sources */,
 				8492B871290801DC00006649 /* CallViewModel_Tests.swift in Sources */,

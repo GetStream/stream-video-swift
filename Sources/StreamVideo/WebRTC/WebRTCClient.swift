@@ -423,6 +423,9 @@ class WebRTCClient: NSObject {
                 with: "useinbandfec=1;usedtx=1"
             )
         }
+        if audioSettings.redundantCodingEnabled {
+            updatedSdp = updatedSdp.preferredRedCodec
+        }
         let offer = RTCSessionDescription(type: initialOffer.type, sdp: updatedSdp)
         try await peerConnection.setLocalDescription(offer)
         let sdp: String

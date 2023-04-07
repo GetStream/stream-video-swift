@@ -15,7 +15,12 @@ class CallController_Mock: CallController {
         token: StreamVideo.mockToken.rawValue,
         callCid: "default:test",
         callCoordinatorController: callCoordinatorController,
-        videoConfig: VideoConfig()
+        videoConfig: VideoConfig(),
+        audioSettings: AudioSettings(
+            accessRequestEnabled: true,
+            opusDtxEnabled: true,
+            redundantCodingEnabled: true
+        )
     )
     
     override func joinCall(
