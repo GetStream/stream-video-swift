@@ -221,7 +221,7 @@ open class CallViewModel: ObservableObject {
     
     /// Toggles the camera position (front vs back).
     public func toggleCameraPosition() {
-        guard let call = call else { return }
+        guard let call = call, callSettings.videoOn else { return }
         let next = callSettings.cameraPosition.next()
         call.changeCameraMode(position: next) { [weak self] in
             guard let self = self else { return }
