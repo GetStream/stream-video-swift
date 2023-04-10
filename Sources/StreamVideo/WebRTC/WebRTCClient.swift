@@ -360,6 +360,9 @@ class WebRTCClient: NSObject {
                 videoOptions: videoOptions
             )
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
+            publisher?.onDisconnect = { [weak self] _ in
+                self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+            }
         }
         publishUserMedia(callSettings: callSettings)
     }

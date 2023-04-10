@@ -290,7 +290,11 @@ class CallController {
     private func handleSignalChannelDisconnect(
         source: WebSocketConnectionState.DisconnectionSource
     ) {
-        guard let call = call, source != .userInitiated else { return }
+        guard let call = call,
+                call.reconnectionStatus != .reconnecting,
+                source != .userInitiated else {
+            return            
+        }
         if reconnectionDate == nil {
             reconnectionDate = Date()
         }
@@ -303,6 +307,7 @@ class CallController {
         }
         Task {
             do {
+                await webRTCClient?.cleanUp()
                 log.debug("Waiting to reconnect")
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 log.debug("Retrying to connect to the call")
@@ -323,6 +328,7 @@ class CallController {
     private func handleReconnectionError() {
         log.error("Error while reconnecting to the call")
         self.call?.update(reconnectionStatus: .disconnected)
+        self.cleanUp()
     }
     
 }

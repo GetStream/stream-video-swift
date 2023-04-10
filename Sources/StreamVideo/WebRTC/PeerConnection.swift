@@ -30,6 +30,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private var screensharingStreams = [RTCMediaStream]()
         
     var onNegotiationNeeded: ((PeerConnection) -> Void)?
+    var onDisconnect: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
     
@@ -200,6 +201,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         log.debug("Peer connection state changed to \(newState)")
+        if newState == .disconnected {
+            log.debug("Peer connection disconnected")
+            onDisconnect?(self)
+        }
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
