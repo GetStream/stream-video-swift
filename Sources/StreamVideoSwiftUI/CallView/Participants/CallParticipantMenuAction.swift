@@ -8,7 +8,7 @@ import StreamVideo
 public struct CallParticipantMenuAction: Identifiable {
     public var id: String
     public let title: String
-    public let requiredCapability: CallCapability
+    public let requiredCapability: OwnCapability
     public let iconName: String
     public let action: (String) -> Void
     public let confirmationPopup: ConfirmationPopup?
