@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct TranscriptionSettings: Codable, JSONEncodable, Hashable {
 
     internal enum Mode: String, Codable, CaseIterable {

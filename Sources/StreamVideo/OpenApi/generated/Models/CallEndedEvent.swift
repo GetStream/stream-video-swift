@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen */
-internal struct CallEndedEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallEndedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var callCid: String
     internal var createdAt: Date

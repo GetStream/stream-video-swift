@@ -47,10 +47,15 @@ class InviteParticipantsViewModel: ObservableObject {
     func inviteUsersTapped() {
         guard let call else { return }
         Task {
-            try await call.addMembersToCall(ids: selectedUsers.map(\.id))
-            withAnimation {
-                allUsers = allUsers.filter { !selectedUsers.contains($0) }
-                selectedUsers = []
+            do {
+                let result = try await call.addMembers(ids: selectedUsers.map(\.id))
+                log.debug("added call members \(result)")
+                withAnimation {
+                    allUsers = allUsers.filter { !selectedUsers.contains($0) }
+                    selectedUsers = []
+                }
+            } catch {
+                log.error(error.localizedDescription)
             }
         }
     }

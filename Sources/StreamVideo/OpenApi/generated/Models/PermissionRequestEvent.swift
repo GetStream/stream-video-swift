@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user */
-internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var callCid: String
     internal var createdAt: Date

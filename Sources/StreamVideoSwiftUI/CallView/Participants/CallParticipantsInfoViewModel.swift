@@ -52,6 +52,10 @@ class CallParticipantsInfoViewModel: ObservableObject {
     )
     
     private var call: Call?
+    
+    var inviteParticipantsButtonShown: Bool {
+        call?.currentUserHasCapability(.updateCallMember) == true
+    }
             
     init(call: Call?) {
         self.call = call

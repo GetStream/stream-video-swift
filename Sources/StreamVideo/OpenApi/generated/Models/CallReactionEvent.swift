@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen */
-internal struct CallReactionEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallReactionEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var callCid: String
     internal var createdAt: Date

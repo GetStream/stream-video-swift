@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct EdgeResponse: Codable, JSONEncodable, Hashable {
 
     internal var continentCode: String

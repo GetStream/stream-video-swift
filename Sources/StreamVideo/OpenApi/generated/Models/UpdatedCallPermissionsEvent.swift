@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly */
-internal struct UpdatedCallPermissionsEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct UpdatedCallPermissionsEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var callCid: String
     internal var createdAt: Date

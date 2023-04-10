@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct RequestPermissionRequest: Codable, JSONEncodable, Hashable {
 
     internal var permissions: [String]

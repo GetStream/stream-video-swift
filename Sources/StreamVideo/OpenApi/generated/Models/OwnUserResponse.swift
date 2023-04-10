@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
 
     internal var createdAt: Date

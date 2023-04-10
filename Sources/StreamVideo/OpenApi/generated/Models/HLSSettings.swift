@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct HLSSettings: Codable, JSONEncodable, Hashable {
 
     internal var autoOn: Bool

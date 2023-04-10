@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current. */
-internal struct CallUpdatedEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallUpdatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var call: CallResponse
     internal var callCid: String

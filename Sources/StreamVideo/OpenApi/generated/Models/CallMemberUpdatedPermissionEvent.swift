@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when one or more members get its role updated */
-internal struct CallMemberUpdatedPermissionEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallMemberUpdatedPermissionEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var call: CallResponse
     internal var callCid: String

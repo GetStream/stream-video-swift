@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct MemberResponse: Codable, JSONEncodable, Hashable {
 
     /** Date/time of creation */

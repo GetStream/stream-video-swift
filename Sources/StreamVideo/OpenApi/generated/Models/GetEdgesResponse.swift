@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct GetEdgesResponse: Codable, JSONEncodable, Hashable {
 
     /** Duration of the request in human-readable format */

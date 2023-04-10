@@ -130,7 +130,9 @@ struct CallParticipantsViewContainer: View {
                 }
                 
                 HStack(spacing: 16) {
-                    ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
+                    if viewModel.inviteParticipantsButtonShown {
+                        ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
+                    }
                     
                     ParticipantsButton(
                         title: callSettings.audioOn ? L10n.Call.Participants.muteme : L10n.Call.Participants.unmuteme,
@@ -169,7 +171,6 @@ struct CallParticipantsViewContainer: View {
     }
     
     private var popupHeight: CGFloat {
-        // TODO: update this.
         let height = 44 + listHeight + 80
         if height > maxHeight {
             return maxHeight

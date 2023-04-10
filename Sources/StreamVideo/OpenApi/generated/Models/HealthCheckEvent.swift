@@ -10,7 +10,11 @@ import Foundation
 import AnyCodable
 #endif
 
-internal struct HealthCheckEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
 
     /** The connection_id for this client */
     internal var connectionId: String

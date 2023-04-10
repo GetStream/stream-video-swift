@@ -184,8 +184,15 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Adds members with the specified `ids` to the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to add.
     /// - Throws: An error if the members could not be added to the call.
-    public func addMembersToCall(ids: [String]) async throws {
+    public func addMembers(ids: [String]) async throws -> [User] {
         try await callController.addMembersToCall(ids: ids)
+    }
+    
+    /// Remove members with the specified `ids` from the current call.
+    /// - Parameter ids: An array of `String` values representing the member IDs to remove.
+    /// - Throws: An error if the members could not be removed from the call.
+    public func removeMembers(ids: [String]) async throws -> [User] {
+        try await callController.removeMembersFromCall(ids: ids)
     }
     
     /// Sets a `videoFilter` for the current call.

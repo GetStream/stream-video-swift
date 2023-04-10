@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct DatacenterResponse: Codable, JSONEncodable, Hashable {
 
     internal var coordinates: Coordinates

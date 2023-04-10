@@ -90,8 +90,29 @@ class CallCoordinatorController: @unchecked Sendable {
         _ = try await coordinatorClient.sendEvent(with: request)
     }
     
-    func addMembersToCall(with cid: String, memberIds: [String]) async throws {
-        throw ClientError.Unexpected("Not implemented")
+    func updateCallMembers(
+        callId: String,
+        callType: String,
+        updateMembers: [MemberRequest],
+        removedIds: [String]
+    ) async throws -> [User] {
+        let request = UpdateCallMembersRequest(
+            removeMembers: removedIds,
+            updateMembers: updateMembers
+        )
+        let response = try await coordinatorClient.updateCallMembers(
+            request: request,
+            callId: callId,
+            callType: callType
+        )
+        return response.members.map { member in
+            User(
+                id: member.userId,
+                name: member.user.name,
+                imageURL: URL(string: member.user.image ?? ""),
+                role: member.user.role
+            )
+        }
     }
 
     // MARK: - private

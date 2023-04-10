@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct QueryCallsResponse: Codable, JSONEncodable, Hashable {
 
     internal var calls: [CallStateResponseFields]

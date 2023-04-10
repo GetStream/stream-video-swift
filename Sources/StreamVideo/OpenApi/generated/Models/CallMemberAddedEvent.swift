@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when one or more members are added to a call */
-internal struct CallMemberAddedEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallMemberAddedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var call: CallResponse
     internal var callCid: String

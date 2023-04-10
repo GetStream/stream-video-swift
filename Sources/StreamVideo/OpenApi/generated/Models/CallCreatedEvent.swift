@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when a call is created. Clients receiving this event should check if the ringing  field is set to true and if so, show the call screen */
-internal struct CallCreatedEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallCreatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var call: CallResponse
     internal var callCid: String

@@ -34,4 +34,6 @@ public struct CallCapability: RawRepresentable, ExpressibleByStringLiteral, Hash
     public static let endCall: Self = "end-call"
     public static let muteUsers: Self = "mute-users"
     public static let updateCallPermissions: Self = "update-call-permissions"
+    public static let updateCallMember: Self = "update-call-member"
+    public static let removeCallMember: Self = "remove-call-member"
 }

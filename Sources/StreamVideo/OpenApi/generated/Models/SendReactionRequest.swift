@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct SendReactionRequest: Codable, JSONEncodable, Hashable {
 
     static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)

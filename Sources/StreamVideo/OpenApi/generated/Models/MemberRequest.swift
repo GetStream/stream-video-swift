@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct MemberRequest: Codable, JSONEncodable, Hashable {
 
     static let userIdRule = StringRule(minLength: 1, maxLength: nil, pattern: nil)

@@ -6,7 +6,7 @@ import Foundation
 import WebRTC
 
 /// Class that handles a particular call.
-public class CallController {
+class CallController {
         
     private var webRTCClient: WebRTCClient? {
         didSet {
@@ -50,7 +50,7 @@ public class CallController {
     ///  - participantIds: array of the ids of the participants
     ///  - ring: whether ringing events should be handled
     /// - Returns: a newly created `Call`.
-    public func joinCall(
+    func joinCall(
         callType: CallType,
         callId: String,
         callSettings: CallSettings,
@@ -84,7 +84,7 @@ public class CallController {
     ///   - callSettings: The settings to use for the call.
     ///   - videoOptions: The `VideoOptions` for the call.
     /// - Throws: An error if the call could not be joined.
-    public func joinCall(
+    func joinCall(
         on edgeServer: EdgeServer,
         callType: CallType,
         callId: String,
@@ -107,7 +107,7 @@ public class CallController {
     ///   - participants: An array of `User` instances representing the participants in the call.
     /// - Returns: An `EdgeServer` instance representing the selected server.
     /// - Throws: An error if an `EdgeServer` could not be selected.
-    public func selectEdgeServer(
+    func selectEdgeServer(
         videoOptions: VideoOptions,
         participants: [User]
     ) async throws -> EdgeServer {
@@ -121,27 +121,27 @@ public class CallController {
     }
     
     /// Starts capturing the local video.
-    public func startCapturingLocalVideo() {
+    func startCapturingLocalVideo() {
         webRTCClient?.startCapturingLocalVideo(cameraPosition: .front)
     }
     
     /// Changes the audio state for the current user.
     /// - Parameter isEnabled: whether audio should be enabled.
-    public func changeAudioState(isEnabled: Bool) async throws {
+    func changeAudioState(isEnabled: Bool) async throws {
         let webRTCClient = try currentWebRTCClient()
         try await webRTCClient.changeAudioState(isEnabled: isEnabled)
     }
     
     /// Changes the video state for the current user.
     /// - Parameter isEnabled: whether video should be enabled.
-    public func changeVideoState(isEnabled: Bool) async throws {
+    func changeVideoState(isEnabled: Bool) async throws {
         let webRTCClient = try currentWebRTCClient()
         try await webRTCClient.changeVideoState(isEnabled: isEnabled)
     }
     
     /// Changes the availability of sound during the call.
     /// - Parameter isEnabled: whether the sound should be enabled.
-    public func changeSoundState(isEnabled: Bool) async throws {
+    func changeSoundState(isEnabled: Bool) async throws {
         let webRTCClient = try currentWebRTCClient()
         try await webRTCClient.changeSoundState(isEnabled: isEnabled)
     }
@@ -150,7 +150,7 @@ public class CallController {
     /// - Parameters:
     ///  - position: the new camera position.
     ///  - completion: called when the camera position is changed.
-    public func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
+    func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
         webRTCClient?.changeCameraMode(position: position, completion: completion)
     }
     
@@ -158,21 +158,37 @@ public class CallController {
     /// - Parameters:
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
-    public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
+    func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
         await webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
     /// Adds members with the specified `ids` to the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to add.
     /// - Throws: An error if the members could not be added to the call.
-    public func addMembersToCall(ids: [String]) async throws {
-        let callCid = "\(callType.name):\(callId)"
-        try await callCoordinatorController.addMembersToCall(with: callCid, memberIds: ids)
+    func addMembersToCall(ids: [String]) async throws -> [User] {
+        try await callCoordinatorController.updateCallMembers(
+            callId: callId,
+            callType: callType.name,
+            updateMembers: ids.map { MemberRequest(userId: $0) },
+            removedIds: []
+        )
+    }
+    
+    /// Removes members with the specified `ids` from the current call.
+    /// - Parameter ids: An array of `String` values representing the member IDs to remove.
+    /// - Throws: An error if the members could not be removed from the call.
+    func removeMembersFromCall(ids: [String]) async throws -> [User] {
+        try await callCoordinatorController.updateCallMembers(
+            callId: callId,
+            callType: callType.name,
+            updateMembers: [],
+            removedIds: ids
+        )
     }
     
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
-    public func setVideoFilter(_ videoFilter: VideoFilter?) {
+    func setVideoFilter(_ videoFilter: VideoFilter?) {
         webRTCClient?.setVideoFilter(videoFilter)
     }
     

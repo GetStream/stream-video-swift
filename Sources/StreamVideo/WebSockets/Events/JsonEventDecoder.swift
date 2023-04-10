@@ -8,7 +8,7 @@ struct JsonEventDecoder: AnyEventDecoder {
     
     func decode(from data: Data) throws -> Event {
         let decoder = JSONDecoder.stream
-        let event = try decoder.decode(WSEvent.self, from: data)
+        let event = try decoder.decode(VideoEvent.self, from: data)
         
         switch event {
         case .typeBlockedUserEvent(let callBlocked):
@@ -80,7 +80,7 @@ struct JsonEventDecoder: AnyEventDecoder {
             )
         case .typeUpdatedCallPermissionsEvent(let value):
             return value
-        case .typeWSConnectedEvent(let value):
+        case .typeConnectedEvent(let value):
             return value
         }
     }
@@ -104,8 +104,8 @@ extension CallMemberRemovedEvent: Event {}
 extension CallMemberUpdatedPermissionEvent: Event {}
 extension CallMemberUpdatedEvent: Event {}
 extension UnblockedUserEvent: Event {}
-extension WSConnectedEvent: HealthCheck {}
-extension WSEvent: Event {}
+extension ConnectedEvent: HealthCheck {}
+extension VideoEvent: Event {}
 
 extension UserResponse {
     var toUser: User {

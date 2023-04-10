@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct Device: Codable, JSONEncodable, Hashable {
 
     /** Date/time of creation */

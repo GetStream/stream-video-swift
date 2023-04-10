@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct GeofenceSettings: Codable, JSONEncodable, Hashable {
 
     internal var names: [String]

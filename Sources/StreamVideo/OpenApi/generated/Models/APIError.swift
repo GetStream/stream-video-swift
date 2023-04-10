@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct APIError: Codable, JSONEncodable, Hashable {
 
     /** Response HTTP status code */

@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct VideoSettings: Codable, JSONEncodable, Hashable {
 
     internal var accessRequestEnabled: Bool

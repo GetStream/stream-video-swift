@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent by a user accepting an incoming ringing call. Clients receiving this event should dismiss the call screen and move to the call. */
-internal struct CallAcceptedEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallAcceptedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var callCid: String
     internal var createdAt: Date

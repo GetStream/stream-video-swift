@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct BroadcastSettings: Codable, JSONEncodable, Hashable {
 
     internal var enabled: Bool

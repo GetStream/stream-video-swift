@@ -129,6 +129,17 @@ class CoordinatorClient: @unchecked Sendable {
         return try await execute(urlRequest: request)
     }
     
+    func updateCallMembers(
+        request: UpdateCallMembersRequest,
+        callId: String,
+        callType: String
+    ) async throws -> UpdateCallMembersResponse {
+        try await execute(
+            request: request,
+            path: "/call/\(callType)/\(callId)/members"
+        )
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken

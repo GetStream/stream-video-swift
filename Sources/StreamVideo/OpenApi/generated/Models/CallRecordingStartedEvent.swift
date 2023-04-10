@@ -11,7 +11,11 @@ import AnyCodable
 #endif
 
 /** This event is sent when call recording has started */
-internal struct CallRecordingStartedEvent: Codable, JSONEncodable, Hashable {
+
+
+
+
+internal struct CallRecordingStartedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
     internal var callCid: String
     internal var createdAt: Date

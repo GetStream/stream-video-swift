@@ -216,7 +216,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
             healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
         } else if let healthCheckEvent = healthCheckEvent as? Stream_Video_Sfu_Event_HealthCheckResponse {
             healthCheckInfo = HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
-        } else if let wsConnected = healthCheckEvent as? WSConnectedEvent {
+        } else if let wsConnected = healthCheckEvent as? ConnectedEvent {
             let healthCheck = HealthCheckEvent(
                 connectionId: wsConnected.connectionId,
                 createdAt: wsConnected.createdAt,
