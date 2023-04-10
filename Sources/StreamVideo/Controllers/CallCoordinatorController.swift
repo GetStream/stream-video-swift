@@ -161,15 +161,13 @@ class CallCoordinatorController: @unchecked Sendable {
             id: user.id,
             image: user.imageURL?.absoluteString,
             name: user.name,
-            role: currentUserRole,
-            teams: nil // TODO:
+            role: currentUserRole
         )
         let callRequest = CallRequest(
             createdBy: userRequest,
             createdById: user.id,
             members: members,
-            settingsOverride: nil,
-            team: nil // TODO:
+            settingsOverride: nil
         )
         let joinCall = JoinCallRequest(create: true, data: callRequest, ring: ring)
         let joinCallRequest = JoinCallRequestData(

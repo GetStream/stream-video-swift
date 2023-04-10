@@ -80,7 +80,7 @@ class PermissionsController {
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
-    func currentUserHasCapability(_ capability: CallCapability) -> Bool {
+    func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
         let currentCallCapabilities = callCoordinatorController.currentCallSettings?.callCapabilities
         return currentCallCapabilities?.contains(
             capability.rawValue

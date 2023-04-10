@@ -227,7 +227,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
-    public func currentUserHasCapability(_ capability: CallCapability) -> Bool {
+    public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
         permissionsController.currentUserHasCapability(capability)
     }
     

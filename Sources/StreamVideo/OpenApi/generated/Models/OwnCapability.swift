@@ -15,7 +15,7 @@ import AnyCodable
 
 
 
-internal enum OwnCapability: String, Codable, CaseIterable {
+public enum OwnCapability: String, Codable, CaseIterable {
     case blockUsers = "block-users"
     case createCall = "create-call"
     case createReaction = "create-reaction"
