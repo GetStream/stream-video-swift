@@ -28,7 +28,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                 ) {
                     participantsContent
                 }
-                .frame(maxWidth: availableSize.width, maxHeight: .infinity)
+                .frame(width: availableSize.width)
             } else {
                 VStack {
                     participantsContent
@@ -80,7 +80,8 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
     private var size: CGSize {
         if #available(iOS 14.0, *) {
             let dividerWidth: CGFloat = isPortrait ? 2 : 3
-            return CGSize(width: availableSize.width / dividerWidth, height: availableSize.height / 2)
+            let dividerHeight: CGFloat = isPortrait ? 3 : 2
+            return CGSize(width: availableSize.width / dividerWidth, height: availableSize.height / dividerHeight)
         } else {
             return CGSize(width: availableSize.width, height: availableSize.height / 2)
         }

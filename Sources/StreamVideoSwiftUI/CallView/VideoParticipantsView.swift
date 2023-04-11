@@ -187,7 +187,7 @@ public struct VideoCallParticipantView: View {
                 name: participant.name,
                 imageURL: participant.profileImageURL
             )
-            .frame(maxWidth: availableSize.width)
+            .frame(width: availableSize.width)
             .opacity(showVideo ? 0 : 1)
         )
         .accessibility(identifier: showVideo ? "CallParticipantVideoView" : "CallParticipantImageView")
