@@ -42,6 +42,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     private let permissionsController: PermissionsController
     private let members: [User]
     private let videoOptions: VideoOptions
+    private var allEventsMiddleware: AllEventsMiddleware?
     
     internal init(
         callId: String,
@@ -51,7 +52,8 @@ public class Call: ObservableObject, @unchecked Sendable {
         eventsController: EventsController,
         permissionsController: PermissionsController,
         members: [User],
-        videoOptions: VideoOptions
+        videoOptions: VideoOptions,
+        allEventsMiddleWare: AllEventsMiddleware?
     ) {
         self.callId = callId
         self.callType = callType
@@ -61,6 +63,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         self.permissionsController = permissionsController
         self.members = members
         self.videoOptions = videoOptions
+        self.allEventsMiddleware = allEventsMiddleWare
         self.callController.call = self
     }
     
@@ -204,7 +207,20 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
+        recordingController.cleanUp()
+        eventsController.cleanUp()
+        permissionsController.cleanUp()
         callController.cleanUp()
+    }
+    
+    /// Listen to all raw WS events. The data is provided as a dictionary.
+    /// `VideoConfig`'s `listenToAllEvents` needs to be true.
+    public func allEvents() -> AsyncStream<PublicWSEvent> {
+        AsyncStream(PublicWSEvent.self) { [weak self] continuation in
+            self?.allEventsMiddleware?.onEvent = { callEvent in
+                continuation.yield(callEvent)
+            }
+        }
     }
     
     //MARK: - Permissions

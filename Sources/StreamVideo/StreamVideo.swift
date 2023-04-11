@@ -36,6 +36,7 @@ public class StreamVideo {
     private let permissionsMiddleware = PermissionsMiddleware()
     private let customEventsMiddleware = CustomEventsMiddleware()
     private let recordingEventsMiddleware = RecordingEventsMiddleware()
+    private let allEventsMiddleware = AllEventsMiddleware()
         
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -46,7 +47,9 @@ public class StreamVideo {
             customEventsMiddleware,
             recordingEventsMiddleware
         ]
-        center.add(middlewares: middlewares)
+        if videoConfig.listenToAllEvents {
+            center.add(middlewares: middlewares)
+        }
         return center
     }()
     
@@ -117,6 +120,12 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleCallEnded),
+            name: Notification.Name(CallNotification.callEnded),
+            object: nil
+        )
     }
     
     /// Connects the current user.
@@ -141,7 +150,8 @@ public class StreamVideo {
             eventsController: eventsController,
             permissionsController: permissionsController,
             members: members,
-            videoOptions: VideoOptions()
+            videoOptions: VideoOptions(),
+            allEventsMiddleWare: videoConfig.listenToAllEvents ? allEventsMiddleware : nil
         )
     }
     
@@ -256,7 +266,8 @@ public class StreamVideo {
             callId,
             callType,
             apiKey.apiKeyString,
-            videoConfig
+            videoConfig,
+            videoConfig.listenToAllEvents ? allEventsMiddleware : nil
         )
         callsMiddleware.onCallUpdated = controller.update(callInfo:)
         return controller
@@ -336,6 +347,15 @@ public class StreamVideo {
             webSocketClient,
             eventNotificationCenter
         )
+    }
+    
+    @objc private func handleCallEnded() {
+        recordingEventsMiddleware.onRecordingEvent = nil
+        callsMiddleware.onCallUpdated = nil
+        customEventsMiddleware.onCustomEvent = nil
+        customEventsMiddleware.onNewReaction = nil
+        permissionsMiddleware.onPermissionRequestEvent = nil
+        permissionsMiddleware.onPermissionsUpdatedEvent = nil
     }
 }
 

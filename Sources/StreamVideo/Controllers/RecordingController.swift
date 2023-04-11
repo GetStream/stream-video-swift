@@ -74,6 +74,11 @@ class RecordingController {
         }
         return events
     }
+    
+    func cleanUp() {
+        onRecordingEvent = nil
+        onRecordingRequestedEvent = nil
+    }
 }
 
 public struct RecordingEvent {

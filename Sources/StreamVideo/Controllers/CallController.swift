@@ -12,6 +12,9 @@ class CallController {
         didSet {
             handleParticipantsUpdated()
             handleParticipantEvent()
+            if let allEventsMiddleware {
+                webRTCClient?.eventNotificationCenter.add(middleware: allEventsMiddleware)
+            }
         }
     }
 
@@ -24,6 +27,7 @@ class CallController {
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat = 30
     private var reconnectionDate: Date?
+    private var allEventsMiddleware: AllEventsMiddleware?
     
     init(
         callCoordinatorController: CallCoordinatorController,
@@ -31,12 +35,14 @@ class CallController {
         callId: String,
         callType: CallType,
         apiKey: String,
-        videoConfig: VideoConfig
+        videoConfig: VideoConfig,
+        allEventsMiddleware: AllEventsMiddleware?
     ) {
         self.user = user
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
+        self.allEventsMiddleware = allEventsMiddleware
         self.apiKey = apiKey
         self.videoConfig = videoConfig
     }

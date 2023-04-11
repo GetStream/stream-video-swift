@@ -247,6 +247,11 @@ class PermissionsController {
         return requests
     }
     
+    func cleanUp() {
+        self.onPermissionRequestEvent = nil
+        self.onPermissionsUpdatedEvent = nil
+    }
+    
     // MARK: - private
     
     private func updatePermissions(

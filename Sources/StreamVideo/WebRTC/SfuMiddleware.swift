@@ -76,6 +76,11 @@ class SfuMiddleware: EventMiddleware {
         return event
     }
     
+    func cleanUp() {
+        onParticipantEvent = nil
+        onSocketConnected = nil
+    }
+    
     private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {
         do {
             log.debug("Handling subscriber offer")

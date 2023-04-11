@@ -17,9 +17,14 @@ class WebRTCClient: NSObject {
     actor State: ObservableObject {
         private var cancellables = Set<AnyCancellable>()
         var connectionState = ConnectionState.disconnected(reason: nil)
-        @Published var callParticipants = [String: CallParticipant]()
+        @Published var callParticipants = [String: CallParticipant]() {
+            didSet {
+                continuation?.yield([true])
+            }
+        }
         var tracks = [String: RTCVideoTrack]()
         var screensharingTracks = [String: RTCVideoTrack]()
+        private var continuation: AsyncStream<[Bool]>.Continuation?
         
         func update(connectionState: ConnectionState) {
             self.connectionState = connectionState
@@ -63,12 +68,17 @@ class WebRTCClient: NSObject {
         
         func callParticipantsUpdates() -> AsyncStream<[Bool]> {
             let updates = AsyncStream([Bool].self) { continuation in
-                $callParticipants.sink { _ in
-                    continuation.yield([true])
-                }
-                .store(in: &cancellables)
+                self.continuation = continuation
             }
             return updates
+        }
+        
+        func cleanUp() {
+            callParticipants = [:]
+            tracks = [:]
+            screensharingTracks = [:]
+            connectionState = .disconnected(reason: .user)
+            continuation?.finish()
         }
     }
     
@@ -205,10 +215,11 @@ class WebRTCClient: NSObject {
         localAudioTrack = nil
         localVideoTrack = nil
         sessionID = UUID().uuidString
-        await state.update(callParticipants: [:])
-        await state.update(tracks: [:])
-        await state.update(screensharingTracks: [:])
-        await state.update(connectionState: .disconnected(reason: .user))
+        await state.cleanUp()
+        sfuMiddleware.cleanUp()
+        onParticipantsUpdated = nil
+        onParticipantEvent = nil
+        onSignalConnectionStateChange = nil
     }
     
     func startCapturingLocalVideo(cameraPosition: AVCaptureDevice.Position) {

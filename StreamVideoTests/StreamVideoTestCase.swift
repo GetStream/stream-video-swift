@@ -13,5 +13,8 @@ open class StreamVideoTestCase: XCTestCase {
     open override func setUp() {
         super.setUp()
         streamVideo = StreamVideo.mock(httpClient: httpClient)
+        Task {
+            try await streamVideo?.connect()
+        }
     }
 }
