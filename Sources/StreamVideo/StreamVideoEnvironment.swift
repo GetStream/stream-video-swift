@@ -40,7 +40,7 @@ extension StreamVideo {
             _ user: User,
             _ apiKey: String,
             _ hostname: String,
-            _ token: UserToken,
+            _ token: String,
             _ videoConfig: VideoConfig
         ) -> CallCoordinatorController = {
             CallCoordinatorController(
@@ -49,7 +49,7 @@ extension StreamVideo {
                 coordinatorInfo: CoordinatorInfo(
                     apiKey: $2,
                     hostname: $3,
-                    token: $4.rawValue
+                    token: $4
                 ),
                 videoConfig: $5
             )

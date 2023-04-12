@@ -10,10 +10,14 @@ class CoordinatorClient: @unchecked Sendable {
     let hostname: String
     var token: String
     let apiKey: String
-    let userId: String
+    var userId: String
     var connectionId = ""
     let syncQueue = DispatchQueue(label: "io.getstream.CoordinatorClient", qos: .userInitiated)
     let pathPrefix: String = "video"
+    
+    private var isAnonymous: Bool {
+        userId.isAnonymousUser
+    }
     
     init(
         httpClient: HTTPClient,
@@ -140,15 +144,32 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
+    func createGuestUser(request: CreateGuestRequest) async throws -> CreateGuestResponse {
+        try await execute(
+            request: request,
+            path: "/guest",
+            asGuest: true
+        )
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
         }
     }
     
-    private func execute<Request: Codable, Response: Codable>(request: Request, path: String) async throws -> Response {
+    private func execute<Request: Codable, Response: Codable>(
+        request: Request,
+        path: String,
+        asGuest: Bool = false
+    ) async throws -> Response {
         let requestData = try JSONEncoder().encode(request)
-        var request = try makeRequest(for: path)
+        var request: URLRequest
+        if asGuest || isAnonymous {
+            request = try makeGuestRequest(for: path)
+        } else {
+            request = try makeRequest(for: path)
+        }
         request.httpBody = requestData
         return try await execute(urlRequest: request)
     }
@@ -162,7 +183,24 @@ class CoordinatorClient: @unchecked Sendable {
             log.error("Error decoding response \(error.localizedDescription)")
             throw error
         }
-
+    }
+    
+    private func makeGuestRequest(for path: String, httpMethod: String = "POST") throws -> URLRequest {
+        let queryParams = "?api_key=\(apiKey)"
+        let url = hostname + pathPrefix + path + queryParams
+        guard let url = URL(string: url) else {
+            throw ClientError.InvalidURL()
+        }
+        var request = URLRequest(url: url)
+        if isAnonymous {
+            request.setValue("\(token)", forHTTPHeaderField: "Authorization")
+        }
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        request.setValue("anonymous", forHTTPHeaderField: "stream-auth-type")
+        request.setValue("stream-video-swift", forHTTPHeaderField: "X-Stream-Client")
+        request.setValue(UUID().uuidString, forHTTPHeaderField: "x-client-request-id")
+        request.httpMethod = httpMethod
+        return request
     }
 
     private func makeRequest(for path: String, httpMethod: String = "POST") throws -> URLRequest {
@@ -173,7 +211,7 @@ class CoordinatorClient: @unchecked Sendable {
         }
         let url = hostname + pathPrefix + path + queryParams
         guard let url = URL(string: url) else {
-            throw NSError(domain: "stream", code: 123)
+            throw ClientError.InvalidURL()
         }
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")

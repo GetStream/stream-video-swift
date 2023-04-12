@@ -26,3 +26,18 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
         self.extraData = extraData
     }
 }
+
+public extension User {
+    /// Creates a guest user with the provided id.
+    /// - Parameter userId: the id of the user.
+    /// - Returns: a guest `User`.
+    static func guest(_ userId: String) -> User {
+        User(id: userId, name: userId)
+    }
+
+    /// Creates an anonymous user.
+    /// - Returns: an anonymous `User`.
+    static var anonymous: User {
+        User(id: .anonymous)
+    }
+}

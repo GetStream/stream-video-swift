@@ -24,10 +24,10 @@ internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
     internal var image: String?
     internal var name: String?
     internal var role: String
-    internal var teams: [String]?
+    internal var teams: [String]
     internal var updatedAt: Date
 
-    internal init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, devices: [Device], id: String, image: String? = nil, name: String? = nil, role: String, teams: [String]? = nil, updatedAt: Date) {
+    internal init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, devices: [Device], id: String, image: String? = nil, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
         self.createdAt = createdAt
         self.custom = custom
         self.deletedAt = deletedAt
@@ -65,7 +65,7 @@ internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(image, forKey: .image)
         try container.encodeIfPresent(name, forKey: .name)
         try container.encode(role, forKey: .role)
-        try container.encodeIfPresent(teams, forKey: .teams)
+        try container.encode(teams, forKey: .teams)
         try container.encode(updatedAt, forKey: .updatedAt)
     }
 }

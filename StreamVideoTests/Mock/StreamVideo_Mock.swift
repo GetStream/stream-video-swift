@@ -35,7 +35,7 @@ extension StreamVideo {
                 coordinatorInfo: CoordinatorInfo(
                     apiKey: apiKey,
                     hostname: hostname,
-                    token: token.rawValue
+                    token: token
                 ),
                 videoConfig: videoConfig
             )

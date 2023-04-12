@@ -23,7 +23,7 @@ public class StreamVideo {
     }
 
     private let tokenProvider: UserTokenProvider
-    private let endpointConfig: EndpointConfig = .production
+    private static let endpointConfig: EndpointConfig = .production
     private let httpClient: HTTPClient
     
     private var webSocketClient: WebSocketClient? {
@@ -92,6 +92,90 @@ public class StreamVideo {
             environment: Environment()
         )
     }
+    
+    /// Initializes a new instance of `StreamVideo` with the specified parameters.
+    /// - Parameters:
+    ///   - apiKey: The API key.
+    ///   - user: The `User` who is logged in.
+    ///   - token: The `UserToken` used to authenticate the user.
+    ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    /// - Returns: A new instance of `StreamVideo`.
+    public convenience init(
+        apiKey: String,
+        user: User,
+        token: UserToken,
+        videoConfig: VideoConfig = VideoConfig()
+    ) {
+        let tokenProvider: UserTokenProvider = { result in
+            log.error("Provide a token provider, since the token has expiry date")
+            result(
+                .failure(ClientError.MissingToken())
+            )
+        }
+        self.init(
+            apiKey: apiKey,
+            user: user,
+            token: token,
+            videoConfig: videoConfig,
+            tokenProvider: tokenProvider,
+            environment: Environment()
+        )
+    }
+    
+    /// Initializes a new instance of `StreamVideo` as a guest user, with the specified parameters.
+    /// This method is async and throwing, since it loads a guest token first.
+    /// - Parameters:
+    ///   - apiKey: The API key.
+    ///   - user: The guest user.
+    ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    /// - Returns: A new instance of `StreamVideo`.
+    public convenience init(
+        apiKey: String,
+        user: User,
+        videoConfig: VideoConfig = VideoConfig()
+    ) async throws {
+        let environment = Environment()
+        var tokenProvider: UserTokenProvider = { _ in }
+        
+        // Create the call coordinator to fetch a guest token.
+        let httpClient = environment.httpClientBuilder(tokenProvider)
+        let callCoordinatorController = environment.callCoordinatorControllerBuilder(
+            httpClient,
+            user,
+            apiKey,
+            Self.endpointConfig.hostname,
+            "",
+            videoConfig
+        )
+        
+        // Fetch the guest token.
+        let guestUserResponse = try await callCoordinatorController.createGuestUser(with: user.id)
+        let token = try UserToken(rawValue: guestUserResponse.accessToken)
+        callCoordinatorController.update(token: token)
+        
+        // Update the user and token provider.
+        let updatedUser = guestUserResponse.user.toUser
+        callCoordinatorController.update(user: updatedUser)
+        tokenProvider = { result in
+            Self.loadGuestToken(
+                userId: user.id,
+                callCoordinatorController: callCoordinatorController,
+                result: result
+            )
+        }
+        httpClient.update(tokenProvider: tokenProvider)
+        
+        self.init(
+            apiKey: apiKey,
+            user: updatedUser,
+            token: token,
+            videoConfig: videoConfig,
+            tokenProvider: tokenProvider,
+            httpClient: httpClient,
+            callCoordinatorController: callCoordinatorController,
+            environment: environment
+        )
+    }
         
     init(
         apiKey: String,
@@ -99,6 +183,8 @@ public class StreamVideo {
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping UserTokenProvider,
+        httpClient: HTTPClient? = nil,
+        callCoordinatorController: CallCoordinatorController? = nil,
         environment: Environment
     ) {
         self.apiKey = APIKey(apiKey)
@@ -107,17 +193,18 @@ public class StreamVideo {
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
         self.environment = environment
-        httpClient = environment.httpClientBuilder(tokenProvider)
-        callCoordinatorController = environment.callCoordinatorControllerBuilder(
-            httpClient,
+        self.httpClient = httpClient ?? environment.httpClientBuilder(tokenProvider)
+        self.callCoordinatorController = callCoordinatorController ?? environment.callCoordinatorControllerBuilder(
+            self.httpClient,
             user,
             apiKey,
-            endpointConfig.hostname,
-            token, videoConfig
+            Self.endpointConfig.hostname,
+            token.rawValue,
+            videoConfig
         )
-        latencyService = environment.latencyServiceBuilder(httpClient)
+        latencyService = environment.latencyServiceBuilder(self.httpClient)
                 
-        httpClient.setTokenUpdater { [weak self] token in
+        self.httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
@@ -131,6 +218,10 @@ public class StreamVideo {
     
     /// Connects the current user.
     public func connect() async throws {
+        if user.id.isAnonymousUser {
+            // Anonymous users can't connect to the WS.
+            throw ClientError.MissingPermissions()
+        }
         try await connectWebSocketClient()
     }
     
@@ -275,8 +366,8 @@ public class StreamVideo {
     }
     
     private func connectWebSocketClient() async throws {
-        let queryParams = endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
-        if let connectURL = try? URL(string: endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
+        let queryParams = Self.endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
+        if let connectURL = try? URL(string: Self.endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
         } else {
@@ -348,6 +439,24 @@ public class StreamVideo {
             webSocketClient,
             eventNotificationCenter
         )
+    }
+    
+    private static func loadGuestToken(
+        userId: String,
+        callCoordinatorController: CallCoordinatorController,
+        result: @escaping (Result<UserToken, Error>) -> Void
+    )  {
+        Task {
+            do {
+                let response = try await callCoordinatorController.createGuestUser(with: userId)
+                let tokenValue = response.accessToken
+                callCoordinatorController.update(user: response.user.toUser)
+                let token = try UserToken(rawValue: tokenValue)
+                result(.success(token))
+            } catch {
+                result(.failure(error))
+            }
+        }
     }
     
     @objc private func handleCallEnded() {

@@ -12,7 +12,7 @@ class CallCoordinatorController: @unchecked Sendable {
     private(set) var currentCallSettings: CallSettingsInfo?
     private let latencyService: LatencyService
     private let videoConfig: VideoConfig
-    private let user: User
+    private var user: User
     
     init(
         httpClient: HTTPClient,
@@ -68,6 +68,11 @@ class CallCoordinatorController: @unchecked Sendable {
         coordinatorClient.connectionId = connectionId
     }
     
+    func update(user: User) {
+        self.user = user
+        coordinatorClient.userId = user.id
+    }
+    
     func makeVoipNotificationsController() -> VoipNotificationsController {
         VoipNotificationsController(coordinatorClient: coordinatorClient)
     }
@@ -88,6 +93,11 @@ class CallCoordinatorController: @unchecked Sendable {
             sendEventRequest: sendEventRequest
         )
         _ = try await coordinatorClient.sendEvent(with: request)
+    }
+    
+    func createGuestUser(with id: String) async throws -> CreateGuestResponse {
+        let request = CreateGuestRequest(user: .init(id: id, name: id))
+        return try await coordinatorClient.createGuestUser(request: request)
     }
     
     func updateCallMembers(
@@ -169,7 +179,8 @@ class CallCoordinatorController: @unchecked Sendable {
             members: members,
             settingsOverride: nil
         )
-        let joinCall = JoinCallRequest(create: true, data: callRequest, ring: ring)
+        let create = !user.id.isAnonymousUser
+        let joinCall = JoinCallRequest(create: create, data: callRequest, ring: ring)
         let joinCallRequest = JoinCallRequestData(
             id: callId,
             type: type,

@@ -233,25 +233,33 @@ class WebRTCClient: NSObject {
     }
     
     func setupUserMedia(callSettings: CallSettings) async {
-        await audioSession.configure(callSettings: callSettings)
+        if hasCapability(.sendAudio) {
+            await audioSession.configure(callSettings: callSettings)
+            
+            // Audio
+            let audioTrack = await makeAudioTrack()
+            localAudioTrack = audioTrack
+        }
         
-        // Audio
-        let audioTrack = await makeAudioTrack()
-        localAudioTrack = audioTrack
-        
-        // Video
-        let videoTrack = await makeVideoTrack()
-        localVideoTrack = videoTrack
-        await state.add(track: localVideoTrack, id: sessionID)
+        if hasCapability(.sendVideo) {
+            // Video
+            let videoTrack = await makeVideoTrack()
+            localVideoTrack = videoTrack
+            await state.add(track: localVideoTrack, id: sessionID)
+        }
     }
     
     func publishUserMedia(callSettings: CallSettings) {
-        if let audioTrack = localAudioTrack, callSettings.audioOn, publisher?.audioTrackPublished == false {
+        if hasCapability(.sendAudio),
+            let audioTrack = localAudioTrack, callSettings.audioOn,
+            publisher?.audioTrackPublished == false {
             log.debug("publishing audio track")
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"], trackType: .audio)
         }
-        if videoConfig.videoEnabled, callSettings.videoOn, let videoTrack = localVideoTrack,
-           publisher?.videoTrackPublished == false {
+        if hasCapability(.sendVideo),
+            videoConfig.videoEnabled, callSettings.videoOn,
+            let videoTrack = localVideoTrack,           
+            publisher?.videoTrackPublished == false {
             log.debug("publishing video track")
             publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"], trackType: .video)
         }
@@ -686,6 +694,13 @@ class WebRTCClient: NSObject {
                 await self.handleParticipantsUpdated()
             }
         }
+    }
+    
+    private func hasCapability(_ ownCapability: OwnCapability) -> Bool {
+        callCoordinatorController
+            .currentCallSettings?
+            .callCapabilities
+            .contains(ownCapability.rawValue) == true
     }
 }
 
