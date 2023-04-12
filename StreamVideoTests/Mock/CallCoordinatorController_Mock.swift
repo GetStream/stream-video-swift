@@ -15,4 +15,18 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
         // No op
     }
     
+    override func createGuestUser(with id: String) async throws -> CreateGuestResponse {
+        CreateGuestResponse(
+            accessToken: StreamVideo.mockToken.rawValue,
+            duration: "",
+            user: UserResponse(
+                createdAt: Date(),
+                custom: [:],
+                id: StreamVideo.mockUser.id,
+                role: "", teams: [],
+                updatedAt: Date()
+            )
+        )
+    }
+    
 }

@@ -16,7 +16,20 @@ extension StreamVideo {
     static var mockToken = try! UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0")
     
     static func mock(httpClient: HTTPClient) -> StreamVideo {
-        let environment = Environment(httpClientBuilder: { _ in
+        let streamVideo = StreamVideo(
+            apiKey: apiKey,
+            user: mockUser,
+            token: mockToken,
+            tokenProvider: { result in
+                result(.success(mockToken))
+            },
+            environment: mockEnvironment(httpClient)
+        )
+        return streamVideo
+    }
+    
+    static func mockEnvironment(_ httpClient: HTTPClient) -> Environment {
+        return Environment(httpClientBuilder: { _ in
             httpClient
         }, callControllerBuilder: { callCoordinatorController, user, callId, callType, apiKey, videoConfig, eventsMiddleware in
             CallController_Mock(
@@ -40,15 +53,6 @@ extension StreamVideo {
                 videoConfig: videoConfig
             )
         })
-        let streamVideo = StreamVideo(
-            apiKey: apiKey,
-            user: mockUser,
-            token: mockToken,
-            tokenProvider: { result in
-                result(.success(mockToken))
-            },
-            environment: environment
-        )
-        return streamVideo
     }
+    
 }

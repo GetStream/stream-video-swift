@@ -74,6 +74,7 @@
 		843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843B707429C270C300AB0573 /* ReconnectionView.swift */; };
 		843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9729E695CF00E0EB63 /* CreateGuestResponse.swift */; };
 		843DAB9A29E695CF00E0EB63 /* CreateGuestRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */; };
+		843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */; };
 		8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8440861D2901A16F0027849C /* SfuMiddleware.swift */; };
 		84429933293FA48B0037232A /* ScreenSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429931293FA4850037232A /* ScreenSharingView.swift */; };
 		844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299342940A16F0037232A /* ZoomableScrollView.swift */; };
@@ -569,6 +570,7 @@
 		843B707429C270C300AB0573 /* ReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionView.swift; sourceTree = "<group>"; };
 		843DAB9729E695CF00E0EB63 /* CreateGuestResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateGuestResponse.swift; sourceTree = "<group>"; };
 		843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateGuestRequest.swift; sourceTree = "<group>"; };
+		843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo_Tests.swift; sourceTree = "<group>"; };
 		8440861D2901A16F0027849C /* SfuMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SfuMiddleware.swift; sourceTree = "<group>"; };
 		84429931293FA4850037232A /* ScreenSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingView.swift; sourceTree = "<group>"; };
 		844299342940A16F0037232A /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
@@ -1676,6 +1678,7 @@
 				8492B87629081CE700006649 /* Mock */,
 				8492B8722908024800006649 /* StreamVideoTestCase.swift */,
 				8492B870290801DC00006649 /* CallViewModel_Tests.swift */,
+				843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */,
 			);
 			path = StreamVideoTests;
 			sourceTree = "<group>";
@@ -2460,6 +2463,7 @@
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
+				843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

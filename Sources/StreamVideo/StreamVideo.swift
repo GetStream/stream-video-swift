@@ -134,7 +134,20 @@ public class StreamVideo {
         user: User,
         videoConfig: VideoConfig = VideoConfig()
     ) async throws {
-        let environment = Environment()
+        try await self.init(
+            apiKey: apiKey,
+            user: user,
+            videoConfig: videoConfig,
+            environment: Environment()
+        )
+    }
+    
+    convenience init(
+        apiKey: String,
+        user: User,
+        videoConfig: VideoConfig = VideoConfig(),
+        environment: Environment
+    ) async throws {
         var tokenProvider: UserTokenProvider = { _ in }
         
         // Create the call coordinator to fetch a guest token.
