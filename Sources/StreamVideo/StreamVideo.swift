@@ -41,15 +41,16 @@ public class StreamVideo {
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
-        let middlewares: [EventMiddleware] = [
+        var middlewares: [EventMiddleware] = [
             callsMiddleware,
             permissionsMiddleware,
             customEventsMiddleware,
             recordingEventsMiddleware
         ]
         if videoConfig.listenToAllEvents {
-            center.add(middlewares: middlewares)
+            middlewares.append(allEventsMiddleware)
         }
+        center.add(middlewares: middlewares)
         return center
     }()
     

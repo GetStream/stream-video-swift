@@ -36,6 +36,18 @@ class CallController_Mock: CallController {
         }
     }
     
+    override func joinCall(
+        on edgeServer: EdgeServer,
+        callType: CallType,
+        callId: String,
+        callSettings: CallSettings,
+        videoOptions: VideoOptions
+    ) async throws {
+        webRTCClient.onParticipantsUpdated = { [weak self] participants in
+            self?.call?.participants = participants
+        }
+    }
+    
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
     
     override func changeVideoState(isEnabled: Bool) async throws { /* no op */ }
