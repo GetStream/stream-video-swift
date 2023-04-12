@@ -49,3 +49,55 @@ private func connectUser() {
     }
 }
 ```
+
+#### Guest users
+
+Another type of users are guest users. Guests can perform web socket connection and join a call (depending on the configured permissions). Also, guests are able to send audio and video to a call.
+
+Creating a `StreamVideo` client for a guest user is an async and throwing operation, since we are fetching a guest token for the user to join a call in the background. 
+
+Here's an example initialization of the `StreamVideo` client for guest users:
+
+```swift
+Task {
+    let streamVideo = try await StreamVideo(apiKey: "api_key", user: .guest("martin"))
+}
+```
+
+After the client is initalized, you can safely create a `CallViewModel` and join calls, like a regular user.
+
+#### Anonymous users
+
+Anonymous users don't have a profile. They are not able to send audio or video, and they are not able to perform a web socket connection. If you try to call the `connect` method for an anonymous user, a `MissingPermission` error will be thrown.
+
+Anonymous users need a call token to join a call. Call tokens are JWT authentication tokens that include additional claims that grant special access to a list of calls. They allow anonymous users to have access to a list of calls.
+
+Few important things about call tokens:
+- Call tokens must have an expiration time included to avoid security problems.
+- Call tokens can contain up to 100 call ids.
+- Call tokens for anonymous users must be generated with the special `!anon` user_id claim.
+- Membership / role can only be invalidated using the existing API around token invalidation (we invalidate all tokens for a user).
+- Generating a call token does not require any API interaction and can be done with any server-side SDK.
+
+The call token should contain `user_id="!anon"`, as well as the list of supported call ids `call_cids=["default:1", "default:2"]`.
+
+In order to create a `StreamVideo` client for an anonymous user, you need to provide the `.anonymous` `User` type:
+
+```swift
+let streamVideo = StreamVideo(apiKey: "api_key", user: .anonymous, token: serverSideGeneratedToken) { result in
+    Task {
+        do {
+            let token = try await TokenService.shared.fetchToken(for: user.id)
+            result(.success(token))
+        } catch {
+            result(.failure(error))
+        }
+    }
+}
+```
+
+Alternatively, you can skip the `tokenProvider` parameter which is called when a token expires. In that case, the user will have an invalid token and will not be able to be part of the call anymore.
+
+```swift
+let streamVideo = StreamVideo(apiKey: "api_key", user: .anonymous, token: serverSideGeneratedToken)
+```
