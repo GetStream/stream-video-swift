@@ -14,6 +14,9 @@ public struct VideoConfig: Sendable {
     /// An array of `VideoFilter` objects representing the filters to apply to the video.
     public let videoFilters: [VideoFilter]
     
+    /// By default is false. Set to true if you want to listen to all the raw WS events.
+    public let listenToAllEvents: Bool
+    
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoEnabled: A Boolean value indicating whether video is enabled for the call.
@@ -23,9 +26,11 @@ public struct VideoConfig: Sendable {
     public init(
         videoEnabled: Bool = true,
         playSounds: Bool = true,
+        listenToAllEvents: Bool = false,
         videoFilters: [VideoFilter] = []
     ) {
         self.playSounds = true
+        self.listenToAllEvents = listenToAllEvents
         self.videoEnabled = videoEnabled
         self.videoFilters = videoFilters
     }

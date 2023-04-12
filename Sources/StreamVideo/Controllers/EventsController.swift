@@ -84,6 +84,11 @@ class EventsController {
         }
         return requests
     }
+    
+    func cleanUp() {
+        self.onCustomEvent = nil
+        self.onNewReaction = nil
+    }
 }
 
 public struct CustomEvent {

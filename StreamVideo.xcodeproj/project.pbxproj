@@ -256,6 +256,7 @@
 		84C4004029E3F446007B69C2 /* VideoEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4003C29E3F446007B69C2 /* VideoEvent.swift */; };
 		84C4004129E3F446007B69C2 /* WSClientEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4003D29E3F446007B69C2 /* WSClientEvent.swift */; };
 		84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4003E29E3F446007B69C2 /* ConnectedEvent.swift */; };
+		84C4004629E55DAF007B69C2 /* AllEventsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4004529E55DAE007B69C2 /* AllEventsMiddleware.swift */; };
 		84C619C629432E890051C513 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84C619C529432E890051C513 /* NukeUI */; };
 		84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
 		84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37029DC856C001D2118 /* CallMemberRemovedEvent.swift */; };
@@ -733,6 +734,7 @@
 		84C4003C29E3F446007B69C2 /* VideoEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoEvent.swift; sourceTree = "<group>"; };
 		84C4003D29E3F446007B69C2 /* WSClientEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WSClientEvent.swift; sourceTree = "<group>"; };
 		84C4003E29E3F446007B69C2 /* ConnectedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectedEvent.swift; sourceTree = "<group>"; };
+		84C4004529E55DAE007B69C2 /* AllEventsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllEventsMiddleware.swift; sourceTree = "<group>"; };
 		84D2E37029DC856C001D2118 /* CallMemberRemovedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberRemovedEvent.swift; sourceTree = "<group>"; };
 		84D2E37129DC856C001D2118 /* CallMemberUpdatedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberUpdatedEvent.swift; sourceTree = "<group>"; };
 		84D2E37229DC856C001D2118 /* CallMemberUpdatedPermissionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberUpdatedPermissionEvent.swift; sourceTree = "<group>"; };
@@ -1017,6 +1019,7 @@
 				84A8B8902993D3AB003AA570 /* PermissionsMiddleware.swift */,
 				84A88203299F83C500EA22ED /* CustomEventsMiddleware.swift */,
 				84BD8FFE29B109B5002CFBA0 /* RecordingEventsMiddleware.swift */,
+				84C4004529E55DAE007B69C2 /* AllEventsMiddleware.swift */,
 			);
 			path = Events;
 			sourceTree = "<group>";
@@ -2230,6 +2233,7 @@
 				846E4B0129D2D372003733AB /* Sorting.swift in Sources */,
 				8478EB13288A054B00525538 /* VideoConfig.swift in Sources */,
 				8492B875290808AE00006649 /* StreamVideoEnvironment.swift in Sources */,
+				84C4004629E55DAF007B69C2 /* AllEventsMiddleware.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
 				8409465B29AF4EEC007AF5BF /* ListRecordingsResponse.swift in Sources */,
