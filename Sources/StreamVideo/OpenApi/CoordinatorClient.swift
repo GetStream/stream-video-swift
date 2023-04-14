@@ -152,6 +152,10 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
+    func queryCalls(request: QueryCallsRequest) async throws -> QueryCallsResponse {
+        try await execute(request: request, path: "/calls")
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken

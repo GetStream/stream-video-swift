@@ -36,60 +36,68 @@ struct HomeView: View {
     @ObservedObject var appState = AppState.shared
     
     var body: some View {
-        VStack {
-            ZStack {
-                HStack {
-                    Button {
-                        logoutAlertShown = true
-                    } label: {
-                        UserAvatar(imageURL: streamVideo.user.imageURL, size: imageSize)
-                            .accessibilityIdentifier("userAvatar")
-                    }
-                    .padding()
-
-                    Spacer()
-                }
-                Text("Call details")
-                    .font(.title)
-                    .padding()
-                
-                HStack {
-                    Spacer()
-                    appState.loading ? ProgressView().padding() : nil
-                }
-            }
-            
-            Picker("Call action", selection: $callAction) {
-                Text(CallAction.startCall.rawValue).tag(CallAction.startCall)
-                Text(CallAction.joinCall.rawValue).tag(CallAction.joinCall)
-            }
-            .pickerStyle(.segmented)
-            
-            TextField("Insert a call id", text: $callId)
-                .textFieldStyle(.roundedBorder)
-                .padding()
-                .accessibilityIdentifier("callId")
-            
-            if callAction == .startCall {
-                startCallView
-                    .transition(.opacity)
-            } else {
-                Button {
-                    viewModel.joinCall(callId: callId, type: .default)
-                } label: {
-                    Text("Join a call")
+        NavigationView {
+            VStack {
+                ZStack {
+                    HStack {
+                        Button {
+                            logoutAlertShown = true
+                        } label: {
+                            UserAvatar(imageURL: streamVideo.user.imageURL, size: imageSize)
+                                .accessibilityIdentifier("userAvatar")
+                        }
                         .padding()
-                        .accessibilityIdentifier("joinCall")
-                }
-                .foregroundColor(Color.white)
-                .background(makeCallEnabled ? Color.gray : Color.blue)
-                .disabled(makeCallEnabled)
-                .cornerRadius(16)
-                .transition(.opacity)
-            }
 
-            Spacer()
+                        Spacer()
+                    }
+                    Text("Call details")
+                        .font(.title)
+                        .padding()
+                    
+                    HStack {
+                        Spacer()
+                        ZStack {
+                            if appState.loading {
+                                ProgressView()
+                            }
+                        }
+                        .padding()
+                    }
+                }
+                
+                Picker("Call action", selection: $callAction) {
+                    Text(CallAction.startCall.rawValue).tag(CallAction.startCall)
+                    Text(CallAction.joinCall.rawValue).tag(CallAction.joinCall)
+                }
+                .pickerStyle(.segmented)
+                
+                TextField("Insert a call id", text: $callId)
+                    .textFieldStyle(.roundedBorder)
+                    .padding()
+                    .accessibilityIdentifier("callId")
+                
+                if callAction == .startCall {
+                    startCallView
+                        .transition(.opacity)
+                } else {
+                    Button {
+                        viewModel.joinCall(callId: callId, type: .default)
+                    } label: {
+                        Text("Join a call")
+                            .padding()
+                            .accessibilityIdentifier("joinCall")
+                    }
+                    .foregroundColor(Color.white)
+                    .background(makeCallEnabled ? Color.gray : Color.blue)
+                    .disabled(makeCallEnabled)
+                    .cornerRadius(16)
+                    .transition(.opacity)
+                }
+
+                Spacer()
+            }
         }
+        .navigationBarHidden(true)
         .onAppear() {
             CallService.shared.registerForIncomingCalls()
         }

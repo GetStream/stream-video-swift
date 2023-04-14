@@ -7,6 +7,8 @@ import Foundation
 class RecordingController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
+    private let callId: String
+    private let callType: CallType
     
     var onRecordingEvent: ((RecordingEvent) -> Void)?
     var onRecordingRequestedEvent: ((RecordingEvent) -> Void)?
@@ -17,10 +19,14 @@ class RecordingController {
     
     init(
         callCoordinatorController: CallCoordinatorController,
-        currentUser: User
+        currentUser: User,
+        callId: String,
+        callType: CallType
     ) {
         self.callCoordinatorController = callCoordinatorController
         self.currentUser = currentUser
+        self.callId = callId
+        self.callType = callType
     }
     
     /// Starts recording a call with the specified call ID and call type.
@@ -29,7 +35,7 @@ class RecordingController {
     ///   - callType: The type of the call to start recording.
     /// - Throws: An error if the recording fails.
     func startRecording(callId: String, callType: CallType) async throws {
-        let callCid = "\(callType.name):\(callId)"
+        let callCid = callCid(from: callId, callType: callType)
         let recordingEvent = RecordingEvent(callCid: callCid, type: callType.name, action: .requested)
         try await coordinatorClient.startRecording(callId: callId, callType: callType.name)
         onRecordingRequestedEvent?(recordingEvent)
@@ -67,9 +73,12 @@ class RecordingController {
     /// Creates an asynchronous stream of `RecordingEvent` objects.
     /// - Returns: An `AsyncStream` of `RecordingEvent` objects.
     func recordingEvents() -> AsyncStream<RecordingEvent> {
+        let callCid = callCid(from: callId, callType: callType)
         let events = AsyncStream(RecordingEvent.self) { [weak self] continuation in
             self?.onRecordingEvent = { event in
-                continuation.yield(event)
+                if event.callCid == callCid {
+                    continuation.yield(event)
+                }
             }
         }
         return events

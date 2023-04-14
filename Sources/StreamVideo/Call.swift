@@ -30,7 +30,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     /// The unique identifier of the call, formatted as `callType.name:callId`.
     public var cId: String {
-        "\(callType.name):\(callId)"
+        callCid(from: callId, callType: callType)
     }
     
     /// The closure that handles the participant events.

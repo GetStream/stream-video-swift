@@ -76,7 +76,7 @@ class CallController_Mock: CallController {
             callCapabilities: [],
             callSettings: mockResponseBuilder.makeCallSettingsResponse(),
             callInfo: CallInfo(
-                cId: "\(callType.name):\(callId)",
+                cId: callCid(from: callId, callType: callType),
                 backstage: false,
                 blockedUsers: []
             ),

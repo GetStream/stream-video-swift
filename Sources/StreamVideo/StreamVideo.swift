@@ -244,9 +244,13 @@ public class StreamVideo {
         members: [User] = []
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
-        let recordingController = makeRecordingController(with: callController)
-        let eventsController = makeEventsController()
-        let permissionsController = makePermissionsController()
+        let recordingController = makeRecordingController(
+            with: callController,
+            callId: callId,
+            callType: callType
+        )
+        let eventsController = makeEventsController(callId: callId, callType: callType)
+        let permissionsController = makePermissionsController(callId: callId, callType: callType)
         return Call(
             callId: callId,
             callType: callType,
@@ -264,6 +268,18 @@ public class StreamVideo {
     /// - Returns: `VoipNotificationsController`
     public func makeVoipNotificationsController() -> VoipNotificationsController {
         callCoordinatorController.makeVoipNotificationsController()
+    }
+    
+    /// Creates a controller used for querying and watching calls.
+    /// - Parameter callsQuery: the query for the calls.
+    /// - Returns: `CallsController`
+    public func makeCallsController(callsQuery: CallsQuery) -> CallsController {
+        let controller = CallsController(
+            streamVideo: self,
+            coordinatorClient: self.callCoordinatorController.coordinatorClient,
+            callsQuery: callsQuery
+        )
+        return controller
     }
     
     /// Accepts the call with the provided call id and type.
@@ -308,14 +324,26 @@ public class StreamVideo {
         }
     }
     
+    // MARK: - internal
+    
+    func watchEvents() -> AsyncStream<Event> {
+        AsyncStream(Event.self) { [weak self] continuation in
+            self?.callsMiddleware.onAnyEvent = { event in
+                continuation.yield(event)
+            }
+        }
+    }
+    
     // MARK: - private
     
     /// Creates a permissions controller used for managing permissions.
     /// - Returns: `PermissionsController`
-    private func makePermissionsController() -> PermissionsController {
+    private func makePermissionsController(callId: String, callType: CallType) -> PermissionsController {
         let controller = PermissionsController(
             callCoordinatorController: callCoordinatorController,
-            currentUser: user
+            currentUser: user,
+            callId: callId,
+            callType: callType
         )
         permissionsMiddleware.onPermissionRequestEvent = { request in
             controller.onPermissionRequestEvent?(request)
@@ -328,10 +356,16 @@ public class StreamVideo {
     
     /// Creates recording controller used for managing recordings.
     /// - Returns: `RecordingController`
-    private func makeRecordingController(with callController: CallController) -> RecordingController {
+    private func makeRecordingController(
+        with callController: CallController,
+        callId: String,
+        callType: CallType
+    ) -> RecordingController {
         let controller = RecordingController(
             callCoordinatorController: callCoordinatorController,
-            currentUser: user
+            currentUser: user,
+            callId: callId,
+            callType: callType
         )
         controller.onRecordingRequestedEvent = { event in
             callController.updateCall(from: event)
@@ -345,10 +379,12 @@ public class StreamVideo {
     
     /// Creates an events controller used for managing events.
     /// - Returns: `EventsController`
-    private func makeEventsController() -> EventsController {
+    private func makeEventsController(callId: String, callType: CallType) -> EventsController {
         let controller = EventsController(
             callCoordinatorController: callCoordinatorController,
-            currentUser: user
+            currentUser: user,
+            callId: callId,
+            callType: callType
         )
         customEventsMiddleware.onCustomEvent = { event in
             controller.onCustomEvent?(event)

@@ -8,6 +8,7 @@ class CallsMiddleware: EventMiddleware {
     
     var onCallEvent: ((CallEvent) -> Void)?
     var onCallUpdated: ((CallInfo) -> Void)?
+    var onAnyEvent: ((Event) -> Void)?
     
     func handle(event: Event) -> Event? {
         if let incomingCallEvent = event as? IncomingCallEvent, incomingCallEvent.ringing {
@@ -49,6 +50,7 @@ class CallsMiddleware: EventMiddleware {
             )
             onCallUpdated?(callInfo)
         }
+        onAnyEvent?(event)
         
         return event
     }

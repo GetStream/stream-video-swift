@@ -8,6 +8,8 @@ class PermissionsController {
     
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
+    private let callId: String
+    private let callType: CallType
     
     /// Event that fires when a permission is requested.
     var onPermissionRequestEvent: ((PermissionRequest) -> Void)?
@@ -22,12 +24,18 @@ class PermissionsController {
     /// - Parameters:
     ///   - callCoordinatorController: The call coordinator controller.
     ///   - currentUser: The current user.
+    ///   - callId: The id of the call.
+    ///   - callType: The call type.
     init(
         callCoordinatorController: CallCoordinatorController,
-        currentUser: User
+        currentUser: User,
+        callId: String,
+        callType: CallType
     ) {
         self.callCoordinatorController = callCoordinatorController
         self.currentUser = currentUser
+        self.callId = callId
+        self.callType = callType
     }
     
     /// Checks if the current user can request permissions.
@@ -226,9 +234,10 @@ class PermissionsController {
     /// Returns an `AsyncStream` of `PermissionRequest` objects that represent the permission requests events.
     /// - Returns: An `AsyncStream` of `PermissionRequest` objects.
     func permissionRequests() -> AsyncStream<PermissionRequest> {
+        let callCid = callCid(from: callId, callType: callType)
         let requests = AsyncStream(PermissionRequest.self) { [weak self] continuation in
             self?.onPermissionRequestEvent = { event in
-                if self?.currentUserHasCapability(.updateCallPermissions) == true {
+                if event.callCid == callCid && self?.currentUserHasCapability(.updateCallPermissions) == true {
                     continuation.yield(event)
                 }
             }
@@ -239,9 +248,12 @@ class PermissionsController {
     /// Returns an `AsyncStream` of `PermissionsUpdated` objects that represent the permission updates events.
     /// - Returns: An `AsyncStream` of `PermissionsUpdated` objects.
     func permissionUpdates() -> AsyncStream<PermissionsUpdated> {
+        let callCid = callCid(from: callId, callType: callType)
         let requests = AsyncStream(PermissionsUpdated.self) { [weak self] continuation in
             self?.onPermissionsUpdatedEvent = { event in
-                continuation.yield(event)
+                if event.callCid == callCid {
+                    continuation.yield(event)
+                }
             }
         }
         return requests

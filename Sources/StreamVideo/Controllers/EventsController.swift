@@ -8,7 +8,9 @@ class EventsController {
     
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
-    
+    private let callId: String
+    private let callType: CallType
+
     private var coordinatorClient: CoordinatorClient {
         callCoordinatorController.coordinatorClient
     }
@@ -22,12 +24,18 @@ class EventsController {
     /// - Parameters:
     ///   - callCoordinatorController: The `CallCoordinatorController` instance that manages the call.
     ///   - currentUser: The `User` model representing the current user.
+    ///   - callId: The id of the call.
+    ///   - callType: The call type.
     init(
         callCoordinatorController: CallCoordinatorController,
-        currentUser: User
+        currentUser: User,
+        callId: String,
+        callType: CallType
     ) {
         self.callCoordinatorController = callCoordinatorController
         self.currentUser = currentUser
+        self.callId = callId
+        self.callType = callType
     }
     
     /// Sends a custom event to the call.
@@ -66,9 +74,12 @@ class EventsController {
     /// Returns an asynchronous stream of custom events received during the call.
     /// - Returns: An `AsyncStream` of `CustomEvent` objects.
     func customEvents() -> AsyncStream<CustomEvent> {
+        let callCid = callCid(from: callId, callType: callType)
         let requests = AsyncStream(CustomEvent.self) { [weak self] continuation in
             self?.onCustomEvent = { event in
-                continuation.yield(event)
+                if event.callCid == callCid {
+                    continuation.yield(event)
+                }
             }
         }
         return requests
@@ -77,9 +88,12 @@ class EventsController {
     /// Returns an asynchronous stream of reactions received during the call.
     /// - Returns: An `AsyncStream` of `CallReaction` objects.
     func reactions() -> AsyncStream<CallReaction> {
+        let callCid = callCid(from: callId, callType: callType)
         let requests = AsyncStream(CallReaction.self) { [weak self] continuation in
             self?.onNewReaction = { event in
-                continuation.yield(event)
+                if event.callCid == callCid {
+                    continuation.yield(event)
+                }
             }
         }
         return requests

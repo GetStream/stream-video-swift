@@ -238,7 +238,7 @@ class CallController {
             apiKey: apiKey,
             hostname: edgeServer.url,
             token: edgeServer.token,
-            callCid: "\(callType.name):\(callId)",
+            callCid: callCid(from: callId, callType: callType),
             callCoordinatorController: callCoordinatorController,
             videoConfig: videoConfig,
             audioSettings: edgeServer.callSettings.callSettings.audio
