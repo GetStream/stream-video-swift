@@ -22,9 +22,9 @@ internal struct ConnectedEvent: Codable, JSONEncodable, Hashable, WSClientEvent 
     internal var createdAt: Date
     internal var me: OwnUserResponse
     /** The type of event: \"connection.ok\" in this case */
-    internal var type: String
+    internal var type: String = "connection.ok"
 
-    internal init(connectionId: String, createdAt: Date, me: OwnUserResponse, type: String) {
+    internal init(connectionId: String, createdAt: Date, me: OwnUserResponse, type: String = "connection.ok") {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.me = me

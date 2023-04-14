@@ -23,9 +23,9 @@ internal struct CallMemberUpdatedEvent: Codable, JSONEncodable, Hashable, WSCall
     /** The list of members that were updated */
     internal var members: [MemberResponse]
     /** The type of event: \"call.member_added\" in this case */
-    internal var type: String
+    internal var type: String = "call.member_updated"
 
-    internal init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String) {
+    internal init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String = "call.member_updated") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt

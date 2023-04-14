@@ -20,9 +20,9 @@ internal struct CallRecordingStartedEvent: Codable, JSONEncodable, Hashable, WSC
     internal var callCid: String
     internal var createdAt: Date
     /** The type of event: \"call.recording_started\" in this case */
-    internal var type: String
+    internal var type: String = "call.recording_started"
 
-    internal init(callCid: String, createdAt: Date, type: String) {
+    internal init(callCid: String, createdAt: Date, type: String = "call.recording_started") {
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type

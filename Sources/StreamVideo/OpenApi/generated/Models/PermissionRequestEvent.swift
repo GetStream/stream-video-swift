@@ -22,10 +22,10 @@ internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCall
     /** The list of permissions requested by the user */
     internal var permissions: [String]
     /** The type of event: \"call.permission_request\" in this case */
-    internal var type: String
+    internal var type: String = "call.permission_request"
     internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, permissions: [String], type: String, user: UserResponse) {
+    internal init(callCid: String, createdAt: Date, permissions: [String], type: String = "call.permission_request", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.permissions = permissions

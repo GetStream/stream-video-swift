@@ -23,9 +23,9 @@ internal struct CallUpdatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
     internal var capabilitiesByRole: [String: [String]]
     internal var createdAt: Date
     /** The type of event: \"call.ended\" in this case */
-    internal var type: String
+    internal var type: String = "call.updated"
 
-    internal init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date, type: String) {
+    internal init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date, type: String = "call.updated") {
         self.call = call
         self.callCid = callCid
         self.capabilitiesByRole = capabilitiesByRole

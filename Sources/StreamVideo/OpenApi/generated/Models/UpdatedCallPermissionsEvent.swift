@@ -22,10 +22,10 @@ internal struct UpdatedCallPermissionsEvent: Codable, JSONEncodable, Hashable, W
     /** The capabilities of the current user */
     internal var ownCapabilities: [OwnCapability]
     /** The type of event: \"call.permissions_updated\" in this case */
-    internal var type: String
+    internal var type: String = "call.permissions_updated"
     internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, ownCapabilities: [OwnCapability], type: String, user: UserResponse) {
+    internal init(callCid: String, createdAt: Date, ownCapabilities: [OwnCapability], type: String = "call.permissions_updated", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.ownCapabilities = ownCapabilities

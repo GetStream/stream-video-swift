@@ -19,10 +19,10 @@ internal struct CallAcceptedEvent: Codable, JSONEncodable, Hashable, WSCallEvent
 
     internal var callCid: String
     internal var createdAt: Date
-    internal var type: String
+    internal var type: String = "call.accepted"
     internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, type: String, user: UserResponse) {
+    internal init(callCid: String, createdAt: Date, type: String = "call.accepted", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type

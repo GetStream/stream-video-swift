@@ -272,6 +272,8 @@
 		84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493B29E7F5D2002CA428 /* CallsView.swift */; };
 		84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493D29E7F75E002CA428 /* CallsViewModel.swift */; };
 		84D6494029E94C14002CA428 /* CallsQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493F29E94C14002CA428 /* CallsQuery.swift */; };
+		84D6494329E9AD08002CA428 /* RTMPIngress.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6494129E9AD07002CA428 /* RTMPIngress.swift */; };
+		84D6494429E9AD08002CA428 /* CallIngressResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6494229E9AD08002CA428 /* CallIngressResponse.swift */; };
 		84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC382C29A8B9EC00946713 /* CallParticipantMenuAction.swift */; };
 		84DC382F29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC382E29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift */; };
 		84DC388E29ADFCFD00946713 /* JSONEncodingHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC383C29ADFCFB00946713 /* JSONEncodingHelper.swift */; };
@@ -755,6 +757,8 @@
 		84D6493B29E7F5D2002CA428 /* CallsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsView.swift; sourceTree = "<group>"; };
 		84D6493D29E7F75E002CA428 /* CallsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsViewModel.swift; sourceTree = "<group>"; };
 		84D6493F29E94C14002CA428 /* CallsQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsQuery.swift; sourceTree = "<group>"; };
+		84D6494129E9AD07002CA428 /* RTMPIngress.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RTMPIngress.swift; sourceTree = "<group>"; };
+		84D6494229E9AD08002CA428 /* CallIngressResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallIngressResponse.swift; sourceTree = "<group>"; };
 		84DC382C29A8B9EC00946713 /* CallParticipantMenuAction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantMenuAction.swift; sourceTree = "<group>"; };
 		84DC382E29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantsInfoViewModel.swift; sourceTree = "<group>"; };
 		84DC383C29ADFCFB00946713 /* JSONEncodingHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONEncodingHelper.swift; sourceTree = "<group>"; };
@@ -1492,6 +1496,8 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				84D6494229E9AD08002CA428 /* CallIngressResponse.swift */,
+				84D6494129E9AD07002CA428 /* RTMPIngress.swift */,
 				843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */,
 				843DAB9729E695CF00E0EB63 /* CreateGuestResponse.swift */,
 				84C4003E29E3F446007B69C2 /* ConnectedEvent.swift */,
@@ -2387,12 +2393,14 @@
 				84F7385A287C1A3400A363F4 /* CallModels.swift in Sources */,
 				841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */,
 				84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */,
+				84D6494329E9AD08002CA428 /* RTMPIngress.swift in Sources */,
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				8490032729D308A000AD9BB4 /* TranscriptionSettingsRequest.swift in Sources */,
 				84DC38D029ADFCFD00946713 /* OwnUserResponse.swift in Sources */,
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
 				84DC38D629ADFCFD00946713 /* GeofenceSettingsRequest.swift in Sources */,
 				84DC38BB29ADFCFD00946713 /* UnblockUserRequest.swift in Sources */,
+				84D6494429E9AD08002CA428 /* CallIngressResponse.swift in Sources */,
 				84DC38A229ADFCFD00946713 /* UnblockedUserEvent.swift in Sources */,
 				84F73855287C1A3400A363F4 /* Utils.swift in Sources */,
 				84DC389029ADFCFD00946713 /* SendEventResponse.swift in Sources */,

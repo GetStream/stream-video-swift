@@ -21,9 +21,9 @@ internal struct CallReactionEvent: Codable, JSONEncodable, Hashable, WSCallEvent
     internal var createdAt: Date
     internal var reaction: ReactionResponse
     /** The type of event: \"call.reaction_new\" in this case */
-    internal var type: String
+    internal var type: String = "call.reaction_new"
 
-    internal init(callCid: String, createdAt: Date, reaction: ReactionResponse, type: String) {
+    internal init(callCid: String, createdAt: Date, reaction: ReactionResponse, type: String = "call.reaction_new") {
         self.callCid = callCid
         self.createdAt = createdAt
         self.reaction = reaction

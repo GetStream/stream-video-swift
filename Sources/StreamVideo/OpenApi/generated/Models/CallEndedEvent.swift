@@ -20,10 +20,10 @@ internal struct CallEndedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
     internal var callCid: String
     internal var createdAt: Date
     /** The type of event: \"call.ended\" in this case */
-    internal var type: String
+    internal var type: String = "call.ended"
     internal var user: UserResponse?
 
-    internal init(callCid: String, createdAt: Date, type: String, user: UserResponse? = nil) {
+    internal init(callCid: String, createdAt: Date, type: String = "call.ended", user: UserResponse? = nil) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type

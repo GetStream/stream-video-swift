@@ -20,9 +20,9 @@ internal struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEven
     internal var connectionId: String
     internal var createdAt: Date
     /** The type of event: \"health.check\" in this case */
-    internal var type: String
+    internal var type: String = "health.check"
 
-    internal init(connectionId: String, createdAt: Date, type: String) {
+    internal init(connectionId: String, createdAt: Date, type: String = "health.check") {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.type = type

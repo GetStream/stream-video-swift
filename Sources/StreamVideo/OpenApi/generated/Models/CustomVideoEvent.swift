@@ -22,10 +22,10 @@ internal struct CustomVideoEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
     /** Custom data for this object */
     internal var custom: [String: AnyCodable]
     /** The type of event, \"custom\" in this case */
-    internal var type: String
+    internal var type: String = "custom"
     internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, custom: [String: AnyCodable], type: String, user: UserResponse) {
+    internal init(callCid: String, createdAt: Date, custom: [String: AnyCodable], type: String = "custom", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom

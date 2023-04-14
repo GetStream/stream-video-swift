@@ -25,9 +25,9 @@ internal struct CallMemberUpdatedPermissionEvent: Codable, JSONEncodable, Hashab
     /** The list of members that were updated */
     internal var members: [MemberResponse]
     /** The type of event: \"call.member_added\" in this case */
-    internal var type: String
+    internal var type: String = "call.updated_permission"
 
-    internal init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date, members: [MemberResponse], type: String) {
+    internal init(call: CallResponse, callCid: String, capabilitiesByRole: [String: [String]], createdAt: Date, members: [MemberResponse], type: String = "call.updated_permission") {
         self.call = call
         self.callCid = callCid
         self.capabilitiesByRole = capabilitiesByRole

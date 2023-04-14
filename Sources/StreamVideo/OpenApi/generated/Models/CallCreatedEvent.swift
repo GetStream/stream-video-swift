@@ -25,9 +25,9 @@ internal struct CallCreatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
     /** true when the call was created with ring enabled */
     internal var ringing: Bool
     /** The type of event: \"call.created\" in this case */
-    internal var type: String
+    internal var type: String = "call.created"
 
-    internal init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], ringing: Bool, type: String) {
+    internal init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], ringing: Bool, type: String = "call.created") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt

@@ -21,10 +21,10 @@ internal struct BlockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
     internal var callCid: String
     internal var createdAt: Date
     /** The type of event: \"call.blocked_user\" in this case */
-    internal var type: String
+    internal var type: String = "call.blocked_user"
     internal var user: UserResponse
 
-    internal init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, type: String, user: UserResponse) {
+    internal init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, type: String = "call.blocked_user", user: UserResponse) {
         self.blockedByUser = blockedByUser
         self.callCid = callCid
         self.createdAt = createdAt
