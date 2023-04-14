@@ -305,3 +305,6 @@ struct WebSocketErrorContainer: Decodable {
     /// A server error was received.
     let error: ErrorPayload
 }
+
+struct WSDisconnected: Event {}
+struct WSConnected: Event {}

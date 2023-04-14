@@ -34,6 +34,7 @@ public class CallsController: ObservableObject {
     private let streamVideo: StreamVideo
     
     private var watchTask: Task<Void, Error>?
+    private var socketDisconnected = false
     
     init(streamVideo: StreamVideo, coordinatorClient: CoordinatorClient, callsQuery: CallsQuery) {
         self.coordinatorClient = coordinatorClient
@@ -44,6 +45,17 @@ public class CallsController: ObservableObject {
     
     /// Loads the next page of calls.
     public func loadNextCalls() async throws {
+        try await loadCalls()
+    }
+    
+    public func cleanUp() {
+        watchTask?.cancel()
+        watchTask = nil
+    }
+    
+    // MARK: - private
+    
+    private func loadCalls(shouldRefresh: Bool = false) async throws {
         let isLoading = await state.loading
         let loadedAllCalls = await state.loadedAllCalls
         if isLoading || loadedAllCalls {
@@ -71,7 +83,11 @@ public class CallsController: ObservableObject {
                     updatedAt: $0.call.updatedAt
                 )
             }
-            self.calls.append(contentsOf: calls)
+            if shouldRefresh {
+                self.calls = calls
+            } else {
+                self.calls.append(contentsOf: calls)
+            }
             await state.update(loading: false)
         } catch {
             log.error("Error querying calls \(error.localizedDescription)")
@@ -79,13 +95,6 @@ public class CallsController: ObservableObject {
             throw error
         }
     }
-    
-    public func cleanUp() {
-        watchTask?.cancel()
-        watchTask = nil
-    }
-    
-    // MARK: - private
     
     private func makeQueryCallsRequest() -> QueryCallsRequest {
         let sortParams = makeSortParamsRequest()
@@ -137,6 +146,24 @@ public class CallsController: ObservableObject {
             var call = calls[index]
             call.applyUpdates(from: callUpdated.call)
             calls[index] = call
+        } else if event is WSDisconnected {
+            self.socketDisconnected = true
+        } else if event is WSConnected {
+            if socketDisconnected {
+                reWatchCalls()
+            }
+        }
+    }
+    
+    private func reWatchCalls() {
+        socketDisconnected = false
+        guard callsQuery.watch else { return }
+        // Clean up and re-watch the calls
+        prev = nil
+        next = nil
+        Task {
+            await state.update(loadedAllCalls: false)
+            try await loadCalls(shouldRefresh: true)
         }
     }
     
