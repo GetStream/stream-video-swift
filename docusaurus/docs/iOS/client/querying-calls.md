@@ -1,0 +1,112 @@
+---
+title: Querying Calls
+---
+
+The `StreamVideo` SDK allows you to query calls and watch them. This allows you to build apps that display feeds of calls with realtime updates (without joining them), similar to Clubhouse.
+
+You can query calls based on built-in fields as well as any custom field you add to the calls. Multiple filters can be combined using AND, OR logical operators, each filter can use its comparison (equality, inequality, greater than, greater or equal, etc.). 
+
+### CallsController
+
+In order to query calls, you need to create an instance of the `CallsController`, via the `StreamVideo` object's method `makeCallsController`:
+
+```swift
+private lazy var callsController: CallsController = {
+    let sortParam = CallSortParam(direction: .descending, field: .createdAt)
+    let filters: [String: RawJSON] = ["type": .dictionary(["$eq": .string("audio_room")])]
+    let callsQuery = CallsQuery(sortParams: [sortParam], filters: filters, watch: true)
+    return streamVideo.makeCallsController(callsQuery: callsQuery)
+}()
+```
+
+The controller requires the `CallsQuery` parameter, which provides sorting and filtering information for the query, as well as whether the calls should be watched.
+
+#### Sort Parameters
+
+The `CallSortParam` model contains two properties - `direction` and `field`. The `direction` can be `ascending` and `descending`, while the `field` can be one of the following values:
+
+```swift
+/// The sort field for the call start time.
+static let startsAt: Self = "starts_at"
+/// The sort field for the call creation time.
+static let createdAt: Self = "created_at"
+/// The sort field for the call update time.
+static let updatedAt: Self = "updated_at"
+/// The sort field for the call end time.
+static let endedAt: Self = "ended_at"
+/// The sort field for the call type.
+static let type: Self = "type"
+/// The sort field for the call id.
+static let id: Self = "id"
+/// The sort field for the call cid.
+static let cid: Self = "cid"
+```
+
+You can provide an array of `CallSortParam`'s in order to have sorting by multiple fields.
+
+#### Filters
+
+The `StreamVideo` API supports MongoDB style queries to make it easier to fetch the required data. For example, if you want to query the channels that are of type `audio_room`, you would need to write the following filter:
+
+```swift
+let filters: [String: RawJSON] = ["type": .dictionary(["$eq": .string("audio_room")])]
+```
+
+You can find the supported operators [here](https://getstream.io/chat/docs/ios-swift/query_syntax_operators/?language=swift&q=filter).
+
+#### Pagination
+
+You can fetch the next calls from the specified query, by calling the `loadNextCalls` method. For example, if you are doing pagination in SwiftUI, you can use the `onAppear` modifier on each entry, and based on its index fetch the next calls.
+
+First, in your SwiftUI view, you can call a method from your presentation layer (e.g. a view model), on the view item appearance:
+
+```swift
+ScrollView {
+    LazyVStack {
+        ForEach(viewModel.calls) { call in
+        	CallView(call: call)
+            	.padding(.vertical, 4)
+            	.onAppear {
+                	viewModel.onCallAppear(call)
+            	}
+        }
+    }
+}
+```
+
+Next, in your presentation layer, you can check based on the call index, if the next page should be fetched:
+
+```swift
+func onCallAppear(_ call: CallData) {
+    let index = calls.firstIndex { callData in
+        callData.callCid == call.callCid
+    }
+    guard let index else { return }
+    
+    if index < calls.count - 10 {
+        return
+    }
+    
+    loadCalls()
+}
+
+func loadCalls() {
+    Task {
+        try await callsController.loadNextCalls()
+    }
+}
+```
+
+The `CallsController` automatically manages the cursors for the pagination. You only need to be careful not to call the `loadNextCalls` method before it's necessary (like in the example above).
+
+#### Watching Calls
+
+If you set the `watch` property to `true`, you will be able to watch realtime updates of the calls. The `@Published` `calls` variable will provide all the updates to the calls, that you can use to update your UI.
+
+#### Cleanup
+
+When you are done watching channels, you should cleanup the controller (which will stop the WS updates):
+
+```swift
+callsController.cleanUp()
+```
