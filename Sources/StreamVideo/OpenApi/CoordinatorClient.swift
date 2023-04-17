@@ -36,7 +36,7 @@ class CoordinatorClient: @unchecked Sendable {
     func joinCall(with request: JoinCallRequestData) async throws -> JoinCallResponse {
         try await execute(
             request: request.joinCallRequest,
-            path: "/join_call/\(request.type)/\(request.id)"
+            path: "/call/\(request.type)/\(request.id)/join"
         )
     }
     
