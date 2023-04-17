@@ -1,6 +1,6 @@
 ### 🔗 Issue Links
 
-_Provide all Jira tickets and/or Github issues related to this PR, if applicable._
+_Provide all JIRA tickets and/or GitHub issues related to this PR, if applicable._
 
 ### 🎯 Goal
 
@@ -18,9 +18,9 @@ _Provide a detailed description of the implementation and explain your decisions
 
 _Add relevant screenshots and/or videos/gifs to easily see what this PR changes, if applicable._
 
-| Before | After |
-| ------ | ----- |
-|  img   |  img  |
+|  Before  |  After  |
+| -------- | ------- |
+|  `img`   |  `img`  |
 
 ### 🧪 Manual Testing Notes
 
@@ -30,11 +30,11 @@ _Explain how this change can be tested manually, if applicable._
 
 - [ ] I have signed the [Stream CLA](https://docs.google.com/forms/d/e/1FAIpQLScFKsKkAJI7mhCr7K9rEIOpqIDThrWxuvxnwUq2XkHyG154vQ/viewform) (required)
 - [ ] This change follows zero ⚠️ policy (required)
-- [x] This change should be manually QAed
+- [x] This change should receive manual QA
 - [ ] Changelog is updated with client-facing changes
 - [ ] New code is covered by unit tests
 - [ ] Comparison screenshots added for visual changes
-- [ ] Affected documentation updated (docusaurus, tutorial, CMS)
+- [ ] Affected documentation updated (Docusaurus, tutorial, CMS)
 
 ### 🎁 Meme
 

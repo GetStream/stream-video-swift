@@ -55,7 +55,7 @@ The `handleReaction` method would be your own handling of the reaction.
 
 You can also send custom events for cases where you need something different than reactions. The steps are very similar to sending reactions above.
 
-For example, let's see how we can send some broadcasting event to all partcipiants in the call, like starting a game.
+For example, let's see how we can send some broadcasting event to all participants in the call, like starting a game.
 
 First, let's create a new event type:
 

@@ -107,9 +107,9 @@ You can mute/unmute the audio during a call, using the `toggleMicrophoneEnabled`
 
 The view model also has support for explicitly asking to capture the current user's local video. To do this, you will need to call `startCapturingLocalVideo`.
 
-### Screensharing Session
+### Screen Sharing Session
 
-When there is a screensharing session in progress, it can be accessed via the `screensharingSession` published property in the view model.
+When there is a screen sharing session in progress, it can be accessed via the `screensharingSession` published property in the view model.
 
 ### Other properties
 
@@ -121,7 +121,7 @@ Here are some other useful properties from the view model that you can use to bu
 - `participantEvent` - published variable that contains info about a participant event. It's reset to nil after 2 seconds.
 - `isMinimized` - whether the call is in minimized mode.
 - `localVideoPrimary` - `false` by default. It becomes `true` when the current user's local video is shown as a primary view.
-- `hideUIElements` - whether the UI elements, such as the call controls should be hidden (for example while screensharing).
+- `hideUIElements` - whether the UI elements, such as the call controls should be hidden (for example while screen sharing).
 - `blockedUsers` - a list of the blocked users in the call.
 - `recordingState` - the current recording state of the call.
 - `localParticipant` - returns the local participant of the call.

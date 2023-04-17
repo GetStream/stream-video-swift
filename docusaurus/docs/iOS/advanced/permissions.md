@@ -12,14 +12,14 @@ The StreamVideo SDK has support for such capabilities, with the usage of the `Ca
 
 As soon as you join a call, the `Call` object allows you to perform several permissions related actions:
 - check if a user has the capabilities to perform an action
-- ask for additional capabilities (e.g. to become a speaker in audio room)
+- ask for additional capabilities (for example to become a speaker in audio room)
 - listen to permissions-related events
 - granting and revoking permissions
-- perform a moderation action (e.g. muting a user)
+- perform a moderation action (for example muting a user)
 
 #### Checking for capabilities 
 
-Every user has certain call capabiltities, depending on their role in the call. For actions that are beyond the scope of a regular member, you need to check if the user has the appropriate capability, before showing a UI to execute it.
+Every user has certain call capabilities, depending on their role in the call. For actions that are beyond the scope of a regular member, you need to check if the user has the appropriate capability, before showing a UI to execute it.
 
 To perform this check, you should use the `Call`'s `currentUserHasCapability` method. In this method, you pass the capability you want to check. 
 
@@ -139,7 +139,7 @@ func muteUsers(ids: [String]) {
 }
 ```
 
-In the request, you need to specify the list of user ids you want to mute, as well as whether it's the audio, video or screensharing track. If you are using our `CallViewModel`, the call controls are automatically updated to reflect the state change. If you are using your custom presentation layer, you would need to directly check the changes in the `participants` array of the `Call` object for updates.
+In the request, you need to specify the list of user ids you want to mute, as well as whether it's the audio, video or screen sharing track. If you are using our `CallViewModel`, the call controls are automatically updated to reflect the state change. If you are using your custom presentation layer, you would need to directly check the changes in the `participants` array of the `Call` object for updates.
 
 #### Ending a call
 

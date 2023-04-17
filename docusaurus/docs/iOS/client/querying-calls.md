@@ -2,7 +2,7 @@
 title: Querying Calls
 ---
 
-The `StreamVideo` SDK allows you to query calls and watch them. This allows you to build apps that display feeds of calls with realtime updates (without joining them), similar to Clubhouse.
+The `StreamVideo` SDK allows you to query calls and watch them. This allows you to build apps that display feeds of calls with real-time updates (without joining them), similar to Clubhouse.
 
 You can query calls based on built-in fields as well as any custom field you add to the calls. Multiple filters can be combined using AND, OR logical operators, each filter can use its comparison (equality, inequality, greater than, greater or equal, etc.). 
 
@@ -58,7 +58,7 @@ You can find the supported operators [here](https://getstream.io/chat/docs/ios-s
 
 You can fetch the next calls from the specified query, by calling the `loadNextCalls` method. For example, if you are doing pagination in SwiftUI, you can use the `onAppear` modifier on each entry, and based on its index fetch the next calls.
 
-First, in your SwiftUI view, you can call a method from your presentation layer (e.g. a view model), on the view item appearance:
+First, in your SwiftUI view, you can call a method from your presentation layer (for example a view model), on the view item appearance:
 
 ```swift
 ScrollView {
@@ -101,7 +101,7 @@ The `CallsController` automatically manages the cursors for the pagination. You 
 
 #### Watching Calls
 
-If you set the `watch` property to `true`, you will be able to watch realtime updates of the calls. The `@Published` `calls` variable will provide all the updates to the calls, that you can use to update your UI.
+If you set the `watch` property to `true`, you will be able to watch real-time updates of the calls. The `@Published` `calls` variable will provide all the updates to the calls, that you can use to update your UI.
 
 #### Cleanup
 

@@ -12,7 +12,7 @@ You can create a new call via the `StreamVideo`'s method `func makeCall(callType
 
 It's a lower-level component than the stateful `CallViewModel`, and it's suitable if you want to create your own presentation logic and state handling. 
 
-The `Call` object should exist while the call is active. Afterwards, you should clean up all the state related to the call (provided you don't use our `CallViewModel`), by calling the `leave` method and deallocating the instance.
+The `Call` object should exist while the call is active. Afterwards, you should clean up all the state related to the call (provided you don't use our `CallViewModel`), by calling the `leave` method and de-allocating the instance.
 
 Every call has a call id and type. You can join a call with the same id as many times as you need. However, the call sends ringing events only the first time. If you want to receive ring events, you should always use a unique call id.
 

@@ -646,7 +646,7 @@ private func subscribeForCallStateChanges() {
 
 In audio rooms, usually you would need the hosts to be able to control who is able to speak and who should be only a listener. In order to do that, you will need to use the `Call`'s permission features. Additionally, you will need to listen to permission requests and permission updates, so you can update your UI accordingly.
 
-Let's first add a method that will listen to permission requests. These are events triggered by user actions such as "raising a hand".
+Let's first add a method that will listen to permission requests. These are events triggered by user actions such as "raising a hand."
 
 ```swift
 private func subscribeForPermissionsRequests() {

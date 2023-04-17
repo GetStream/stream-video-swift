@@ -64,7 +64,7 @@ Task {
 }
 ```
 
-After the client is initalized, you can safely create a `CallViewModel` and join calls, like a regular user.
+After the client is initialized, you can safely create a `CallViewModel` and join calls, like a regular user.
 
 #### Anonymous users
 
@@ -75,7 +75,7 @@ Anonymous users need a call token to join a call. Call tokens are JWT authentica
 Few important things about call tokens:
 - Call tokens must have an expiration time included to avoid security problems.
 - Call tokens can contain up to 100 call ids.
-- Call tokens for anonymous users must be generated with the special `!anon` user_id claim.
+- Call tokens for anonymous users must be generated with the special `!anon` `user_id` claim.
 - Membership / role can only be invalidated using the existing API around token invalidation (we invalidate all tokens for a user).
 - Generating a call token does not require any API interaction and can be done with any server-side SDK.
 

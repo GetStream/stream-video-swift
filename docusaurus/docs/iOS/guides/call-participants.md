@@ -9,15 +9,15 @@ You can use this property to filter participants, based on their properties. Her
 - `userId`: `String` - The user's id. This is not necessarily unique, since a user can join from multiple devices. 
 - `role`: `String` - The user's role in the call.
 - `name`: `String` - The user's name.
-- `profileImageURL`: `URL?` - The user's profile image url.
+- `profileImageURL`: `URL?` - The user's profile image URL.
 - `trackLookupPrefix`: `String?` - The id of the track that's connected to the participant.
 - `isOnline`: `Bool` - Returns whether the participant is online.
 - `hasVideo`: `Bool` - Returns whether the participant has video.
 - `hasAudio`: `Bool` - Returns whether the participant has audio.
-- `isScreensharing`: `Bool` - Returns whether the participant is screensharing.
+- `isScreensharing`: `Bool` - Returns whether the participant is screen sharing.
 - `track`: `RTCVideoTrack?` - Returns the participant's video track.
 - `trackSize`: `CGSize` - Returns the size of the track for the participant.
-- `screenshareTrack`: `RTCVideoTrack?` - Returns the screensharing track for the participant.
+- `screenshareTrack`: `RTCVideoTrack?` - Returns the screen sharing track for the participant.
 - `showTrack`: `Bool` - Returns whether the track should be shown.
 - `isSpeaking`: `Bool` - Returns whether the participant is speaking.
 - `sessionId`: `String` - Returns the session id of the participant.

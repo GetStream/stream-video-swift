@@ -45,7 +45,7 @@ func stopRecording() {
 }
 ```
 
-This wil change the current recording state of the call to `noRecording`.
+This will change the current recording state of the call to `noRecording`.
 
 #### Recording events
 

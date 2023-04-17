@@ -28,7 +28,7 @@ The `livestream` call type is configured to be used for livestreaming apps. Acce
 
 The sorting of participants in a call is connected to the call type. For example, the audio room apps usually put the hosts at the top (role based sorting), then the speakers and finally the listeners. On the other hand, meeting based apps usually put the speakers and the participants with video at the top. 
 
-The `StreamVideo` SDK comes with preconfigured functions that allow you to apply sorting to the participants list. Additionally, you can create your own sorting criteria, based on the properties available in the `CallParticipant` model.
+The `StreamVideo` SDK comes with pre-configured functions that allow you to apply sorting to the participants list. Additionally, you can create your own sorting criteria, based on the properties available in the `CallParticipant` model.
 
 When a call type is created, you can optionally specify the sorting comparators:
 

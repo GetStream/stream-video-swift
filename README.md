@@ -1,10 +1,10 @@
 # StreamVideo iOS
 
-This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repo includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
+This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repository includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
 
 ## Introduction
 
-This repo contains the following parts:
+This repository contains the following parts:
 - low-level client for calling (can be used standalone if you want to build your own UI)
 - SwiftUI SDK (UI components developed in SwiftUI)
 - UIKit SDK (wrappers for easier usage in UIKit apps)
