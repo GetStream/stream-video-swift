@@ -439,12 +439,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         XCTAssert(callViewModel.participantsLayout == .fullScreen)
     }
     
-    // MARK: - private
-    
-    private func waitForCallEvent() async throws {
-        try await Task.sleep(nanoseconds: 500_000_000)
-    }
-    
 }
 
 @MainActor
