@@ -15,6 +15,7 @@ open class CallViewModel: ObservableObject {
     /// Provides access to the current call.
     @Published public var call: Call? {
         didSet {
+            lastLayoutChange = Date()
             participantUpdates = call?.$participants
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] participants in
@@ -75,7 +76,7 @@ open class CallViewModel: ObservableObject {
     @Published public var outgoingCallMembers = [User]()
     
     /// Dictionary of the call participants.
-    @Published public var callParticipants = [String: CallParticipant]() {
+    @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
             if let id = pinnedParticipant?.id, callParticipants[id]?.isPinned == false {
                 callParticipants[id] = callParticipants[id]?.withUpdated(pinState: true)
@@ -100,7 +101,13 @@ open class CallViewModel: ObservableObject {
     @Published public var localVideoPrimary = false
     
     /// Optional property about the ongoing screensharing session (if any).
-    @Published public var screensharingSession: ScreensharingSession?
+    @Published public var screensharingSession: ScreensharingSession? {
+        didSet {
+            if screensharingSession?.participant.id != oldValue?.participant.id {
+                lastLayoutChange = Date()
+            }
+        }
+    }
     
     /// Whether the UI elements, such as the call controls should be hidden (for example while screensharing).
     @Published public var hideUIElements = false
@@ -115,8 +122,14 @@ open class CallViewModel: ObservableObject {
     @Published public var recordingState: RecordingState = .noRecording
     
     /// The participants layout.
-    @Published public private(set) var participantsLayout: ParticipantsLayout
-    
+    @Published public private(set) var participantsLayout: ParticipantsLayout {
+        didSet {
+            if participantsLayout != oldValue {
+                lastLayoutChange = Date()
+            }
+        }
+    }
+        
     @Published public var pinnedParticipant: CallParticipant? {
         didSet {
             if let id = pinnedParticipant?.id, callParticipants[id]?.isPinned == false {
@@ -155,6 +168,7 @@ open class CallViewModel: ObservableObject {
     private var ringingTimer: Foundation.Timer?
     
     private var callRejectionEvents = [String: Int]()
+    private var lastLayoutChange = Date()
     
     public var participants: [CallParticipant] {
         callParticipants
@@ -341,8 +355,36 @@ open class CallViewModel: ObservableObject {
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
     public func changeTrackVisbility(for participant: CallParticipant, isVisible: Bool) {
+        if !isVisible {
+            if participantsLayout == .fullScreen {
+                if participant.id == participants.first?.id {
+                    log.debug("Skip hiding the track for the top participant")
+                    return
+                }
+            } else if participantsLayout == .grid && participants.count < 6 {
+                log.debug("Skip hiding tracks in small grids")
+                return
+            } else {
+                let diff = abs(lastLayoutChange.timeIntervalSinceNow)
+                if diff < 3 {
+                    log.debug("Ignore track changes because of recent layout change")
+                    return
+                }
+            }
+        }
         Task {
             await call?.changeTrackVisibility(for: participant, isVisible: isVisible)
+        }
+    }
+    
+    /// Updates the track size for the provided participant.
+    /// - Parameters:
+    ///  - trackSize: the size of the track.
+    ///  - participant: the call participant.
+    public func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) {
+        Task {
+            log.debug("Updating track size for participant \(participant.name) to \(trackSize)")
+            await call?.updateTrackSize(trackSize, for: participant)
         }
     }
     

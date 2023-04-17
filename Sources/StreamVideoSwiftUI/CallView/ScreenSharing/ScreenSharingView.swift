@@ -40,8 +40,8 @@ public struct ScreenSharingView: View {
                                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
                                 contentMode: .scaleAspectFill
                             ) { participant, view in
-                                if let track = participant.track {
-                                    view.add(track: track)
+                                view.handleViewRendering(for: participant) { size, participant in
+                                    viewModel.updateTrackSize(size, for: participant)
                                 }
                             }
                             .adjustVideoFrame(to: thumbnailSize, ratio: 1)
@@ -49,6 +49,9 @@ public struct ScreenSharingView: View {
                             .accessibility(identifier: "screenSharingParticipantView")
                             .onAppear {
                                 viewModel.changeTrackVisbility(for: participant, isVisible: true)
+                            }
+                            .onDisappear {
+                                viewModel.changeTrackVisbility(for: participant, isVisible: false)
                             }
                         }
                         

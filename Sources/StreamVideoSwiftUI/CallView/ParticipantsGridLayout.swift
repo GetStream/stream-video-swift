@@ -76,30 +76,36 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                     viewFactory: viewFactory,
                     participants: participants,
                     pinnedParticipant: $pinnedParticipant,
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
+                    availableSize: availableSize,
+                    onViewUpdate: { participant, view in
+                        onViewRendering(view, participant)
+                    },
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
             } else if participants.count == 4 {
                 TwoColumnParticipantsView(
                     viewFactory: viewFactory,
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3]],
                     pinnedParticipant: $pinnedParticipant,
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
+                    availableSize: availableSize,
+                    onViewUpdate: { participant, view in
+                        onViewRendering(view, participant)
+                    },
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
             } else if participants.count == 5 {
                 TwoColumnParticipantsView(
                     viewFactory: viewFactory,
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3], participants[4]],
                     pinnedParticipant: $pinnedParticipant,
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
+                    availableSize: availableSize,
+                    onViewUpdate: { participant, view in
+                        onViewRendering(view, participant)
+                    },
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
             } else {
                 ParticipantsGridView(
                     viewFactory: viewFactory,
@@ -136,7 +142,8 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
-                    }
+                    },
+                    onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if participants.count == 4 {
                 TwoRowParticipantsView(
@@ -144,20 +151,24 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                     firstRowParticipants: [participants[0], participants[1]],
                     secondRowParticipants: [participants[2], participants[3]],
                     pinnedParticipant: $pinnedParticipant,
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
+                    availableSize: availableSize,
+                    onViewUpdate: { participant, view in
+                        onViewRendering(view, participant)
+                    },
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
             } else if participants.count == 5 {
                 TwoRowParticipantsView(
                     viewFactory: viewFactory,
                     firstRowParticipants: [participants[0], participants[1]],
                     secondRowParticipants: [participants[2], participants[3], participants[4]],
                     pinnedParticipant: $pinnedParticipant,
-                    availableSize: availableSize
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                }
+                    availableSize: availableSize,
+                    onViewUpdate: { participant, view in
+                        onViewRendering(view, participant)
+                    },
+                    onChangeTrackVisibility: onChangeTrackVisibility
+                )
             } else {
                 ParticipantsGridView(
                     viewFactory: viewFactory,
@@ -185,6 +196,7 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -193,7 +205,8 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
                 participants: leftColumnParticipants,
                 pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
-                onViewUpdate: onViewUpdate
+                onViewUpdate: onViewUpdate,
+                onChangeTrackVisibility: onChangeTrackVisibility
             )
             .adjustVideoFrame(to: size.width)
             
@@ -202,7 +215,8 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
                 participants: rightColumnParticipants,
                 pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
-                onViewUpdate: onViewUpdate
+                onViewUpdate: onViewUpdate,
+                onChangeTrackVisibility: onChangeTrackVisibility
             )
             .adjustVideoFrame(to: size.width)
         }
@@ -225,6 +239,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -233,7 +248,8 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
                 participants: firstRowParticipants,
                 pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
-                onViewUpdate: onViewUpdate
+                onViewUpdate: onViewUpdate,
+                onChangeTrackVisibility: onChangeTrackVisibility
             )
             
             HorizontalParticipantsView(
@@ -241,7 +257,8 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
                 participants: secondRowParticipants,
                 pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
-                onViewUpdate: onViewUpdate
+                onViewUpdate: onViewUpdate,
+                onChangeTrackVisibility: onChangeTrackVisibility
             )
         }
         .frame(maxWidth: availableSize.width, maxHeight: .infinity)
@@ -260,6 +277,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
     @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
         VStack(spacing: 0) {
@@ -279,6 +297,9 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                         ratio: ratio
                     )
                 )
+                .onAppear {
+                    onChangeTrackVisibility(participant, true)
+                }
             }
         }
     }
@@ -300,6 +321,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
         HStack(spacing: 0) {
@@ -319,6 +341,9 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                         ratio: ratio
                     )
                 )
+                .onAppear {
+                    onChangeTrackVisibility(participant, true)
+                }
             }
         }
     }

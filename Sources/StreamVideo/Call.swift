@@ -198,6 +198,14 @@ public class Call: ObservableObject, @unchecked Sendable {
         try await callController.removeMembersFromCall(ids: ids)
     }
     
+    /// Updates the track size for the provided participant.
+    /// - Parameters:
+    ///  - trackSize: the size of the track.
+    ///  - participant: the call participant.
+    public func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
+        await callController.updateTrackSize(trackSize, for: participant)
+    }
+    
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     public func setVideoFilter(_ videoFilter: VideoFilter?) {

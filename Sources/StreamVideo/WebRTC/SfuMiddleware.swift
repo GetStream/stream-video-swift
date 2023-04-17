@@ -105,7 +105,7 @@ class SfuMiddleware: EventMiddleware {
             return
         }
         let callParticipants = await state.callParticipants
-        let showTrack = (callParticipants.count + 1) < participantsThreshold
+        let showTrack = callParticipants.count < participantsThreshold
         let participant = event.participant.toCallParticipant(showTrack: showTrack)
         await state.update(callParticipant: participant)
         let event = ParticipantEvent(

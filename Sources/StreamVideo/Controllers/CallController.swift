@@ -198,6 +198,14 @@ class CallController {
         webRTCClient?.setVideoFilter(videoFilter)
     }
     
+    /// Updates the track size for the provided participant.
+    /// - Parameters:
+    ///  - trackSize: the size of the track.
+    ///  - participant: the call participant.
+    func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
+        await webRTCClient?.updateTrackSize(trackSize, for: participant)
+    }
+    
     /// Cleans up the call controller.
     func cleanUp() {
         call = nil

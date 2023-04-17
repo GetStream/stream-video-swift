@@ -36,8 +36,8 @@ public struct MinimizedCallView: View {
                     availableSize: proxy.size,
                     contentMode: .scaleAspectFill
                 ) { participant, view in
-                    if let track = participant.track {
-                        view.add(track: track)
+                    view.handleViewRendering(for: participant) { size, participant in
+                        viewModel.updateTrackSize(size, for: participant)
                     }
                 }
             } else {

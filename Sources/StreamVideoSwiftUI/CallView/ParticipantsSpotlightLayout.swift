@@ -45,12 +45,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
                 contentMode: .scaleAspectFill
             ) { participant, view in
-                if let track = participant.track {
-                    view.add(track: track)
-                }
-            }
-            .onAppear {
-                onChangeTrackVisibility(participant, true)
+                onViewRendering(view, participant)
             }
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
@@ -65,6 +60,10 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 log.debug("Participant \(participant.name) is visible")
                 onChangeTrackVisibility(participant, true)
             }
+            .modifier(ParticipantChangeModifier(
+                participant: participant,
+                onChangeTrackVisibility: onChangeTrackVisibility)
+            )
             
             ScrollView(.horizontal) {
                 HorizontalContainer {
@@ -74,12 +73,13 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                             availableSize: .init(width: thumbnailSize, height: thumbnailSize),
                             contentMode: .scaleAspectFill
                         ) { participant, view in
-                            if let track = participant.track {
-                                view.add(track: track)
-                            }
+                            onViewRendering(view, participant)
                         }
                         .onAppear {
                             onChangeTrackVisibility(participant, true)
+                        }
+                        .onDisappear {
+                            onChangeTrackVisibility(participant, false)
                         }
                         .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                         .cornerRadius(8)

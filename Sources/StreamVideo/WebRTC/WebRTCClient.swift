@@ -114,7 +114,7 @@ class WebRTCClient: NSObject {
     private let user: User
     private let callCid: String
     private let audioSession = AudioSession()
-    private let participantsThreshold = 8
+    private let participantsThreshold = 10
     private var connectOptions: ConnectOptions?
     private let callCoordinatorController: CallCoordinatorController
     private let videoConfig: VideoConfig
@@ -320,6 +320,18 @@ class WebRTCClient: NSObject {
         }
         log.debug("Setting track for \(participant.name) to \(isVisible)")
         let updated = participant.withUpdated(showTrack: isVisible)
+        let trackId = participant.trackLookupPrefix ?? participant.id
+        let track = await state.tracks[trackId]
+        track?.isEnabled = isVisible
+        await state.update(callParticipant: updated)
+        await state.add(track: track, id: trackId)
+    }
+    
+    func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
+        guard let participant = await state.callParticipants[participant.id] else {
+            return
+        }
+        let updated = participant.withUpdated(trackSize: trackSize)
         await state.update(callParticipant: updated)
     }
     

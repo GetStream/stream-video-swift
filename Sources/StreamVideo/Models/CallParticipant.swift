@@ -6,7 +6,7 @@ import Foundation
 @preconcurrency import WebRTC
 
 /// Represents a participant in the call.
-public struct CallParticipant: Identifiable, Sendable {
+public struct CallParticipant: Identifiable, Sendable, Equatable {
     /// The unique call id of the participant.
     public var id: String
     /// The user's id. This is not necessarily unique, since a user can join from multiple devices.

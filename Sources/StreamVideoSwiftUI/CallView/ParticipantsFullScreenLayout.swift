@@ -53,9 +53,32 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
             log.debug("Participant \(participant.name) is visible")
             onChangeTrackVisibility(participant, true)
         }
+        .modifier(ParticipantChangeModifier(
+            participant: participant,
+            onChangeTrackVisibility: onChangeTrackVisibility)
+        )        
     }
     
     private var ratio: CGFloat {
         size.width / size.height
     }
+}
+
+struct ParticipantChangeModifier: ViewModifier {
+    
+    var participant: CallParticipant
+    var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
+    
+    func body(content: Content) -> some View {
+        if #available(iOS 14, *) {
+            content
+                .onChange(of: participant) { newValue in
+                    log.debug("Participant \(newValue.name) is visible")
+                    onChangeTrackVisibility(newValue, true)
+                }
+        } else {
+            content
+        }
+    }
+    
 }

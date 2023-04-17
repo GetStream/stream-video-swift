@@ -68,7 +68,9 @@ public struct CallView<Factory: ViewFactory>: View {
                                 proxy: reader
                             ) {
                                 withAnimation {
-                                    viewModel.localVideoPrimary.toggle()
+                                    if participants.count == 1 {
+                                        viewModel.localVideoPrimary.toggle()
+                                    }
                                 }
                             }
                         }
@@ -116,8 +118,8 @@ public struct CallView<Factory: ViewFactory>: View {
                     availableSize: size,
                     contentMode: .scaleAspectFill
                 ) { participant, view in
-                    if let track = participant.track {
-                        view.add(track: track)
+                    view.handleViewRendering(for: participant) { size, participant in
+                        viewModel.updateTrackSize(size, for: participant)
                     }
                 }
                 .accessibility(identifier: "minimizedParticipantView")
@@ -152,9 +154,8 @@ public struct CallView<Factory: ViewFactory>: View {
     }
     
     private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
-        if let track = participant.track {
-            log.debug("adding track to a view \(view)")
-            view.add(track: track)
+        view.handleViewRendering(for: participant) { size, participant in
+            viewModel.updateTrackSize(size, for: participant)
         }
     }
 }

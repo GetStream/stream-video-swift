@@ -61,6 +61,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             }
             .onDisappear {
                 log.debug("Participant \(participant.name) is not visible")
+                participantVisibilityChanged(participant, false)
             }
         }
     }
