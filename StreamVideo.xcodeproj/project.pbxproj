@@ -42,6 +42,14 @@
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
 		8423B7562950BB0B00012F8D /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8423B7552950BB0B00012F8D /* Sentry */; };
+		842747E529EECD0100E063AD /* ClientError_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747E429EECD0100E063AD /* ClientError_Tests.swift */; };
+		842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747E629EECF9600E063AD /* ErrorPayload_Tests.swift */; };
+		842747EA29EED0F200E063AD /* UserToken_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747E929EED0F200E063AD /* UserToken_Tests.swift */; };
+		842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747EB29EED59000E063AD /* JSONDecoder_Tests.swift */; };
+		842747EE29EED60600E063AD /* Calendar+GMT.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747ED29EED60600E063AD /* Calendar+GMT.swift */; };
+		842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747F029EED88800E063AD /* InternetConnection_Tests.swift */; };
+		842747F329EED8D900E063AD /* InternetConnection_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747F229EED8D900E063AD /* InternetConnection_Mock.swift */; };
+		842747F629EEDB1300E063AD /* EventBatcher_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */; };
 		84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */; };
 		84274F482884251600CF8794 /* InternetConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84274F472884251600CF8794 /* InternetConnection.swift */; };
 		842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */; };
@@ -566,6 +574,14 @@
 		841F2C7D29429DAD00D8D655 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk/usr/lib/swift/libswift_Concurrency.tbd; sourceTree = DEVELOPER_DIR; };
 		84201792288AB699004964B3 /* AddUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUserView.swift; sourceTree = "<group>"; };
 		84231E4628B2506B007985EF /* VideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer.swift; sourceTree = "<group>"; };
+		842747E429EECD0100E063AD /* ClientError_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientError_Tests.swift; sourceTree = "<group>"; };
+		842747E629EECF9600E063AD /* ErrorPayload_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPayload_Tests.swift; sourceTree = "<group>"; };
+		842747E929EED0F200E063AD /* UserToken_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserToken_Tests.swift; sourceTree = "<group>"; };
+		842747EB29EED59000E063AD /* JSONDecoder_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JSONDecoder_Tests.swift; sourceTree = "<group>"; };
+		842747ED29EED60600E063AD /* Calendar+GMT.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Calendar+GMT.swift"; sourceTree = "<group>"; };
+		842747F029EED88800E063AD /* InternetConnection_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternetConnection_Tests.swift; sourceTree = "<group>"; };
+		842747F229EED8D900E063AD /* InternetConnection_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InternetConnection_Mock.swift; sourceTree = "<group>"; };
+		842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBatcher_Tests.swift; sourceTree = "<group>"; };
 		84274F452884249900CF8794 /* ConnectionRecoveryHandler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionRecoveryHandler.swift; sourceTree = "<group>"; };
 		84274F472884251600CF8794 /* InternetConnection.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = InternetConnection.swift; sourceTree = "<group>"; };
 		842C7EAD28A2773700C2AB7F /* IncomingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView.swift; sourceTree = "<group>"; };
@@ -1103,6 +1119,40 @@
 			path = Client;
 			sourceTree = "<group>";
 		};
+		842747E329EECCDA00E063AD /* Errors */ = {
+			isa = PBXGroup;
+			children = (
+				842747E429EECD0100E063AD /* ClientError_Tests.swift */,
+				842747E629EECF9600E063AD /* ErrorPayload_Tests.swift */,
+			);
+			path = Errors;
+			sourceTree = "<group>";
+		};
+		842747E829EED0AB00E063AD /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				842747E929EED0F200E063AD /* UserToken_Tests.swift */,
+				842747EB29EED59000E063AD /* JSONDecoder_Tests.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		842747EF29EED82900E063AD /* HTTPClient */ = {
+			isa = PBXGroup;
+			children = (
+				842747F029EED88800E063AD /* InternetConnection_Tests.swift */,
+			);
+			path = HTTPClient;
+			sourceTree = "<group>";
+		};
+		842747F429EEDACB00E063AD /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
@@ -1341,7 +1391,7 @@
 			path = Participants;
 			sourceTree = "<group>";
 		};
-		8490031729D2E0B200AD9BB4 /* Utils */ = {
+		8490031729D2E0B200AD9BB4 /* TestUtils */ = {
 			isa = PBXGroup;
 			children = (
 				84F58B7D29EE97B300010C4C /* VirtualTime */,
@@ -1352,8 +1402,9 @@
 				84F58B8029EE9C4900010C4C /* WebSocketPingController_Delegate.swift */,
 				84F58B8C29EEAE2D00010C4C /* AssertAsync.swift */,
 				84F58B9429EEBA3900010C4C /* EquatableEvent.swift */,
+				842747ED29EED60600E063AD /* Calendar+GMT.swift */,
 			);
-			path = Utils;
+			path = TestUtils;
 			sourceTree = "<group>";
 		};
 		8492B87629081CE700006649 /* Mock */ = {
@@ -1371,6 +1422,7 @@
 				84F58B8E29EEB32700010C4C /* WebSocketPingController_Mock.swift */,
 				84F58B9029EEB36E00010C4C /* EventNotificationCenter_Mock.swift */,
 				84F58B9229EEB53E00010C4C /* EventMiddleware_Mock.swift */,
+				842747F229EED8D900E063AD /* InternetConnection_Mock.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -1781,8 +1833,12 @@
 				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
 				84F58B6E29EE911500010C4C /* WebSocketClient */,
 				84D6494529E9F2B7002CA428 /* WebRTC */,
-				8490031729D2E0B200AD9BB4 /* Utils */,
+				842747E329EECCDA00E063AD /* Errors */,
+				842747E829EED0AB00E063AD /* Models */,
+				842747EF29EED82900E063AD /* HTTPClient */,
+				842747F429EEDACB00E063AD /* Utils */,
 				8469593029BB3D3700134EA0 /* protobuf */,
+				8490031729D2E0B200AD9BB4 /* TestUtils */,
 				8492B87629081CE700006649 /* Mock */,
 				8492B8722908024800006649 /* StreamVideoTestCase.swift */,
 				8492B870290801DC00006649 /* CallViewModel_Tests.swift */,
@@ -2571,6 +2627,8 @@
 			files = (
 				84F58B7829EE945900010C4C /* RetryStrategy_Tests.swift in Sources */,
 				84F58B7029EE914400010C4C /* BackgroundTaskScheduler_Tests.swift in Sources */,
+				842747F329EED8D900E063AD /* InternetConnection_Mock.swift in Sources */,
+				842747EE29EED60600E063AD /* Calendar+GMT.swift in Sources */,
 				846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */,
 				84F58B8929EEAC4400010C4C /* MockFunc.swift in Sources */,
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
@@ -2579,9 +2637,13 @@
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
 				84F58B8729EEABF700010C4C /* EventBatcher_Mock.swift in Sources */,
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
+				842747EA29EED0F200E063AD /* UserToken_Tests.swift in Sources */,
+				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				8492B871290801DC00006649 /* CallViewModel_Tests.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
+				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
 				8490032F29D6D00C00AD9BB4 /* CallController_Mock.swift in Sources */,
+				842747E529EECD0100E063AD /* ClientError_Tests.swift in Sources */,
 				84F58B7429EE928400010C4C /* TestError.swift in Sources */,
 				84F58B9129EEB36E00010C4C /* EventNotificationCenter_Mock.swift in Sources */,
 				84F58B7F29EE97C800010C4C /* VirtualTimer.swift in Sources */,
@@ -2592,10 +2654,12 @@
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
 				84F58B8B29EEACAD00010C4C /* WebSocketEngine_Mock.swift in Sources */,
 				84F58B8D29EEAE2D00010C4C /* AssertAsync.swift in Sources */,
+				842747F629EEDB1300E063AD /* EventBatcher_Tests.swift in Sources */,
 				84F58B8529EEABC100010C4C /* EventDecoder_Mock.swift in Sources */,
 				8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */,
 				84D6494729E9F2D0002CA428 /* WebRTCClient_Tests.swift in Sources */,
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
+				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
 				84F58B8329EE9E6400010C4C /* WebSocketClient_Tests.swift in Sources */,
