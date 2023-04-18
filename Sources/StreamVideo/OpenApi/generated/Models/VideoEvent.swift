@@ -21,6 +21,8 @@ internal class VideoEventMapping: Decodable {
 internal enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
+    case typeCallBroadcastingStartedEvent(CallBroadcastingStartedEvent)
+    case typeCallBroadcastingStoppedEvent(CallBroadcastingStoppedEvent)
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallEndedEvent(CallEndedEvent)
     case typeCallMemberAddedEvent(CallMemberAddedEvent)
@@ -45,6 +47,10 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeBlockedUserEvent(let value):
             try container.encode(value)
         case .typeCallAcceptedEvent(let value):
+            try container.encode(value)
+        case .typeCallBroadcastingStartedEvent(let value):
+            try container.encode(value)
+        case .typeCallBroadcastingStoppedEvent(let value):
             try container.encode(value)
         case .typeCallCreatedEvent(let value):
             try container.encode(value)
@@ -92,6 +98,12 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.blocked_user" {
             let value = try container.decode(BlockedUserEvent.self)
             self = .typeBlockedUserEvent(value)
+        } else if dto.type == "call.broadcasting_started" {
+            let value = try container.decode(CallBroadcastingStartedEvent.self)
+            self = .typeCallBroadcastingStartedEvent(value)
+        } else if dto.type == "call.broadcasting_stopped" {
+            let value = try container.decode(CallBroadcastingStoppedEvent.self)
+            self = .typeCallBroadcastingStoppedEvent(value)
         } else if dto.type == "call.created" {
             let value = try container.decode(CallCreatedEvent.self)
             self = .typeCallCreatedEvent(value)

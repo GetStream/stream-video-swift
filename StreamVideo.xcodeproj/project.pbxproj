@@ -135,6 +135,8 @@
 		846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */; };
 		84767502290A824B0015DC53 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 84767501290A824B0015DC53 /* WebRTC */; };
 		8478EB13288A054B00525538 /* VideoConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8478EB12288A054B00525538 /* VideoConfig.swift */; };
+		8479E74429EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479E74229EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift */; };
+		8479E74529EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479E74329EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift */; };
 		8479F83429C09EF1009ECE37 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479F83329C09EF1009ECE37 /* UserAvatar.swift */; };
 		847BE09C29DADE0100B55D21 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09B29DADE0100B55D21 /* Call.swift */; };
 		847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D001F29C8AB1E00DD0A50 /* RecordingView.swift */; };
@@ -637,6 +639,8 @@
 		846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardReadable.swift; sourceTree = "<group>"; };
 		846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedParticipantView.swift; sourceTree = "<group>"; };
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
+		8479E74229EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallBroadcastingStoppedEvent.swift; sourceTree = "<group>"; };
+		8479E74329EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallBroadcastingStartedEvent.swift; sourceTree = "<group>"; };
 		8479F83329C09EF1009ECE37 /* UserAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAvatar.swift; sourceTree = "<group>"; };
 		847BE09B29DADE0100B55D21 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		847D001F29C8AB1E00DD0A50 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
@@ -1506,6 +1510,8 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				8479E74329EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift */,
+				8479E74229EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift */,
 				84D6494229E9AD08002CA428 /* CallIngressResponse.swift */,
 				84D6494129E9AD07002CA428 /* RTMPIngress.swift */,
 				843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */,
@@ -2318,6 +2324,7 @@
 				84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */,
 				84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */,
 				84A7E17428814D7400526C98 /* LatencyService.swift in Sources */,
+				8479E74529EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift in Sources */,
 				8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */,
 				8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */,
 				8409465929AF4EEC007AF5BF /* SendReactionResponse.swift in Sources */,
@@ -2391,6 +2398,7 @@
 				84DC38BD29ADFCFD00946713 /* UserResponse.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84DC38C529ADFCFD00946713 /* GetOrCreateCallRequest.swift in Sources */,
+				8479E74429EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift in Sources */,
 				84C4003F29E3F446007B69C2 /* WSCallEvent.swift in Sources */,
 				84A881FE299E478D00EA22ED /* AnyDecodable.swift in Sources */,
 				84BD8FFD29B1019E002CFBA0 /* RecordingController.swift in Sources */,
