@@ -11,9 +11,6 @@ protocol ConnectionRecoveryHandler: ConnectionStateDelegate {}
 /// The type is designed to obtain missing events that happened in watched channels while user
 /// was not connected to the web-socket.
 ///
-/// The object listens for `ConnectionStatusUpdated` events
-/// and remembers the `CurrentUserDTO.lastReceivedEventDate` when status becomes `connecting`.
-///
 /// When the status becomes `connected` the `/sync` endpoint is called
 /// with `lastReceivedEventDate` and `cids` of watched channels.
 ///

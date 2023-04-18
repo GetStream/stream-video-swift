@@ -145,9 +145,3 @@ final class Sorting_Tests: XCTestCase {
     }
     
 }
-
-extension CallParticipant: Equatable {
-    public static func == (lhs: CallParticipant, rhs: CallParticipant) -> Bool {
-        lhs.id == rhs.id
-    }
-}
