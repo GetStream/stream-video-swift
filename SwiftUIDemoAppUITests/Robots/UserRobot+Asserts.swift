@@ -6,65 +6,216 @@ import XCTest
 
 extension UserRobot {
     
-    static let defaultTimeout: Double = 15
+    static let defaultTimeout: Double = TestRunnerEnvironment.isCI ? 60 : 30
     
     @discardableResult
     func assertParticipantJoinCall() -> Self {
-        let expectedText = "joined"
-        let participantEvent = CallPage.participantEvent.wait().waitForText(expectedText, mustBeEqual: false)
-        XCTAssertTrue(participantEvent.label.contains(expectedText))
-        return self
+        assertParticipantEvent("joined")
     }
     
     @discardableResult
     func assertParticipantLeaveCall() -> Self {
-        let expectedText = "left"
-        let participantEvent = CallPage.participantEvent.wait().waitForDisappearance().wait().waitForText(expectedText, mustBeEqual: false)
-        XCTAssertTrue(participantEvent.label.contains(expectedText))
+        assertParticipantEvent("left")
+    }
+    
+    @discardableResult
+    private func assertParticipantEvent(_ expectedText: String) -> Self {
+        let participantEvent = CallPage.participantEvent.wait().waitForText(expectedText, timeout: UserRobot.defaultTimeout, mustBeEqual: false)
+        let errMessage = "`\(participantEvent.label)` does not contain `\(expectedText)`"
+        XCTAssertTrue(participantEvent.label.contains(expectedText), errMessage)
         return self
     }
     
     @discardableResult
-    func assertParticipantIsVisible() -> Self {
-        let videoView = CallPage.participantVideoView.waitCount(1, timeout: UserRobot.defaultTimeout)
-        XCTAssertTrue(videoView.firstMatch.exists)
+    func assertUserMicrophoneIsEnabled() -> Self {
+        assertToogle(CallPage.microphoneToggle.firstMatch, state: .enable)
+    }
+    
+    @discardableResult
+    func assertUserMicrophoneIsDisabled() -> Self {
+        assertToogle(CallPage.microphoneToggle.firstMatch, state: .disable)
+    }
+    
+    @discardableResult
+    func assertParticipantCameraIsEnabled() -> Self {
+        assertToogle(CallPage.participantView.firstMatch, state: .enable)
+    }
+    
+    @discardableResult
+    func assertParticipantCameraIsDisabled() -> Self {
+        assertToogle(CallPage.participantView.firstMatch, state: .disable)
+    }
+    
+    @discardableResult
+    func assertParticipantMicrophoneIsEnabled() -> Self {
+        assertToogle(CallPage.participantMicIcon.firstMatch, state: .enable)
+    }
+    
+    @discardableResult
+    func assertParticipantMicrophoneIsDisabled() -> Self {
+        assertToogle(CallPage.participantMicIcon.firstMatch, state: .disable)
+    }
+    
+    @discardableResult
+    private func assertToogle(_ toogle: XCUIElement, state: UserControls) -> Self {
+        switch state {
+        case .enable:
+            XCTAssertTrue(toogle.wait().waitForValue("1").isOn, "Toggle should be on")
+        case .disable:
+            XCTAssertTrue(toogle.wait().waitForValue("0").isOff, "Toggle should be off")
+        }
         return self
     }
     
     @discardableResult
-    func assertParticipantIsNotVisible() -> Self {
-        let imageView = CallPage.participantImageView.waitCount(1, timeout: UserRobot.defaultTimeout)
-        XCTAssertTrue(imageView.firstMatch.exists)
+    func assertConnectionQualityIndicator() -> Self {
+        XCTAssertTrue(CallPage.connectionQualityIndicator.wait().exists, "connectionQualityIndicator should appear")
         return self
     }
     
     @discardableResult
-    func assertParticipantIsMuted() -> Self {
-        let mutedMicImage = CallPage.participantMicDisabledImage.waitCount(1, timeout: UserRobot.defaultTimeout)
-        XCTAssertTrue(mutedMicImage.firstMatch.exists)
+    func assertParticipantStartSharingScreen() -> Self {
+        let expectedText = "presenting"
+        XCTAssertTrue(CallPage.screenSharingView.wait(timeout: UserRobot.defaultTimeout).exists, "screenSharingView should appear")
+        XCTAssertTrue(CallPage.screenSharingLabel.label.contains(expectedText), "`\(CallPage.screenSharingLabel.label)` does not contain `\(expectedText)`")
         return self
     }
     
     @discardableResult
-    func assertParticipantIsNotMuted() -> Self {
-        let unmutedMicImage = CallPage.participantMicEnabledImage.waitCount(1, timeout: UserRobot.defaultTimeout)
-        XCTAssertTrue(unmutedMicImage.firstMatch.exists)
+    func assertParticipantStartRecordingCall() -> Self {
+        XCTAssertTrue(CallPage.recordingLabel.wait(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should appear")
         return self
     }
     
     @discardableResult
-    func assertParticipantStartSharingScreen(userCount: Int = 2) -> Self {
-        XCTAssertTrue(CallPage.screenSharingView.wait(timeout: UserRobot.defaultTimeout).exists)
-        XCTAssertTrue(CallPage.screenSharingLabel.label.contains("presenting"))
-        XCTAssertEqual(userCount, CallPage.screenSharingParticipantView.count)
+    func assertParticipantStopRecordingCall() -> Self {
+        XCTAssertFalse(CallPage.recordingLabel.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should disappear")
+        return self
+    }
+    
+    @discardableResult
+    func assertUserCountWhenScreenSharing(_ userCount: Int) -> Self {
+        let actualViewsCount = CallPage.screenSharingParticipantView.waitCount(userCount, timeout: UserRobot.defaultTimeout, exact: true).count
+        XCTAssertEqual(userCount, actualViewsCount)
+        return self
+    }
+    
+    @discardableResult
+    func assertScreenSharingParticipantListVisibity(percent: Int) -> Self {
+        assertParticipantListVisibity(expectedPercent: percent, details: CallPage.screenSharingParticipantListDetails)
+    }
+    
+    @discardableResult
+    func assertSpotlightViewParticipantListVisibity(percent: Int) -> Self {
+        assertParticipantListVisibity(expectedPercent: percent, details: CallPage.spotlightViewParticipantListDetails)
+    }
+    
+    @discardableResult
+    func assertGridViewParticipantListVisibity(percent: Int) -> Self {
+        assertParticipantListVisibity(expectedPercent: percent, details: CallPage.gridViewParticipantListDetails)
+    }
+    
+    @discardableResult
+    private func assertParticipantListVisibity(expectedPercent: Int, details: XCUIElement) -> Self {
+        let expectedValue = "\(expectedPercent)%"
+        let actualValue = details.waitForValue(expectedValue).value as? String
+        XCTAssertEqual(expectedValue, actualValue)
         return self
     }
     
     @discardableResult
     func assertParticipantStopSharingScreen() -> Self {
-        XCTAssertFalse(CallPage.screenSharingView.waitForDisappearance().exists)
-        XCTAssertFalse(CallPage.screenSharingLabel.exists)
+        XCTAssertFalse(CallPage.screenSharingView.waitForDisappearance(timeout: Self.defaultTimeout).exists, "screenSharingView should disappear")
+        XCTAssertFalse(CallPage.screenSharingLabel.exists, "screenSharingLabel should disappear")
         XCTAssertEqual(0, CallPage.screenSharingParticipantView.count)
+        return self
+    }
+    
+    @discardableResult
+    func assertCallControls() -> Self {
+        XCTAssertTrue(CallPage.hangUpButton.wait().exists, "hangUpButton should appear")
+        XCTAssertTrue(CallPage.cameraToggle.exists, "cameraToggle should appear")
+        XCTAssertTrue(CallPage.cameraPositionToggle.exists, "cameraPositionToggle should appear")
+        XCTAssertTrue(CallPage.microphoneToggle.exists, "microphoneToggle should appear")
+        return self
+    }
+    
+    @discardableResult
+    func assertThereAreNoCallControls() -> Self {
+        XCTAssertFalse(CallPage.hangUpButton.waitForDisappearance().exists, "hangUpButton should disappear")
+        XCTAssertFalse(CallPage.cameraToggle.exists, "cameraToggle should disappear")
+        XCTAssertFalse(CallPage.cameraPositionToggle.exists, "cameraPositionToggle should disappear")
+        XCTAssertFalse(CallPage.microphoneToggle.exists, "microphoneToggle should disappear")
+        return self
+    }
+    
+    @discardableResult
+    func assertEmptyCall() -> Self {
+        XCTAssertFalse(CallPage.minimizedCallView.exists, "minimizedCallView should disappear")
+        XCTAssertEqual(0, CallPage.participantView.count)
+        return self
+    }
+    
+    @discardableResult
+    func assertConnectingView(with participantCount: Int) -> Self {
+        XCTAssertTrue(CallPage.ConnectingView.callConnectingView.wait().exists, "callConnectingView should appear")
+        XCTAssertTrue(CallPage.ConnectingView.callingIndicator.exists, "callingIndicator should appear")
+        if participantCount > 1 {
+            XCTAssertEqual(participantCount, CallPage.ConnectingView.callConnectingGroupView.count)
+        } else if participantCount > 0 {
+            XCTAssertTrue(CallPage.ConnectingView.callConnectingParticipantView.exists, "callConnectingParticipantView should appear")
+        }
+        return self
+    }
+    
+    @discardableResult
+    func assertGridView(with participantCount: Int) -> Self {
+        XCTAssertEqual(participantCount, CallPage.participantView.waitCount(participantCount, timeout: UserRobot.defaultTimeout).count)
+        XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
+        XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
+        return self
+    }
+    
+    @discardableResult
+    func assertSpotlightView(with participantCount: Int) -> Self {
+        let maxVisibleParticipantCount = 6
+        let count = participantCount > maxVisibleParticipantCount ? maxVisibleParticipantCount : participantCount
+        XCTAssertTrue(CallPage.spotlightViewParticipantList.wait().exists, "spotlightViewParticipantList should appear")
+        XCTAssertEqual(count, CallPage.spotlightParticipantView.waitCount(count, timeout: UserRobot.defaultTimeout).count)
+        XCTAssertEqual(1, CallPage.participantView.count)
+        XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
+        return self
+    }
+    
+    @discardableResult
+    func assertFullscreenView() -> Self {
+        XCTAssertEqual(1, CallPage.participantView.count)
+        XCTAssertEqual(0, CallPage.spotlightParticipantView.count)
+        XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
+        XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
+        return self
+    }
+    
+    @discardableResult
+    func assertLobby() -> Self {
+        XCTAssertTrue(LobbyPage.otherParticipantsCount.wait().exists, "otherParticipantsCount should appear")
+        XCTAssertTrue(LobbyPage.microphoneToggle.exists, "microphoneToggle should appear")
+        XCTAssertTrue(LobbyPage.cameraToggle.exists, "cameraToggle should appear")
+        XCTAssertTrue(LobbyPage.connectionQualityIndicator.exists, "connectionQualityIndicator should appear")
+        XCTAssertTrue(LobbyPage.microphoneCheckView.exists, "microphoneCheckView should appear")
+        XCTAssertTrue(LobbyPage.cameraCheckView.exists, "cameraCheckView should appear")
+        return self
+    }
+    
+    @discardableResult
+    func assertOtherParticipantsCountInLobby(_ count: Int) -> Self {
+        XCTAssertEqual("\(count)", LobbyPage.otherParticipantsCount.wait().value as? String)
+        return self
+    }
+    
+    @discardableResult
+    func assertParticipantsAreVisible(count: Int) -> Self {
+        XCTAssertEqual(count, CallPage.participantView.waitCount(count, timeout: UserRobot.defaultTimeout).count)
         return self
     }
 }

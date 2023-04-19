@@ -73,6 +73,7 @@ public struct CallView<Factory: ViewFactory>: View {
                                     }
                                 }
                             }
+                            .accessibility(identifier: "cornerDragableView")
                         }
                     }
                     .padding(.top, 4)

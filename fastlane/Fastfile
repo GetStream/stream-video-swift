@@ -155,25 +155,55 @@ desc 'Runs e2e ui tests in Debug config'
 lane :test_e2e do |options|
   next unless is_check_required(sources: sources_matrix[:e2e])
 
+  update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
+
   start_sinatra
   start_video_buddy
 
   device = options[:ios] && options[:ios] != 'latest' ? "#{options[:device]} (#{options[:ios]})" : options[:device]
   prepare_simulator(device: device) if is_ci && (options[:ios].nil? || ['latest', '15.4'].include?(options[:ios]))
 
-  scan(
+  scan_options = {
     project: xcode_project,
     scheme: 'DemoApp',
     testplan: 'SwiftUIDemoApp',
     result_bundle: true,
-    clean: true,
     devices: device,
-    number_of_retries: 3
+    number_of_retries: 2
+  }
+
+  build_for_testing = is_ci && options[:cron].nil?
+  scan(scan_options.merge(clean: true, build_for_testing: build_for_testing))
+
+  if build_for_testing
+    parallelize_tests_on_ci(
+      scan: scan_options,
+      derived_data: lane_context[SharedValues::SCAN_DERIVED_DATA_PATH],
+      batch: options[:batch]
+    )
+  end
+end
+
+private_lane :parallelize_tests_on_ci do |options|
+  xctestrun = Dir.glob("#{options[:derived_data]}/Build/Products/*.xctestrun").first
+  tests = retrieve_xctest_names(xctestrun: xctestrun).values.flatten
+  slice_size = (tests.size / ENV['MATRIX_SIZE'].to_f).ceil
+  only_testing = []
+  tests.each_slice(slice_size) { |test| only_testing << test }
+  only_testing_batch = only_testing[options[:batch].to_i]
+
+  UI.success("Tests in total: #{only_testing.flatten.size}. Running #{only_testing_batch.size} of them ⌛️")
+  scan(
+    options[:scan].merge(
+      test_without_building: true,
+      derived_data_path: options[:derived_data],
+      only_testing: only_testing_batch
+    )
   )
 end
 
 private_lane :update_testplan_on_ci do |options|
-  update_testplan(path: options[:path], env_vars: { key: 'CI', value: 'TRUE' }) if is_ci
+  update_testplan(path: options[:path], env_vars: { key: 'CI', value: 'TRUE' }) if is_ci || options[:force]
 end
 
 desc 'Builds SwiftUI Demo app'

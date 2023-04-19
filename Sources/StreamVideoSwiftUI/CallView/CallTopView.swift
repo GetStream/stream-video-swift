@@ -27,10 +27,11 @@ public struct CallTopView: View {
                     .foregroundColor(colors.textInverted)
                     .padding()
             }
-            .accessibility(identifier: "minimizeCallView")
+            .accessibility(identifier: "minimizeCallViewButton")
             
             if viewModel.recordingState == .recording {
                 RecordingView()
+                    .accessibility(identifier: "recordingLabel")
             }
 
             Spacer()
@@ -39,6 +40,7 @@ public struct CallTopView: View {
             if #available(iOS 14, *) {
                 LayoutMenuView(viewModel: viewModel)
                     .opacity(viewModel.screensharingSession != nil ? 0 : 1)
+                    .accessibility(identifier: "viewMenu")
                 
                 Button {
                     viewModel.participantsShown.toggle()

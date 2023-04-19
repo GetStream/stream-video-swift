@@ -10,36 +10,108 @@ final class UserRobot: Robot {}
 // CallDetailsPage
 extension UserRobot {
     @discardableResult
-    private func typeText(_ text: String, obtainKeyboardFocus: Bool = true) -> Self {
+    private func typeText(_ text: String, obtainKeyboardFocus: Bool = true, clean: Bool = false) -> Self {
         let inputField = CallDetailsPage.callIdInputField
         if obtainKeyboardFocus {
-            inputField.obtainKeyboardFocus().typeText(text)
-        } else {
-            inputField.typeText(text)
+            inputField.obtainKeyboardFocus()
         }
+        if clean {
+            inputField.clear()
+        }
+        inputField.typeText(text)
         return self
     }
     
     @discardableResult
-    func login() -> Self {
+    func login(userIndex: Int = 0) -> Self {
         let users = LoginPage.users
         if users.count > 0 {
-            users.firstMatch.tap()
+            users.element(boundBy: userIndex).tap()
         }
         return self
     }
     
     @discardableResult
-    func startCall(_ callId: String) -> Self {
-        typeText(callId)
+    func logout() -> Self {
+        let users = LoginPage.users
+        if users.count == 0 {
+            CallDetailsPage.userAvatar.wait().tap()
+            CallDetailsPage.signOutButton.wait().tap()
+        }
+        return self
+    }
+    
+    @discardableResult
+    func tapOnStartCallButton(withDelay: Bool = false) -> Self {
+        if withDelay { sleep(2) } // FIXME: https://github.com/GetStream/ios-issues-tracking/issues/382
         CallDetailsPage.startCallButton.tap()
         return self
     }
     
     @discardableResult
-    func joinCall(_ callId: String) -> Self {
-        typeText(callId)
+    func startCall(_ callId: String, clearTextField clean: Bool = false, waitForCompletion: Bool = true) -> Self {
+        typeText(callId, clean: clean)
+        tapOnStartCallButton()
+        if waitForCompletion {
+            CallPage.ConnectingView.callConnectingView.waitForDisappearance(timeout: Self.defaultTimeout)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func joinCall(_ callId: String, clearTextField clean: Bool = false, waitForCompletion: Bool = true) -> Self {
+        CallDetailsPage.joinCallTab.tap()
+        typeText(callId, clean: clean)
         CallDetailsPage.joinCallButton.tap()
+        if waitForCompletion {
+            CallPage.ConnectingView.callConnectingView.waitForDisappearance(timeout: Self.defaultTimeout)
+        }
+        return self
+    }
+    
+    @discardableResult
+    func joinCallFromLobby() -> Self {
+        if !LobbyPage.otherParticipantsCount.exists {
+            CallDetailsPage.lobbyTab.tap()
+            tapOnStartCallButton()
+        }
+        LobbyPage.joinCallButton.tap()
+        return self
+    }
+    
+    @discardableResult
+    func enterLobby(_ callId: String, clearTextField clean: Bool = false) -> Self {
+        typeText(callId, clean: clean)
+        enterLobby()
+        return self
+    }
+    
+    @discardableResult
+    func enterLobby() -> Self {
+        CallDetailsPage.lobbyTab.tap()
+        tapOnStartCallButton()
+        return self
+    }
+    
+    @discardableResult
+    func enterRingEvents(_ callId: String) -> Self {
+        typeText(callId)
+        enterRingEvents()
+        return self
+    }
+    
+    @discardableResult
+    func enterRingEvents() -> Self {
+        CallDetailsPage.ringEventsTab.tap()
+        tapOnStartCallButton()
+        return self
+    }
+    
+    @discardableResult
+    func selectParticipants(count: Int) -> Self {
+        for i in 0...count - 1 {
+            CallDetailsPage.participants.element(boundBy: i).tap()
+        }
         return self
     }
 }
@@ -56,33 +128,146 @@ extension UserRobot {
         case front
     }
     
+    enum Direction {
+        case right
+        case left
+        case up
+        case down
+    }
+    
+    enum View: String {
+        case grid
+        case fullscreen
+        case spotlight
+    }
+    
+    @discardableResult
     func microphone(_ action: UserControls) -> Self {
-        userControls(toggle: CallPage.microphoneToggle, action: action)
+        userControls(toggle: CallPage.microphoneToggle.firstMatch, action: action)
     }
     
+    @discardableResult
     func camera(_ action: UserControls) -> Self {
-        userControls(toggle: CallPage.cameraToggle, action: action)
+        userControls(toggle: CallPage.cameraToggle.firstMatch, action: action)
     }
     
+    @discardableResult
     func camera(_ position: CameraPosition) -> Self {
         userControls(
-            toggle: CallPage.cameraPositionToggle,
+            toggle: CallPage.cameraPositionToggle.firstMatch,
             action: position == .front ? .enable : .disable
         )
     }
     
-    func minimizeCall() {
+    @discardableResult
+    func minimizeCall() -> Self {
         CallPage.minimizeCallViewButton.wait().tap()
+        return self
     }
     
-    func endCall() {
-        CallPage.hangUpButton.wait().tap()
+    @discardableResult
+    func endCall() -> Self {
+        CallPage.hangUpButton.firstMatch.safeTap()
+        return self
     }
     
+    @discardableResult
+    func setView(mode: View) -> Self {
+        CallPage.viewMenu.wait().tap()
+        switch mode {
+        case .grid:
+            CallPage.ViewMenu.grid.tap()
+        case .fullscreen:
+            CallPage.ViewMenu.fullscreen.tap()
+        case .spotlight:
+            CallPage.ViewMenu.spotlight.tap()
+        }
+        return self
+    }
+    
+    @discardableResult
+    func minimizeVideoView() -> Self {
+        CallPage.minimizeCallViewButton.wait().tap()
+        return self
+    }
+    
+    @discardableResult
+    func maximizeVideoView() -> Self {
+        CallPage.minimizedCallView.wait().safeTap()
+        return self
+    }
+    
+    @discardableResult
+    func moveCornerDragableViewToTheBottom() -> Self {
+        CallPage.cornerDragableView.dragAndDrop(dropElement: CallPage.hangUpButton, duration: 0.5)
+        return self
+    }
+    
+    @discardableResult
+    func moveMinimizedCallViewToTheLeft() -> Self {
+        CallPage.minimizedCallView.dragAndDrop(dropElement: CallDetailsPage.userAvatar, duration: 0.5)
+        return self
+    }
+    
+    @discardableResult
+    func scrollScreenSharingParticipantList(to: Direction, times: Int = 1) -> Self {
+        let scrollView = CallPage.screenSharingParticipantList
+        for _ in 1...times {
+            switch to {
+            case .right:
+                scrollView.swipeLeft()
+            case .left:
+                scrollView.swipeRight()
+            default:
+                break
+            }
+        }
+        return self
+    }
+    
+    @discardableResult
+    func scrollSpotlightParticipantList(to: Direction, times: Int = 1) -> Self {
+        let scrollView = CallPage.spotlightViewParticipantList
+        for _ in 1...times {
+            switch to {
+            case .right:
+                scrollView.swipeLeft()
+            case .left:
+                scrollView.swipeRight()
+            default:
+                break
+            }
+        }
+        return self
+    }
+    
+    @discardableResult
+    func scrollGridViewParticipantList(to: Direction, times: Int = 1) -> Self {
+        let scrollView = CallPage.gridViewParticipantList
+        for _ in 1...times {
+            switch to {
+            case .down:
+                scrollView.swipeUp()
+            case .up:
+                scrollView.swipeDown()
+            default:
+                break
+            }
+        }
+        return self
+    }
+    
+    @discardableResult
     private func userControls(toggle: XCUIElement, action: UserControls) -> Self {
         if action == .disable && toggle.isOn || action == .enable && toggle.isOff {
             toggle.tap()
         }
+        return self
+    }
+    
+    @discardableResult
+    func waitForDisappearanceOfParticipantEventLabel() -> Self {
+        CallPage.participantEvent.waitForDisappearance(timeout: Self.defaultTimeout)
         return self
     }
 }

@@ -70,6 +70,7 @@ public struct ScreenSharingView: View {
                 }
                 .padding()
                 .padding(.bottom)
+                .accessibility(identifier: "screenSharingParticipantList")
             }
         }
         .frame(

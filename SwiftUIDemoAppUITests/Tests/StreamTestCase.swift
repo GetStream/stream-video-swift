@@ -14,6 +14,7 @@ class StreamTestCase: XCTestCase {
     var terminalRobot = TerminalRobot()
     var recordVideo = false
     let callId = randomCallId
+    let allViews: [UserRobot.View] = [.grid, .fullscreen, .spotlight]
 
     override func setUpWithError() throws {
         try super.setUpWithError()

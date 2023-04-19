@@ -25,6 +25,7 @@ struct ConnectionQualityIndicator: View {
         .frame(width: size, height: size)
         .background(connectionQuality == .unknown ? Color.clear : Color.black.opacity(0.6))
         .cornerRadius(6)
+        .accessibility(identifier: "connectionQualityIndicator")
     }
     
     private func color(for index: Int) -> Color {

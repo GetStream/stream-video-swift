@@ -163,6 +163,7 @@ struct HomeView: View {
             }
             .frame(maxHeight: UIScreen.main.bounds.height / 4)
             .listStyle(PlainListStyle())
+            .accessibility(identifier: "participantList")
             
             Picker("Call flow", selection: $callFlow) {
                 Text(CallFlow.joinImmediately.rawValue)

@@ -156,11 +156,11 @@ jobs:
     needs: allure_testops_launch
     env:
       LAUNCH_ID: ${{ needs.allure_testops_launch.outputs.launch_id }}
+    strategy:
+      matrix:
+        batch: [0, 1, 2]
+      fail-fast: false
     steps:
-    - name: Install Bot SSH Key # required while stream-video-buddy is private
-      uses: webfactory/ssh-agent@v0.7.0
-      with:
-        ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - uses: actions/checkout@v3.1.0
       if: env.LAUNCH_ID != ''
     - uses: ./.github/actions/bootstrap
@@ -171,11 +171,12 @@ jobs:
         INSTALL_VIDEO_BUDDY: true
     - name: Run UI Tests (Debug)
       if: env.LAUNCH_ID != ''
-      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 40
+      run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:"${{ matrix.batch }}"
+      timeout-minutes: 60
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PR_NUM: ${{ github.event.number }}
+        MATRIX_SIZE: ${{ strategy.job-total }}
         STREAM_SDK_TEST_APP: ${{ secrets.STREAM_SDK_TEST_APP }}
         STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
         STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}

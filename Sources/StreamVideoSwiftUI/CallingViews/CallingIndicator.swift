@@ -34,6 +34,7 @@ struct CallingIndicator: View {
                     value: isTransparent
                 )
         }
+        .accessibility(identifier: "callingIndicator")
         .foregroundColor(.white)
         .onAppear {
             isTransparent.toggle()

@@ -8,9 +8,10 @@ public class ParticipantRobot {
     private let videoBuddyUrlString = "http://localhost:5678/stream-video-buddy"
     private var screenSharingDuration: Int? = nil
     private var callRecordingDuration: Int? = nil
-    private var callDuration: Double? = 10
     private var userCount: Int = 1
     private var messageCount: Int = 1
+    private var callDuration: Double = TestRunnerEnvironment.isCI ? 60 : 30
+    private var _showWindow: Bool = false
     
     public enum Options: String {
         case withCamera = "camera"
@@ -68,6 +69,12 @@ public class ParticipantRobot {
         messageCount = count
         return self
     }
+    
+    @discardableResult
+    func showWindow() -> Self {
+        _showWindow = true
+        return self
+    }
 
     func joinCall(
         _ callId: String,
@@ -80,6 +87,8 @@ public class ParticipantRobot {
         params[Config.callId.rawValue] = callId
         params[Config.userCount.rawValue] = userCount
         params[Config.messageCount.rawValue] = messageCount
+        params[Config.callDuration.rawValue] = callDuration
+        params[DebugActions.showWindow.rawValue] = _showWindow
         
         for option in options {
             params[option.rawValue] = true
@@ -87,10 +96,6 @@ public class ParticipantRobot {
         
         for action in actions {
             params[action.rawValue] = true
-        }
-        
-        if let callDuration {
-            params[Config.callDuration.rawValue] = callDuration
         }
         
         if let callRecordingDuration {
