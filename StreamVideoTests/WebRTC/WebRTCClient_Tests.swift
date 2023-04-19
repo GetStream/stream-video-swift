@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideo
+@preconcurrency import WebRTC
 import XCTest
 
 final class WebRTCClient_Tests: StreamVideoTestCase {
@@ -10,6 +11,8 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     private let callCid = "default:123"
     private let sessionId = "123"
     private let userId = "martin"
+    
+    let mockResponseBuilder = MockResponseBuilder()
     
     private lazy var participant: Stream_Video_Sfu_Models_Participant = {
         var participant = Stream_Video_Sfu_Models_Participant()
@@ -24,10 +27,175 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         participantJoined.participant = participant
         return participantJoined
     }()
+    
+    private var webRTCClient: WebRTCClient!
+    private var callSettings: CallSettingsInfo?
+    
+    override func setUp() {
+        super.setUp()
+        callSettings = CallSettingsInfo(
+            callCapabilities: ["send-audio", "send-video"],
+            callSettings: mockResponseBuilder.makeCallSettingsResponse(),
+            callInfo: .init(cId: callCid, backstage: false, blockedUsers: []),
+            recording: false
+        )
+    }
+        
+    func test_webRTCClient_connectionFlow() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient(callSettings: callSettings)
+        
+        // When
+        try await webRTCClient.connect(
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            connectOptions: ConnectOptions(iceServers: [])
+        )
+        
+        // Then
+        var state = await webRTCClient.state.connectionState
+        XCTAssert(state == .connecting)
+        
+        // When
+        let engine = webRTCClient.signalChannel?.engine as! WebSocketEngine_Mock
+        engine.simulateConnectionSuccess()
+        
+        // Then
+        // Connection flow is not finished until join response arrives.
+        state = await webRTCClient.state.connectionState
+        XCTAssert(state == .connecting)
+        
+        // When
+        let eventNotificationCenter = webRTCClient.eventNotificationCenter
+        let event = Stream_Video_Sfu_Event_JoinResponse()
+        eventNotificationCenter.process(event)
+        try await waitForCallEvent()
+        
+        // Then
+        state = await webRTCClient.state.connectionState
+        XCTAssert(state == .connected)
+    }
+    
+    func test_webRTCClient_defaultCallCapabilities() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+     
+        // Then
+        XCTAssert(webRTCClient.localAudioTrack != nil)
+        XCTAssert(webRTCClient.localVideoTrack != nil)
+    }
+    
+    func test_webRTCClient_callCapabilitiesNoAudioAndVideo() async throws {
+        // Given
+        callSettings = nil
+        try await test_webRTCClient_connectionFlow()
+     
+        // Then
+        XCTAssert(webRTCClient.localAudioTrack == nil)
+        XCTAssert(webRTCClient.localVideoTrack == nil)
+    }
+    
+    func test_webRTCClient_cleanup() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+     
+        // Then
+        XCTAssert(webRTCClient.localAudioTrack != nil)
+        XCTAssert(webRTCClient.localVideoTrack != nil)
+        
+        // When
+        await webRTCClient.cleanUp()
+        
+        // Then
+        XCTAssert(webRTCClient.localAudioTrack == nil)
+        XCTAssert(webRTCClient.localVideoTrack == nil)
+    }
+    
+    func test_webRTCClient_assignTracksMatchingTrackLookupPrefix() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+        var participant = participant.toCallParticipant()
+        participant.trackLookupPrefix = "test-track"
+        let track = await makeVideoTrack()
+        
+        // When
+        await webRTCClient.state.update(tracks: ["test-track": track])
+        await webRTCClient.state.update(callParticipant: participant)
+        try await waitForCallEvent()
+        
+        // Then
+        let callParticipant = await webRTCClient.state.callParticipants[participant.id]
+        XCTAssert(callParticipant?.track != nil)
+    }
+    
+    func test_webRTCClient_assignTracksMatchingId() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+        let participant = participant.toCallParticipant()
+        let track = await makeVideoTrack()
+        
+        // When
+        await webRTCClient.state.update(tracks: ["123": track])
+        await webRTCClient.state.update(callParticipant: participant)
+        try await waitForCallEvent()
+        
+        // Then
+        let callParticipant = await webRTCClient.state.callParticipants[participant.id]
+        XCTAssert(callParticipant?.track != nil)
+    }
+    
+    func test_webRTCClient_assignTracksNoMatch() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+        let participant = participant.toCallParticipant()
+        let track = await makeVideoTrack()
+        
+        // When
+        await webRTCClient.state.update(tracks: ["test-track": track])
+        await webRTCClient.state.update(callParticipant: participant)
+        try await waitForCallEvent()
+        
+        // Then
+        let callParticipant = await webRTCClient.state.callParticipants[participant.id]
+        XCTAssert(callParticipant?.track == nil)
+    }
+    
+    func test_webRTCClient_assignScreenSharingMatchingTrackLookupPrefix() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+        var participant = participant.toCallParticipant()
+        participant.trackLookupPrefix = "test-track"
+        let screensharingTrack = await makeVideoTrack()
+        
+        // When
+        await webRTCClient.state.update(screensharingTracks: ["test-track": screensharingTrack])
+        await webRTCClient.state.update(callParticipant: participant)
+        try await waitForCallEvent()
+        
+        // Then
+        let callParticipant = await webRTCClient.state.callParticipants[participant.id]
+        XCTAssert(callParticipant?.screenshareTrack != nil)
+    }
+    
+    func test_webRTCClient_assignScreenSharingMatchingId() async throws {
+        // Given
+        try await test_webRTCClient_connectionFlow()
+        let participant = participant.toCallParticipant()
+        let screensharingTrack = await makeVideoTrack()
+        
+        // When
+        await webRTCClient.state.update(screensharingTracks: ["123": screensharingTrack])
+        await webRTCClient.state.update(callParticipant: participant)
+        try await waitForCallEvent()
+        
+        // Then
+        let callParticipant = await webRTCClient.state.callParticipants[participant.id]
+        XCTAssert(callParticipant?.screenshareTrack != nil)
+    }
 
     func test_webRTCClient_participantJoinedAndLeft() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         
         // When
         webRTCClient.eventNotificationCenter.process(participantJoined)
@@ -52,7 +220,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_dominantSpeakerChanged() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var dominantSpeakerChanged = Stream_Video_Sfu_Event_DominantSpeakerChanged()
         dominantSpeakerChanged.sessionID = sessionId
         dominantSpeakerChanged.userID = userId
@@ -71,7 +239,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_audioLevelsChanged() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var audioLevelsChanged = Stream_Video_Sfu_Event_AudioLevelChanged()
         var audioLevel = Stream_Video_Sfu_Event_AudioLevel()
         audioLevel.sessionID = sessionId
@@ -93,7 +261,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_connectionQualityChanged() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var connectionQualityChanged = Stream_Video_Sfu_Event_ConnectionQualityChanged()
         var update = Stream_Video_Sfu_Event_ConnectionQualityInfo()
         update.sessionID = sessionId
@@ -115,7 +283,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_joinResponse() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var joinResponse = Stream_Video_Sfu_Event_JoinResponse()
         joinResponse.callState.participants = [participant]
         
@@ -131,7 +299,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_audioTrackPublished() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var trackPublished = Stream_Video_Sfu_Event_TrackPublished()
         trackPublished.sessionID = sessionId
         trackPublished.userID = userId
@@ -151,7 +319,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_videoTrackPublished() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var trackPublished = Stream_Video_Sfu_Event_TrackPublished()
         trackPublished.sessionID = sessionId
         trackPublished.userID = userId
@@ -171,7 +339,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_screenshareTrackPublished() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var trackPublished = Stream_Video_Sfu_Event_TrackPublished()
         trackPublished.sessionID = sessionId
         trackPublished.userID = userId
@@ -191,7 +359,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_audioTrackUnpublished() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var trackUnpublished = Stream_Video_Sfu_Event_TrackUnpublished()
         trackUnpublished.sessionID = sessionId
         trackUnpublished.userID = userId
@@ -211,7 +379,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_videoTrackUnpublished() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var trackUnpublished = Stream_Video_Sfu_Event_TrackUnpublished()
         trackUnpublished.sessionID = sessionId
         trackUnpublished.userID = userId
@@ -231,7 +399,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_screenshareTrackUnpublished() async throws {
         // Given
-        let webRTCClient = makeWebRTCClient()
+        webRTCClient = makeWebRTCClient()
         var trackUnpublished = Stream_Video_Sfu_Event_TrackUnpublished()
         trackUnpublished.sessionID = sessionId
         trackUnpublished.userID = userId
@@ -251,31 +419,50 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     // MARK: - private
     
-    func makeWebRTCClient() -> WebRTCClient {
+    func makeWebRTCClient(callSettings: CallSettingsInfo? = nil) -> WebRTCClient {
+        let time = VirtualTime()
+        VirtualTimeTimer.time = time
+        var environment = WebSocketClient.Environment.mock
+        environment.timerType = VirtualTimeTimer.self
+        
+        let callCoordinator = CallCoordinatorController_Mock(
+            httpClient: HTTPClient_Mock(),
+            user: StreamVideo.mockUser,
+            coordinatorInfo: CoordinatorInfo(
+                apiKey: StreamVideo.apiKey,
+                hostname: "test.com",
+                token: StreamVideo.mockToken.rawValue
+            ),
+            videoConfig: VideoConfig()
+        )
+        
+        if let callSettings {
+            callCoordinator.update(callSettings: callSettings)
+        }
+        
         let webRTCClient = WebRTCClient(
             user: StreamVideo.mockUser,
             apiKey: StreamVideo.apiKey,
             hostname: "test.com",
             token: StreamVideo.mockToken.rawValue,
             callCid: callCid,
-            callCoordinatorController: CallCoordinatorController_Mock(
-                httpClient: HTTPClient_Mock(),
-                user: StreamVideo.mockUser,
-                coordinatorInfo: CoordinatorInfo(
-                    apiKey: StreamVideo.apiKey,
-                    hostname: "test.com",
-                    token: StreamVideo.mockToken.rawValue
-                ),
-                videoConfig: VideoConfig()
-            ),
+            callCoordinatorController: callCoordinator,
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
                 opusDtxEnabled: true,
                 redundantCodingEnabled: true
-            )
+            ),
+            environment: environment
         )
         return webRTCClient
+    }
+    
+    private func makeVideoTrack() async -> RTCVideoTrack {
+        let factory = PeerConnectionFactory()
+        let videoSource = await factory.makeVideoSource(forScreenShare: false)
+        let track = await factory.makeVideoTrack(source: videoSource)
+        return track
     }
 
 }

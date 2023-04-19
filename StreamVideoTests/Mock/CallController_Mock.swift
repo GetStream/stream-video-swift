@@ -20,9 +20,10 @@ class CallController_Mock: CallController {
             accessRequestEnabled: true,
             opusDtxEnabled: true,
             redundantCodingEnabled: true
-        )
+        ),
+        environment: WebSocketClient.Environment.mock
     )
-    
+
     override func joinCall(
         callType: CallType,
         callId: String,

@@ -9,7 +9,7 @@ import WebRTC
 class CallCoordinatorController: @unchecked Sendable {
     
     let coordinatorClient: CoordinatorClient
-    private(set) var currentCallSettings: CallSettingsInfo?
+    var currentCallSettings: CallSettingsInfo?
     private let latencyService: LatencyService
     private let videoConfig: VideoConfig
     private var user: User

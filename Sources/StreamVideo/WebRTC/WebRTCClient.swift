@@ -100,17 +100,15 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private var signalChannel: WebSocketClient?
+    private(set) var signalChannel: WebSocketClient?
     
     private(set) var sessionID = UUID().uuidString
     private let token: String
     private let timeoutInterval: TimeInterval = 15
     
-    // Video tracks.
+    private(set) var localVideoTrack: RTCVideoTrack?
+    private(set) var localAudioTrack: RTCAudioTrack?
     private var videoCapturer: VideoCapturer?
-    private var localVideoTrack: RTCVideoTrack?
-
-    private var localAudioTrack: RTCAudioTrack?
     private let user: User
     private let callCid: String
     private let audioSession = AudioSession()
@@ -121,6 +119,7 @@ class WebRTCClient: NSObject {
     private let audioSettings: AudioSettings
     private(set) var callSettings = CallSettings()
     private(set) var videoOptions = VideoOptions()
+    private let environment: WebSocketClient.Environment
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onParticipantEvent: ((ParticipantEvent) -> Void)? {
@@ -157,7 +156,8 @@ class WebRTCClient: NSObject {
         callCid: String,
         callCoordinatorController: CallCoordinatorController,
         videoConfig: VideoConfig,
-        audioSettings: AudioSettings
+        audioSettings: AudioSettings,
+        environment: WebSocketClient.Environment
     ) {
         state = State()
         self.user = user
@@ -166,6 +166,7 @@ class WebRTCClient: NSObject {
         self.audioSettings = audioSettings
         self.videoConfig = videoConfig
         self.callCoordinatorController = callCoordinatorController
+        self.environment = environment
         httpClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession()
         )
@@ -543,6 +544,7 @@ class WebRTCClient: NSObject {
             eventDecoder: WebRTCEventDecoder(),
             eventNotificationCenter: eventNotificationCenter,
             webSocketClientType: .sfu,
+            environment: environment,
             connectURL: url,
             requiresAuth: false
         )

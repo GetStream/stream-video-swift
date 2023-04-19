@@ -249,7 +249,8 @@ class CallController {
             callCid: callCid(from: callId, callType: callType),
             callCoordinatorController: callCoordinatorController,
             videoConfig: videoConfig,
-            audioSettings: edgeServer.callSettings.callSettings.audio
+            audioSettings: edgeServer.callSettings.callSettings.audio,
+            environment: .init()
         )
         webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
         
