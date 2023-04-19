@@ -303,10 +303,11 @@ class CallController {
     }
     
     private func handleSignalChannelDisconnect(
-        source: WebSocketConnectionState.DisconnectionSource
+        source: WebSocketConnectionState.DisconnectionSource,
+        isRetry: Bool = false
     ) {
         guard let call = call,
-                call.reconnectionStatus != .reconnecting,
+                (call.reconnectionStatus != .reconnecting || isRetry),
                 source != .userInitiated else {
             return            
         }
@@ -326,6 +327,7 @@ class CallController {
                 log.debug("Waiting to reconnect")
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 log.debug("Retrying to connect to the call")
+                self.call?.update(reconnectionStatus: .reconnecting)
                 try await joinCall(
                     callType: call.callType,
                     callId: call.callId,
@@ -333,9 +335,13 @@ class CallController {
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                     participants: []
                 )
-                self.call?.update(reconnectionStatus: .reconnecting)
             } catch {
-                self.handleReconnectionError()
+                if diff > sfuReconnectionTime {
+                    self.handleReconnectionError()
+                } else {
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                    self.handleSignalChannelDisconnect(source: source, isRetry: true)
+                }
             }
         }
     }
