@@ -281,6 +281,7 @@
 		84C4004629E55DAF007B69C2 /* AllEventsMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C4004529E55DAE007B69C2 /* AllEventsMiddleware.swift */; };
 		84C619C629432E890051C513 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84C619C529432E890051C513 /* NukeUI */; };
 		84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
+		84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D114D929F092E700BCCB0C /* CallController_Tests.swift */; };
 		84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37029DC856C001D2118 /* CallMemberRemovedEvent.swift */; };
 		84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37129DC856C001D2118 /* CallMemberUpdatedEvent.swift */; };
 		84D2E37829DC856D001D2118 /* CallMemberUpdatedPermissionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37229DC856C001D2118 /* CallMemberUpdatedPermissionEvent.swift */; };
@@ -804,6 +805,7 @@
 		84C4003D29E3F446007B69C2 /* WSClientEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WSClientEvent.swift; sourceTree = "<group>"; };
 		84C4003E29E3F446007B69C2 /* ConnectedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectedEvent.swift; sourceTree = "<group>"; };
 		84C4004529E55DAE007B69C2 /* AllEventsMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AllEventsMiddleware.swift; sourceTree = "<group>"; };
+		84D114D929F092E700BCCB0C /* CallController_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallController_Tests.swift; sourceTree = "<group>"; };
 		84D2E37029DC856C001D2118 /* CallMemberRemovedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberRemovedEvent.swift; sourceTree = "<group>"; };
 		84D2E37129DC856C001D2118 /* CallMemberUpdatedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberUpdatedEvent.swift; sourceTree = "<group>"; };
 		84D2E37229DC856C001D2118 /* CallMemberUpdatedPermissionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberUpdatedPermissionEvent.swift; sourceTree = "<group>"; };
@@ -1625,6 +1627,14 @@
 			path = DependencyInjection;
 			sourceTree = "<group>";
 		};
+		84D114D829F092B200BCCB0C /* Controllers */ = {
+			isa = PBXGroup;
+			children = (
+				84D114D929F092E700BCCB0C /* CallController_Tests.swift */,
+			);
+			path = Controllers;
+			sourceTree = "<group>";
+		};
 		84D6494529E9F2B7002CA428 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
@@ -1857,6 +1867,7 @@
 				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
 				84F58B6E29EE911500010C4C /* WebSocketClient */,
 				84D6494529E9F2B7002CA428 /* WebRTC */,
+				84D114D829F092B200BCCB0C /* Controllers */,
 				842747E329EECCDA00E063AD /* Errors */,
 				842747E829EED0AB00E063AD /* Models */,
 				842747EF29EED82900E063AD /* HTTPClient */,
@@ -2692,6 +2703,7 @@
 				84D6494729E9F2D0002CA428 /* WebRTCClient_Tests.swift in Sources */,
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
+				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
 				84F58B8329EE9E6400010C4C /* WebSocketClient_Tests.swift in Sources */,

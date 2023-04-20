@@ -25,9 +25,10 @@ class CallController {
     internal let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoConfig: VideoConfig
-    private let sfuReconnectionTime: CGFloat = 30
+    private let sfuReconnectionTime: CGFloat
     private var reconnectionDate: Date?
     private var allEventsMiddleware: AllEventsMiddleware?
+    private let environment: CallController.Environment
     
     init(
         callCoordinatorController: CallCoordinatorController,
@@ -36,7 +37,8 @@ class CallController {
         callType: CallType,
         apiKey: String,
         videoConfig: VideoConfig,
-        allEventsMiddleware: AllEventsMiddleware?
+        allEventsMiddleware: AllEventsMiddleware?,
+        environment: CallController.Environment = .init()
     ) {
         self.user = user
         self.callId = callId
@@ -45,6 +47,8 @@ class CallController {
         self.allEventsMiddleware = allEventsMiddleware
         self.apiKey = apiKey
         self.videoConfig = videoConfig
+        self.sfuReconnectionTime = environment.sfuReconnectionTime
+        self.environment = environment
     }
     
     /// Joins a call with the provided information.
@@ -241,16 +245,16 @@ class CallController {
         videoOptions: VideoOptions,
         ring: Bool
     ) async throws {
-        webRTCClient = WebRTCClient(
-            user: user,
-            apiKey: apiKey,
-            hostname: edgeServer.url,
-            token: edgeServer.token,
-            callCid: callCid(from: callId, callType: callType),
-            callCoordinatorController: callCoordinatorController,
-            videoConfig: videoConfig,
-            audioSettings: edgeServer.callSettings.callSettings.audio,
-            environment: .init()
+        webRTCClient = environment.webRTCBuilder(
+            user,
+            apiKey,
+            edgeServer.url,
+            edgeServer.token,
+            callCid(from: callId, callType: callType),
+            callCoordinatorController,
+            videoConfig,
+            edgeServer.callSettings.callSettings.audio,
+            .init()
         )
         webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
         
@@ -352,4 +356,34 @@ class CallController {
         self.cleanUp()
     }
     
+}
+
+extension CallController {
+    struct Environment {
+        var webRTCBuilder: (
+            _ user: User,
+            _ apiKey: String,
+            _ hostname: String,
+            _ token: String,
+            _ callCid: String,
+            _ callCoordinatorController: CallCoordinatorController,
+            _ videoConfig: VideoConfig,
+            _ audioSettings: AudioSettings,
+            _ environment: WebSocketClient.Environment
+        ) -> WebRTCClient = {
+            WebRTCClient(
+                user: $0,
+                apiKey: $1,
+                hostname: $2,
+                token: $3,
+                callCid: $4,
+                callCoordinatorController: $5,
+                videoConfig: $6,
+                audioSettings: $7,
+                environment: $8
+            )
+        }
+        
+        var sfuReconnectionTime: CGFloat = 30
+    }
 }
