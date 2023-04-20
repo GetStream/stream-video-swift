@@ -28,16 +28,7 @@ final class CallController_Tests: StreamVideoTestCase {
         // Given
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = CallController(
-            callCoordinatorController: callCoordinator,
-            user: user,
-            callId: callId,
-            callType: callType,
-            apiKey: apiKey,
-            videoConfig: videoConfig,
-            allEventsMiddleware: nil,
-            environment: .mock(with: webRTCClient)
-        )
+        let callController = makeCallController(callCoordinator: callCoordinator)
         let call = streamVideo?.makeCall(callType: callType, callId: callId)
         
         // When
@@ -83,16 +74,7 @@ final class CallController_Tests: StreamVideoTestCase {
         // Given
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = CallController(
-            callCoordinatorController: callCoordinator,
-            user: user,
-            callId: callId,
-            callType: callType,
-            apiKey: apiKey,
-            videoConfig: videoConfig,
-            allEventsMiddleware: nil,
-            environment: .mock(with: webRTCClient)
-        )
+        let callController = makeCallController(callCoordinator: callCoordinator)
         let call = streamVideo?.makeCall(callType: callType, callId: callId)
         
         // When
@@ -124,7 +106,131 @@ final class CallController_Tests: StreamVideoTestCase {
         XCTAssert(callController.call == nil)
     }
     
+    func test_callController_updateCallInfo() async throws {
+        // Given
+        let callCoordinator = makeCallCoordinatorController()
+        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
+        let callController = makeCallController(callCoordinator: callCoordinator)
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            participants: []
+        )
+        callController.call = call
+        callController.update(callInfo: CallInfo(cId: callCid, backstage: true, blockedUsers: []))
+        
+        // Then
+        XCTAssert(callController.call?.callInfo?.backstage == true)
+    }
+    
+    func test_callController_updateCallInfoDifferentCallCid() async throws {
+        // Given
+        let callCoordinator = makeCallCoordinatorController()
+        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
+        let callController = makeCallController(callCoordinator: callCoordinator)
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            participants: []
+        )
+        callController.call = call
+        callController.update(callInfo: CallInfo(cId: "default:different", backstage: true, blockedUsers: []))
+        
+        // Then
+        XCTAssert(callController.call?.callInfo?.backstage == nil)
+    }
+    
+    func test_callController_updateRecordingState() async throws {
+        // Given
+        let callCoordinator = makeCallCoordinatorController()
+        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
+        let callController = makeCallController(callCoordinator: callCoordinator)
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            participants: []
+        )
+        callController.call = call
+        callController.updateCall(from: .init(callCid: callCid, type: "default", action: .started))
+        
+        // Then
+        XCTAssert(callController.call?.recordingState == .recording)
+    }
+    
+    func test_callController_updateRecordingStateDifferentCallCid() async throws {
+        // Given
+        let callCoordinator = makeCallCoordinatorController()
+        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
+        let callController = makeCallController(callCoordinator: callCoordinator)
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            participants: []
+        )
+        callController.call = call
+        callController.updateCall(from: .init(callCid: "default:different", type: "default", action: .started))
+        
+        // Then
+        XCTAssert(callController.call?.recordingState == .noRecording)
+    }
+    
+    func test_callController_cleanup() async throws {
+        // Given
+        let callCoordinator = makeCallCoordinatorController()
+        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
+        let callController = makeCallController(callCoordinator: callCoordinator)
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            participants: []
+        )
+        callController.call = call
+        callController.cleanUp()
+        
+        // Then
+        XCTAssert(callController.call == nil)
+    }
+    
     // MARK: - private
+    
+    private func makeCallController(callCoordinator: CallCoordinatorController_Mock) -> CallController {
+        let callController = CallController(
+            callCoordinatorController: callCoordinator,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: videoConfig,
+            allEventsMiddleware: nil,
+            environment: .mock(with: webRTCClient)
+        )
+        return callController
+    }
     
     private func makeCallCoordinatorController() -> CallCoordinatorController_Mock {
         let callCoordinator = CallCoordinatorController_Mock(
