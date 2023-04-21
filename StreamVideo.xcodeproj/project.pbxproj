@@ -39,6 +39,8 @@
 		8411925E28C5E5D00074EF88 /* DefaultRTCConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */; };
 		8412903629DDD1ED00C70A6D /* UpdateCallMembersRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8412903429DDD1ED00C70A6D /* UpdateCallMembersRequest.swift */; };
 		8412903729DDD1ED00C70A6D /* UpdateCallMembersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8412903529DDD1ED00C70A6D /* UpdateCallMembersResponse.swift */; };
+		8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */; };
+		8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081029F284A800FF2D7C /* AssertJSONEqual.swift */; };
 		8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 8415D3E0290B2AF2006E53CB /* outgoing.m4a */; };
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
@@ -237,7 +239,6 @@
 		84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */; };
 		84A7E1A82883E46200526C98 /* Timers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A72883E46200526C98 /* Timers.swift */; };
 		84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1A92883E4AD00526C98 /* APIKey.swift */; };
-		84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */; };
 		84A7E1AE2883E6B300526C98 /* HTTPUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */; };
 		84A7E1B02883E73100526C98 /* EventBatcher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1AF2883E73100526C98 /* EventBatcher.swift */; };
 		84A8416D29A3CD1E009E1261 /* CoordinatorRequests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849FD33B2982D4870032B914 /* CoordinatorRequests.swift */; };
@@ -583,6 +584,8 @@
 		8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCConfiguration.swift; sourceTree = "<group>"; };
 		8412903429DDD1ED00C70A6D /* UpdateCallMembersRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallMembersRequest.swift; sourceTree = "<group>"; };
 		8412903529DDD1ED00C70A6D /* UpdateCallMembersResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallMembersResponse.swift; sourceTree = "<group>"; };
+		8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawJSON_Tests.swift; sourceTree = "<group>"; };
+		8414081029F284A800FF2D7C /* AssertJSONEqual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertJSONEqual.swift; sourceTree = "<group>"; };
 		8415D3E0290B2AF2006E53CB /* outgoing.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = outgoing.m4a; sourceTree = "<group>"; };
 		8415D3E2290BC882006E53CB /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
@@ -769,7 +772,6 @@
 		84A7E1952883661A00526C98 /* BackgroundTaskScheduler.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = BackgroundTaskScheduler.swift; sourceTree = "<group>"; };
 		84A7E1A72883E46200526C98 /* Timers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Timers.swift; sourceTree = "<group>"; };
 		84A7E1A92883E4AD00526C98 /* APIKey.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIKey.swift; sourceTree = "<group>"; };
-		84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPHeader.swift; sourceTree = "<group>"; };
 		84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPUtils.swift; sourceTree = "<group>"; };
 		84A7E1AF2883E73100526C98 /* EventBatcher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventBatcher.swift; sourceTree = "<group>"; };
 		84A881FB299E476000EA22ED /* AnyCodable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnyCodable.swift; sourceTree = "<group>"; };
@@ -1177,6 +1179,7 @@
 			children = (
 				842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */,
 				842747FD29EEF39B00E063AD /* LatencyService_Tests.swift */,
+				8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1433,6 +1436,7 @@
 				842747ED29EED60600E063AD /* Calendar+GMT.swift */,
 				842747F929EEEC5A00E063AD /* EventLogger.swift */,
 				842747FB29EEECBA00E063AD /* AssertTestQueue.swift */,
+				8414081029F284A800FF2D7C /* AssertJSONEqual.swift */,
 			);
 			path = TestUtils;
 			sourceTree = "<group>";
@@ -1547,7 +1551,6 @@
 			isa = PBXGroup;
 			children = (
 				84A7E1782881922400526C98 /* HTTPClient.swift */,
-				84A7E1AB2883E51E00526C98 /* HTTPHeader.swift */,
 				84A7E1AD2883E6B300526C98 /* HTTPUtils.swift */,
 				8469593329BB5CE200134EA0 /* HTTPConfig.swift */,
 				84274F472884251600CF8794 /* InternetConnection.swift */,
@@ -2644,7 +2647,6 @@
 				84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */,
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
-				84A7E1AC2883E51E00526C98 /* HTTPHeader.swift in Sources */,
 				84DC38AD29ADFCFD00946713 /* HealthCheckEvent.swift in Sources */,
 				8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */,
 				84DC38AA29ADFCFD00946713 /* CallRecordingStoppedEvent.swift in Sources */,
@@ -2682,6 +2684,7 @@
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
+				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
 				84F58B8729EEABF700010C4C /* EventBatcher_Mock.swift in Sources */,
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
 				842747EA29EED0F200E063AD /* UserToken_Tests.swift in Sources */,
@@ -2705,6 +2708,7 @@
 				84F58B8D29EEAE2D00010C4C /* AssertAsync.swift in Sources */,
 				842747F629EEDB1300E063AD /* EventBatcher_Tests.swift in Sources */,
 				84F58B8529EEABC100010C4C /* EventDecoder_Mock.swift in Sources */,
+				8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */,
 				8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */,
 				842747FE29EEF39B00E063AD /* LatencyService_Tests.swift in Sources */,
 				84D6494729E9F2D0002CA428 /* WebRTCClient_Tests.swift in Sources */,
