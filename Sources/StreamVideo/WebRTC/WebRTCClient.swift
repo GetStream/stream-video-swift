@@ -258,7 +258,7 @@ class WebRTCClient: NSObject {
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"], trackType: .audio)
         }
         if hasCapability(.sendVideo),
-            videoConfig.videoEnabled, callSettings.videoOn,
+            callSettings.videoOn,
             let videoTrack = localVideoTrack,           
             publisher?.videoTrackPublished == false {
             log.debug("publishing video track")
@@ -405,7 +405,7 @@ class WebRTCClient: NSObject {
         let track = stream.videoTracks.first
         Task {
             let last = idParts.last
-            if videoConfig.videoEnabled && last == Constants.videoTrackType && track != nil {
+            if last == Constants.videoTrackType && track != nil {
                 await self.state.add(track: track, id: trackId)
             } else if last == Constants.screenshareTrackType && track != nil {
                 await self.state.add(screensharingTrack: track, id: trackId)

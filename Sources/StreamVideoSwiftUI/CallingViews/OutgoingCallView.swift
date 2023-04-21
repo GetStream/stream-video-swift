@@ -26,9 +26,7 @@ public struct OutgoingCallView: View {
             title: L10n.Call.Outgoing.title
         )
         .onAppear {
-            if streamVideo.videoConfig.playSounds {
-                utils.callSoundsPlayer.playOutgoingCallSound()
-            }
+            utils.callSoundsPlayer.playOutgoingCallSound()
         }
         .onDisappear {
             utils.callSoundsPlayer.stopOngoingSound()

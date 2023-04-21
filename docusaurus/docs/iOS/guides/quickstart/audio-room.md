@@ -80,9 +80,7 @@ class AppState: ObservableObject {
             apiKey: "your_api_key",
             user: user.userInfo,
             token: user.token,
-            videoConfig: VideoConfig(
-               videoEnabled: false
-            ),
+            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 result(.success(user.token))
             }
@@ -215,9 +213,7 @@ func login(_ user: UserCredentials) {
       apiKey: "us83cfwuhy8n",
       user: user.userInfo,
       token: user.token,
-      videoConfig: VideoConfig(
-            videoEnabled: false
-      ),
+      videoConfig: VideoConfig(),
       tokenProvider: { result in
             result(.success(user.token))
       }

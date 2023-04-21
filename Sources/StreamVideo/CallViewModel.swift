@@ -189,9 +189,6 @@ open class CallViewModel: ObservableObject {
         participantsLayout: ParticipantsLayout = .grid
     ) {
         self.participantsLayout = participantsLayout
-        if !streamVideo.videoConfig.videoEnabled {
-            callSettings = CallSettings(speakerOn: false)
-        }
         subscribeToCallEvents()
     }
 

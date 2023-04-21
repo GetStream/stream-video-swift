@@ -121,9 +121,7 @@ struct IncomingCallViewContent: View {
             FallbackBackground()
         )
         .onAppear {
-            if streamVideo.videoConfig.playSounds {
-                utils.callSoundsPlayer.playIncomingCallSound()
-            }
+            utils.callSoundsPlayer.playIncomingCallSound()
         }
         .onDisappear {
             utils.callSoundsPlayer.stopOngoingSound()

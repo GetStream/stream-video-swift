@@ -195,7 +195,7 @@ public struct VideoCallParticipantView: View {
     }
     
     private var showVideo: Bool {
-        participant.shouldDisplayTrack && streamVideo.videoConfig.videoEnabled
+        participant.shouldDisplayTrack
     }
 }
 

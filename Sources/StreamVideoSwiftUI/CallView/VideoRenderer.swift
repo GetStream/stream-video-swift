@@ -51,7 +51,7 @@ public struct LocalVideoView: View {
     }
     
     private var showVideo: Bool {
-        callSettings.videoOn && streamVideo.videoConfig.videoEnabled
+        callSettings.videoOn
     }
 }
 

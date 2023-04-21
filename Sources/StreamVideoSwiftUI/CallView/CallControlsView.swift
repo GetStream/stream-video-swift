@@ -24,20 +24,18 @@ public struct CallControlsView: View {
         HStack(alignment: .top) {
             Spacer()
             
-            if streamVideo.videoConfig.videoEnabled {
-                VideoIconView(viewModel: viewModel)
-                Spacer()
-            }
+            VideoIconView(viewModel: viewModel)
+            
+            Spacer()
             
             MicrophoneIconView(viewModel: viewModel)
             
             Spacer()
             
-            if streamVideo.videoConfig.videoEnabled {
-                ToggleCameraIconView(viewModel: viewModel)
-                Spacer()
-            }
+            ToggleCameraIconView(viewModel: viewModel)
             
+            Spacer()
+
             HangUpIconView(viewModel: viewModel)
             
             Spacer()
