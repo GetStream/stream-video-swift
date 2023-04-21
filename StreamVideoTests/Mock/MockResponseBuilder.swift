@@ -28,7 +28,7 @@ class MockResponseBuilder {
             autoRejectTimeoutMs: 15000
         )
         let screensharingSettings = ScreensharingSettings(
-            accessRequestEnabled: true,
+            accessRequestEnabled: false,
             enabled: true
         )
         let transcriptionSettings = TranscriptionSettings(

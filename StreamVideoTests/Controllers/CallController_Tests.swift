@@ -6,17 +6,8 @@
 import XCTest
 import SwiftProtobuf
 
-final class CallController_Tests: StreamVideoTestCase {
-    
-    let user = User(id: "test")
-    let callId = "123"
-    let callType = CallType.default
-    let apiKey = "123"
-    let videoConfig = VideoConfig()
-    var callCid: String {
-        "\(callType.name):\(callId)"
-    }
-    
+final class CallController_Tests: ControllerTestCase {
+
     private var webRTCClient: WebRTCClient!
     
     public override func setUp() {
@@ -230,20 +221,6 @@ final class CallController_Tests: StreamVideoTestCase {
             environment: .mock(with: webRTCClient)
         )
         return callController
-    }
-    
-    private func makeCallCoordinatorController() -> CallCoordinatorController_Mock {
-        let callCoordinator = CallCoordinatorController_Mock(
-            httpClient: HTTPClient_Mock(),
-            user: user,
-            coordinatorInfo: CoordinatorInfo(
-                apiKey: apiKey,
-                hostname: "test.com",
-                token: StreamVideo.mockToken.rawValue
-            ),
-            videoConfig: videoConfig
-        )
-        return callCoordinator
     }
     
     private func makeWebRTCClient(callCoordinator: CallCoordinatorController_Mock) -> WebRTCClient {
