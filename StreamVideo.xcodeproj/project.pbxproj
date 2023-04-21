@@ -41,6 +41,8 @@
 		8412903729DDD1ED00C70A6D /* UpdateCallMembersResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8412903529DDD1ED00C70A6D /* UpdateCallMembersResponse.swift */; };
 		8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */; };
 		8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081029F284A800FF2D7C /* AssertJSONEqual.swift */; };
+		8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */; };
+		8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */; };
 		8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 8415D3E0290B2AF2006E53CB /* outgoing.m4a */; };
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
@@ -586,6 +588,8 @@
 		8412903529DDD1ED00C70A6D /* UpdateCallMembersResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallMembersResponse.swift; sourceTree = "<group>"; };
 		8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawJSON_Tests.swift; sourceTree = "<group>"; };
 		8414081029F284A800FF2D7C /* AssertJSONEqual.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertJSONEqual.swift; sourceTree = "<group>"; };
+		8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RTCConfiguration_Tests.swift; sourceTree = "<group>"; };
+		8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettings_Tests.swift; sourceTree = "<group>"; };
 		8415D3E0290B2AF2006E53CB /* outgoing.m4a */ = {isa = PBXFileReference; lastKnownFileType = file; path = outgoing.m4a; sourceTree = "<group>"; };
 		8415D3E2290BC882006E53CB /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
@@ -1162,6 +1166,7 @@
 			children = (
 				842747E929EED0F200E063AD /* UserToken_Tests.swift */,
 				842747EB29EED59000E063AD /* JSONDecoder_Tests.swift */,
+				8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1177,6 +1182,8 @@
 		842747F429EEDACB00E063AD /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
+				846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */,
 				842747F529EEDB1300E063AD /* EventBatcher_Tests.swift */,
 				842747FD29EEF39B00E063AD /* LatencyService_Tests.swift */,
 				8414080E29F2838F00FF2D7C /* RawJSON_Tests.swift */,
@@ -1426,8 +1433,6 @@
 			isa = PBXGroup;
 			children = (
 				84F58B7D29EE97B300010C4C /* VirtualTime */,
-				8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */,
-				846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */,
 				84F58B7329EE928400010C4C /* TestError.swift */,
 				84F58B7529EE92BF00010C4C /* UniqueValues.swift */,
 				84F58B8029EE9C4900010C4C /* WebSocketPingController_Delegate.swift */,
@@ -1648,6 +1653,7 @@
 			isa = PBXGroup;
 			children = (
 				84D6494629E9F2D0002CA428 /* WebRTCClient_Tests.swift */,
+				8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -2687,6 +2693,7 @@
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
 				84F58B8729EEABF700010C4C /* EventBatcher_Mock.swift in Sources */,
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
+				8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */,
 				842747EA29EED0F200E063AD /* UserToken_Tests.swift in Sources */,
 				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				8492B871290801DC00006649 /* CallViewModel_Tests.swift in Sources */,
@@ -2713,6 +2720,7 @@
 				842747FE29EEF39B00E063AD /* LatencyService_Tests.swift in Sources */,
 				84D6494729E9F2D0002CA428 /* WebRTCClient_Tests.swift in Sources */,
 				8478A0EA29F25F500001F860 /* PermissionsController_Tests.swift in Sources */,
+				8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */,
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
 				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
