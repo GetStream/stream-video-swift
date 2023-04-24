@@ -29,6 +29,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     internal var custom: [String: AnyCodable]
     /** Date/time when the call ended */
     internal var endedAt: Date?
+    internal var hlsPlaylistUrl: String
     /** Call ID */
     internal var id: String
     internal var ingress: CallIngressResponse
@@ -45,7 +46,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.broadcasting = broadcasting
@@ -54,6 +55,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         self.createdBy = createdBy
         self.custom = custom
         self.endedAt = endedAt
+        self.hlsPlaylistUrl = hlsPlaylistUrl
         self.id = id
         self.ingress = ingress
         self.ownCapabilities = ownCapabilities
@@ -75,6 +77,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         case createdBy = "created_by"
         case custom
         case endedAt = "ended_at"
+        case hlsPlaylistUrl = "hls_playlist_url"
         case id
         case ingress
         case ownCapabilities = "own_capabilities"
@@ -99,6 +102,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(createdBy, forKey: .createdBy)
         try container.encode(custom, forKey: .custom)
         try container.encodeIfPresent(endedAt, forKey: .endedAt)
+        try container.encode(hlsPlaylistUrl, forKey: .hlsPlaylistUrl)
         try container.encode(id, forKey: .id)
         try container.encode(ingress, forKey: .ingress)
         try container.encode(ownCapabilities, forKey: .ownCapabilities)

@@ -70,6 +70,9 @@
 		842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842C7EBB28A2A86700C2AB7F /* CallingParticipantView.swift */; };
 		842C7EBE28A2B31400C2AB7F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842C7EBD28A2B31400C2AB7F /* Assets.xcassets */; };
 		842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842C7EBD28A2B31400C2AB7F /* Assets.xcassets */; };
+		842D3B5829F667660051698A /* CreateDeviceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D3B5529F667660051698A /* CreateDeviceRequest.swift */; };
+		842D3B5929F667660051698A /* ListDevicesResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D3B5629F667660051698A /* ListDevicesResponse.swift */; };
+		842D3B5A29F667660051698A /* ModelResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D3B5729F667660051698A /* ModelResponse.swift */; };
 		842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */; };
 		842D8BDB2865B37800801910 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD62865B37800801910 /* Assets.xcassets */; };
 		842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD82865B37800801910 /* Preview Assets.xcassets */; };
@@ -615,6 +618,9 @@
 		842C7EB928A2A85C00C2AB7F /* CallingGroupView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingGroupView.swift; sourceTree = "<group>"; };
 		842C7EBB28A2A86700C2AB7F /* CallingParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingParticipantView.swift; sourceTree = "<group>"; };
 		842C7EBD28A2B31400C2AB7F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		842D3B5529F667660051698A /* CreateDeviceRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateDeviceRequest.swift; sourceTree = "<group>"; };
+		842D3B5629F667660051698A /* ListDevicesResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListDevicesResponse.swift; sourceTree = "<group>"; };
+		842D3B5729F667660051698A /* ModelResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ModelResponse.swift; sourceTree = "<group>"; };
 		842D8BC32865B31B00801910 /* DemoApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamVideoSwiftUIApp.swift; sourceTree = "<group>"; };
 		842D8BD62865B37800801910 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1661,6 +1667,9 @@
 		84DC383E29ADFCFC00946713 /* Models */ = {
 			isa = PBXGroup;
 			children = (
+				842D3B5529F667660051698A /* CreateDeviceRequest.swift */,
+				842D3B5629F667660051698A /* ListDevicesResponse.swift */,
+				842D3B5729F667660051698A /* ModelResponse.swift */,
 				8479E74329EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift */,
 				8479E74229EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift */,
 				84D6494229E9AD08002CA428 /* CallIngressResponse.swift */,
@@ -2498,6 +2507,7 @@
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,
 				84DC38DD29ADFCFD00946713 /* Models.swift in Sources */,
+				842D3B5829F667660051698A /* CreateDeviceRequest.swift in Sources */,
 				84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */,
 				8490DD1F298D39D9007E53D2 /* JsonEventDecoder.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
@@ -2576,8 +2586,10 @@
 				846E4AF029CDEA66003733AB /* DeviceFieldsRequest.swift in Sources */,
 				84DC38A729ADFCFD00946713 /* GoLiveResponse.swift in Sources */,
 				84DC38C329ADFCFD00946713 /* GeofenceSettings.swift in Sources */,
+				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
 				84BD8FFF29B109B5002CFBA0 /* RecordingEventsMiddleware.swift in Sources */,
+				842D3B5929F667660051698A /* ListDevicesResponse.swift in Sources */,
 				84DC38BD29ADFCFD00946713 /* UserResponse.swift in Sources */,
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84DC38C529ADFCFD00946713 /* GetOrCreateCallRequest.swift in Sources */,
