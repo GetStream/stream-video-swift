@@ -11,7 +11,7 @@ class StreamTestCase: XCTestCase {
     let deviceRobot = DeviceRobot(app)
     var userRobot = UserRobot()
     var participantRobot = ParticipantRobot()
-    var terminalRobot = TerminalRobot()
+    var sinatra = Sinatra()
     var recordVideo = false
     let callId = randomCallId
     let allViews: [UserRobot.View] = [.grid, .fullscreen, .spotlight]
@@ -65,13 +65,13 @@ extension StreamTestCase {
 
     private func startVideo() {
         if recordVideo {
-            terminalRobot.recordVideo(name: testName)
+            sinatra.recordVideo(name: testName)
         }
     }
 
     private func stopVideo() {
         if recordVideo {
-            terminalRobot.recordVideo(name: testName, delete: !isTestFailed(), stop: true)
+            sinatra.recordVideo(name: testName, delete: !isTestFailed(), stop: true)
         }
     }
 

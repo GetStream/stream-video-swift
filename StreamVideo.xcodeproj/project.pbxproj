@@ -12,8 +12,9 @@
 		82392D662993CD7B00941435 /* StreamChatTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 82392D652993CD7B00941435 /* StreamChatTestHelpers */; };
 		82392D6B2993CDF500941435 /* UserRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D6A2993CDF500941435 /* UserRobot.swift */; };
 		82392D6D2993CE7200941435 /* StreamVideoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D6C2993CE7200941435 /* StreamVideoUITests.swift */; };
-		82392D6F2994027C00941435 /* TerminalRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D6E2994027C00941435 /* TerminalRobot.swift */; };
+		82392D6F2994027C00941435 /* Sinatra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D6E2994027C00941435 /* Sinatra.swift */; };
 		82392D71299403B200941435 /* CallViewsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D70299403B200941435 /* CallViewsTests.swift */; };
+		824DBAA029F6D77B005ACD09 /* ReconnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */; };
 		82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8268615F290A7556005BFFED /* SystemEnvironment.swift */; };
 		828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */; };
 		82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82AD932429E6FCCF00D4D295 /* LobbyPage.swift */; };
@@ -558,9 +559,10 @@
 		82392D5E2993CCB300941435 /* ParticipantRobot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantRobot.swift; sourceTree = "<group>"; };
 		82392D6A2993CDF500941435 /* UserRobot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserRobot.swift; sourceTree = "<group>"; };
 		82392D6C2993CE7200941435 /* StreamVideoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUITests.swift; sourceTree = "<group>"; };
-		82392D6E2994027C00941435 /* TerminalRobot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TerminalRobot.swift; sourceTree = "<group>"; };
+		82392D6E2994027C00941435 /* Sinatra.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sinatra.swift; sourceTree = "<group>"; };
 		82392D70299403B200941435 /* CallViewsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewsTests.swift; sourceTree = "<group>"; };
 		82392D7429940C4500941435 /* SwiftUIDemoApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SwiftUIDemoApp.xctestplan; sourceTree = "<group>"; };
+		824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionTests.swift; sourceTree = "<group>"; };
 		8268615F290A7556005BFFED /* SystemEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemEnvironment.swift; sourceTree = "<group>"; };
 		828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserRobot+Asserts.swift"; sourceTree = "<group>"; };
 		82AD932429E6FCCF00D4D295 /* LobbyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyPage.swift; sourceTree = "<group>"; };
@@ -1088,7 +1090,7 @@
 			isa = PBXGroup;
 			children = (
 				82392D5E2993CCB300941435 /* ParticipantRobot.swift */,
-				82392D6E2994027C00941435 /* TerminalRobot.swift */,
+				82392D6E2994027C00941435 /* Sinatra.swift */,
 			);
 			path = Robots;
 			sourceTree = "<group>";
@@ -1111,6 +1113,7 @@
 				82B8C0F929E80997001F816C /* RingProcessTests.swift */,
 				82B8C0FB29E80A2A001F816C /* CallLifecycleTests.swift */,
 				82D858B729EDAE0A00CF9F8B /* ParticipantActionsTests.swift */,
+				824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -2412,9 +2415,10 @@
 				82392D6B2993CDF500941435 /* UserRobot.swift in Sources */,
 				82D858B829EDAE0A00CF9F8B /* ParticipantActionsTests.swift in Sources */,
 				82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */,
-				82392D6F2994027C00941435 /* TerminalRobot.swift in Sources */,
+				82392D6F2994027C00941435 /* Sinatra.swift in Sources */,
 				82392D6D2993CE7200941435 /* StreamVideoUITests.swift in Sources */,
 				82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */,
+				824DBAA029F6D77B005ACD09 /* ReconnectionTests.swift in Sources */,
 				828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */,
 				82B8C0FC29E80A2A001F816C /* CallLifecycleTests.swift in Sources */,
 				82392D71299403B200941435 /* CallViewsTests.swift in Sources */,

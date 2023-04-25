@@ -218,6 +218,16 @@ extension UserRobot {
         XCTAssertEqual(count, CallPage.participantView.waitCount(count, timeout: UserRobot.defaultTimeout).count)
         return self
     }
+    
+    @discardableResult
+    func assertReconnectingMessage(isVisible: Bool) -> Self {
+        if isVisible {
+            XCTAssertTrue(CallPage.reconnectingMessage.wait().exists, "reconnectingMessage should appear")
+        } else {
+            XCTAssertFalse(CallPage.reconnectingMessage.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "reconnectingMessage should disappear")
+        }
+        return self
+    }
 }
 
 extension XCUIElement {

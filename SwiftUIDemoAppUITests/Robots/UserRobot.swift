@@ -53,6 +53,7 @@ extension UserRobot {
         typeText(callId, clean: clean)
         tapOnStartCallButton()
         if waitForCompletion {
+            CallPage.hangUpButton.wait()
             CallPage.ConnectingView.callConnectingView.waitForDisappearance(timeout: Self.defaultTimeout)
         }
         return self

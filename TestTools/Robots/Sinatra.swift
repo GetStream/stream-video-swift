@@ -4,8 +4,18 @@
 
 import Foundation
 
-public class TerminalRobot {
+public class Sinatra {
     private let baseUrl = "http://localhost:4567"
+    
+    enum ConnectionState: String {
+        case on
+        case off
+    }
+    
+    func setConnection(state: ConnectionState) {
+        let url = URL(string: "\(baseUrl)/connection/\(state.rawValue)")!
+        invokeSinatra(url: url)
+    }
     
     func recordVideo(name: String, delete: Bool = false, stop: Bool = false) {
         let json: [String: Any] = ["delete": delete, "stop": stop]
@@ -14,7 +24,7 @@ public class TerminalRobot {
         invokeSinatra(url: url, body: json)
     }
     
-    private func invokeSinatra(url: URL, body: [String: Any]) {
+    private func invokeSinatra(url: URL, body: [String: Any] = [:]) {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])

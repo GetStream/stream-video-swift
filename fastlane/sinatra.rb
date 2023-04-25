@@ -7,6 +7,12 @@ post '/push/:udid/:bundle_id' do
   puts `xcrun simctl push #{params['udid']} #{params['bundle_id']} #{push_data_file}`
 end
 
+post '/connection/:state' do
+  ['Ethernet', 'Wi-Fi'].each do |service|
+    `networksetup -setnetworkserviceenabled '#{service}' #{params['state']} || true`
+  end
+end
+
 post '/record_video/:udid/:test_name' do
   recordings_dir = 'recordings'
   video_base_name = "#{recordings_dir}/#{params['test_name']}"
