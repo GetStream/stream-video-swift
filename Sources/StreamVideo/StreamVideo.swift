@@ -62,6 +62,9 @@ public class StreamVideo {
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
+    
+    private var pushDeviceData: DeviceData?
+    private var voipDeviceData: DeviceData?
         
     private let apiKey: APIKey
     private let latencyService: LatencyService
@@ -316,6 +319,36 @@ public class StreamVideo {
         }
     }
     
+    public func setDevice(
+        id: String,
+        pushProvider: PushNotificationsProvider = .apn,
+        name: String = "apn"
+    ) async throws {
+        let createDeviceRequest = CreateDeviceRequest(
+            id: id,
+            pushProvider: .init(rawValue: pushProvider.rawValue),
+            pushProviderName: name,
+            user: nil,
+            userId: user.id
+        )
+        
+        if webSocketClient?.connectionState.canRegisterDevice == true {
+            let deviceData = DeviceData(id: id, provider: pushProvider, name: name)
+            if pushProvider == .apnVoip {
+                self.voipDeviceData = deviceData
+            } else {
+                self.pushDeviceData = deviceData
+            }
+            return
+        }
+        
+        try await callCoordinatorController.createDevice(request: createDeviceRequest)
+    }
+    
+    public func setVoipDevice(id: String) async throws {
+        try await setDevice(id: id, pushProvider: .apnVoip, name: "apn-voip")
+    }
+    
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
         self.watchContinuation?.finish()
@@ -471,7 +504,17 @@ public class StreamVideo {
                 image: self.user.imageURL?.absoluteString,
                 name: self.user.name
             )
+            var deviceRequest: DeviceFieldsRequest?
+            if let pushDeviceData {
+                //TODO: handle voip
+                deviceRequest = DeviceFieldsRequest(
+                    id: pushDeviceData.id,
+                    pushProvider: .init(rawValue: pushDeviceData.provider.rawValue) ?? .apn,
+                    pushProviderName: pushDeviceData.name
+                )
+            }
             let authRequest = WSAuthMessageRequest(
+                device: deviceRequest,
                 token: self.token.rawValue,
                 userDetails: connectUserRequest
             )

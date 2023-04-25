@@ -12,8 +12,23 @@ class AppState: ObservableObject {
     @Published var deeplinkCallId: String?
     @Published var currentUser: User?
     @Published var loading = false
+    @Published var voipPushToken: String? {
+        didSet {
+            setVoipToken()
+        }
+    }
+    @Published var pushToken: String? {
+        didSet {
+            setPushToken()
+        }
+    }
     
-    var streamVideo: StreamVideo?
+    var streamVideo: StreamVideo? {
+        didSet {
+            setPushToken()
+            setVoipToken()
+        }
+    }
     
     static let shared = AppState()
     
@@ -30,6 +45,25 @@ class AppState: ObservableObject {
             }
         }
     }
+    
+    private func setVoipToken() {
+        if let voipPushToken, let streamVideo {
+            Task {
+                try await streamVideo.setVoipDevice(id: voipPushToken)
+                self.voipPushToken = nil
+            }
+        }
+    }
+    
+    private func setPushToken() {
+        if let pushToken, let streamVideo {
+            Task {
+                try await streamVideo.setDevice(id: pushToken)
+                self.pushToken = nil
+            }
+        }
+    }
+        
 }
 
 enum UserState {

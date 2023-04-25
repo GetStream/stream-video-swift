@@ -35,8 +35,11 @@ class VoipPushService: NSObject, PKPushRegistryDelegate {
         print(credentials.token)
         let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
         log.debug("pushRegistry deviceToken = \(deviceToken)")
-        voipNotificationsController.addDevice(with: deviceToken)
-        voipTokenHandler.save(voipPushToken: deviceToken)
+        Task {
+            await MainActor.run(body: {
+                AppState.shared.voipPushToken = deviceToken
+            })
+        }
     }
             
     func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {

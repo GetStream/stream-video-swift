@@ -124,6 +124,10 @@ class CallCoordinatorController: @unchecked Sendable {
             )
         }
     }
+    
+    func createDevice(request: CreateDeviceRequest) async throws {
+        try await coordinatorClient.createDevice(request: request)
+    }
 
     // MARK: - private
         

@@ -156,6 +156,12 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/calls")
     }
     
+    func createDevice(request: CreateDeviceRequest) async throws {
+        var urlRequest = try makeRequest(for: "/devices")
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+        _ = try await httpClient.execute(request: urlRequest)
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
