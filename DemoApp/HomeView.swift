@@ -125,6 +125,9 @@ struct HomeView: View {
         .background(
             viewModel.callingState == .inCall && !viewModel.isMinimized ? Color.black.edgesIgnoringSafeArea(.all) : nil
         )
+        .onReceive(appState.$activeCall) { call in
+            viewModel.setActiveCall(call)
+        }
     }
     
     private var makeCallEnabled: Bool {

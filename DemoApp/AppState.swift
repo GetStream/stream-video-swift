@@ -22,6 +22,7 @@ class AppState: ObservableObject {
             setPushToken()
         }
     }
+    @Published var activeCall: Call?
     
     var streamVideo: StreamVideo? {
         didSet {

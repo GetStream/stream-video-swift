@@ -17,7 +17,7 @@ class CallService {
     ) { [weak self] payload, type, completion in
         let aps = payload.dictionaryPayload["aps"] as? [String: Any]
         let alert = aps?["alert"] as? [String: Any]
-        let callCid = alert?["call_cid"] as? String ?? "unknown"
+        let callCid = alert?["call_cid"] as? String ?? "default:888"
         self?.callService.reportIncomingCall(
             callCid: callCid,
             callInfo: self?.callInfo(from: alert) ?? Self.defaultCallText

@@ -98,6 +98,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                     let callType: CallType = .init(name: callType)
                     self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                    AppState.shared.activeCall = call
                     Task {
                         try await call?.join()
                         await MainActor.run {
@@ -114,6 +115,11 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callKitId = nil
         call?.leave()
         call = nil
+        Task {
+            await MainActor.run {
+                AppState.shared.activeCall = nil
+            }
+        }
         action.fulfill()
     }
     

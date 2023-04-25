@@ -505,14 +505,14 @@ public class StreamVideo {
                 name: self.user.name
             )
             var deviceRequest: DeviceFieldsRequest?
-            if let pushDeviceData {
-                //TODO: handle voip
-                deviceRequest = DeviceFieldsRequest(
-                    id: pushDeviceData.id,
-                    pushProvider: .init(rawValue: pushDeviceData.provider.rawValue) ?? .apn,
-                    pushProviderName: pushDeviceData.name
-                )
-            }
+//            if let pushDeviceData {
+//                //TODO: handle voip
+//                deviceRequest = DeviceFieldsRequest(
+//                    id: pushDeviceData.id,
+//                    pushProvider: .init(rawValue: pushDeviceData.provider.rawValue) ?? .apn,
+//                    pushProviderName: pushDeviceData.name
+//                )
+//            }
             let authRequest = WSAuthMessageRequest(
                 device: deviceRequest,
                 token: self.token.rawValue,

@@ -13,7 +13,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     
     /// Provides access to the current call.
-    @Published public var call: Call? {
+    @Published public private(set) var call: Call? {
         didSet {
             lastLayoutChange = Date()
             participantUpdates = call?.$participants
@@ -401,6 +401,16 @@ open class CallViewModel: ObservableObject {
     public func update(participantsLayout: ParticipantsLayout) {
         self.automaticLayoutHandling = false
         self.participantsLayout = participantsLayout
+    }
+    
+    public func setActiveCall(_ call: Call?) {
+        if let call {
+            self.callingState = .inCall
+            self.call = call
+        } else {
+            self.callingState = .idle
+            self.call = nil
+        }
     }
     
     // MARK: - private
