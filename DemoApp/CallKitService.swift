@@ -2,6 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import UIKit
 import Foundation
 @preconcurrency import CallKit
 import StreamVideo
@@ -36,6 +37,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = true
         configuration.supportedHandleTypes = [.generic]
+        configuration.iconTemplateImageData = UIImage(named: "logo")?.pngData()
         let provider = CXProvider(
             configuration: configuration
         )
