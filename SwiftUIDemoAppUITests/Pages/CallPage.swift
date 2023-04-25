@@ -75,4 +75,5 @@ enum CallPage {
     static var spotlightViewParticipantListDetails: XCUIElement {
         spotlightViewParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Horizontal scroll bar'")).firstMatch
     }
+    static var reconnectingMessage: XCUIElement { app.staticTexts["reconnectingMessage"] }
 }

@@ -27,6 +27,7 @@ public struct ReconnectionView<Factory: ViewFactory>: View {
                     Text(L10n.Call.Current.reconnecting)
                         .applyCallingStyle()
                         .padding()
+                        .accessibility(identifier: "reconnectingMessage")
                     CallingIndicator()
                 }
                 .padding()
