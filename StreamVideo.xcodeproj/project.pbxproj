@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784EE29FA8123006DD4F7 /* WebRTC */; };
+		820784F129FA8156006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784F029FA8156006DD4F7 /* WebRTC */; };
 		82392D542993C9E100941435 /* StreamTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D532993C9E100941435 /* StreamTestCase.swift */; };
 		82392D5F2993CCB300941435 /* ParticipantRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D5E2993CCB300941435 /* ParticipantRobot.swift */; };
 		82392D662993CD7B00941435 /* StreamChatTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 82392D652993CD7B00941435 /* StreamChatTestHelpers */; };
@@ -15,8 +17,18 @@
 		82392D6F2994027C00941435 /* Sinatra.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D6E2994027C00941435 /* Sinatra.swift */; };
 		82392D71299403B200941435 /* CallViewsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D70299403B200941435 /* CallViewsTests.swift */; };
 		824DBAA029F6D77B005ACD09 /* ReconnectionTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */; };
+		824DBAA529F93E1F005ACD09 /* AssertSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */; };
+		824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */; };
+		824DBAA729F93E2B005ACD09 /* SnapshotVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */; };
+		824DBAA829F93E2B005ACD09 /* SnapshotVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */; };
 		82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8268615F290A7556005BFFED /* SystemEnvironment.swift */; };
 		828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */; };
+		829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */; };
+		829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */; };
+		829F7BFA29FABC0E003EBACE /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
+		829F7BFB29FABC0E003EBACE /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
+		829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
+		829F7BFE29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
 		82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82AD932429E6FCCF00D4D295 /* LobbyPage.swift */; };
 		82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F729E80933001F816C /* LobbyTests.swift */; };
 		82B8C0FA29E80997001F816C /* RingProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F929E80997001F816C /* RingProcessTests.swift */; };
@@ -24,6 +36,10 @@
 		82C837E029A531ED00CB6B0E /* CallPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837DF29A531ED00CB6B0E /* CallPage.swift */; };
 		82C837E229A532C000CB6B0E /* LoginPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837E129A532C000CB6B0E /* LoginPage.swift */; };
 		82C837E429A5333700CB6B0E /* CallDetailsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837E329A5333700CB6B0E /* CallDetailsPage.swift */; };
+		82CC95872A05514900CC1841 /* coffee.png in Resources */ = {isa = PBXBuildFile; fileRef = 82CC95852A05514900CC1841 /* coffee.png */; };
+		82CC95882A05514900CC1841 /* coffee.png in Resources */ = {isa = PBXBuildFile; fileRef = 82CC95852A05514900CC1841 /* coffee.png */; };
+		82CC95892A05514900CC1841 /* olive.png in Resources */ = {isa = PBXBuildFile; fileRef = 82CC95862A05514900CC1841 /* olive.png */; };
+		82CC958A2A05514900CC1841 /* olive.png in Resources */ = {isa = PBXBuildFile; fileRef = 82CC95862A05514900CC1841 /* olive.png */; };
 		82D858B829EDAE0A00CF9F8B /* ParticipantActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D858B729EDAE0A00CF9F8B /* ParticipantActionsTests.swift */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
@@ -197,12 +213,8 @@
 		8492B875290808AE00006649 /* StreamVideoEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B874290808AE00006649 /* StreamVideoEnvironment.swift */; };
 		8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
 		8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
-		8493223729082E620013C029 /* OutgoingCallView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223629082E620013C029 /* OutgoingCallView_Tests.swift */; };
 		8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */; };
-		8493223C29082F0F0013C029 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
-		8493223D29082F0F0013C029 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
 		84932240290830390013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493223F290830390013C029 /* SnapshotTesting */; };
-		84932243290830F80013C029 /* ViewFrameUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932242290830F80013C029 /* ViewFrameUtils.swift */; };
 		8493224F2908378A0013C029 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493224E2908378A0013C029 /* AppDelegate.swift */; };
 		849322512908378A0013C029 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322502908378A0013C029 /* SceneDelegate.swift */; };
 		849322582908378B0013C029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 849322572908378B0013C029 /* Assets.xcassets */; };
@@ -584,8 +596,14 @@
 		82392D70299403B200941435 /* CallViewsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewsTests.swift; sourceTree = "<group>"; };
 		82392D7429940C4500941435 /* SwiftUIDemoApp.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = SwiftUIDemoApp.xctestplan; sourceTree = "<group>"; };
 		824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionTests.swift; sourceTree = "<group>"; };
+		824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotVariant.swift; sourceTree = "<group>"; };
+		824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertSnapshot.swift; sourceTree = "<group>"; };
 		8268615F290A7556005BFFED /* SystemEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemEnvironment.swift; sourceTree = "<group>"; };
 		828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserRobot+Asserts.swift"; sourceTree = "<group>"; };
+		829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridLayout_Tests.swift; sourceTree = "<group>"; };
+		829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsSpotlightLayout_Tests.swift; sourceTree = "<group>"; };
+		829F7BF929FABC0E003EBACE /* StreamFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamFactory.swift; sourceTree = "<group>"; };
+		829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsFullScreenLayout_Tests.swift; sourceTree = "<group>"; };
 		82AD932429E6FCCF00D4D295 /* LobbyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyPage.swift; sourceTree = "<group>"; };
 		82B82F2229114001001B5FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82B82F242911414D001B5FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -596,6 +614,8 @@
 		82C837DF29A531ED00CB6B0E /* CallPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallPage.swift; sourceTree = "<group>"; };
 		82C837E129A532C000CB6B0E /* LoginPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginPage.swift; sourceTree = "<group>"; };
 		82C837E329A5333700CB6B0E /* CallDetailsPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallDetailsPage.swift; sourceTree = "<group>"; };
+		82CC95852A05514900CC1841 /* coffee.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = coffee.png; sourceTree = "<group>"; };
+		82CC95862A05514900CC1841 /* olive.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = olive.png; sourceTree = "<group>"; };
 		82D858B729EDAE0A00CF9F8B /* ParticipantActionsTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantActionsTests.swift; sourceTree = "<group>"; };
 		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
 		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
@@ -765,9 +785,7 @@
 		8492B874290808AE00006649 /* StreamVideoEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoEnvironment.swift; sourceTree = "<group>"; };
 		8492B87729081D1600006649 /* HTTPClient_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPClient_Mock.swift; sourceTree = "<group>"; };
 		8492B87929081E6600006649 /* StreamVideo_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo_Mock.swift; sourceTree = "<group>"; };
-		8493223629082E620013C029 /* OutgoingCallView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView_Tests.swift; sourceTree = "<group>"; };
 		8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoUITestCase.swift; sourceTree = "<group>"; };
-		84932242290830F80013C029 /* ViewFrameUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFrameUtils.swift; sourceTree = "<group>"; };
 		84932244290831B70013C029 /* StreamVideoSwiftUI.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideoSwiftUI.xctestplan; sourceTree = "<group>"; };
 		84932245290831DB0013C029 /* StreamVideo.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideo.xctestplan; sourceTree = "<group>"; };
 		8493224C290837890013C029 /* DemoAppUIKit.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = DemoAppUIKit.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1054,6 +1072,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F737F5287C13AD00A363F4 /* StreamVideo.framework in Frameworks */,
+				820784F129FA8156006DD4F7 /* WebRTC in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1072,6 +1091,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F7380F287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
+				820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */,
 				84932240290830390013C029 /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1114,6 +1134,8 @@
 		82392D5C2993CBE200941435 /* TestTools */ = {
 			isa = PBXGroup;
 			children = (
+				82CE900229FC3A7B00770EF6 /* Resources */,
+				824DBAA129F93DA1005ACD09 /* SnapshotTesting */,
 				82392D5D2993CC7C00941435 /* Robots */,
 			);
 			path = TestTools;
@@ -1160,6 +1182,35 @@
 				82AD932429E6FCCF00D4D295 /* LobbyPage.swift */,
 			);
 			path = Pages;
+			sourceTree = "<group>";
+		};
+		824DBAA129F93DA1005ACD09 /* SnapshotTesting */ = {
+			isa = PBXGroup;
+			children = (
+				824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */,
+				824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */,
+				829F7BF929FABC0E003EBACE /* StreamFactory.swift */,
+			);
+			path = SnapshotTesting;
+			sourceTree = "<group>";
+		};
+		829F7BFF29FAC5B1003EBACE /* CallView */ = {
+			isa = PBXGroup;
+			children = (
+				829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */,
+				829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */,
+				829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */,
+			);
+			path = CallView;
+			sourceTree = "<group>";
+		};
+		82CE900229FC3A7B00770EF6 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				82CC95852A05514900CC1841 /* coffee.png */,
+				82CC95862A05514900CC1841 /* olive.png */,
+			);
+			path = Resources;
 			sourceTree = "<group>";
 		};
 		841947922884ABB20007B36E /* Events */ = {
@@ -1524,22 +1575,6 @@
 				842747F229EED8D900E063AD /* InternetConnection_Mock.swift */,
 			);
 			path = Mock;
-			sourceTree = "<group>";
-		};
-		8493223529082C530013C029 /* CallingViews */ = {
-			isa = PBXGroup;
-			children = (
-				8493223629082E620013C029 /* OutgoingCallView_Tests.swift */,
-			);
-			path = CallingViews;
-			sourceTree = "<group>";
-		};
-		84932241290830E60013C029 /* Utils */ = {
-			isa = PBXGroup;
-			children = (
-				84932242290830F80013C029 /* ViewFrameUtils.swift */,
-			);
-			path = Utils;
 			sourceTree = "<group>";
 		};
 		8493224D2908378A0013C029 /* DemoAppUIKit */ = {
@@ -1987,8 +2022,7 @@
 			children = (
 				84932244290831B70013C029 /* StreamVideoSwiftUI.xctestplan */,
 				8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */,
-				84932241290830E60013C029 /* Utils */,
-				8493223529082C530013C029 /* CallingViews */,
+				829F7BFF29FAC5B1003EBACE /* CallView */,
 			);
 			path = StreamVideoSwiftUITests;
 			sourceTree = "<group>";
@@ -2195,6 +2229,9 @@
 				84F737F7287C13AD00A363F4 /* PBXTargetDependency */,
 			);
 			name = StreamVideoTests;
+			packageProductDependencies = (
+				820784F029FA8156006DD4F7 /* WebRTC */,
+			);
 			productName = StreamVideoTests;
 			productReference = 84F737F4287C13AD00A363F4 /* StreamVideoTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
@@ -2239,6 +2276,7 @@
 			name = StreamVideoSwiftUITests;
 			packageProductDependencies = (
 				8493223F290830390013C029 /* SnapshotTesting */,
+				820784EE29FA8123006DD4F7 /* WebRTC */,
 			);
 			productName = StreamVideoSwiftUITests;
 			productReference = 84F7380E287C141000A363F4 /* StreamVideoSwiftUITests.xctest */;
@@ -2435,6 +2473,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82CC95872A05514900CC1841 /* coffee.png in Resources */,
+				82CC95892A05514900CC1841 /* olive.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2449,6 +2489,8 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82CC95882A05514900CC1841 /* coffee.png in Resources */,
+				82CC958A2A05514900CC1841 /* olive.png in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2916,11 +2958,13 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				8493223C29082F0F0013C029 /* HTTPClient_Mock.swift in Sources */,
-				8493223D29082F0F0013C029 /* StreamVideo_Mock.swift in Sources */,
-				84932243290830F80013C029 /* ViewFrameUtils.swift in Sources */,
+				824DBAA529F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
+				829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */,
+				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
+				824DBAA729F93E2B005ACD09 /* SnapshotVariant.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
-				8493223729082E620013C029 /* OutgoingCallView_Tests.swift in Sources */,
+				829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */,
+				829F7BFA29FABC0E003EBACE /* StreamFactory.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2940,8 +2984,12 @@
 			buildActionMask = 2147483647;
 			files = (
 				8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */,
+				824DBAA829F93E2B005ACD09 /* SnapshotVariant.swift in Sources */,
 				8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */,
 				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
+				824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
+				829F7BFE29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */,
+				829F7BFB29FABC0E003EBACE /* StreamFactory.swift in Sources */,
 				8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3893,8 +3941,8 @@
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing.git";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = exactVersion;
+				version = 1.11.0;
 			};
 		};
 		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
@@ -3916,6 +3964,16 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		820784EE29FA8123006DD4F7 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
+			productName = WebRTC;
+		};
+		820784F029FA8156006DD4F7 /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
+			productName = WebRTC;
+		};
 		82392D652993CD7B00941435 /* StreamChatTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 82392D622993CD4700941435 /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */;
