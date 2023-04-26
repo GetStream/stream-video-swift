@@ -365,7 +365,7 @@ extension CallParticipant {
             id: id,
             name: name,
             imageURL: profileImageURL,
-            extraData: [:]
+            customData: [:]
         )
     }
 }

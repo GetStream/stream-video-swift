@@ -85,7 +85,7 @@ public class CallsController: ObservableObject {
                     broadcasting: $0.call.broadcasting,
                     recording: $0.call.recording,
                     updatedAt: $0.call.updatedAt,
-                    extraData: result
+                    customData: result
                 )
             }
             if shouldRefresh {
@@ -195,7 +195,7 @@ public struct CallData: @unchecked Sendable {
     public var recording: Bool
     public var startsAt: Date?
     public var updatedAt: Date
-    public var extraData: [String: Any]
+    public var customData: [String: Any]
     
     mutating func applyUpdates(from callResponse: CallResponse) {
         self.backstage = callResponse.backstage

@@ -22,7 +22,7 @@ let reactionRequest = CallReactionRequest(
     callType: callType,
     reactionType: "your_custom_type", // e.g. "raiseHand"
     emojiCode: "emoji_code", //
-    extraData: [
+    customData: [
         "id": .string("some_id"),
         "duration": .number(duration),
         "sound": .string(sound),
@@ -32,7 +32,7 @@ let reactionRequest = CallReactionRequest(
 try await call.send(reaction: reactionRequest)
 ```
 
-Note that in the `extraData` dictionary, you can provide additional information to help you handle the reaction better. For example, you can pass a duration, to control how long the reaction is displayed on the screen, or sound filenames that can be played while the reaction is shown. Additionally, you can use boolean flags like for example `isReverted`, to check whether the user is sending the reaction, or wants it reverted.
+Note that in the `customData` dictionary, you can provide additional information to help you handle the reaction better. For example, you can pass a duration, to control how long the reaction is displayed on the screen, or sound filenames that can be played while the reaction is shown. Additionally, you can use boolean flags like for example `isReverted`, to check whether the user is sending the reaction, or wants it reverted.
 
 #### Listening to reaction events
 
@@ -43,7 +43,7 @@ private func subscribeToReactionEvents() {
     Task {
         for await event in call.reactions() {
             log.debug("received an event \(event)")
-            handleReaction(with: event.extraData, from: event.user)
+            handleReaction(with: event.customData, from: event.user)
         }
     }
 }
@@ -84,7 +84,7 @@ func send(event: GameEvent) {
             callId: callId,
             callType: callType,
             type: .gameStarted,
-            extraData: [
+            customData: [
                 "id": .string(event.id),
                 "name": .string(event.name)
             ]
@@ -94,7 +94,7 @@ func send(event: GameEvent) {
 }
 ```
 
-In the code above, we are creating a `CustomEventRequest`, with the call id and call type where the user is a participant. We also provide the newly defined `gameStarted` event type. Finally, we are providing our custom event info in the `extraData` parameter.
+In the code above, we are creating a `CustomEventRequest`, with the call id and call type where the user is a participant. We also provide the newly defined `gameStarted` event type. Finally, we are providing our custom event info in the `customData` parameter.
 
 #### Listening to custom events
 
@@ -106,7 +106,7 @@ private func subscribeToCustomEvents() {
         for await event in call.customEvents() {
             log.debug("received an event \(event)")
             if event.type == EventType.gameStarted.rawValue {
-                handleEvent(with: event.extraData, from: event.user)
+                handleEvent(with: event.customData, from: event.user)
             }            
         }
     }        

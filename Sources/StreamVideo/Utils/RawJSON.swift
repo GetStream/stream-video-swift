@@ -66,8 +66,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let price = extraData["price"]?.numberValue ?? 0
+    /// let customData = message.customData
+    /// let price = customData["price"]?.numberValue ?? 0
     /// ```
     var numberValue: Double? {
         guard case let .number(value) = self else {
@@ -81,8 +81,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let email = extraData["email"]?.stringValue ?? ""
+    /// let customData = message.customData
+    /// let email = customData["email"]?.stringValue ?? ""
     /// ```
     var stringValue: String? {
         guard case let .string(value) = self else {
@@ -96,8 +96,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let isManager = extraData["isManager"]?.boolValue ?? false
+    /// let customData = message.customData
+    /// let isManager = customData["isManager"]?.boolValue ?? false
     /// ```
     var boolValue: Bool? {
         guard case let .bool(value) = self else {
@@ -111,8 +111,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let flightPrice = extraData["flight"]?.dictionaryValue?["price"]?.numberValue ?? 0
+    /// let customData = message.customData
+    /// let flightPrice = customData["flight"]?.dictionaryValue?["price"]?.numberValue ?? 0
     /// ```
     var dictionaryValue: [String: RawJSON]? {
         guard case let .dictionary(value) = self else {
@@ -126,8 +126,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let flights: [RawJSON]? = extraData["flights"]?.arrayValue
+    /// let customData = message.customData
+    /// let flights: [RawJSON]? = customData["flights"]?.arrayValue
     /// ```
     var arrayValue: [RawJSON]? {
         guard case let .array(value) = self else {
@@ -141,8 +141,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let ages = extraData["ages"]?.numberArrayValue ?? []
+    /// let customData = message.customData
+    /// let ages = customData["ages"]?.numberArrayValue ?? []
     /// ```
     var numberArrayValue: [Double]? {
         guard let rawArrayValue = arrayValue else {
@@ -157,8 +157,8 @@ public extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let names = extraData["names"]?.stringArrayValue ?? []
+    /// let customData = message.customData
+    /// let names = customData["names"]?.stringArrayValue ?? []
     /// ```
     var stringArrayValue: [String]? {
         guard let rawArrayValue = arrayValue else {
@@ -199,7 +199,7 @@ extension RawJSON: ExpressibleByDictionaryLiteral {
     ///
     /// Example:
     /// ```
-    /// let extraData: [String: RawJSON] = [
+    /// let customData: [String: RawJSON] = [
     ///     "flight": [
     ///         "price": .number(1000),
     ///         "destination": .string("Lisbon")
@@ -219,7 +219,7 @@ extension RawJSON: ExpressibleByArrayLiteral {
     ///
     /// Example:
     /// ```
-    /// let extraData: [String: RawJSON] = [
+    /// let customData: [String: RawJSON] = [
     ///     "names": [.string("John"), string("Doe")]
     /// ]
     /// ```
@@ -233,7 +233,7 @@ extension RawJSON: ExpressibleByStringLiteral {
     ///
     /// Example:
     /// ```
-    /// let extraData: [String: RawJSON] = [
+    /// let customData: [String: RawJSON] = [
     ///     "names": ["John", "Doe"] // instead of [.string("John"), .string("Doe")]
     /// ]
     /// ```
@@ -247,7 +247,7 @@ extension RawJSON: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     ///
     /// Example:
     /// ```
-    /// let extraData: [String: RawJSON] = [
+    /// let customData: [String: RawJSON] = [
     ///     "distances": [3.5, 4.5] // instead of [.number(3.5), .number(3.5)]
     /// ]
     /// ```
@@ -259,7 +259,7 @@ extension RawJSON: ExpressibleByIntegerLiteral, ExpressibleByFloatLiteral {
     ///
     /// Example:
     /// ```
-    /// let extraData: [String: RawJSON] = [
+    /// let customData: [String: RawJSON] = [
     ///     "ages": [23, 32] // instead of [.number(23.0), .number(32.0)]
     /// ]
     /// ```
@@ -273,7 +273,7 @@ extension RawJSON: ExpressibleByBooleanLiteral {
     ///
     /// Example:
     /// ```
-    /// let extraData: [String: RawJSON] = [
+    /// let customData: [String: RawJSON] = [
     ///     "isManager": true // instead of .bool(true)
     /// ]
     /// ```
@@ -290,9 +290,9 @@ extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let price = extraData["flight"]?["price"].numberValue
-    /// let destination = extraData["flight"]?["destination"].stringValue
+    /// let customData = message.customData
+    /// let price = customData["flight"]?["price"].numberValue
+    /// let destination = customData["flight"]?["destination"].stringValue
     /// ```
     subscript(key: String) -> RawJSON? {
         get {
@@ -317,8 +317,8 @@ extension RawJSON {
     ///
     /// Example:
     /// ```
-    /// let extraData = message.extraData
-    /// let secondFlightPrice = extraData["flights"]?[1]?["price"] ?? 0
+    /// let customData = message.customData
+    /// let secondFlightPrice = customData["flights"]?[1]?["price"] ?? 0
     /// ```
     subscript(index: Int) -> RawJSON? {
         get {
@@ -340,9 +340,9 @@ extension RawJSON {
 }
 
 extension RawJSON {
-    static func convert(extraData: [String: RawJSON]) -> [String: AnyCodable] {
+    static func convert(customData: [String: RawJSON]) -> [String: AnyCodable] {
         var result = [String: AnyCodable]()
-        for (key, value) in extraData {
+        for (key, value) in customData {
             result[key] = AnyCodable(value)
         }
         return result
