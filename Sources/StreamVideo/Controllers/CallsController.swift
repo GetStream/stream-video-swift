@@ -73,14 +73,19 @@ public class CallsController: ObservableObject {
             prev = response.prev
             next = response.next
             let calls = response.calls.map {
-                CallData(
+                var result = [String: Any]()
+                for (key, value) in $0.call.custom {
+                    result[key] = value.value
+                }
+                return CallData(
                     callCid: $0.call.cid,
                     members: $0.members.map { $0.user.toUser },
                     createdAt: $0.call.createdAt,
                     backstage: $0.call.backstage,
                     broadcasting: $0.call.broadcasting,
                     recording: $0.call.recording,
-                    updatedAt: $0.call.updatedAt
+                    updatedAt: $0.call.updatedAt,
+                    extraData: result
                 )
             }
             if shouldRefresh {
@@ -180,7 +185,7 @@ public class CallsController: ObservableObject {
     }
 }
 
-public struct CallData: Sendable {
+public struct CallData: @unchecked Sendable {
     public let callCid: String
     public var members: [User]
     public let createdAt: Date
@@ -190,6 +195,7 @@ public struct CallData: Sendable {
     public var recording: Bool
     public var startsAt: Date?
     public var updatedAt: Date
+    public var extraData: [String: Any]
     
     mutating func applyUpdates(from callResponse: CallResponse) {
         self.backstage = callResponse.backstage
