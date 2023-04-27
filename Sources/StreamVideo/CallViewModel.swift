@@ -169,6 +169,7 @@ open class CallViewModel: ObservableObject {
     
     private var callRejectionEvents = [String: Int]()
     private var lastLayoutChange = Date()
+    private var enteringCall = false
     
     public var participants: [CallParticipant] {
         callParticipants
@@ -438,16 +439,22 @@ open class CallViewModel: ObservableObject {
     }
     
     private func enterCall(callId: String, callType: CallType, participants: [User], ring: Bool = false) {
+        if enteringCall || callingState == .inCall {
+            return
+        }
+        enteringCall = true
         Task {
             do {
                 log.debug("Starting call")
                 let call = streamVideo.makeCall(callType: callType, callId: callId, members: participants)
                 try await call.join(ring: ring, callSettings: callSettings)
                 save(call: call)
+                enteringCall = false
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
                 self.error = error
                 callingState = .idle
+                enteringCall = false
             }
         }
     }
