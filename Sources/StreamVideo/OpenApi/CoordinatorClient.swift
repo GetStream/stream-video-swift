@@ -40,6 +40,14 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
+    func getOrCreateCall(
+        with request: GetOrCreateCallRequest,
+        callId: String,
+        callType: String
+    ) async throws -> GetOrCreateCallResponse {
+        try await execute(request: request, path: "/call/\(callType)/\(callId)")
+    }
+    
     func getCallEdgeServer(with request: SelectEdgeServerRequestData) async throws -> GetCallEdgeServerResponse {
         try await execute(
             request: request.getCallEdgeServerRequest,
