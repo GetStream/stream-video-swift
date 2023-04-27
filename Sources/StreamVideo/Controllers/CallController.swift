@@ -130,6 +130,43 @@ class CallController {
         )
     }
     
+    /// Gets or creates the call on the backend with the given parameters.
+    ///
+    /// - Parameters:
+    ///  - members: An optional array of User objects to add to the call.
+    ///  - startsAt: An optional Date object representing the time the call is scheduled to start.
+    ///  - customData: An optional dictionary of custom data to attach to the call.
+    ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
+    ///  - ring: A boolean value indicating whether to ring the call.
+    /// - Throws: An error if the call creation fails.
+    /// - Returns: The call's data.
+    func getOrCreateCall(
+        members: [User],
+        startsAt: Date?,
+        customData: [String: RawJSON],
+        membersLimit: Int?,
+        ring: Bool
+    ) async throws -> CallData {
+        let data = CallRequest(
+            custom: RawJSON.convert(customData: customData),
+            members: members.map {
+                MemberRequest(
+                    custom: RawJSON.convert(customData: $0.customData),
+                    role: $0.role,
+                    userId: $0.id
+                )
+            },
+            startsAt: startsAt
+        )
+        let request = GetOrCreateCallRequest(data: data, membersLimit: membersLimit, ring: ring)
+        let response = try await callCoordinatorController.coordinatorClient.getOrCreateCall(
+            with: request,
+            callId: callId,
+            callType: callType.name
+        )
+        return response.call.toCallData(members: response.members, blockedUsers: response.blockedUsers)
+    }
+    
     /// Starts capturing the local video.
     func startCapturingLocalVideo() {
         webRTCClient?.startCapturingLocalVideo(cameraPosition: .front)

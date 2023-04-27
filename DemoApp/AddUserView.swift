@@ -36,7 +36,7 @@ struct AddUserView: View {
                     id: id,
                     name: name,
                     imageURL: nil,
-                    extraData: [:]
+                    customData: [:]
                 )
                 User.builtInUsers.append(userInfo)
                 presentationMode.wrappedValue.dismiss()

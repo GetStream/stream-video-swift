@@ -21,7 +21,6 @@
         "guides/mic-camera-setup",
         "guides/quickstart/livestream",
         "guides/audio-out",
-        "guides/call-viewmodel",
         "guides/call-events",
         "guides/call-state",
         "guides/call-participants",
@@ -34,7 +33,6 @@
         "ui/ui-overview",
         "ui/customizing-views",
         "ui/view-slots",
-        "ui/screen-sharing",
         "ui/ui-kit-customizations",
         "ui/text-localization",
         "ui/injecting-dependencies"

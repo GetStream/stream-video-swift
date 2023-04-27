@@ -353,7 +353,7 @@ open class CallViewModel: ObservableObject {
     ///  - isVisible: whether the track should be visible.
     public func changeTrackVisbility(for participant: CallParticipant, isVisible: Bool) {
         if !isVisible {
-            if participantsLayout == .fullScreen {
+            if participantsLayout == .fullScreen || participantsLayout == .spotlight {
                 if participant.id == participants.first?.id {
                     log.debug("Skip hiding the track for the top participant")
                     return

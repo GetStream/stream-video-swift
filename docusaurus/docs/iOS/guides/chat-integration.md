@@ -220,7 +220,7 @@ public struct CallChatChannelHeader: ToolbarContent {
                         id: member.id,
                         name: member.name,
                         imageURL: member.imageURL,
-                        extraData: [:]
+                        customData: [:]
                     )
                 }
                 callViewModel.startCall(callId: UUID().uuidString, type: "default", participants: participants)

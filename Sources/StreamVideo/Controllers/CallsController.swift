@@ -73,14 +73,9 @@ public class CallsController: ObservableObject {
             prev = response.prev
             next = response.next
             let calls = response.calls.map {
-                CallData(
-                    callCid: $0.call.cid,
-                    members: $0.members.map { $0.user.toUser },
-                    createdAt: $0.call.createdAt,
-                    backstage: $0.call.backstage,
-                    broadcasting: $0.call.broadcasting,
-                    recording: $0.call.recording,
-                    updatedAt: $0.call.updatedAt
+                $0.call.toCallData(
+                    members: $0.members,
+                    blockedUsers: $0.blockedUsers
                 )
             }
             if shouldRefresh {
@@ -180,9 +175,35 @@ public class CallsController: ObservableObject {
     }
 }
 
-public struct CallData: Sendable {
+extension CallResponse {
+    
+    func toCallData(
+        members: [MemberResponse],
+        blockedUsers: [UserResponse]
+    ) -> CallData {
+        var result = [String: Any]()
+        for (key, value) in custom {
+            result[key] = value.value
+        }
+        return CallData(
+            callCid: cid,
+            members: members.map { $0.user.toUser },
+            blockedUsers: blockedUsers.map { $0.toUser },
+            createdAt: createdAt,
+            backstage: backstage,
+            broadcasting: broadcasting,
+            recording: recording,
+            updatedAt: updatedAt,
+            customData: result
+        )
+    }
+    
+}
+
+public struct CallData: @unchecked Sendable {
     public let callCid: String
     public var members: [User]
+    public var blockedUsers: [User]
     public let createdAt: Date
     public var backstage: Bool
     public var broadcasting: Bool
@@ -190,6 +211,7 @@ public struct CallData: Sendable {
     public var recording: Bool
     public var startsAt: Date?
     public var updatedAt: Date
+    public var customData: [String: Any]
     
     mutating func applyUpdates(from callResponse: CallResponse) {
         self.backstage = callResponse.backstage

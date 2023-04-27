@@ -102,6 +102,32 @@ public class Call: ObservableObject, @unchecked Sendable {
             videoOptions: videoOptions
         )
     }
+    
+    /// Gets or creates the call on the backend with the given parameters.
+    ///
+    /// - Parameters:
+    ///  - members: An optional array of User objects to add to the call.
+    ///  - startsAt: An optional Date object representing the time the call is scheduled to start.
+    ///  - customData: An optional dictionary of custom data to attach to the call.
+    ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
+    ///  - ring: A boolean value indicating whether to ring the call.
+    /// - Throws: An error if the call creation fails.
+    /// - Returns: The call's data.
+    public func getOrCreate(
+        members: [User] = [],
+        startsAt: Date? = nil,
+        customData: [String: RawJSON] = [:],
+        membersLimit: Int? = nil,
+        ring: Bool = false
+    ) async throws -> CallData {
+        try await callController.getOrCreateCall(
+            members: members,
+            startsAt: startsAt,
+            customData: customData,
+            membersLimit: membersLimit,
+            ring: ring
+        )
+    }
 
     /// Selects an `EdgeServer` for a call with the specified `participants`.
     /// - Parameters:

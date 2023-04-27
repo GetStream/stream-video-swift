@@ -43,7 +43,7 @@ class EventsController {
     /// - Throws: An error if the sending fails.
     func send(event: CustomEventRequest) async throws {
         let sendEventRequest = SendEventRequest(
-            custom: RawJSON.convert(extraData: event.extraData),
+            custom: RawJSON.convert(customData: event.customData),
             type: event.type.rawValue
         )
         let request = EventRequestData(
@@ -59,7 +59,7 @@ class EventsController {
     /// - Throws: An error if the sending fails.
     func send(reaction: CallReactionRequest) async throws {
         let request = SendReactionRequest(
-            custom: RawJSON.convert(extraData: reaction.extraData),
+            custom: RawJSON.convert(customData: reaction.customData),
             emojiCode: reaction.emojiCode,
             type: reaction.reactionType
         )
@@ -108,7 +108,7 @@ class EventsController {
 public struct CustomEvent {
     public let callCid: String
     public let createdAt: Date
-    public let extraData: [String: Any]
+    public let customData: [String: Any]
     public let type: String
     public let user: User
 }
@@ -116,7 +116,7 @@ public struct CustomEvent {
 public struct CallReaction {
     public let callCid: String
     public let createdAt: Date
-    public let extraData: [String: Any]
+    public let customData: [String: Any]
     public let type: String
     public let emojiCode: String?
     public let user: User
@@ -127,7 +127,7 @@ extension CustomVideoEvent {
         CustomEvent(
             callCid: callCid,
             createdAt: createdAt,
-            extraData: mapped,
+            customData: mapped,
             type: type,
             user: User(
                 id: user.id,
@@ -151,7 +151,7 @@ extension CallReactionEvent {
         CallReaction(
             callCid: callCid,
             createdAt: createdAt,
-            extraData: mapped,
+            customData: mapped,
             type: reaction.type,
             emojiCode: reaction.emojiCode,
             user: User(
