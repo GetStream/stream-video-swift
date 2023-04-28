@@ -65,14 +65,14 @@ class CallController {
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        participants: [User],
+        members: [User],
         ring: Bool = false
     ) async throws {
         let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            participants: participants,
+            members: members,
             ring: ring
         )
         
@@ -114,18 +114,18 @@ class CallController {
     /// Selects an `EdgeServer` for a call with the specified `videoOptions` and `participants`.
     /// - Parameters:
     ///   - videoOptions: The `VideoOptions` for the call.
-    ///   - participants: An array of `User` instances representing the participants in the call.
+    ///   - members: An array of `User` instances representing the members in the call.
     /// - Returns: An `EdgeServer` instance representing the selected server.
     /// - Throws: An error if an `EdgeServer` could not be selected.
     func selectEdgeServer(
         videoOptions: VideoOptions,
-        participants: [User]
+        members: [User]
     ) async throws -> EdgeServer {
         try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            participants: participants,
+            members: members,
             ring: false
         )
     }
@@ -374,7 +374,7 @@ class CallController {
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
-                    participants: []
+                    members: []
                 )
             } catch {
                 if diff > sfuReconnectionTime {

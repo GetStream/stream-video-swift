@@ -4,7 +4,6 @@
 
 extension String {
     public static let `default`: Self = "default"
-    public static let ringing: Self = "ringing"
     public static let development: Self = "development"
     public static let audioRoom: Self = "audioRoom"
     public static let livestream: Self = "livestream"

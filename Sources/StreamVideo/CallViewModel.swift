@@ -267,12 +267,12 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
-    ///  - participants: list of participants that are part of the call.
+    ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callId: String, type: String, participants: [User], ring: Bool = false) {
-        outgoingCallMembers = participants
+    public func startCall(callId: String, type: String, members: [User], ring: Bool = false) {
+        outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
-        enterCall(callId: callId, callType: type, participants: participants, ring: ring)
+        enterCall(callId: callId, callType: type, members: members, ring: ring)
     }
     
     /// Joins an existing call with the provided info.
@@ -281,20 +281,20 @@ open class CallViewModel: ObservableObject {
     ///  - type: optional type of a call. If not provided, the default would be used.
     public func joinCall(callId: String, type: String) {
         callingState = .joining
-        enterCall(callId: callId, callType: type, participants: [])
+        enterCall(callId: callId, callType: type, members: [])
     }
     
     /// Enters into a lobby before joining a call.
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
-    ///  - participants: list of participants that are part of the call.
-    public func enterLobby(callId: String, type: String, participants: [User]) {
-        let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: participants)
+    ///  - members: list of members that are part of the call.
+    public func enterLobby(callId: String, type: String, members: [User]) {
+        let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: members)
         callingState = .lobby(lobbyInfo)
         Task {
-            let call = streamVideo.makeCall(callType: type, callId: callId, members: participants)
-            self.edgeServer = try await call.selectEdgeServer(participants: participants)
+            let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
+            self.edgeServer = try await call.selectEdgeServer(members: members)
         }
     }
     
@@ -302,8 +302,8 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
-    ///  - participants: list of participants that are part of the call.
-    public func joinCallFromLobby(callId: String, type: String, participants: [User]) throws {
+    ///  - members: list of participants that are part of the call.
+    public func joinCallFromLobby(callId: String, type: String, members: [User]) throws {
         guard let edgeServer = edgeServer else {
             throw ClientError.Unexpected("Edge server not available")
         }
@@ -311,7 +311,7 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 log.debug("Starting call")
-                let call = streamVideo.makeCall(callType: type, callId: callId, members: participants)
+                let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
                 try await call.join(on: edgeServer, callSettings: callSettings)
                 save(call: call)
             } catch {
@@ -329,7 +329,7 @@ open class CallViewModel: ObservableObject {
     public func acceptCall(callId: String, type: String) {
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: type)
-            enterCall(callId: callId, callType: type, participants: [])
+            enterCall(callId: callId, callType: type, members: [])
         }
     }
     
@@ -435,7 +435,7 @@ open class CallViewModel: ObservableObject {
         isMinimized = false
     }
     
-    private func enterCall(callId: String, callType: String, participants: [User], ring: Bool = false) {
+    private func enterCall(callId: String, callType: String, members: [User], ring: Bool = false) {
         if enteringCall || callingState == .inCall {
             return
         }
@@ -443,7 +443,7 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 log.debug("Starting call")
-                let call = streamVideo.makeCall(callType: callType, callId: callId, members: participants)
+                let call = streamVideo.makeCall(callType: callType, callId: callId, members: members)
                 try await call.join(ring: ring, callSettings: callSettings)
                 save(call: call)
                 enteringCall = false

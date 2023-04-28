@@ -198,7 +198,7 @@ struct JoinCallView: View {
                 .streamAccessibility(value: "\(otherParticipantsCount)")
             
             Button {
-                callViewModel.startCall(callId: callId, type: callType, participants: callParticipants)
+                callViewModel.startCall(callId: callId, type: callType, members: callParticipants)
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()

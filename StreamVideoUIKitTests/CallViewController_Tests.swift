@@ -15,7 +15,7 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         let participants = [User(id: "Test1"), User(id: "Test2")]
         
         // When
-        callViewController.startCall(callId: "1234", participants: participants)
+        callViewController.startCall(callId: "1234", members: participants)
         
         // Then
         assertSnapshot(matching: callViewController.view, as: .image)

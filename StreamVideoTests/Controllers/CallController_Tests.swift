@@ -28,7 +28,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         webRTCClient.signalChannel?.connect()
@@ -74,7 +74,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         webRTCClient.signalChannel?.connect()
@@ -110,7 +110,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         callController.update(callInfo: CallInfo(cId: callCid, backstage: true, blockedUsers: []))
@@ -132,7 +132,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         callController.update(callInfo: CallInfo(cId: "default:different", backstage: true, blockedUsers: []))
@@ -154,7 +154,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         callController.updateCall(from: .init(callCid: callCid, type: "default", action: .started))
@@ -176,7 +176,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         callController.updateCall(from: .init(callCid: "default:different", type: "default", action: .started))
@@ -198,7 +198,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            participants: []
+            members: []
         )
         callController.call = call
         callController.cleanUp()

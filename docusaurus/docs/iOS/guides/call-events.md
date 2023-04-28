@@ -29,15 +29,15 @@ Here's an example implementation from our `CallViewModel`:
 public func acceptCall(callId: String, type: String) {
     Task {
         try await streamVideo.acceptCall(callId: callId, callType: type)
-        enterCall(callId: callId, callType: type, participants: [])
+        enterCall(callId: callId, callType: type, members: [])
     }
 }
 
-private func enterCall(callId: String, callType: String, participants: [User], ring: Bool = false) {
+private func enterCall(callId: String, callType: String, members: [User], ring: Bool = false) {
     Task {
         do {
             log.debug("Starting call")
-            let call = streamVideo.makeCall(callType: callType, callId: callId, members: participants)
+            let call = streamVideo.makeCall(callType: callType, callId: callId, members: members)
             try await call.join(ring: ring, callSettings: callSettings)
             save(call: call)
         } catch {

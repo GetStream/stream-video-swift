@@ -36,13 +36,13 @@ class CallCoordinatorController: @unchecked Sendable {
         callType: String,
         callId: String,
         videoOptions: VideoOptions,
-        participants: [User],
+        members: [User],
         ring: Bool
     ) async throws -> EdgeServer {
         let joinCallResponse = try await joinCall(
             callId: callId,
             type: callType,
-            participants: participants,
+            participants: members,
             ring: ring
         )
         

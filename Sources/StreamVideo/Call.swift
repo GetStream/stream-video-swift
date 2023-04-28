@@ -81,7 +81,7 @@ public class Call: ObservableObject, @unchecked Sendable {
             callId: callId,
             callSettings: callSettings,
             videoOptions: videoOptions,
-            participants: members,
+            members: members,
             ring: ring
         )
     }
@@ -131,15 +131,15 @@ public class Call: ObservableObject, @unchecked Sendable {
 
     /// Selects an `EdgeServer` for a call with the specified `participants`.
     /// - Parameters:
-    ///   - participants: An array of `User` instances representing the participants in the call.
+    ///   - members: An array of `User` instances representing the members in the call.
     /// - Returns: An `EdgeServer` instance representing the selected server.
     /// - Throws: An error if an `EdgeServer` could not be selected.
     public func selectEdgeServer(
-        participants: [User]
+        members: [User]
     ) async throws -> EdgeServer {
         try await callController.selectEdgeServer(
             videoOptions: VideoOptions(),
-            participants: participants
+            members: members
         )
     }
     

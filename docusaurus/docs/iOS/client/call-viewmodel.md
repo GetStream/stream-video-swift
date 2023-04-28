@@ -16,17 +16,17 @@ The `CallViewModel` exposes a `@Published` `callingState` variable, that can be 
 
 ### Starting a call
 
-You can start a call using the method `startCall(callId: String, type: String, participants: [UserInfo])`, where the parameters are:
+You can start a call using the method `startCall(callId: String, type: String, members: [UserInfo])`, where the parameters are:
 
 - `callId` - the id of the call. If you use the ringing functionality, this should be always a unique value.
 - `type` - the call type.
-- `participants` - the list of participants in the call.
+- `members` - the list of members in the call.
 
 Here's an example usage:
 
 ```swift
 Button {
-    viewModel.startCall(callId: callId, type: "default", participants: selectedParticipants)
+    viewModel.startCall(callId: callId, type: "default", members: members)
 } label: {
     Text("Start a call")
 }
@@ -53,9 +53,9 @@ Button {
 
 ### Entering the lobby
 
-If you want to display a lobby screen before the user joins the call, you should use the `enterLobby(callId: String, type: String, participants: [User])` method. This will change the calling state to `.lobby`. When that happens, you can either display your custom implementation of a lobby view, or use the one from the SDK.
+If you want to display a lobby screen before the user joins the call, you should use the `enterLobby(callId: String, type: String, members: [User])` method. This will change the calling state to `.lobby`. When that happens, you can either display your custom implementation of a lobby view, or use the one from the SDK.
 
-When the user decides to join the call, you should call the `joinCallFromLobby(callId: String, type: String, participants: [User])` method.
+When the user decides to join the call, you should call the `joinCallFromLobby(callId: String, type: String, members: [User])` method.
 
 ### Accepting a call
 
