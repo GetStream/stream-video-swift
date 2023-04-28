@@ -14,7 +14,9 @@ class AppState: ObservableObject {
     @Published var loading = false
     @Published var voipPushToken: String? {
         didSet {
-            setVoipToken()
+            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
+                self.setVoipToken()
+            })
         }
     }
     @Published var pushToken: String? {

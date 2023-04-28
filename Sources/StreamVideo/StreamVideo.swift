@@ -324,29 +324,11 @@ public class StreamVideo {
         pushProvider: PushNotificationsProvider = .apn,
         name: String = "apn"
     ) async throws {
-        let createDeviceRequest = CreateDeviceRequest(
-            id: id,
-            pushProvider: .init(rawValue: pushProvider.rawValue),
-            pushProviderName: name,
-            user: nil,
-            userId: user.id
-        )
-        
-        if webSocketClient?.connectionState.canRegisterDevice == true {
-            let deviceData = DeviceData(id: id, provider: pushProvider, name: name)
-            if pushProvider == .apnVoip {
-                self.voipDeviceData = deviceData
-            } else {
-                self.pushDeviceData = deviceData
-            }
-            return
-        }
-        
-        try await callCoordinatorController.createDevice(request: createDeviceRequest)
+//        try await setDevice(id: id, pushProvider: pushProvider, name: name, isVoip: false)
     }
     
-    public func setVoipDevice(id: String) async throws {
-        try await setDevice(id: id, pushProvider: .apnVoip, name: "apn-voip")
+    public func setVoipDevice(id: String, name: String = "voip") async throws {
+        try await setDevice(id: id, pushProvider: .apn, name: name, isVoip: true)
     }
     
     /// Disconnects the current `StreamVideo` client.
@@ -504,25 +486,67 @@ public class StreamVideo {
                 image: self.user.imageURL?.absoluteString,
                 name: self.user.name
             )
-            var deviceRequest: DeviceFieldsRequest?
-//            if let pushDeviceData {
-//                //TODO: handle voip
-//                deviceRequest = DeviceFieldsRequest(
-//                    id: pushDeviceData.id,
-//                    pushProvider: .init(rawValue: pushDeviceData.provider.rawValue) ?? .apn,
-//                    pushProviderName: pushDeviceData.name
-//                )
-//            }
+            
+            var deviceRequest: PushDeviceRequest?
+            if let pushDeviceData {
+                log.debug("Setting push device data")
+                deviceRequest = PushDeviceRequest(
+                    id: pushDeviceData.id,
+                    pushProvider: .init(rawValue: pushDeviceData.provider.rawValue) ?? .apn,
+                    pushProviderName: pushDeviceData.name
+                )
+            }
+            
+            var voipDeviceRequest: PushDeviceRequest?
+            if let voipDeviceData {
+                log.debug("Setting voip device data")
+                voipDeviceRequest = PushDeviceRequest(
+                    id: voipDeviceData.id,
+                    pushProvider: .init(rawValue: voipDeviceData.provider.rawValue) ?? .apn,
+                    pushProviderName: voipDeviceData.name
+                )
+            }
+            
             let authRequest = WSAuthMessageRequest(
                 device: deviceRequest,
                 token: self.token.rawValue,
-                userDetails: connectUserRequest
+                userDetails: connectUserRequest,
+                voipDevice: voipDeviceRequest
             )
 
             webSocketClient.engine?.send(jsonMessage: authRequest)
         }
         
         return webSocketClient
+    }
+    
+    private func setDevice(
+        id: String,
+        pushProvider: PushNotificationsProvider,
+        name: String,
+        isVoip: Bool
+    ) async throws {
+        if webSocketClient?.connectionState.canRegisterDevice == true {
+            let deviceData = DeviceData(id: id, provider: pushProvider, name: name)
+            if isVoip {
+                self.voipDeviceData = deviceData
+            } else {
+                self.pushDeviceData = deviceData
+            }
+            return
+        }
+        
+        let createDeviceRequest = CreateDeviceRequest(
+            id: id,
+            pushProvider: .init(rawValue: pushProvider.rawValue),
+            pushProviderName: name,
+            user: nil,
+            userId: user.id
+        )
+        
+        log.debug("Sending request to save device")
+
+        try await callCoordinatorController.createDevice(request: createDeviceRequest)
     }
     
     private func setupConnectionRecoveryHandler() {

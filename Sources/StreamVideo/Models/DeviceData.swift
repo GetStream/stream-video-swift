@@ -14,7 +14,6 @@ struct DeviceData {
 public struct PushNotificationsProvider: RawRepresentable, Hashable, ExpressibleByStringLiteral, Sendable {
     public static let firebase: Self = "firebase"
     public static let apn: Self = "apn"
-    public static let apnVoip: Self = "apn-voip"
     
     public let rawValue: String
 
