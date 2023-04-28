@@ -243,7 +243,7 @@ public class StreamVideo {
     }
     
     public func makeCall(
-        callType: CallType,
+        callType: String,
         callId: String,
         members: [User] = []
     ) -> Call {
@@ -290,7 +290,7 @@ public class StreamVideo {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func acceptCall(callId: String, callType: CallType) async throws {
+    public func acceptCall(callId: String, callType: String) async throws {
         try await callCoordinatorController.sendEvent(
             type: .callAccepted,
             callId: callId,
@@ -302,7 +302,7 @@ public class StreamVideo {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func rejectCall(callId: String, callType: CallType) async throws {
+    public func rejectCall(callId: String, callType: String) async throws {
         try await callCoordinatorController.sendEvent(
             type: .callRejected,
             callId: callId,
@@ -357,7 +357,7 @@ public class StreamVideo {
     
     /// Creates a permissions controller used for managing permissions.
     /// - Returns: `PermissionsController`
-    private func makePermissionsController(callId: String, callType: CallType) -> PermissionsController {
+    private func makePermissionsController(callId: String, callType: String) -> PermissionsController {
         let controller = PermissionsController(
             callCoordinatorController: callCoordinatorController,
             currentUser: user,
@@ -378,7 +378,7 @@ public class StreamVideo {
     private func makeRecordingController(
         with callController: CallController,
         callId: String,
-        callType: CallType
+        callType: String
     ) -> RecordingController {
         let controller = RecordingController(
             callCoordinatorController: callCoordinatorController,
@@ -398,7 +398,7 @@ public class StreamVideo {
     
     /// Creates an events controller used for managing events.
     /// - Returns: `EventsController`
-    private func makeEventsController(callId: String, callType: CallType) -> EventsController {
+    private func makeEventsController(callId: String, callType: String) -> EventsController {
         let controller = EventsController(
             callCoordinatorController: callCoordinatorController,
             currentUser: user,
@@ -419,7 +419,7 @@ public class StreamVideo {
     ///    - callType: the type of the call.
     ///    - callId: the id of the call.
     /// - Returns: `CallController`
-    private func makeCallController(callType: CallType, callId: String) -> CallController {
+    private func makeCallController(callType: String, callId: String) -> CallController {
         let controller = environment.callControllerBuilder(
             callCoordinatorController,
             user,

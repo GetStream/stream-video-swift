@@ -26,7 +26,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// The call id.
     public let callId: String
     /// The call type.
-    public let callType: CallType
+    public let callType: String
     
     /// The unique identifier of the call, formatted as `callType.name:callId`.
     public var cId: String {
@@ -46,7 +46,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     internal init(
         callId: String,
-        callType: CallType,
+        callType: String,
         callController: CallController,
         recordingController: RecordingController,
         eventsController: EventsController,
@@ -81,7 +81,7 @@ public class Call: ObservableObject, @unchecked Sendable {
             callId: callId,
             callSettings: callSettings,
             videoOptions: videoOptions,
-            participants: members,
+            members: members,
             ring: ring
         )
     }
@@ -131,15 +131,15 @@ public class Call: ObservableObject, @unchecked Sendable {
 
     /// Selects an `EdgeServer` for a call with the specified `participants`.
     /// - Parameters:
-    ///   - participants: An array of `User` instances representing the participants in the call.
+    ///   - members: An array of `User` instances representing the members in the call.
     /// - Returns: An `EdgeServer` instance representing the selected server.
     /// - Throws: An error if an `EdgeServer` could not be selected.
     public func selectEdgeServer(
-        participants: [User]
+        members: [User]
     ) async throws -> EdgeServer {
         try await callController.selectEdgeServer(
             videoOptions: VideoOptions(),
-            participants: participants
+            members: members
         )
     }
     
@@ -271,7 +271,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     ///   - permissions: The permissions to request.
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     public func request(permissions: [Permission]) async throws {
-        try await permissionsController.request(permissions: permissions, callId: callId, callType: callType.name)
+        try await permissionsController.request(permissions: permissions, callId: callId, callType: callType)
     }
     
     /// Checks if the current user has a certain call capability.
@@ -294,7 +294,7 @@ public class Call: ObservableObject, @unchecked Sendable {
             permissions: permissions,
             for: userId,
             callId: callId,
-            callType: callType.name
+            callType: callType
         )
     }
     
@@ -311,7 +311,7 @@ public class Call: ObservableObject, @unchecked Sendable {
             permissions: permissions,
             for: userId,
             callId: callId,
-            callType: callType.name
+            callType: callType
         )
     }
     
@@ -325,14 +325,14 @@ public class Call: ObservableObject, @unchecked Sendable {
         try await permissionsController.muteUsers(
             with: request,
             callId: callId,
-            callType: callType.name
+            callType: callType
         )
     }
     
     /// Ends a call.
     /// - Throws: error if ending the call fails.
     public func end() async throws {
-        try await permissionsController.endCall(callId: callId, callType: callType.name)
+        try await permissionsController.endCall(callId: callId, callType: callType)
     }
     
     /// Blocks a user in a call.
@@ -340,7 +340,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     ///   - userId: The ID of the user to block.
     /// - Throws: error if blocking the user fails.
     public func blockUser(with userId: String) async throws {
-        try await permissionsController.blockUser(with: userId, callId: callId, callType: callType.name)
+        try await permissionsController.blockUser(with: userId, callId: callId, callType: callType)
     }
     
     /// Unblocks a user in a call.
@@ -348,19 +348,19 @@ public class Call: ObservableObject, @unchecked Sendable {
     ///   - userId: The ID of the user to unblock.
     /// - Throws: error if unblocking the user fails.
     public func unblockUser(with userId: String) async throws {
-        try await permissionsController.unblockUser(with: userId, callId: callId, callType: callType.name)
+        try await permissionsController.unblockUser(with: userId, callId: callId, callType: callType)
     }
     
     /// Starts a live call.
     /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
     public func goLive() async throws {
-        try await permissionsController.goLive(callId: callId, callType: callType.name)
+        try await permissionsController.goLive(callId: callId, callType: callType)
     }
     
     /// Stops an ongoing live call.
     /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
     public func stopLive() async throws {
-        try await permissionsController.stopLive(callId: callId, callType: callType.name)
+        try await permissionsController.stopLive(callId: callId, callType: callType)
     }
     
     /// Returns an `AsyncStream` of `PermissionRequest` objects that represent the permission requests events.
@@ -391,7 +391,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     public func listRecordings() async throws -> [CallRecordingInfo] {
         try await recordingController.listRecordings(
             callId: callId,
-            callType: callType.name,
+            callType: callType,
             session: callId
         )
     }

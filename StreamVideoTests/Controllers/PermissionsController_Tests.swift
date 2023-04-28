@@ -93,7 +93,7 @@ final class PermissionsController_Tests: ControllerTestCase {
             try await permissionsController.request(
                 permissions: [.sendAudio],
                 callId: callId,
-                callType: callType.name)
+                callType: callType)
             XCTFail("Error should be thrown")
         } catch {
             XCTAssert(error is ClientError.MissingPermissions)
@@ -111,7 +111,7 @@ final class PermissionsController_Tests: ControllerTestCase {
         
         // Then
         do {
-            try await permissionsController.goLive(callId: callId, callType: callType.name)
+            try await permissionsController.goLive(callId: callId, callType: callType)
             XCTFail("Error should be thrown")
         } catch {
             XCTAssert(error is ClientError.MissingPermissions)
@@ -129,7 +129,7 @@ final class PermissionsController_Tests: ControllerTestCase {
         
         // Then
         do {
-            try await permissionsController.stopLive(callId: callId, callType: callType.name)
+            try await permissionsController.stopLive(callId: callId, callType: callType)
             XCTFail("Error should be thrown")
         } catch {
             XCTAssert(error is ClientError.MissingPermissions)

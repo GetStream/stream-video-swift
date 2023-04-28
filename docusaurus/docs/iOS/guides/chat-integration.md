@@ -223,7 +223,7 @@ public struct CallChatChannelHeader: ToolbarContent {
                         customData: [:]
                     )
                 }
-                callViewModel.startCall(callId: UUID().uuidString, type: "default", participants: participants)
+                callViewModel.startCall(callId: UUID().uuidString, type: "default", members: participants)
             } label: {
                 Image(systemName: "phone.fill")
             }

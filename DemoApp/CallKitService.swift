@@ -98,7 +98,6 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         )
                         AppState.shared.streamVideo = streamVideo
                     }
-                    let callType: CallType = .init(name: callType)
                     self.call = streamVideo.makeCall(callType: callType, callId: callId)
                     AppState.shared.activeCall = call
                     Task {

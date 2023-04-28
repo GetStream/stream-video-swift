@@ -42,8 +42,8 @@ open class CallViewController: UIViewController {
         }
     }
     
-    public func startCall(callId: String, participants: [User]) {
-        viewModel.startCall(callId: callId, type: .default, participants: participants)
+    public func startCall(callId: String, members: [User]) {
+        viewModel.startCall(callId: callId, type: .default, members: members)
         listenToCallStateChanges()
     }
     

@@ -14,9 +14,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     let secondUser = User(id: "test2")
     let thirdUser = User(id: "test3")
     let callId = "test"
-    let callType = CallType(name: "default")
+    let callType: String = .default
     var callCid: String {
-        "\(callType.name):\(callId)"
+        "\(callType):\(callId)"
     }
     
     lazy var participants = [firstUser, secondUser]
@@ -33,7 +33,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
@@ -45,7 +45,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
@@ -57,7 +57,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         try await waitForCallEvent()
         let event = CallEventInfo(callId: callId, user: secondUser, action: .reject)
         eventNotificationCenter?.process(event)
@@ -72,7 +72,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let threeParticipants = participants + [thirdUser]
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: threeParticipants, ring: true)        
+        callViewModel.startCall(callId: callId, type: .default, members: threeParticipants, ring: true)        
         try await waitForCallEvent()
         let firstReject = CallEventInfo(callId: callId, user: secondUser, action: .reject)
         eventNotificationCenter?.process(firstReject)
@@ -93,7 +93,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         try await waitForCallEvent()
         let event = CallEventInfo(callId: callId, user: secondUser, action: .cancel)
         eventNotificationCenter?.process(event)
@@ -107,7 +107,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         try await waitForCallEvent()
         let event = CallEventInfo(callId: callId, user: firstUser, action: .end)
         eventNotificationCenter?.process(event)
@@ -121,7 +121,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         try await waitForCallEvent()
         let event = CallEventInfo(callId: callId, user: firstUser, action: .block)
         eventNotificationCenter?.process(event)
@@ -135,7 +135,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         try await waitForCallEvent()
         let event = CallEventInfo(callId: callId, user: secondUser, action: .block)
         eventNotificationCenter?.process(event)
@@ -149,7 +149,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants, ring: true)
+        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
         try await waitForCallEvent()
         callViewModel.hangUp()
         
@@ -166,7 +166,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = IncomingCallEvent(
             callCid: callCid,
             createdBy: secondUser.id,
-            type: callType.name,
+            type: callType,
             users: participants,
             ringing: true
         )
@@ -196,7 +196,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = IncomingCallEvent(
             callCid: callCid,
             createdBy: secondUser.id,
-            type: callType.name,
+            type: callType,
             users: participants,
             ringing: true
         )
@@ -234,7 +234,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.enterLobby(callId: callId, type: callType, participants: participants)
+        callViewModel.enterLobby(callId: callId, type: callType, members: participants)
         
         // Then
         guard case let .lobby(lobbyInfo) = callViewModel.callingState else {
@@ -250,7 +250,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         try callViewModel.joinCallFromLobby(
             callId: callId,
             type: callType,
-            participants: participants
+            members: participants
         )
         try await waitForCallEvent()
         
@@ -263,7 +263,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.enterLobby(callId: callId, type: callType, participants: participants)
+        callViewModel.enterLobby(callId: callId, type: callType, members: participants)
         
         // Then
         guard case let .lobby(lobbyInfo) = callViewModel.callingState else {
@@ -289,7 +289,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         callViewModel.toggleCameraEnabled()
         
@@ -302,7 +302,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         callViewModel.toggleMicrophoneEnabled()
         
@@ -315,7 +315,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         callViewModel.toggleCameraPosition()
         
@@ -331,7 +331,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         let event = ParticipantEvent(id: "test", action: .join, user: "test", imageURL: nil)
         callViewModel.call?.onParticipantEvent?(event)
@@ -348,7 +348,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -377,7 +377,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -399,7 +399,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -421,7 +421,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, participants: participants)
+        callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid

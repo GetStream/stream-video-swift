@@ -184,12 +184,12 @@ struct HomeView: View {
             Button {
                 resignFirstResponder()
                 if callFlow == .lobby {
-                    viewModel.enterLobby(callId: callId, type: .default, participants: selectedParticipants)
+                    viewModel.enterLobby(callId: callId, type: .default, members: selectedParticipants)
                 } else {
                     viewModel.startCall(
                         callId: callId,
                         type: .default,
-                        participants: selectedParticipants,
+                        members: selectedParticipants,
                         ring: callFlow == .ringEvents
                     )
                 }

@@ -21,23 +21,23 @@ You should use the methods provided by the `StreamVideo` object to react to inco
 
 #### Accepting a call
 
-Accepting a call can be done by calling the `acceptCall(callId: String, callType: CallType)` method from the `StreamVideo` object. Additionally, when you accept a call, you should also join it, by creating an instance of the `Call` object and calling its `join` method.
+Accepting a call can be done by calling the `acceptCall(callId: String, callType: String)` method from the `StreamVideo` object. Additionally, when you accept a call, you should also join it, by creating an instance of the `Call` object and calling its `join` method.
 
 Here's an example implementation from our `CallViewModel`:
 
 ```swift
-public func acceptCall(callId: String, type: CallType) {
+public func acceptCall(callId: String, type: String) {
     Task {
         try await streamVideo.acceptCall(callId: callId, callType: type)
-        enterCall(callId: callId, callType: type, participants: [])
+        enterCall(callId: callId, callType: type, members: [])
     }
 }
 
-private func enterCall(callId: String, callType: CallType, participants: [User], ring: Bool = false) {
+private func enterCall(callId: String, callType: String, members: [User], ring: Bool = false) {
     Task {
         do {
             log.debug("Starting call")
-            let call = streamVideo.makeCall(callType: callType, callId: callId, members: participants)
+            let call = streamVideo.makeCall(callType: callType, callId: callId, members: members)
             try await call.join(ring: ring, callSettings: callSettings)
             save(call: call)
         } catch {
@@ -51,10 +51,10 @@ private func enterCall(callId: String, callType: CallType, participants: [User],
 
 #### Rejecting a call
 
-In order to reject a call, you should call `StreamVideo`'s `rejectCall(callId: String, type: CallType)` method. This will trigger the `rejected` call event to all involved participants, and you should use this to hide the incoming / outgoing call screens.
+In order to reject a call, you should call `StreamVideo`'s `rejectCall(callId: String, type: String)` method. This will trigger the `rejected` call event to all involved participants, and you should use this to hide the incoming / outgoing call screens.
 
 ```swift
-public func rejectCall(callId: String, type: CallType) {
+public func rejectCall(callId: String, type: String) {
     Task {
         try await streamVideo.rejectCall(callId: callId, callType: type)
     }

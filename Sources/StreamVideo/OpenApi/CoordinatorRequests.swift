@@ -65,13 +65,13 @@ struct SendReactionRequestData {
 
 public struct CustomEventRequest {
     public let callId: String
-    public let callType: CallType
+    public let callType: String
     public let type: EventType
     public let customData: [String: RawJSON]
     
     public init(
         callId: String,
-        callType: CallType,
+        callType: String,
         type: EventType,
         customData: [String: RawJSON]
     ) {
@@ -84,14 +84,14 @@ public struct CustomEventRequest {
 
 public struct CallReactionRequest {
     public let callId: String
-    public let callType: CallType
+    public let callType: String
     public let reactionType: String
     public let emojiCode: String?
     public let customData: [String: RawJSON]
     
     public init(
         callId: String,
-        callType: CallType,
+        callType: String,
         reactionType: String,
         emojiCode: String? = nil,
         customData: [String : RawJSON]

@@ -8,7 +8,7 @@ class RecordingController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
     private let callId: String
-    private let callType: CallType
+    private let callType: String
     
     var onRecordingEvent: ((RecordingEvent) -> Void)?
     var onRecordingRequestedEvent: ((RecordingEvent) -> Void)?
@@ -21,7 +21,7 @@ class RecordingController {
         callCoordinatorController: CallCoordinatorController,
         currentUser: User,
         callId: String,
-        callType: CallType
+        callType: String
     ) {
         self.callCoordinatorController = callCoordinatorController
         self.currentUser = currentUser
@@ -34,10 +34,10 @@ class RecordingController {
     ///   - callId: The ID of the call to start recording.
     ///   - callType: The type of the call to start recording.
     /// - Throws: An error if the recording fails.
-    func startRecording(callId: String, callType: CallType) async throws {
+    func startRecording(callId: String, callType: String) async throws {
         let callCid = callCid(from: callId, callType: callType)
-        let recordingEvent = RecordingEvent(callCid: callCid, type: callType.name, action: .requested)
-        try await coordinatorClient.startRecording(callId: callId, callType: callType.name)
+        let recordingEvent = RecordingEvent(callCid: callCid, type: callType, action: .requested)
+        try await coordinatorClient.startRecording(callId: callId, callType: callType)
         onRecordingRequestedEvent?(recordingEvent)
     }
     
@@ -46,8 +46,8 @@ class RecordingController {
     ///   - callId: The ID of the call to stop recording.
     ///   - callType: The type of the call to stop recording.
     /// - Throws: An error if stopping the recording fails.
-    func stopRecording(callId: String, callType: CallType) async throws {
-        try await coordinatorClient.stopRecording(callId: callId, callType: callType.name)
+    func stopRecording(callId: String, callType: String) async throws {
+        try await coordinatorClient.stopRecording(callId: callId, callType: callType)
     }
     
     /// Lists recordings for a call with the specified call ID, call type, and session.

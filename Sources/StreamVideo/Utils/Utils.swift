@@ -13,8 +13,8 @@ func postNotification(with name: String, userInfo: [AnyHashable: Any] = [:]) {
     NotificationCenter.default.post(name: NSNotification.Name(name), object: nil, userInfo: userInfo)
 }
 
-func callCid(from callId: String, callType: CallType) -> String {
-    "\(callType.name):\(callId)"
+func callCid(from callId: String, callType: String) -> String {
+    "\(callType):\(callId)"
 }
 
 public enum CallNotification {

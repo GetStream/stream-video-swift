@@ -25,11 +25,11 @@ class CallController_Mock: CallController {
     )
 
     override func joinCall(
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        participants: [User],
+        members: [User],
         ring: Bool = false
     ) async throws {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
@@ -39,7 +39,7 @@ class CallController_Mock: CallController {
     
     override func joinCall(
         on edgeServer: EdgeServer,
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions
@@ -59,7 +59,7 @@ class CallController_Mock: CallController {
     
     override func selectEdgeServer(
         videoOptions: VideoOptions,
-        participants: [User]
+        members: [User]
     ) async throws -> EdgeServer {
         EdgeServer(
             url: "localhost",
@@ -72,7 +72,7 @@ class CallController_Mock: CallController {
     
     // MARK: - private
     
-    func makeCallSettingsInfo(callId: String, callType: CallType) -> CallSettingsInfo {
+    func makeCallSettingsInfo(callId: String, callType: String) -> CallSettingsInfo {
         let callSettingsInfo = CallSettingsInfo(
             callCapabilities: [],
             callSettings: mockResponseBuilder.makeCallSettingsResponse(),

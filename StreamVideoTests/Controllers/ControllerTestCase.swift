@@ -9,11 +9,11 @@ class ControllerTestCase: StreamVideoTestCase {
 
     let user = User(id: "test")
     let callId = "123"
-    let callType = CallType.default
+    let callType: String = .default
     let apiKey = "123"
     let videoConfig = VideoConfig()
     var callCid: String {
-        "\(callType.name):\(callId)"
+        "\(callType):\(callId)"
     }
 
     func makeCallCoordinatorController() -> CallCoordinatorController_Mock {

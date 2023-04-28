@@ -33,16 +33,16 @@ class CallCoordinatorController: @unchecked Sendable {
     }
     
     func joinCall(
-        callType: CallType,
+        callType: String,
         callId: String,
         videoOptions: VideoOptions,
-        participants: [User],
+        members: [User],
         ring: Bool
     ) async throws -> EdgeServer {
         let joinCallResponse = try await joinCall(
             callId: callId,
-            type: callType.name,
-            participants: participants,
+            type: callType,
+            participants: members,
             ring: ring
         )
         
@@ -50,7 +50,7 @@ class CallCoordinatorController: @unchecked Sendable {
         
         let edgeServer = try await selectEdgeServer(
             callId: joinCallResponse.call.id,
-            type: callType.name,
+            type: callType,
             latencyByEdge: latencyByEdge,
             edges: joinCallResponse.edges
         )
@@ -80,7 +80,7 @@ class CallCoordinatorController: @unchecked Sendable {
     func sendEvent(
         type: EventType,
         callId: String,
-        callType: CallType,
+        callType: String,
         customData: [String: AnyCodable]? = nil
     ) async throws {
         let sendEventRequest = SendEventRequest(
@@ -89,7 +89,7 @@ class CallCoordinatorController: @unchecked Sendable {
         )
         let request = EventRequestData(
             id: callId,
-            type: callType.name,
+            type: callType,
             sendEventRequest: sendEventRequest
         )
         _ = try await coordinatorClient.sendEvent(with: request)

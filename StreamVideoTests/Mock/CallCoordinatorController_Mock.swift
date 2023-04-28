@@ -11,7 +11,7 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
     override func sendEvent(
         type: EventType,
         callId: String,
-        callType: CallType,
+        callType: String,
         customData: [String: AnyCodable]? = nil
     ) async throws {
         // No op
@@ -32,10 +32,10 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
     }
     
     override func joinCall(
-        callType: CallType,
+        callType: String,
         callId: String,
         videoOptions: VideoOptions,
-        participants: [User],
+        members: [User],
         ring: Bool
     ) async throws -> EdgeServer {
         if let error {

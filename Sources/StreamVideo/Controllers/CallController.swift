@@ -21,7 +21,7 @@ class CallController {
     weak var call: Call?
     private let user: User
     private let callId: String
-    private let callType: CallType
+    private let callType: String
     internal let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoConfig: VideoConfig
@@ -34,7 +34,7 @@ class CallController {
         callCoordinatorController: CallCoordinatorController,
         user: User,
         callId: String,
-        callType: CallType,
+        callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
         allEventsMiddleware: AllEventsMiddleware?,
@@ -61,18 +61,18 @@ class CallController {
     ///  - ring: whether ringing events should be handled
     /// - Returns: a newly created `Call`.
     func joinCall(
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        participants: [User],
+        members: [User],
         ring: Bool = false
     ) async throws {
         let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            participants: participants,
+            members: members,
             ring: ring
         )
         
@@ -89,14 +89,14 @@ class CallController {
     /// Joins a call on the specified `edgeServer` with the given `callType`, `callId`, `callSettings`, and `videoOptions`.
     /// - Parameters:
     ///   - edgeServer: The `EdgeServer` to join the call on.
-    ///   - callType: The `CallType` of the call.
+    ///   - callType: The type of the call.
     ///   - callId: The unique identifier for the call.
     ///   - callSettings: The settings to use for the call.
     ///   - videoOptions: The `VideoOptions` for the call.
     /// - Throws: An error if the call could not be joined.
     func joinCall(
         on edgeServer: EdgeServer,
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions
@@ -114,18 +114,18 @@ class CallController {
     /// Selects an `EdgeServer` for a call with the specified `videoOptions` and `participants`.
     /// - Parameters:
     ///   - videoOptions: The `VideoOptions` for the call.
-    ///   - participants: An array of `User` instances representing the participants in the call.
+    ///   - members: An array of `User` instances representing the members in the call.
     /// - Returns: An `EdgeServer` instance representing the selected server.
     /// - Throws: An error if an `EdgeServer` could not be selected.
     func selectEdgeServer(
         videoOptions: VideoOptions,
-        participants: [User]
+        members: [User]
     ) async throws -> EdgeServer {
         try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            participants: participants,
+            members: members,
             ring: false
         )
     }
@@ -162,7 +162,7 @@ class CallController {
         let response = try await callCoordinatorController.coordinatorClient.getOrCreateCall(
             with: request,
             callId: callId,
-            callType: callType.name
+            callType: callType
         )
         return response.call.toCallData(members: response.members, blockedUsers: response.blockedUsers)
     }
@@ -215,7 +215,7 @@ class CallController {
     func addMembersToCall(ids: [String]) async throws -> [User] {
         try await callCoordinatorController.updateCallMembers(
             callId: callId,
-            callType: callType.name,
+            callType: callType,
             updateMembers: ids.map { MemberRequest(userId: $0) },
             removedIds: []
         )
@@ -227,7 +227,7 @@ class CallController {
     func removeMembersFromCall(ids: [String]) async throws -> [User] {
         try await callCoordinatorController.updateCallMembers(
             callId: callId,
-            callType: callType.name,
+            callType: callType,
             updateMembers: [],
             removedIds: ids
         )
@@ -276,7 +276,7 @@ class CallController {
     
     private func connectToEdge(
         _ edgeServer: EdgeServer,
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
@@ -374,7 +374,7 @@ class CallController {
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
-                    participants: []
+                    members: []
                 )
             } catch {
                 if diff > sfuReconnectionTime {

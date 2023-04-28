@@ -9,7 +9,7 @@ class EventsController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
     private let callId: String
-    private let callType: CallType
+    private let callType: String
 
     private var coordinatorClient: CoordinatorClient {
         callCoordinatorController.coordinatorClient
@@ -30,7 +30,7 @@ class EventsController {
         callCoordinatorController: CallCoordinatorController,
         currentUser: User,
         callId: String,
-        callType: CallType
+        callType: String
     ) {
         self.callCoordinatorController = callCoordinatorController
         self.currentUser = currentUser
@@ -48,7 +48,7 @@ class EventsController {
         )
         let request = EventRequestData(
             id: event.callId,
-            type: event.callType.name,
+            type: event.callType,
             sendEventRequest: sendEventRequest
         )
         _ = try await coordinatorClient.sendEvent(with: request)
@@ -65,7 +65,7 @@ class EventsController {
         )
         let requestData = SendReactionRequestData(
             id: reaction.callId,
-            type: reaction.callType.name,
+            type: reaction.callType,
             sendReactionRequest: request
         )
         _ = try await coordinatorClient.sendReaction(with: requestData)

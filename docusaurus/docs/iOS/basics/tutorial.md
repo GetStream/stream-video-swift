@@ -152,7 +152,7 @@ struct ContentView: View {
                 callViewModel.startCall(
                     callId: callId,
                     type: "default",
-                    participants: [/* Your list of participants goes here. */]
+                    members: [/* Your list of participants goes here. */]
                 )
             } label: {
                 Text("Start a call")
@@ -237,7 +237,7 @@ struct ContentView: View {
                 callViewModel.startCall(
                     callId: callId,
                     type: "default",
-                    participants: [/* Your list of participants goes here. */]
+                    members: [/* Your list of participants goes here. */]
                 )
             } label: {
                 Text("Start a call")

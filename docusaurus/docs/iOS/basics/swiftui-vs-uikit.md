@@ -49,7 +49,7 @@ The UIKit SDK provides UIKit wrappers around the SwiftUI views. Its main integra
 private func didTapStartButton() {
     let next = CallViewController.make(with: callViewModel)
     next.modalPresentationStyle = .fullScreen
-    next.startCall(callId: text, type: "default", participants: selectedParticipants)
+    next.startCall(callId: text, type: "default", members: selectedParticipants)
     self.navigationController?.present(next, animated: true)
 }
 ```
