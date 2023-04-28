@@ -9,7 +9,7 @@ class PermissionsController {
     private let callCoordinatorController: CallCoordinatorController
     private let currentUser: User
     private let callId: String
-    private let callType: CallType
+    private let callType: String
     
     /// Event that fires when a permission is requested.
     var onPermissionRequestEvent: ((PermissionRequest) -> Void)?
@@ -30,7 +30,7 @@ class PermissionsController {
         callCoordinatorController: CallCoordinatorController,
         currentUser: User,
         callId: String,
-        callType: CallType
+        callType: String
     ) {
         self.callCoordinatorController = callCoordinatorController
         self.currentUser = currentUser

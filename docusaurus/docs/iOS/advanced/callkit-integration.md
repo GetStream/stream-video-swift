@@ -217,7 +217,6 @@ func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
             )
             AppState.shared.streamVideo = streamVideo
         }
-        let callType: CallType = .init(name: callType)
         let callController = streamVideo.makeCallController(callType: callType, callId: callId)
         Task {
             _ = try await callController.joinCall(

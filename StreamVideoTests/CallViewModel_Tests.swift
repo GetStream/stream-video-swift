@@ -14,9 +14,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     let secondUser = User(id: "test2")
     let thirdUser = User(id: "test3")
     let callId = "test"
-    let callType = CallType(name: "default")
+    let callType: String = .default
     var callCid: String {
-        "\(callType.name):\(callId)"
+        "\(callType):\(callId)"
     }
     
     lazy var participants = [firstUser, secondUser]
@@ -166,7 +166,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = IncomingCallEvent(
             callCid: callCid,
             createdBy: secondUser.id,
-            type: callType.name,
+            type: callType,
             users: participants,
             ringing: true
         )
@@ -196,7 +196,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = IncomingCallEvent(
             callCid: callCid,
             createdBy: secondUser.id,
-            type: callType.name,
+            type: callType,
             users: participants,
             ringing: true
         )

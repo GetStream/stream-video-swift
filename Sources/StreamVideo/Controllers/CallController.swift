@@ -21,7 +21,7 @@ class CallController {
     weak var call: Call?
     private let user: User
     private let callId: String
-    private let callType: CallType
+    private let callType: String
     internal let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let videoConfig: VideoConfig
@@ -34,7 +34,7 @@ class CallController {
         callCoordinatorController: CallCoordinatorController,
         user: User,
         callId: String,
-        callType: CallType,
+        callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
         allEventsMiddleware: AllEventsMiddleware?,
@@ -61,7 +61,7 @@ class CallController {
     ///  - ring: whether ringing events should be handled
     /// - Returns: a newly created `Call`.
     func joinCall(
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
@@ -89,14 +89,14 @@ class CallController {
     /// Joins a call on the specified `edgeServer` with the given `callType`, `callId`, `callSettings`, and `videoOptions`.
     /// - Parameters:
     ///   - edgeServer: The `EdgeServer` to join the call on.
-    ///   - callType: The `CallType` of the call.
+    ///   - callType: The type of the call.
     ///   - callId: The unique identifier for the call.
     ///   - callSettings: The settings to use for the call.
     ///   - videoOptions: The `VideoOptions` for the call.
     /// - Throws: An error if the call could not be joined.
     func joinCall(
         on edgeServer: EdgeServer,
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions
@@ -162,7 +162,7 @@ class CallController {
         let response = try await callCoordinatorController.coordinatorClient.getOrCreateCall(
             with: request,
             callId: callId,
-            callType: callType.name
+            callType: callType
         )
         return response.call.toCallData(members: response.members, blockedUsers: response.blockedUsers)
     }
@@ -215,7 +215,7 @@ class CallController {
     func addMembersToCall(ids: [String]) async throws -> [User] {
         try await callCoordinatorController.updateCallMembers(
             callId: callId,
-            callType: callType.name,
+            callType: callType,
             updateMembers: ids.map { MemberRequest(userId: $0) },
             removedIds: []
         )
@@ -227,7 +227,7 @@ class CallController {
     func removeMembersFromCall(ids: [String]) async throws -> [User] {
         try await callCoordinatorController.updateCallMembers(
             callId: callId,
-            callType: callType.name,
+            callType: callType,
             updateMembers: [],
             removedIds: ids
         )
@@ -276,7 +276,7 @@ class CallController {
     
     private func connectToEdge(
         _ edgeServer: EdgeServer,
-        callType: CallType,
+        callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,

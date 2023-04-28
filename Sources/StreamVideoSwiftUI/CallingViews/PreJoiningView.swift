@@ -14,13 +14,13 @@ public struct LobbyView: View {
     @StateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
-    var callType: CallType
+    var callType: String
     var callParticipants: [User]
         
     public init(
         callViewModel: CallViewModel,
         callId: String,
-        callType: CallType,
+        callType: String,
         callParticipants: [User]
     ) {
         _callViewModel = ObservedObject(wrappedValue: callViewModel)
@@ -52,7 +52,7 @@ struct LobbyContentView: View {
     @ObservedObject var microphoneChecker: MicrophoneChecker
     
     var callId: String
-    var callType: CallType
+    var callType: String
     var callParticipants: [User]
     
     var body: some View {
@@ -187,7 +187,7 @@ struct JoinCallView: View {
     @ObservedObject var callViewModel: CallViewModel
     
     var callId: String
-    var callType: CallType
+    var callType: String
     var callParticipants: [User]
     
     var body: some View {

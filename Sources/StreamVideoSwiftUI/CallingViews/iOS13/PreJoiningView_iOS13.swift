@@ -14,13 +14,13 @@ struct LobbyView_iOS13: View {
     @BackportStateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
-    var callType: CallType
+    var callType: String
     var callParticipants: [User]
         
     public init(
         callViewModel: CallViewModel,
         callId: String,
-        callType: CallType,
+        callType: String,
         callParticipants: [User]
     ) {
         _callViewModel = ObservedObject(wrappedValue: callViewModel)

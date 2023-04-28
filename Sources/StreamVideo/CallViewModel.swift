@@ -170,6 +170,7 @@ open class CallViewModel: ObservableObject {
     private var callRejectionEvents = [String: Int]()
     private var lastLayoutChange = Date()
     private var enteringCall = false
+    private var participantsSortComparators = defaultComparators
     
     public var participants: [CallParticipant] {
         callParticipants
@@ -181,7 +182,7 @@ open class CallViewModel: ObservableObject {
                 }
             }
             .map(\.value)
-            .sorted(using: call?.callType.sortComparators ?? defaultComparators)
+            .sorted(using: participantsSortComparators)
     }
         
     private var automaticLayoutHandling = true
@@ -268,7 +269,7 @@ open class CallViewModel: ObservableObject {
     ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callId: String, type: CallType, participants: [User], ring: Bool = false) {
+    public func startCall(callId: String, type: String, participants: [User], ring: Bool = false) {
         outgoingCallMembers = participants
         callingState = ring ? .outgoing : .joining
         enterCall(callId: callId, callType: type, participants: participants, ring: ring)
@@ -278,7 +279,7 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - type: optional type of a call. If not provided, the default would be used.
-    public func joinCall(callId: String, type: CallType) {
+    public func joinCall(callId: String, type: String) {
         callingState = .joining
         enterCall(callId: callId, callType: type, participants: [])
     }
@@ -288,7 +289,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
-    public func enterLobby(callId: String, type: CallType, participants: [User]) {
+    public func enterLobby(callId: String, type: String, participants: [User]) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: participants)
         callingState = .lobby(lobbyInfo)
         Task {
@@ -302,7 +303,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
     ///  - participants: list of participants that are part of the call.
-    public func joinCallFromLobby(callId: String, type: CallType, participants: [User]) throws {
+    public func joinCallFromLobby(callId: String, type: String, participants: [User]) throws {
         guard let edgeServer = edgeServer else {
             throw ClientError.Unexpected("Edge server not available")
         }
@@ -325,7 +326,7 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func acceptCall(callId: String, type: CallType) {
+    public func acceptCall(callId: String, type: String) {
         Task {
             try await streamVideo.acceptCall(callId: callId, callType: type)
             enterCall(callId: callId, callType: type, participants: [])
@@ -336,7 +337,7 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func rejectCall(callId: String, type: CallType) {
+    public func rejectCall(callId: String, type: String) {
         Task {
             try await streamVideo.rejectCall(callId: callId, callType: type)
             self.callingState = .idle
@@ -404,6 +405,12 @@ open class CallViewModel: ObservableObject {
         self.participantsLayout = participantsLayout
     }
     
+    /// Updates the participants sorting.
+    /// - Parameter participantsSortComparators: the new sort comparators.
+    public func update(participantsSortComparators: [Comparator<CallParticipant>]) {
+        self.participantsSortComparators = participantsSortComparators
+    }
+    
     // MARK: - private
     
     /// Leaves the current call.
@@ -428,7 +435,7 @@ open class CallViewModel: ObservableObject {
         isMinimized = false
     }
     
-    private func enterCall(callId: String, callType: CallType, participants: [User], ring: Bool = false) {
+    private func enterCall(callId: String, callType: String, participants: [User], ring: Bool = false) {
         if enteringCall || callingState == .inCall {
             return
         }
@@ -600,7 +607,7 @@ public enum CallingState: Equatable {
 
 public struct LobbyInfo: Equatable {
     public let callId: String
-    public let callType: CallType
+    public let callType: String
     public let participants: [User]
 }
 

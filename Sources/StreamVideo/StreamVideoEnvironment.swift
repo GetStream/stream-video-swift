@@ -19,7 +19,7 @@ extension StreamVideo {
             _ callCoordinatorController: CallCoordinatorController,
             _ user: User,
             _ callId: String,
-            _ callType: CallType,
+            _ callType: String,
             _ apiKey: String,
             _ videoConfig: VideoConfig,
             _ allEventsMiddleware: AllEventsMiddleware?
