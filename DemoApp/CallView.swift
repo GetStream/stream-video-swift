@@ -5,6 +5,7 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import Intents
 
 struct CallView: View {
     
@@ -22,5 +23,21 @@ struct CallView: View {
     var body: some View {
         HomeView(viewModel: viewModel)
             .modifier(CallModifier(viewModel: viewModel))
+            .onContinueUserActivity(
+                NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
+                    let interaction = userActivity.interaction
+                    if let callIntent = interaction?.intent as? INStartCallIntent {
+                        
+                        let contact = callIntent.contacts?.first
+                        
+                        let contactHandle = contact?.personHandle
+                        
+                        if let phoneNumber = contactHandle?.value {
+                            print(phoneNumber)
+                            // Your Call Logic
+                        }
+                    }
+                }
+            )
     }
 }
