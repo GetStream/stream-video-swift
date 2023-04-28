@@ -192,6 +192,7 @@ extension CallResponse {
             createdAt: createdAt,
             backstage: backstage,
             broadcasting: broadcasting,
+            endedAt: endedAt,
             recording: recording,
             updatedAt: updatedAt,
             customData: result
