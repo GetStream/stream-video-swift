@@ -360,7 +360,8 @@ open class CallViewModel: ObservableObject {
                     log.debug("Skip hiding the track for the top participant")
                     return
                 }
-            } else if participantsLayout == .grid && participants.count < 6 {
+            }
+            if participantsLayout == .grid && participants.count < 6 {
                 log.debug("Skip hiding tracks in small grids")
                 return
             } else {
