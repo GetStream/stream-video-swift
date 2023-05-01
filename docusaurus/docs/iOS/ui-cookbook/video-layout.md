@@ -33,7 +33,7 @@ struct JoinCallView: View {
             TextField("Insert call id", text: $callId)
             Button {
                 resignFirstResponder()
-                viewModel.startCall(callId: callId, members: [])
+                viewModel.startCall(callId: callId, type: .default, members: [])
             } label: {
                 Text("Join call")
             }
@@ -62,7 +62,7 @@ struct HomeView: View {
         ZStack {
             JoinCallView(viewModel: viewModel)
             
-            if viewModel.callingState == .outgoing {
+            if viewModel.callingState == .joining {
                 ProgressView()
             } else if viewModel.callingState == .inCall {
                 CallView(viewModel: viewModel)
@@ -74,7 +74,7 @@ struct HomeView: View {
 
 In this view, we are creating the `CallViewModel`, that allows us to start a call, but also listen to the `callingState`. We can use this `@Published` variable to update our UI accordingly. 
 
-When the call is in the `.outgoing` state, we can show a `ProgressView`. Whenever it changes to the `.inCall` state (which means the user has joined the call), we can show our custom `CallView`.
+When the call is in the `.joining` state, we can show a `ProgressView`. Whenever it changes to the `.inCall` state (which means the user has joined the call), we can show our custom `CallView`.
 
 ### Building a custom CallView
 
