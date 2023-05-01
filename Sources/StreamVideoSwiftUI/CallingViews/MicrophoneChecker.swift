@@ -6,13 +6,17 @@ import AVFoundation
 import Foundation
 import StreamVideo
 
-class MicrophoneChecker: ObservableObject {
+/// Checks the audio capabilities of the device.
+public class MicrophoneChecker: ObservableObject {
     
-    @Published var decibels = [Float](repeating: 0.0, count: 3)
+    /// Returns the last three decibel values.
+    @Published public var decibels: [Float]
     
     private static let minimalDecibelValue: Float = -120
     
     private var timer: Timer?
+    
+    private let valueLimit: Int
     
     private let audioFilename: URL = {
         let documentPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
@@ -20,10 +24,13 @@ class MicrophoneChecker: ObservableObject {
         return audioFilename
     }()
     
-    init() {
+    public init(valueLimit: Int = 3) {
+        self.valueLimit = valueLimit
+        self.decibels = [Float](repeating: 0.0, count: valueLimit)
         setUpAudioCapture()
     }
     
+    /// Checks if there are decibel values available.
     public var hasDecibelValues: Bool {
         for decibel in decibels {
             if decibel > Self.minimalDecibelValue {
@@ -32,6 +39,8 @@ class MicrophoneChecker: ObservableObject {
         }
         return false
     }
+    
+    //MARK: - private
     
     private func setUpAudioCapture() {
         let recordingSession = AVAudioSession.sharedInstance()
@@ -67,7 +76,7 @@ class MicrophoneChecker: ObservableObject {
                 let decibel = audioRecorder.averagePower(forChannel: 0)
                 var temp = self.decibels
                 temp.append(decibel)
-                if temp.count > 3 {
+                if temp.count > valueLimit {
                     temp = Array(temp.dropFirst())
                 }
                 self.decibels = temp
