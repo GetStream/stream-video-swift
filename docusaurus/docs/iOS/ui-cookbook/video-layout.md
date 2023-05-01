@@ -84,23 +84,23 @@ First, let's see how we can access the participants.
 
 ```swift
 var participants: [CallParticipant] {
-    viewModel.callParticipants
-        .map(\.value)
-        .sorted(by: { $0.name < $1.name })
-}
-    
-var dominantSpeaker: CallParticipant? {
-    (participants.first { $0.isSpeaking } ?? participants.first)
-}
-    
-var otherParticipants: [CallParticipant] {
-    participants.filter { $0.id != dominantSpeaker?.id }
+    viewModel
+        .callParticipants.map(\.value)
+        .sorted(using: defaultComparators)
 }
 ```
 
 The call participants are exposed via the `CallViewModel`'s `callParticipants` dictionary. You can sort them or group them based on their different properties, such as whether they are speaking, they have audio / video or any other different criteria. The `callParticipants` dictionary is a `@Published` variable, and it will trigger updates in your views, whenever its state changes.
 
-In the example above, we are interested in the current speaker, while we also filter the `otherParticipants` to display them in the bottom section.
+There are default sort comparators, that you can use to sort the participants. The default comparators prioritize the pinned user, then the dominant speaker etc:
+
+```swift
+public let defaultComparators: [Comparator<CallParticipant>] = [
+    pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
+]
+``` 
+
+You can provide your own ordering by calling the `sorted(using: comparators)`  method on the `CallParticipants`.
 
 Additionally, you can access the same properties for the local user, via the `CallViewModel`'s `localParticipant` variable.
 
@@ -111,10 +111,11 @@ var body: some View {
     VStack {
         ZStack {
             GeometryReader { reader in
-                if let dominantSpeaker {
+                if let dominantSpeaker = participants.first {
                     VideoCallParticipantView(
                         participant: dominantSpeaker,
-                        availableSize: reader.size
+                        availableSize: reader.size,
+                        contentMode: .scaleAspectFit
                     ) { participant, view in
                         if let track = dominantSpeaker.track {
                             view.add(track: track)
@@ -135,7 +136,7 @@ var body: some View {
         
         ScrollView(.horizontal) {
             HStack {
-                ForEach(otherParticipants) { participant in
+                ForEach(participants.dropFirst()) { participant in
                     BottomParticipantView(participant: participant)
                 }
             }
@@ -189,14 +190,14 @@ Finally, let's see the horizontally scrollable list at the bottom again:
 ```swift
 ScrollView(.horizontal) {
     HStack {
-        ForEach(otherParticipants) { participant in
+        ForEach(participants.dropFirst()) { participant in
             BottomParticipantView(participant: participant)
         }
     }
 }
 ```
 
-Using the `otherParticipants` array we defined above, this components displays a custom view of type `BottomParticipantView`:
+Here, we drop the first element (that's displayed in the dominant speaker view) from the participants array. This components displays a custom view of type `BottomParticipantView`:
 
 ```swift
 struct BottomParticipantView: View {
