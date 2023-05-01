@@ -141,6 +141,19 @@ public class CallsController: ObservableObject {
             var call = calls[index]
             call.applyUpdates(from: callUpdated.call)
             calls[index] = call
+        } else if let callCreated = event as? CallCreatedEvent {
+            let callData = callCreated.call.toCallData(
+                members: callCreated.members,
+                blockedUsers: callCreated.call.blockedUserIds.map { UserResponse(
+                    createdAt: Date(),
+                    custom: [:],
+                    id: $0,
+                    role: "user",
+                    teams: [],
+                    updatedAt: Date())
+                }
+            )
+            calls.insert(callData, at: 0)
         } else if event is WSDisconnected {
             self.socketDisconnected = true
         } else if event is WSConnected {
@@ -192,6 +205,7 @@ extension CallResponse {
             createdAt: createdAt,
             backstage: backstage,
             broadcasting: broadcasting,
+            endedAt: endedAt,
             recording: recording,
             updatedAt: updatedAt,
             customData: result

@@ -26,15 +26,19 @@ struct JsonEventDecoder: AnyEventDecoder {
                 action: .accept
             )
         case .typeCallCreatedEvent(let callCreated):
-            let call = callCreated.call
-            let members = callCreated.members.compactMap { $0.user.toUser }
-            return IncomingCallEvent(
-                callCid: call.cid,
-                createdBy: call.createdBy.id,
-                type: call.type,
-                users: members,
-                ringing: callCreated.ringing
-            )
+            if callCreated.ringing {
+                let call = callCreated.call
+                let members = callCreated.members.compactMap { $0.user.toUser }
+                return IncomingCallEvent(
+                    callCid: call.cid,
+                    createdBy: call.createdBy.id,
+                    type: call.type,
+                    users: members,
+                    ringing: callCreated.ringing
+                )
+            } else {
+                return callCreated
+            }
         case .typeCallEndedEvent(let callEnded):
             let callId = callEnded.callCid
             return CallEventInfo(

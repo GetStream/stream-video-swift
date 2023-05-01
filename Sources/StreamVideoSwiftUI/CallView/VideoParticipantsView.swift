@@ -199,15 +199,19 @@ public struct VideoCallParticipantView: View {
     }
 }
 
-struct ParticipantInfoView: View {
-    
+public struct ParticipantInfoView: View {
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
     
     var participant: CallParticipant
     var isPinned: Bool
     
-    var body: some View {
+    public init(participant: CallParticipant, isPinned: Bool) {
+        self.participant = participant
+        self.isPinned = isPinned
+    }
+    
+    public var body: some View {
         HStack(spacing: 2) {
             if isPinned {
                 Image(systemName: "pin.fill")

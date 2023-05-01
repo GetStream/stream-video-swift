@@ -5,8 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-struct MicrophoneCheckView: View {
-    
+public struct MicrophoneCheckView: View {
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
@@ -14,9 +13,21 @@ struct MicrophoneCheckView: View {
     var decibels: [Float]
     var microphoneOn: Bool
     var hasDecibelValues: Bool
-    let maxHeight: Float = 14
+    var maxHeight: Float = 14
     
-    var body: some View {
+    public init(
+        decibels: [Float],
+        microphoneOn: Bool,
+        hasDecibelValues: Bool,
+        maxHeight: Float = 14
+    ) {
+        self.decibels = decibels
+        self.microphoneOn = microphoneOn
+        self.hasDecibelValues = hasDecibelValues
+        self.maxHeight = maxHeight
+    }
+    
+    public var body: some View {
         HStack(spacing: 2) {
             Text(streamVideo.user.name)
                 .font(.caption)

@@ -15,7 +15,6 @@
         "guides/quickstart/audio-room",
         "guides/chat-integration",
         "guides/call-lifecycle",
-        "guides/authentication-users",
         "guides/joining-leaving-calls",
         "guides/call-types",
         "guides/mic-camera-setup",

@@ -5,14 +5,24 @@
 import StreamVideo
 import SwiftUI
 
-struct ConnectionQualityIndicator: View {
+public struct ConnectionQualityIndicator: View {
     
-    private let size: CGFloat = 28
-    private let width: CGFloat = 3
+    private var size: CGFloat = 28
+    private var width: CGFloat = 3
     
     var connectionQuality: ConnectionQuality
     
-    var body: some View {
+    public init(
+        connectionQuality: ConnectionQuality,
+        size: CGFloat = 28,
+        width: CGFloat = 3
+    ) {
+        self.connectionQuality = connectionQuality
+        self.size = size
+        self.width = width
+    }
+    
+    public var body: some View {
         HStack(alignment: .bottom, spacing: 2) {
             ForEach(1..<4) { index in
                 IndicatorPart(

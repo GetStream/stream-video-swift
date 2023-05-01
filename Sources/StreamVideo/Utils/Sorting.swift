@@ -56,7 +56,7 @@ public var userId: Comparator<CallParticipant> = { (p1, p2) in
     p1.id >= p2.id ? .orderedDescending : .orderedAscending
 }
 
-extension Sequence {
+public extension Sequence {
     func sorted(using comparators: [Comparator<Element>], order: SortOrder = .descending) -> [Element] {
         sorted { valueA, valueB in
             for comparator in comparators {
@@ -77,7 +77,7 @@ extension Sequence {
     }
 }
 
-enum SortOrder {
+public enum SortOrder {
     case ascending
     case descending
 }
