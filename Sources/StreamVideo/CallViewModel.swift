@@ -489,8 +489,9 @@ open class CallViewModel: ObservableObject {
             for await callEvent in streamVideo.callEvents() {
                 if case let .incoming(incomingCall) = callEvent,
                    incomingCall.callerId != streamVideo.user.id {
+                    let isAppActive = UIApplication.shared.applicationState == .active
                     // TODO: implement holding a call.
-                    if callingState == .idle {
+                    if callingState == .idle && isAppActive {
                         callingState = .incoming(incomingCall)
                     }
                 } else if case .rejected = callEvent {
@@ -518,7 +519,7 @@ open class CallViewModel: ObservableObject {
             let eventCount = (callRejectionEvents[eventInfo.callId] ?? 0) + 1
             callRejectionEvents[eventInfo.callId] = eventCount
             let outgoingMembersCount = outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count
-            if eventCount == outgoingMembersCount {
+            if eventCount >= outgoingMembersCount {
                 leaveCall()
             }
         }
