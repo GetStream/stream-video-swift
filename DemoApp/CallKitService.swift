@@ -51,6 +51,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         let callUUID = UUID()
         callKitId = callUUID
         update.remoteHandle = CXHandle(type: .generic, value: callInfo)
+        update.hasVideo = true
         provider.reportNewIncomingCall(
             with: callUUID,
             update: update,

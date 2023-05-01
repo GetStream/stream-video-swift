@@ -6,7 +6,7 @@ import Foundation
 
 class CallService {
     
-    private static let defaultCallText = "You are receiving a call"
+    private static let defaultCallText = "Unknown Caller"
     
     static let shared = CallService()
     

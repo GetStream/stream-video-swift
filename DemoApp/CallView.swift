@@ -24,18 +24,14 @@ struct CallView: View {
         HomeView(viewModel: viewModel)
             .modifier(CallModifier(viewModel: viewModel))
             .onContinueUserActivity(
-                NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
+                NSStringFromClass(INStartVideoCallIntent.self), perform: { userActivity in
                     let interaction = userActivity.interaction
-                    if let callIntent = interaction?.intent as? INStartCallIntent {
-                        
+                    if let callIntent = interaction?.intent as? INStartVideoCallIntent {
+
                         let contact = callIntent.contacts?.first
-                        
-                        let contactHandle = contact?.personHandle
-                        
-                        if let phoneNumber = contactHandle?.value {
-                            print(phoneNumber)
-                            // Your Call Logic
-                        }
+
+                        guard let name = contact?.personHandle?.value else { return }
+                        viewModel.startCall(callId: UUID().uuidString, type: .default, members: [.init(id: name)], ring: true)
                     }
                 }
             )
