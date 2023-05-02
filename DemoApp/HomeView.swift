@@ -107,16 +107,7 @@ struct HomeView: View {
                 message: Text("Are you sure you want to sign out?"),
                 primaryButton: .destructive(Text("Sign out")) {
                     withAnimation {
-                        if let userToken = UnsecureUserRepository.shared.currentVoipPushToken() {
-                            let controller = streamVideo.makeVoipNotificationsController()
-                            controller.removeDevice(with: userToken)
-                        }
-                        UnsecureUserRepository.shared.removeCurrentUser()
-                        Task {
-                            await streamVideo.disconnect()
-                            AppState.shared.streamVideo = nil
-                            AppState.shared.userState = .notLoggedIn
-                        }
+                        AppState.shared.logout()
                     }
                 },
                 secondaryButton: .cancel()

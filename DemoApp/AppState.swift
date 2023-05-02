@@ -14,13 +14,13 @@ class AppState: ObservableObject {
     @Published var loading = false
     @Published var voipPushToken: String? {
         didSet {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 3, execute: {
-                self.setVoipToken()
-            })
+            UnsecureUserRepository.shared.save(voipPushToken: voipPushToken)
+            setVoipToken()
         }
     }
     @Published var pushToken: String? {
         didSet {
+            UnsecureUserRepository.shared.save(pushToken: pushToken)
             setPushToken()
         }
     }
@@ -49,11 +49,25 @@ class AppState: ObservableObject {
         }
     }
     
+    func logout() {
+        Task {
+            if let voipPushToken = UnsecureUserRepository.shared.currentVoipPushToken() {
+                try? await streamVideo?.deleteDevice(id: voipPushToken)
+            }
+            if let pushToken = UnsecureUserRepository.shared.currentPushToken() {
+                try? await streamVideo?.deleteDevice(id: pushToken)
+            }
+            await streamVideo?.disconnect()
+            UnsecureUserRepository.shared.removeCurrentUser()
+            streamVideo = nil
+            userState = .notLoggedIn
+        }
+    }
+    
     private func setVoipToken() {
         if let voipPushToken, let streamVideo {
             Task {
                 try await streamVideo.setVoipDevice(id: voipPushToken)
-                self.voipPushToken = nil
             }
         }
     }
@@ -62,7 +76,6 @@ class AppState: ObservableObject {
         if let pushToken, let streamVideo {
             Task {
                 try await streamVideo.setDevice(id: pushToken)
-                self.pushToken = nil
             }
         }
     }

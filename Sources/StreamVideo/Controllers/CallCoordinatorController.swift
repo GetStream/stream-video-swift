@@ -72,11 +72,7 @@ class CallCoordinatorController: @unchecked Sendable {
         self.user = user
         coordinatorClient.userId = user.id
     }
-    
-    func makeVoipNotificationsController() -> VoipNotificationsController {
-        VoipNotificationsController(coordinatorClient: coordinatorClient)
-    }
-    
+
     func sendEvent(
         type: EventType,
         callId: String,
@@ -123,10 +119,6 @@ class CallCoordinatorController: @unchecked Sendable {
                 role: member.user.role
             )
         }
-    }
-    
-    func createDevice(request: CreateDeviceRequest) async throws {
-        try await coordinatorClient.createDevice(request: request)
     }
 
     // MARK: - private

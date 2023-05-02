@@ -62,15 +62,13 @@ public class StreamVideo {
 
     var tokenRetryTimer: TimerControl?
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
-    
-    private var pushDeviceData: DeviceData?
-    private var voipDeviceData: DeviceData?
         
     private let apiKey: APIKey
     private let latencyService: LatencyService
     
     private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
+    private let pushNotificationsConfig: PushNotificationsConfig
     
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -85,7 +83,8 @@ public class StreamVideo {
         user: User,
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
-        tokenProvider: @escaping UserTokenProvider
+        tokenProvider: @escaping UserTokenProvider,
+        pushNotificationsConfig: PushNotificationsConfig = .default
     ) {
         self.init(
             apiKey: apiKey,
@@ -93,6 +92,7 @@ public class StreamVideo {
             token: token,
             videoConfig: videoConfig,
             tokenProvider: tokenProvider,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
     }
@@ -108,7 +108,8 @@ public class StreamVideo {
         apiKey: String,
         user: User,
         token: UserToken,
-        videoConfig: VideoConfig = VideoConfig()
+        videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default
     ) {
         let tokenProvider: UserTokenProvider = { result in
             log.error("Provide a token provider, since the token has expiry date")
@@ -122,6 +123,7 @@ public class StreamVideo {
             token: token,
             videoConfig: videoConfig,
             tokenProvider: tokenProvider,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
     }
@@ -150,6 +152,7 @@ public class StreamVideo {
         apiKey: String,
         user: User,
         videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default,
         environment: Environment
     ) async throws {
         var tokenProvider: UserTokenProvider = { _ in }
@@ -190,6 +193,7 @@ public class StreamVideo {
             tokenProvider: tokenProvider,
             httpClient: httpClient,
             callCoordinatorController: callCoordinatorController,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: environment
         )
     }
@@ -202,6 +206,7 @@ public class StreamVideo {
         tokenProvider: @escaping UserTokenProvider,
         httpClient: HTTPClient? = nil,
         callCoordinatorController: CallCoordinatorController? = nil,
+        pushNotificationsConfig: PushNotificationsConfig,
         environment: Environment
     ) {
         self.apiKey = APIKey(apiKey)
@@ -210,6 +215,7 @@ public class StreamVideo {
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
         self.environment = environment
+        self.pushNotificationsConfig = pushNotificationsConfig
         self.httpClient = httpClient ?? environment.httpClientBuilder(tokenProvider)
         self.callCoordinatorController = callCoordinatorController ?? environment.callCoordinatorControllerBuilder(
             self.httpClient,
@@ -267,13 +273,7 @@ public class StreamVideo {
             allEventsMiddleWare: videoConfig.listenToAllEvents ? allEventsMiddleware : nil
         )
     }
-    
-    /// Creates a call controller used for voip notifications.
-    /// - Returns: `VoipNotificationsController`
-    public func makeVoipNotificationsController() -> VoipNotificationsController {
-        callCoordinatorController.makeVoipNotificationsController()
-    }
-    
+
     /// Creates a controller used for querying and watching calls.
     /// - Parameter callsQuery: the query for the calls.
     /// - Returns: `CallsController`
@@ -319,16 +319,30 @@ public class StreamVideo {
         }
     }
     
-    public func setDevice(
-        id: String,
-        pushProvider: PushNotificationsProvider = .apn,
-        name: String = "apn"
-    ) async throws {
-//        try await setDevice(id: id, pushProvider: pushProvider, name: name, isVoip: false)
+    public func setDevice(id: String) async throws {
+        try await setDevice(
+            id: id,
+            pushProvider: pushNotificationsConfig.pushProviderInfo.pushProvider,
+            name: pushNotificationsConfig.pushProviderInfo.name,
+            isVoip: false
+        )
     }
     
-    public func setVoipDevice(id: String, name: String = "voip") async throws {
-        try await setDevice(id: id, pushProvider: .apn, name: name, isVoip: true)
+    public func setVoipDevice(id: String) async throws {
+        try await setDevice(
+            id: id,
+            pushProvider: pushNotificationsConfig.voipPushProviderInfo.pushProvider,
+            name: pushNotificationsConfig.voipPushProviderInfo.name,
+            isVoip: true
+        )
+    }
+    
+    public func deleteDevice(id: String) async throws {
+        try await callCoordinatorController.coordinatorClient.deleteDevice(with: id)
+    }
+    
+    public func listDevices() async throws -> [Device] {
+        try await callCoordinatorController.coordinatorClient.listDevices().devices
     }
     
     /// Disconnects the current `StreamVideo` client.
@@ -487,31 +501,9 @@ public class StreamVideo {
                 name: self.user.name
             )
             
-            var deviceRequest: PushDeviceRequest?
-            if let pushDeviceData {
-                log.debug("Setting push device data")
-                deviceRequest = PushDeviceRequest(
-                    id: pushDeviceData.id,
-                    pushProvider: .init(rawValue: pushDeviceData.provider.rawValue) ?? .apn,
-                    pushProviderName: pushDeviceData.name
-                )
-            }
-            
-            var voipDeviceRequest: PushDeviceRequest?
-            if let voipDeviceData {
-                log.debug("Setting voip device data")
-                voipDeviceRequest = PushDeviceRequest(
-                    id: voipDeviceData.id,
-                    pushProvider: .init(rawValue: voipDeviceData.provider.rawValue) ?? .apn,
-                    pushProviderName: voipDeviceData.name
-                )
-            }
-            
             let authRequest = WSAuthMessageRequest(
-                device: deviceRequest,
                 token: self.token.rawValue,
-                userDetails: connectUserRequest,
-                voipDevice: voipDeviceRequest
+                userDetails: connectUserRequest
             )
 
             webSocketClient.engine?.send(jsonMessage: authRequest)
@@ -526,27 +518,18 @@ public class StreamVideo {
         name: String,
         isVoip: Bool
     ) async throws {
-        if webSocketClient?.connectionState.canRegisterDevice == true {
-            let deviceData = DeviceData(id: id, provider: pushProvider, name: name)
-            if isVoip {
-                self.voipDeviceData = deviceData
-            } else {
-                self.pushDeviceData = deviceData
-            }
-            return
-        }
-        
         let createDeviceRequest = CreateDeviceRequest(
             id: id,
             pushProvider: .init(rawValue: pushProvider.rawValue),
             pushProviderName: name,
-            user: nil,
-            userId: user.id
+            user: UserRequest(id: user.id),
+            userId: user.id,
+            voipToken: isVoip
         )
         
         log.debug("Sending request to save device")
 
-        try await callCoordinatorController.createDevice(request: createDeviceRequest)
+        try await callCoordinatorController.coordinatorClient.createDevice(request: createDeviceRequest)
     }
     
     private func setupConnectionRecoveryHandler() {

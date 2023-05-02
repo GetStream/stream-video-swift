@@ -25,13 +25,21 @@ protocol VoipTokenHandler {
     
 }
 
-//NOTE: This is just for simplicity. User data shouldn't be kept in `UserDefaults`.
-class UnsecureUserRepository: UserRepository, VoipTokenHandler {
+protocol PushTokenHandler {
     
+    func save(pushToken: String?)
+    
+    func currentPushToken() -> String?
+    
+}
+
+//NOTE: This is just for simplicity. User data shouldn't be kept in `UserDefaults`.
+class UnsecureUserRepository: UserRepository, VoipTokenHandler, PushTokenHandler {
     private let defaults = UserDefaults.standard
     private let userKey = "stream.video.user"
     private let tokenKey = "stream.video.token"
     private let voipPushTokenKey = "stream.video.voip.token"
+    private let pushTokenKey = "stream.video.push.token"
     
     static let shared = UnsecureUserRepository()
     
@@ -74,10 +82,19 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler {
         defaults.value(forKey: voipPushTokenKey) as? String
     }
     
+    func currentPushToken() -> String? {
+        defaults.value(forKey: pushTokenKey) as? String
+    }
+    
+    func save(pushToken: String?) {
+        defaults.set(pushToken, forKey: pushTokenKey)
+    }
+    
     func removeCurrentUser() {
         defaults.set(nil, forKey: userKey)
         defaults.set(nil, forKey: tokenKey)
         defaults.set(nil, forKey: voipPushTokenKey)
+        defaults.set(nil, forKey: pushTokenKey)
     }
     
     

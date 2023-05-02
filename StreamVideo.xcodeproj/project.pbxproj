@@ -129,7 +129,6 @@
 		8458B706290ACFE400F8E487 /* incoming.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8458B705290ACFE400F8E487 /* incoming.wav */; };
 		845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
 		8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* LocalStorage.swift */; };
-		8468822428E1C685003BA9EE /* VoipNotificationsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468822328E1C685003BA9EE /* VoipNotificationsController.swift */; };
 		8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */; };
 		8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593329BB5CE200134EA0 /* HTTPConfig.swift */; };
 		8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593529BB6B4E00134EA0 /* EdgeResponse.swift */; };
@@ -388,6 +387,7 @@
 		84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */; };
 		84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */; };
 		84E5C50F29FAC1D40003A27A /* PushDeviceRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E5C50E29FAC1D40003A27A /* PushDeviceRequest.swift */; };
+		84E5C51C2A013C440003A27A /* PushNotificationsConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E5C51B2A013C440003A27A /* PushNotificationsConfig.swift */; };
 		84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E7CD3628D64609009F3542 /* CallingIndicator.swift */; };
 		84E86D4F2905E731004BA44C /* Utils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E86D4E2905E731004BA44C /* Utils.swift */; };
 		84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */; };
@@ -681,7 +681,6 @@
 		8458B705290ACFE400F8E487 /* incoming.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = incoming.wav; sourceTree = "<group>"; };
 		845C573128DDC57A00D38FCC /* DemoAppUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAppUtils.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* LocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStorage.swift; sourceTree = "<group>"; };
-		8468822328E1C685003BA9EE /* VoipNotificationsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipNotificationsController.swift; sourceTree = "<group>"; };
 		8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalServer_Tests.swift; sourceTree = "<group>"; };
 		8469593329BB5CE200134EA0 /* HTTPConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HTTPConfig.swift; sourceTree = "<group>"; };
 		8469593529BB6B4E00134EA0 /* EdgeResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EdgeResponse.swift; sourceTree = "<group>"; };
@@ -923,6 +922,7 @@
 		84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQuality.swift; sourceTree = "<group>"; };
 		84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQualityIndicator.swift; sourceTree = "<group>"; };
 		84E5C50E29FAC1D40003A27A /* PushDeviceRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PushDeviceRequest.swift; sourceTree = "<group>"; };
+		84E5C51B2A013C440003A27A /* PushNotificationsConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PushNotificationsConfig.swift; sourceTree = "<group>"; };
 		84E7CD3628D64609009F3542 /* CallingIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingIndicator.swift; sourceTree = "<group>"; };
 		84E86D4E2905E731004BA44C /* Utils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Utils.swift; sourceTree = "<group>"; };
 		84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipantImageView.swift; sourceTree = "<group>"; };
@@ -1396,6 +1396,7 @@
 				84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */,
 				84D6493F29E94C14002CA428 /* CallsQuery.swift */,
 				842D3B5D29F6D36E0051698A /* DeviceData.swift */,
+				84E5C51B2A013C440003A27A /* PushNotificationsConfig.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1800,7 +1801,6 @@
 			children = (
 				84EA5D3E28C09AAB004D3531 /* CallController.swift */,
 				84EA5D4028C0ABCB004D3531 /* CallCoordinatorController.swift */,
-				8468822328E1C685003BA9EE /* VoipNotificationsController.swift */,
 				84A8B88E2993CAFD003AA570 /* PermissionsController.swift */,
 				84A88201299E8C5200EA22ED /* EventsController.swift */,
 				84BD8FFC29B1019E002CFBA0 /* RecordingController.swift */,
@@ -2483,6 +2483,7 @@
 				846E4B0129D2D372003733AB /* Sorting.swift in Sources */,
 				8478EB13288A054B00525538 /* VideoConfig.swift in Sources */,
 				8492B875290808AE00006649 /* StreamVideoEnvironment.swift in Sources */,
+				84E5C51C2A013C440003A27A /* PushNotificationsConfig.swift in Sources */,
 				84C4004629E55DAF007B69C2 /* AllEventsMiddleware.swift in Sources */,
 				84A7E184288362DF00526C98 /* Atomic.swift in Sources */,
 				84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */,
@@ -2611,7 +2612,6 @@
 				84BD8FFD29B1019E002CFBA0 /* RecordingController.swift in Sources */,
 				84A881FC299E476000EA22ED /* AnyCodable.swift in Sources */,
 				84DC38C429ADFCFD00946713 /* MemberResponse.swift in Sources */,
-				8468822428E1C685003BA9EE /* VoipNotificationsController.swift in Sources */,
 				84DC38CB29ADFCFD00946713 /* SortParamRequest.swift in Sources */,
 				8490032529D308A000AD9BB4 /* GetCallResponse.swift in Sources */,
 				846E4AF829CDEA66003733AB /* CreateCallTypeResponse.swift in Sources */,
