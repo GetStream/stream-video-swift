@@ -153,6 +153,7 @@ By default, this modifier is applied to the video call participant view:
 ForEach(participants) { participant in
     viewFactory.makeVideoParticipantView(
         participant: participant,
+        id: participant.id,
         availableSize: availableSize,
         contentMode: .scaleAspectFill,
         onViewUpdate: onViewUpdate

@@ -51,12 +51,14 @@ public protocol ViewFactory: AnyObject {
     /// Creates a view for a video call participant with the specified parameters.
     /// - Parameters:
     ///  - participant: The participant to display.
+    ///  - id: id of the participant.
     ///  - availableSize: The available size for the participant's video view.
     ///  - contentMode: The content mode for the participant's video view.
     ///  - onViewUpdate: A closure to be called whenever the participant's video view is updated.
     /// - Returns: A view for the specified video call participant.
     func makeVideoParticipantView(
         participant: CallParticipant,
+        id: String,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
@@ -181,12 +183,14 @@ extension ViewFactory {
     
     public func makeVideoParticipantView(
         participant: CallParticipant,
+        id: String,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> some View {
         VideoCallParticipantView(
             participant: participant,
+            id: id,
             availableSize: availableSize,
             contentMode: contentMode,
             onViewUpdate: onViewUpdate

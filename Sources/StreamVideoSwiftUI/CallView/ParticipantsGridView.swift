@@ -43,6 +43,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
         ForEach(participants) { participant in
             viewFactory.makeVideoParticipantView(
                 participant: participant,
+                id: participant.id,
                 availableSize: size,
                 contentMode: .scaleAspectFill,
                 onViewUpdate: onViewUpdate

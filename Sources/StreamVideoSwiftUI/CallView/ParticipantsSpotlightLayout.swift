@@ -39,14 +39,13 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     
     public var body: some View {
         VStack {
-            VideoCallParticipantView(
+            viewFactory.makeVideoParticipantView(
                 participant: participant,
                 id: "\(participant.id)-spotlight",
                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                contentMode: .scaleAspectFill
-            ) { participant, view in
-                onViewRendering(view, participant)
-            }
+                contentMode: .scaleAspectFill) { participant, view in
+                    onViewRendering(view, participant)
+                }
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
@@ -68,13 +67,13 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             ScrollView(.horizontal) {
                 HorizontalContainer {
                     ForEach(participants) { participant in
-                        VideoCallParticipantView(
+                        viewFactory.makeVideoParticipantView(
                             participant: participant,
+                            id: participant.id,
                             availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                            contentMode: .scaleAspectFill
-                        ) { participant, view in
-                            onViewRendering(view, participant)
-                        }
+                            contentMode: .scaleAspectFill) { participant, view in
+                                onViewRendering(view, participant)
+                            }
                         .onAppear {
                             onChangeTrackVisibility(participant, true)
                         }
