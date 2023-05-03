@@ -284,6 +284,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
                     participant: participant,
+                    id: participant.id,
                     availableSize: availableSize,
                     contentMode: .scaleAspectFill,
                     onViewUpdate: onViewUpdate
@@ -328,6 +329,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
                     participant: participant,
+                    id: participant.id,
                     availableSize: size,
                     contentMode: .scaleAspectFill,
                     onViewUpdate: onViewUpdate

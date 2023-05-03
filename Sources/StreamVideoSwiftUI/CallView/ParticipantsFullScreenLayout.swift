@@ -34,6 +34,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     public var body: some View {
         viewFactory.makeVideoParticipantView(
             participant: participant,
+            id: participant.id,
             availableSize: size,
             contentMode: .scaleAspectFit,
             onViewUpdate: { participant, view in

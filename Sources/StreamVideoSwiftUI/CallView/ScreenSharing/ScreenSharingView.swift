@@ -54,16 +54,6 @@ public struct ScreenSharingView: View {
                                 viewModel.changeTrackVisbility(for: participant, isVisible: false)
                             }
                         }
-                        
-                        LocalVideoView(callSettings: viewModel.callSettings) { view in
-                            if let track = viewModel.localParticipant?.track {
-                                view.add(track: track)
-                            } else {
-                                viewModel.startCapturingLocalVideo()
-                            }
-                        }
-                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
-                        .cornerRadius(8)
                     }
                     .frame(height: thumbnailSize)
                     .cornerRadius(8)
