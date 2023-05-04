@@ -23,10 +23,9 @@ struct CallView: View {
     var body: some View {
         HomeView(viewModel: viewModel)
             .modifier(CallModifier(viewModel: viewModel))
-            .onContinueUserActivity(
-                NSStringFromClass(INStartVideoCallIntent.self), perform: { userActivity in
+            .onContinueUserActivity(NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
                     let interaction = userActivity.interaction
-                    if let callIntent = interaction?.intent as? INStartVideoCallIntent {
+                    if let callIntent = interaction?.intent as? INStartCallIntent {
 
                         let contact = callIntent.contacts?.first
 

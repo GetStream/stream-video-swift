@@ -2,6 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import StreamVideo
 import SwiftUI
 import UIKit
 
@@ -29,7 +30,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        print("==== notification received \(response.notification.request.content)")
+        log.debug("push notification received \(response.notification.request.content)")
     }
 
     func setupRemoteNotifications() {
@@ -43,8 +44,4 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                 }
             }
     }
-}
-
-extension UIColor {
-    static let streamBlue = UIColor(red: 0, green: 108.0 / 255.0, blue: 255.0 / 255.0, alpha: 1)
 }

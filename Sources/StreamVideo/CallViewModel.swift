@@ -392,7 +392,7 @@ open class CallViewModel: ObservableObject {
     public func hangUp() {
         if callingState == .outgoing {
             Task {
-                try await call?.end()
+                try? await call?.end()
                 leaveCall()
             }
         } else {
