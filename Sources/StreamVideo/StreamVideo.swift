@@ -241,6 +241,9 @@ public class StreamVideo {
     
     /// Connects the current user.
     public func connect() async throws {
+        if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
+            return
+        }
         if user.id.isAnonymousUser {
             // Anonymous users can't connect to the WS.
             throw ClientError.MissingPermissions()

@@ -54,6 +54,12 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         update.localizedCallerName = displayName
         update.remoteHandle = CXHandle(type: .generic, value: callerId)
         update.hasVideo = true
+        Task {
+            await MainActor.run(body: {
+                setupStreamVideoIfNeeded()
+                connectStreamVideo()
+            })
+        }
         provider.reportNewIncomingCall(
             with: callUUID,
             update: update,
@@ -82,25 +88,9 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     func providerDidReset(_ provider: CXProvider) {}
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-        guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
-            action.fail()
-            return
-        }
         if !callId.isEmpty {
             Task {
                 await MainActor.run {
-                    if AppState.shared.streamVideo == nil {
-                        let streamVideo = StreamVideo(
-                            apiKey: Config.apiKey,
-                            user: currentUser.userInfo,
-                            token: currentUser.token,
-                            videoConfig: VideoConfig(),
-                            tokenProvider: { result in
-                                result(.success(currentUser.token))
-                            }
-                        )
-                        AppState.shared.streamVideo = streamVideo
-                    }
                     Task {
                         try await streamVideo.connect()
                         self.call = streamVideo.makeCall(callType: callType, callId: callId)
@@ -113,14 +103,40 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                 }
             }
-
+        } else {
+            action.fail()
+        }
+    }
+    
+    @MainActor
+    private func setupStreamVideoIfNeeded() {
+        guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
+            return
+        }
+        if AppState.shared.streamVideo == nil {
+            let streamVideo = StreamVideo(
+                apiKey: Config.apiKey,
+                user: currentUser.userInfo,
+                token: currentUser.token,
+                videoConfig: VideoConfig(),
+                tokenProvider: { result in
+                    result(.success(currentUser.token))
+                }
+            )
+            AppState.shared.streamVideo = streamVideo
+        }
+    }
+    
+    private func connectStreamVideo() {
+        Task {
+            try await streamVideo.connect()
+            subscribeToCallEvents()
         }
     }
     
     private func subscribeToCallEvents() {
         Task {
             for await event in streamVideo.callEvents() {
-                print("===== received \(event)")
                 switch event {
                 case .canceled(_), .ended(_):
                     endCurrentCall()
