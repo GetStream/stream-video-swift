@@ -390,7 +390,14 @@ open class CallViewModel: ObservableObject {
     
     /// Hangs up from the active call.
     public func hangUp() {
-        leaveCall()
+        if callingState == .outgoing {
+            Task {
+                try await call?.end()
+                leaveCall()
+            }
+        } else {
+            leaveCall()
+        }
     }
     
     /// Sets a video filter for the current call.

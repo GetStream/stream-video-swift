@@ -31,7 +31,8 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         
     func reportIncomingCall(
         callCid: String,
-        callInfo: String,
+        displayName: String,
+        callerId: String,
         completion: @escaping (Error?) -> Void
     ) {
         let configuration = CXProviderConfiguration()
@@ -50,7 +51,8 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
         let callUUID = UUID()
         callKitId = callUUID
-        update.remoteHandle = CXHandle(type: .generic, value: callInfo)
+        update.localizedCallerName = displayName
+        update.remoteHandle = CXHandle(type: .generic, value: callerId)
         update.hasVideo = true
         provider.reportNewIncomingCall(
             with: callUUID,
@@ -99,9 +101,11 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         )
                         AppState.shared.streamVideo = streamVideo
                     }
-                    self.call = streamVideo.makeCall(callType: callType, callId: callId)
-                    AppState.shared.activeCall = call
                     Task {
+                        try await streamVideo.connect()
+                        self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                        AppState.shared.activeCall = call
+                        subscribeToCallEvents()
                         try await call?.join()
                         await MainActor.run {
                             action.fulfill()
@@ -110,6 +114,20 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                 }
             }
 
+        }
+    }
+    
+    private func subscribeToCallEvents() {
+        Task {
+            for await event in streamVideo.callEvents() {
+                print("===== received \(event)")
+                switch event {
+                case .canceled(_), .ended(_):
+                    endCurrentCall()
+                default:
+                    log.debug("received call event")
+                }
+            }
         }
     }
     

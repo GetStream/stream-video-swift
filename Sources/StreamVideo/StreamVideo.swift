@@ -83,8 +83,8 @@ public class StreamVideo {
         user: User,
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
-        tokenProvider: @escaping UserTokenProvider,
-        pushNotificationsConfig: PushNotificationsConfig = .default
+        pushNotificationsConfig: PushNotificationsConfig = .default,
+        tokenProvider: @escaping UserTokenProvider
     ) {
         self.init(
             apiKey: apiKey,

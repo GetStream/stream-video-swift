@@ -4,12 +4,6 @@
 
 import Foundation
 
-struct DeviceData {
-    let id: String
-    let provider: PushNotificationsProvider
-    let name: String
-}
-
 /// A type that represents the supported push providers.
 public struct PushNotificationsProvider: RawRepresentable, Hashable, ExpressibleByStringLiteral, Sendable {
     public static let firebase: Self = "firebase"

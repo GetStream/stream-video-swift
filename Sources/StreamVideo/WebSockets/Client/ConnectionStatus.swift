@@ -144,9 +144,3 @@ enum WebSocketConnectionState: Equatable {
         }
     }
 }
-
-extension WebSocketConnectionState {
-    var canRegisterDevice: Bool {
-        self == .initialized || self == .connecting || self == .authenticating
-    }
-}
