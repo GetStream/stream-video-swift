@@ -15,7 +15,6 @@ class VoipPushService: NSObject, PKPushRegistryDelegate {
     private let voipQueue: DispatchQueue
     private let voipRegistry: PKPushRegistry
     private let voipTokenHandler: VoipTokenHandler
-    private lazy var voipNotificationsController = streamVideo.makeVoipNotificationsController()
     
     var onReceiveIncomingPush: VoipPushHandler
     
@@ -35,15 +34,20 @@ class VoipPushService: NSObject, PKPushRegistryDelegate {
         print(credentials.token)
         let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
         log.debug("pushRegistry deviceToken = \(deviceToken)")
-        voipNotificationsController.addDevice(with: deviceToken)
-        voipTokenHandler.save(voipPushToken: deviceToken)
+        Task {
+            await MainActor.run(body: {
+                AppState.shared.voipPushToken = deviceToken
+            })
+        }
     }
             
     func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
         log.debug("pushRegistry:didInvalidatePushTokenForType:")
         if let savedToken = voipTokenHandler.currentVoipPushToken() {
-            voipNotificationsController.removeDevice(with: savedToken)
-            voipTokenHandler.save(voipPushToken: nil)
+            Task {
+                try await streamVideo.deleteDevice(id: savedToken)
+                voipTokenHandler.save(voipPushToken: nil)
+            }
         }
     }
     

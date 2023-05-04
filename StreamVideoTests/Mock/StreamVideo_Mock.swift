@@ -23,6 +23,7 @@ extension StreamVideo {
             tokenProvider: { result in
                 result(.success(mockToken))
             },
+            pushNotificationsConfig: .default,
             environment: mockEnvironment(httpClient)
         )
         return streamVideo

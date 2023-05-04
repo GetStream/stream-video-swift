@@ -19,6 +19,21 @@ class CoordinatorClient: @unchecked Sendable {
         userId.isAnonymousUser
     }
     
+    private var connectionQueryParams: [String: String] {
+        [
+            "api_key": apiKey,
+            "user_id": userId,
+            "connection_id": connectionId
+        ]
+    }
+    
+    private var defaultQueryParams: [String: String] {
+        [
+            "api_key": apiKey,
+            "user_id": userId
+        ]
+    }
+    
     init(
         httpClient: HTTPClient,
         apiKey: String,
@@ -164,6 +179,35 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/calls")
     }
     
+    func listDevices() async throws -> ListDevicesResponse {
+        let urlRequest = try makeRequest(
+            for: "/devices",
+            httpMethod: "GET",
+            queryParams: defaultQueryParams
+        )
+        return try await execute(urlRequest: urlRequest)
+    }
+    
+    func createDevice(request: CreateDeviceRequest) async throws {
+        var urlRequest = try makeRequest(
+            for: "/devices",
+            queryParams: defaultQueryParams
+        )
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+        _ = try await httpClient.execute(request: urlRequest)
+    }
+    
+    func deleteDevice(with id: String) async throws {
+        var queryParams = defaultQueryParams
+        queryParams["id"] = id
+        let urlRequest = try makeRequest(
+            for: "/devices",
+            httpMethod: "DELETE",
+            queryParams: queryParams
+        )
+        _ = try await httpClient.execute(request: urlRequest)
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
@@ -215,16 +259,24 @@ class CoordinatorClient: @unchecked Sendable {
         return request
     }
 
-    private func makeRequest(for path: String, httpMethod: String = "POST") throws -> URLRequest {
-        guard !connectionId.isEmpty,
-              let queryParams = "?api_key=\(apiKey)&user_id=\(userId)&connection_id=\(connectionId)"
-              .addingPercentEncoding(withAllowedCharacters: .urlQueryAllowed) else {
-            throw ClientError.Unexpected()
-        }
-        let url = hostname + pathPrefix + path + queryParams
-        guard let url = URL(string: url) else {
-            throw ClientError.InvalidURL()
-        }
+    private func makeRequest(
+        for path: String,
+        httpMethod: String = "POST"
+    ) throws -> URLRequest {
+        let url = try makeURLRequiringConnectionId(with: path)
+        return makeURLRequest(url: url, httpMethod: httpMethod)
+    }
+    
+    private func makeRequest(
+        for path: String,
+        httpMethod: String = "POST",
+        queryParams: [String: String]
+    ) throws -> URLRequest {
+        let url = try makeURL(with: path, queryItems: queryParams)
+        return makeURLRequest(url: url, httpMethod: httpMethod)
+    }
+    
+    private func makeURLRequest(url: URL, httpMethod: String = "POST") -> URLRequest {
         var request = URLRequest(url: url)
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("\(token)", forHTTPHeaderField: "Authorization")
@@ -233,6 +285,24 @@ class CoordinatorClient: @unchecked Sendable {
         request.setValue(UUID().uuidString, forHTTPHeaderField: "x-client-request-id")
         request.httpMethod = httpMethod
         return request
+    }
+    
+    private func makeURLRequiringConnectionId(with path: String) throws -> URL {
+        guard !connectionId.isEmpty else { throw ClientError.Unexpected() }
+        let urlString = hostname + pathPrefix + path
+        return try self.url(string: urlString, queryItems: connectionQueryParams)
+    }
+    
+    private func makeURL(with path: String, queryItems: [String: String]) throws -> URL {
+        let urlString = hostname + pathPrefix + path
+        return try self.url(string: urlString, queryItems: queryItems)
+    }
+    
+    private func url(string: String, queryItems: [String: String]) throws -> URL {
+        guard let url = URL(string: string) else {
+            throw ClientError.InvalidURL()
+        }
+        return try url.appendingQueryItems(queryItems)
     }
 }
 

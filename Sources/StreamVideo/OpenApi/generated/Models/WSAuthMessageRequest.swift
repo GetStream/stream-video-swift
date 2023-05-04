@@ -10,24 +10,17 @@ import Foundation
 import AnyCodable
 #endif
 
-
-
-
-
 internal struct WSAuthMessageRequest: Codable, JSONEncodable, Hashable {
 
-    internal var device: DeviceFieldsRequest?
     internal var token: String
     internal var userDetails: ConnectUserDetailsRequest
 
-    internal init(device: DeviceFieldsRequest? = nil, token: String, userDetails: ConnectUserDetailsRequest) {
-        self.device = device
+    internal init(token: String, userDetails: ConnectUserDetailsRequest) {
         self.token = token
         self.userDetails = userDetails
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
-        case device
         case token
         case userDetails = "user_details"
     }
@@ -36,7 +29,6 @@ internal struct WSAuthMessageRequest: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(device, forKey: .device)
         try container.encode(token, forKey: .token)
         try container.encode(userDetails, forKey: .userDetails)
     }

@@ -13,7 +13,7 @@ open class CallViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
     
     /// Provides access to the current call.
-    @Published public var call: Call? {
+    @Published public private(set) var call: Call? {
         didSet {
             lastLayoutChange = Date()
             participantUpdates = call?.$participants
@@ -390,7 +390,14 @@ open class CallViewModel: ObservableObject {
     
     /// Hangs up from the active call.
     public func hangUp() {
-        leaveCall()
+        if callingState == .outgoing {
+            Task {
+                try? await call?.end()
+                leaveCall()
+            }
+        } else {
+            leaveCall()
+        }
     }
     
     /// Sets a video filter for the current call.
@@ -406,6 +413,16 @@ open class CallViewModel: ObservableObject {
         self.participantsLayout = participantsLayout
     }
     
+    public func setActiveCall(_ call: Call?) {
+        if let call {
+            self.callingState = .inCall
+            self.call = call
+        } else {
+            self.callingState = .idle
+            self.call = nil
+        }
+    }
+
     /// Updates the participants sorting.
     /// - Parameter participantsSortComparators: the new sort comparators.
     public func update(participantsSortComparators: [Comparator<CallParticipant>]) {

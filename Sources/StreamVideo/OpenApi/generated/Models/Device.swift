@@ -10,11 +10,7 @@ import Foundation
 import AnyCodable
 #endif
 
-
-
-
-
-internal struct Device: Codable, JSONEncodable, Hashable {
+public struct Device: Codable, JSONEncodable, Hashable {
 
     /** Date/time of creation */
     internal var createdAt: Date
@@ -46,7 +42,7 @@ internal struct Device: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encodeIfPresent(disabled, forKey: .disabled)

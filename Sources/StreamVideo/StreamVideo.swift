@@ -68,6 +68,7 @@ public class StreamVideo {
     
     private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
+    private let pushNotificationsConfig: PushNotificationsConfig
     
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
@@ -75,6 +76,7 @@ public class StreamVideo {
     ///   - user: The `User` who is logged in.
     ///   - token: The `UserToken` used to authenticate the user.
     ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - pushNotificationsConfig: Config for push notifications.
     ///   - tokenProvider: A closure that refreshes a token when it expires.
     /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
@@ -82,6 +84,7 @@ public class StreamVideo {
         user: User,
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default,
         tokenProvider: @escaping UserTokenProvider
     ) {
         self.init(
@@ -90,6 +93,7 @@ public class StreamVideo {
             token: token,
             videoConfig: videoConfig,
             tokenProvider: tokenProvider,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
     }
@@ -100,12 +104,14 @@ public class StreamVideo {
     ///   - user: The `User` who is logged in.
     ///   - token: The `UserToken` used to authenticate the user.
     ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - pushNotificationsConfig: Config for push notifications.
     /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
         apiKey: String,
         user: User,
         token: UserToken,
-        videoConfig: VideoConfig = VideoConfig()
+        videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default
     ) {
         let tokenProvider: UserTokenProvider = { result in
             log.error("Provide a token provider, since the token has expiry date")
@@ -119,6 +125,7 @@ public class StreamVideo {
             token: token,
             videoConfig: videoConfig,
             tokenProvider: tokenProvider,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
     }
@@ -129,16 +136,19 @@ public class StreamVideo {
     ///   - apiKey: The API key.
     ///   - user: The guest user.
     ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - pushNotificationsConfig: Config for push notifications.
     /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
         apiKey: String,
         user: User,
-        videoConfig: VideoConfig = VideoConfig()
+        videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default
     ) async throws {
         try await self.init(
             apiKey: apiKey,
             user: user,
             videoConfig: videoConfig,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
     }
@@ -147,6 +157,7 @@ public class StreamVideo {
         apiKey: String,
         user: User,
         videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default,
         environment: Environment
     ) async throws {
         var tokenProvider: UserTokenProvider = { _ in }
@@ -187,6 +198,7 @@ public class StreamVideo {
             tokenProvider: tokenProvider,
             httpClient: httpClient,
             callCoordinatorController: callCoordinatorController,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: environment
         )
     }
@@ -199,6 +211,7 @@ public class StreamVideo {
         tokenProvider: @escaping UserTokenProvider,
         httpClient: HTTPClient? = nil,
         callCoordinatorController: CallCoordinatorController? = nil,
+        pushNotificationsConfig: PushNotificationsConfig,
         environment: Environment
     ) {
         self.apiKey = APIKey(apiKey)
@@ -207,6 +220,7 @@ public class StreamVideo {
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
         self.environment = environment
+        self.pushNotificationsConfig = pushNotificationsConfig
         self.httpClient = httpClient ?? environment.httpClientBuilder(tokenProvider)
         self.callCoordinatorController = callCoordinatorController ?? environment.callCoordinatorControllerBuilder(
             self.httpClient,
@@ -232,6 +246,9 @@ public class StreamVideo {
     
     /// Connects the current user.
     public func connect() async throws {
+        if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
+            return
+        }
         if user.id.isAnonymousUser {
             // Anonymous users can't connect to the WS.
             throw ClientError.MissingPermissions()
@@ -239,6 +256,13 @@ public class StreamVideo {
         try await connectWebSocketClient()
     }
     
+    /// Creates a call with the provided call id, type and members.
+    /// This doesn't method create the call on the backend, for that you need to call `join` or `getOrCreateCall`.
+    /// - Parameters:
+    ///  - callType: the type of the call.
+    ///  - callId: the id of the all.
+    ///  - members: the members of the call.
+    /// - Returns: `Call` object.
     public func makeCall(
         callType: String,
         callId: String,
@@ -264,13 +288,7 @@ public class StreamVideo {
             allEventsMiddleWare: videoConfig.listenToAllEvents ? allEventsMiddleware : nil
         )
     }
-    
-    /// Creates a call controller used for voip notifications.
-    /// - Returns: `VoipNotificationsController`
-    public func makeVoipNotificationsController() -> VoipNotificationsController {
-        callCoordinatorController.makeVoipNotificationsController()
-    }
-    
+
     /// Creates a controller used for querying and watching calls.
     /// - Parameter callsQuery: the query for the calls.
     /// - Returns: `CallsController`
@@ -314,6 +332,40 @@ public class StreamVideo {
                 continuation.yield(callEvent)
             }
         }
+    }
+    
+    /// Sets a device for push notifications.
+    /// - Parameter id: the id of the device (token) for push notifications.
+    public func setDevice(id: String) async throws {
+        try await setDevice(
+            id: id,
+            pushProvider: pushNotificationsConfig.pushProviderInfo.pushProvider,
+            name: pushNotificationsConfig.pushProviderInfo.name,
+            isVoip: false
+        )
+    }
+    
+    /// Sets a device for VoIP push notifications.
+    /// - Parameter id: the id of the device (token) for VoIP push notifications.
+    public func setVoipDevice(id: String) async throws {
+        try await setDevice(
+            id: id,
+            pushProvider: pushNotificationsConfig.voipPushProviderInfo.pushProvider,
+            name: pushNotificationsConfig.voipPushProviderInfo.name,
+            isVoip: true
+        )
+    }
+    
+    /// Deletes the device with the provided id.
+    /// - Parameter id: the id of the device that will be deleted.
+    public func deleteDevice(id: String) async throws {
+        try await callCoordinatorController.coordinatorClient.deleteDevice(with: id)
+    }
+    
+    /// Lists the devices registered for the user.
+    /// - Returns: an array of `Device`s.
+    public func listDevices() async throws -> [Device] {
+        try await callCoordinatorController.coordinatorClient.listDevices().devices
     }
     
     /// Disconnects the current `StreamVideo` client.
@@ -471,6 +523,7 @@ public class StreamVideo {
                 image: self.user.imageURL?.absoluteString,
                 name: self.user.name
             )
+            
             let authRequest = WSAuthMessageRequest(
                 token: self.token.rawValue,
                 userDetails: connectUserRequest
@@ -480,6 +533,26 @@ public class StreamVideo {
         }
         
         return webSocketClient
+    }
+    
+    private func setDevice(
+        id: String,
+        pushProvider: PushNotificationsProvider,
+        name: String,
+        isVoip: Bool
+    ) async throws {
+        let createDeviceRequest = CreateDeviceRequest(
+            id: id,
+            pushProvider: .init(rawValue: pushProvider.rawValue),
+            pushProviderName: name,
+            user: UserRequest(id: user.id),
+            userId: user.id,
+            voipToken: isVoip
+        )
+        
+        log.debug("Sending request to save device")
+
+        try await callCoordinatorController.coordinatorClient.createDevice(request: createDeviceRequest)
     }
     
     private func setupConnectionRecoveryHandler() {

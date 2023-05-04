@@ -2,6 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import UIKit
 import Foundation
 @preconcurrency import CallKit
 import StreamVideo
@@ -30,12 +31,14 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         
     func reportIncomingCall(
         callCid: String,
-        callInfo: String,
+        displayName: String,
+        callerId: String,
         completion: @escaping (Error?) -> Void
     ) {
         let configuration = CXProviderConfiguration()
         configuration.supportsVideo = true
         configuration.supportedHandleTypes = [.generic]
+        configuration.iconTemplateImageData = UIImage(named: "logo")?.pngData()
         let provider = CXProvider(
             configuration: configuration
         )
@@ -48,7 +51,15 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
         let callUUID = UUID()
         callKitId = callUUID
-        update.remoteHandle = CXHandle(type: .generic, value: callInfo)
+        update.localizedCallerName = displayName
+        update.remoteHandle = CXHandle(type: .generic, value: callerId)
+        update.hasVideo = true
+        Task {
+            await MainActor.run(body: {
+                setupStreamVideoIfNeeded()
+                connectStreamVideo()
+            })
+        }
         provider.reportNewIncomingCall(
             with: callUUID,
             update: update,
@@ -77,27 +88,14 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     func providerDidReset(_ provider: CXProvider) {}
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-        guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
-            action.fail()
-            return
-        }
         if !callId.isEmpty {
             Task {
                 await MainActor.run {
-                    if AppState.shared.streamVideo == nil {
-                        let streamVideo = StreamVideo(
-                            apiKey: Config.apiKey,
-                            user: currentUser.userInfo,
-                            token: currentUser.token,
-                            videoConfig: VideoConfig(),
-                            tokenProvider: { result in
-                                result(.success(currentUser.token))
-                            }
-                        )
-                        AppState.shared.streamVideo = streamVideo
-                    }
-                    self.call = streamVideo.makeCall(callType: callType, callId: callId)
                     Task {
+                        try await streamVideo.connect()
+                        self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                        AppState.shared.activeCall = call
+                        subscribeToCallEvents()
                         try await call?.join()
                         await MainActor.run {
                             action.fulfill()
@@ -105,7 +103,47 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     }
                 }
             }
-
+        } else {
+            action.fail()
+        }
+    }
+    
+    @MainActor
+    private func setupStreamVideoIfNeeded() {
+        guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
+            return
+        }
+        if AppState.shared.streamVideo == nil {
+            let streamVideo = StreamVideo(
+                apiKey: Config.apiKey,
+                user: currentUser.userInfo,
+                token: currentUser.token,
+                videoConfig: VideoConfig(),
+                tokenProvider: { result in
+                    result(.success(currentUser.token))
+                }
+            )
+            AppState.shared.streamVideo = streamVideo
+        }
+    }
+    
+    private func connectStreamVideo() {
+        Task {
+            try await streamVideo.connect()
+            subscribeToCallEvents()
+        }
+    }
+    
+    private func subscribeToCallEvents() {
+        Task {
+            for await event in streamVideo.callEvents() {
+                switch event {
+                case .canceled(_), .ended(_):
+                    endCurrentCall()
+                default:
+                    log.debug("received call event")
+                }
+            }
         }
     }
     
@@ -113,6 +151,11 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         callKitId = nil
         call?.leave()
         call = nil
+        Task {
+            await MainActor.run {
+                AppState.shared.activeCall = nil
+            }
+        }
         action.fulfill()
     }
     

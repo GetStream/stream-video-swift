@@ -107,16 +107,7 @@ struct HomeView: View {
                 message: Text("Are you sure you want to sign out?"),
                 primaryButton: .destructive(Text("Sign out")) {
                     withAnimation {
-                        if let userToken = UnsecureUserRepository.shared.currentVoipPushToken() {
-                            let controller = streamVideo.makeVoipNotificationsController()
-                            controller.removeDevice(with: userToken)
-                        }
-                        UnsecureUserRepository.shared.removeCurrentUser()
-                        Task {
-                            await streamVideo.disconnect()
-                            AppState.shared.streamVideo = nil
-                            AppState.shared.userState = .notLoggedIn
-                        }
+                        AppState.shared.logout()
                     }
                 },
                 secondaryButton: .cancel()
@@ -125,6 +116,9 @@ struct HomeView: View {
         .background(
             viewModel.callingState == .inCall && !viewModel.isMinimized ? Color.black.edgesIgnoringSafeArea(.all) : nil
         )
+        .onReceive(appState.$activeCall) { call in
+            viewModel.setActiveCall(call)
+        }
     }
     
     private var makeCallEnabled: Bool {

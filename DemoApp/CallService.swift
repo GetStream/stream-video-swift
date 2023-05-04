@@ -3,10 +3,11 @@
 //
 
 import Foundation
+import StreamVideo
 
 class CallService {
     
-    private static let defaultCallText = "You are receiving a call"
+    private static let defaultCallText = "Unknown Caller"
     
     static let shared = CallService()
     
@@ -15,33 +16,24 @@ class CallService {
     lazy var voipPushService = VoipPushService(
         voipTokenHandler: UnsecureUserRepository.shared
     ) { [weak self] payload, type, completion in
-        let aps = payload.dictionaryPayload["aps"] as? [String: Any]
-        let alert = aps?["alert"] as? [String: Any]
-        let callCid = alert?["call_cid"] as? String ?? "unknown"
+        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
+        let callCid = streamDict?["call_cid"] as? String ?? "unknown"
+        let createdByName = streamDict?["created_by_display_name"] as? String ?? Self.defaultCallText
+        let createdById = streamDict?["created_by_id"] as? String ?? Self.defaultCallText
         self?.callService.reportIncomingCall(
             callCid: callCid,
-            callInfo: self?.callInfo(from: alert) ?? Self.defaultCallText
+            displayName: createdByName,
+            callerId: createdById
         ) { _ in
             completion()
         }
     }
     
     func registerForIncomingCalls() {
+    #if targetEnvironment(simulator)
+        log.info("CallKit notifications not working on a simulator")
+    #else
         voipPushService.registerForVoIPPushes()
-    }
-    
-    private func callInfo(from callPayload: [String: Any]?) -> String {
-        guard let userIds = callPayload?["user_ids"] as? String else { return Self.defaultCallText }
-        let parts = userIds.components(separatedBy: ",")
-        if parts.count == 0 {
-            return Self.defaultCallText
-        } else if parts.count == 1 {
-            return "\(parts[0]) is calling you"
-        } else if parts.count == 2 {
-            return "\(parts[0]) and \(parts[1]) are calling you"
-        } else {
-            let othersCount = parts.count - 2
-            return "\(parts[0]), \(parts[1]) and \(othersCount) are calling you"
-        }
+    #endif
     }
 }

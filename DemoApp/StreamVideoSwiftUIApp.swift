@@ -15,6 +15,8 @@ struct StreamVideoSwiftUIApp: App {
     @State var streamVideoUI: StreamVideoUI?
     
     @ObservedObject var appState = AppState.shared
+    
+    @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
             
     init() {
         checkLoggedInUser()

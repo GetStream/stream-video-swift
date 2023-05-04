@@ -10,10 +10,6 @@ import Foundation
 import AnyCodable
 #endif
 
-
-
-
-
 internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
 
     internal enum PushProvider: String, Codable, CaseIterable {
@@ -22,19 +18,20 @@ internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         case huawei = "huawei"
         case xiaomi = "xiaomi"
     }
-    static let idRule = StringRule(minLength: 1, maxLength: 255, pattern: nil)
     internal var id: String?
     internal var pushProvider: PushProvider?
     internal var pushProviderName: String?
     internal var user: UserRequest?
     internal var userId: String?
+    internal var voipToken: Bool?
 
-    internal init(id: String? = nil, pushProvider: PushProvider? = nil, pushProviderName: String? = nil, user: UserRequest? = nil, userId: String? = nil) {
+    internal init(id: String? = nil, pushProvider: PushProvider? = nil, pushProviderName: String? = nil, user: UserRequest? = nil, userId: String? = nil, voipToken: Bool? = nil) {
         self.id = id
         self.pushProvider = pushProvider
         self.pushProviderName = pushProviderName
         self.user = user
         self.userId = userId
+        self.voipToken = voipToken
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
@@ -43,6 +40,7 @@ internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         case pushProviderName = "push_provider_name"
         case user
         case userId = "user_id"
+        case voipToken = "voip_token"
     }
 
     // Encodable protocol methods
@@ -54,6 +52,7 @@ internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(pushProviderName, forKey: .pushProviderName)
         try container.encodeIfPresent(user, forKey: .user)
         try container.encodeIfPresent(userId, forKey: .userId)
+        try container.encodeIfPresent(voipToken, forKey: .voipToken)
     }
 }
 
