@@ -76,6 +76,7 @@ public class StreamVideo {
     ///   - user: The `User` who is logged in.
     ///   - token: The `UserToken` used to authenticate the user.
     ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - pushNotificationsConfig: Config for push notifications.
     ///   - tokenProvider: A closure that refreshes a token when it expires.
     /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
@@ -103,6 +104,7 @@ public class StreamVideo {
     ///   - user: The `User` who is logged in.
     ///   - token: The `UserToken` used to authenticate the user.
     ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - pushNotificationsConfig: Config for push notifications.
     /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
         apiKey: String,
@@ -134,16 +136,19 @@ public class StreamVideo {
     ///   - apiKey: The API key.
     ///   - user: The guest user.
     ///   - videoConfig: A `VideoConfig` instance representing the current video config.
+    ///   - pushNotificationsConfig: Config for push notifications.
     /// - Returns: A new instance of `StreamVideo`.
     public convenience init(
         apiKey: String,
         user: User,
-        videoConfig: VideoConfig = VideoConfig()
+        videoConfig: VideoConfig = VideoConfig(),
+        pushNotificationsConfig: PushNotificationsConfig = .default
     ) async throws {
         try await self.init(
             apiKey: apiKey,
             user: user,
             videoConfig: videoConfig,
+            pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
     }
@@ -251,6 +256,13 @@ public class StreamVideo {
         try await connectWebSocketClient()
     }
     
+    /// Creates a call with the provided call id, type and members.
+    /// This doesn't method create the call on the backend, for that you need to call `join` or `getOrCreateCall`.
+    /// - Parameters:
+    ///  - callType: the type of the call.
+    ///  - callId: the id of the all.
+    ///  - members: the members of the call.
+    /// - Returns: `Call` object.
     public func makeCall(
         callType: String,
         callId: String,
@@ -322,6 +334,8 @@ public class StreamVideo {
         }
     }
     
+    /// Sets a device for push notifications.
+    /// - Parameter id: the id of the device (token) for push notifications.
     public func setDevice(id: String) async throws {
         try await setDevice(
             id: id,
@@ -331,6 +345,8 @@ public class StreamVideo {
         )
     }
     
+    /// Sets a device for VoIP push notifications.
+    /// - Parameter id: the id of the device (token) for VoIP push notifications.
     public func setVoipDevice(id: String) async throws {
         try await setDevice(
             id: id,
@@ -340,10 +356,14 @@ public class StreamVideo {
         )
     }
     
+    /// Deletes the device with the provided id.
+    /// - Parameter id: the id of the device that will be deleted.
     public func deleteDevice(id: String) async throws {
         try await callCoordinatorController.coordinatorClient.deleteDevice(with: id)
     }
     
+    /// Lists the devices registered for the user.
+    /// - Returns: an array of `Device`s.
     public func listDevices() async throws -> [Device] {
         try await callCoordinatorController.coordinatorClient.listDevices().devices
     }
