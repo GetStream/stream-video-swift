@@ -152,7 +152,7 @@ var body: some View {
 }
 ```
 
-Our main container would be a `VStack`, that will show consist of two parts - the dominant speaker view and the scrollable participant list. 
+Our main container would be a `VStack`, that consists of two parts - the dominant speaker view and the scrollable participant list. 
 Additionally, the dominant speaker view also shows the call controls for the current user, which means we can use a `ZStack`.
 
 #### Dominant speaker view
