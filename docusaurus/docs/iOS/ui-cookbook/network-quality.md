@@ -6,7 +6,7 @@ Network quality can impact the video experience a lot. Therefore, it's always a 
 
 ### Before joining a call
 
-Before the user joins the call, the network quality is determined client side, from the SDK, by sending latency checks to the SFU that will host the call for the user. 
+Before the user joins the call, the network quality is determined on the client side, from the SDK, by sending latency checks to the SFU that will host the call for the user. 
 
 This is already handled in our `LobbyView`. However, if you want to create your own version of a lobby view, you can use our `LobbyViewModel`, for getting information about the current user's network quality.
 
