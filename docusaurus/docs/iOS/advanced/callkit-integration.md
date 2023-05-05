@@ -76,17 +76,23 @@ Next, we need to implement the `PKPushRegistryDelegate`:
 
 ```swift
 func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
+    print(credentials.token)
     let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
     log.debug("pushRegistry deviceToken = \(deviceToken)")
-    voipNotificationsController.addDevice(with: deviceToken)
-    voipTokenHandler.save(voipPushToken: deviceToken)
+    Task {
+        await MainActor.run(body: {
+            AppState.shared.voipPushToken = deviceToken
+        })
+    }
 }
-
+        
 func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
     log.debug("pushRegistry:didInvalidatePushTokenForType:")
     if let savedToken = voipTokenHandler.currentVoipPushToken() {
-        voipNotificationsController.removeDevice(with: savedToken)
-        voipTokenHandler.save(voipPushToken: nil)
+        Task {
+            try await streamVideo.deleteDevice(id: savedToken)
+            voipTokenHandler.save(voipPushToken: nil)
+        }
     }
 }
 
@@ -102,11 +108,27 @@ func pushRegistry(
 
 #### Saving the PN credentials
 
-We're implementing three methods here. The `pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType)` method is called when new push notifications credentials are provided. You should use this method to save the device token to our backend, by using `VoipNotificationsController`'s method `addDevice`. Also, you should save the token locally, in order to be able to delete it from the backend if the user logs out. For simplicity, we're storing it in a simple `UserDefaults` wrapper, but in a real-world app you should store it in a more secure place, such as the iOS Keychain.
+We're implementing three methods here. The `pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType)` method is called when new push notifications credentials are provided. You should use this method to save the device token to our backend. In our sample app, we are storing it in our `AppState` object. Whenever the `StreamVideo` SDK is initalized, we are saving the token to our backend, by calling the `setVoipDevice` method.
+
+```swift
+private func setVoipToken() {
+    if let voipPushToken, let streamVideo {
+        Task {
+            try await streamVideo.setVoipDevice(id: voipPushToken)
+        }
+    }
+}
+```
+
+Also, you should save the token locally, in order to be able to delete it from the backend if the user logs out. For simplicity, we're storing it in a simple `UserDefaults` wrapper, but in a real-world app you should store it in a more secure place, such as the iOS Keychain.
 
 #### Removing the PN credentials
 
-The `pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType)` is called when the push token is invalidated. When this method is called, you should delete the value saved with the method above.
+The `pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType)` is called when the push token is invalidated. When this method is called, you should delete the value saved with the method `deleteDevice` in `StreamVideo`.
+
+```swift
+try await streamVideo.deleteDevice(id: savedToken)
+```
 
 #### Receiving a push notification
 
@@ -118,44 +140,35 @@ The `CallService` class handles the `onReceiveIncomingPush` callbacks invoked by
 
 ```swift
 class CallService {
-
-    private static let defaultCallText = "You are receiving a call"
-
+    
+    private static let defaultCallText = "Unknown Caller"
+    
     static let shared = CallService()
-
+    
     let callService = CallKitService()
-
+    
     lazy var voipPushService = VoipPushService(
         voipTokenHandler: UnsecureUserRepository.shared
     ) { [weak self] payload, type, completion in
-        let aps = payload.dictionaryPayload["aps"] as? [String: Any]
-        let alert = aps?["alert"] as? [String: Any]
-        let callCid = alert?["call_cid"] as? String ?? "unknown"
+        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
+        let callCid = streamDict?["call_cid"] as? String ?? "unknown"
+        let createdByName = streamDict?["created_by_display_name"] as? String ?? Self.defaultCallText
+        let createdById = streamDict?["created_by_id"] as? String ?? Self.defaultCallText
         self?.callService.reportIncomingCall(
             callCid: callCid,
-            callInfo: self?.callInfo(from: alert) ?? Self.defaultCallText
+            displayName: createdByName,
+            callerId: createdById
         ) { _ in
             completion()
         }
     }
-
+    
     func registerForIncomingCalls() {
+    #if targetEnvironment(simulator)
+        log.info("CallKit notifications not working on a simulator")
+    #else
         voipPushService.registerForVoIPPushes()
-    }
-
-    private func callInfo(from callPayload: [String: Any]?) -> String {
-        guard let userIds = callPayload?["user_ids"] as? String else { return Self.defaultCallText }
-        let parts = userIds.components(separatedBy: ",")
-        if parts.count == 0 {
-            return Self.defaultCallText
-        } else if parts.count == 1 {
-            return "\(parts[0]) is calling you"
-        } else if parts.count == 2 {
-            return "\(parts[0]) and \(parts[1]) are calling you"
-        } else {
-            let othersCount = parts.count - 2
-            return "\(parts[0]), \(parts[1]) and \(othersCount) are calling you"
-        }
+    #endif
     }
 }
 ```
@@ -165,12 +178,14 @@ The `CallKitService` has a method called `reportIncomingCall`, which reports the
 ```swift
 func reportIncomingCall(
     callCid: String,
-    callInfo: String,
+    displayName: String,
+    callerId: String,
     completion: @escaping (Error?) -> Void
 ) {
     let configuration = CXProviderConfiguration()
     configuration.supportsVideo = true
     configuration.supportedHandleTypes = [.generic]
+    configuration.iconTemplateImageData = UIImage(named: "logo")?.pngData()
     let provider = CXProvider(
         configuration: configuration
     )
@@ -183,7 +198,15 @@ func reportIncomingCall(
     }
     let callUUID = UUID()
     callKitId = callUUID
-    update.remoteHandle = CXHandle(type: .generic, value: callInfo)
+    update.localizedCallerName = displayName
+    update.remoteHandle = CXHandle(type: .generic, value: callerId)
+    update.hasVideo = true
+    Task {
+        await MainActor.run(body: {
+            setupStreamVideoIfNeeded()
+            connectStreamVideo()
+        })
+    }
     provider.reportNewIncomingCall(
         with: callUUID,
         update: update,
@@ -194,43 +217,72 @@ func reportIncomingCall(
 
 The method also saves the `callId` and `callType`, and it generates a call UUID, which is required by CallKit for identifying calls.
 
+Before we report the call to `CallKit`, we are also setting up the `StreamVideo` client (if it's not setup already). Also, we are subscribing to web socket events. This is needed to handle the case when the caller stops the call - in this case we should also end the native calling screen.
+
+```swift
+@MainActor
+private func setupStreamVideoIfNeeded() {
+    guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
+        return
+    }
+    if AppState.shared.streamVideo == nil {
+        let streamVideo = StreamVideo(
+            apiKey: Config.apiKey,
+            user: currentUser.userInfo,
+            token: currentUser.token,
+            videoConfig: VideoConfig(),
+            tokenProvider: { result in
+                result(.success(currentUser.token))
+            }
+        )
+        AppState.shared.streamVideo = streamVideo
+    }
+}
+
+private func connectStreamVideo() {
+    Task {
+        try await streamVideo.connect()
+        subscribeToCallEvents()
+    }
+}
+
+private func subscribeToCallEvents() {
+    Task {
+        for await event in streamVideo.callEvents() {
+            switch event {
+            case .canceled(_), .ended(_):
+                endCurrentCall()
+            default:
+                log.debug("received call event")
+            }
+        }
+    }
+}
+```
+
 The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDKs calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions.
 
 First, we need to accept the call both from `CallKit`, as well as initiate the call inside the SDK. This is done with the `provider(_ provider: CXProvider, perform action: CXAnswerCallAction)` method in the `CXProviderDelegate`.
 
 ```swift
 func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-    guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
-        action.fail()
-        return
-    }
     if !callId.isEmpty {
-        if AppState.shared.streamVideo == nil {
-            let streamVideo = StreamVideo(
-                apiKey: "key1",
-                user: currentUser.userInfo,
-                token: currentUser.token,
-                videoConfig: VideoConfig(),
-                tokenProvider: { result in
-                    result(.success(currentUser.token))
-                }
-            )
-            AppState.shared.streamVideo = streamVideo
-        }
-        let callController = streamVideo.makeCallController(callType: callType, callId: callId)
         Task {
-            _ = try await callController.joinCall(
-                callType: callType,
-                callId: callId,
-                callSettings: CallSettings(),
-                videoOptions: VideoOptions(),
-                participantIds: []
-            )
             await MainActor.run {
-                AppState.shared.activeCallController = callController
-                action.fulfill()
+                Task {
+                    try await streamVideo.connect()
+                    self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                    AppState.shared.activeCall = call
+                    subscribeToCallEvents()
+                    try await call?.join()
+                    await MainActor.run {
+                        action.fulfill()
+                    }
+                }
             }
         }
+    } else {
+        action.fail()
     }
 }
 ```
@@ -252,7 +304,69 @@ Similarly, when the user decides to end the call via the `CallKit` interface, we
 ```swift
 func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
     callKitId = nil
-    streamVideo.leaveCall()
+    call?.leave()
+    call = nil
+    Task {
+        await MainActor.run {
+            AppState.shared.activeCall = nil
+        }
+    }
     action.fulfill()
 }
 ```
+
+### Starting a call from Recents
+
+When a call is started via `CallKit`, it appears in the "Recents" section in the native iOS phone app. Usually, when you tap on a recents entry, you should be able to call the person again.
+
+For this, we need to add a `INStartCallIntent` intent extension. To do this, go to your targets in Xcode and add a new "Intents Extension".
+
+After the extension is created, go to its `IntentHandler` and add the following code:
+
+```swift
+import Intents
+
+class IntentHandler: INExtension, INStartCallIntentHandling {
+     override func handler(for intent: INIntent) -> Any {
+         return self
+     }
+
+     func handle(intent: INStartCallIntent, completion: @escaping (INStartCallIntentResponse) -> Void) {
+         let userActivity = NSUserActivity(activityType: NSStringFromClass(INStartCallIntent.self))
+         let response = INStartCallIntentResponse(code: .continueInApp, userActivity: userActivity)
+
+         completion(response)
+     }
+}
+```
+
+In the `Info.plist` file of the extension, add the `INStartCallIntent` value in `IntentsSupported`, under `NSExtension` -> `NSExtensionAttributes`.
+
+With this setup, our app has the ability to react to `INStartCallIntent`s. Next, let's handle these intents in our SwiftUI code.
+
+In the `CallView` in our DemoApp, we are adding the following code:
+
+```swift
+var body: some View {
+    HomeView(viewModel: viewModel)
+        .modifier(CallModifier(viewModel: viewModel))
+        .onContinueUserActivity(NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
+                let interaction = userActivity.interaction
+                if let callIntent = interaction?.intent as? INStartCallIntent {
+
+                    let contact = callIntent.contacts?.first
+
+                    guard let name = contact?.personHandle?.value else { return }
+                    viewModel.startCall(callId: UUID().uuidString, type: .default, members: [.init(id: name)], ring: true)
+                }
+            }
+        )
+}
+```
+
+The important part is the `onContinueUserActivity`, where we listen to `INStartCallIntent`s. In the closure, we are extracting the first contact and take their name, which is the user id. We use that name to start a ringing call.
+
+Additionally, if you have integration with the native contacts on iOS (`Contacts` framework), you can extract the full name, phone number etc, and use those to provide more details for the members. Alternatively, you can call our `queryUsers` method to get more user information that's available on the Stream backend.
+
+If you are using UIKit, you should implement the method `application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([UIUserActivityRestoring]?) -> Void)` in your `AppDelegate`, and provide a similar handling as in the SwiftUI sample.
+

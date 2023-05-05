@@ -13,14 +13,14 @@ import AnyCodable
 public struct Device: Codable, JSONEncodable, Hashable {
 
     /** Date/time of creation */
-    internal var createdAt: Date
+    public var createdAt: Date
     /** Whether device is disabled or not */
-    internal var disabled: Bool?
+    public var disabled: Bool?
     /** Reason explaining why device had been disabled */
-    internal var disabledReason: String?
-    internal var id: String
-    internal var pushProvider: String
-    internal var pushProviderName: String?
+    public var disabledReason: String?
+    public var id: String
+    public var pushProvider: String
+    public var pushProviderName: String?
 
     internal init(createdAt: Date, disabled: Bool? = nil, disabledReason: String? = nil, id: String, pushProvider: String, pushProviderName: String? = nil) {
         self.createdAt = createdAt
