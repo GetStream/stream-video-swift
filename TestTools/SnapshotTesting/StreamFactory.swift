@@ -69,7 +69,7 @@ struct ParticipantFactory {
                 userId: "test\(i)",
                 roles: ["user"],
                 name: "\(i) Test",
-                profileImageURL: i % 2 == 0 ? ImageFactory.coffee : ImageFactory.olive,
+                profileImageURL: ImageFactory.get(i),
                 trackLookupPrefix: nil,
                 hasVideo: hasVideo,
                 hasAudio: hasAudio,
@@ -96,7 +96,7 @@ struct UserFactory {
             let participant = User(
                 id: "test\(i)",
                 name: "\(i) Test",
-                imageURL: i % 2 == 0 ? ImageFactory.coffee : ImageFactory.olive
+                imageURL: ImageFactory.get(i)
             )
             factory.append(participant)
         }
@@ -106,8 +106,31 @@ struct UserFactory {
 }
 
 struct ImageFactory {
-    static let olive = Bundle.testResources.url(forResource: "olive", withExtension: "png")
-    static let coffee = Bundle.testResources.url(forResource: "coffee", withExtension: "png")
+    
+    static func get(_ number: Int) -> URL? {
+        switch number {
+        case 1:
+            return Bundle.testResources.url(forResource: "olive", withExtension: "png")
+        case 2:
+            return Bundle.testResources.url(forResource: "coffee", withExtension: "png")
+        case 3:
+            return Bundle.testResources.url(forResource: "sky", withExtension: "png")
+        case 4:
+            return Bundle.testResources.url(forResource: "forest", withExtension: "png")
+        case 5:
+            return Bundle.testResources.url(forResource: "sun", withExtension: "png")
+        case 6:
+            return Bundle.testResources.url(forResource: "fire", withExtension: "png")
+        case 7:
+            return Bundle.testResources.url(forResource: "sea", withExtension: "png")
+        case 8:
+            return Bundle.testResources.url(forResource: "violet", withExtension: "png")
+        case 9:
+            return Bundle.testResources.url(forResource: "pink", withExtension: "png")
+        default:
+            return Bundle.testResources.url(forResource: "skin", withExtension: "png")
+        }
+    }
 }
 
 extension Bundle {
