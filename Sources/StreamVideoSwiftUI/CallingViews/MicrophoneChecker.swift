@@ -76,7 +76,7 @@ public class MicrophoneChecker: ObservableObject {
                 let decibel = audioRecorder.averagePower(forChannel: 0)
                 var temp = self.decibels
                 temp.append(decibel)
-                if temp.count > valueLimit {
+                if temp.count > self.valueLimit {
                     temp = Array(temp.dropFirst())
                 }
                 self.decibels = temp
