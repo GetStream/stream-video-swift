@@ -12,7 +12,7 @@ In this tutorial, we will build a video calling app without using our UI SDKs. T
 
 Here's a screenshot of what we are going to build:
 
-![Screenshot shows the resulting UI](../assets/cookbook_1.png)
+![Screenshot shows the resulting UI](../assets/cookbook_01.png)
 
 ### Prerequisites
 
