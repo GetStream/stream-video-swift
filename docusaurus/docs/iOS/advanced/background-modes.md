@@ -11,6 +11,6 @@ In the case of your app, assuming user **A** has audio unmuted, video on, and i
 1. Click the app's name in the Project Navigator, select your target, and go to the **Signing & Capabilities** tab.
 2. Enable these capabilities by selecting the following checkboxes.
 
-![Configure background modes](https://github.com/GetStream/stream-video-swift/blob/main/docusaurus/docs/iOS/assets/callkit_01.png)
+![Configure background modes](../assets/callkit_01.png)
 
 After enabling these background mode capabilities, unmuted audio will remain unmuted when the app goes into the background. Also, picture-in-picture will be available to the call participant while the app remains in the background. 
