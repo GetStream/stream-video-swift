@@ -86,13 +86,6 @@ struct VideoDemoSwiftUIApp: App {
                 result(.success(userCredentials.token))
             }
         )
-        connectUser()
-    }
-
-    private func connectUser() {
-        Task {
-            try await streamVideo?.connect()
-        }
     }
 
     var body: some Scene {
@@ -138,6 +131,8 @@ import SwiftUI
 
 struct ContentView: View {
 
+    @Injected(\.streamVideo) var streamVideo
+
     @StateObject var callViewModel = CallViewModel()
     @State var callId = ""
 
@@ -160,6 +155,11 @@ struct ContentView: View {
         }
         .padding()
         .modifier(CallModifier(viewModel: callViewModel))
+        .onAppear {
+            Task {
+                try await streamVideo.connect()
+            }
+        }
     }
 }
 ```
@@ -167,6 +167,12 @@ struct ContentView: View {
 Here, you need to create the `CallViewModel`, which deals with the call related state and provides access to features like muting audio/video, changing the camera, starting / stopping calls etc.
 
 In the example, we're also setting a `CallModifier` to the view. With this modifier, the calling support is added to your view. The modifier handles everything from reporting incoming / outgoing calls to showing the appropriate UI based on the call state.
+
+Lastly, we are also calling `streamVideo.connect()` in the `.onAppear` modifier. This is necessary, so that the user we've set during initialization of the `StreamVideo` object is connected to the backend.
+
+:::note
+In a production application we would call the `.connect()` function earlier during our login flow. For the sake of this tutorial we're simplifying this here. The way we retrieve the `streamVideo` object here is through the `@Injected` property wrapper (read more on [this page](../ui/injecting-dependencies.md).)
+:::
 
 ### UI Customizations
 
