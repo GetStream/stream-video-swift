@@ -116,7 +116,7 @@ public class VideoRenderer: RTCMTLVideoView {
 
 extension VideoRenderer {
     
-    func handleViewRendering(
+    public func handleViewRendering(
         for participant: CallParticipant,
         onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> ()
     ) {

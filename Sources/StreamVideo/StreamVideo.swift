@@ -276,6 +276,7 @@ public class StreamVideo {
         )
         let eventsController = makeEventsController(callId: callId, callType: callType)
         let permissionsController = makePermissionsController(callId: callId, callType: callType)
+        let livestreamController = makeLivestreamController(callType: callType, callId: callId)
         return Call(
             callId: callId,
             callType: callType,
@@ -283,6 +284,7 @@ public class StreamVideo {
             recordingController: recordingController,
             eventsController: eventsController,
             permissionsController: permissionsController,
+            livestreamController: livestreamController,
             members: members,
             videoOptions: VideoOptions(),
             allEventsMiddleWare: videoConfig.listenToAllEvents ? allEventsMiddleware : nil
@@ -470,6 +472,17 @@ public class StreamVideo {
         return controller
     }
     
+    private func makeLivestreamController(callType: String, callId: String) -> LivestreamController {
+        let controller = LivestreamController(
+            callCoordinatorController: callCoordinatorController,
+            currentUser: user,
+            callId: callId,
+            callType: callType
+        )
+        callsMiddleware.onBroadcastingEvent = controller.onBroadcastingEvent
+        return controller
+    }
+    
     private func connectWebSocketClient() async throws {
         let queryParams = Self.endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
         if let connectURL = try? URL(string: Self.endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
@@ -588,6 +601,7 @@ public class StreamVideo {
     @objc private func handleCallEnded() {
         recordingEventsMiddleware.onRecordingEvent = nil
         callsMiddleware.onCallUpdated = nil
+        callsMiddleware.onBroadcastingEvent = nil
         customEventsMiddleware.onCustomEvent = nil
         customEventsMiddleware.onNewReaction = nil
         permissionsMiddleware.onPermissionRequestEvent = nil

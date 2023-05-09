@@ -290,6 +290,128 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case react // = 1
+  case angular // = 2
+  case android // = 3
+  case ios // = 4
+  case flutter // = 5
+  case reactNative // = 6
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .react
+    case 2: self = .angular
+    case 3: self = .android
+    case 4: self = .ios
+    case 5: self = .flutter
+    case 6: self = .reactNative
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .react: return 1
+    case .angular: return 2
+    case .android: return 3
+    case .ios: return 4
+    case .flutter: return 5
+    case .reactNative: return 6
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_SdkType: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_SdkType] = [
+    .unspecified,
+    .react,
+    .angular,
+    .android,
+    .ios,
+    .flutter,
+    .reactNative,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+enum Stream_Video_Sfu_Models_TrackUnpublishReason: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+
+  /// Default value which is used when the specific reason
+  /// for muting the track is not known.
+  case unspecified // = 0
+
+  /// Represents user muting their tracks.
+  case userMuted // = 1
+
+  /// Represents muting the track because the permission to
+  /// publish the track has been revoked.
+  case permissionRevoked // = 2
+
+  /// Represents muting the track due to moderation actions.
+  /// This is different from permission revoked because the
+  /// participant can unmute themselves here whereas in case
+  /// of "permission revoke" it is not possible until the
+  /// call permissions are updated.
+  case moderation // = 3
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .userMuted
+    case 2: self = .permissionRevoked
+    case 3: self = .moderation
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .userMuted: return 1
+    case .permissionRevoked: return 2
+    case .moderation: return 3
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_TrackUnpublishReason: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_TrackUnpublishReason] = [
+    .unspecified,
+    .userMuted,
+    .permissionRevoked,
+    .moderation,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
 struct Stream_Video_Sfu_Models_CallState {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -554,11 +676,126 @@ struct Stream_Video_Sfu_Models_ClientDetails {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  var version: Int32 = 0
+  var sdk: Stream_Video_Sfu_Models_Sdk {
+    get {return _sdk ?? Stream_Video_Sfu_Models_Sdk()}
+    set {_sdk = newValue}
+  }
+  /// Returns true if `sdk` has been explicitly set.
+  var hasSdk: Bool {return self._sdk != nil}
+  /// Clears the value of `sdk`. Subsequent reads from it will return its default value.
+  mutating func clearSdk() {self._sdk = nil}
 
-  var os: String = String()
+  var os: Stream_Video_Sfu_Models_OS {
+    get {return _os ?? Stream_Video_Sfu_Models_OS()}
+    set {_os = newValue}
+  }
+  /// Returns true if `os` has been explicitly set.
+  var hasOs: Bool {return self._os != nil}
+  /// Clears the value of `os`. Subsequent reads from it will return its default value.
+  mutating func clearOs() {self._os = nil}
 
-  var browser: String = String()
+  var browser: Stream_Video_Sfu_Models_Browser {
+    get {return _browser ?? Stream_Video_Sfu_Models_Browser()}
+    set {_browser = newValue}
+  }
+  /// Returns true if `browser` has been explicitly set.
+  var hasBrowser: Bool {return self._browser != nil}
+  /// Clears the value of `browser`. Subsequent reads from it will return its default value.
+  mutating func clearBrowser() {self._browser = nil}
+
+  var device: Stream_Video_Sfu_Models_Device {
+    get {return _device ?? Stream_Video_Sfu_Models_Device()}
+    set {_device = newValue}
+  }
+  /// Returns true if `device` has been explicitly set.
+  var hasDevice: Bool {return self._device != nil}
+  /// Clears the value of `device`. Subsequent reads from it will return its default value.
+  mutating func clearDevice() {self._device = nil}
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _sdk: Stream_Video_Sfu_Models_Sdk? = nil
+  fileprivate var _os: Stream_Video_Sfu_Models_OS? = nil
+  fileprivate var _browser: Stream_Video_Sfu_Models_Browser? = nil
+  fileprivate var _device: Stream_Video_Sfu_Models_Device? = nil
+}
+
+struct Stream_Video_Sfu_Models_Sdk {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var type: Stream_Video_Sfu_Models_SdkType = .unspecified
+
+  var major: String = String()
+
+  var minor: String = String()
+
+  var patch: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_OS {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var name: String = String()
+
+  var version: String = String()
+
+  var architecture: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_Browser {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var name: String = String()
+
+  var version: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_Device {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var name: String = String()
+
+  var version: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+/// CallGrants represents the set of permissions given
+/// to the user for the current call.
+struct Stream_Video_Sfu_Models_CallGrants {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var canPublishAudio: Bool = false
+
+  var canPublishVideo: Bool = false
+
+  var canScreenshare: Bool = false
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -571,6 +808,8 @@ extension Stream_Video_Sfu_Models_ConnectionQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ErrorCode: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
@@ -582,6 +821,11 @@ extension Stream_Video_Sfu_Models_TrackInfo: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Call: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Error: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ClientDetails: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Sdk: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_OS: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Browser: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Device: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_CallGrants: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -637,6 +881,27 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     403: .same(proto: "ERROR_CODE_PERMISSION_DENIED"),
     429: .same(proto: "ERROR_CODE_TOO_MANY_REQUESTS"),
     500: .same(proto: "ERROR_CODE_INTERNAL_SERVER_ERROR"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_SdkType: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "SDK_TYPE_UNSPECIFIED"),
+    1: .same(proto: "SDK_TYPE_REACT"),
+    2: .same(proto: "SDK_TYPE_ANGULAR"),
+    3: .same(proto: "SDK_TYPE_ANDROID"),
+    4: .same(proto: "SDK_TYPE_IOS"),
+    5: .same(proto: "SDK_TYPE_FLUTTER"),
+    6: .same(proto: "SDK_TYPE_REACT_NATIVE"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_TrackUnpublishReason: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "TRACK_UNPUBLISH_REASON_UNSPECIFIED"),
+    1: .same(proto: "TRACK_UNPUBLISH_REASON_USER_MUTED"),
+    2: .same(proto: "TRACK_UNPUBLISH_REASON_PERMISSION_REVOKED"),
+    3: .same(proto: "TRACK_UNPUBLISH_REASON_MODERATION"),
   ]
 }
 
@@ -1209,9 +1474,10 @@ extension Stream_Video_Sfu_Models_Error: SwiftProtobuf.Message, SwiftProtobuf._M
 extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".ClientDetails"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
-    1: .same(proto: "version"),
+    1: .same(proto: "sdk"),
     2: .same(proto: "os"),
     3: .same(proto: "browser"),
+    4: .same(proto: "device"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1220,31 +1486,254 @@ extension Stream_Video_Sfu_Models_ClientDetails: SwiftProtobuf.Message, SwiftPro
       // allocates stack space for every case branch when no optimizations are
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
-      case 1: try { try decoder.decodeSingularInt32Field(value: &self.version) }()
-      case 2: try { try decoder.decodeSingularStringField(value: &self.os) }()
-      case 3: try { try decoder.decodeSingularStringField(value: &self.browser) }()
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._sdk) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._os) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._browser) }()
+      case 4: try { try decoder.decodeSingularMessageField(value: &self._device) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
-    if self.version != 0 {
-      try visitor.visitSingularInt32Field(value: self.version, fieldNumber: 1)
-    }
-    if !self.os.isEmpty {
-      try visitor.visitSingularStringField(value: self.os, fieldNumber: 2)
-    }
-    if !self.browser.isEmpty {
-      try visitor.visitSingularStringField(value: self.browser, fieldNumber: 3)
-    }
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._sdk {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try { if let v = self._os {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._browser {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
+    try { if let v = self._device {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 4)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Models_ClientDetails, rhs: Stream_Video_Sfu_Models_ClientDetails) -> Bool {
+    if lhs._sdk != rhs._sdk {return false}
+    if lhs._os != rhs._os {return false}
+    if lhs._browser != rhs._browser {return false}
+    if lhs._device != rhs._device {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_Sdk: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Sdk"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "type"),
+    2: .same(proto: "major"),
+    3: .same(proto: "minor"),
+    4: .same(proto: "patch"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.type) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.major) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.minor) }()
+      case 4: try { try decoder.decodeSingularStringField(value: &self.patch) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.type != .unspecified {
+      try visitor.visitSingularEnumField(value: self.type, fieldNumber: 1)
+    }
+    if !self.major.isEmpty {
+      try visitor.visitSingularStringField(value: self.major, fieldNumber: 2)
+    }
+    if !self.minor.isEmpty {
+      try visitor.visitSingularStringField(value: self.minor, fieldNumber: 3)
+    }
+    if !self.patch.isEmpty {
+      try visitor.visitSingularStringField(value: self.patch, fieldNumber: 4)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_Sdk, rhs: Stream_Video_Sfu_Models_Sdk) -> Bool {
+    if lhs.type != rhs.type {return false}
+    if lhs.major != rhs.major {return false}
+    if lhs.minor != rhs.minor {return false}
+    if lhs.patch != rhs.patch {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_OS: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".OS"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+    2: .same(proto: "version"),
+    3: .same(proto: "architecture"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.version) }()
+      case 3: try { try decoder.decodeSingularStringField(value: &self.architecture) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 1)
+    }
+    if !self.version.isEmpty {
+      try visitor.visitSingularStringField(value: self.version, fieldNumber: 2)
+    }
+    if !self.architecture.isEmpty {
+      try visitor.visitSingularStringField(value: self.architecture, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_OS, rhs: Stream_Video_Sfu_Models_OS) -> Bool {
+    if lhs.name != rhs.name {return false}
     if lhs.version != rhs.version {return false}
-    if lhs.os != rhs.os {return false}
-    if lhs.browser != rhs.browser {return false}
+    if lhs.architecture != rhs.architecture {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_Browser: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Browser"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+    2: .same(proto: "version"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.version) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 1)
+    }
+    if !self.version.isEmpty {
+      try visitor.visitSingularStringField(value: self.version, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_Browser, rhs: Stream_Video_Sfu_Models_Browser) -> Bool {
+    if lhs.name != rhs.name {return false}
+    if lhs.version != rhs.version {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_Device: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Device"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "name"),
+    2: .same(proto: "version"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.name) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.version) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.name.isEmpty {
+      try visitor.visitSingularStringField(value: self.name, fieldNumber: 1)
+    }
+    if !self.version.isEmpty {
+      try visitor.visitSingularStringField(value: self.version, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_Device, rhs: Stream_Video_Sfu_Models_Device) -> Bool {
+    if lhs.name != rhs.name {return false}
+    if lhs.version != rhs.version {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_CallGrants: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CallGrants"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "can_publish_audio"),
+    2: .standard(proto: "can_publish_video"),
+    3: .standard(proto: "can_screenshare"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularBoolField(value: &self.canPublishAudio) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.canPublishVideo) }()
+      case 3: try { try decoder.decodeSingularBoolField(value: &self.canScreenshare) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.canPublishAudio != false {
+      try visitor.visitSingularBoolField(value: self.canPublishAudio, fieldNumber: 1)
+    }
+    if self.canPublishVideo != false {
+      try visitor.visitSingularBoolField(value: self.canPublishVideo, fieldNumber: 2)
+    }
+    if self.canScreenshare != false {
+      try visitor.visitSingularBoolField(value: self.canScreenshare, fieldNumber: 3)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_CallGrants, rhs: Stream_Video_Sfu_Models_CallGrants) -> Bool {
+    if lhs.canPublishAudio != rhs.canPublishAudio {return false}
+    if lhs.canPublishVideo != rhs.canPublishVideo {return false}
+    if lhs.canScreenshare != rhs.canScreenshare {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

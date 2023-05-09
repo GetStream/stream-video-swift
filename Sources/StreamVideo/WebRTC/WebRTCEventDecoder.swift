@@ -40,6 +40,8 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .error(value):
             return value
+        case let .callGrantsUpdated(value):
+            return value
         }
     }
 }

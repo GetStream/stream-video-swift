@@ -40,6 +40,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     private let recordingController: RecordingController
     private let eventsController: EventsController
     private let permissionsController: PermissionsController
+    private let livestreamController: LivestreamController
     private let members: [User]
     private let videoOptions: VideoOptions
     private var allEventsMiddleware: AllEventsMiddleware?
@@ -51,6 +52,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         recordingController: RecordingController,
         eventsController: EventsController,
         permissionsController: PermissionsController,
+        livestreamController: LivestreamController,
         members: [User],
         videoOptions: VideoOptions,
         allEventsMiddleWare: AllEventsMiddleware?
@@ -61,6 +63,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         self.recordingController = recordingController
         self.eventsController = eventsController
         self.permissionsController = permissionsController
+        self.livestreamController = livestreamController
         self.members = members
         self.videoOptions = videoOptions
         self.allEventsMiddleware = allEventsMiddleWare
@@ -245,6 +248,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         eventsController.cleanUp()
         permissionsController.cleanUp()
         callController.cleanUp()
+        livestreamController.cleanUp()
     }
     
     /// Listen to all raw WS events. The data is provided as a dictionary.
@@ -399,6 +403,23 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Creates an asynchronous stream of `RecordingEvent` objects.
     public func recordingEvents() -> AsyncStream<RecordingEvent> {
         recordingController.recordingEvents()
+    }
+    
+    //MARK: - Broadcasting
+    
+    /// Starts broadcasting of the call.
+    public func startBroadcasting() async throws {
+        try await livestreamController.startBroadcasting()
+    }
+    
+    /// Stops broadcasting of the call.
+    public func stopBroadcasting() async throws {
+        try await livestreamController.stopBroadcasting()
+    }
+    
+    /// Listens to broadcasting events.
+    public func broadcastingEvents() -> AsyncStream<BroadcastingEvent> {
+        livestreamController.broadcastingEvents()
     }
     
     //MARK: - Events

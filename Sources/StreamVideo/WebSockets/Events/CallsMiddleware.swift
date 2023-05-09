@@ -8,6 +8,7 @@ class CallsMiddleware: EventMiddleware {
     
     var onCallEvent: ((CallEvent) -> Void)?
     var onCallUpdated: ((CallInfo) -> Void)?
+    var onBroadcastingEvent: ((BroadcastingEvent) -> Void)?
     var onAnyEvent: ((Event) -> Void)?
     
     func handle(event: Event) -> Event? {
@@ -49,6 +50,21 @@ class CallsMiddleware: EventMiddleware {
                 blockedUsers: blockedUsers
             )
             onCallUpdated?(callInfo)
+        } else if let event = event as? CallBroadcastingStartedEvent {
+            let broadcastStarted = BroadcastingStartedEvent(
+                callCid: event.callCid,
+                createdAt: event.createdAt,
+                hlsPlaylistUrl: event.hlsPlaylistUrl,
+                type: event.type
+            )
+            onBroadcastingEvent?(broadcastStarted)
+        } else if let event = event as? CallBroadcastingStoppedEvent {
+            let broadcastStopped = BroadcastingStoppedEvent(
+                callCid: event.callCid,
+                createdAt: event.createdAt,
+                type: event.type
+            )
+            onBroadcastingEvent?(broadcastStopped)
         }
         onAnyEvent?(event)
         

@@ -197,6 +197,16 @@ class CoordinatorClient: @unchecked Sendable {
         _ = try await httpClient.execute(request: urlRequest)
     }
     
+    func startBroadcasting(callId: String, callType: String) async throws {
+        let urlRequest = try makeRequest(for: "/call/\(callType)/\(callId)/start_broadcasting")
+        _ = try await httpClient.execute(request: urlRequest)
+    }
+    
+    func stopBroadcasting(callId: String, callType: String) async throws {
+        let urlRequest = try makeRequest(for: "/call/\(callType)/\(callId)/stop_broadcasting")
+        _ = try await httpClient.execute(request: urlRequest)
+    }
+    
     func deleteDevice(with id: String) async throws {
         var queryParams = defaultQueryParams
         queryParams["id"] = id

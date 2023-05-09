@@ -36,6 +36,8 @@ public class CallsController: ObservableObject {
     private var watchTask: Task<Void, Error>?
     private var socketDisconnected = false
     
+    private var broadcastEventsContinuation: AsyncStream<BroadcastingEvent>.Continuation?
+    
     init(streamVideo: StreamVideo, coordinatorClient: CoordinatorClient, callsQuery: CallsQuery) {
         self.coordinatorClient = coordinatorClient
         self.callsQuery = callsQuery
@@ -46,6 +48,12 @@ public class CallsController: ObservableObject {
     /// Loads the next page of calls.
     public func loadNextCalls() async throws {
         try await loadCalls()
+    }
+    
+    public func broadcastEvents() -> AsyncStream<BroadcastingEvent> {
+        AsyncStream { continuation in
+            self.broadcastEventsContinuation = continuation
+        }
     }
     
     public func cleanUp() {
@@ -154,6 +162,39 @@ public class CallsController: ObservableObject {
                 }
             )
             calls.insert(callData, at: 0)
+        } else if let broadcastingStarted = event as? CallBroadcastingStartedEvent {
+            let index = calls.firstIndex { callData in
+                callData.callCid == broadcastingStarted.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].broadcasting = true
+            broadcastEventsContinuation?.yield(
+                BroadcastingStartedEvent(
+                    callCid: broadcastingStarted.callCid,
+                    createdAt: broadcastingStarted.createdAt,
+                    hlsPlaylistUrl: broadcastingStarted.hlsPlaylistUrl,
+                    type: broadcastingStarted.type
+                )
+            )
+        } else if let broadcastingStopped = event as? CallBroadcastingStoppedEvent {
+            let index = calls.firstIndex { callData in
+                callData.callCid == broadcastingStopped.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].broadcasting = false
+            broadcastEventsContinuation?.yield(
+                BroadcastingStoppedEvent(
+                    callCid: broadcastingStopped.callCid,
+                    createdAt: broadcastingStopped.createdAt,
+                    type: broadcastingStopped.type
+                )
+            )
         } else if event is WSDisconnected {
             self.socketDisconnected = true
         } else if event is WSConnected {
