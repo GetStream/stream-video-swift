@@ -249,6 +249,7 @@ extension CallResponse {
             endedAt: endedAt,
             recording: recording,
             updatedAt: updatedAt,
+            hlsPlaylistUrl: hlsPlaylistUrl,
             customData: result
         )
     }

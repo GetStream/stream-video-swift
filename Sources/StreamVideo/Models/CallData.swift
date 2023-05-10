@@ -15,6 +15,7 @@ public struct CallData: @unchecked Sendable {
     public var recording: Bool
     public var startsAt: Date?
     public var updatedAt: Date
+    public var hlsPlaylistUrl: String
     public var customData: [String: Any]
 }
 
@@ -26,5 +27,6 @@ extension CallData {
         self.recording = callResponse.recording
         self.startsAt = callResponse.startsAt
         self.updatedAt = callResponse.updatedAt
+        self.hlsPlaylistUrl = callResponse.hlsPlaylistUrl
     }
 }

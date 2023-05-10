@@ -19,6 +19,8 @@ public class Call: ObservableObject, @unchecked Sendable {
     @Published public private(set) var reconnectionStatus = ReconnectionStatus.connected
     /// The call recording state.
     @Published public private(set) var recordingState: RecordingState = .noRecording
+    /// The total number of participants connected to the call.
+    @Published public internal(set) var participantCount: UInt32 = 0
     
     /// The id of the current session.
     var sessionId: String = ""
@@ -419,7 +421,20 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     /// Listens to broadcasting events.
     public func broadcastingEvents() -> AsyncStream<BroadcastingEvent> {
-        livestreamController.broadcastingEvents()
+        AsyncStream { continuation in
+            Task {
+                for await event in livestreamController.broadcastingEvents() {
+                    if event.callCid == cId {
+                        if event is BroadcastingStoppedEvent {
+                            state?.broadcasting = false
+                        } else {
+                            state?.broadcasting = true
+                        }
+                        continuation.yield(event)
+                    }
+                }
+            }
+        }
     }
     
     //MARK: - Events
@@ -465,7 +480,6 @@ public class Call: ObservableObject, @unchecked Sendable {
     internal func update(recordingState: RecordingState) {
         self.recordingState = recordingState
     }
-    
 }
 
 public enum ReconnectionStatus {

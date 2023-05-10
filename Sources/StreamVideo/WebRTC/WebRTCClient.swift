@@ -128,6 +128,7 @@ class WebRTCClient: NSObject {
         }
     }
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
+    var onParticipantCountUpdated: ((UInt32) -> ())?
     
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -211,6 +212,8 @@ class WebRTCClient: NSObject {
         videoCapturer = nil
         publisher = nil
         subscriber = nil
+        signalChannel?.onWSConnectionEstablished = nil
+        signalChannel?.participantCountUpdated = nil
         signalChannel?.disconnect {}
         signalChannel = nil
         localAudioTrack = nil
@@ -221,6 +224,7 @@ class WebRTCClient: NSObject {
         onParticipantsUpdated = nil
         onParticipantEvent = nil
         onSignalConnectionStateChange = nil
+        onParticipantCountUpdated = nil
     }
     
     func startCapturingLocalVideo(cameraPosition: AVCaptureDevice.Position) {
@@ -556,6 +560,9 @@ class WebRTCClient: NSObject {
             Task {
                 try await self.handleSocketConnected()
             }
+        }
+        webSocketClient.participantCountUpdated = { [weak self] participantCount in
+            self?.onParticipantCountUpdated?(participantCount)
         }
 
         return webSocketClient

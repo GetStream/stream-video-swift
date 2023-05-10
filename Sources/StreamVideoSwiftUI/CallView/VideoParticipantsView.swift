@@ -155,6 +155,7 @@ public struct VideoCallParticipantView: View {
     var id: String
     var availableSize: CGSize
     var contentMode: UIView.ContentMode
+    var edgesIgnoringSafeArea: Edge.Set
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     public init(
@@ -162,12 +163,14 @@ public struct VideoCallParticipantView: View {
         id: String? = nil,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
+        edgesIgnoringSafeArea: Edge.Set = .all,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) {
         self.participant = participant
         self.id = id ?? participant.id
         self.availableSize = availableSize
         self.contentMode = contentMode
+        self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.onViewUpdate = onViewUpdate
     }
     
@@ -180,7 +183,7 @@ public struct VideoCallParticipantView: View {
             onViewUpdate(participant, view)
         }
         .opacity(showVideo ? 1 : 0)
-        .edgesIgnoringSafeArea(.all)
+        .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
         .overlay(

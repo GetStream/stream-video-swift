@@ -12,6 +12,7 @@ class CallController {
         didSet {
             handleParticipantsUpdated()
             handleParticipantEvent()
+            handleParticipantCountUpdated()
             if let allEventsMiddleware {
                 webRTCClient?.eventNotificationCenter.add(middleware: allEventsMiddleware)
             }
@@ -318,13 +319,23 @@ class CallController {
     
     private func handleParticipantsUpdated() {
         webRTCClient?.onParticipantsUpdated = { [weak self] participants in
-            self?.call?.participants = participants
+            DispatchQueue.main.async {
+                self?.call?.participants = participants
+            }
         }
     }
     
     private func handleParticipantEvent() {
         webRTCClient?.onParticipantEvent = { [weak self] event in
             self?.call?.onParticipantEvent?(event)
+        }
+    }
+    
+    private func handleParticipantCountUpdated() {
+        webRTCClient?.onParticipantCountUpdated = { [weak self] participantCount in
+            DispatchQueue.main.async {
+                self?.call?.participantCount = participantCount
+            }
         }
     }
     

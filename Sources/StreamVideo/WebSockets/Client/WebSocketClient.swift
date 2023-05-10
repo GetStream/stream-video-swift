@@ -73,6 +73,7 @@ class WebSocketClient {
         
     var onWSConnectionEstablished: (() -> Void)?
     var onConnected: (() -> Void)?
+    var participantCountUpdated: ((UInt32) -> ())?
     
     init(
         sessionConfiguration: URLSessionConfiguration,
@@ -188,9 +189,10 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.info("Skipping unsupported event type", subsystems: .webSocket)
         } catch {
             // Check if the message contains an error object from the server
-            let errorContainer = try? StreamJSONDecoder.default.decode(WebSocketErrorContainer.self, from: data)
-            let webSocketError = ClientError.WebSocket(with: errorContainer?.error)
-            connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
+            if let errorContainer = try? StreamJSONDecoder.default.decode(WebSocketErrorContainer.self, from: data) {
+                let webSocketError = ClientError.WebSocket(with: errorContainer.error)
+                connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
+            }
         }
     }
     
@@ -216,6 +218,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
             healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
         } else if let healthCheckEvent = healthCheckEvent as? Stream_Video_Sfu_Event_HealthCheckResponse {
             healthCheckInfo = HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
+            participantCountUpdated?(healthCheckEvent.participantCount)
         } else if let wsConnected = healthCheckEvent as? ConnectedEvent {
             let healthCheck = HealthCheckEvent(
                 connectionId: wsConnected.connectionId,
