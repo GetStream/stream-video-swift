@@ -1,5 +1,20 @@
 # StreamVideo iOS
 
+<p align="center">
+  <a href="https://cocoapods.org/pods/StreamVideo"><img src="https://img.shields.io/badge/CocoaPods-compatible-green" /></a>
+  <a href="https://github.com/Carthage/Carthage"><img src="https://img.shields.io/badge/Carthage-compatible-green" /></a>
+  <a href="https://www.swift.org/package-manager/"><img src="https://img.shields.io/badge/SPM-compatible-green" /></a>
+</p>
+<p align="center">
+  <a href="https://getstream.io/video/docs/sdk/ios/"><img src="https://img.shields.io/badge/iOS-11%2B-lightblue" /></a>
+  <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.6-orange.svg" /></a>
+  <a href="https://github.com/GetStream/stream-video-swift/actions"><img src="https://github.com/GetStream/stream-video-swift/actions/workflows/cron-checks.yml/badge.svg" /></a>
+</p>
+<p align="center">
+  <img alt="StreamVideo" src="https://img.shields.io/endpoint?url=https://stream-sdks-size-badges.onrender.com/ios/stream-video&cacheSeconds=86400"/>
+  <img alt="StreamVideoSwiftUI" src="https://img.shields.io/endpoint?url=https://stream-sdks-size-badges.onrender.com/ios/stream-video-swiftui&cacheSeconds=86400"/>
+</p>
+
 This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repository includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
 
 ## Introduction
@@ -18,7 +33,7 @@ This repository contains the following parts:
 
 ### Low-Level Client
 
-The low-level client is used for establishing audio and video calls. It integrates with Stream's backend infrastructure, and implements the WebRTC protocol. 
+The low-level client is used for establishing audio and video calls. It integrates with Stream's backend infrastructure, and implements the WebRTC protocol.
 
 Here are the most important components that the low-level client provides:
 - `StreamVideo` - the main SDK object.
@@ -33,13 +48,13 @@ The simplest way to add calling support to your hosting view is to attach the `C
 
 ```swift
 struct CallView: View {
-    
+
     @StateObject var viewModel: CallViewModel
-    
+
     init() {
-        _viewModel = StateObject(wrappedValue: CallViewModel())        
+        _viewModel = StateObject(wrappedValue: CallViewModel())
     }
-        
+
     var body: some View {
         HomeView(viewModel: viewModel)
             .modifier(CallModifier(viewModel: viewModel))
@@ -50,7 +65,7 @@ struct CallView: View {
 
 You can customize the look and feel of the screens presented in the calling flow, by implementing the corresponding methods in our `ViewFactory`.
 
-Most of our components are public, so you can use them as building blocks if you want to build your custom UI. 
+Most of our components are public, so you can use them as building blocks if you want to build your custom UI.
 
 All the texts, images, fonts and sounds used in the SDK are configurable via our `Appearance` class, to help you brand the views to be inline with your hosting app.
 
