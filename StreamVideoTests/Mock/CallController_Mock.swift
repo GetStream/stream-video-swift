@@ -73,14 +73,21 @@ class CallController_Mock: CallController {
     // MARK: - private
     
     func makeCallSettingsInfo(callId: String, callType: String) -> CallSettingsInfo {
+        let state = CallData(
+            callCid: callCid(from: callId, callType: callType),
+            members: [],
+            blockedUsers: [],
+            createdAt: Date(),
+            backstage: false,
+            broadcasting: false,
+            recording: false,
+            updatedAt: Date(),
+            customData: [:]
+        )
         let callSettingsInfo = CallSettingsInfo(
             callCapabilities: [],
             callSettings: mockResponseBuilder.makeCallSettingsResponse(),
-            callInfo: CallInfo(
-                cId: callCid(from: callId, callType: callType),
-                backstage: false,
-                blockedUsers: []
-            ),
+            state: state,
             recording: false
         )
         return callSettingsInfo

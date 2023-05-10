@@ -113,10 +113,21 @@ final class CallController_Tests: ControllerTestCase {
             members: []
         )
         callController.call = call
-        callController.update(callInfo: CallInfo(cId: callCid, backstage: true, blockedUsers: []))
+        callController.update(
+            state: CallData(
+                callCid: callCid,
+                members: [],
+                blockedUsers: [],
+                createdAt: Date(),
+                backstage: true,
+                broadcasting: false,
+                recording: false,
+                updatedAt: Date(),
+                customData: [:])
+        )
         
         // Then
-        XCTAssert(callController.call?.callInfo?.backstage == true)
+        XCTAssert(callController.call?.state?.backstage == true)
     }
     
     func test_callController_updateCallInfoDifferentCallCid() async throws {
@@ -135,10 +146,21 @@ final class CallController_Tests: ControllerTestCase {
             members: []
         )
         callController.call = call
-        callController.update(callInfo: CallInfo(cId: "default:different", backstage: true, blockedUsers: []))
+        callController.update(
+            state: CallData(
+                callCid: "default:different",
+                members: [],
+                blockedUsers: [],
+                createdAt: Date(),
+                backstage: true,
+                broadcasting: false,
+                recording: false,
+                updatedAt: Date(),
+                customData: [:])
+        )
         
         // Then
-        XCTAssert(callController.call?.callInfo?.backstage == nil)
+        XCTAssert(callController.call?.state?.backstage == nil)
     }
     
     func test_callController_updateRecordingState() async throws {

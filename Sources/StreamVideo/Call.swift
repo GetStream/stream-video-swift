@@ -14,7 +14,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
     }
     /// The call info published to the participants.
-    @Published public private(set) var callInfo: CallInfo?
+    @Published public private(set) var state: CallData?
     /// Indicates the reconnection status..
     @Published public private(set) var reconnectionStatus = ReconnectionStatus.connected
     /// The call recording state.
@@ -159,17 +159,17 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Adds the given user to the list of blocked users for the call.
     /// - Parameter blockedUser: The user to add to the list of blocked users.
     public func add(blockedUser: User) {
-        var blockedUsers = callInfo?.blockedUsers ?? []
+        var blockedUsers = state?.blockedUsers ?? []
         if !blockedUsers.contains(blockedUser) {
             blockedUsers.append(blockedUser)
-            callInfo?.blockedUsers = blockedUsers
+            state?.blockedUsers = blockedUsers
         }
     }
     
     /// Removes the given user from the list of blocked users for the call.
     /// - Parameter blockedUser: The user to remove from the list of blocked users.
     public func remove(blockedUser: User) {
-        callInfo?.blockedUsers.removeAll { user in
+        state?.blockedUsers.removeAll { user in
             user.id == blockedUser.id
         }
     }
@@ -458,8 +458,8 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
     }
     
-    internal func update(callInfo: CallInfo) {
-        self.callInfo = callInfo
+    internal func update(state: CallData) {
+        self.state = state
     }
     
     internal func update(recordingState: RecordingState) {

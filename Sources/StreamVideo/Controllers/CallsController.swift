@@ -254,26 +254,3 @@ extension CallResponse {
     }
     
 }
-
-public struct CallData: @unchecked Sendable {
-    public let callCid: String
-    public var members: [User]
-    public var blockedUsers: [User]
-    public let createdAt: Date
-    public var backstage: Bool
-    public var broadcasting: Bool
-    public var endedAt: Date?
-    public var recording: Bool
-    public var startsAt: Date?
-    public var updatedAt: Date
-    public var customData: [String: Any]
-    
-    mutating func applyUpdates(from callResponse: CallResponse) {
-        self.backstage = callResponse.backstage
-        self.broadcasting = callResponse.broadcasting
-        self.endedAt = callResponse.endedAt
-        self.recording = callResponse.recording
-        self.startsAt = callResponse.startsAt
-        self.updatedAt = callResponse.updatedAt
-    }
-}

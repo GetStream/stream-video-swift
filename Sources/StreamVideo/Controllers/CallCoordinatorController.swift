@@ -226,10 +226,9 @@ class CallCoordinatorController: @unchecked Sendable {
         let callSettings = CallSettingsInfo(
             callCapabilities: response.call.ownCapabilities.map(\.rawValue),
             callSettings: response.call.settings,
-            callInfo: CallInfo(
-                cId: response.call.cid,
-                backstage: response.call.backstage,
-                blockedUsers: response.blockedUsers.map { $0.toUser }
+            state: response.call.toCallData(
+                members: response.members,
+                blockedUsers: response.blockedUsers
             ),
             recording: response.call.recording
         )
@@ -254,7 +253,7 @@ public struct EdgeServer: Sendable {
 struct CallSettingsInfo: Sendable {
     let callCapabilities: [String]
     let callSettings: CallSettingsResponse
-    let callInfo: CallInfo
+    let state: CallData
     let recording: Bool
 }
 

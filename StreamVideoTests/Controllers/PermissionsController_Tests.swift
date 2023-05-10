@@ -11,10 +11,21 @@ final class PermissionsController_Tests: ControllerTestCase {
         // Given
         let callCoordinator = makeCallCoordinatorController()
         let callSettingsResponse = MockResponseBuilder().makeCallSettingsResponse()
+        let state = CallData(
+            callCid: callCid,
+            members: [],
+            blockedUsers: [],
+            createdAt: Date(),
+            backstage: false,
+            broadcasting: false,
+            recording: false,
+            updatedAt: Date(),
+            customData: [:]
+        )
         let callSettings = CallSettingsInfo(
             callCapabilities: ["send-audio"],
             callSettings: callSettingsResponse,
-            callInfo: .init(cId: callCid, backstage: false, blockedUsers: []),
+            state: state,
             recording: false
         )
         callCoordinator.update(callSettings: callSettings)
@@ -38,10 +49,21 @@ final class PermissionsController_Tests: ControllerTestCase {
         // Given
         let callCoordinator = makeCallCoordinatorController()
         let callSettingsResponse = MockResponseBuilder().makeCallSettingsResponse()
+        let state = CallData(
+            callCid: callCid,
+            members: [],
+            blockedUsers: [],
+            createdAt: Date(),
+            backstage: false,
+            broadcasting: false,
+            recording: false,
+            updatedAt: Date(),
+            customData: [:]
+        )
         let callSettings = CallSettingsInfo(
             callCapabilities: ["send-audio"],
             callSettings: callSettingsResponse,
-            callInfo: .init(cId: callCid, backstage: false, blockedUsers: []),
+            state: state,
             recording: false
         )
         callCoordinator.update(callSettings: callSettings)

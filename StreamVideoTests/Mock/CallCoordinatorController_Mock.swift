@@ -42,11 +42,21 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
             throw error
         }
         let callSettingsResponse = MockResponseBuilder().makeCallSettingsResponse()
-        let callInfo = CallInfo(cId: "default:123", backstage: false, blockedUsers: [])
+        let state = CallData(
+            callCid: "default:123",
+            members: [],
+            blockedUsers: [],
+            createdAt: Date(),
+            backstage: true,
+            broadcasting: false,
+            recording: false,
+            updatedAt: Date(),
+            customData: [:]
+        )
         let callSettingsInfo = CallSettingsInfo(
             callCapabilities: ["send-audio"],
             callSettings: callSettingsResponse,
-            callInfo: callInfo,
+            state: state,
             recording: false
         )
         return EdgeServer(

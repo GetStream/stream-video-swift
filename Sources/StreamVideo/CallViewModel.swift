@@ -21,10 +21,10 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] participants in
                     self?.callParticipants = participants
             })
-            callUpdates = call?.$callInfo
+            callUpdates = call?.$state
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] callInfo in
-                    self?.blockedUsers = callInfo?.blockedUsers ?? []
+                .sink(receiveValue: { [weak self] state in
+                    self?.blockedUsers = state?.blockedUsers ?? []
             })
             recordingUpdates = call?.$recordingState
                 .receive(on: RunLoop.main)

@@ -7,7 +7,7 @@ import Foundation
 class CallsMiddleware: EventMiddleware {
     
     var onCallEvent: ((CallEvent) -> Void)?
-    var onCallUpdated: ((CallInfo) -> Void)?
+    var onCallUpdated: ((CallData) -> Void)?
     var onBroadcastingEvent: ((BroadcastingEvent) -> Void)?
     var onAnyEvent: ((Event) -> Void)?
     
@@ -43,13 +43,20 @@ class CallsMiddleware: EventMiddleware {
             }
             onCallEvent?(callEvent)
         } else if let event = event as? CallUpdatedEvent {
-            let blockedUsers = event.call.blockedUserIds.map { User(id: $0) }
-            let callInfo = CallInfo(
-                cId: event.call.cid,
-                backstage: event.call.backstage,
-                blockedUsers: blockedUsers
+            let state = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map {
+                    UserResponse(
+                        createdAt: Date(),
+                        custom: [:],
+                        id: $0,
+                        role: "user",
+                        teams: [],
+                        updatedAt: Date()
+                    )
+                }
             )
-            onCallUpdated?(callInfo)
+            onCallUpdated?(state)
         } else if let event = event as? CallBroadcastingStartedEvent {
             let broadcastStarted = BroadcastingStartedEvent(
                 callCid: event.callCid,

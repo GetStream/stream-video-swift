@@ -33,10 +33,21 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     override func setUp() {
         super.setUp()
+        let state = CallData(
+            callCid: callCid,
+            members: [],
+            blockedUsers: [],
+            createdAt: Date(),
+            backstage: false,
+            broadcasting: false,
+            recording: false,
+            updatedAt: Date(),
+            customData: [:]
+        )
         callSettings = CallSettingsInfo(
             callCapabilities: ["send-audio", "send-video"],
             callSettings: mockResponseBuilder.makeCallSettingsResponse(),
-            callInfo: .init(cId: callCid, backstage: false, blockedUsers: []),
+            state: state,
             recording: false
         )
     }

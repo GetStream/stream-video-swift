@@ -256,9 +256,9 @@ class CallController {
         }
     }
     
-    func update(callInfo: CallInfo) {
-        if callInfo.cId == call?.cId {
-            call?.update(callInfo: callInfo)
+    func update(state: CallData) {
+        if state.callCid == call?.cId {
+            call?.update(state: state)
         } else {
             log.warning("Received call info that doesn't match the active call")
         }
@@ -306,6 +306,7 @@ class CallController {
         let sessionId = webRTCClient?.sessionID ?? ""
         call?.sessionId = sessionId
         call?.update(recordingState: edgeServer.callSettings.recording ? .recording : .noRecording)
+        call?.update(state: edgeServer.callSettings.state)
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {

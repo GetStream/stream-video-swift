@@ -468,7 +468,7 @@ public class StreamVideo {
             videoConfig,
             videoConfig.listenToAllEvents ? allEventsMiddleware : nil
         )
-        callsMiddleware.onCallUpdated = controller.update(callInfo:)
+        callsMiddleware.onCallUpdated = controller.update(state:)
         return controller
     }
     
