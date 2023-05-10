@@ -46,6 +46,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     private let members: [User]
     private let videoOptions: VideoOptions
     private var allEventsMiddleware: AllEventsMiddleware?
+    private var broadcastingTask: Task<Void, Never>?
     
     internal init(
         callId: String,
@@ -70,6 +71,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         self.videoOptions = videoOptions
         self.allEventsMiddleware = allEventsMiddleWare
         self.callController.call = self
+        self.subscribeToBroadcastingEvents()
     }
     
     /// Joins the current call.
@@ -246,6 +248,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
+        broadcastingTask?.cancel()
         recordingController.cleanUp()
         eventsController.cleanUp()
         permissionsController.cleanUp()
@@ -421,20 +424,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     /// Listens to broadcasting events.
     public func broadcastingEvents() -> AsyncStream<BroadcastingEvent> {
-        AsyncStream { continuation in
-            Task {
-                for await event in livestreamController.broadcastingEvents() {
-                    if event.callCid == cId {
-                        if event is BroadcastingStoppedEvent {
-                            state?.broadcasting = false
-                        } else {
-                            state?.broadcasting = true
-                        }
-                        continuation.yield(event)
-                    }
-                }
-            }
-        }
+        livestreamController.broadcastingEvents()
     }
     
     //MARK: - Events
@@ -479,6 +469,24 @@ public class Call: ObservableObject, @unchecked Sendable {
     
     internal func update(recordingState: RecordingState) {
         self.recordingState = recordingState
+    }
+    
+    //MARK: - private
+    
+    private func subscribeToBroadcastingEvents() {
+        broadcastingTask = Task {
+            for await event in livestreamController.broadcastingEvents() {
+                if event.callCid == cId {
+                    await MainActor.run {
+                        if event is BroadcastingStoppedEvent {
+                            state?.broadcasting = false
+                        } else {
+                            state?.broadcasting = true
+                        }
+                    }                    
+                }
+            }
+        }
     }
 }
 

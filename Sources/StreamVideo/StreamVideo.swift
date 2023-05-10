@@ -479,7 +479,9 @@ public class StreamVideo {
             callId: callId,
             callType: callType
         )
-        callsMiddleware.onBroadcastingEvent = controller.onBroadcastingEvent
+        callsMiddleware.onBroadcastingEvent = { event in
+            controller.onBroadcastingEvent?(event)
+        }
         return controller
     }
     

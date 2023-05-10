@@ -63,7 +63,7 @@ class LivestreamController {
     }
 }
 
-public protocol BroadcastingEvent {
+public protocol BroadcastingEvent: Sendable {
     var callCid: String { get }
     var type: String { get }
 }
