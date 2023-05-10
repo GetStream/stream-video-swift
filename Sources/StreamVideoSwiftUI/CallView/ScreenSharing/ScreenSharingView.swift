@@ -37,6 +37,7 @@ public struct ScreenSharingView: View {
                         ForEach(viewModel.participants) { participant in
                             VideoCallParticipantView(
                                 participant: participant,
+                                id: "\(participant.id)-screenshare-participant",
                                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
                                 contentMode: .scaleAspectFill
                             ) { participant, view in
