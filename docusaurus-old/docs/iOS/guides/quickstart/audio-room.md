@@ -137,7 +137,7 @@ Next, add a new `@Published` property to the `AppState`:
 @Published var userState: UserState = .notLoggedIn
 ```
 
-This value can now be used inside of the start point of your application. Depending on what you called your application this might have a different name, in our case, this is the `AudioRoomsApp.swift` file. Fill in the code, so that it looks like this:
+This value can now be used inside the start point of your application. Depending on what you called your application, this might have a different name in our case, this is the `AudioRoomsApp.swift` file. Fill in the code so that it looks like this:
 
 ```swift
 @main
@@ -225,13 +225,13 @@ func login(_ user: UserCredentials) {
 }
 ```
 
-For this to work you'll need to add a `currentUser` variable to your `AppState` object:
+For this to work, you'll need to add a `currentUser` variable to your `AppState` object:
 
 ```swift
 var currentUser: User?
 ```
 
-You might have caught that to save the current user you are accessing a `UnsecureUserRepository` object. We didn't discuss this yet, but we implemented a convenience class for this. The full code can be found [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/Helpers/LocalStorage.swift), so please create a new Swift file, call it `LocalStorage` and copy the code from the file there.
+You might have caught that to save the current user, you are accessing a `UnsecureUserRepository` object. We didn't discuss this yet, but we implemented a convenience class for this. The full code can be found [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/Helpers/LocalStorage.swift), so please create a new Swift file, call it `LocalStorage` and copy the code from the file there.
 
 :::warning
 It is also mentioned in the source code, but in a production app you should not save user-sensitive data in `UserDefaults`. For the sake of this guide and because we are using hard-coded credentials anyways we went that route, but in a production app, you should treat your user data with a very high sense of privacy.
@@ -265,7 +265,7 @@ func checkLoggedInUser() {
 }
 ```
 
-You'll call this function inside of your application's main file, again in our case this is `AudioRoomsApp` (but yours might have a different name). Add an `onAppear` modifier to the previously created `ZStack` and inside of it call the `checkLoggedInUser` function of the `appState`:
+You'll call this function inside of your application's main file, again in our case this is `AudioRoomsApp` (but yours might have a different name). Add an `onAppear` modifier to the previously created `ZStack`, and inside of it call the `checkLoggedInUser` function of the `appState`:
 
 ```swift
 ZStack {
@@ -286,7 +286,7 @@ With that, the login process is finished.
 
 ## Show a list of audio rooms
 
-The next thing to do is to show a list of the available audio rooms. From there on the user can tap on a room and join it and depending on their role will be entering the room as a speaker or a listener.
+The next thing to do is to show a list of the available audio rooms. From there on the user can tap on a room and join it and, depending on their role will be entering the room as a speaker or a listener.
 
 But let's first think about the data you need for an audio room. A room needs four properties:
 
@@ -309,9 +309,9 @@ struct AudioRoom: Identifiable {
 }
 ```
 
-The audio rooms we can load from our API by performing a `CallsQuery` and implement an observation on the results.
+The audio rooms we can load from our API by performing a `CallsQuery` and implementing an observation on the results.
 
-Create a `AudioRoomsViewModel`, it will take care of the data flow. Create a new Swift file and call it `AudioRoomsViewModel`. This will contain two `@Published` properties: `audioRooms` (an array of `AudioRoom` objects) and an optional `selectedAudioRoom` that will be set when a room is entered to open up a sheet. On initialization, it will load the available rooms from our API and assigns them to its `audioRooms` property. On top of that, the loading of the rooms is implemented in such a way that it is an observation of the calls available on our API. When a new room is added, our model will be informed and update the `audioRooms` property accordingly.
+Create an `AudioRoomsViewModel`; it will take care of the data flow. Please create a new Swift file and call it `AudioRoomsViewModel`. This will contain two `@Published` properties: `audioRooms` (an array of `AudioRoom` objects) and an optional `selectedAudioRoom` set when a room is entered to open up a sheet. Initially, it will load the available rooms from our API and assign them to its `audioRooms` property. On top of that, the loading of the rooms is implemented in such a way that it is an observation of the calls available on our API. Our model will be informed when adding a new room and update the `audioRooms` property accordingly.
 
 Here is the full code of the `AudioRoomsViewModel`:
 
@@ -354,7 +354,7 @@ class AudioRoomsViewModel: ObservableObject {
 }
 ```
 
-We are now able to fetch existing and new audio rooms. But we will also need a way to create room. To do that we can create a model called `CreateRoomViewModel`. Start by creating a file with the same name make sure the contents of the file look like this:
+We are now able to fetch existing and new audio rooms. But we will also need a way to create room. To do that, we can create a model called `CreateRoomViewModel`. Start by creating a file with the same name and make sure the contents of the file look like this:
 
 ```swift
 import Foundation
@@ -393,9 +393,9 @@ class CreateRoomViewModel: ObservableObject {
 
 It is a straightforward model that allows us to create a new audio room on our API.
 
-With that, you can start the implementation of the view code. Create a new SwiftUI view and call it `AudioRoomsView`. It will have a `@StateObject` for the `AudioRoomsViewModel` and an `@ObservedObject` of type `AppState` that will be handed down from the parent. Next to that it will obtain a reference to the `StreamVideo` client through injection. A way to initiate the creation of a new audio room. It will then create a scrollable list of all `AudioRoom` elements that act as buttons to join a room. It will also have a logout button in the `toolbar`.
+With that, you can start the implementation of the view code. Create a new SwiftUI view and call it `AudioRoomsView`. It will have a `@StateObject` for the `AudioRoomsViewModel` and an `@ObservedObject` of type `AppState` that will be handed down from the parent. Next to that, it will obtain a reference to the `StreamVideo` client through injection. We also add a way to initiate the creation of a new audio room. It will then create a scrollable list of all `AudioRoom` elements that act as buttons to join a room. It will also have a logout button in the `toolbar`.
 
-Before you start with the list you will create a helper view that creates the UI for a single `AudioRoom` element in the list. This makes the code a little more structured. Create a new SwiftUI view called `AudioRoomCell`. Its code will lay out all the properties vertically and not do much else, so here it is:
+Before you start with the list, you will create a helper view that creates the UI for a single `AudioRoom` element in the list. This makes the code a little more structured. Create a new SwiftUI view called `AudioRoomCell`. Its code will lay out all the properties vertically and not do much else, so here it is:
 
 ```swift
 struct AudioRoomCell: View {
@@ -456,7 +456,7 @@ For the preview to work you can hand in the `.preview` that we defined in the `A
 
 Now, you can finally tackle the `AudioRoomsView`. Create a new SwiftUI view and give it the name `AudioRoomsView`. It will have a `NavigationView` at the root with a `ScrollView` that contains the `AudioRoomCell` views that are constructed from the `audioRooms` of the `AudioRoomsViewModel`.
 
-You'll attach a `.sheet` that will open up once the optional `selectedAudioRoom` of the `AudioRoomsViewModel` is set which is done on tap of an `AudioRoomCell` element, which is wrapped in a button. And finally we will add a toolbar button that shows a `.sheet` to display the UI to create an audio room.
+You'll attach a `.sheet` that will open once the optional `selectedAudioRoom` of the `AudioRoomsViewModel` is set on tap of an `AudioRoomCell` element wrapped in a button. And finally, we will add a toolbar button that shows a `.sheet` to display the UI to create an audio room.
 
 Here is the code for the component:
 
@@ -540,63 +540,7 @@ struct AudioRoomsView: View {
 Let's not forget to add the `CreateRoomForm`. We need a way to allow the user to collect some input before we can create an audio room using the `CreateRoomViewModel`.
 
 Create a Swift file named `CreateRoomForm`. And add the following contents:
-
-```swift
-struct CreateRoomForm: View {
-    
-    @Environment(\.dismiss) var dismiss
-    
-    @StateObject var viewModel: CreateRoomViewModel
-    
-    @State private var title: String = ""
-    @State private var description: String = ""
-    
-    var buttonDisabled: Bool {
-        title.isEmpty || description.isEmpty
-    }
-    
-    init(user: User) {
-        _viewModel = StateObject(wrappedValue: CreateRoomViewModel(user: user))
-    }
-    
-    var body: some View {
-        NavigationView {
-            Form {
-                Section {
-                    TextField("Title of the room", text: $title)
-                    Text("This describes the title of the room.")
-                        .foregroundColor(.secondary)
-                        .font(.footnote)
-                    
-                    TextField("Description", text: $description)
-                    Text("Give more detail about what this room is for.")
-                        .foregroundColor(.secondary)
-                        .font(.footnote)
-                } header: {
-                    Text("Room information")
-                }
-                
-                Button {
-                    viewModel.createRoom(title: title, description: description)
-                    dismiss()
-                } label: {
-                    Text("Create")
-                }
-                .disabled(buttonDisabled)
-
-            }
-            .navigationTitle("Create Room")
-            .toolbar {
-                Button("Close", role: .destructive) {
-                    dismiss()
-                }
-            }
-        }
-    }
-}
-```
-
-You will add one more feature to this view and that is to log out the current user. Let's first implement a function in the `AppState` that does the work and then cover the UI for it. Go to the `AppState` file and add the `logout` function:
+You will add one more feature to this view: log out the current user. Let's first implement a function in the `AppState` that does the work and then cover the UI for it. Go to the `AppState` file and add the `logout` function:
 
 ```swift
 func logout() {
@@ -647,7 +591,7 @@ Next, go back to the `AudioRoomsView` file and add the following code below the 
 }
 ```
 
-The code does three interesting things:
+The code does three exciting things:
 
 1. It adds a `ToolbarItem` and places it on the trailing side (with `placement: .navigationBarTrailing`)
 2. Call the previously created `.logout` function when the user taps the button
@@ -663,13 +607,13 @@ The last remaining thing to do is to create the UI and logic for the audio room 
 
 It gets initialized with the `AudioRoom` object that the user has selected to join. The first thing it does is to check whether the user has permission to speak or is joining as a listener. Then, the user joins the call by using the `CallViewModel` that the `StreamVideo` SDK provides. This offers a lot of functionality around calls (as the name suggests) and makes interaction with the SDK simple.
 
-After joining the call the user will be subscribed to three things:
+After joining the call, the user will be subscribed to three things:
 
 - changes to the participants of the call (listening to changes in the `callParticipants` property of the `CallViewModel`)
 - audio changes, like muting and un-muting (by subscribing to the `callSettings` object in the `CallViewModel`)
 - updates to the call state (you guessed it, there's a `callingState` property of the `CallViewModel`)
 
-With all this logic there are a few properties that the `AudioRoomViewModel` needs, so add those first:
+With all this logic, there are a few properties that the `AudioRoomViewModel` needs, so add those first:
 
 ```swift
 import Combine
@@ -776,7 +720,7 @@ private func update(participants: [String: CallParticipant]) {
 }
 ```
 
-The next two functions are very straightforward, so you'll implement them together. First, you subscribe to audio changes with the `callSettings` object and update the `isUserMuted` object. Second, the `callingState` is observed and the `loading` state is updated.
+The next two functions are very straightforward, so you'll implement them together. First, you subscribe to audio changes with the `callSettings` object and update the `isUserMuted` object. Second, the `callingState` is observed, and the `loading`` state is updated.
 
 Here is the code:
 
@@ -997,7 +941,7 @@ struct ImageFromUrl_Previews: PreviewProvider {
 
 The second helper view is the `ParticipantsView` which will hold a list of `CallParticipant` objects (taken from the `StreamVideo` SDK).
 
-Create a new SwiftUI view and call it `ParticipantsView`. The participants will be arranged horizontally (so in an `HStack`) and you'll show each participant's photo (gladly, you already created a helper view for that) and text in a `VStack`.
+Please create a new SwiftUI view and call it `ParticipantsView`. The participants will be arranged horizontally (in an `HStack`), and you'll show each participant's photo (gladly, you already created a helper view for that) and text in a `VStack`.
 
 Fill in the following code in the `ParticipantsView`:
 
@@ -1077,7 +1021,7 @@ init(audioRoom: AudioRoom) {
 }
 ```
 
-The `presentationMode` variable is needed since the `AudioRoomView` is shown inside of a sheet. When the user wants to leave the room you can close the sheet using the `dismiss()` function of the `presentationMode`.
+The `presentationMode` variable is needed since the `AudioRoomView` is shown inside a sheet. When the user wants to leave the room you can close the sheet using the `dismiss()` function of the `presentationMode`.
 
 Add the following code to the `body` of your `AudioRoomView`:
 
