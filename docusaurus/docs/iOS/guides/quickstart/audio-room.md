@@ -309,82 +309,140 @@ struct AudioRoom: Identifiable {
 }
 ```
 
-Similar to the `UserCredentials` we have defined a bunch of audio rooms in advance. This code was added to the `AudioRoom` file (see full code [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/AudioRooms/AudioRooms/Model/AudioRoom.swift)). Most noticeable there is a `DemoAudioRoomRepository`, that conforms to the `AudioRoomRepository` protocol. That defines a single static function called `loadAudioRooms` and returns an array of `AudioRoom` objects. Please copy the code from the file into your project.
+The audio rooms we can load from our API by performing a `CallsQuery` and implement an observation on the results.
 
-Next, you'll create the view model that will take care of the data flow. Create a new Swift file and call it `AudioRoomsViewModel`. This will contain two `@Published` properties: `audioRooms` (an array of `AudioRoom` objects) and an optional `selectedAudioRoom` that will be set when a room is entered to open up a sheet. On initialization, it will load the available rooms from the `DemoAudioRoomRepository` and assign them to its `audioRooms` property.
+Create a `AudioRoomsViewModel`, it will take care of the data flow. Create a new Swift file and call it `AudioRoomsViewModel`. This will contain two `@Published` properties: `audioRooms` (an array of `AudioRoom` objects) and an optional `selectedAudioRoom` that will be set when a room is entered to open up a sheet. On initialization, it will load the available rooms from our API and assigns them to its `audioRooms` property. On top of that, the loading of the rooms is implemented in such a way that it is an observation of the calls available on our API. When a new room is added, our model will be informed and update the `audioRooms` property accordingly.
 
 Here is the full code of the `AudioRoomsViewModel`:
 
 ```swift
 import SwiftUI
+import StreamVideo
+import Combine
 
 @MainActor
 class AudioRoomsViewModel: ObservableObject {
-
+    
     @Published var audioRooms = [AudioRoom]()
     @Published var selectedAudioRoom: AudioRoom?
-
+    
+    @Injected(\.streamVideo) var streamVideo
+    
+    private var cancellables = Set<AnyCancellable>()
+    
     init() {
-        self.audioRooms = DemoAudioRoomRepository.loadAudioRooms()
+        Task {
+            let callsQuery = CallsQuery(sortParams: [], filters: ["audioRoomCall": .bool(true)], watch: true)
+            let controller = streamVideo.makeCallsController(callsQuery: callsQuery)
+            controller.$calls
+                .sink { retrievedAudioRooms in
+                    DispatchQueue.main.async {
+                        self.audioRooms = retrievedAudioRooms.compactMap { callData in
+                            if let _ = callData.endedAt { return nil }
+                            return AudioRoom(from: callData.customData, id: callData.callCid)
+                        }
+                    }
+                }
+                .store(in: &cancellables)
+            try? await controller.loadNextCalls()
+        }
+    }
+    
+    deinit {
+        self.cancellables.removeAll()
     }
 }
 ```
 
-With that, you can start the implementation of the view code. Create a new SwiftUI view and call it `AudioRoomsView`. It will have a `@StateObject` for the `AudioRoomsViewModel` and an `@ObservedObject` of type `AppState` that will be handed down from the parent. It will then create a scrollable list of all `AudioRoom` elements that act as buttons to join a room. It will also have a logout button in the `toolbar`.
+We are now able to fetch existing and new audio rooms. But we will also need a way to create room. To do that we can create a model called `CreateRoomViewModel`. Start by creating a file with the same name make sure the contents of the file look like this:
+
+```swift
+import Foundation
+import StreamVideo
+
+class CreateRoomViewModel: ObservableObject {
+    
+    @Injected(\.streamVideo) var streamVideo
+    
+    let user: User
+    
+    init(user: User) {
+        self.user = user
+    }
+    
+    func createRoom(title: String, description: String) {
+        Task {
+            let call = self.streamVideo.makeCall(callType: .audioRoom, callId: UUID().uuidString)
+            let data = try await call.getOrCreate(
+                members: [user.asAdmin],
+                customData: [
+                    "title": .string(title),
+                    "description": .string(description),
+                    "hosts": .array([
+                        .dictionary(user.toDict())
+                    ]),
+                    "audioRoomCall": .bool(true)
+                ],
+                ring: false
+            )
+            print("Audio room created at \(data.createdAt)")
+        }
+    }
+}
+```
+
+It is a straightforward model that allows us to create a new audio room on our API.
+
+With that, you can start the implementation of the view code. Create a new SwiftUI view and call it `AudioRoomsView`. It will have a `@StateObject` for the `AudioRoomsViewModel` and an `@ObservedObject` of type `AppState` that will be handed down from the parent. Next to that it will obtain a reference to the `StreamVideo` client through injection. A way to initiate the creation of a new audio room. It will then create a scrollable list of all `AudioRoom` elements that act as buttons to join a room. It will also have a logout button in the `toolbar`.
 
 Before you start with the list you will create a helper view that creates the UI for a single `AudioRoom` element in the list. This makes the code a little more structured. Create a new SwiftUI view called `AudioRoomCell`. Its code will lay out all the properties vertically and not do much else, so here it is:
 
 ```swift
 struct AudioRoomCell: View {
-
-   let audioRoom: AudioRoom
-   let imageOffset: CGFloat = 10
-
-   var body: some View {
-      HStack {
-         VStack(alignment: .leading) {
-            Text(audioRoom.title)
-               .font(.headline)
-
-            Text(audioRoom.subtitle)
-               .font(.caption)
-
-            HStack(spacing: 30) {
-               if audioRoom.hosts.count > 1 {
-                  ZStack {
-                     ImageFromUrl(
-                        url: audioRoom.hosts[0].imageURL,
-                        size: 40,
-                        offset: -imageOffset
-                     )
-
-                     ImageFromUrl(
-                        url: audioRoom.hosts[1].imageURL,
-                        size: 40,
-                        offset: imageOffset
-                     )
-                  }
-                  .frame(height: 80)
-                  .padding(.leading, imageOffset)
-               }
-
-               VStack(alignment: .leading, spacing: imageOffset / 2) {
-                  ForEach(audioRoom.hosts) { host in
-                     Text(host.name)
-                        .font(.headline)
-                  }
-               }
+    
+    let audioRoom: AudioRoom
+    
+    let imageOffset: CGFloat = 10
+    
+    var body: some View {
+        HStack {
+            VStack(alignment: .leading) {
+                Text(audioRoom.title)
+                    .font(.headline)
+                
+                Text(audioRoom.subtitle)
+                    .font(.caption)
+                
+                HStack(spacing: 30) {
+                    ZStack {
+                        ForEach(Array(audioRoom.hosts.enumerated()), id: \.offset) { (index, host) in
+                            ImageFromUrl(
+                                url: host.imageURL,
+                                size: 40,
+                                offset: -imageOffset * CGFloat(index)
+                            )
+                        }
+                    }
+                    .frame(height: 80)
+                    .padding(.leading, imageOffset)
+                    
+                    VStack(alignment: .leading, spacing: imageOffset / 2) {
+                        ForEach(audioRoom.hosts) { host in
+                            Text(host.name)
+                                .font(.headline)
+                        }
+                    }
+                }
             }
-         }
-         .padding()
-
-         Spacer()
-      }
-      .foregroundColor(.primary)
-      .background(Color.backgroundColor)
-      .cornerRadius(16)
-      .padding(.horizontal)
-   }
+            .padding()
+            
+            Spacer()
+        }
+        .foregroundColor(.primary)
+        .background(Color.backgroundColor)
+        .cornerRadius(16)
+        .padding(.horizontal)
+    }
 }
 
 extension Color {
@@ -398,37 +456,143 @@ For the preview to work you can hand in the `.preview` that we defined in the `A
 
 Now, you can finally tackle the `AudioRoomsView`. Create a new SwiftUI view and give it the name `AudioRoomsView`. It will have a `NavigationView` at the root with a `ScrollView` that contains the `AudioRoomCell` views that are constructed from the `audioRooms` of the `AudioRoomsViewModel`.
 
-You'll attach a `.sheet` that will open up once the optional `selectedAudioRoom` of the `AudioRoomsViewModel` is set which is done on tap of an `AudioRoomCell` element, which is wrapped in a button.
+You'll attach a `.sheet` that will open up once the optional `selectedAudioRoom` of the `AudioRoomsViewModel` is set which is done on tap of an `AudioRoomCell` element, which is wrapped in a button. And finally we will add a toolbar button that shows a `.sheet` to display the UI to create an audio room.
 
 Here is the code for the component:
 
 ```swift
 struct AudioRoomsView: View {
-
-   @StateObject var viewModel = AudioRoomsViewModel()
-   @ObservedObject var appState: AppState
-   @Injected(\.streamVideo) var streamVideo
-
-   var body: some View {
-      NavigationView {
-         ScrollView {
-            LazyVStack {
-               ForEach(viewModel.audioRooms) { audioRoom in
-                  Button {
-                     viewModel.selectedAudioRoom = audioRoom
-                  } label: {
-                     AudioRoomCell(audioRoom: audioRoom)
-                  }
-               }
+    
+    @StateObject var viewModel = AudioRoomsViewModel()
+    
+    @ObservedObject var appState: AppState
+    
+    @Injected(\.streamVideo) var streamVideo
+    
+    @State private var showCreateRoom = false
+    
+    var body: some View {
+        NavigationView {
+            ZStack(alignment: .bottomTrailing) {
+                ScrollView {
+                    LazyVStack {
+                        ForEach(viewModel.audioRooms) { audioRoom in
+                            Button {
+                                viewModel.selectedAudioRoom = audioRoom
+                            } label: {
+                                AudioRoomCell(audioRoom: audioRoom)
+                            }
+                        }
+                    }
+                    .sheet(item: $viewModel.selectedAudioRoom) { audioRoom in
+                        AudioRoomView(audioRoom: audioRoom)
+                    }
+                }
+                
+                if let _ = appState.currentUser {
+                    Button {
+                        showCreateRoom = true
+                    } label: {
+                        Label("Create", systemImage: "plus")
+                            .foregroundColor(.primary)
+                    }
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 12)
+                    .background(in: Capsule())
+                    .overlay(Capsule().stroke(Color.secondary, lineWidth: 1))
+                    .shadow(color: Color(.sRGBLinear, white: 0, opacity: 0.13), radius: 4)
+                    .padding(20)
+                }
             }
-            .sheet(item: $viewModel.selectedAudioRoom) { audioRoom in
-               // This will be replaced soon:
-               Text(audioRoom.title)
+            .navigationTitle("Audio Rooms")
+            .toolbar {
+                ToolbarItem(placement: .navigationBarTrailing) {
+                    Button {
+                        appState.logout()
+                    } label: {
+                        HStack {
+                            Text("Logout")
+                                .foregroundColor(.primary)
+                            
+                            ImageFromUrl(
+                                url: streamVideo.user.imageURL,
+                                size: 32
+                            )
+                        }
+                        .padding(8)
+                        .overlay(Capsule().stroke(Color.secondary, lineWidth: 1))
+                    }
+                    .padding()
+                }
             }
-         }
-         .navigationTitle("Audio Rooms")
-      }
-   }
+            .sheet(isPresented: $showCreateRoom) {
+                if let user = appState.currentUser {
+                    CreateRoomForm(user: user)
+                } else {
+                    Text("No user found.")
+                }
+            }
+        }
+    }
+}
+```
+
+Let's not forget to add the `CreateRoomForm`. We need a way to allow the user to collect some input before we can create an audio room using the `CreateRoomViewModel`.
+
+Create a Swift file named `CreateRoomForm`. And add the following contents:
+
+```swift
+struct CreateRoomForm: View {
+    
+    @Environment(\.dismiss) var dismiss
+    
+    @StateObject var viewModel: CreateRoomViewModel
+    
+    @State private var title: String = ""
+    @State private var description: String = ""
+    
+    var buttonDisabled: Bool {
+        title.isEmpty || description.isEmpty
+    }
+    
+    init(user: User) {
+        _viewModel = StateObject(wrappedValue: CreateRoomViewModel(user: user))
+    }
+    
+    var body: some View {
+        NavigationView {
+            Form {
+                Section {
+                    TextField("Title of the room", text: $title)
+                    Text("This describes the title of the room.")
+                        .foregroundColor(.secondary)
+                        .font(.footnote)
+                    
+                    TextField("Description", text: $description)
+                    Text("Give more detail about what this room is for.")
+                        .foregroundColor(.secondary)
+                        .font(.footnote)
+                } header: {
+                    Text("Room information")
+                }
+                
+                Button {
+                    viewModel.createRoom(title: title, description: description)
+                    dismiss()
+                } label: {
+                    Text("Create")
+                }
+                .disabled(buttonDisabled)
+
+            }
+            .navigationTitle("Create Room")
+            .toolbar {
+                Button("Close", role: .destructive) {
+                    dismiss()
+                }
+            }
+        }
+    }
 }
 ```
 
