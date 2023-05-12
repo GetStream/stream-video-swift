@@ -43,7 +43,11 @@ end
 lane :match_me do |options|
   custom_match(
     api_key: appstore_api_key,
-    app_identifier: ['io.getstream.iOS.VideoDemoApp', 'io.getstream.iOS.DemoAppUIKit'],
+    app_identifier: [
+      'io.getstream.iOS.VideoDemoApp',
+      'io.getstream.iOS.DemoAppUIKit',
+      'io.getstream.iOS.VideoDemoApp.CallIntent'
+    ],
     readonly: options[:readonly],
     register_device: options[:register_device]
   )
