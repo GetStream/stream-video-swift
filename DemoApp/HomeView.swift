@@ -81,6 +81,7 @@ struct HomeView: View {
                         .transition(.opacity)
                 } else {
                     Button {
+                        resignFirstResponder()
                         viewModel.joinCall(callId: callId, type: .default)
                     } label: {
                         Text("Join a call")

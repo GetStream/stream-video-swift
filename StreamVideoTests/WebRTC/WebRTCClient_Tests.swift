@@ -42,6 +42,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             broadcasting: false,
             recording: false,
             updatedAt: Date(),
+            hlsPlaylistUrl: "",
             customData: [:]
         )
         callSettings = CallSettingsInfo(
@@ -51,7 +52,15 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             recording: false
         )
     }
-        
+
+    func test_webRTCClient_init_signalChannelIsUsingTheExpectedConnectURL() {
+        // Given
+        webRTCClient = makeWebRTCClient(callSettings: callSettings)
+
+        // Then
+        XCTAssertEqual(webRTCClient.signalChannel?.connectURL.absoluteString, "wss://test.com/ws")
+    }
+
     func test_webRTCClient_connectionFlow() async throws {
         // Given
         webRTCClient = makeWebRTCClient(callSettings: callSettings)
@@ -455,6 +464,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             user: StreamVideo.mockUser,
             apiKey: StreamVideo.apiKey,
             hostname: "test.com",
+            webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: callCid,
             callCoordinatorController: callCoordinator,

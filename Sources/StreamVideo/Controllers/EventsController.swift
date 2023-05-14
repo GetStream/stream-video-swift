@@ -164,8 +164,10 @@ extension CallReactionEvent {
     
     var mapped: [String: Any] {
         var result = [String: Any]()
-        for (key, value) in reaction.custom {
-            result[key] = value.value
+        if let custom = reaction.custom {
+            for (key, value) in custom {
+                result[key] = value.value
+            }
         }
         return result
     }

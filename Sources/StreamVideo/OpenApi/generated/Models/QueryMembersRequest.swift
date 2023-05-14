@@ -19,7 +19,7 @@ internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
     static let idRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
     static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
     static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
-    internal var filterConditions: [String: AnyCodable]
+    internal var filterConditions: [String: AnyCodable]?
     internal var id: String?
     internal var limit: Int?
     internal var next: String?
@@ -27,7 +27,7 @@ internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
     internal var sort: [SortParamRequest]?
     internal var type: String
 
-    internal init(filterConditions: [String: AnyCodable], id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
+    internal init(filterConditions: [String: AnyCodable]? = nil, id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
         self.filterConditions = filterConditions
         self.id = id
         self.limit = limit
@@ -51,7 +51,7 @@ internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(filterConditions, forKey: .filterConditions)
+        try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
         try container.encodeIfPresent(id, forKey: .id)
         try container.encodeIfPresent(limit, forKey: .limit)
         try container.encodeIfPresent(next, forKey: .next)

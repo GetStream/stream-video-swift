@@ -153,6 +153,7 @@ class WebRTCClient: NSObject {
         user: User,
         apiKey: String,
         hostname: String,
+        webSocketURLString: String,
         token: String,
         callCid: String,
         callCoordinatorController: CallCoordinatorController,
@@ -179,7 +180,7 @@ class WebRTCClient: NSObject {
             token: token
         )
         super.init()
-        if let url = webSocketURL(from: hostname) {
+        if let url = URL(string: webSocketURLString) {
             signalChannel = makeWebSocketClient(url: url, apiKey: .init(apiKey))
         }
         addOnParticipantsChangeHandler()

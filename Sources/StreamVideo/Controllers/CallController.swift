@@ -287,6 +287,7 @@ class CallController {
             user,
             apiKey,
             edgeServer.url,
+            edgeServer.webSocketURL,
             edgeServer.token,
             callCid(from: callId, callType: callType),
             callCoordinatorController,
@@ -413,6 +414,7 @@ extension CallController {
             _ user: User,
             _ apiKey: String,
             _ hostname: String,
+            _ webSocketURLString: String,
             _ token: String,
             _ callCid: String,
             _ callCoordinatorController: CallCoordinatorController,
@@ -424,12 +426,13 @@ extension CallController {
                 user: $0,
                 apiKey: $1,
                 hostname: $2,
-                token: $3,
-                callCid: $4,
-                callCoordinatorController: $5,
-                videoConfig: $6,
-                audioSettings: $7,
-                environment: $8
+                webSocketURLString: $3,
+                token: $4,
+                callCid: $5,
+                callCoordinatorController: $6,
+                videoConfig: $7,
+                audioSettings: $8,
+                environment: $9
             )
         }
         

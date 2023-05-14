@@ -25,6 +25,7 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallBroadcastingStoppedEvent(CallBroadcastingStoppedEvent)
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallEndedEvent(CallEndedEvent)
+    case typeCallLiveStartedEvent(CallLiveStartedEvent)
     case typeCallMemberAddedEvent(CallMemberAddedEvent)
     case typeCallMemberRemovedEvent(CallMemberRemovedEvent)
     case typeCallMemberUpdatedEvent(CallMemberUpdatedEvent)
@@ -33,6 +34,10 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallRecordingStartedEvent(CallRecordingStartedEvent)
     case typeCallRecordingStoppedEvent(CallRecordingStoppedEvent)
     case typeCallRejectedEvent(CallRejectedEvent)
+    case typeCallSessionEndedEvent(CallSessionEndedEvent)
+    case typeCallSessionParticipantJoinedEvent(CallSessionParticipantJoinedEvent)
+    case typeCallSessionParticipantLeftEvent(CallSessionParticipantLeftEvent)
+    case typeCallSessionStartedEvent(CallSessionStartedEvent)
     case typeCallUpdatedEvent(CallUpdatedEvent)
     case typeConnectedEvent(ConnectedEvent)
     case typeCustomVideoEvent(CustomVideoEvent)
@@ -56,6 +61,8 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeCallEndedEvent(let value):
             try container.encode(value)
+        case .typeCallLiveStartedEvent(let value):
+            try container.encode(value)
         case .typeCallMemberAddedEvent(let value):
             try container.encode(value)
         case .typeCallMemberRemovedEvent(let value):
@@ -71,6 +78,14 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallRecordingStoppedEvent(let value):
             try container.encode(value)
         case .typeCallRejectedEvent(let value):
+            try container.encode(value)
+        case .typeCallSessionEndedEvent(let value):
+            try container.encode(value)
+        case .typeCallSessionParticipantJoinedEvent(let value):
+            try container.encode(value)
+        case .typeCallSessionParticipantLeftEvent(let value):
+            try container.encode(value)
+        case .typeCallSessionStartedEvent(let value):
             try container.encode(value)
         case .typeCallUpdatedEvent(let value):
             try container.encode(value)
@@ -110,6 +125,9 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.ended" {
             let value = try container.decode(CallEndedEvent.self)
             self = .typeCallEndedEvent(value)
+        } else if dto.type == "call.live_started" {
+            let value = try container.decode(CallLiveStartedEvent.self)
+            self = .typeCallLiveStartedEvent(value)
         } else if dto.type == "call.member_added" {
             let value = try container.decode(CallMemberAddedEvent.self)
             self = .typeCallMemberAddedEvent(value)
@@ -119,6 +137,9 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.member_updated" {
             let value = try container.decode(CallMemberUpdatedEvent.self)
             self = .typeCallMemberUpdatedEvent(value)
+        } else if dto.type == "call.member_updated_permission" {
+            let value = try container.decode(CallMemberUpdatedPermissionEvent.self)
+            self = .typeCallMemberUpdatedPermissionEvent(value)
         } else if dto.type == "call.permission_request" {
             let value = try container.decode(PermissionRequestEvent.self)
             self = .typePermissionRequestEvent(value)
@@ -137,15 +158,24 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.rejected" {
             let value = try container.decode(CallRejectedEvent.self)
             self = .typeCallRejectedEvent(value)
+        } else if dto.type == "call.session_ended" {
+            let value = try container.decode(CallSessionEndedEvent.self)
+            self = .typeCallSessionEndedEvent(value)
+        } else if dto.type == "call.session_participant_joined" {
+            let value = try container.decode(CallSessionParticipantJoinedEvent.self)
+            self = .typeCallSessionParticipantJoinedEvent(value)
+        } else if dto.type == "call.session_participant_left" {
+            let value = try container.decode(CallSessionParticipantLeftEvent.self)
+            self = .typeCallSessionParticipantLeftEvent(value)
+        } else if dto.type == "call.session_started" {
+            let value = try container.decode(CallSessionStartedEvent.self)
+            self = .typeCallSessionStartedEvent(value)
         } else if dto.type == "call.unblocked_user" {
             let value = try container.decode(UnblockedUserEvent.self)
             self = .typeUnblockedUserEvent(value)
         } else if dto.type == "call.updated" {
             let value = try container.decode(CallUpdatedEvent.self)
             self = .typeCallUpdatedEvent(value)
-        } else if dto.type == "call.updated_permission" {
-            let value = try container.decode(CallMemberUpdatedPermissionEvent.self)
-            self = .typeCallMemberUpdatedPermissionEvent(value)
         } else if dto.type == "connection.ok" {
             let value = try container.decode(ConnectedEvent.self)
             self = .typeConnectedEvent(value)

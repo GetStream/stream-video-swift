@@ -125,5 +125,3 @@ public struct MuteRequest {
         self.screenshare = screenshare
     }
 }
-
-extension DatacenterResponse: @unchecked Sendable {}

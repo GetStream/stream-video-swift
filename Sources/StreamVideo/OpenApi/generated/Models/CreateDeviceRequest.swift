@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
 
     internal enum PushProvider: String, Codable, CaseIterable {
@@ -18,6 +22,7 @@ internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         case huawei = "huawei"
         case xiaomi = "xiaomi"
     }
+    static let idRule = StringRule(minLength: 1, maxLength: 255, pattern: nil)
     internal var id: String?
     internal var pushProvider: PushProvider?
     internal var pushProviderName: String?

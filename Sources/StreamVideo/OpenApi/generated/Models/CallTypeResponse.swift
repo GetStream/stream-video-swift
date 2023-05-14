@@ -19,13 +19,15 @@ internal struct CallTypeResponse: Codable, JSONEncodable, Hashable {
     internal var createdAt: Date
     internal var grants: [String: [String]]
     internal var name: String
+    internal var notificationSettings: NotificationSettings
     internal var settings: CallSettingsResponse
     internal var updatedAt: Date
 
-    internal init(createdAt: Date, grants: [String: [String]], name: String, settings: CallSettingsResponse, updatedAt: Date) {
+    internal init(createdAt: Date, grants: [String: [String]], name: String, notificationSettings: NotificationSettings, settings: CallSettingsResponse, updatedAt: Date) {
         self.createdAt = createdAt
         self.grants = grants
         self.name = name
+        self.notificationSettings = notificationSettings
         self.settings = settings
         self.updatedAt = updatedAt
     }
@@ -34,6 +36,7 @@ internal struct CallTypeResponse: Codable, JSONEncodable, Hashable {
         case createdAt = "created_at"
         case grants
         case name
+        case notificationSettings = "notification_settings"
         case settings
         case updatedAt = "updated_at"
     }
@@ -45,6 +48,7 @@ internal struct CallTypeResponse: Codable, JSONEncodable, Hashable {
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(grants, forKey: .grants)
         try container.encode(name, forKey: .name)
+        try container.encode(notificationSettings, forKey: .notificationSettings)
         try container.encode(settings, forKey: .settings)
         try container.encode(updatedAt, forKey: .updatedAt)
     }

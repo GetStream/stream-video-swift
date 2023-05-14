@@ -19,17 +19,17 @@ internal struct JoinCallResponse: Codable, JSONEncodable, Hashable {
     internal var blockedUsers: [UserResponse]
     internal var call: CallResponse
     internal var created: Bool
+    internal var credentials: Credentials
     internal var duration: String
-    internal var edges: [DatacenterResponse]
     internal var members: [MemberResponse]
     internal var membership: MemberResponse?
 
-    internal init(blockedUsers: [UserResponse], call: CallResponse, created: Bool, duration: String, edges: [DatacenterResponse], members: [MemberResponse], membership: MemberResponse? = nil) {
+    internal init(blockedUsers: [UserResponse], call: CallResponse, created: Bool, credentials: Credentials, duration: String, members: [MemberResponse], membership: MemberResponse? = nil) {
         self.blockedUsers = blockedUsers
         self.call = call
         self.created = created
+        self.credentials = credentials
         self.duration = duration
-        self.edges = edges
         self.members = members
         self.membership = membership
     }
@@ -38,8 +38,8 @@ internal struct JoinCallResponse: Codable, JSONEncodable, Hashable {
         case blockedUsers = "blocked_users"
         case call
         case created
+        case credentials
         case duration
-        case edges
         case members
         case membership
     }
@@ -51,8 +51,8 @@ internal struct JoinCallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(blockedUsers, forKey: .blockedUsers)
         try container.encode(call, forKey: .call)
         try container.encode(created, forKey: .created)
+        try container.encode(credentials, forKey: .credentials)
         try container.encode(duration, forKey: .duration)
-        try container.encode(edges, forKey: .edges)
         try container.encode(members, forKey: .members)
         try container.encodeIfPresent(membership, forKey: .membership)
     }

@@ -20,6 +20,7 @@ final class PermissionsController_Tests: ControllerTestCase {
             broadcasting: false,
             recording: false,
             updatedAt: Date(),
+            hlsPlaylistUrl: "",
             customData: [:]
         )
         let callSettings = CallSettingsInfo(
@@ -58,6 +59,7 @@ final class PermissionsController_Tests: ControllerTestCase {
             broadcasting: false,
             recording: false,
             updatedAt: Date(),
+            hlsPlaylistUrl: "",
             customData: [:]
         )
         let callSettings = CallSettingsInfo(

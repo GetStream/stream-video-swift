@@ -25,6 +25,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of creation */
     internal var createdAt: Date
     internal var createdBy: UserResponse
+    internal var currentSessionId: String
     /** Custom data for this object */
     internal var custom: [String: AnyCodable]
     /** Date/time when the call ended */
@@ -46,13 +47,14 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.broadcasting = broadcasting
         self.cid = cid
         self.createdAt = createdAt
         self.createdBy = createdBy
+        self.currentSessionId = currentSessionId
         self.custom = custom
         self.endedAt = endedAt
         self.hlsPlaylistUrl = hlsPlaylistUrl
@@ -75,6 +77,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         case cid
         case createdAt = "created_at"
         case createdBy = "created_by"
+        case currentSessionId = "current_session_id"
         case custom
         case endedAt = "ended_at"
         case hlsPlaylistUrl = "hls_playlist_url"
@@ -100,6 +103,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(cid, forKey: .cid)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(createdBy, forKey: .createdBy)
+        try container.encode(currentSessionId, forKey: .currentSessionId)
         try container.encode(custom, forKey: .custom)
         try container.encodeIfPresent(endedAt, forKey: .endedAt)
         try container.encode(hlsPlaylistUrl, forKey: .hlsPlaylistUrl)
