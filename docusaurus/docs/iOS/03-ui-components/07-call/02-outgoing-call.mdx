@@ -2,8 +2,8 @@
 
 The `OutgoingCallContent` lets you easily build UI when you're calling or ringing other people in an app. It's used to show more information about the participants you're calling, as well as give you the option to cancel the call before anyone accepts. We provide two versions of the `OutgoingCallContent`:
 
-* **Bound**: This version binds itself to a `CallViewModel` and loads all the required data. It also connects the action handlers for audio, video and cancelling a call.
-* **Stateless**: This is a stateless version of the `OutgoingCallContent`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
+- **Bound**: This version binds itself to a `CallViewModel` and loads all the required data. It also connects the action handlers for audio, video and cancelling a call.
+- **Stateless**: This is a stateless version of the `OutgoingCallContent`, which doesn't depend on a `ViewModel` and instead depends on pure state from external sources to render its UI.
 
 > **Note**: If you want to learn more about our component types, make sure to read through our [Compose Components Overview](../../01-overview.mdx).
 
@@ -48,11 +48,11 @@ public fun OutgoingCallContent(
   	..., // State
     onBackPressed: () -> Unit,
     onCallAction: (CallAction) -> Unit,
-) 
+)
 ```
 
-* `onBackPressed`: Handler when the user triggers the back action. Useful to either cancel the call or put it in the background.
-* `onCallAction`: Handler when the user clicks on any of the visible actions, that allow them to enable and disable audio or video or cancel the call.
+- `onBackPressed`: Handler when the user triggers the back action. Useful to either cancel the call or put it in the background.
+- `onCallAction`: Handler when the user clicks on any of the visible actions, that allow them to enable and disable audio or video or cancel the call.
 
 To override these action handlers, simply pass in custom logic when using the component:
 
