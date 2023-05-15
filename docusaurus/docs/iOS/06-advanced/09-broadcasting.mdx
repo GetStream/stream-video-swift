@@ -1,0 +1,53 @@
+---
+title: Broadcasting
+description: Broadcasting to HLS & RTMP
+---
+
+The StreamVideo SDK has support for broadcasting calls. You can find a tutorial on how to implement broadcasting calls in our [livestreaming tutorial](../../tutorials/livestream).
+
+### Creating a call
+
+First, you need to create a call with a user that has the capability to start broadcasting calls (`start-broadcast-call`).
+
+```swift
+let call = streamVideo.makeCall(callType: .default, callId: callId, members: [currentUser])
+Task {
+    try await call.join()
+}
+```
+
+The code above will create and join the call. If you just want to create it (and not join it), you can use the method `getOrCreateCall`:
+
+```swift
+let call = try await call.getOrCreate(members: members, startsAt: Date(), customData: [:], membersLimit: 100, ring: false)    
+```
+
+### Start broadcasting
+
+You can start broadcasting a call, by calling the method `startBroadcasting`:
+
+```swift
+try await call.startBroadcasting()
+```
+
+After few seconds of setup, the call would be broadcasted, and you will receive an event called `BroadcastingStartedEvent`. Also, the `state` of the call would be updated - the `broadcasting` value would become true.
+
+You can listen to the broadcasting events on the call by subscribing to its `AsyncStream`:
+
+```swift
+for await event in call.broadcastingEvents() {
+    print(event)
+}
+```
+
+In the `BroadcastingStartedEvent`, you will receive the `hlsPlaylistUrl`, a URL that can be used by other participants to watch the broadcasting.
+
+### Stop broadcasting
+
+When you are done with broadcasting, you should call the method `stopBroadcasting`.
+
+```swift
+try await call.stopBroadcasting()
+```
+
+This action will also send `BroadcastingStoppedEvent` to all participants who are watching the call.

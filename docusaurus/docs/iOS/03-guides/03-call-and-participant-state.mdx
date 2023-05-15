@@ -1,0 +1,128 @@
+---
+title: Call & Participant State
+description: How the state is exposed
+---
+
+## Call State
+
+When you join a call, we expose the following state from the `Call` object:
+- `participants` - dictionary of the participants in the call
+- `state` - the call state
+- `reconnectionStatus` - whether the call is reconnecting
+- `recordingState` - the recording state of the call
+- `participantCount - number of participants connected to the call
+
+The `call.state` provides additional information about the call:
+- `callCid`: String - the call cid, in the format type:callId.
+- `members`: [User] - the members of the call.
+- `blockedUsers`: [User] - the blocked users.
+- `createdAt`: Date - the creation date of the call.
+- `backstage`: Bool - whether the call is in backstage.
+- `broadcasting`: Bool - whether the call is being broadcasted.
+- `endedAt`: Date? - optional end date of the call.
+- `recording`: Bool - whether the call is being recorded.
+- `startsAt`: Date? - the starting date of the call.
+- `updatedAt`: Date - the update date of a call.
+- `hlsPlaylistUrl`: String - hls playlist url if the call is being broadcasted.
+- `customData`: [String: Any] - any custom data that you passed while creating the call.
+
+## Call Participant
+
+When users join a call, they become `CallParticipant`s. The call participants are available from the `CallViewModel`'s `callParticipants` property, as a dictionary, or directly from the `call` object.
+
+You can use this property to filter participants, based on their properties. Here's a list of the info that is available about the `CallParticipant`:
+- `id`: `String` - The unique call id of the participant.
+- `userId`: `String` - The user's id. This is not necessarily unique, since a user can join from multiple devices. 
+- `role`: `String` - The user's role in the call.
+- `name`: `String` - The user's name.
+- `profileImageURL`: `URL?` - The user's profile image URL.
+- `trackLookupPrefix`: `String?` - The id of the track that's connected to the participant.
+- `hasVideo`: `Bool` - Returns whether the participant has video.
+- `hasAudio`: `Bool` - Returns whether the participant has audio.
+- `isScreensharing`: `Bool` - Returns whether the participant is screen sharing.
+- `track`: `RTCVideoTrack?` - Returns the participant's video track.
+- `trackSize`: `CGSize` - Returns the size of the track for the participant.
+- `screenshareTrack`: `RTCVideoTrack?` - Returns the screen sharing track for the participant.
+- `showTrack`: `Bool` - Returns whether the track should be shown.
+- `isSpeaking`: `Bool` - Returns whether the participant is speaking.
+- `sessionId`: `String` - Returns the session id of the participant.
+- `connectionQuality`: `ConnectionQuality` - Returns the connection quality of the participant.
+- `joinedAt`: `Date` - Returns the date when the user joined the call.
+- `isPinned`: `Bool` - Returns whether the current user is pinned.
+
+These properties can be used to do custom filtering of the participants. For example, if you want to get the first user who is speaking, you can do the following:
+
+```swift
+var speaker: CallParticipant? {
+    participants.first { $0.isSpeaking }
+}
+```
+
+## Calling state
+
+If you are using our `CallViewModel`, the state of the call is managed for you and available as a `@Published` property called `callingState`. It can be used to show custom UI, such as incoming / outgoing call screens, depending on your use-case. If you are using our default UI components, you don't have to do any special handling about the `callingState`.
+
+The `CallingState` enumeration has the following possible values:
+- `idle` - There's no active call at the moment. In this case, your hosting view should be displayed.
+- `lobby(LobbyInfo)` - The user is in the lobby before joining the call.
+- `incoming(IncomingCall)` - There's an incoming call, therefore an incoming call screen needs to be displayed.
+- `joining` - The user is joining a call.
+- `outgoing` - The user rings someone, therefore an outgoing call needs to be displayed.
+- `inCall` - The user is in a call.
+- `reconnecting` - The user dropped the connection and now they are trying to reconnect.
+
+### Example handling
+
+If you want to build your own UI layer, here's an example how to react to the changes of the calling state in SwiftUI:
+
+```swift
+public var body: some View {
+    ZStack {
+        if viewModel.callingState == .outgoing {
+            viewFactory.makeOutgoingCallView(viewModel: viewModel)
+        } else if viewModel.callingState == .inCall {
+            if !viewModel.participants.isEmpty {
+                if viewModel.isMinimized {
+                    MinimizedCallView(viewModel: viewModel)
+                } else {
+                    viewFactory.makeCallView(viewModel: viewModel)
+                }
+            } else {
+                WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
+            }
+        } else if case let .incoming(callInfo) = viewModel.callingState {
+            viewFactory.makeIncomingCallView(viewModel: viewModel, callInfo: callInfo)
+        }
+    }
+    .onReceive(viewModel.$callingState) { _ in
+        if viewModel.callingState == .idle || viewModel.callingState == .inCall {
+            utils.callSoundsPlayer.stopOngoingSound()
+        }
+    }
+}
+```
+
+Similarly, you can listen to the UI changes via the `@Published` property in UIKit:
+
+```swift
+private func listenToIncomingCalls() {
+    callViewModel.$callingState.sink { [weak self] newState in
+        guard let self = self else { return }
+        if case .incoming(_) = newState, self == self.navigationController?.topViewController {
+            let next = CallViewController.make(with: self.callViewModel)
+            CallViewHelper.shared.add(callView: next.view)
+        } else if newState == .idle {
+            CallViewHelper.shared.removeCallView()
+        }
+    }
+    .store(in: &cancellables)
+}
+```
+
+### Call Settings
+
+The `CallViewModel` provides information about the current call settings, such as the camera position and whether there's an audio and video turned on. This is available as a `@Published` property called `callSettings`.
+
+If you are building a custom UI, you should use the values from this struct to show the corresponding call controls and camera (front or back).
+
+If you want to learn more about the call settings and how to use them, please check the following [page](../client/call-viewmodel.md).
