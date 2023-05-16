@@ -10,7 +10,6 @@ class CallCoordinatorController: @unchecked Sendable {
     
     let coordinatorClient: CoordinatorClient
     var currentCallSettings: CallSettingsInfo?
-    private let latencyService: LatencyService
     private let videoConfig: VideoConfig
     private var user: User
     
@@ -20,7 +19,6 @@ class CallCoordinatorController: @unchecked Sendable {
         coordinatorInfo: CoordinatorInfo,
         videoConfig: VideoConfig
     ) {
-        latencyService = LatencyService(httpClient: httpClient)
         coordinatorClient = CoordinatorClient(
             httpClient: httpClient,
             apiKey: coordinatorInfo.apiKey,
@@ -39,24 +37,40 @@ class CallCoordinatorController: @unchecked Sendable {
         members: [User],
         ring: Bool
     ) async throws -> EdgeServer {
-        let joinCallResponse = try await joinCall(
+        let location = try await getLocation()
+        let response = try await joinCall(
             callId: callId,
             type: callType,
+            location: location,
             participants: members,
             ring: ring
         )
-        
-        let latencyByEdge = await measureLatencies(for: joinCallResponse.edges)
-        
-        let edgeServer = try await selectEdgeServer(
-            callId: joinCallResponse.call.id,
-            type: callType,
-            latencyByEdge: latencyByEdge,
-            edges: joinCallResponse.edges
+        let iceServersResponse: [ICEServer] = response.credentials.iceServers
+        let iceServers = iceServersResponse.map { iceServer in
+            IceServer(
+                urls: iceServer.urls,
+                username: iceServer.username,
+                password: iceServer.password
+            )
+        }
+        let callSettings = CallSettingsInfo(
+            callCapabilities: response.call.ownCapabilities.map(\.rawValue),
+            callSettings: response.call.settings,
+            state: response.call.toCallData(
+                members: response.members,
+                blockedUsers: response.blockedUsers
+            ),
+            recording: response.call.recording
         )
-        
+        let edgeServer = EdgeServer(
+            url: response.credentials.server.url,
+            webSocketURL: response.credentials.server.wsEndpoint,
+            token: response.credentials.token,
+            iceServers: iceServers,
+            callSettings: callSettings,
+            latencyURL: nil
+        )
         currentCallSettings = edgeServer.callSettings
-        
         return edgeServer
     }
 
@@ -122,34 +136,27 @@ class CallCoordinatorController: @unchecked Sendable {
     }
 
     // MARK: - private
-        
-    private func measureLatencies(
-        for endpoints: [DatacenterResponse]
-    ) async -> [String: [Float]] {
-        await withTaskGroup(of: [String: [Float]].self) { group in
-            var result: [String: [Float]] = [:]
-            for endpoint in endpoints {
-                group.addTask {
-                    let value = await self.latencyService.measureLatency(for: endpoint, tries: 3)
-                    return [endpoint.name: value]
-                }
-            }
-            
-            for await latency in group {
-                for (key, value) in latency {
-                    result[key] = value
-                }
-            }
-            
-            log.debug("Reported latencies for edges: \(result)")
-            
-            return result
+
+    private func getLocation() async throws -> String {
+        guard let url = URL(string: "https://hint.stream-io-video.com/") else {
+            throw URLError(.badURL)
         }
+        var request = URLRequest(url: url)
+        request.httpMethod = "HEAD"
+        let (_, response) = try await URLSession.shared.data(for: request)
+        if let response = response as? HTTPURLResponse {
+            let headerKey = "X-Amz-Cf-Pop"
+            if let prefix = response.value(forHTTPHeaderField: headerKey)?.prefix(3) {
+                return String(prefix)
+            }
+        }
+        throw FetchingLocationError()
     }
-    
+
     private func joinCall(
         callId: String,
         type: String,
+        location: String,
         participants: [User],
         ring: Bool
     ) async throws -> JoinCallResponse {
@@ -176,7 +183,7 @@ class CallCoordinatorController: @unchecked Sendable {
             settingsOverride: nil
         )
         let create = !user.id.isAnonymousUser
-        let joinCall = JoinCallRequest(create: create, data: callRequest, ring: ring)
+        let joinCall = JoinCallRequest(create: create, data: callRequest, location: location, ring: ring)
         let joinCallRequest = JoinCallRequestData(
             id: callId,
             type: type,
@@ -185,65 +192,11 @@ class CallCoordinatorController: @unchecked Sendable {
         let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
     }
-    
-    private func selectEdgeServer(
-        callId: String,
-        type: String,
-        latencyByEdge: [String: [Float]],
-        edges: [DatacenterResponse]
-    ) async throws -> EdgeServer {
-        let getCallEdgeServerRequest = GetCallEdgeServerRequest(
-            latencyMeasurements: latencyByEdge
-        )
-        let selectEdgeRequest = SelectEdgeServerRequestData(
-            id: callId,
-            type: type,
-            getCallEdgeServerRequest: getCallEdgeServerRequest
-        )
-        let response = try await coordinatorClient.getCallEdgeServer(with: selectEdgeRequest)
-        let credentials = response.credentials
-        let iceServersResponse: [ICEServer] = credentials.iceServers
-        let iceServers = iceServersResponse.map { iceServer in
-            IceServer(
-                urls: iceServer.urls,
-                username: iceServer.username,
-                password: iceServer.password
-            )
-        }
-        let edgeName = response.credentials.server.edgeName
-        let edge = edges.first { $0.name == edgeName }
-        var latencyURL: String? = edge.map(\.latencyUrl) ?? nil
-        if latencyURL == nil {
-            for edge in edges {
-                let maxLatency = Float(Int.max)
-                let name = edge.name
-                let latency = latencyByEdge[name]?.last ?? maxLatency
-                if latency != maxLatency {
-                    latencyURL = edge.latencyUrl
-                }
-            }
-        }
-        let callSettings = CallSettingsInfo(
-            callCapabilities: response.call.ownCapabilities.map(\.rawValue),
-            callSettings: response.call.settings,
-            state: response.call.toCallData(
-                members: response.members,
-                blockedUsers: response.blockedUsers
-            ),
-            recording: response.call.recording
-        )
-        return EdgeServer(
-            url: credentials.server.url,
-            token: credentials.token,
-            iceServers: iceServers,
-            callSettings: callSettings,
-            latencyURL: latencyURL
-        )
-    }
 }
 
 public struct EdgeServer: Sendable {
     let url: String
+    let webSocketURL: String
     let token: String
     let iceServers: [IceServer]
     let callSettings: CallSettingsInfo
@@ -270,3 +223,5 @@ struct CoordinatorInfo {
     let hostname: String
     let token: String
 }
+
+public struct FetchingLocationError: Error {}

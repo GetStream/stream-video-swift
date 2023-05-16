@@ -18,17 +18,20 @@ internal struct CreateCallTypeRequest: Codable, JSONEncodable, Hashable {
 
     internal var grants: [String: [String]]?
     internal var name: String
+    internal var notificationSettings: NotificationSettingsRequest?
     internal var settings: CallSettingsRequest?
 
-    internal init(grants: [String: [String]]? = nil, name: String, settings: CallSettingsRequest? = nil) {
+    internal init(grants: [String: [String]]? = nil, name: String, notificationSettings: NotificationSettingsRequest? = nil, settings: CallSettingsRequest? = nil) {
         self.grants = grants
         self.name = name
+        self.notificationSettings = notificationSettings
         self.settings = settings
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case grants
         case name
+        case notificationSettings = "notification_settings"
         case settings
     }
 
@@ -38,6 +41,7 @@ internal struct CreateCallTypeRequest: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(grants, forKey: .grants)
         try container.encode(name, forKey: .name)
+        try container.encodeIfPresent(notificationSettings, forKey: .notificationSettings)
         try container.encodeIfPresent(settings, forKey: .settings)
     }
 }

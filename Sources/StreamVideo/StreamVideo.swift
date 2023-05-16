@@ -64,8 +64,6 @@ public class StreamVideo {
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
         
     private let apiKey: APIKey
-    private let latencyService: LatencyService
-    
     private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
@@ -230,8 +228,6 @@ public class StreamVideo {
             token.rawValue,
             videoConfig
         )
-        latencyService = environment.latencyServiceBuilder(self.httpClient)
-                
         self.httpClient.setTokenUpdater { [weak self] token in
             self?.token = token
         }

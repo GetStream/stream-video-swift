@@ -12,6 +12,7 @@ class CallController_Mock: CallController {
         user: StreamVideo.mockUser,
         apiKey: "key1",
         hostname: "localhost",
+        webSocketURLString: "wss://localhost/ws",
         token: StreamVideo.mockToken.rawValue,
         callCid: "default:test",
         callCoordinatorController: callCoordinatorController,
@@ -63,6 +64,7 @@ class CallController_Mock: CallController {
     ) async throws -> EdgeServer {
         EdgeServer(
             url: "localhost",
+            webSocketURL: "wss://localhost/ws",
             token: "token",
             iceServers: [],
             callSettings: makeCallSettingsInfo(callId: "test", callType: .default),
@@ -82,6 +84,7 @@ class CallController_Mock: CallController {
             broadcasting: false,
             recording: false,
             updatedAt: Date(),
+            hlsPlaylistUrl: "",
             customData: [:]
         )
         let callSettingsInfo = CallSettingsInfo(

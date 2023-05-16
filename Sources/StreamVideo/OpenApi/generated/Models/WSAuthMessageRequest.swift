@@ -10,6 +10,10 @@ import Foundation
 import AnyCodable
 #endif
 
+
+
+
+
 internal struct WSAuthMessageRequest: Codable, JSONEncodable, Hashable {
 
     internal var token: String

@@ -55,12 +55,6 @@ extension StreamVideo {
             )
         }
         
-        var latencyServiceBuilder: (
-            _ httpClient: HTTPClient
-        ) -> LatencyService = {
-            LatencyService(httpClient: $0)
-        }
-        
         var connectionRecoveryHandlerBuilder: (
             _ webSocketClient: WebSocketClient,
             _ eventNotificationCenter: EventNotificationCenter

@@ -15,6 +15,25 @@ final class CallController_Tests: ControllerTestCase {
         streamVideo = StreamVideo(apiKey: apiKey, user: user, token: StreamVideo.mockToken, videoConfig: videoConfig)
     }
 
+    func test_callController_joinCall_webRTCClientSignalChannelUsesTheExpectedConnectURL() async throws {
+        // Given
+        let callCoordinator = makeCallCoordinatorController()
+        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
+        let callController = makeCallController(callCoordinator: callCoordinator)
+
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            members: []
+        )
+
+        // Then
+        XCTAssertEqual(webRTCClient.signalChannel?.connectURL.absoluteString, "wss://test.com/ws")
+    }
+
     func test_callController_reconnectionSuccess() async throws {
         // Given
         let callCoordinator = makeCallCoordinatorController()
@@ -123,6 +142,7 @@ final class CallController_Tests: ControllerTestCase {
                 broadcasting: false,
                 recording: false,
                 updatedAt: Date(),
+                hlsPlaylistUrl: "",
                 customData: [:])
         )
         
@@ -156,6 +176,7 @@ final class CallController_Tests: ControllerTestCase {
                 broadcasting: false,
                 recording: false,
                 updatedAt: Date(),
+                hlsPlaylistUrl: "",
                 customData: [:])
         )
         
@@ -255,6 +276,7 @@ final class CallController_Tests: ControllerTestCase {
             user: StreamVideo.mockUser,
             apiKey: StreamVideo.apiKey,
             hostname: "test.com",
+            webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: self.callCid,
             callCoordinatorController: callCoordinator,
@@ -275,7 +297,7 @@ extension CallController.Environment {
     
     static func mock(with webRTCClient: WebRTCClient) -> Self {
         .init(
-            webRTCBuilder: { _, _, _, _, _, _, _, _, _ in
+            webRTCBuilder: { _, _, _, _, _, _, _, _, _, _ in
             webRTCClient
         },
             sfuReconnectionTime: 5

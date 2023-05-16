@@ -90,6 +90,16 @@ struct JsonEventDecoder: AnyEventDecoder {
             return value
         case .typeCallBroadcastingStoppedEvent(let value):
             return value
+        case .typeCallLiveStartedEvent(let value):
+            return value
+        case .typeCallSessionEndedEvent(let value):
+            return value
+        case .typeCallSessionParticipantJoinedEvent(let value):
+            return value
+        case .typeCallSessionParticipantLeftEvent(let value):
+            return value
+        case .typeCallSessionStartedEvent(let value):
+            return value
         }
     }
 }
@@ -116,6 +126,12 @@ extension ConnectedEvent: HealthCheck {}
 extension VideoEvent: Event {}
 extension CallBroadcastingStartedEvent: Event {}
 extension CallBroadcastingStoppedEvent: Event {}
+extension CallLiveStartedEvent: Event {}
+extension CallSessionEndedEvent: Event {}
+extension CallSessionParticipantJoinedEvent: Event {}
+extension CallSessionParticipantLeftEvent: Event {}
+extension CallSessionStartedEvent: Event {}
+
 
 extension UserResponse {
     var toUser: User {

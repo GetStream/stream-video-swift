@@ -20,15 +20,15 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
     /** if true the call will be created if it doesn't exist */
     internal var create: Bool?
     internal var data: CallRequest?
-    internal var datacenterHintedId: String?
+    internal var location: String
     internal var membersLimit: Int?
     /** if true and the call is created, the notification will include ring=true */
     internal var ring: Bool?
 
-    internal init(create: Bool? = nil, data: CallRequest? = nil, datacenterHintedId: String? = nil, membersLimit: Int? = nil, ring: Bool? = nil) {
+    internal init(create: Bool? = nil, data: CallRequest? = nil, location: String, membersLimit: Int? = nil, ring: Bool? = nil) {
         self.create = create
         self.data = data
-        self.datacenterHintedId = datacenterHintedId
+        self.location = location
         self.membersLimit = membersLimit
         self.ring = ring
     }
@@ -36,7 +36,7 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case create
         case data
-        case datacenterHintedId = "datacenter_hinted_id"
+        case location
         case membersLimit = "members_limit"
         case ring
     }
@@ -47,7 +47,7 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(create, forKey: .create)
         try container.encodeIfPresent(data, forKey: .data)
-        try container.encodeIfPresent(datacenterHintedId, forKey: .datacenterHintedId)
+        try container.encode(location, forKey: .location)
         try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
         try container.encodeIfPresent(ring, forKey: .ring)
     }

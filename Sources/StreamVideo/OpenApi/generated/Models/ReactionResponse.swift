@@ -16,12 +16,12 @@ import AnyCodable
 
 internal struct ReactionResponse: Codable, JSONEncodable, Hashable {
 
-    internal var custom: [String: AnyCodable]
+    internal var custom: [String: AnyCodable]?
     internal var emojiCode: String?
     internal var type: String
     internal var user: UserResponse
 
-    internal init(custom: [String: AnyCodable], emojiCode: String? = nil, type: String, user: UserResponse) {
+    internal init(custom: [String: AnyCodable]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
         self.custom = custom
         self.emojiCode = emojiCode
         self.type = type
@@ -39,7 +39,7 @@ internal struct ReactionResponse: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(custom, forKey: .custom)
+        try container.encodeIfPresent(custom, forKey: .custom)
         try container.encodeIfPresent(emojiCode, forKey: .emojiCode)
         try container.encode(type, forKey: .type)
         try container.encode(user, forKey: .user)

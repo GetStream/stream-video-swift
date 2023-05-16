@@ -51,6 +51,7 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
             broadcasting: false,
             recording: false,
             updatedAt: Date(),
+            hlsPlaylistUrl: "",
             customData: [:]
         )
         let callSettingsInfo = CallSettingsInfo(
@@ -61,6 +62,7 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
         )
         return EdgeServer(
             url: "test.com",
+            webSocketURL: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             iceServers: [],
             callSettings: callSettingsInfo,
