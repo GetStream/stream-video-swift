@@ -1,6 +1,9 @@
 name: Test Flight Deploy DemoApp
 
 on:
+  pull_request:
+    branches:
+      - 'main'
   release:
     types: [published]
 
