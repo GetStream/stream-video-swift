@@ -1,6 +1,6 @@
 Pod::Spec.new do |spec|
   spec.name = 'StreamVideo'
-  spec.version = '0.0.6'
+  spec.version = '0.0.7'
   spec.summary = 'StreamVideo iOS Video Client'
   spec.description = 'stream-video-swift is the official Swift client for Stream Video, a service for building video applications.'
 
