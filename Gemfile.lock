@@ -1,8 +1,3 @@
-PATH
-  remote: /Users/alexeyalterpesotskiy/Code/stream/fastlane/fastlane-plugin-stream_actions
-  specs:
-    fastlane-plugin-stream_actions (0.2.4)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -22,7 +17,7 @@ GEM
     ast (2.4.2)
     atomos (0.1.3)
     aws-eventstream (1.2.0)
-    aws-partitions (1.761.0)
+    aws-partitions (1.765.0)
     aws-sdk-core (3.172.0)
       aws-eventstream (~> 1, >= 1.0.2)
       aws-partitions (~> 1, >= 1.651.0)
@@ -193,6 +188,7 @@ GEM
       bundler
       fastlane
       pry
+    fastlane-plugin-stream_actions (0.2.5)
     fastlane-plugin-versioning (0.5.1)
     ffi (1.15.5)
     fourflusher (2.3.1)
@@ -201,7 +197,7 @@ GEM
     git (1.18.0)
       addressable (~> 2.8)
       rchardet (~> 1.8)
-    google-apis-androidpublisher_v3 (0.41.0)
+    google-apis-androidpublisher_v3 (0.42.0)
       google-apis-core (>= 0.11.0, < 2.a)
     google-apis-core (0.11.0)
       addressable (~> 2.5, >= 2.5.1)
@@ -280,8 +276,8 @@ GEM
     naturally (2.2.1)
     netrc (0.11.0)
     no_proxy_fix (0.1.2)
-    nokogiri (1.14.3)
-      mini_portile2 (~> 2.8.0)
+    nokogiri (1.15.0)
+      mini_portile2 (~> 2.8.2)
       racc (~> 1.4)
     octokit (5.6.1)
       faraday (>= 1, < 3)
@@ -359,7 +355,7 @@ GEM
       clamp (~> 1.3)
       nokogiri (>= 1.13.9)
       xcodeproj (~> 1.21)
-    sqlite3 (1.6.2)
+    sqlite3 (1.6.3)
       mini_portile2 (~> 2.8.0)
     terminal-notifier (2.0.0)
     terminal-table (1.8.0)
@@ -409,7 +405,7 @@ DEPENDENCIES
   fastlane
   fastlane-plugin-emerge
   fastlane-plugin-lizard
-  fastlane-plugin-stream_actions!
+  fastlane-plugin-stream_actions (= 0.2.5)
   fastlane-plugin-versioning
   jazzy
   json
