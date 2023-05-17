@@ -31,13 +31,11 @@ end
 desc "Release a new version"
 lane :release do |options|
   release_ios_sdk(
-    check_release_branch: false,
+    check_release_branch: false, # DELETE ME
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
-    github_repo: github_repo,
-    pod_sync: options[:pod_sync], # `false` by default
-    skip_pod_list: true # Needs to be set to `false` after first release
+    github_repo: github_repo
   )
 end
 
