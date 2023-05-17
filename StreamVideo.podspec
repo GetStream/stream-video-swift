@@ -16,8 +16,8 @@ Pod::Spec.new do |spec|
   spec.framework = "Foundation"
   spec.module_name = spec.name
   spec.source = { git: "https://github.com/GetStream/stream-video-swift.git", tag: spec.version }
-  spec.source_files = ["Sources/StreamVideo/**/*.swift"]
-  spec.exclude_files = ["Sources/StreamVideo/**/*_Tests.swift", "Sources/StreamVideo/**/*_Mock.swift"]
+  spec.source_files = ["Sources/#{spec.name}/**/*.swift"]
+  spec.exclude_files = ["Sources/#{spec.name}/**/*_Tests.swift", "Sources/#{spec.name}/**/*_Mock.swift"]
 
   spec.dependency("SwiftProtobuf", "~> 1.18.0")
   spec.dependency("WebRTC-SDK", "104.5112.11")
