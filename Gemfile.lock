@@ -1,3 +1,8 @@
+PATH
+  remote: /Users/alexeyalterpesotskiy/Code/stream/fastlane/fastlane-plugin-stream_actions
+  specs:
+    fastlane-plugin-stream_actions (0.2.4)
+
 GEM
   remote: https://rubygems.org/
   specs:
@@ -188,7 +193,6 @@ GEM
       bundler
       fastlane
       pry
-    fastlane-plugin-stream_actions (0.2.4)
     fastlane-plugin-versioning (0.5.1)
     ffi (1.15.5)
     fourflusher (2.3.1)
@@ -405,7 +409,7 @@ DEPENDENCIES
   fastlane
   fastlane-plugin-emerge
   fastlane-plugin-lizard
-  fastlane-plugin-stream_actions (= 0.2.4)
+  fastlane-plugin-stream_actions!
   fastlane-plugin-versioning
   jazzy
   json
