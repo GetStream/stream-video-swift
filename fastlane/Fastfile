@@ -31,6 +31,7 @@ end
 desc "Release a new version"
 lane :release do |options|
   release_ios_sdk(
+    check_release_branch: false,
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
