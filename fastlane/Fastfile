@@ -34,9 +34,7 @@ lane :release do |options|
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
-    github_repo: github_repo,
-    pod_sync: options[:pod_sync],
-    skip_pod_list: true # This argument needs to be removed after first release
+    github_repo: github_repo
   )
 end
 
