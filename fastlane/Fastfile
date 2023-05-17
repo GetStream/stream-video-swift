@@ -8,7 +8,7 @@ import 'Allurefile'
 
 xcode_version = ENV['XCODE_VERSION'] || '14.2'
 xcode_project = 'StreamVideo.xcodeproj'
-sdk_names = ['StreamVideo', 'StreamVideoSwiftUI']
+sdk_names = ['StreamVideo']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 sinatra_port = 4567
 video_buddy_port = 5678
