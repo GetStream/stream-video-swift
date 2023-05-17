@@ -15,12 +15,12 @@ Pod::Spec.new do |spec|
 
   spec.framework = 'Foundation', 'SwiftUI'
   spec.module_name = spec.name
-  spec.source = { git: 'https://github.com/GetStream/stream-video-swift.git', tag: spec.version }
+  spec.source = { git: 'https://github.com/GetStream/stream-video-swift.git', tag: "#{spec.version}" }
   spec.source_files = ["Sources/#{spec.name}/**/*.swift"]
   spec.exclude_files = ["Sources/#{spec.name}/**/*_Tests.swift", "Sources/#{spec.name}/**/*_Mock.swift"]
   spec.resource_bundles = { spec.name => ["Sources/#{spec.name}/Resources/**/*"] }
 
-  spec.dependency('StreamVideo', "= #{spec.version}")
+  spec.dependency('StreamVideo', "#{spec.version}")
   spec.dependency('Nuke', '10.7.1')
   spec.dependency('NukeUI', '0.8.0')
 end
