@@ -32,7 +32,7 @@ jobs:
       - name: "Fastlane - Publish Release"
         # if: startsWith(github.event.pull_request.head.ref, 'release/')
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
         run: bundle exec fastlane publish_release version:"0.0.16" --verbose
         # run: bundle exec fastlane publish_release version:${{ env.RELEASE_VERSION }} --verbose
