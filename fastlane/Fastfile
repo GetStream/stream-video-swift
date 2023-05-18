@@ -31,7 +31,6 @@ end
 desc "Release a new version"
 lane :release do |options|
   ios_sdk_release(
-    check_branch: false, # TODO: delete this before merging the PR
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
