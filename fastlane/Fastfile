@@ -30,9 +30,19 @@ end
 
 desc "Release a new version"
 lane :release do |options|
-  release_ios_sdk(
+  ios_sdk_release(
     version: options[:version],
     bump_type: options[:type],
+    sdk_names: sdk_names,
+    github_repo: github_repo,
+    create_pull_request: false # TODO: delete this once we have a develop branch
+  )
+end
+
+desc "Release a new version"
+lane :publish_release do |options|
+  publish_ios_sdk_release(
+    version: options[:version],
     sdk_names: sdk_names,
     github_repo: github_repo
   )

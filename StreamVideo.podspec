@@ -2,7 +2,7 @@ Pod::Spec.new do |spec|
   spec.name = 'StreamVideo'
   spec.version = '0.0.14'
   spec.summary = 'StreamVideo iOS Video Client'
-  spec.description = 'stream-video-swift is the official Swift client for Stream Video, a service for building video applications.'
+  spec.description = 'StreamVideo is the official Swift client for Stream Video, a service for building video applications.'
 
   spec.homepage = 'https://getstream.io/video/'
   spec.license = { type: 'BSD-3', file: 'LICENSE' }
@@ -15,7 +15,7 @@ Pod::Spec.new do |spec|
 
   spec.framework = 'Foundation'
   spec.module_name = spec.name
-  spec.source = { git: 'https://github.com/GetStream/stream-video-swift.git', tag: "#{spec.version}" }
+  spec.source = { git: 'https://github.com/GetStream/stream-video-swift.git', tag: spec.version }
   spec.source_files = ["Sources/#{spec.name}/**/*.swift"]
   spec.exclude_files = ["Sources/#{spec.name}/**/*_Tests.swift", "Sources/#{spec.name}/**/*_Mock.swift"]
 
