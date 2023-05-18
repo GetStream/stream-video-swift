@@ -1,6 +1,9 @@
 name: "Publish new release"
 
 on:
+  push: # TODO: delete this trigger before merging this PR
+    branches:
+      - ci/clean-up-release-pipeline
   pull_request:
     branches:
       - main
@@ -11,7 +14,7 @@ jobs:
   release:
     name: Publish new release
     runs-on: macos-12
-    if: false # TODO: delete this once we have a develop branch
+    # if: false # TODO: delete this once we have a develop branch
     # if: github.event.pull_request.merged == true # only merged pull requests must trigger this job
     steps:
       - name: Install Bot SSH Key
@@ -19,16 +22,17 @@ jobs:
         with:
           ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
       - uses: actions/checkout@v3.1.0
-      - name: Extract version from branch name (for release branches)
-        if: startsWith(github.event.pull_request.head.ref, 'release/')
-        run: |
-          BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
-          VERSION=${BRANCH_NAME#release/}
-          echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
-      - uses: ./.github/actions/bootstrap
+      # - name: Extract version from branch name (for release branches)
+      #   if: startsWith(github.event.pull_request.head.ref, 'release/')
+      #   run: |
+      #     BRANCH_NAME="${{ github.event.pull_request.head.ref }}"
+      #     VERSION=${BRANCH_NAME#release/}
+      #     echo "RELEASE_VERSION=$VERSION" >> $GITHUB_ENV
+      # - uses: ./.github/actions/bootstrap
       - name: "Fastlane - Publish Release"
         if: startsWith(github.event.pull_request.head.ref, 'release/')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COCOAPODS_TRUNK_TOKEN: ${{ secrets.COCOAPODS_TRUNK_TOKEN }}
-        run: bundle exec fastlane publish_release version:${{ env.RELEASE_VERSION }} --verbose
+        run: bundle exec fastlane publish_release version:"0.0.16" --verbose
+        # run: bundle exec fastlane publish_release version:${{ env.RELEASE_VERSION }} --verbose

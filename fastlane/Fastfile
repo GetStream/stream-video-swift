@@ -31,6 +31,7 @@ end
 desc "Release a new version"
 lane :release do |options|
   ios_sdk_release(
+    check_branch: false, # TODO: delete this before merging this PR
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
@@ -42,6 +43,7 @@ end
 desc "Publish a new release to GitHub and CocoaPods"
 lane :publish_release do |options|
   publish_ios_sdk_release(
+    check_branch: false, # TODO: delete this before merging this PR
     version: options[:version],
     sdk_names: sdk_names,
     github_repo: github_repo
