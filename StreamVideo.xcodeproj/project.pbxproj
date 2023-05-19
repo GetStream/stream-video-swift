@@ -33,12 +33,18 @@
 		824DBAA729F93E2B005ACD09 /* SnapshotVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */; };
 		824DBAA829F93E2B005ACD09 /* SnapshotVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */; };
 		8251E60D2A17838D00E7257A /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 8251E60C2A17838D00E7257A /* WebRTC */; };
+		8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8251E62A2A17BEB400E7257A /* StreamVideoTestResources.swift */; };
+		8251E62C2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8251E62A2A17BEB400E7257A /* StreamVideoTestResources.swift */; };
+		8251E62D2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8251E62A2A17BEB400E7257A /* StreamVideoTestResources.swift */; };
+		8251E62F2A17BEEF00E7257A /* ImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8251E62E2A17BEEF00E7257A /* ImageFactory.swift */; };
+		8251E6302A17BEEF00E7257A /* ImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8251E62E2A17BEEF00E7257A /* ImageFactory.swift */; };
+		8251E6312A17BEEF00E7257A /* ImageFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8251E62E2A17BEEF00E7257A /* ImageFactory.swift */; };
 		82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8268615F290A7556005BFFED /* SystemEnvironment.swift */; };
 		828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */; };
 		829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */; };
 		829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */; };
-		829F7BFA29FABC0E003EBACE /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
-		829F7BFB29FABC0E003EBACE /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
+		829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* ViewFactory.swift */; };
+		829F7BFB29FABC0E003EBACE /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* ViewFactory.swift */; };
 		829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
 		82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82AD932429E6FCCF00D4D295 /* LobbyPage.swift */; };
 		82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F729E80933001F816C /* LobbyTests.swift */; };
@@ -99,7 +105,6 @@
 		82E3BA552A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */; };
 		82E3BA562A0BAF64001AB93E /* WebSocketEngine_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8A29EEACAD00010C4C /* WebSocketEngine_Mock.swift */; };
 		82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8A29EEACAD00010C4C /* WebSocketEngine_Mock.swift */; };
-		82E7C8B72A0BF6A200694FED /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -665,11 +670,13 @@
 		824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionTests.swift; sourceTree = "<group>"; };
 		824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SnapshotVariant.swift; sourceTree = "<group>"; };
 		824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertSnapshot.swift; sourceTree = "<group>"; };
+		8251E62A2A17BEB400E7257A /* StreamVideoTestResources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoTestResources.swift; sourceTree = "<group>"; };
+		8251E62E2A17BEEF00E7257A /* ImageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFactory.swift; sourceTree = "<group>"; };
 		8268615F290A7556005BFFED /* SystemEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemEnvironment.swift; sourceTree = "<group>"; };
 		828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserRobot+Asserts.swift"; sourceTree = "<group>"; };
 		829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridLayout_Tests.swift; sourceTree = "<group>"; };
 		829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsSpotlightLayout_Tests.swift; sourceTree = "<group>"; };
-		829F7BF929FABC0E003EBACE /* StreamFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamFactory.swift; sourceTree = "<group>"; };
+		829F7BF929FABC0E003EBACE /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsFullScreenLayout_Tests.swift; sourceTree = "<group>"; };
 		82AD932429E6FCCF00D4D295 /* LobbyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyPage.swift; sourceTree = "<group>"; };
 		82B82F2229114001001B5FD7 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1209,6 +1216,7 @@
 		82392D5C2993CBE200941435 /* TestTools */ = {
 			isa = PBXGroup;
 			children = (
+				8251E6292A17BE9F00E7257A /* TestData */,
 				82CE900229FC3A7B00770EF6 /* Resources */,
 				824DBAA129F93DA1005ACD09 /* SnapshotTesting */,
 				82392D5D2993CC7C00941435 /* Robots */,
@@ -1264,9 +1272,18 @@
 			children = (
 				824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */,
 				824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */,
-				829F7BF929FABC0E003EBACE /* StreamFactory.swift */,
 			);
 			path = SnapshotTesting;
+			sourceTree = "<group>";
+		};
+		8251E6292A17BE9F00E7257A /* TestData */ = {
+			isa = PBXGroup;
+			children = (
+				8251E62A2A17BEB400E7257A /* StreamVideoTestResources.swift */,
+				829F7BF929FABC0E003EBACE /* ViewFactory.swift */,
+				8251E62E2A17BEEF00E7257A /* ImageFactory.swift */,
+			);
+			path = TestData;
 			sourceTree = "<group>";
 		};
 		829F7BFF29FAC5B1003EBACE /* CallView */ = {
@@ -2985,9 +3002,10 @@
 				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
 				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
+				8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
 				84F58B8329EE9E6400010C4C /* WebSocketClient_Tests.swift in Sources */,
-				82E7C8B72A0BF6A200694FED /* StreamFactory.swift in Sources */,
+				8251E62F2A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3085,13 +3103,15 @@
 				82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
+				8251E6302A17BEEF00E7257A /* ImageFactory.swift in Sources */,
+				8251E62C2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
 				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,
 				82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */,
 				82E3BA562A0BAF64001AB93E /* WebSocketEngine_Mock.swift in Sources */,
 				829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */,
 				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
-				829F7BFA29FABC0E003EBACE /* StreamFactory.swift in Sources */,
+				829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */,
 				82E3BA4E2A0BAE4D001AB93E /* VirtualTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3122,12 +3142,14 @@
 				8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */,
 				82E3BA3B2A0BADC0001AB93E /* CallCoordinatorController_Mock.swift in Sources */,
 				82E3BA4F2A0BAE4E001AB93E /* VirtualTimer.swift in Sources */,
+				8251E6312A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				82E3BA412A0BADFA001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
 				82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */,
 				824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
+				8251E62D2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				82E3BA492A0BAE2B001AB93E /* AssertAsync.swift in Sources */,
-				829F7BFB29FABC0E003EBACE /* StreamFactory.swift in Sources */,
+				829F7BFB29FABC0E003EBACE /* ViewFactory.swift in Sources */,
 				82E3BA552A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
 				82E3BA4D2A0BAE41001AB93E /* EquatableEvent.swift in Sources */,
 				8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */,

@@ -92,12 +92,11 @@ struct ParticipantFactory {
 }
 
 struct UserFactory {
-    static func get(_ count: Int, skipFirst: Bool = false) -> [User] {
+    static func get(_ count: Int) -> [User] {
         var factory: [User] = []
         guard count > 0 else { return factory }
         
-        let list = skipFirst ? (2...count + 1) : (1...count)
-        for i in list {
+        for i in (1...count) {
             let participant = User(
                 id: "test\(i)",
                 name: "\(i) Test",
@@ -108,60 +107,4 @@ struct UserFactory {
         
         return factory
     }
-}
-
-struct ImageFactory {
-    
-    static func get(_ number: Int) -> URL? {
-        switch number {
-        case 1:
-            return Bundle.testResources.url(forResource: "olive", withExtension: "png")
-        case 2:
-            return Bundle.testResources.url(forResource: "coffee", withExtension: "png")
-        case 3:
-            return Bundle.testResources.url(forResource: "sky", withExtension: "png")
-        case 4:
-            return Bundle.testResources.url(forResource: "forest", withExtension: "png")
-        case 5:
-            return Bundle.testResources.url(forResource: "sun", withExtension: "png")
-        case 6:
-            return Bundle.testResources.url(forResource: "fire", withExtension: "png")
-        case 7:
-            return Bundle.testResources.url(forResource: "sea", withExtension: "png")
-        case 8:
-            return Bundle.testResources.url(forResource: "violet", withExtension: "png")
-        case 9:
-            return Bundle.testResources.url(forResource: "pink", withExtension: "png")
-        default:
-            return Bundle.testResources.url(forResource: "skin", withExtension: "png")
-        }
-    }
-}
-
-extension Bundle {
-    
-    private final class StreamVideoTestResources {}
-    
-    static let bundleName = "StreamVideo_StreamVideoTestResources"
-    
-    static let testResources: Bundle = {
-        let candidates = [
-            // Bundle should be present here when the package is linked into an App.
-            Bundle.main.resourceURL,
-
-            // Bundle should be present here when the package is linked into a framework.
-            Bundle(for: StreamVideoTestResources.self).resourceURL,
-
-            // For command-line tools.
-            Bundle.main.bundleURL
-        ]
-
-        for candidate in candidates {
-            let bundlePath = candidate?.appendingPathComponent(bundleName + ".bundle")
-            if let bundle = bundlePath.flatMap(Bundle.init(url:)) {
-                return bundle
-            }
-        }
-        return Bundle(for: StreamVideoTestResources.self)
-    }()
 }
