@@ -32,6 +32,7 @@
 		824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */; };
 		824DBAA729F93E2B005ACD09 /* SnapshotVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */; };
 		824DBAA829F93E2B005ACD09 /* SnapshotVariant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */; };
+		8251E60D2A17838D00E7257A /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 8251E60C2A17838D00E7257A /* WebRTC */; };
 		82686160290A7556005BFFED /* SystemEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8268615F290A7556005BFFED /* SystemEnvironment.swift */; };
 		828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */; };
 		829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */; };
@@ -39,7 +40,6 @@
 		829F7BFA29FABC0E003EBACE /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
 		829F7BFB29FABC0E003EBACE /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
 		829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
-		829F7BFE29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
 		82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82AD932429E6FCCF00D4D295 /* LobbyPage.swift */; };
 		82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F729E80933001F816C /* LobbyTests.swift */; };
 		82B8C0FA29E80997001F816C /* RingProcessTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B8C0F929E80997001F816C /* RingProcessTests.swift */; };
@@ -68,6 +68,38 @@
 		82E2F9202A0559E60012C037 /* sun.png in Resources */ = {isa = PBXBuildFile; fileRef = 82E2F90D2A0559E60012C037 /* sun.png */; };
 		82E2F9212A0559E60012C037 /* skin.png in Resources */ = {isa = PBXBuildFile; fileRef = 82E2F90E2A0559E60012C037 /* skin.png */; };
 		82E2F9222A0559E60012C037 /* skin.png in Resources */ = {isa = PBXBuildFile; fileRef = 82E2F90E2A0559E60012C037 /* skin.png */; };
+		82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
+		82E3BA372A0BAD59001AB93E /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
+		82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032E29D6D00C00AD9BB4 /* CallController_Mock.swift */; };
+		82E3BA392A0BADB9001AB93E /* CallController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490032E29D6D00C00AD9BB4 /* CallController_Mock.swift */; };
+		82E3BA3A2A0BADBF001AB93E /* CallCoordinatorController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490033229D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift */; };
+		82E3BA3B2A0BADC0001AB93E /* CallCoordinatorController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490033229D6FD8D00AD9BB4 /* CallCoordinatorController_Mock.swift */; };
+		82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490033029D6D2BF00AD9BB4 /* MockResponseBuilder.swift */; };
+		82E3BA3D2A0BADCB001AB93E /* MockResponseBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490033029D6D2BF00AD9BB4 /* MockResponseBuilder.swift */; };
+		82E3BA402A0BADF9001AB93E /* WebSocketPingController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8E29EEB32700010C4C /* WebSocketPingController_Mock.swift */; };
+		82E3BA412A0BADFA001AB93E /* WebSocketPingController_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8E29EEB32700010C4C /* WebSocketPingController_Mock.swift */; };
+		82E3BA422A0BAE09001AB93E /* EventBatcher_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8629EEABF700010C4C /* EventBatcher_Mock.swift */; };
+		82E3BA432A0BAE0A001AB93E /* EventBatcher_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8629EEABF700010C4C /* EventBatcher_Mock.swift */; };
+		82E3BA442A0BAE0F001AB93E /* EventDecoder_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8429EEABC100010C4C /* EventDecoder_Mock.swift */; };
+		82E3BA452A0BAE10001AB93E /* EventDecoder_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8429EEABC100010C4C /* EventDecoder_Mock.swift */; };
+		82E3BA462A0BAE1E001AB93E /* VirtualTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B7B29EE979F00010C4C /* VirtualTime.swift */; };
+		82E3BA472A0BAE1F001AB93E /* VirtualTime.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B7B29EE979F00010C4C /* VirtualTime.swift */; };
+		82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8C29EEAE2D00010C4C /* AssertAsync.swift */; };
+		82E3BA492A0BAE2B001AB93E /* AssertAsync.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8C29EEAE2D00010C4C /* AssertAsync.swift */; };
+		82E3BA4A2A0BAE33001AB93E /* UniqueValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B7529EE92BF00010C4C /* UniqueValues.swift */; };
+		82E3BA4B2A0BAE34001AB93E /* UniqueValues.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B7529EE92BF00010C4C /* UniqueValues.swift */; };
+		82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B9429EEBA3900010C4C /* EquatableEvent.swift */; };
+		82E3BA4D2A0BAE41001AB93E /* EquatableEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B9429EEBA3900010C4C /* EquatableEvent.swift */; };
+		82E3BA4E2A0BAE4D001AB93E /* VirtualTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B7E29EE97C800010C4C /* VirtualTimer.swift */; };
+		82E3BA4F2A0BAE4E001AB93E /* VirtualTimer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B7E29EE97C800010C4C /* VirtualTimer.swift */; };
+		82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8829EEAC4400010C4C /* MockFunc.swift */; };
+		82E3BA512A0BAEAB001AB93E /* MockFunc.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8829EEAC4400010C4C /* MockFunc.swift */; };
+		82E3BA532A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */; };
+		82E3BA542A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */; };
+		82E3BA552A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */; };
+		82E3BA562A0BAF64001AB93E /* WebSocketEngine_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8A29EEACAD00010C4C /* WebSocketEngine_Mock.swift */; };
+		82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8A29EEACAD00010C4C /* WebSocketEngine_Mock.swift */; };
+		82E7C8B72A0BF6A200694FED /* StreamFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* StreamFactory.swift */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -660,6 +692,7 @@
 		82E2F90C2A0559E50012C037 /* olive.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = olive.png; sourceTree = "<group>"; };
 		82E2F90D2A0559E60012C037 /* sun.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sun.png; sourceTree = "<group>"; };
 		82E2F90E2A0559E60012C037 /* skin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = skin.png; sourceTree = "<group>"; };
+		82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketClientEnvironment_Mock.swift; sourceTree = "<group>"; };
 		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
 		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		8403C0AE2897D9940092BD43 /* VoipPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipPushService.swift; sourceTree = "<group>"; };
@@ -1153,6 +1186,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */,
+				8251E60D2A17838D00E7257A /* WebRTC in Frameworks */,
 				8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -1623,6 +1657,7 @@
 				84F58B9029EEB36E00010C4C /* EventNotificationCenter_Mock.swift */,
 				84F58B9229EEB53E00010C4C /* EventMiddleware_Mock.swift */,
 				842747F229EED8D900E063AD /* InternetConnection_Mock.swift */,
+				82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */,
 			);
 			path = Mock;
 			sourceTree = "<group>";
@@ -2372,6 +2407,7 @@
 			name = StreamVideoUIKitTests;
 			packageProductDependencies = (
 				8493227F29093A9E0013C029 /* SnapshotTesting */,
+				8251E60C2A17838D00E7257A /* WebRTC */,
 			);
 			productName = StreamVideoUIKitTests;
 			productReference = 84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */;
@@ -2942,6 +2978,7 @@
 				8414081129F284A800FF2D7C /* AssertJSONEqual.swift in Sources */,
 				8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */,
 				84D6494729E9F2D0002CA428 /* WebRTCClient_Tests.swift in Sources */,
+				82E3BA532A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
 				8478A0EA29F25F500001F860 /* PermissionsController_Tests.swift in Sources */,
 				8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */,
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
@@ -2950,6 +2987,7 @@
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */,
 				84F58B8329EE9E6400010C4C /* WebSocketClient_Tests.swift in Sources */,
+				82E7C8B72A0BF6A200694FED /* StreamFactory.swift in Sources */,
 				843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3032,13 +3070,29 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82E3BA462A0BAE1E001AB93E /* VirtualTime.swift in Sources */,
 				824DBAA529F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
 				829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */,
 				829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */,
+				82E3BA4A2A0BAE33001AB93E /* UniqueValues.swift in Sources */,
+				82E3BA542A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
+				82E3BA372A0BAD59001AB93E /* StreamVideo_Mock.swift in Sources */,
+				82E3BA442A0BAE0F001AB93E /* EventDecoder_Mock.swift in Sources */,
+				82E3BA402A0BADF9001AB93E /* WebSocketPingController_Mock.swift in Sources */,
+				82E3BA3A2A0BADBF001AB93E /* CallCoordinatorController_Mock.swift in Sources */,
+				82E3BA422A0BAE09001AB93E /* EventBatcher_Mock.swift in Sources */,
 				824DBAA729F93E2B005ACD09 /* SnapshotVariant.swift in Sources */,
+				82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */,
+				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
+				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
+				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,
+				82E3BA382A0BADB8001AB93E /* CallController_Mock.swift in Sources */,
+				82E3BA562A0BAF64001AB93E /* WebSocketEngine_Mock.swift in Sources */,
 				829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */,
+				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
 				829F7BFA29FABC0E003EBACE /* StreamFactory.swift in Sources */,
+				82E3BA4E2A0BAE4D001AB93E /* VirtualTimer.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3057,14 +3111,27 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82E3BA3D2A0BADCB001AB93E /* MockResponseBuilder.swift in Sources */,
 				8493227A290938440013C029 /* CallViewController_Tests.swift in Sources */,
+				82E3BA4B2A0BAE34001AB93E /* UniqueValues.swift in Sources */,
+				82E3BA512A0BAEAB001AB93E /* MockFunc.swift in Sources */,
+				82E3BA472A0BAE1F001AB93E /* VirtualTime.swift in Sources */,
 				824DBAA829F93E2B005ACD09 /* SnapshotVariant.swift in Sources */,
+				82E3BA392A0BADB9001AB93E /* CallController_Mock.swift in Sources */,
+				82E3BA432A0BAE0A001AB93E /* EventBatcher_Mock.swift in Sources */,
 				8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */,
+				82E3BA3B2A0BADC0001AB93E /* CallCoordinatorController_Mock.swift in Sources */,
+				82E3BA4F2A0BAE4E001AB93E /* VirtualTimer.swift in Sources */,
+				82E3BA412A0BADFA001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
+				82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */,
 				824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
-				829F7BFE29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */,
+				82E3BA492A0BAE2B001AB93E /* AssertAsync.swift in Sources */,
 				829F7BFB29FABC0E003EBACE /* StreamFactory.swift in Sources */,
+				82E3BA552A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
+				82E3BA4D2A0BAE41001AB93E /* EquatableEvent.swift in Sources */,
 				8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */,
+				82E3BA452A0BAE10001AB93E /* EventDecoder_Mock.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4056,6 +4123,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 82392D622993CD4700941435 /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */;
 			productName = StreamChatTestHelpers;
+		};
+		8251E60C2A17838D00E7257A /* WebRTC */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
+			productName = WebRTC;
 		};
 		8423B7552950BB0B00012F8D /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;

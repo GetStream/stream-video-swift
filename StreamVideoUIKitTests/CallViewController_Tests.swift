@@ -18,7 +18,7 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         callViewController.startCall(callId: "1234", members: participants)
         
         // Then
-        assertSnapshot(matching: callViewController.view, as: .image)
+        AssertSnapshot(callViewController.view)
     }
 
 }

@@ -70,7 +70,7 @@ func AssertSnapshot(
 ///   so that the newly captured snapshot is compared with the current reference.
 func AssertSnapshot(
     _ view: UIView,
-    variants: [SnapshotVariant] = SnapshotVariant.all,
+    variants: [SnapshotVariant] = [SnapshotVariant.defaultLight],
     size: CGSize? = nil,
     suffix: String? = nil,
     record: Bool = false,

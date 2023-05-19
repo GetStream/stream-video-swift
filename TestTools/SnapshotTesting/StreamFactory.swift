@@ -63,6 +63,8 @@ struct ParticipantFactory {
         connectionQuality: ConnectionQuality = .excellent
     ) -> [CallParticipant] {
         var factory: [CallParticipant] = []
+        guard count > 0 else { return factory }
+        
         for i in 1...count {
             let participant = CallParticipant(
                 id: "test\(i)",
@@ -90,9 +92,12 @@ struct ParticipantFactory {
 }
 
 struct UserFactory {
-    static func get(_ count: Int) -> [User] {
+    static func get(_ count: Int, skipFirst: Bool = false) -> [User] {
         var factory: [User] = []
-        for i in 1...count {
+        guard count > 0 else { return factory }
+        
+        let list = skipFirst ? (2...count + 1) : (1...count)
+        for i in list {
             let participant = User(
                 id: "test\(i)",
                 name: "\(i) Test",

@@ -359,13 +359,3 @@ final class WebSocketClient_Tests: XCTestCase {
         wait(for: [expectation], timeout: defaultTimeout)
     }
 }
-
-extension WebSocketClient.Environment {
-    static var mock: Self {
-        .init(
-            createPingController: WebSocketPingController_Mock.init,
-            createEngine: WebSocketEngine_Mock.init,
-            eventBatcherBuilder: { EventBatcher_Mock(handler: $0) }
-        )
-    }
-}
