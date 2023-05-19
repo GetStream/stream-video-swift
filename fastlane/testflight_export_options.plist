@@ -8,6 +8,8 @@
         <string>match AppStore io.getstream.iOS.VideoDemoApp</string>
         <key>io.getstream.iOS.DemoAppUIKit</key>
         <string>match AppStore io.getstream.iOS.DemoAppUIKit</string>
+        <key>io.getstream.iOS.VideoDemoApp.CallIntent</key>
+        <string>match AppStore io.getstream.iOS.VideoDemoApp.CallIntent</string>
     </dict>
 </dict>
 </plist>
