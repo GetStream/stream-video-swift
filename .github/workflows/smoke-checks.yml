@@ -10,10 +10,6 @@ on:
     branches:
       - '**'
 
-  release:
-    types:
-      - created
-
   workflow_dispatch:
 
 concurrency:
