@@ -30,24 +30,22 @@ end
 
 desc "Release a new version"
 lane :release do |options|
-  release_ios_sdk(
+  version_number = release_ios_sdk(
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
     github_repo: github_repo,
-    update_version_numbers: true,
-    publish_release: true, # TODO: delete this once we have a develop branch
     create_pull_request: false # TODO: create pull request once we have a develop branch
   )
+  publish_release(version: version_number) # TODO: delete this once we have a develop branch
 end
 
 desc "Publish a new release to GitHub and CocoaPods"
 lane :publish_release do |options|
-  release_ios_sdk(
+  publish_ios_sdk(
     version: options[:version],
     sdk_names: sdk_names,
-    github_repo: github_repo,
-    publish_release: true
+    github_repo: github_repo
   )
 end
 
