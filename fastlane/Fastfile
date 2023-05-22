@@ -34,10 +34,9 @@ lane :release do |options|
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
-    github_repo: github_repo,
-    create_pull_request: false # TODO: create pull request once we have a develop branch
+    github_repo: github_repo
   )
-  publish_release(version: version_number) # TODO: delete this once we have a develop branch
+  publish_release(version: version_number)
 end
 
 desc "Publish a new release to GitHub and CocoaPods"
