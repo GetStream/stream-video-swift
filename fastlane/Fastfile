@@ -288,7 +288,7 @@ end
 desc 'Run source code linting'
 lane :run_linter do
   Dir.chdir('..') do
-    sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf')
+    sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi')
   end
 end
 

@@ -7,3 +7,4 @@ ignore:
   - "**/*_Vendor.swift"
   - "**/Generated/"
   - "**/protobuf/"
+  - "**/OpenApi/"
