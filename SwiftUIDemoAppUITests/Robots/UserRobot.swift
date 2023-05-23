@@ -23,8 +23,11 @@ extension UserRobot {
     }
     
     @discardableResult
-    func login(userIndex: Int = 0) -> Self {
+    func login(userIndex: Int = 0, waitForLoginPage: Bool = false) -> Self {
         let users = LoginPage.users
+        if waitForLoginPage {
+            users.firstMatch.wait()
+        }
         if users.count > 0 {
             users.element(boundBy: userIndex).tap()
         }
@@ -174,7 +177,7 @@ extension UserRobot {
     
     @discardableResult
     func setView(mode: View) -> Self {
-        CallPage.viewMenu.wait().tap()
+        CallPage.viewMenu.wait().safeTap()
         switch mode {
         case .grid:
             CallPage.ViewMenu.grid.tap()
@@ -269,6 +272,12 @@ extension UserRobot {
     @discardableResult
     func waitForDisappearanceOfParticipantEventLabel() -> Self {
         CallPage.participantEvent.waitForDisappearance(timeout: Self.defaultTimeout)
+        return self
+    }
+    
+    @discardableResult
+    func waitForParticipantsToJoin(_ count: Int) -> Self {
+        sleep(UInt32(count))
         return self
     }
 }

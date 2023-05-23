@@ -118,7 +118,7 @@ extension UserRobot {
     @discardableResult
     private func assertParticipantListVisibity(expectedPercent: Int, details: XCUIElement) -> Self {
         let expectedValue = "\(expectedPercent)%"
-        let actualValue = details.waitForValue(expectedValue).value as? String
+        let actualValue = (details.wait().value as! String).filter { !$0.isWhitespace }
         XCTAssertEqual(expectedValue, actualValue)
         return self
     }
