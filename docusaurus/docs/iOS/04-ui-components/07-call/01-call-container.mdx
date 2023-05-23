@@ -5,112 +5,60 @@ The easiest way to setup a screen that shows incoming, outgoing and active call 
 `CallContainer` sets up the following functionality by connecting multiple components:
 
 * [**`OutgoingCall`**](../outgoing-call): When the user is calling other people. Shows other participants avatars and controls for switching audio/video and canceling the call.
-* [**`IncomingCall`**](../incoming-call): When the user is being called by another person. Shows the incoming
+* [**`IncomingCall`**](../incoming-call): When the user is being called by another person. Shows the incoming call screen.
+* [**`ActiveCall`**](../active-call): When the user is in an active call.
 
-In this section we will cover component at the highest top of the hierarchy which enable you to quickly implement a Video Call app.
-These components abstract the logic needed to write a functioning video call experience, which makes them less open to customisation.
+In this section we will cover this higher level component which enables you to quickly implement a Video Call app.
 
 ## Usage
 
-`CallContainer` is at the top of the hierarchy. It is a bound component that automatically handles Incoming/Outgoing and Active call components and states. All you have to do is pass it the `CallViewModel`:
+`CallContainer` is a container for the different types of calling screens. It is a bound component that automatically handles Incoming/Outgoing and Active call components and states. All you have to do is pass it a `ViewFactory` and the `CallViewModel`:
 
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent {
-        VideoTheme {
-            CallContainer(viewModel = callViewModel)
-        }
+```swift
+
+@StateObject var viewModel = CallViewModel()
+
+public var body: some View {
+    ZStack {
+        YourRootView()
+        CallContainer(viewFactory: CustomViewFactory(), viewModel: viewModel)
     }
 }
 ```
 
-We require of you to provide a ViewModel, because of the underlying `StreamVideo` instance, which isn't a singleton. Using this UI component and our ViewModel, will show the following UI based on the Call state.kotlin
+The `ViewFactory` parameter is used for customizing the different view slots in the call container. You can find more information about the available slots [here](../../../guides/view-slots).
 
-![Call Activity](https://user-images.githubusercontent.com/17215808/216000813-86ebd384-f5d1-4e53-9b23-ce1f14b6de4e.png)
+In these slots, you can both replace the UI components and customize the behaviour of the buttons and actions displayed in the screens.
 
-If you want to customize the behavior for your use case, you can override the action handlers.
+If you want to use our default UI Components and behaviour, you can just pass our default view factory in the creation of the `CallContainer`:
 
-## Handling Actions
+```swift
+CallContainer(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
+```
 
-When it comes to actions the `CallContainer` exposes, you're able to override the following:
+The `viewModel` parameter is the `CallViewModel` object that is responsible for managing the state of the calls. We recommend creating it as a `StateObject` in the view that will use the `CallContainer`.
 
-* **onBackPressed**: Back pressed actions to go back when accessing different Call menus or trigger Picture-In-Picture mode.
-* **onCallAction**: Handler that notifies that user performed some kind of a `CallAction`, to trigger enable or disable video and audio states, leaving the call and more.
+## CallModifier
 
-These actions are defined by default, but you can override them by simply passing a custom handler when calling the component:
+Another way of adding video call support to your views is attaching the `CallModifier` to them. With the call modifier, you get the call capabilities to any view, while the logic with the `CallContainer` is encapsulated in the modifier, making the video call support a one-line code.
 
-```kotlin
-override fun onCreate(savedInstanceState: Bundle?) {
-    super.onCreate(savedInstanceState)
-    setContent {
-        VideoTheme {
-            CallContainer(
-                viewModel = callViewModel,
-                onCallAction = {
-                    // TODO - handle call actions
-                }
-            )
-        }
-    }
+Here's an example usage:
+
+```swift
+
+@StateObject var viewModel = CallViewModel()
+
+var body: some View {
+    YourRootView()
+        .modifier(CallModifier(viewModel: viewModel))
 }
 ```
 
-You can also pass the actions to the `ViewModel` to handle the default actions we define in our UI, but you can handle any custom actions here, if you've built some custom UI.
+Optionally, you can also pass a `ViewFactory` to the `CallModifier`, if you need to customize the default UI components:
 
-When it comes to custom UI, the `CallContainer` exposes some Slot APIs for you to consume.
-
-## Customization
-
-`CallContainer` is our main **Screen component** and as such offers limited customization through itself. While you can customize all the `VideoTheme` properties, to style the UI, change colors, sizes, paddings, text styles and more, you can still override some Slot APIs to customize specific UI within this component.
-
-More specifically, the `CallContainer` exposes the following Slots:
-
-```kotlin
-@Composable
-public fun CallContainer(
-    ...
-    callControlsContent: @Composable () -> Unit = { // 1
-        DefaultCallControlsContent(
-            viewModel,
-            onCallAction
-        )
-    },
-    pictureInPictureContent: @Composable (Call) -> Unit = { DefaultPictureInPictureContent(it) }, // 2
-    incomingCallContent: @Composable () -> Unit = { // 3
-        IncomingCallContent(
-            modifier = modifier,
-            viewModel = viewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    },
-    callContent: @Composable () -> Unit = { // 4
-        DefaultCallContent(
-            viewModel = viewModel,
-            modifier = modifier,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction,
-            callControlsContent = callControlsContent,
-            pictureInPictureContent = pictureInPictureContent
-        )
-    },
-    outgoingCallContent: @Composable () -> Unit = { // 5
-        OutgoingCallContent(
-            modifier = modifier,
-            viewModel = viewModel,
-            onBackPressed = onBackPressed,
-            onCallAction = onCallAction
-        )
-    }
-)
+```swift
+var body: some View {
+    YourRootView()
+        .modifier(CallModifier(viewFactory: CustomViewFactory(), viewModel: viewModel))
+}
 ```
-
-
-* **callControlsContent**: Represents the content that features various controls and actions in a call, such as audio and video handles and leaving a call.
-* **pictureInPictureContent**: Represents the content that will be shown in Picture-In-Picture mode.
-* **incomingCallContent**: Represents the content shown when the active user is being ringed or called by other users, in the Incoming call state.
-* **outgoingCallContent**: Represents the content shown when the active user is calling or ringing other users, in the Outgoing call state.
-* **callContent**: Represents the active call content, when the user fully joins and connects to a call.
-
-Using any of these slots, you can fully replace the content that's shown in different states and you can build these components to be rendered differently, as the state updates.
