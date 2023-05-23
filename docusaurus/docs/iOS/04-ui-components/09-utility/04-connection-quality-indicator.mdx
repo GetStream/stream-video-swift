@@ -8,44 +8,35 @@ Let's see how to use the component.
 
 ## Usage
 
-To use the `ConnectionQualityIndicator`, you add it anywhere in your custom Composable functions, like so:
+### Before joining a call
 
-```kotlin
-@Composable
-fun MyCustomUi(connectionQuality: ConnectionQuality) {
-    Box(modifier = Modifier.fillMaxSize()) {
-        // ... The rest of your UI
-        ConnectionQualityIndicator(
-            connectionQuality = connectionQuality,
-            modifier = Modifier.size(56.dp)
-        )
-    }
+Before the user joins the call, the network quality is determined on the client side, from the SDK, by sending latency checks to the SFU that will host the call for the user. 
+
+This is already handled in our `LobbyView`. However, if you want to create your own version of a lobby view, you can use our `LobbyViewModel`, for getting information about the current user's network quality.
+
+This information is available via the `connectionQuality` property in the `LobbyViewModel`. The connection quality property can have the following values:
+
+```swift
+public enum ConnectionQuality: Sendable {
+    case unknown
+    case poor
+    case good
+    case excellent
 }
 ```
 
-In this small example, you're using the `ConnectionQualityIndicator` within custom UI. You pass in the `ConnectionQuality` as well as `Modifier` for size.
+You can build your own UI to display this value, or use our default `ConnectionQualityIndicator` view. The `ConnectionQualityIndicator` view expects the `connectionQuality` parameter, and changes its UI depending on the value. Here's an example usage:
 
-The `ConnectionQuality` enum has the following possible values:
+```swift
+ConnectionQualityIndicator(connectionQuality: viewModel.connectionQuality)
+```
 
-- `CONNECTION_QUALITY_EXCELLENT`: The connection quality is excellent, there are little to no issues in data transfer.
-- `CONNECTION_QUALITY_GOOD`: The connection quality is good. There might be smaller issues with data, but nothing that impacts performance.
-- `CONNECTION_QUALITY_POOR`: The connection quality is poor. You're probably experiencing quality issues and the performance isn't ideal.
-- `CONNECTION_QUALITY_UNSPECIFIED`: There is no connection to the call server or there are issues measuring the quality.
+Additionally, you can change the size and the width of the connection quality ticks, by passing the `size` and `width` parameters to the `ConnectionQualityIndicator` view.
 
-By default, the snippet above will produce a UI similar to the following:
+### Network quality in a call
 
-![Default ConnectionQualityIndicator](https://user-images.githubusercontent.com/17215808/223086732-170f269f-ed18-493a-8fbc-d1c4ff618eea.png)
+When you are in a call, the network quality for each participant is delivered from the server. It's available via the `connectionQuality` property for each `CallParticipant`.
 
-The component is very simple and doesn't have any behavior. As such, it doesn't allow any customization for action handling, but it does allow small UI customization.
+By default, the SwiftUI SDK displays this information in the `VideoCallParticipantModifier`, via the same `ConnectionQualityIndicator` as above.
 
-## Customization
-
-Within the `VideoTheme`, there are a few ways you can customize the look and feel of the `ConnectionQualityIndictator`:
-
-* `StreamDimens.connectionIndicatorBarMaxHeight`: Allows you to customize the max height of the bars.
-* `StreamDimens.connectionIndicatorBarWidth`: Changes the width of each bar for the quality.
-* `StreamColors.connectionQualityBackground`: Changes the color of the background on which the bars are drawn.
-* `StreamColors.connectionQualityBar`: Affects the colors of the quality bars.
-* `StreamShapes.connectionQualityIndicator`: Provides the shape of the indicator background.
-
-Overriding and changing these properties within their respective classes allows you to change the look and feel of the component to match your design style.
+If you wish to change this behaviour, you should implement the `makeVideoCallParticipantModifier` method and provide your own implementation that can modify or hide this view.

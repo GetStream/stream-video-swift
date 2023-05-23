@@ -228,11 +228,7 @@ public struct ParticipantInfoView: View {
                 .font(fonts.caption1)
                 .accessibility(identifier: "participantName")
                         
-            (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-                .foregroundColor(.white)
-                .padding(.all, 4)
-                .accessibility(identifier: "participantMic")
-                .streamAccessibility(value: participant.hasAudio ? "1" : "0")
+            SoundIndicator(participant: participant)
         }
         .padding(.all, 2)
         .padding(.horizontal, 4)
@@ -240,4 +236,24 @@ public struct ParticipantInfoView: View {
         .background(Color.black.opacity(0.6))
         .cornerRadius(8)
     }
+}
+
+public struct SoundIndicator: View {
+            
+    @Injected(\.images) var images
+    
+    let participant: CallParticipant
+    
+    public init(participant: CallParticipant) {
+        self.participant = participant
+    }
+    
+    public var body: some View {
+        (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+            .foregroundColor(.white)
+            .padding(.all, 4)
+            .accessibility(identifier: "participantMic")
+            .streamAccessibility(value: participant.hasAudio ? "1" : "0")
+    }
+    
 }

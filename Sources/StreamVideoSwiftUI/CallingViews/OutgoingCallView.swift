@@ -43,7 +43,7 @@ struct OutgoingCallBackground: View {
     var body: some View {
         ZStack {
             if viewModel.outgoingCallMembers.count == 1 {
-                CallingScreenBackground(imageURL: viewModel.outgoingCallMembers.first?.imageURL)
+                CallBackground(imageURL: viewModel.outgoingCallMembers.first?.imageURL)
             } else {
                 FallbackBackground()
             }

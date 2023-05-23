@@ -6,11 +6,15 @@ import NukeUI
 import StreamVideo
 import SwiftUI
 
-struct CallingScreenBackground: View {
+public struct CallBackground: View {
     
     var imageURL: URL?
     
-    var body: some View {
+    public init(imageURL: URL? = nil) {
+        self.imageURL = imageURL
+    }
+    
+    public var body: some View {
         CallParticipantBackground(imageURL: imageURL) {
             FallbackBackground()
         }

@@ -118,7 +118,7 @@ struct IncomingCallViewContent: View {
             .padding()
         }
         .background(
-            FallbackBackground()
+            CallBackground()
         )
         .onAppear {
             utils.callSoundsPlayer.playIncomingCallSound()
