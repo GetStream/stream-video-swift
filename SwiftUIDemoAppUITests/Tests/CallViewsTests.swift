@@ -23,6 +23,7 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1542)
         
         let participants = 50
+        let callDuration = Double(participants) * 2
         
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
@@ -30,7 +31,7 @@ final class CallViewsTests: StreamTestCase {
         AND("\(participants) participants join the call with camera and mic enabled") {
             participantRobot
                 .setUserCount(participants)
-                .setCallDuration(Double(participants))
+                .setCallDuration(callDuration)
                 .joinCall(callId, options: [.withCamera, .withMicrophone])
         }
         WHEN("user sleeps for \(participants) seconds") {
