@@ -299,7 +299,7 @@ end
 
 lane :sources_matrix do
   {
-    e2e: ['Sources', 'DemoApp', xcode_project],
+    e2e: ['Sources', 'DemoApp', 'SwiftUIDemoAppUITests', xcode_project],
     unit: ['Sources', 'StreamVideoTests', xcode_project],
     swiftui: ['Sources', 'StreamVideoSwiftUITests', xcode_project],
     emerge_swiftui: ['Sources/StreamVideoSwiftUI', 'Sources/StreamVideo', xcode_project],

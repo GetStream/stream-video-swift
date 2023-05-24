@@ -23,7 +23,7 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1542)
         
         let participants = 50
-        let timeout = Double(participants)
+        let callDuration = Double(participants) * 2
         
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
@@ -31,11 +31,11 @@ final class CallViewsTests: StreamTestCase {
         AND("\(participants) participants join the call with camera and mic enabled") {
             participantRobot
                 .setUserCount(participants)
-                .setCallDuration(timeout)
+                .setCallDuration(callDuration)
                 .joinCall(callId, options: [.withCamera, .withMicrophone])
         }
-        WHEN("user sleeps for \(timeout) seconds") {
-            sleep(UInt32(timeout))
+        WHEN("user sleeps for \(participants) seconds") {
+            userRobot.waitForParticipantsToJoin(participants)
         }
         for view in allViews {
             AND("user turns on \(view.rawValue) view") {
@@ -142,7 +142,7 @@ final class CallViewsTests: StreamTestCase {
                 .startCall(callId)
                 .microphone(.disable)
         }
-        WHEN("two participants joins the call") {
+        WHEN("six participants joins the call") {
             let timeout = UserRobot.defaultTimeout * 2
             participantRobot
                 .setUserCount(participants)
@@ -154,6 +154,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -314,13 +315,14 @@ final class CallViewsTests: StreamTestCase {
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
         }
-        WHEN("twenty participants join the call") {
+        WHEN("ten participants join the call") {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, actions: [.shareScreen])
         }
         THEN("user observers participant's screen") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertParticipantStartSharingScreen()
                 .assertScreenSharingParticipantListVisibity(percent: 0)
         }
@@ -339,7 +341,7 @@ final class CallViewsTests: StreamTestCase {
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
         }
-        AND("twenty participants join the call") {
+        AND("ten participants join the call") {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
@@ -349,6 +351,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("user observers the list of participants") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertGridView(with: participants)
                 .assertGridViewParticipantListVisibity(percent: 0)
         }
@@ -367,7 +370,7 @@ final class CallViewsTests: StreamTestCase {
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
         }
-        AND("twenty participants join the call") {
+        AND("ten participants join the call") {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
@@ -377,6 +380,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("user observers the list of participants") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertSpotlightView(with: participants)
                 .assertSpotlightViewParticipantListVisibity(percent: 0)
         }

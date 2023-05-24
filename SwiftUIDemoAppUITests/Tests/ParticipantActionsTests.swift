@@ -60,7 +60,7 @@ final class ParticipantActionsTests: StreamTestCase {
                 .microphone(.disable)
         }
         AND("participant joins the call and turns camera on") {
-            participantRobot.joinCall(callId, options: [.withCamera])
+            participantRobot.joinCall(callId, options: [.withCamera, .withMicrophone])
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -124,7 +124,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call and starts recording the call for 3 seconds") {
             participantRobot
-                .setCallRecordingDuration(20)
+                .setCallRecordingDuration(35)
                 .joinCall(callId, actions: [.recordCall])
         }
         for view in allViews {

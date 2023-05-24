@@ -110,7 +110,7 @@ final class CallLifecycleTests: StreamTestCase {
         GIVEN("user starts a call") {
             userRobot
                 .logout()
-                .login(userIndex: 0)
+                .login(userIndex: 0, waitForLoginPage: true)
                 .startCall(callId)
         }
         AND("participant joins the call") {
@@ -121,7 +121,7 @@ final class CallLifecycleTests: StreamTestCase {
                 .assertParticipantJoinCall()
                 .endCall()
                 .logout()
-                .login(userIndex: 0)
+                .login(userIndex: 0, waitForLoginPage: true)
                 .startCall(callId, clearTextField: true)
         }
         THEN("there is one participant on the call") {
@@ -137,7 +137,7 @@ final class CallLifecycleTests: StreamTestCase {
         GIVEN("user starts a call") {
             userRobot
                 .logout()
-                .login(userIndex: 0)
+                .login(userIndex: 0, waitForLoginPage: true)
                 .startCall(callId)
         }
         AND("participant joins the call") {
@@ -148,7 +148,7 @@ final class CallLifecycleTests: StreamTestCase {
                 .assertParticipantJoinCall()
                 .endCall()
                 .logout()
-                .login(userIndex: 1)
+                .login(userIndex: 1, waitForLoginPage: true)
                 .startCall(callId, clearTextField: true)
         }
         THEN("there is one participant on the call") {
