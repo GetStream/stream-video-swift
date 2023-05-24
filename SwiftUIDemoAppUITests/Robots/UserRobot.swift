@@ -180,11 +180,11 @@ extension UserRobot {
         CallPage.viewMenu.wait().safeTap()
         switch mode {
         case .grid:
-            CallPage.ViewMenu.grid.tap()
+            CallPage.ViewMenu.grid.safeTap()
         case .fullscreen:
-            CallPage.ViewMenu.fullscreen.tap()
+            CallPage.ViewMenu.fullscreen.safeTap()
         case .spotlight:
-            CallPage.ViewMenu.spotlight.tap()
+            CallPage.ViewMenu.spotlight.safeTap()
         }
         return self
     }

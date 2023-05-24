@@ -170,7 +170,7 @@ extension UserRobot {
     
     @discardableResult
     func assertGridView(with participantCount: Int) -> Self {
-        XCTAssertEqual(participantCount, CallPage.participantView.waitCount(participantCount, timeout: UserRobot.defaultTimeout).count)
+        XCTAssertEqual(participantCount, CallPage.participantView.waitCount(participantCount, timeout: UserRobot.defaultTimeout).count, "GridView")
         XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
         return self
@@ -181,16 +181,16 @@ extension UserRobot {
         let maxVisibleParticipantCount = 6
         let count = participantCount > maxVisibleParticipantCount ? maxVisibleParticipantCount : participantCount
         XCTAssertTrue(CallPage.spotlightViewParticipantList.wait().exists, "spotlightViewParticipantList should appear")
-        XCTAssertEqual(count, CallPage.spotlightParticipantView.waitCount(count, timeout: UserRobot.defaultTimeout).count)
-        XCTAssertEqual(1, CallPage.participantView.count)
+        XCTAssertEqual(count, CallPage.spotlightParticipantView.waitCount(count, timeout: UserRobot.defaultTimeout).count, "SpotlightView")
+        XCTAssertEqual(1, CallPage.participantView.count, "SpotlightView")
         XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
         return self
     }
     
     @discardableResult
     func assertFullscreenView() -> Self {
-        XCTAssertEqual(1, CallPage.participantView.count)
-        XCTAssertEqual(0, CallPage.spotlightParticipantView.count)
+        XCTAssertEqual(1, CallPage.participantView.count, "FullscreenView")
+        XCTAssertEqual(0, CallPage.spotlightParticipantView.count, "FullscreenView")
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
         XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
         return self

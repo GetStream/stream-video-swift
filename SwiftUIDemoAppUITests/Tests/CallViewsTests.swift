@@ -153,6 +153,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
