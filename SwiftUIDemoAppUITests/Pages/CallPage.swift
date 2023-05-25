@@ -61,7 +61,7 @@ enum CallPage {
     static var screenSharingLabel: XCUIElement { app.staticTexts["participantPresentingLabel"] }
     static var screenSharingView: XCUIElement { app.otherElements["screenSharingView"] }
     static var screenSharingParticipantView: XCUIElementQuery {
-        app.otherElements.matching(NSPredicate(format: "identifier LIKE 'screenSharingParticipantView'")).images
+        app.otherElements.matching(NSPredicate(format: "identifier LIKE 'screenSharingParticipantView' AND value != nil"))
     }
     static var screenSharingParticipantList: XCUIElement { app.scrollViews["screenSharingParticipantList"] }
     static var screenSharingParticipantListDetails: XCUIElement {

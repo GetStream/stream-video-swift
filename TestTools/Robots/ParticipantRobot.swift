@@ -12,6 +12,7 @@ public class ParticipantRobot {
     private var messageCount: Int = 1
     private var callDuration: Double = TestRunnerEnvironment.isCI ? 60 : 30
     private var _showWindow: Bool = false
+    private var _recordTestSession: Bool = false
     
     public enum Options: String {
         case withCamera = "camera"
@@ -71,8 +72,14 @@ public class ParticipantRobot {
     }
     
     @discardableResult
-    func showWindow() -> Self {
+    func showDebugWindow() -> Self {
         _showWindow = true
+        return self
+    }
+    
+    @discardableResult
+    func recordTestSession() -> Self {
+        _recordTestSession = true
         return self
     }
 
@@ -80,7 +87,6 @@ public class ParticipantRobot {
         _ callId: String,
         options: [Options] = [],
         actions: [Actions] = [],
-        debug: [DebugActions] = [],
         async: Bool = true
     ) {
         var params: [String: Any] = [:]
@@ -89,6 +95,7 @@ public class ParticipantRobot {
         params[Config.messageCount.rawValue] = messageCount
         params[Config.callDuration.rawValue] = callDuration
         params[DebugActions.showWindow.rawValue] = _showWindow
+        params[DebugActions.recordSession.rawValue] = _recordTestSession
         
         for option in options {
             params[option.rawValue] = true
