@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '14.2'
+xcode_version = ENV['XCODE_VERSION'] || '14.3'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
@@ -30,6 +30,7 @@ end
 
 desc "Release a new version"
 lane :release do |options|
+  pod_lint
   version_number = release_ios_sdk(
     version: options[:version],
     bump_type: options[:type],
@@ -46,6 +47,11 @@ lane :publish_release do |options|
     sdk_names: sdk_names,
     github_repo: github_repo
   )
+end
+
+lane :pod_lint do
+  # We don't lint StreamVideoSwiftUI and StreamVideoUIKit podspecs since pod lints them against StreamVideo's remote version instead of local one
+  pod_lib_lint(podspec: 'StreamVideo.podspec', allow_warnings: true)
 end
 
 lane :match_me do |options|

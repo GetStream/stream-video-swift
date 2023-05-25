@@ -20,6 +20,7 @@ class StreamTestCase: XCTestCase {
         try super.setUpWithError()
         continueAfterFailure = false
         alertHandler()
+        ipadSetup()
         startVideo()
         app.launch()
     }
@@ -60,6 +61,12 @@ extension StreamTestCase {
                 return true
             }
             return false
+        }
+    }
+    
+    private func ipadSetup() {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            app.landscape()
         }
     }
 
