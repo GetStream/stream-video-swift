@@ -67,14 +67,16 @@ class CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         members: [User],
-        ring: Bool = false
+        ring: Bool = false,
+        notify: Bool = false
     ) async throws {
         let edgeServer = try await callCoordinatorController.joinCall(
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
             members: members,
-            ring: ring
+            ring: ring,
+            notify: notify
         )
         
         try await connectToEdge(
@@ -127,7 +129,38 @@ class CallController {
             callId: callId,
             videoOptions: videoOptions,
             members: members,
-            ring: false
+            ring: false,
+            notify: false
+        )
+    }
+    
+    /// Gets the call on the backend with the given parameters.
+    ///
+    /// - Parameters:
+    ///  - callId: the id of the call.
+    ///  - type: the type of the call.
+    ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
+    ///  - notify: A boolean value indicating whether members should be notified about the call.
+    ///  - ring: A boolean value indicating whether to ring the call.
+    /// - Throws: An error if the call doesn't exist.
+    /// - Returns: The call's data.
+    func getCall(
+        callId: String,
+        type: String,
+        membersLimit: Int?,
+        ring: Bool,
+        notify: Bool
+    ) async throws -> CallData {
+        let response = try await callCoordinatorController.coordinatorClient.getCall(
+            callId: callId,
+            type: type,
+            membersLimit: membersLimit,
+            ring: ring,
+            notify: notify
+        )
+        return response.call.toCallData(
+            members: response.members,
+            blockedUsers: response.blockedUsers
         )
     }
     
@@ -139,6 +172,7 @@ class CallController {
     ///  - customData: An optional dictionary of custom data to attach to the call.
     ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
     ///  - ring: A boolean value indicating whether to ring the call.
+    ///  - notify: A boolean value indicating whether to notify members.
     /// - Throws: An error if the call creation fails.
     /// - Returns: The call's data.
     func getOrCreateCall(
@@ -146,7 +180,8 @@ class CallController {
         startsAt: Date?,
         customData: [String: RawJSON],
         membersLimit: Int?,
-        ring: Bool
+        ring: Bool,
+        notify: Bool
     ) async throws -> CallData {
         let data = CallRequest(
             custom: RawJSON.convert(customData: customData),
@@ -159,7 +194,12 @@ class CallController {
             },
             startsAt: startsAt
         )
-        let request = GetOrCreateCallRequest(data: data, membersLimit: membersLimit, ring: ring)
+        let request = GetOrCreateCallRequest(
+            data: data,
+            membersLimit: membersLimit,
+            notify: notify,
+            ring: ring
+        )
         let response = try await callCoordinatorController.coordinatorClient.getOrCreateCall(
             with: request,
             callId: callId,

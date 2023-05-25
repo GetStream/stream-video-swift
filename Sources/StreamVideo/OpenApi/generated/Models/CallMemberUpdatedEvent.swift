@@ -22,7 +22,7 @@ internal struct CallMemberUpdatedEvent: Codable, JSONEncodable, Hashable, WSCall
     internal var createdAt: Date
     /** The list of members that were updated */
     internal var members: [MemberResponse]
-    /** The type of event: \"call.member_added\" in this case */
+    /** The type of event: \"call.member_updated\" in this case */
     internal var type: String = "call.member_updated"
 
     internal init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String = "call.member_updated") {

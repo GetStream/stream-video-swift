@@ -9,7 +9,6 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
     var error: Error?
     
     override func sendEvent(
-        type: EventType,
         callId: String,
         callType: String,
         customData: [String: AnyCodable]? = nil
@@ -36,7 +35,8 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
         callId: String,
         videoOptions: VideoOptions,
         members: [User],
-        ring: Bool
+        ring: Bool,
+        notify: Bool
     ) async throws -> EdgeServer {
         if let error {
             throw error
@@ -52,7 +52,9 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
             recording: false,
             updatedAt: Date(),
             hlsPlaylistUrl: "",
-            customData: [:]
+            autoRejectTimeout: 15000,
+            customData: [:],
+            createdBy: .anonymous
         )
         let callSettingsInfo = CallSettingsInfo(
             callCapabilities: ["send-audio"],
@@ -68,6 +70,14 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
             callSettings: callSettingsInfo,
             latencyURL: nil
         )
+    }
+    
+    override func acceptCall(callId: String, type: String) async throws -> AcceptCallResponse {
+        AcceptCallResponse(duration: "1.0")
+    }
+    
+    override func rejectCall(callId: String, type: String) async throws -> RejectCallResponse {
+        RejectCallResponse(duration: "1.0")
     }
     
     func update(callSettings: CallSettingsInfo) {

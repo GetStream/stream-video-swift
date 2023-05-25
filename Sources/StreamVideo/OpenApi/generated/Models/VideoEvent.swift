@@ -30,10 +30,12 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallMemberRemovedEvent(CallMemberRemovedEvent)
     case typeCallMemberUpdatedEvent(CallMemberUpdatedEvent)
     case typeCallMemberUpdatedPermissionEvent(CallMemberUpdatedPermissionEvent)
+    case typeCallNotificationEvent(CallNotificationEvent)
     case typeCallReactionEvent(CallReactionEvent)
     case typeCallRecordingStartedEvent(CallRecordingStartedEvent)
     case typeCallRecordingStoppedEvent(CallRecordingStoppedEvent)
     case typeCallRejectedEvent(CallRejectedEvent)
+    case typeCallRingEvent(CallRingEvent)
     case typeCallSessionEndedEvent(CallSessionEndedEvent)
     case typeCallSessionParticipantJoinedEvent(CallSessionParticipantJoinedEvent)
     case typeCallSessionParticipantLeftEvent(CallSessionParticipantLeftEvent)
@@ -71,6 +73,8 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeCallMemberUpdatedPermissionEvent(let value):
             try container.encode(value)
+        case .typeCallNotificationEvent(let value):
+            try container.encode(value)
         case .typeCallReactionEvent(let value):
             try container.encode(value)
         case .typeCallRecordingStartedEvent(let value):
@@ -78,6 +82,8 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallRecordingStoppedEvent(let value):
             try container.encode(value)
         case .typeCallRejectedEvent(let value):
+            try container.encode(value)
+        case .typeCallRingEvent(let value):
             try container.encode(value)
         case .typeCallSessionEndedEvent(let value):
             try container.encode(value)
@@ -140,6 +146,9 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.member_updated_permission" {
             let value = try container.decode(CallMemberUpdatedPermissionEvent.self)
             self = .typeCallMemberUpdatedPermissionEvent(value)
+        } else if dto.type == "call.notification" {
+            let value = try container.decode(CallNotificationEvent.self)
+            self = .typeCallNotificationEvent(value)
         } else if dto.type == "call.permission_request" {
             let value = try container.decode(PermissionRequestEvent.self)
             self = .typePermissionRequestEvent(value)
@@ -158,6 +167,9 @@ internal enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.rejected" {
             let value = try container.decode(CallRejectedEvent.self)
             self = .typeCallRejectedEvent(value)
+        } else if dto.type == "call.ring" {
+            let value = try container.decode(CallRingEvent.self)
+            self = .typeCallRingEvent(value)
         } else if dto.type == "call.session_ended" {
             let value = try container.decode(CallSessionEndedEvent.self)
             self = .typeCallSessionEndedEvent(value)

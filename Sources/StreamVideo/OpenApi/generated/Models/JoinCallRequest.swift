@@ -22,14 +22,16 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
     internal var data: CallRequest?
     internal var location: String
     internal var membersLimit: Int?
+    internal var notify: Bool?
     /** if true and the call is created, the notification will include ring=true */
     internal var ring: Bool?
 
-    internal init(create: Bool? = nil, data: CallRequest? = nil, location: String, membersLimit: Int? = nil, ring: Bool? = nil) {
+    internal init(create: Bool? = nil, data: CallRequest? = nil, location: String, membersLimit: Int? = nil, notify: Bool? = nil, ring: Bool? = nil) {
         self.create = create
         self.data = data
         self.location = location
         self.membersLimit = membersLimit
+        self.notify = notify
         self.ring = ring
     }
 
@@ -38,6 +40,7 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
         case data
         case location
         case membersLimit = "members_limit"
+        case notify
         case ring
     }
 
@@ -49,6 +52,7 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(data, forKey: .data)
         try container.encode(location, forKey: .location)
         try container.encodeIfPresent(membersLimit, forKey: .membersLimit)
+        try container.encodeIfPresent(notify, forKey: .notify)
         try container.encodeIfPresent(ring, forKey: .ring)
     }
 }

@@ -22,7 +22,7 @@ internal struct CallMemberRemovedEvent: Codable, JSONEncodable, Hashable, WSCall
     internal var createdAt: Date
     /** the list of member IDs removed from the call */
     internal var members: [String]
-    /** The type of event: \"call.member_added\" in this case */
+    /** The type of event: \"call.member_removed\" in this case */
     internal var type: String = "call.member_removed"
 
     internal init(call: CallResponse, callCid: String, createdAt: Date, members: [String], type: String = "call.member_removed") {

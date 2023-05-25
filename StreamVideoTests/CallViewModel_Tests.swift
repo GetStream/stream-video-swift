@@ -10,6 +10,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
     
+    private let mockResponseBuilder = MockResponseBuilder()
+    
     let firstUser = StreamVideo.mockUser
     let secondUser = User(id: "test2")
     let thirdUser = User(id: "test3")
@@ -54,12 +56,20 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     func test_outgoingCall_rejectedEvent() async throws {
         // Given
-        let callViewModel = CallViewModel()
+        let callViewModel = callViewModelWithRingingCall(participants: participants)
+        try await waitForCallEvent()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
-        try await waitForCallEvent()
-        let event = CallEventInfo(callId: callId, user: secondUser, action: .reject)
+        let callResponse = mockResponseBuilder.makeCallResponse(
+            cid: callCid,
+            rejectedBy: [secondUser.id: Date()]
+        )
+        let event = CallRejectedEvent(
+            call: callResponse,
+            callCid: callCid,
+            createdAt: Date(),
+            user: secondUser.toUserResponse()
+        )
         eventNotificationCenter?.process(event)
         
         // Then
@@ -68,35 +78,38 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
         // Given
-        let callViewModel = CallViewModel()
         let threeParticipants = participants + [thirdUser]
+        let callViewModel = callViewModelWithRingingCall(participants: threeParticipants)
+        try await waitForCallEvent()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: threeParticipants, ring: true)        
-        try await waitForCallEvent()
-        let firstReject = CallEventInfo(callId: callId, user: secondUser, action: .reject)
+        let firstCallResponse = mockResponseBuilder.makeCallResponse(
+            cid: callCid,
+            rejectedBy: [secondUser.id: Date()]
+        )
+        let firstReject = CallRejectedEvent(
+            call: firstCallResponse,
+            callCid: callCid,
+            createdAt: Date(),
+            user: secondUser.toUserResponse()
+        )
         eventNotificationCenter?.process(firstReject)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .outgoing)
         
         // When
-        let secondReject = CallEventInfo(callId: callId, user: thirdUser, action: .reject)
+        let secondCallResponse = mockResponseBuilder.makeCallResponse(
+            cid: callCid,
+            rejectedBy: [secondUser.id: Date(), thirdUser.id: Date()]
+        )
+        let secondReject = CallRejectedEvent(
+            call: secondCallResponse,
+            callCid: callCid,
+            createdAt: Date(),
+            user: thirdUser.toUserResponse()
+        )
         eventNotificationCenter?.process(secondReject)
-        
-        // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle)
-    }
-    
-    func test_outgoingCall_canceledEvent() async throws {
-        // Given
-        let callViewModel = CallViewModel()
-        
-        // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
-        try await waitForCallEvent()
-        let event = CallEventInfo(callId: callId, user: secondUser, action: .cancel)
-        eventNotificationCenter?.process(event)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -104,12 +117,11 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     func test_outgoingCall_callEndedEvent() async throws {
         // Given
-        let callViewModel = CallViewModel()
+        let callViewModel = callViewModelWithRingingCall(participants: participants)
+        try await waitForCallEvent()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
-        try await waitForCallEvent()
-        let event = CallEventInfo(callId: callId, user: firstUser, action: .end)
+        let event = CallEndedEvent(callCid: callCid, createdAt: Date())
         eventNotificationCenter?.process(event)
         
         // Then
@@ -118,12 +130,15 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     func test_outgoingCall_blockEventCurrentUser() async throws {
         // Given
-        let callViewModel = CallViewModel()
+        let callViewModel = callViewModelWithRingingCall(participants: participants)
+        try await waitForCallEvent()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
-        try await waitForCallEvent()
-        let event = CallEventInfo(callId: callId, user: firstUser, action: .block)
+        let event = BlockedUserEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            user: firstUser.toUserResponse()
+        )
         eventNotificationCenter?.process(event)
         
         // Then
@@ -133,15 +148,25 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     func test_outgoingCall_blockEventOtherUser() async throws {
         // Given
         let callViewModel = CallViewModel()
-        
-        // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let callData = mockResponseBuilder.makeCallResponse(
+            cid: callCid
+        )
+        .toCallData(members: [], blockedUsers: [])
+        call?.update(state: callData)
+        callViewModel.setActiveCall(call)
         try await waitForCallEvent()
-        let event = CallEventInfo(callId: callId, user: secondUser, action: .block)
+
+        // When
+        let event = BlockedUserEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            user: secondUser.toUserResponse()
+        )
         eventNotificationCenter?.process(event)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState != .idle)
+        try await XCTAssertWithDelay(callViewModel.call?.state?.blockedUsers.first == secondUser)
     }
     
     func test_outgoingCall_hangUp() async throws {
@@ -163,12 +188,20 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         try await waitForCallEvent()
-        let event = IncomingCallEvent(
+        let event = CallRingEvent(
+            call: mockResponseBuilder.makeCallResponse(cid: callCid),
             callCid: callCid,
-            createdBy: secondUser.id,
-            type: callType,
-            users: participants,
-            ringing: true
+            createdAt: Date(),
+            members: [],
+            sessionId: "123",
+            user: UserResponse(
+                createdAt: Date(),
+                custom: [:],
+                id: secondUser.id,
+                role: "user",
+                teams: [],
+                updatedAt: Date()
+            )
         )
         eventNotificationCenter?.process(event)
         
@@ -193,12 +226,23 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         try await waitForCallEvent()
-        let event = IncomingCallEvent(
+        let event = CallRingEvent(
+            call: mockResponseBuilder.makeCallResponse(
+                cid: callCid,
+                rejectedBy: [firstUser.id: Date()]
+            ),
             callCid: callCid,
-            createdBy: secondUser.id,
-            type: callType,
-            users: participants,
-            ringing: true
+            createdAt: Date(),
+            members: [],
+            sessionId: "123",
+            user: UserResponse(
+                createdAt: Date(),
+                custom: [:],
+                id: secondUser.id,
+                role: "user",
+                teams: [],
+                updatedAt: Date()
+            )
         )
         eventNotificationCenter?.process(event)
         
@@ -439,6 +483,22 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         XCTAssert(callViewModel.participantsLayout == .fullScreen)
     }
     
+    //MARK: - private
+    
+    private func callViewModelWithRingingCall(participants: [User]) -> CallViewModel {
+        let callViewModel = CallViewModel()
+        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let callData = mockResponseBuilder.makeCallResponse(
+            cid: callCid
+        )
+        .toCallData(members: [], blockedUsers: [])
+        call?.update(state: callData)
+        callViewModel.setActiveCall(call)
+        callViewModel.outgoingCallMembers = participants
+        callViewModel.callingState = .outgoing
+        return callViewModel
+    }
+    
 }
 
 @MainActor
@@ -448,4 +508,19 @@ func XCTAssertWithDelay(
 ) async throws {
     try await Task.sleep(nanoseconds: nanoseconds)
     XCTAssert(try expression())
+}
+
+extension User {
+    func toUserResponse() -> UserResponse {
+        UserResponse(
+            createdAt: Date(),
+            custom: RawJSON.convert(customData: customData),
+            id: id,
+            image: imageURL?.absoluteString,
+            name: name,
+            role: role,
+            teams: [],
+            updatedAt: Date()
+        )
+    }
 }

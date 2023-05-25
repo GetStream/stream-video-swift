@@ -55,6 +55,24 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
+    func getCall(
+        callId: String,
+        type: String,
+        membersLimit: Int?,
+        ring: Bool,
+        notify: Bool
+    ) async throws -> GetCallResponse {
+        var queryParams = connectionQueryParams
+        if let membersLimit {
+            queryParams["membersLimit"] = "\(membersLimit)"
+        }
+        queryParams["ring"] = "\(ring)"
+        queryParams["notify"] = "\(notify)"
+        let path = "/call/\(type)/\(callId)"
+        let request = try makeRequest(for: path, httpMethod: "GET", queryParams: queryParams)
+        return try await execute(urlRequest: request)
+    }
+    
     func getOrCreateCall(
         with request: GetOrCreateCallRequest,
         callId: String,
@@ -75,6 +93,16 @@ class CoordinatorClient: @unchecked Sendable {
             request: request.sendEventRequest,
             path: "/call/\(request.type)/\(request.id)/event"
         )
+    }
+    
+    func acceptCall(callId: String, type: String) async throws -> AcceptCallResponse {
+        let request = try makeRequest(for: "/call/\(type)/\(callId)/accept")
+        return try await execute(urlRequest: request)
+    }
+    
+    func rejectCall(callId: String, type: String) async throws -> RejectCallResponse {
+        let request = try makeRequest(for: "/call/\(type)/\(callId)/reject")
+        return try await execute(urlRequest: request)
     }
     
     func endCall(with request: EndCallRequestData) async throws -> EndCallResponse {

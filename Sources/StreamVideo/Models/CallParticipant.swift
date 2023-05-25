@@ -358,41 +358,6 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     }
 }
 
-extension CallParticipant {
-    
-    public func toUser() -> User {
-        User(
-            id: id,
-            name: name,
-            imageURL: profileImageURL,
-            customData: [:]
-        )
-    }
-}
-
-extension User {
-    
-    func toCallParticipant() -> CallParticipant {
-        CallParticipant(
-            id: id,
-            userId: id,
-            roles: [],
-            name: name.isEmpty ? id : name,
-            profileImageURL: imageURL,
-            trackLookupPrefix: nil,
-            hasVideo: false,
-            hasAudio: false,
-            isScreenSharing: false,
-            showTrack: false,
-            isDominantSpeaker: false,
-            sessionId: "",
-            connectionQuality: .unknown,
-            joinedAt: Date(),
-            isPinned: false
-        )
-    }
-}
-
 extension Stream_Video_Sfu_Models_Participant {
     
     func toCallParticipant(showTrack: Bool = true) -> CallParticipant {

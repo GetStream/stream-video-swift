@@ -250,7 +250,10 @@ extension CallResponse {
             recording: recording,
             updatedAt: updatedAt,
             hlsPlaylistUrl: hlsPlaylistUrl,
-            customData: result
+            autoRejectTimeout: settings.ring.autoCancelTimeoutMs,
+            customData: result,
+            session: session?.toCallSession(),
+            createdBy: createdBy.toUser
         )
     }
     

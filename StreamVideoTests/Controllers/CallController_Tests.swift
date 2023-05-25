@@ -143,7 +143,10 @@ final class CallController_Tests: ControllerTestCase {
                 recording: false,
                 updatedAt: Date(),
                 hlsPlaylistUrl: "",
-                customData: [:])
+                autoRejectTimeout: 15000,
+                customData: [:],
+                createdBy: .anonymous
+            )
         )
         
         // Then
@@ -177,7 +180,10 @@ final class CallController_Tests: ControllerTestCase {
                 recording: false,
                 updatedAt: Date(),
                 hlsPlaylistUrl: "",
-                customData: [:])
+                autoRejectTimeout: 15000,
+                customData: [:],
+                createdBy: .anonymous
+            )
         )
         
         // Then
@@ -283,8 +289,10 @@ final class CallController_Tests: ControllerTestCase {
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
+                micDefaultOn: true,
                 opusDtxEnabled: true,
-                redundantCodingEnabled: true
+                redundantCodingEnabled: true,
+                speakerDefaultOn: true
             ),
             environment: environment
         )

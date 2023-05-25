@@ -21,7 +21,9 @@ final class PermissionsController_Tests: ControllerTestCase {
             recording: false,
             updatedAt: Date(),
             hlsPlaylistUrl: "",
-            customData: [:]
+            autoRejectTimeout: 15000,
+            customData: [:],
+            createdBy: .anonymous
         )
         let callSettings = CallSettingsInfo(
             callCapabilities: ["send-audio"],
@@ -60,7 +62,9 @@ final class PermissionsController_Tests: ControllerTestCase {
             recording: false,
             updatedAt: Date(),
             hlsPlaylistUrl: "",
-            customData: [:]
+            autoRejectTimeout: 15000,
+            customData: [:],
+            createdBy: .anonymous
         )
         let callSettings = CallSettingsInfo(
             callCapabilities: ["send-audio"],

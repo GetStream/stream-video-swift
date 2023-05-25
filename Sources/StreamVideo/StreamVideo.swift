@@ -298,30 +298,6 @@ public class StreamVideo {
         )
         return controller
     }
-    
-    /// Accepts the call with the provided call id and type.
-    /// - Parameters:
-    ///  - callId: the id of the call.
-    ///  - callType: the type of the call.
-    public func acceptCall(callId: String, callType: String) async throws {
-        try await callCoordinatorController.sendEvent(
-            type: .callAccepted,
-            callId: callId,
-            callType: callType
-        )
-    }
-    
-    /// Rejects the call with the provided call id and type.
-    /// - Parameters:
-    ///  - callId: the id of the call.
-    ///  - callType: the type of the call.
-    public func rejectCall(callId: String, callType: String) async throws {
-        try await callCoordinatorController.sendEvent(
-            type: .callRejected,
-            callId: callId,
-            callType: callType
-        )
-    }
         
     /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
     public func callEvents() -> AsyncStream<CallEvent> {

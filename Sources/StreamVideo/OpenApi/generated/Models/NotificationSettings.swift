@@ -16,21 +16,24 @@ import AnyCodable
 
 internal struct NotificationSettings: Codable, JSONEncodable, Hashable {
 
-    internal var callCreated: EventNotificationSettings
     internal var callLiveStarted: EventNotificationSettings
+    internal var callNotification: EventNotificationSettings
+    internal var callRing: EventNotificationSettings
     internal var enabled: Bool
     internal var sessionStarted: EventNotificationSettings
 
-    internal init(callCreated: EventNotificationSettings, callLiveStarted: EventNotificationSettings, enabled: Bool, sessionStarted: EventNotificationSettings) {
-        self.callCreated = callCreated
+    internal init(callLiveStarted: EventNotificationSettings, callNotification: EventNotificationSettings, callRing: EventNotificationSettings, enabled: Bool, sessionStarted: EventNotificationSettings) {
         self.callLiveStarted = callLiveStarted
+        self.callNotification = callNotification
+        self.callRing = callRing
         self.enabled = enabled
         self.sessionStarted = sessionStarted
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
-        case callCreated = "call_created"
         case callLiveStarted = "call_live_started"
+        case callNotification = "call_notification"
+        case callRing = "call_ring"
         case enabled
         case sessionStarted = "session_started"
     }
@@ -39,8 +42,9 @@ internal struct NotificationSettings: Codable, JSONEncodable, Hashable {
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encode(callCreated, forKey: .callCreated)
         try container.encode(callLiveStarted, forKey: .callLiveStarted)
+        try container.encode(callNotification, forKey: .callNotification)
+        try container.encode(callRing, forKey: .callRing)
         try container.encode(enabled, forKey: .enabled)
         try container.encode(sessionStarted, forKey: .sessionStarted)
     }

@@ -37,6 +37,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** The capabilities of the current user */
     internal var ownCapabilities: [OwnCapability]
     internal var recording: Bool
+    internal var session: CallSessionResponse?
     internal var settings: CallSettingsResponse
     /** Date/time when the call will start */
     internal var startsAt: Date?
@@ -47,7 +48,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.broadcasting = broadcasting
@@ -62,6 +63,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         self.ingress = ingress
         self.ownCapabilities = ownCapabilities
         self.recording = recording
+        self.session = session
         self.settings = settings
         self.startsAt = startsAt
         self.team = team
@@ -85,6 +87,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         case ingress
         case ownCapabilities = "own_capabilities"
         case recording
+        case session
         case settings
         case startsAt = "starts_at"
         case team
@@ -111,6 +114,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(ingress, forKey: .ingress)
         try container.encode(ownCapabilities, forKey: .ownCapabilities)
         try container.encode(recording, forKey: .recording)
+        try container.encodeIfPresent(session, forKey: .session)
         try container.encode(settings, forKey: .settings)
         try container.encodeIfPresent(startsAt, forKey: .startsAt)
         try container.encodeIfPresent(team, forKey: .team)

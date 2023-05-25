@@ -6,11 +6,59 @@
 
 class MockResponseBuilder {
     
+    func makeCallResponse(
+        cid: String,
+        acceptedBy: [String: Date] = [:],
+        rejectedBy: [String: Date] = [:]
+    ) -> CallResponse {
+        let userResponse = UserResponse(
+            createdAt: Date(),
+            custom: [:],
+            id: "test",
+            role: "user",
+            teams: [],
+            updatedAt: Date()
+        )
+        let callIngressResponse = CallIngressResponse(
+            rtmp: RTMPIngress(address: "test")
+        )
+        let session = CallSessionResponse(
+            acceptedBy: acceptedBy,
+            id: "test",
+            participants: [],
+            participantsCountByRole: [:],
+            rejectedBy: rejectedBy
+        )
+        let callResponse = CallResponse(
+            backstage: false,
+            blockedUserIds: [],
+            broadcasting: false,
+            cid: cid,
+            createdAt: Date(),
+            createdBy: userResponse,
+            currentSessionId: "123",
+            custom: [:],
+            hlsPlaylistUrl: "",
+            id: "test",
+            ingress: callIngressResponse,
+            ownCapabilities: [.sendAudio, .sendVideo],
+            recording: false,
+            session: session,
+            settings: makeCallSettingsResponse(),
+            transcribing: false,
+            type: "default",
+            updatedAt: Date()
+        )
+        return callResponse
+    }
+    
     func makeCallSettingsResponse() -> CallSettingsResponse {
         let audioSettings = AudioSettings(
             accessRequestEnabled: true,
+            micDefaultOn: true,
             opusDtxEnabled: true,
-            redundantCodingEnabled: true
+            redundantCodingEnabled: true,
+            speakerDefaultOn: true
         )
         let backstageSettings = BackstageSettings(enabled: false)
         let broadcastSettings = BroadcastSettings(
@@ -25,7 +73,7 @@ class MockResponseBuilder {
         )
         let ringSettings = RingSettings(
             autoCancelTimeoutMs: 15000,
-            autoRejectTimeoutMs: 15000
+            incomingCallTimeoutMs: 15000
         )
         let screensharingSettings = ScreensharingSettings(
             accessRequestEnabled: false,
@@ -37,7 +85,10 @@ class MockResponseBuilder {
         )
         let videoSettings = VideoSettings(
             accessRequestEnabled: true,
-            enabled: true
+            cameraDefaultOn: true,
+            cameraFacing: .front,
+            enabled: true,
+            targetResolution: .init(bitrate: 100, height: 100, width: 100)
         )
         
         return CallSettingsResponse(
