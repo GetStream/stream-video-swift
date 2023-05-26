@@ -7,6 +7,8 @@ import SwiftUI
 import UIKit
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
+    
+    @Injected(\.streamVideo) var streamVideo
 
     func application(
         _ application: UIApplication,
@@ -30,7 +32,24 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didReceive response: UNNotificationResponse,
         withCompletionHandler completionHandler: @escaping () -> Void
     ) {
-        log.debug("push notification received \(response.notification.request.content)")
+        let userInfo = response.notification.request.content.userInfo
+        log.debug("push notification received \(userInfo)")
+        guard let stream = userInfo["stream"] as? [String: Any],
+                let callCid = stream["call_cid"] as? String else {
+            return
+        }
+        let components = callCid.components(separatedBy: ":")
+        if components.count >= 2 {
+            let callType = components[0]
+            let callId = components[1]
+            let call = streamVideo.makeCall(callType: callType, callId: callId)
+            AppState.shared.activeCall = call
+            Task {
+                try await streamVideo.connect()
+                try await call.accept()
+                try await call.join()
+            }
+        }
     }
 
     func setupRemoteNotifications() {
