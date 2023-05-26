@@ -43,7 +43,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             recording: false,
             updatedAt: Date(),
             hlsPlaylistUrl: "",
-            customData: [:]
+            autoRejectTimeout: 15000,
+            customData: [:],
+            createdBy: .anonymous
         )
         callSettings = CallSettingsInfo(
             callCapabilities: ["send-audio", "send-video"],
@@ -471,8 +473,10 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
+                micDefaultOn: true,
                 opusDtxEnabled: true,
-                redundantCodingEnabled: true
+                redundantCodingEnabled: true,
+                speakerDefaultOn: true
             ),
             environment: environment
         )

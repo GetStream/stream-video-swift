@@ -14,17 +14,6 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     public let id: String
     public let callerId: String
     public let type: String
-    public let participants: [CallParticipant]
-    
-    public init(
-        id: String,
-        callerId: String,
-        type: String,
-        participants: [CallParticipant]
-    ) {
-        self.id = id
-        self.callerId = callerId
-        self.type = type
-        self.participants = participants
-    }
+    public let participants: [User]
+    public let timeout: TimeInterval
 }

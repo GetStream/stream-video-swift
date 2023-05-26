@@ -19,8 +19,10 @@ class CallController_Mock: CallController {
         videoConfig: VideoConfig(),
         audioSettings: AudioSettings(
             accessRequestEnabled: true,
+            micDefaultOn: true,
             opusDtxEnabled: true,
-            redundantCodingEnabled: true
+            redundantCodingEnabled: true,
+            speakerDefaultOn: true
         ),
         environment: WebSocketClient.Environment.mock
     )
@@ -31,7 +33,8 @@ class CallController_Mock: CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         members: [User],
-        ring: Bool = false
+        ring: Bool = false,
+        notify: Bool = false
     ) async throws {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
             self?.call?.participants = participants
@@ -85,7 +88,9 @@ class CallController_Mock: CallController {
             recording: false,
             updatedAt: Date(),
             hlsPlaylistUrl: "",
-            customData: [:]
+            autoRejectTimeout: 15000,
+            customData: [:],
+            createdBy: .anonymous
         )
         let callSettingsInfo = CallSettingsInfo(
             callCapabilities: [],

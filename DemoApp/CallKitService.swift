@@ -7,6 +7,12 @@ import Foundation
 @preconcurrency import CallKit
 import StreamVideo
 
+enum CallKitState {
+    case idle
+    case joining
+    case inCall
+}
+
 class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     @Injected(\.streamVideo) var streamVideo
@@ -16,8 +22,11 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     private var call: Call?
     
+    private var state: CallKitState = .idle
     private var callKitId: UUID?
     private let callController = CXCallController()
+    private var createdBy: User?
+    private var ringingTimer: Foundation.Timer?
     
     override init() {
         super.init()
@@ -65,6 +74,27 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             update: update,
             completion: completion
         )
+        checkIfCallWasHandled(callId: callId, type: callType)
+    }
+    
+    private func checkIfCallWasHandled(callId: String, type: String) {
+        Task {
+            let call = streamVideo.makeCall(callType: type, callId: callId)
+            let callState = try await call.get()
+            let acceptedBy = callState.session?.acceptedBy ?? [:]
+            let rejectedBy = callState.session?.rejectedBy ?? [:]
+            let currentUserId = streamVideo.user.id
+            let isAccepted = acceptedBy[currentUserId] != nil
+            let isRejected = rejectedBy[currentUserId] != nil
+            if (isAccepted || isRejected) && state == .idle {
+                endCurrentCall()
+            } else {
+                createdBy = callState.createdBy
+                await MainActor.run {
+                    startTimer(timeout: TimeInterval(callState.autoRejectTimeout / 1000))
+                }
+            }
+        }
     }
     
     @objc func endCurrentCall() {
@@ -89,17 +119,25 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         if !callId.isEmpty {
+            stopTimer()
             Task {
                 await MainActor.run {
                     Task {
-                        try await streamVideo.connect()
-                        self.call = streamVideo.makeCall(callType: callType, callId: callId)
-                        AppState.shared.activeCall = call
-                        subscribeToCallEvents()
-                        try await call?.join()
-                        await MainActor.run {
-                            action.fulfill()
+                        state = .joining
+                        do {
+                            self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                            AppState.shared.activeCall = call
+                            subscribeToCallEvents()
+                            try await call?.accept()
+                            try await call?.join()
+                            state = .inCall
+                            await MainActor.run {
+                                action.fulfill()
+                            }
+                        } catch {
+                            state = .idle
                         }
+                        
                     }
                 }
             }
@@ -134,12 +172,35 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
     }
     
+    private func startTimer(timeout: TimeInterval) {
+        guard state == .idle else { return }
+        ringingTimer = Foundation.Timer.scheduledTimer(
+            withTimeInterval: timeout,
+            repeats: false,
+            block: { [weak self] _ in
+                guard let self = self else { return }
+                log.debug("Detected ringing timeout, hanging up...")
+                self.endCurrentCall()
+            }
+        )
+    }
+    
     private func subscribeToCallEvents() {
         Task {
             for await event in streamVideo.callEvents() {
                 switch event {
-                case .canceled(_), .ended(_):
+                case .ended(_):
                     endCurrentCall()
+                case .rejected(let callInfo):
+                    if callInfo.user?.id == streamVideo.user.id {
+                        endCurrentCall()
+                    } else if callInfo.user?.id == createdBy?.id {
+                        endCurrentCall()
+                    }
+                case .accepted(let callInfo):
+                    if callInfo.user?.id == streamVideo.user.id && state == .idle {
+                        endCurrentCall()
+                    }
                 default:
                     log.debug("received call event")
                 }
@@ -149,14 +210,24 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
         callKitId = nil
-        call?.leave()
-        call = nil
+        stopTimer()
         Task {
+            if call == nil {
+                call = streamVideo.makeCall(callType: callType, callId: callId)
+            }
+            try await call?.reject()
+            call = nil
+            createdBy = nil
+            state = .idle
             await MainActor.run {
                 AppState.shared.activeCall = nil
             }
+            action.fulfill()
         }
-        action.fulfill()
     }
     
+    private func stopTimer() {
+        ringingTimer?.invalidate()
+        ringingTimer = nil
+    }
 }

@@ -10,20 +10,22 @@ import Foundation
 import AnyCodable
 #endif
 
-/** This event is sent when a user rejects a ringing call. Clients receiving this event should dismiss  the call screen unless the call includes more users. */
+/** This event is sent when a user rejects a notification to join a call. */
 
 
 
 
 internal struct CallRejectedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
+    internal var call: CallResponse
     internal var callCid: String
     internal var createdAt: Date
     /** The type of event: \"call.rejected\" in this case */
     internal var type: String = "call.rejected"
     internal var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, type: String = "call.rejected", user: UserResponse) {
+    internal init(call: CallResponse, callCid: String, createdAt: Date, type: String = "call.rejected", user: UserResponse) {
+        self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type
@@ -31,6 +33,7 @@ internal struct CallRejectedEvent: Codable, JSONEncodable, Hashable, WSCallEvent
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
+        case call
         case callCid = "call_cid"
         case createdAt = "created_at"
         case type
@@ -41,6 +44,7 @@ internal struct CallRejectedEvent: Codable, JSONEncodable, Hashable, WSCallEvent
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(call, forKey: .call)
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(type, forKey: .type)

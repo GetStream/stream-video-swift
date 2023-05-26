@@ -10,13 +10,14 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 1787)
         
         let participants = 0
+        let user = 1
 
         WHEN("user opens connecting screen") {
             userRobot.enterRingEvents(callId)
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants)
+                .assertConnectingView(with: participants + user)
                 .assertCallControls()
         }
     }
@@ -25,6 +26,7 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 1788)
         
         let participants = 1
+        let user = 1
         
         WHEN("user calls to participant") {
             userRobot
@@ -33,7 +35,7 @@ final class RingProcessTests: StreamTestCase {
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants)
+                .assertConnectingView(with: participants + user)
                 .assertCallControls()
         }
     }
@@ -42,6 +44,7 @@ final class RingProcessTests: StreamTestCase {
         linkToScenario(withId: 1789)
         
         let participants = 2
+        let user = 1
         
         WHEN("user calls to participant") {
             userRobot
@@ -50,7 +53,7 @@ final class RingProcessTests: StreamTestCase {
         }
         THEN("all required elements are on the screen") {
             userRobot
-                .assertConnectingView(with: participants)
+                .assertConnectingView(with: participants + user)
                 .assertCallControls()
         }
     }

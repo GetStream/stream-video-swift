@@ -16,17 +16,31 @@ import AnyCodable
 
 internal struct VideoSettingsRequest: Codable, JSONEncodable, Hashable {
 
+    internal enum CameraFacing: String, Codable, CaseIterable {
+        case front = "front"
+        case back = "back"
+        case external = "external"
+    }
     internal var accessRequestEnabled: Bool?
+    internal var cameraDefaultOn: Bool?
+    internal var cameraFacing: CameraFacing?
     internal var enabled: Bool?
+    internal var targetResolution: TargetResolutionRequest?
 
-    internal init(accessRequestEnabled: Bool? = nil, enabled: Bool? = nil) {
+    internal init(accessRequestEnabled: Bool? = nil, cameraDefaultOn: Bool? = nil, cameraFacing: CameraFacing? = nil, enabled: Bool? = nil, targetResolution: TargetResolutionRequest? = nil) {
         self.accessRequestEnabled = accessRequestEnabled
+        self.cameraDefaultOn = cameraDefaultOn
+        self.cameraFacing = cameraFacing
         self.enabled = enabled
+        self.targetResolution = targetResolution
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
+        case cameraDefaultOn = "camera_default_on"
+        case cameraFacing = "camera_facing"
         case enabled
+        case targetResolution = "target_resolution"
     }
 
     // Encodable protocol methods
@@ -34,7 +48,10 @@ internal struct VideoSettingsRequest: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encodeIfPresent(cameraDefaultOn, forKey: .cameraDefaultOn)
+        try container.encodeIfPresent(cameraFacing, forKey: .cameraFacing)
         try container.encodeIfPresent(enabled, forKey: .enabled)
+        try container.encodeIfPresent(targetResolution, forKey: .targetResolution)
     }
 }
 

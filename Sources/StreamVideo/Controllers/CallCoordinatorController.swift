@@ -35,7 +35,8 @@ class CallCoordinatorController: @unchecked Sendable {
         callId: String,
         videoOptions: VideoOptions,
         members: [User],
-        ring: Bool
+        ring: Bool,
+        notify: Bool
     ) async throws -> EdgeServer {
         let location = try await getLocation()
         let response = try await joinCall(
@@ -43,7 +44,8 @@ class CallCoordinatorController: @unchecked Sendable {
             type: callType,
             location: location,
             participants: members,
-            ring: ring
+            ring: ring,
+            notify: notify
         )
         let iceServersResponse: [ICEServer] = response.credentials.iceServers
         let iceServers = iceServersResponse.map { iceServer in
@@ -88,14 +90,12 @@ class CallCoordinatorController: @unchecked Sendable {
     }
 
     func sendEvent(
-        type: EventType,
         callId: String,
         callType: String,
         customData: [String: AnyCodable]? = nil
     ) async throws {
         let sendEventRequest = SendEventRequest(
-            custom: customData,
-            type: type.rawValue
+            custom: customData
         )
         let request = EventRequestData(
             id: callId,
@@ -103,6 +103,14 @@ class CallCoordinatorController: @unchecked Sendable {
             sendEventRequest: sendEventRequest
         )
         _ = try await coordinatorClient.sendEvent(with: request)
+    }
+    
+    func acceptCall(callId: String, type: String) async throws -> AcceptCallResponse {
+        try await coordinatorClient.acceptCall(callId: callId, type: type)
+    }
+    
+    func rejectCall(callId: String, type: String) async throws -> RejectCallResponse {
+        try await coordinatorClient.rejectCall(callId: callId, type: type)
     }
     
     func createGuestUser(with id: String) async throws -> CreateGuestResponse {
@@ -158,7 +166,8 @@ class CallCoordinatorController: @unchecked Sendable {
         type: String,
         location: String,
         participants: [User],
-        ring: Bool
+        ring: Bool,
+        notify: Bool
     ) async throws -> JoinCallResponse {
         var members = [MemberRequest]()
         for participant in participants {
@@ -183,7 +192,13 @@ class CallCoordinatorController: @unchecked Sendable {
             settingsOverride: nil
         )
         let create = !user.id.isAnonymousUser
-        let joinCall = JoinCallRequest(create: create, data: callRequest, location: location, ring: ring)
+        let joinCall = JoinCallRequest(
+            create: create,
+            data: callRequest,
+            location: location,
+            notify: notify,
+            ring: ring
+        )
         let joinCallRequest = JoinCallRequestData(
             id: callId,
             type: type,

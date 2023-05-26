@@ -77,10 +77,12 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Joins the current call.
     /// - Parameters:
     ///  - ring: whether the call should ring, `false` by default.
+    ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
     /// - Throws: An error if the call could not be joined.
     public func join(
         ring: Bool = false,
+        notify: Bool = false,
         callSettings: CallSettings = CallSettings()
     ) async throws {
         try await callController.joinCall(
@@ -89,7 +91,8 @@ public class Call: ObservableObject, @unchecked Sendable {
             callSettings: callSettings,
             videoOptions: videoOptions,
             members: members,
-            ring: ring
+            ring: ring,
+            notify: notify
         )
     }
     
@@ -110,6 +113,42 @@ public class Call: ObservableObject, @unchecked Sendable {
         )
     }
     
+    /// Gets the call on the backend with the given parameters.
+    ///
+    /// - Parameters:
+    ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
+    ///  - notify: A boolean value indicating whether members should be notified about the call.
+    ///  - ring: A boolean value indicating whether to ring the call.
+    /// - Throws: An error if the call doesn't exist.
+    /// - Returns: The call's data.
+    public func get(
+        membersLimit: Int? = nil,
+        ring: Bool = false,
+        notify: Bool = false
+    ) async throws -> CallData {
+        try await callController.getCall(
+            callId: callId,
+            type: callType,
+            membersLimit: membersLimit,
+            ring: ring,
+            notify: notify
+        )
+    }
+    
+    /// Rings the call (sends call notification to members).
+    /// - Returns: The call's data.
+    @discardableResult
+    public func ring() async throws -> CallData {
+        try await get(ring: true)
+    }
+    
+    /// Notifies the users of the call, by sending push notification.
+    /// - Returns: The call's data.
+    @discardableResult
+    public func notify() async throws -> CallData {
+        try await get(notify: true)
+    }
+    
     /// Gets or creates the call on the backend with the given parameters.
     ///
     /// - Parameters:
@@ -117,6 +156,7 @@ public class Call: ObservableObject, @unchecked Sendable {
     ///  - startsAt: An optional Date object representing the time the call is scheduled to start.
     ///  - customData: An optional dictionary of custom data to attach to the call.
     ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
+    ///  - notify: A boolean value indicating whether members should be notified about the call.
     ///  - ring: A boolean value indicating whether to ring the call.
     /// - Throws: An error if the call creation fails.
     /// - Returns: The call's data.
@@ -125,6 +165,7 @@ public class Call: ObservableObject, @unchecked Sendable {
         startsAt: Date? = nil,
         customData: [String: RawJSON] = [:],
         membersLimit: Int? = nil,
+        notify: Bool = false,
         ring: Bool = false
     ) async throws -> CallData {
         try await callController.getOrCreateCall(
@@ -132,7 +173,8 @@ public class Call: ObservableObject, @unchecked Sendable {
             startsAt: startsAt,
             customData: customData,
             membersLimit: membersLimit,
-            ring: ring
+            ring: ring,
+            notify: notify
         )
     }
 
@@ -147,6 +189,22 @@ public class Call: ObservableObject, @unchecked Sendable {
         try await callController.selectEdgeServer(
             videoOptions: VideoOptions(),
             members: members
+        )
+    }
+    
+    /// Accepts an incoming call.
+    public func accept() async throws {
+        _ = try await callController.callCoordinatorController.acceptCall(
+            callId: callId,
+            type: callType
+        )
+    }
+    
+    /// Rejects a call.
+    public func reject() async throws {
+        _ = try await callController.callCoordinatorController.rejectCall(
+            callId: callId,
+            type: callType
         )
     }
     
@@ -464,7 +522,12 @@ public class Call: ObservableObject, @unchecked Sendable {
     }
     
     internal func update(state: CallData) {
-        self.state = state
+        var updated = state
+        let members = self.state?.members ?? []
+        if state.members.isEmpty && !members.isEmpty {
+            updated.members = members
+        }
+        self.state = updated
     }
     
     internal func update(recordingState: RecordingState) {

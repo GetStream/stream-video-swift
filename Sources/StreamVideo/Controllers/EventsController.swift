@@ -43,8 +43,7 @@ class EventsController {
     /// - Throws: An error if the sending fails.
     func send(event: CustomEventRequest) async throws {
         let sendEventRequest = SendEventRequest(
-            custom: RawJSON.convert(customData: event.customData),
-            type: event.type.rawValue
+            custom: RawJSON.convert(customData: event.customData)
         )
         let request = EventRequestData(
             id: event.callId,

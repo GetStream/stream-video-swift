@@ -17,19 +17,25 @@ import AnyCodable
 internal struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
 
     internal var accessRequestEnabled: Bool?
+    internal var micDefaultOn: Bool?
     internal var opusDtxEnabled: Bool?
     internal var redundantCodingEnabled: Bool?
+    internal var speakerDefaultOn: Bool?
 
-    internal init(accessRequestEnabled: Bool? = nil, opusDtxEnabled: Bool? = nil, redundantCodingEnabled: Bool? = nil) {
+    internal init(accessRequestEnabled: Bool? = nil, micDefaultOn: Bool? = nil, opusDtxEnabled: Bool? = nil, redundantCodingEnabled: Bool? = nil, speakerDefaultOn: Bool? = nil) {
         self.accessRequestEnabled = accessRequestEnabled
+        self.micDefaultOn = micDefaultOn
         self.opusDtxEnabled = opusDtxEnabled
         self.redundantCodingEnabled = redundantCodingEnabled
+        self.speakerDefaultOn = speakerDefaultOn
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
+        case micDefaultOn = "mic_default_on"
         case opusDtxEnabled = "opus_dtx_enabled"
         case redundantCodingEnabled = "redundant_coding_enabled"
+        case speakerDefaultOn = "speaker_default_on"
     }
 
     // Encodable protocol methods
@@ -37,8 +43,10 @@ internal struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(accessRequestEnabled, forKey: .accessRequestEnabled)
+        try container.encodeIfPresent(micDefaultOn, forKey: .micDefaultOn)
         try container.encodeIfPresent(opusDtxEnabled, forKey: .opusDtxEnabled)
         try container.encodeIfPresent(redundantCodingEnabled, forKey: .redundantCodingEnabled)
+        try container.encodeIfPresent(speakerDefaultOn, forKey: .speakerDefaultOn)
     }
 }
 

@@ -66,18 +66,15 @@ struct SendReactionRequestData {
 public struct CustomEventRequest {
     public let callId: String
     public let callType: String
-    public let type: EventType
     public let customData: [String: RawJSON]
     
     public init(
         callId: String,
         callType: String,
-        type: EventType,
         customData: [String: RawJSON]
     ) {
         self.callId = callId
         self.callType = callType
-        self.type = type
         self.customData = customData
     }
 }

@@ -12,17 +12,17 @@ public enum CallEvent: Sendable {
     case accepted(CallEventInfo)
     /// An outgoing call is rejected.
     case rejected(CallEventInfo)
-    /// An outgoing call is canceled.
-    case canceled(CallEventInfo)
     /// The call is ended.
     case ended(CallEventInfo)
     /// A user was blocked.
     case userBlocked(CallEventInfo)
     /// A user was unblocked.
     case userUnblocked(CallEventInfo)
+    /// Session started.
+    case sessionStarted(SessionInfo)
 }
 
-enum CallEventAction: Sendable {
+public enum CallEventAction: Sendable {
     case accept
     case reject
     case cancel
@@ -31,17 +31,22 @@ enum CallEventAction: Sendable {
     case unblock
 }
 
-struct IncomingCallEvent: Event {
-    let callCid: String
-    let createdBy: String
-    let type: String
-    let users: [User]
-    let ringing: Bool
-}
-
 /// Contains info about a call event.
 public struct CallEventInfo: Event, Sendable {
-    let callId: String
-    let user: User?
-    let action: CallEventAction
+    public let callCid: String
+    public let user: User?
+    public let action: CallEventAction
+    
+    public var callId: String {
+        let components = callCid.components(separatedBy: ":")
+        if components.count > 1 {
+            return components[1]
+        } else {
+            return ""
+        }
+    }
+    
+    public var type: String {
+        callCid.components(separatedBy: ":").first ?? "default"
+    }
 }

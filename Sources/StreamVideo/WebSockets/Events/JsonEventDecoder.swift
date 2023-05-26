@@ -12,40 +12,13 @@ struct JsonEventDecoder: AnyEventDecoder {
         
         switch event {
         case .typeBlockedUserEvent(let callBlocked):
-            let callId = callBlocked.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: User(id: callBlocked.user.id),
-                action: .block
-            )
+            return callBlocked
         case .typeCallAcceptedEvent(let callAccepted):
-            let callId = callAccepted.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: callAccepted.user.toUser,
-                action: .accept
-            )
+            return callAccepted
         case .typeCallCreatedEvent(let callCreated):
-            if callCreated.ringing {
-                let call = callCreated.call
-                let members = callCreated.members.compactMap { $0.user.toUser }
-                return IncomingCallEvent(
-                    callCid: call.cid,
-                    createdBy: call.createdBy.id,
-                    type: call.type,
-                    users: members,
-                    ringing: callCreated.ringing
-                )
-            } else {
-                return callCreated
-            }
+            return callCreated
         case .typeCallEndedEvent(let callEnded):
-            let callId = callEnded.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: callEnded.user?.toUser,
-                action: .end
-            )
+            return callEnded
         case .typeCallMemberAddedEvent(let value):
             return value
         case .typeCallMemberRemovedEvent(let value):
@@ -61,12 +34,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .typeCallRecordingStoppedEvent(let value):
             return value
         case .typeCallRejectedEvent(let callRejected):
-            let callId = callRejected.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: callRejected.user.toUser,
-                action: .reject
-            )
+            return callRejected
         case .typeCallUpdatedEvent(let value):
             return value
         case .typeCustomVideoEvent(let value):
@@ -76,12 +44,7 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .typePermissionRequestEvent(let value):
             return value
         case .typeUnblockedUserEvent(let callUnblocked):
-            let callId = callUnblocked.callCid
-            return CallEventInfo(
-                callId: callId,
-                user: User(id: callUnblocked.user.id),
-                action: .unblock
-            )
+            return callUnblocked
         case .typeUpdatedCallPermissionsEvent(let value):
             return value
         case .typeConnectedEvent(let value):
@@ -99,6 +62,10 @@ struct JsonEventDecoder: AnyEventDecoder {
         case .typeCallSessionParticipantLeftEvent(let value):
             return value
         case .typeCallSessionStartedEvent(let value):
+            return value
+        case .typeCallNotificationEvent(let value):
+            return value
+        case .typeCallRingEvent(let value):
             return value
         }
     }
@@ -131,7 +98,8 @@ extension CallSessionEndedEvent: Event {}
 extension CallSessionParticipantJoinedEvent: Event {}
 extension CallSessionParticipantLeftEvent: Event {}
 extension CallSessionStartedEvent: Event {}
-
+extension CallNotificationEvent: Event {}
+extension CallRingEvent: Event {}
 
 extension UserResponse {
     var toUser: User {
@@ -141,23 +109,6 @@ extension UserResponse {
             imageURL: URL(string: image ?? "")
         )
     }
-}
-
-public struct EventType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
-    public let rawValue: String
-
-    public init(rawValue: String) {
-        self.rawValue = rawValue
-    }
-
-    public init(stringLiteral value: String) {
-        self.init(rawValue: value)
-    }
-}
-
-public extension EventType {
-    static let callRejected: Self = "call.rejected"
-    static let callAccepted: Self = "call.accepted"
 }
 
 extension ClientError {

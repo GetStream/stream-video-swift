@@ -176,12 +176,12 @@ struct HomeView: View {
             Button {
                 resignFirstResponder()
                 if callFlow == .lobby {
-                    viewModel.enterLobby(callId: callId, type: .default, members: selectedParticipants)
+                    viewModel.enterLobby(callId: callId, type: .default, members: members)
                 } else {
                     viewModel.startCall(
                         callId: callId,
                         type: .default,
-                        members: selectedParticipants,
+                        members: members,
                         ring: callFlow == .ringEvents
                     )
                 }
@@ -196,6 +196,15 @@ struct HomeView: View {
             .cornerRadius(16)
         }
     }
+    
+    var members: [User] {
+        var members = selectedParticipants
+        if !selectedParticipants.contains(streamVideo.user) {
+            members.append(streamVideo.user)            
+        }
+        return members
+    }
+    
 }
 
 enum CallAction: String {

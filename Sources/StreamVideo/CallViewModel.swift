@@ -167,7 +167,6 @@ open class CallViewModel: ObservableObject {
         
     private var ringingTimer: Foundation.Timer?
     
-    private var callRejectionEvents = [String: Int]()
     private var lastLayoutChange = Date()
     private var enteringCall = false
     private var participantsSortComparators = defaultComparators
@@ -272,7 +271,23 @@ open class CallViewModel: ObservableObject {
     public func startCall(callId: String, type: String, members: [User], ring: Bool = false) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
-        enterCall(callId: callId, callType: type, members: members, ring: ring)
+        if !ring {
+            enterCall(callId: callId, callType: type, members: members, ring: ring)
+        } else {
+            let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
+            self.call = call
+            Task {
+                do {
+                    let callData = try await call.getOrCreate(members: members, ring: ring)
+                    let timeoutSeconds = TimeInterval(callData.autoRejectTimeout / 1000)
+                    startTimer(timeout: timeoutSeconds)
+                } catch {
+                    self.error = error
+                    callingState = .idle
+                    self.call = nil
+                }
+            }
+        }
     }
     
     /// Joins an existing call with the provided info.
@@ -328,8 +343,15 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     public func acceptCall(callId: String, type: String) {
         Task {
-            try await streamVideo.acceptCall(callId: callId, callType: type)
-            enterCall(callId: callId, callType: type, members: [])
+            let call = streamVideo.makeCall(callType: type, callId: callId)
+            do {
+                try await call.accept()
+                enterCall(call: call, callId: callId, callType: type, members: [])
+            } catch {
+                self.error = error
+                callingState = .idle
+                self.call = nil
+            }
         }
     }
     
@@ -339,7 +361,8 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     public func rejectCall(callId: String, type: String) {
         Task {
-            try await streamVideo.rejectCall(callId: callId, callType: type)
+            let call = streamVideo.makeCall(callType: type, callId: callId)
+            try? await call.reject()
             self.callingState = .idle
         }
     }
@@ -392,7 +415,7 @@ open class CallViewModel: ObservableObject {
     public func hangUp() {
         if callingState == .outgoing {
             Task {
-                try? await call?.end()
+                try? await call?.reject()
                 leaveCall()
             }
         } else {
@@ -447,13 +470,12 @@ open class CallViewModel: ObservableObject {
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
-        callRejectionEvents = [:]
         currentEventsTask?.cancel()
         callingState = .idle
         isMinimized = false
     }
     
-    private func enterCall(callId: String, callType: String, members: [User], ring: Bool = false) {
+    private func enterCall(call: Call? = nil, callId: String, callType: String, members: [User], ring: Bool = false) {
         if enteringCall || callingState == .inCall {
             return
         }
@@ -461,7 +483,7 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 log.debug("Starting call")
-                let call = streamVideo.makeCall(callType: callType, callId: callId, members: members)
+                let call = call ?? streamVideo.makeCall(callType: callType, callId: callId, members: members)
                 try await call.join(ring: ring, callSettings: callSettings)
                 save(call: call)
                 enteringCall = false
@@ -482,23 +504,23 @@ open class CallViewModel: ObservableObject {
     }
     
     private func handleRingingEvents() {
-        let ringingTimeout = TimeInterval(15)
-        guard ringingTimeout > 0 else { return }
-        if callingState == .outgoing {
-            ringingTimer = Foundation.Timer.scheduledTimer(
-                withTimeInterval: ringingTimeout,
-                repeats: false,
-                block: { [weak self] _ in
-                    guard let self = self else { return }
-                    log.debug("Detected ringing timeout, hanging up...")
-                    Task {
-                        await self.hangUp()
-                    }
-                }
-            )
-        } else {
+        if callingState != .outgoing {
             ringingTimer?.invalidate()
         }
+    }
+    
+    private func startTimer(timeout: TimeInterval) {
+        ringingTimer = Foundation.Timer.scheduledTimer(
+            withTimeInterval: timeout,
+            repeats: false,
+            block: { [weak self] _ in
+                guard let self = self else { return }
+                log.debug("Detected ringing timeout, hanging up...")
+                Task {
+                    await self.hangUp()
+                }
+            }
+        )
     }
     
     private func subscribeToCallEvents() {
@@ -511,10 +533,15 @@ open class CallViewModel: ObservableObject {
                     if callingState == .idle && isAppActive {
                         callingState = .incoming(incomingCall)
                     }
+                } else if case let .accepted(callEventInfo) = callEvent {
+                    if callingState == .outgoing {
+                        enterCall(call: call, callId: callEventInfo.callId, callType: callEventInfo.type, members: [])
+                    } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && !enteringCall {
+                        // Accepted on another device.
+                        callingState = .idle
+                    }
                 } else if case .rejected = callEvent {
                     handleRejectedEvent(callEvent)
-                } else if case .canceled = callEvent {
-                    leaveCall()
                 } else if case .ended = callEvent {
                     leaveCall()
                 } else if case let .userBlocked(callEventInfo) = callEvent {
@@ -526,25 +553,31 @@ open class CallViewModel: ObservableObject {
                 } else if case let .userUnblocked(callEventInfo) = callEvent,
                             let user = callEventInfo.user {
                     call?.remove(blockedUser: user)
+                } else {
+                    log.debug("Received call event \(callEvent)")
                 }
             }
         }
     }
     
     private func handleRejectedEvent(_ callEvent: CallEvent) {
-        if case let .rejected(eventInfo) = callEvent {
-            let eventCount = (callRejectionEvents[eventInfo.callId] ?? 0) + 1
-            callRejectionEvents[eventInfo.callId] = eventCount
+        if case .rejected(_) = callEvent {
             let outgoingMembersCount = outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count
-            if eventCount >= outgoingMembersCount {
-                leaveCall()
+            let rejections = call?.state?.session?.rejectedBy.count ?? 0
+            let accepted = call?.state?.session?.acceptedBy.count ?? 0
+                        
+            if rejections >= outgoingMembersCount && accepted == 0 {
+                Task {
+                    try? await call?.reject()
+                    leaveCall()
+                }
             }
         }
     }
     
     private func updateCallStateIfNeeded() {
         if callingState == .outgoing {
-            if callParticipants.count > 1 {
+            if callParticipants.count > 0 {
                 callingState = .inCall
             }
             return
@@ -566,8 +599,14 @@ open class CallViewModel: ObservableObject {
         currentEventsTask = Task {
             for await event in call.participantEvents() {
                 self.participantEvent = event
-                // The event is shown for 2 seconds.
-                try? await Task.sleep(nanoseconds: 2_000_000_000)
+                if event.action == .leave &&
+                    callParticipants.count == 1
+                    && call.state?.session?.acceptedBy.isEmpty == false {
+                    leaveCall()
+                } else {
+                    // The event is shown for 2 seconds.
+                    try? await Task.sleep(nanoseconds: 2_000_000_000)
+                }
                 self.participantEvent = nil
             }
         }

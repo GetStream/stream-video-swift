@@ -39,6 +39,14 @@ public struct IncomingCallView: View {
             onCallAccepted: onCallAccepted,
             onCallRejected: onCallRejected
         )
+        .onChange(of: viewModel.hideIncomingCallScreen) { newValue in
+            if newValue {
+                onCallRejected(viewModel.callInfo.id)
+            }
+        }
+        .onDisappear {
+            viewModel.stopTimer()
+        }
     }
 }
 
@@ -50,7 +58,7 @@ struct IncomingCallViewContent: View {
     @Injected(\.images) var images
     @Injected(\.utils) var utils
     
-    var callParticipants: [CallParticipant]
+    var callParticipants: [User]
     var callInfo: IncomingCall
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void
@@ -61,17 +69,17 @@ struct IncomingCallViewContent: View {
             
             if callParticipants.count > 1 {
                 CallingGroupView(
-                    participants: callParticipants.map { $0.toUser() }
+                    participants: callParticipants
                 )
             } else {
                 AnimatingParticipantView(
-                    participant: callParticipants.first?.toUser(),
+                    participant: callParticipants.first,
                     caller: callInfo.callerId
                 )
             }
             
             CallingParticipantsView(
-                participants: callParticipants.map { $0.toUser() },
+                participants: callParticipants,
                 caller: callInfo.callerId
             )
             .padding()
