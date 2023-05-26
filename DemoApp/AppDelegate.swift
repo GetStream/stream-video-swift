@@ -42,7 +42,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         if components.count >= 2 {
             let callType = components[0]
             let callId = components[1]
-            let call = streamVideo.makeCall(callType: callType, callId: callId)
+            let call = streamVideo.call(callType: callType, callId: callId)
             AppState.shared.activeCall = call
             Task {
                 try await streamVideo.connect()

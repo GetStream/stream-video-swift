@@ -40,7 +40,7 @@ private func enterCall(callId: String, callType: String, members: [User], ring: 
     Task {
         do {
             log.debug("Starting call")
-            let call = streamVideo.makeCall(callType: callType, callId: callId, members: members)
+            let call = streamVideo.call(callType: callType, callId: callId, members: members)
             try await call.join(ring: ring, callSettings: callSettings)
             save(call: call)
         } catch {

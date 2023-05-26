@@ -148,7 +148,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     func test_outgoingCall_blockEventOtherUser() async throws {
         // Given
         let callViewModel = CallViewModel()
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
@@ -487,7 +487,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     private func callViewModelWithRingingCall(participants: [User]) -> CallViewModel {
         let callViewModel = CallViewModel()
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )

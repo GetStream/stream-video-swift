@@ -49,7 +49,7 @@ final class StreamVideo_Tests: XCTestCase {
         )
         
         // When
-        let call = streamVideo.makeCall(callType: .default, callId: "123")
+        let call = streamVideo.call(callType: .default, callId: "123")
         
         // Then
         XCTAssert(call.cId == "default:123")

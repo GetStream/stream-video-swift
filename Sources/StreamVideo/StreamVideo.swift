@@ -259,7 +259,7 @@ public class StreamVideo {
     ///  - callId: the id of the all.
     ///  - members: the members of the call.
     /// - Returns: `Call` object.
-    public func makeCall(
+    public func call(
         callType: String,
         callId: String,
         members: [User] = []

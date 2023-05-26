@@ -15,7 +15,7 @@ There are several ways to join a call:
 You can join a call via the `Call` object's method `join()`. First, you need to create an instance of the `Call` object, from your main `StreamVideo` object:
 
 ```swift
-let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
+let call = streamVideo.call(callType: type, callId: callId, members: members)
 ```
 
 Note that this creates a local instance of the call and it is not synced with the server (unless it was already created before).

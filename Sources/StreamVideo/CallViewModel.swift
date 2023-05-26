@@ -274,7 +274,7 @@ open class CallViewModel: ObservableObject {
         if !ring {
             enterCall(callId: callId, callType: type, members: members, ring: ring)
         } else {
-            let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
+            let call = streamVideo.call(callType: type, callId: callId, members: members)
             self.call = call
             Task {
                 do {
@@ -308,7 +308,7 @@ open class CallViewModel: ObservableObject {
         let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: members)
         callingState = .lobby(lobbyInfo)
         Task {
-            let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
+            let call = streamVideo.call(callType: type, callId: callId, members: members)
             self.edgeServer = try await call.selectEdgeServer(members: members)
         }
     }
@@ -326,7 +326,7 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 log.debug("Starting call")
-                let call = streamVideo.makeCall(callType: type, callId: callId, members: members)
+                let call = streamVideo.call(callType: type, callId: callId, members: members)
                 try await call.join(on: edgeServer, callSettings: callSettings)
                 save(call: call)
             } catch {
@@ -343,7 +343,7 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     public func acceptCall(callId: String, type: String) {
         Task {
-            let call = streamVideo.makeCall(callType: type, callId: callId)
+            let call = streamVideo.call(callType: type, callId: callId)
             do {
                 try await call.accept()
                 enterCall(call: call, callId: callId, callType: type, members: [])
@@ -361,7 +361,7 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     public func rejectCall(callId: String, type: String) {
         Task {
-            let call = streamVideo.makeCall(callType: type, callId: callId)
+            let call = streamVideo.call(callType: type, callId: callId)
             try? await call.reject()
             self.callingState = .idle
         }
@@ -483,7 +483,7 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 log.debug("Starting call")
-                let call = call ?? streamVideo.makeCall(callType: callType, callId: callId, members: members)
+                let call = call ?? streamVideo.call(callType: callType, callId: callId, members: members)
                 try await call.join(ring: ring, callSettings: callSettings)
                 save(call: call)
                 enteringCall = false

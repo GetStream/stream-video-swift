@@ -10,7 +10,7 @@ The StreamVideo SDK has support for broadcasting calls. You can find a tutorial 
 First, you need to create a call with a user that has the capability to start broadcasting calls (`start-broadcast-call`).
 
 ```swift
-let call = streamVideo.makeCall(callType: .default, callId: callId, members: [currentUser])
+let call = streamVideo.call(callType: .default, callId: callId, members: [currentUser])
 Task {
     try await call.join()
 }

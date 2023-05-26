@@ -272,7 +272,7 @@ func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
             await MainActor.run {
                 Task {
                     try await streamVideo.connect()
-                    self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                    self.call = streamVideo.call(callType: callType, callId: callId)
                     AppState.shared.activeCall = call
                     subscribeToCallEvents()
                     try await call?.join()

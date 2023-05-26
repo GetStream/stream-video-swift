@@ -39,7 +39,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(
@@ -85,7 +85,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(
@@ -121,7 +121,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(
@@ -158,7 +158,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(
@@ -195,7 +195,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(
@@ -217,7 +217,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(
@@ -239,7 +239,7 @@ final class CallController_Tests: ControllerTestCase {
         let callCoordinator = makeCallCoordinatorController()
         webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
         let callController = makeCallController(callCoordinator: callCoordinator)
-        let call = streamVideo?.makeCall(callType: callType, callId: callId)
+        let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
         try await callController.joinCall(

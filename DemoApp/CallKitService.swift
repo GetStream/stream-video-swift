@@ -79,7 +79,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     private func checkIfCallWasHandled(callId: String, type: String) {
         Task {
-            let call = streamVideo.makeCall(callType: type, callId: callId)
+            let call = streamVideo.call(callType: type, callId: callId)
             let callState = try await call.get()
             let acceptedBy = callState.session?.acceptedBy ?? [:]
             let rejectedBy = callState.session?.rejectedBy ?? [:]
@@ -125,7 +125,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                     Task {
                         state = .joining
                         do {
-                            self.call = streamVideo.makeCall(callType: callType, callId: callId)
+                            self.call = streamVideo.call(callType: callType, callId: callId)
                             AppState.shared.activeCall = call
                             subscribeToCallEvents()
                             try await call?.accept()
@@ -213,7 +213,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         stopTimer()
         Task {
             if call == nil {
-                call = streamVideo.makeCall(callType: callType, callId: callId)
+                call = streamVideo.call(callType: callType, callId: callId)
             }
             try await call?.reject()
             call = nil
