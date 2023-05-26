@@ -106,9 +106,46 @@ extension UserResponse {
         User(
             id: id,
             name: name,
-            imageURL: URL(string: image ?? "")
+            imageURL: URL(string: image ?? ""),
+            role: role,
+            customData: convert(custom)
         )
     }
+}
+
+func convert(_ custom: [String: AnyCodable]?) -> [String: RawJSON] {
+    guard let custom else { return [:] }
+    var result = [String: RawJSON]()
+    for (key, value) in custom {
+        result[key] = value.toRawJSON()
+    }
+    return result
+}
+
+extension AnyCodable {
+    
+    func toRawJSON() -> RawJSON {
+        if let value = value as? String {
+            return .string(value)
+        } else if let value = value as? Double {
+            return .number(value)
+        } else if let value = value as? Int {
+            return .number(Double(value))
+        } else if let value = value as? Bool {
+            return .bool(value)
+        } else if let value = value as? [Any] {
+            return .array(value.map { AnyCodable($0).toRawJSON() })
+        } else if let value = value as? [String: Any] {
+            var result = [String: RawJSON]()
+            for (key, val) in value {
+                result[key] = AnyCodable(val).toRawJSON()
+            }
+            return .dictionary(result)
+        } else {
+            return .nil
+        }
+    }
+    
 }
 
 extension ClientError {

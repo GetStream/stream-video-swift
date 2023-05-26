@@ -107,7 +107,7 @@ class EventsController {
 public struct CustomEvent {
     public let callCid: String
     public let createdAt: Date
-    public let customData: [String: Any]
+    public let customData: [String: RawJSON]
     public let type: String
     public let user: User
 }
@@ -115,7 +115,7 @@ public struct CustomEvent {
 public struct CallReaction {
     public let callCid: String
     public let createdAt: Date
-    public let customData: [String: Any]
+    public let customData: [String: RawJSON]
     public let type: String
     public let emojiCode: String?
     public let user: User
@@ -126,7 +126,7 @@ extension CustomVideoEvent {
         CustomEvent(
             callCid: callCid,
             createdAt: createdAt,
-            customData: mapped,
+            customData: convert(custom),
             type: type,
             user: User(
                 id: user.id,
@@ -135,14 +135,6 @@ extension CustomVideoEvent {
             )
         )
     }
-    
-    var mapped: [String: Any] {
-        var result = [String: Any]()
-        for (key, value) in custom {
-            result[key] = value.value
-        }
-        return result
-    }
 }
 
 extension CallReactionEvent {
@@ -150,7 +142,7 @@ extension CallReactionEvent {
         CallReaction(
             callCid: callCid,
             createdAt: createdAt,
-            customData: mapped,
+            customData: convert(reaction.custom),
             type: reaction.type,
             emojiCode: reaction.emojiCode,
             user: User(
@@ -159,15 +151,5 @@ extension CallReactionEvent {
                 imageURL: URL(string: reaction.user.image ?? "")
             )
         )
-    }
-    
-    var mapped: [String: Any] {
-        var result = [String: Any]()
-        if let custom = reaction.custom {
-            for (key, value) in custom {
-                result[key] = value.value
-            }
-        }
-        return result
     }
 }

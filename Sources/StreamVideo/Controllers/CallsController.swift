@@ -235,10 +235,6 @@ extension CallResponse {
         members: [MemberResponse],
         blockedUsers: [UserResponse]
     ) -> CallData {
-        var result = [String: Any]()
-        for (key, value) in custom {
-            result[key] = value.value
-        }
         return CallData(
             callCid: cid,
             members: members.map { $0.user.toUser },
@@ -251,7 +247,7 @@ extension CallResponse {
             updatedAt: updatedAt,
             hlsPlaylistUrl: hlsPlaylistUrl,
             autoRejectTimeout: settings.ring.autoCancelTimeoutMs,
-            customData: result,
+            customData: convert(custom),
             session: session?.toCallSession(),
             createdBy: createdBy.toUser
         )
