@@ -180,7 +180,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             block: { [weak self] _ in
                 guard let self = self else { return }
                 log.debug("Detected ringing timeout, hanging up...")
-                endCurrentCall()
+                self.endCurrentCall()
             }
         )
     }
