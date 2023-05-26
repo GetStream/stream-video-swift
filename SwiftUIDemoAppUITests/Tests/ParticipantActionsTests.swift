@@ -116,8 +116,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func testParticipantRecordsCall() {
+    func testParticipantRecordsCall() throws {
         linkToScenario(withId: 1769)
+        
+        throw XCTSkip("Recording the call is broken on the backend")
                 
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
