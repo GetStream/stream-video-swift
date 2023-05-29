@@ -111,11 +111,6 @@ struct StreamCallingView: View {
                 secondaryButton: .cancel()
             )
         }
-        .observeAndHandleDeeplinks(
-            viewModel,
-            deeplinkInfoPublisher: appState.$deeplinkInfo.eraseToAnyPublisher(),
-            resetAppState: { appState.deeplinkInfo = .empty }
-        )
     }
 }
 

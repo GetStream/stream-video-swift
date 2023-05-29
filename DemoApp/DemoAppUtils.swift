@@ -17,25 +17,3 @@ extension URL {
         }
     }
 }
-
-extension View {
-
-    func observeAndHandleDeeplinks(
-        _ viewModel: CallViewModel,
-        deeplinkInfoPublisher: AnyPublisher<DeeplinkInfo, Never>,
-        resetAppState: @escaping () -> Void
-    ) -> some View {
-        self.onReceive(deeplinkInfoPublisher) { deeplinkInfo in
-            if deeplinkInfo != .empty {
-                /// https://github.com/apple/swift/pull/60688
-                Task { @MainActor in
-                    viewModel.joinCall(
-                        callId: deeplinkInfo.callId,
-                        type: deeplinkInfo.callType
-                    )
-                }
-                resetAppState()
-            }
-        }
-    }
-}

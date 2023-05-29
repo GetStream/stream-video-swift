@@ -120,11 +120,6 @@ struct HomeView: View {
         .onReceive(appState.$activeCall) { call in
             viewModel.setActiveCall(call)
         }
-        .observeAndHandleDeeplinks(
-            viewModel,
-            deeplinkInfoPublisher: appState.$deeplinkInfo.eraseToAnyPublisher(),
-            resetAppState: { appState.deeplinkInfo = .empty }
-        )
     }
     
     private var makeCallEnabled: Bool {

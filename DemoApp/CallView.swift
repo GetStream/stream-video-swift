@@ -34,6 +34,15 @@ struct CallView: View {
                     }
                 }
             )
+            .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
+                if deeplinkInfo != .empty {
+                    viewModel.joinCall(
+                        callId: deeplinkInfo.callId,
+                        type: deeplinkInfo.callType
+                    )
+                    appState.deeplinkInfo = .empty
+                }
+            }
     }
 }
 

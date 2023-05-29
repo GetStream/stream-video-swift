@@ -35,8 +35,12 @@ struct StreamVideoSwiftUIApp: App {
                 }
             }
             .onOpenURL { url in
-                DeeplinkAdapter(baseURL: Config.baseURL)
-                    .handle(url: url, completion: handle)
+                guard
+                    let (deeplinkInfo, user) = DeeplinkAdapter(baseURL: Config.baseURL).handle(url: url)
+                else {
+                    return
+                }
+                handle(deeplinkInfo: deeplinkInfo, user: user)
             }
         }
     }

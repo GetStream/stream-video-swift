@@ -22,9 +22,9 @@ struct DeeplinkAdapter {
         url.absoluteString.contains(baseURL.absoluteString)
     }
 
-    func handle(url: URL, completion: (DeeplinkInfo, User) -> Void) {
+    func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User)? {
         guard canHandle(url: url) else {
-            return
+            return nil
         }
 
         let callId = url.lastPathComponent
@@ -34,9 +34,9 @@ struct DeeplinkAdapter {
             let userId = url.queryParameters["user_id"],
             let user = User.builtInUsers.filter({ $0.id == userId }).first
         else {
-            return
+            return nil
         }
 
-        completion(DeeplinkInfo(callId: callId, callType: callType), user)
+        return (DeeplinkInfo(callId: callId, callType: callType), user)
     }
 }
