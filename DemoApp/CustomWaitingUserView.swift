@@ -78,7 +78,11 @@ struct CustomWaitingLocalUserView: View {
     }
     
     private var callLink: String {
-        "https://gtstrm.io/call/\(callType)/\(callId)"
+        Config.baseURL
+            .appendingPathComponent("call")
+            .appendingPathComponent(callType)
+            .appendingPathComponent(callId)
+            .absoluteString
     }
     
     private var callType: String {

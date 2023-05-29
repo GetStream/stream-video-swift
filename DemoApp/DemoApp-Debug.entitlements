@@ -6,7 +6,7 @@
 	<string>development</string>
 	<key>com.apple.developer.associated-domains</key>
 	<array>
-		<string>applinks:getstream.github.io</string>
+		<string>applinks:staging.getstream.io</string>
 	</array>
 </dict>
 </plist>

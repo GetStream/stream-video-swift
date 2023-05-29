@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
+		403BE0FF2A24C68E00988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
+		403BE1012A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */; };
 		436424A42A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436424992A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift */; };
 		436424A52A118E0300CB4A7B /* EventNotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4364249A2A118E0300CB4A7B /* EventNotificationSettings.swift */; };
 		436424A62A118E0300CB4A7B /* NotificationSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4364249B2A118E0300CB4A7B /* NotificationSettingsRequest.swift */; };
@@ -671,6 +674,8 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
+		403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamVideoSwiftUIApp+Sentry.swift"; sourceTree = "<group>"; };
 		436424992A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallSessionParticipantJoinedEvent.swift; sourceTree = "<group>"; };
 		4364249A2A118E0300CB4A7B /* EventNotificationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventNotificationSettings.swift; sourceTree = "<group>"; };
 		4364249B2A118E0300CB4A7B /* NotificationSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationSettingsRequest.swift; sourceTree = "<group>"; };
@@ -1485,10 +1490,12 @@
 				8403C0B02897E7E70092BD43 /* DemoApp.entitlements */,
 				8472604C2A0BB1FA00713E30 /* DemoApp-Debug.entitlements */,
 				842D8BD52865B37800801910 /* StreamVideoSwiftUIApp.swift */,
+				403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */,
 				842D3B5B29F6A4A10051698A /* AppDelegate.swift */,
 				84ED240C286C9515002A3186 /* CallView.swift */,
 				8456E6C5287EB55F004E180E /* AppState.swift */,
 				84093810288A90390089A35B /* HomeView.swift */,
+				403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */,
 				847B47AC2A210C6A000714CE /* StreamCallingView.swift */,
 				844299422942484A0037232A /* DemoUsers.swift */,
 				8456E6C1287EB405004E180E /* LoginView.swift */,
@@ -2747,7 +2754,9 @@
 				847B47B32A23F8C6000714CE /* ShareButtonView.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */,
+				403BE1012A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift in Sources */,
 				842D3B5C29F6A4A10051698A /* AppDelegate.swift in Sources */,
+				403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */,
 				847B47AD2A210C6A000714CE /* StreamCallingView.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
@@ -2788,6 +2797,7 @@
 				84BD8FF729B0F964002CFBA0 /* LoginViewModel.swift in Sources */,
 				8493226E2909235C0013C029 /* AddUserView.swift in Sources */,
 				844299442942484A0037232A /* DemoUsers.swift in Sources */,
+				403BE0FF2A24C68E00988F65 /* DeeplinkAdapter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

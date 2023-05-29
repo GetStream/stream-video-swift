@@ -13,9 +13,9 @@ struct CallView: View {
     
     @ObservedObject var appState = AppState.shared
     
-    init(callId: String? = nil) {
+    init(callId: String) {
         _viewModel = StateObject(wrappedValue: CallViewModel())
-        if let callId = callId, viewModel.callingState == .idle {
+        if !callId.isEmpty, viewModel.callingState == .idle {
             viewModel.joinCall(callId: callId, type: .default)
         }
     }

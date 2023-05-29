@@ -5,7 +5,6 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
-import Sentry
 
 @main
 struct StreamVideoSwiftUIApp: App {
@@ -17,7 +16,7 @@ struct StreamVideoSwiftUIApp: App {
     @ObservedObject var appState = AppState.shared
     
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
-            
+
     init() {
         checkLoggedInUser()
         LogConfig.level = .debug
@@ -28,7 +27,7 @@ struct StreamVideoSwiftUIApp: App {
         WindowGroup {
             ZStack {
                 if appState.userState == .loggedIn {
-                    CallView(callId: appState.deeplinkCallId)
+                    CallView(callId: appState.deeplinkInfo.callId)
                 } else {
                     LoginView() { user in
                         handleSelectedUser(user)
@@ -36,27 +35,19 @@ struct StreamVideoSwiftUIApp: App {
                 }
             }
             .onOpenURL { url in
-                handle(url: url)
+                DeeplinkAdapter(baseURL: Config.baseURL)
+                    .handle(url: url, completion: handle)
             }
         }
     }
     
-    private func handle(url: URL) {
-        let queryParams = url.queryParameters
-        let users = User.builtInUsers
-        guard let userId = queryParams["user_id"],
-              let callId = queryParams["call_id"] else {
-            return
-        }
-        let user = users.filter { $0.id == userId }.first
-        if let user = user {
-            appState.deeplinkCallId = callId
-            appState.userState = .loggedIn
-            Task {
-                let token = try await TokenService.shared.fetchToken(for: user.id)
-                let credentials = UserCredentials(userInfo: user, token: token)
-                handleSelectedUser(credentials, callId: callId)
-            }
+    private func handle(deeplinkInfo: DeeplinkInfo, user: User) {
+        appState.deeplinkInfo = deeplinkInfo
+        appState.userState = .loggedIn
+        Task {
+            let token = try await TokenService.shared.fetchToken(for: user.id)
+            let credentials = UserCredentials(userInfo: user, token: token)
+            handleSelectedUser(credentials, callId: deeplinkInfo.callId)
         }
     }
     
@@ -91,17 +82,4 @@ struct StreamVideoSwiftUIApp: App {
             handleSelectedUser(user)
         }
     }
-    
-    private func configureSentry() {
-    #if RELEASE
-        // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
-        SentrySDK.start { options in
-            options.dsn = "https://88ee362df1bd400094bfbb587c10ee3b@o14368.ingest.sentry.io/4504356153393152"
-            options.debug = true
-            options.tracesSampleRate = 1.0
-            options.enableAppHangTracking = true
-        }
-    #endif
-    }
-    
 }
