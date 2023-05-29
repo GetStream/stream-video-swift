@@ -23,7 +23,7 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             if shouldShowCallView {
-                if viewModel.participants.count > 1 {
+                if viewModel.callParticipants.count > 1 {
                     if viewModel.isMinimized {
                         MinimizedCallView(viewModel: viewModel)
                     } else {
