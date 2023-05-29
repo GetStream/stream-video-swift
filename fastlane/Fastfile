@@ -18,14 +18,13 @@ before_all do |lane|
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
     xcodes(version: xcode_version, select_for_current_build_only: true) unless [:allure_launch].include?(lane)
+  elsif lane == :test_e2e
+    clean_up_ports_for_e2e_test
   end
 end
 
 after_all do |lane|
-  if lane == :test_e2e
-    stop_sinatra
-    stop_video_buddy
-  end
+  clean_up_ports_for_e2e_test if lane == :test_e2e
 end
 
 desc "Release a new version"
@@ -219,6 +218,11 @@ private_lane :parallelize_tests_on_ci do |options|
       only_testing: only_testing_batch
     )
   )
+end
+
+private_lane :clean_up_ports_for_e2e_test do
+  stop_sinatra
+  stop_video_buddy
 end
 
 private_lane :update_testplan_on_ci do |options|

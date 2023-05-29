@@ -33,6 +33,11 @@ enum CallPage {
         }
     }
     
+    enum ParticipantMenu {
+        static var participantCount: XCUIElement { app.scrollViews["participantsScrollView"] }
+        static var closeButton: XCUIElement { app.buttons["Close"] }
+    }
+    
     enum ConnectingView {
         static var callConnectingView: XCUIElement { app.staticTexts["callConnectingView"] }
         static var callingIndicator: XCUIElement { app.otherElements["callingIndicator"] }
