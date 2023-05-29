@@ -42,11 +42,11 @@ struct CallHomeView: View {
     @ObservedObject var viewModel: CallViewModel
     
     var body: some View {
-        #if STREAM_TESTS
-        HomeView(viewModel: viewModel)
-        #else
-        StreamCallingView(viewModel: viewModel)
-        #endif
+        if ProcessInfo.processInfo.arguments.contains("STREAM_TESTS") {
+            HomeView(viewModel: viewModel)
+        } else {
+            StreamCallingView(viewModel: viewModel)
+        }
     }
     
 }

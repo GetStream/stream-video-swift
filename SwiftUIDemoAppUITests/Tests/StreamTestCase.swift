@@ -19,6 +19,8 @@ class StreamTestCase: XCTestCase {
     override func setUpWithError() throws {
         try super.setUpWithError()
         continueAfterFailure = false
+        
+        setLaunchArguments()
         alertHandler()
         ipadSetup()
         startVideo()
@@ -45,6 +47,10 @@ extension StreamTestCase {
 }
 
 extension StreamTestCase {
+    
+    private func setLaunchArguments() {
+        app.setLaunchArguments(.streamTests)
+    }
 
     private func attachElementTree() {
         let attachment = XCTAttachment(string: app.debugDescription)
