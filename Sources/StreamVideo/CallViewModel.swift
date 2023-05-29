@@ -52,9 +52,6 @@ open class CallViewModel: ObservableObject {
     /// Tracks the current state of a call. It should be used to show different UI in your views.
     @Published public var callingState: CallingState = .idle {
         didSet {
-            if callingState == .idle {
-                edgeServer = nil
-            }
             handleRingingEvents()
         }
     }
@@ -111,9 +108,6 @@ open class CallViewModel: ObservableObject {
     
     /// Whether the UI elements, such as the call controls should be hidden (for example while screensharing).
     @Published public var hideUIElements = false
-    
-    /// The current edge server. Can be used in the lobby view.
-    @Published public private(set) var edgeServer: EdgeServer?
     
     /// A list of the blocked users in the call.
     @Published public var blockedUsers = [User]()
@@ -307,10 +301,6 @@ open class CallViewModel: ObservableObject {
     public func enterLobby(callId: String, type: String, members: [User]) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: members)
         callingState = .lobby(lobbyInfo)
-        Task {
-            let call = streamVideo.call(callType: type, callId: callId, members: members)
-            self.edgeServer = try await call.selectEdgeServer(members: members)
-        }
     }
     
     /// Joins a call from the lobby. `enterLobby` needs to be called first.
@@ -319,15 +309,15 @@ open class CallViewModel: ObservableObject {
     ///  - type: the type of the call.
     ///  - members: list of participants that are part of the call.
     public func joinCallFromLobby(callId: String, type: String, members: [User]) throws {
-        guard let edgeServer = edgeServer else {
-            throw ClientError.Unexpected("Edge server not available")
+        guard case .lobby(_) = callingState else {
+            throw ClientError.Unexpected()
         }
         
         Task {
             do {
                 log.debug("Starting call")
-                let call = streamVideo.call(callType: type, callId: callId, members: members)
-                try await call.join(on: edgeServer, callSettings: callSettings)
+                let call = streamVideo.call(callType: type, callId: callId)
+                try await call.join(callSettings: callSettings)
                 save(call: call)
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")

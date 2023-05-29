@@ -96,23 +96,6 @@ public class Call: ObservableObject, @unchecked Sendable {
         )
     }
     
-    /// Joins a call on the specified `edgeServer`.
-    /// - Parameters:
-    ///   - edgeServer: The `EdgeServer` to join the call on.
-    /// - Throws: An error if the call could not be joined.
-    public func join(
-        on edgeServer: EdgeServer,
-        callSettings: CallSettings = CallSettings()
-    ) async throws {
-        try await callController.joinCall(
-            on: edgeServer,
-            callType: callType,
-            callId: callId,
-            callSettings: callSettings,
-            videoOptions: videoOptions
-        )
-    }
-    
     /// Gets the call on the backend with the given parameters.
     ///
     /// - Parameters:
@@ -175,20 +158,6 @@ public class Call: ObservableObject, @unchecked Sendable {
             membersLimit: membersLimit,
             ring: ring,
             notify: notify
-        )
-    }
-
-    /// Selects an `EdgeServer` for a call with the specified `participants`.
-    /// - Parameters:
-    ///   - members: An array of `User` instances representing the members in the call.
-    /// - Returns: An `EdgeServer` instance representing the selected server.
-    /// - Throws: An error if an `EdgeServer` could not be selected.
-    public func selectEdgeServer(
-        members: [User]
-    ) async throws -> EdgeServer {
-        try await callController.selectEdgeServer(
-            videoOptions: VideoOptions(),
-            members: members
         )
     }
     

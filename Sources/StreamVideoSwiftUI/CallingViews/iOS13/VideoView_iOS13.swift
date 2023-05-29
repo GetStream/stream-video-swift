@@ -23,14 +23,14 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             if shouldShowCallView {
-                if !viewModel.participants.isEmpty {
+                if viewModel.participants.count > 1 {
                     if viewModel.isMinimized {
                         MinimizedCallView(viewModel: viewModel)
                     } else {
                         viewFactory.makeCallView(viewModel: viewModel)
                     }
                 } else {
-                    WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
+                    viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
                 }
             } else if case let .lobby(lobbyInfo) = viewModel.callingState {
                 viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)

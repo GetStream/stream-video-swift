@@ -32,6 +32,12 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the incoming call slot.
     func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> IncomingCallViewType
     
+    associatedtype WaitingLocalUserViewType: View
+    /// Creates the waiting local user view, shown when the local participant is the only one on the call.
+    /// - Parameter viewModel: The view model used for the call.
+    /// - Returns: view shown in the waiting local user view.
+    func makeWaitingLocalUserView(viewModel: CallViewModel) -> WaitingLocalUserViewType
+    
     associatedtype ParticipantsViewType: View = VideoParticipantsView<Self>
     /// Creates the video participants view, shown during a call.
     /// - Parameters:
@@ -164,6 +170,10 @@ extension ViewFactory {
                 viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
             })
         }
+    }
+    
+    public func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
+        WaitingLocalUserView(viewModel: viewModel, viewFactory: self)
     }
     
     public func makeVideoParticipantsView(

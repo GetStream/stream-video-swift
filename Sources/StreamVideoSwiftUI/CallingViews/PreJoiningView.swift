@@ -23,7 +23,7 @@ public struct LobbyView: View {
         callType: String,
         callParticipants: [User]
     ) {
-        _callViewModel = ObservedObject(wrappedValue: callViewModel)
+        self.callViewModel = callViewModel
         self.callId = callId
         self.callType = callType
         self.callParticipants = callParticipants
@@ -76,12 +76,6 @@ struct LobbyContentView: View {
                         availableSize: reader.size
                     )
                     
-                    if viewModel.connectionQuality == .poor {
-                        Text(L10n.WaitingRoom.connectionIssues)
-                            .font(.caption)
-                            .foregroundColor(colors.text)
-                    }
-                    
                     if !microphoneChecker.hasDecibelValues {
                         Text(L10n.WaitingRoom.Mic.notWorking)
                             .font(.caption)
@@ -112,14 +106,11 @@ struct LobbyContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         }
-        .onReceive(callViewModel.$edgeServer, perform: { edgeServer in
-            viewModel.latencyURL = edgeServer?.latencyURL
-        })
         .onAppear {
             viewModel.startCamera(front: true)
         }
         .onDisappear {
-            viewModel.stopLatencyChecks()
+            viewModel.stopCamera()
         }
     }
 }
@@ -173,7 +164,6 @@ struct CameraCheckView: View {
                     )
                     .accessibility(identifier: "microphoneCheckView")
                     Spacer()
-                    ConnectionQualityIndicator(connectionQuality: viewModel.connectionQuality)
                 }
                 .padding()
             }

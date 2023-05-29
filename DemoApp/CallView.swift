@@ -21,8 +21,8 @@ struct CallView: View {
     }
         
     var body: some View {
-        HomeView(viewModel: viewModel)
-            .modifier(CallModifier(viewModel: viewModel))
+        CallHomeView(viewModel: viewModel)
+            .modifier(CallModifier(viewFactory: DemoAppViewFactory.shared, viewModel: viewModel))
             .onContinueUserActivity(NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
                     let interaction = userActivity.interaction
                     if let callIntent = interaction?.intent as? INStartCallIntent {
@@ -35,4 +35,18 @@ struct CallView: View {
                 }
             )
     }
+}
+
+struct CallHomeView: View {
+    
+    @ObservedObject var viewModel: CallViewModel
+    
+    var body: some View {
+        #if STREAM_TESTS
+        HomeView(viewModel: viewModel)
+        #else
+        StreamCallingView(viewModel: viewModel)
+        #endif
+    }
+    
 }

@@ -41,38 +41,12 @@ class CallController_Mock: CallController {
         }
     }
     
-    override func joinCall(
-        on edgeServer: EdgeServer,
-        callType: String,
-        callId: String,
-        callSettings: CallSettings,
-        videoOptions: VideoOptions
-    ) async throws {
-        webRTCClient.onParticipantsUpdated = { [weak self] participants in
-            self?.call?.participants = participants
-        }
-    }
-    
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
     
     override func changeVideoState(isEnabled: Bool) async throws { /* no op */ }
     
     override func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
         completion()
-    }
-    
-    override func selectEdgeServer(
-        videoOptions: VideoOptions,
-        members: [User]
-    ) async throws -> EdgeServer {
-        EdgeServer(
-            url: "localhost",
-            webSocketURL: "wss://localhost/ws",
-            token: "token",
-            iceServers: [],
-            callSettings: makeCallSettingsInfo(callId: "test", callType: .default),
-            latencyURL: nil
-        )
     }
     
     // MARK: - private

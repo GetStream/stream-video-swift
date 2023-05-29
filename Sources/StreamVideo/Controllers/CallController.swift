@@ -89,51 +89,6 @@ class CallController {
         )
     }
     
-    /// Joins a call on the specified `edgeServer` with the given `callType`, `callId`, `callSettings`, and `videoOptions`.
-    /// - Parameters:
-    ///   - edgeServer: The `EdgeServer` to join the call on.
-    ///   - callType: The type of the call.
-    ///   - callId: The unique identifier for the call.
-    ///   - callSettings: The settings to use for the call.
-    ///   - videoOptions: The `VideoOptions` for the call.
-    /// - Throws: An error if the call could not be joined.
-    func joinCall(
-        on edgeServer: EdgeServer,
-        callType: String,
-        callId: String,
-        callSettings: CallSettings,
-        videoOptions: VideoOptions
-    ) async throws {
-        try await connectToEdge(
-            edgeServer,
-            callType: callType,
-            callId: callId,
-            callSettings: callSettings,
-            videoOptions: videoOptions,
-            ring: false
-        )
-    }
-
-    /// Selects an `EdgeServer` for a call with the specified `videoOptions` and `participants`.
-    /// - Parameters:
-    ///   - videoOptions: The `VideoOptions` for the call.
-    ///   - members: An array of `User` instances representing the members in the call.
-    /// - Returns: An `EdgeServer` instance representing the selected server.
-    /// - Throws: An error if an `EdgeServer` could not be selected.
-    func selectEdgeServer(
-        videoOptions: VideoOptions,
-        members: [User]
-    ) async throws -> EdgeServer {
-        try await callCoordinatorController.joinCall(
-            callType: callType,
-            callId: callId,
-            videoOptions: videoOptions,
-            members: members,
-            ring: false,
-            notify: false
-        )
-    }
-    
     /// Gets the call on the backend with the given parameters.
     ///
     /// - Parameters:

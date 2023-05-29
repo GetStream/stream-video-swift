@@ -44,17 +44,15 @@ public struct CallContainer<Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             if shouldShowCallView {
-                if !viewModel.participants.isEmpty {
+                if viewModel.participants.count > 1 {
                     if viewModel.isMinimized {
                         MinimizedCallView(viewModel: viewModel)
                     } else {
                         viewFactory.makeCallView(viewModel: viewModel)
                     }
                 } else {
-                    WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
+                    viewFactory.makeWaitingLocalUserView(viewModel: viewModel)
                 }
-            } else if case let .lobby(lobbyInfo) = viewModel.callingState {
-                viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)
             } else if viewModel.callingState == .reconnecting {
                 viewFactory.makeReconnectionView(viewModel: viewModel)
             }
@@ -78,6 +76,8 @@ public struct CallContainer<Factory: ViewFactory>: View {
             viewFactory.makeOutgoingCallView(viewModel: viewModel)
         } else if viewModel.callingState == .joining {
             viewFactory.makeJoiningCallView(viewModel: viewModel)
+        } else if case let .lobby(lobbyInfo) = viewModel.callingState {
+            viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)
         } else {
             EmptyView()
         }
@@ -85,7 +85,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     
     private var shouldShowCallView: Bool {
         switch viewModel.callingState {
-        case .outgoing, .incoming(_), .inCall, .joining:
+        case .outgoing, .incoming(_), .inCall, .joining, .lobby(_):
             return true
         default:
             return false
@@ -94,9 +94,14 @@ public struct CallContainer<Factory: ViewFactory>: View {
 }
 
 public struct WaitingLocalUserView<Factory: ViewFactory>: View {
-    
+            
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory
+    
+    public init(viewModel: CallViewModel, viewFactory: Factory) {
+        self.viewModel = viewModel
+        self.viewFactory = viewFactory
+    }
     
     public var body: some View {
         ZStack {
