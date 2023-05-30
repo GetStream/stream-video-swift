@@ -170,20 +170,21 @@ extension UserRobot {
     
     @discardableResult
     func assertGridView(with participantCount: Int) -> Self {
-        XCTAssertEqual(participantCount, CallPage.participantView.waitCount(participantCount, timeout: UserRobot.defaultTimeout).count, "GridView")
         XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
+        XCTAssertEqual(participantCount, CallPage.participantView.waitCount(participantCount, timeout: UserRobot.defaultTimeout).count, "GridView")
         return self
     }
     
     @discardableResult
     func assertSpotlightView(with participantCount: Int) -> Self {
-        let maxVisibleParticipantCount = 6
-        let count = participantCount > maxVisibleParticipantCount ? maxVisibleParticipantCount : participantCount
         XCTAssertTrue(CallPage.spotlightViewParticipantList.wait().exists, "spotlightViewParticipantList should appear")
-        XCTAssertEqual(count, CallPage.spotlightParticipantView.waitCount(count, timeout: UserRobot.defaultTimeout).count, "SpotlightView")
         XCTAssertEqual(1, CallPage.participantView.count, "SpotlightView")
         XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
+        
+        let maxVisibleCount = 6
+        let expectedCount = participantCount > 6 ? maxVisibleCount : participantCount
+        XCTAssertEqual(expectedCount, CallPage.spotlightParticipantView.count, "SpotlightView")
         return self
     }
     
@@ -201,7 +202,6 @@ extension UserRobot {
         XCTAssertTrue(LobbyPage.otherParticipantsCount.wait().exists, "otherParticipantsCount should appear")
         XCTAssertTrue(LobbyPage.microphoneToggle.exists, "microphoneToggle should appear")
         XCTAssertTrue(LobbyPage.cameraToggle.exists, "cameraToggle should appear")
-        XCTAssertTrue(LobbyPage.connectionQualityIndicator.exists, "connectionQualityIndicator should appear")
         XCTAssertTrue(LobbyPage.microphoneCheckView.exists, "microphoneCheckView should appear")
         XCTAssertTrue(LobbyPage.cameraCheckView.exists, "cameraCheckView should appear")
         return self

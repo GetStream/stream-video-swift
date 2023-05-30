@@ -34,8 +34,8 @@ final class CallViewsTests: StreamTestCase {
                 .setCallDuration(callDuration)
                 .joinCall(callId, options: [.withCamera, .withMicrophone])
         }
-        WHEN("user sleeps for \(participants) seconds") {
-            userRobot.waitForParticipantsToJoin(participants)
+        WHEN("user waits for \(participants) to join") {
+            userRobot.waitForParticipantsToJoin(participants, timeout: callDuration)
         }
         for view in allViews {
             AND("user turns on \(view.rawValue) view") {
@@ -386,7 +386,6 @@ final class CallViewsTests: StreamTestCase {
         }
         AND("user can scroll the list and see all participants") {
             userRobot
-                .waitForDisappearanceOfParticipantEventLabel()
                 .scrollSpotlightParticipantList(to: .right, times: 2)
                 .assertSpotlightViewParticipantListVisibity(percent: 100)
         }

@@ -164,6 +164,8 @@ struct CallParticipantsViewContainer: View {
                     }
                 }
             })
+            .accessibility(identifier: "participantsScrollView")
+            .streamAccessibility(value: "\(participants.count)")
         }
         .frame(height: inviteParticipantsShown ? maxHeight : popupHeight)
         .navigationViewStyle(.stack)

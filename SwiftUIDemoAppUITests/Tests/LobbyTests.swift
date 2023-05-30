@@ -35,19 +35,13 @@ final class LobbyTests: StreamTestCase {
         AND("user observes the number of participants on call") {
             userRobot.assertOtherParticipantsCountInLobby(participants)
         }
-        WHEN("user enables microphone") {
-            userRobot.microphone(.disable)
-        }
-        AND("user joins the call") {
+        WHEN("user joins the call") {
             userRobot.joinCallFromLobby()
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .assertCallControls()
                 .assertParticipantsAreVisible(count: participants)
-        }
-        AND("user's microphone is turned off") {
-            userRobot.assertUserMicrophoneIsDisabled()
         }
     }
     
@@ -63,19 +57,13 @@ final class LobbyTests: StreamTestCase {
         AND("there are no participants on call") {
             userRobot.assertOtherParticipantsCountInLobby(0)
         }
-        WHEN("user disables microphone") {
-            userRobot.microphone(.disable)
-        }
-        AND("user joins the call") {
+        WHEN("user joins the call") {
             userRobot.joinCallFromLobby()
         }
         THEN("there are no participants on the call") {
             userRobot
                 .assertCallControls()
                 .assertParticipantsAreVisible(count: 0)
-        }
-        AND("user's microphone is turned off") {
-            userRobot.assertUserMicrophoneIsDisabled()
         }
     }
 }

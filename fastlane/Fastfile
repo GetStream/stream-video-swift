@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '14.2'
+xcode_version = ENV['XCODE_VERSION'] || '14.3'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
@@ -18,18 +18,18 @@ before_all do |lane|
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
     xcodes(version: xcode_version, select_for_current_build_only: true) unless [:allure_launch].include?(lane)
+  elsif lane == :test_e2e
+    clean_up_ports_for_e2e_test
   end
 end
 
 after_all do |lane|
-  if lane == :test_e2e
-    stop_sinatra
-    stop_video_buddy
-  end
+  clean_up_ports_for_e2e_test if lane == :test_e2e
 end
 
 desc "Release a new version"
 lane :release do |options|
+  pod_lint
   version_number = release_ios_sdk(
     version: options[:version],
     bump_type: options[:type],
@@ -46,6 +46,11 @@ lane :publish_release do |options|
     sdk_names: sdk_names,
     github_repo: github_repo
   )
+end
+
+lane :pod_lint do
+  # We don't lint StreamVideoSwiftUI and StreamVideoUIKit podspecs since pod lints them against StreamVideo's remote version instead of local one
+  pod_lib_lint(podspec: 'StreamVideo.podspec', allow_warnings: true)
 end
 
 lane :match_me do |options|
@@ -213,6 +218,11 @@ private_lane :parallelize_tests_on_ci do |options|
       only_testing: only_testing_batch
     )
   )
+end
+
+private_lane :clean_up_ports_for_e2e_test do
+  stop_sinatra
+  stop_video_buddy
 end
 
 private_lane :update_testplan_on_ci do |options|
