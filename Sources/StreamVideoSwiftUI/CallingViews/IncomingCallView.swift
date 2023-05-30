@@ -74,13 +74,13 @@ struct IncomingCallViewContent: View {
             } else {
                 AnimatingParticipantView(
                     participant: callParticipants.first,
-                    caller: callInfo.callerId
+                    caller: callInfo.caller.id
                 )
             }
             
             CallingParticipantsView(
                 participants: callParticipants,
-                caller: callInfo.callerId
+                caller: callInfo.caller.id
             )
             .padding()
             

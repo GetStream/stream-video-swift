@@ -13,7 +13,7 @@ public class IncomingViewModel: ObservableObject {
     
     public private(set) var callInfo: IncomingCall
     
-    @Published var hideIncomingCallScreen = false
+    @Published public var hideIncomingCallScreen = false
     
     var callParticipants: [User] {
         callInfo.participants.filter { $0.id != streamVideo.user.id }

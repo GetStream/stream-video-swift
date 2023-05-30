@@ -16,11 +16,11 @@ class CallsMiddleware: EventMiddleware {
             log.debug("Received ring event \(ringEvent)")
             let cId = ringEvent.callCid
             let id = cId.components(separatedBy: ":").last ?? cId
-            let userId = ringEvent.call.createdBy.id
+            let caller = ringEvent.call.createdBy.toUser
             let type = ringEvent.call.type
             let incomingCall = IncomingCall(
                 id: id,
-                callerId: userId,
+                caller: caller,
                 type: type,
                 participants: ringEvent.members.map { $0.user.toUser },
                 timeout: TimeInterval(ringEvent.call.settings.ring.autoCancelTimeoutMs / 1000)

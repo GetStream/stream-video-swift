@@ -2,3 +2,22 @@
 title: Connection Unstable
 description: Connection Unstable
 ---
+
+As described [here](../network-quality-indicator), you can listen to the participants' connection quality and show a network quality indicator. Additionally, you can use this information to notify the current user (in case their connection is bad). Depending on the where you want to place the warning, you can choose to customize one of the [view slots available](../../guides/view-slots), and add the indicator as an overlay:
+
+```swift
+YourView()
+    .overlay(
+        participant.connectionQuality == .poor ? Text("Your network connection is bad.") : nil
+    )
+```
+
+When the connection is unstable and it drops, we try to reconnect to the call. In that case, the `callingState` from the `CallViewModel` changes to `reconnecting` and we present a view that reflects this state.
+
+If you want to customize the default reconnection view, you should implement the method `makeReconnectionView` in the `ViewFactory`:
+
+```swift
+func makeReconnectionView(viewModel: CallViewModel) -> some View {
+    ReconnectionView(viewModel: viewModel, viewFactory: self)
+}
+```

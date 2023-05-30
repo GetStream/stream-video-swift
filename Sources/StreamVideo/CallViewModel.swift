@@ -513,7 +513,7 @@ open class CallViewModel: ObservableObject {
         Task {
             for await callEvent in streamVideo.callEvents() {
                 if case let .incoming(incomingCall) = callEvent,
-                   incomingCall.callerId != streamVideo.user.id {
+                   incomingCall.caller.id != streamVideo.user.id {
                     let isAppActive = UIApplication.shared.applicationState == .active
                     // TODO: implement holding a call.
                     if callingState == .idle && isAppActive {

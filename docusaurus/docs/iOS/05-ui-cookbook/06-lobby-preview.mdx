@@ -79,10 +79,14 @@ struct LobbyContentView: View {
             ZStack {
                 VStack {
                     Spacer()
-                    Text("Waiting room")
+                    Text(L10n.WaitingRoom.title)
                         .font(.title)
                         .foregroundColor(colors.text)
                         .bold()
+                    
+                    Text(L10n.WaitingRoom.subtitle)
+                        .font(.body)
+                        .foregroundColor(Color(colors.textLowEmphasis))
                     
                     CameraCheckView(
                         viewModel: viewModel,
@@ -91,14 +95,8 @@ struct LobbyContentView: View {
                         availableSize: reader.size
                     )
                     
-                    if viewModel.connectionQuality == .poor {
-                        Text("Please check your internet connection.")
-                            .font(.caption)
-                            .foregroundColor(colors.text)
-                    }
-                    
                     if !microphoneChecker.hasDecibelValues {
-                        Text("Your mic doesn't seem to be working.")
+                        Text(L10n.WaitingRoom.Mic.notWorking)
                             .font(.caption)
                             .foregroundColor(colors.text)
                     }
@@ -127,14 +125,11 @@ struct LobbyContentView: View {
             .frame(maxWidth: .infinity, maxHeight: .infinity)
             .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         }
-        .onReceive(callViewModel.$edgeServer, perform: { edgeServer in
-            viewModel.latencyURL = edgeServer?.latencyURL
-        })
         .onAppear {
             viewModel.startCamera(front: true)
         }
         .onDisappear {
-            viewModel.stopLatencyChecks()
+            viewModel.stopCamera()
         }
     }
 }

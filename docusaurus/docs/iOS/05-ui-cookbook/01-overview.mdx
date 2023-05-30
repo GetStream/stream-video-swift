@@ -3,6 +3,80 @@ title: Overview
 description: Overview of the UI cookbook
 ---
 
-### Introduction
+## UI Cookbook
 
-Examples of how to build your own custom UI on top of our low level client. 
+export const CookbookCard = ({title, children}) => (
+  <li
+    style={{
+      backgroundColor: '#d3d3d3',
+      borderRadius: '2px',
+      color: '#d3d3d3',
+      width: '250px',
+      height: '200px',
+      float: 'left',
+      padding: '0.5rem',
+      'list-style-type': 'none',
+    }}>
+    <h4>{title}</h4>
+    {children}
+  </li>
+);
+
+
+This cookbook aims to show you how to build your own UI elements for video calling.
+
+### Video Calls & Ringing
+
+<div>
+    <ol style={{display: 'inline-block'}}>
+        <CookbookCard title="Replacing Call Controls">
+            <img src={require('../assets/replacing-call-controls.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Custom label &amp; indicators">
+            <img src={require('../assets/removing-label-and-indicators.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Custom Video Layout">
+            <img src={require('../assets/custom-video-layout.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Incoming Call">
+            <img src={require('../assets/incoming-call.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Lobby/Preview">
+            <img src={require('../assets/lobby-preview.png').default} />
+        </CookbookCard>
+        <CookbookCard title="No-video fallback">
+            <img src={require('../assets/no-video-fallback-avatar.png').default} />
+        </CookbookCard>
+    </ol>
+</div>
+
+### Audio rooms & Livestreams
+
+<div>
+    <ol style={{display: 'inline-block'}}>
+        <CookbookCard title="Permission Requests">
+            <img src={require('../assets/permission-requests.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Audio volume Indicator">
+            <img src={require('../assets/audio-volume-indicator.png').default} />
+        </CookbookCard>
+    </ol>
+</div>
+
+
+
+### Small Components
+
+<div>
+    <ol style={{display: 'inline-block'}}>
+        <CookbookCard title="Network Quality Indicator">
+            <img src={require('../assets/network-quality.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Speaking While Muted">
+            <img src={require('../assets/speaking-while-muted.png').default} />
+        </CookbookCard>
+        <CookbookCard title="Connection Unstable">
+            <img src={require('../assets/connection-unstable.png').default} />
+        </CookbookCard>
+    </ol>
+</div>

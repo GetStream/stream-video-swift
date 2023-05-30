@@ -12,7 +12,7 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     }
     
     public let id: String
-    public let callerId: String
+    public let caller: User
     public let type: String
     public let participants: [User]
     public let timeout: TimeInterval
