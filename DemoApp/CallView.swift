@@ -8,16 +8,15 @@ import StreamVideoSwiftUI
 import Intents
 
 struct CallView: View {
-    
+
+    private var callId: String
     @StateObject var viewModel: CallViewModel
     
     @ObservedObject var appState = AppState.shared
     
     init(callId: String) {
         _viewModel = StateObject(wrappedValue: CallViewModel())
-        if !callId.isEmpty, viewModel.callingState == .idle {
-            viewModel.joinCall(callId: callId, type: .default)
-        }
+        self.callId = callId
     }
         
     var body: some View {
@@ -34,16 +33,24 @@ struct CallView: View {
                     }
                 }
             )
+            .onAppear { joinCall(with: callId) }
             .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
                 if deeplinkInfo != .empty {
-                    // TODO: We need to check if streamVideo.connect() is required to be called prior to joinCall
-                    viewModel.joinCall(
-                        callId: deeplinkInfo.callId,
-                        type: deeplinkInfo.callType
-                    )
+                    joinCall(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
                     appState.deeplinkInfo = .empty
                 }
             }
+    }
+
+    private func joinCall(with callId: String, callType: String = .default) {
+        guard !callId.isEmpty, viewModel.callingState == .idle else {
+            return
+        }
+
+        Task {
+            try await appState.streamVideo?.connect()
+            viewModel.joinCall(callId: callId, type: callType)
+        }
     }
 }
 

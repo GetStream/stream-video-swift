@@ -34,7 +34,7 @@ struct StreamVideoSwiftUIApp: App {
                     CallView(callId: appState.deeplinkInfo.callId)
                 } else {
                     LoginView() { userCredentials in
-                        handleLoggedInUserCredentials(userCredentials)
+                        handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
                     }
                 }
             }
@@ -53,24 +53,22 @@ struct StreamVideoSwiftUIApp: App {
     // MARK: - Private Helpers
 
     private func handle(deeplinkInfo: DeeplinkInfo, user: User?) {
-        appState.deeplinkInfo = deeplinkInfo
-        appState.userState = .loggedIn
         Task {
             if let user = user {
-                try await handleLoggedInUser(user)
+                try await handleLoggedInUser(user, deeplinkInfo: deeplinkInfo)
             } else {
-                try await handleGuestUser()
+                try await handleGuestUser(deeplinkInfo: deeplinkInfo)
             }
         }
     }
     
-    private func handleLoggedInUser(_ user: User) async throws {
+    private func handleLoggedInUser(_ user: User, deeplinkInfo: DeeplinkInfo) async throws {
         let token = try await TokenService.shared.fetchToken(for: user.id)
         let credentials = UserCredentials(userInfo: user, token: token)
-        handleLoggedInUserCredentials(credentials)
+        handleLoggedInUserCredentials(credentials, deeplinkInfo: deeplinkInfo)
     }
 
-    private func handleLoggedInUserCredentials(_ credentials: UserCredentials) {
+    private func handleLoggedInUserCredentials(_ credentials: UserCredentials, deeplinkInfo: DeeplinkInfo) {
         let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
             user: credentials.userInfo,
@@ -88,18 +86,27 @@ struct StreamVideoSwiftUIApp: App {
                 }
             }
         )
-        appState.streamVideo = streamVideo
-        let utils = Utils(userListProvider: MockUserListProvider())
-        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
-        appState.connectUser()
+        setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: credentials.userInfo)
     }
 
-    private func handleGuestUser() async throws {
+    private func handleGuestUser(deeplinkInfo: DeeplinkInfo) async throws {
+        let user = {
+            guard let currentUser = appState.currentUser, currentUser.id == currentUser.name else {
+                return User.guest(UUID().uuidString)
+            }
+            return currentUser
+        }()
         let streamVideo = try await StreamVideo(
             apiKey: Config.apiKey,
-            user: .guest(UUID().uuidString)
+            user: user
         )
+        setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: user)
+    }
 
+    private func setUp(streamVideo: StreamVideo, deeplinkInfo: DeeplinkInfo, user: User?) {
+        appState.deeplinkInfo = deeplinkInfo
+        appState.currentUser = user
+        appState.userState = .loggedIn
         appState.streamVideo = streamVideo
         let utils = Utils(userListProvider: MockUserListProvider())
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
@@ -110,7 +117,7 @@ struct StreamVideoSwiftUIApp: App {
         if let userCredentials = userRepository.loadCurrentUser() {
             appState.currentUser = userCredentials.userInfo
             appState.userState = .loggedIn
-            handleLoggedInUserCredentials(userCredentials)
+            handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
         }
     }
 }

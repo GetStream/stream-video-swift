@@ -111,6 +111,9 @@ struct StreamCallingView: View {
                 secondaryButton: .cancel()
             )
         }
+        .onReceive(appState.$deeplinkInfo, perform: { deeplinkInfo in
+            self.text = deeplinkInfo.callId
+        })
     }
 }
 

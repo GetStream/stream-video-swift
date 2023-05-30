@@ -19,7 +19,7 @@ struct DeeplinkAdapter {
     var baseURL: URL
 
     func canHandle(url: URL) -> Bool {
-        url.absoluteString.contains(baseURL.absoluteString)
+        url.absoluteString.contains(baseURL.absoluteString) || url.scheme == Config.appURLScheme
     }
 
     func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {
