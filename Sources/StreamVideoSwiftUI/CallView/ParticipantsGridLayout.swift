@@ -287,6 +287,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                     id: participant.id,
                     availableSize: availableSize,
                     contentMode: .scaleAspectFill,
+                    customData: [:],
                     onViewUpdate: onViewUpdate
                 )
                 .modifier(
@@ -332,6 +333,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                     id: participant.id,
                     availableSize: size,
                     contentMode: .scaleAspectFill,
+                    customData: [:],
                     onViewUpdate: onViewUpdate
                 )
                 .modifier(

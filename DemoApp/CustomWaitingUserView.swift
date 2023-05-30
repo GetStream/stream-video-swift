@@ -72,7 +72,7 @@ struct CustomWaitingLocalUserView: View {
                 .cornerRadius(16)
                 .frame(height: 200)
                 .padding()
-                .offset(y: -120)
+                .offset(y: -125)
             }
         }
     }

@@ -46,6 +46,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                 id: participant.id,
                 availableSize: size,
                 contentMode: .scaleAspectFill,
+                customData: [:],
                 onViewUpdate: onViewUpdate
             )
             .modifier(

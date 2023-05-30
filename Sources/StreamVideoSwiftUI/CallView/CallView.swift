@@ -51,6 +51,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     if let event = viewModel.participantEvent {
                         Text("\(event.user) \(event.action.display) the call.")
                             .padding(8)
+                            .background(Color(UIColor.systemBackground))
                             .foregroundColor(colors.text)
                             .modifier(ShadowViewModifier())
                             .padding()
@@ -117,7 +118,8 @@ public struct CallView<Factory: ViewFactory>: View {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
                     availableSize: size,
-                    contentMode: .scaleAspectFill
+                    contentMode: .scaleAspectFill,
+                    customData: [:]
                 ) { participant, view in
                     view.handleViewRendering(for: participant) { size, participant in
                         viewModel.updateTrackSize(size, for: participant)
@@ -130,15 +132,23 @@ public struct CallView<Factory: ViewFactory>: View {
         }
     }
     
+    @ViewBuilder
     private var localVideoView: some View {
-        LocalVideoView(callSettings: viewModel.callSettings, showBackground: false) { view in
-            if let track = viewModel.localParticipant?.track {
-                view.add(track: track)
-            } else {
-                viewModel.startCapturingLocalVideo()
+        if let localParticipant = viewModel.localParticipant {
+            LocalVideoView(
+                viewFactory: viewFactory,
+                participant: localParticipant,
+                callSettings: viewModel.callSettings,
+                showBackground: false
+            ) { view in
+                if let track = viewModel.localParticipant?.track {
+                    view.add(track: track)
+                }
             }
+            .opacity(viewModel.localParticipant != nil ? 1 : 0)
+        } else {
+            EmptyView()
         }
-        .opacity(viewModel.localParticipant != nil ? 1 : 0)
     }
     
     private func participantsView(size: CGSize) -> some View {

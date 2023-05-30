@@ -519,6 +519,7 @@ class WebRTCClient: NSObject {
             videoOptions: videoOptions,
             videoFilters: videoConfig.videoFilters
         )
+        startCapturingLocalVideo(cameraPosition: callSettings.cameraPosition == .front ? .front : .back)
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }

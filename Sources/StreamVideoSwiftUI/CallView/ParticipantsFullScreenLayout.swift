@@ -37,6 +37,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
             id: participant.id,
             availableSize: size,
             contentMode: .scaleAspectFit,
+            customData: [:],
             onViewUpdate: { participant, view in
                 onViewRendering(view, participant)
             }

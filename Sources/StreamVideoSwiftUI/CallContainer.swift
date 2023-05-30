@@ -57,6 +57,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
                 viewFactory.makeReconnectionView(viewModel: viewModel)
             }
         }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .alert(isPresented: $viewModel.errorAlertShown, content: {
             return Alert.defaultErrorAlert
         })
@@ -105,13 +106,21 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
     
     public var body: some View {
         ZStack {
-            LocalVideoView(callSettings: viewModel.callSettings) { view in
-                if let track = viewModel.localParticipant?.track {
-                    view.add(track: track)
-                } else {
-                    viewModel.startCapturingLocalVideo()
+            if let localParticipant = viewModel.localParticipant {
+                LocalVideoView(
+                    viewFactory: viewFactory,
+                    participant: localParticipant,
+                    idSuffix: "waiting",
+                    callSettings: viewModel.callSettings
+                ) { view in
+                    if let track = localParticipant.track {
+                        view.add(track: track)
+                    }
                 }
+            } else {
+                DefaultBackgroundGradient()
             }
+            
             VStack {
                 Spacer()
                 viewFactory.makeCallControlsView(viewModel: viewModel)

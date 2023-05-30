@@ -154,6 +154,7 @@ ForEach(participants) { participant in
         id: participant.id,
         availableSize: availableSize,
         contentMode: .scaleAspectFill,
+        customData: [String: RawJSON],
         onViewUpdate: onViewUpdate
     )
     .modifier(

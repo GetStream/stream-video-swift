@@ -60,6 +60,7 @@ public protocol ViewFactory: AnyObject {
     ///  - id: id of the participant.
     ///  - availableSize: The available size for the participant's video view.
     ///  - contentMode: The content mode for the participant's video view.
+    ///  - customData: Any custom data passed to the view.
     ///  - onViewUpdate: A closure to be called whenever the participant's video view is updated.
     /// - Returns: A view for the specified video call participant.
     func makeVideoParticipantView(
@@ -67,6 +68,7 @@ public protocol ViewFactory: AnyObject {
         id: String,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
+        customData: [String: RawJSON],
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> ParticipantViewType
     
@@ -196,6 +198,7 @@ extension ViewFactory {
         id: String,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
+        customData: [String: RawJSON],
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> some View {
         VideoCallParticipantView(
@@ -203,6 +206,7 @@ extension ViewFactory {
             id: id,
             availableSize: availableSize,
             contentMode: contentMode,
+            customData: customData,
             onViewUpdate: onViewUpdate
         )
     }

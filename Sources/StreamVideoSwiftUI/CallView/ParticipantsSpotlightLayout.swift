@@ -43,9 +43,11 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 participant: participant,
                 id: "\(participant.id)-spotlight",
                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                contentMode: .scaleAspectFill) { participant, view in
-                    onViewRendering(view, participant)
-                }
+                contentMode: .scaleAspectFill,
+                customData: [:]
+            ) { participant, view in
+                onViewRendering(view, participant)
+            }
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
@@ -71,9 +73,11 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                             participant: participant,
                             id: participant.id,
                             availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                            contentMode: .scaleAspectFill) { participant, view in
-                                onViewRendering(view, participant)
-                            }
+                            contentMode: .scaleAspectFill,
+                            customData: [:]
+                        ) { participant, view in
+                            onViewRendering(view, participant)
+                        }
                         .onAppear {
                             onChangeTrackVisibility(participant, true)
                         }

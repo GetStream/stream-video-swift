@@ -22,6 +22,7 @@ class TestViewFactory: ViewFactory {
         id: String,
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
+        customData: [String: RawJSON],
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) -> some View {
         let uiImage = UIImage(data: try! Data(contentsOf: participant.profileImageURL!))!

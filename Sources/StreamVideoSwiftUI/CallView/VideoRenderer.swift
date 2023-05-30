@@ -7,19 +7,28 @@ import StreamVideo
 import SwiftUI
 import WebRTC
 
-public struct LocalVideoView: View {
+public struct LocalVideoView<Factory: ViewFactory>: View {
     
     @Injected(\.streamVideo) var streamVideo
     
     private let callSettings: CallSettings
     private var showBackground: Bool
     private var onLocalVideoUpdate: (VideoRenderer) -> Void
+    private var viewFactory: Factory
+    private var participant: CallParticipant
+    private var idSuffix: String
     
     public init(
+        viewFactory: Factory,
+        participant: CallParticipant,
+        idSuffix: String = "local",
         callSettings: CallSettings,
         showBackground: Bool = true,
         onLocalVideoUpdate: @escaping (VideoRenderer) -> Void
     ) {
+        self.viewFactory = viewFactory
+        self.participant = participant
+        self.idSuffix = idSuffix
         self.callSettings = callSettings
         self.showBackground = showBackground
         self.onLocalVideoUpdate = onLocalVideoUpdate
@@ -27,32 +36,26 @@ public struct LocalVideoView: View {
             
     public var body: some View {
         GeometryReader { reader in
-            VideoRendererView(id: "\(streamVideo.user.id)-local", size: reader.size) { view in
+            viewFactory.makeVideoParticipantView(
+                participant: participant,
+                id: "\(streamVideo.user.id)-\(idSuffix)",
+                availableSize: reader.size,
+                contentMode: .scaleAspectFill,
+                customData: ["videoOn": .bool(callSettings.videoOn)]
+            ) { participant, view in
                 onLocalVideoUpdate(view)
             }
             .rotation3DEffect(
-                .degrees(callSettings.cameraPosition == .front ? 180 : 0),
+                .degrees(shouldRotate ? 180 : 0),
                 axis: (x: 0, y: 1, z: 0)
             )
-            .opacity(showVideo ? 1 : 0)
-            .overlay(
-                CallParticipantImageView(
-                    id: streamVideo.user.id,
-                    name: streamVideo.user.name,
-                    imageURL: streamVideo.user.imageURL
-                )
-                .frame(maxWidth: reader.size.width)
-                .opacity(showVideo ? 0 : 1)
-            )
-            .edgesIgnoringSafeArea(.all)
-            .background(Color(UIColor.systemBackground))
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
     
-    private var showVideo: Bool {
-        callSettings.videoOn
+    private var shouldRotate: Bool {
+        callSettings.cameraPosition == .front && callSettings.videoOn
     }
+    
 }
 
 public struct VideoRendererView: UIViewRepresentable {

@@ -192,10 +192,10 @@ struct JoinCallView: View {
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()
+                    .frame(maxWidth: .infinity)
                     .accessibility(identifier: "joinCall")
             }
             .frame(height: 50)
-            .frame(maxWidth: .infinity)
             .background(colors.primaryButtonBackground)
             .cornerRadius(16)
             .foregroundColor(.white)

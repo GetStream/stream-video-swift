@@ -24,6 +24,15 @@ public struct CallBackground: View {
 struct FallbackBackground: View {
         
     var body: some View {
+        DefaultBackgroundGradient()
+            .aspectRatio(contentMode: .fill)
+            .edgesIgnoringSafeArea(.all)
+    }
+}
+
+struct DefaultBackgroundGradient: View {
+    
+    var body: some View {
         LinearGradient(
             colors: [
                 Color(red: 60/255, green: 64/255, blue: 72/255),
@@ -32,8 +41,6 @@ struct FallbackBackground: View {
             startPoint: .top,
             endPoint: .bottom
         )
-        .aspectRatio(contentMode: .fill)
-        .edgesIgnoringSafeArea(.all)
     }
 }
 

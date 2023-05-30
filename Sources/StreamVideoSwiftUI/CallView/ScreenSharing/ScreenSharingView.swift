@@ -39,7 +39,8 @@ public struct ScreenSharingView: View {
                                 participant: participant,
                                 id: "\(participant.id)-screenshare-participant",
                                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                                contentMode: .scaleAspectFill
+                                contentMode: .scaleAspectFill,
+                                customData: [:]
                             ) { participant, view in
                                 view.handleViewRendering(for: participant) { size, participant in
                                     viewModel.updateTrackSize(size, for: participant)

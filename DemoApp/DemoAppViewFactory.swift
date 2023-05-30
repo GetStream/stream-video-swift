@@ -14,4 +14,22 @@ class DemoAppViewFactory: ViewFactory {
         CustomWaitingLocalUserView(viewModel: viewModel, viewFactory: self)
     }
     
+    /*
+    func makeVideoParticipantView(
+        participant: CallParticipant,
+        id: String,
+        availableSize: CGSize,
+        contentMode: UIView.ContentMode,
+        customData: [String: RawJSON],
+        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    ) -> some View {
+        CustomVideoCallParticipantView(
+            participant: participant,
+            id: id,
+            availableSize: availableSize,
+            contentMode: contentMode,
+            onViewUpdate: onViewUpdate
+        )
+    }
+    */
 }

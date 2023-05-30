@@ -205,11 +205,6 @@ public class Call: ObservableObject, @unchecked Sendable {
         }
     }
     
-    /// Starts capturing the local video.
-    public func startCapturingLocalVideo() {
-        callController.startCapturingLocalVideo()
-    }
-    
     /// Changes the audio state for the current user.
     /// - Parameter isEnabled: whether audio should be enabled.
     public func changeAudioState(isEnabled: Bool) async throws {

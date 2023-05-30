@@ -156,6 +156,7 @@ public struct VideoCallParticipantView: View {
     var availableSize: CGSize
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
+    var customData: [String: RawJSON]
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     
     public init(
@@ -164,6 +165,7 @@ public struct VideoCallParticipantView: View {
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         edgesIgnoringSafeArea: Edge.Set = .all,
+        customData: [String: RawJSON],
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) {
         self.participant = participant
@@ -171,6 +173,7 @@ public struct VideoCallParticipantView: View {
         self.availableSize = availableSize
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
+        self.customData = customData
         self.onViewUpdate = onViewUpdate
     }
     
@@ -198,7 +201,7 @@ public struct VideoCallParticipantView: View {
     }
     
     private var showVideo: Bool {
-        participant.shouldDisplayTrack
+        participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
     }
 }
 

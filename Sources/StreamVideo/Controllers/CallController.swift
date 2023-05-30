@@ -163,11 +163,6 @@ class CallController {
         return response.call.toCallData(members: response.members, blockedUsers: response.blockedUsers)
     }
     
-    /// Starts capturing the local video.
-    func startCapturingLocalVideo() {
-        webRTCClient?.startCapturingLocalVideo(cameraPosition: .front)
-    }
-    
     /// Changes the audio state for the current user.
     /// - Parameter isEnabled: whether audio should be enabled.
     func changeAudioState(isEnabled: Bool) async throws {

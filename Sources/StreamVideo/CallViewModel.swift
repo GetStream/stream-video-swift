@@ -357,11 +357,6 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    /// Starts capturing the local video.
-    public func startCapturingLocalVideo() {
-        call?.startCapturingLocalVideo()
-    }
-    
     /// Changes the track visibility for a participant (not visible if they go off-screen).
     /// - Parameters:
     ///  - participant: the participant whose track visibility would be changed.
@@ -463,6 +458,7 @@ open class CallViewModel: ObservableObject {
         currentEventsTask?.cancel()
         callingState = .idle
         isMinimized = false
+        localVideoPrimary = false
     }
     
     private func enterCall(call: Call? = nil, callId: String, callType: String, members: [User], ring: Bool = false) {

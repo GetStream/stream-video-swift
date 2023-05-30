@@ -73,6 +73,7 @@ public func makeVideoParticipantView(
     id: String,
     availableSize: CGSize,
     contentMode: UIView.ContentMode,
+    customData: [String: RawJSON],
     onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
 ) -> some View {
     VideoCallParticipantView(

@@ -132,9 +132,6 @@ var body: some View {
     .onChange(of: call.state?.broadcasting, perform: { state in
         loading = false
     })
-    .onAppear {
-        call.startCapturingLocalVideo()
-    }
     
 }
 ```

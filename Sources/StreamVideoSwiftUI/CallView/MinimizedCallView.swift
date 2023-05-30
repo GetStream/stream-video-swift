@@ -34,7 +34,8 @@ public struct MinimizedCallView: View {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
                     availableSize: proxy.size,
-                    contentMode: .scaleAspectFill
+                    contentMode: .scaleAspectFill,
+                    customData: [:]
                 ) { participant, view in
                     view.handleViewRendering(for: participant) { size, participant in
                         viewModel.updateTrackSize(size, for: participant)
