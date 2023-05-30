@@ -36,6 +36,7 @@ struct CallView: View {
             )
             .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
                 if deeplinkInfo != .empty {
+                    // TODO: We need to check if streamVideo.connect() is required to be called prior to joinCall
                     viewModel.joinCall(
                         callId: deeplinkInfo.callId,
                         type: deeplinkInfo.callType

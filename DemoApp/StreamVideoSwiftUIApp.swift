@@ -8,14 +8,18 @@ import StreamVideoSwiftUI
 
 @main
 struct StreamVideoSwiftUIApp: App {
-    
-    private let userRepository: UserRepository = UnsecureUserRepository.shared
-    
+
+    // MARK: - State properties
+
     @State var streamVideoUI: StreamVideoUI?
-    
     @ObservedObject var appState = AppState.shared
-    
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
+
+    // MARK: - instance Properties
+
+    private let userRepository: UserRepository = UnsecureUserRepository.shared
+
+    // MARK: - Lifecycle
 
     init() {
         checkLoggedInUser()
@@ -29,14 +33,15 @@ struct StreamVideoSwiftUIApp: App {
                 if appState.userState == .loggedIn {
                     CallView(callId: appState.deeplinkInfo.callId)
                 } else {
-                    LoginView() { user in
-                        handleSelectedUser(user)
+                    LoginView() { userCredentials in
+                        handleLoggedInUserCredentials(userCredentials)
                     }
                 }
             }
             .onOpenURL { url in
+                let (deeplinkInfo, user) = DeeplinkAdapter(baseURL: Config.baseURL).handle(url: url)
                 guard
-                    let (deeplinkInfo, user) = DeeplinkAdapter(baseURL: Config.baseURL).handle(url: url)
+                    deeplinkInfo != .empty
                 else {
                     return
                 }
@@ -44,27 +49,37 @@ struct StreamVideoSwiftUIApp: App {
             }
         }
     }
-    
-    private func handle(deeplinkInfo: DeeplinkInfo, user: User) {
+
+    // MARK: - Private Helpers
+
+    private func handle(deeplinkInfo: DeeplinkInfo, user: User?) {
         appState.deeplinkInfo = deeplinkInfo
         appState.userState = .loggedIn
         Task {
-            let token = try await TokenService.shared.fetchToken(for: user.id)
-            let credentials = UserCredentials(userInfo: user, token: token)
-            handleSelectedUser(credentials, callId: deeplinkInfo.callId)
+            if let user = user {
+                try await handleLoggedInUser(user)
+            } else {
+                try await handleGuestUser()
+            }
         }
     }
     
-    private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
+    private func handleLoggedInUser(_ user: User) async throws {
+        let token = try await TokenService.shared.fetchToken(for: user.id)
+        let credentials = UserCredentials(userInfo: user, token: token)
+        handleLoggedInUserCredentials(credentials)
+    }
+
+    private func handleLoggedInUserCredentials(_ credentials: UserCredentials) {
         let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
-            user: user.userInfo,
-            token: user.token,
+            user: credentials.userInfo,
+            token: credentials.token,
             videoConfig: VideoConfig(),
             tokenProvider: { result in
                 Task {
                     do {
-                        let token = try await TokenService.shared.fetchToken(for: user.id)
+                        let token = try await TokenService.shared.fetchToken(for: credentials.id)
                         userRepository.save(token: token.rawValue)
                         result(.success(token))
                     } catch {
@@ -78,12 +93,24 @@ struct StreamVideoSwiftUIApp: App {
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
         appState.connectUser()
     }
+
+    private func handleGuestUser() async throws {
+        let streamVideo = try await StreamVideo(
+            apiKey: Config.apiKey,
+            user: .guest(UUID().uuidString)
+        )
+
+        appState.streamVideo = streamVideo
+        let utils = Utils(userListProvider: MockUserListProvider())
+        streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
+        appState.connectUser()
+    }
     
     private func checkLoggedInUser() {
-        if let user = userRepository.loadCurrentUser() {
-            appState.currentUser = user.userInfo
+        if let userCredentials = userRepository.loadCurrentUser() {
+            appState.currentUser = userCredentials.userInfo
             appState.userState = .loggedIn
-            handleSelectedUser(user)
+            handleLoggedInUserCredentials(userCredentials)
         }
     }
 }

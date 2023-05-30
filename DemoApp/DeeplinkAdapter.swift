@@ -22,20 +22,18 @@ struct DeeplinkAdapter {
         url.absoluteString.contains(baseURL.absoluteString)
     }
 
-    func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User)? {
+    func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {
         guard canHandle(url: url) else {
-            return nil
+            return (.empty, nil)
         }
 
-        let callId = url.lastPathComponent
+        guard let callId = url.queryParameters["id"] else {
+            return (.empty, nil)
+        }
+
         let callType = url.queryParameters["type"] ?? "default"
-
-        guard
-            let userId = url.queryParameters["user_id"],
-            let user = User.builtInUsers.filter({ $0.id == userId }).first
-        else {
-            return nil
-        }
+        let user = url.queryParameters["user_id"]
+            .flatMap { userId in User.builtInUsers.filter({ $0.id == userId }).first }
 
         return (DeeplinkInfo(callId: callId, callType: callType), user)
     }
