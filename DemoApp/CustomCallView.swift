@@ -1,15 +1,11 @@
----
-title: Speaking While Muted
-description: Speaking While Muted
----
+//
+// Copyright © 2023 Stream.io Inc. All rights reserved.
+//
 
-Some calling apps show an indicator when you are trying to speak while you are muted. This is helpful for users that forgot to turn on the microphone when they try to speak.
+import StreamVideo
+import StreamVideoSwiftUI
+import SwiftUI
 
-You can easily add such functionality with the `StreamVideo` iOS SDK. One approach to achieve this is to add an overlay to the `CallView` with the indicator. The logic for displaying the popup can be determined by listening to sounds even when the microphone is turned off. When a sound goes over a certain threshold, we will display the indicator.
-
-Here's an example implementation for this approach, using the `MicrophoneChecker` from the SDK:
-
-```swift
 struct CustomCallView<Factory: ViewFactory>: View {
     
     @Injected(\.colors) var colors
@@ -21,7 +17,7 @@ struct CustomCallView<Factory: ViewFactory>: View {
     @State var mutedIndicatorShown = false
     
     var body: some View {
-        CallView(viewFactory: viewFactory, viewModel: viewModel)
+        StreamVideoSwiftUI.CallView(viewFactory: viewFactory, viewModel: viewModel)
             .onReceive(viewModel.$callSettings) { callSettings in
                 updateMicrophoneChecker()
             }
@@ -66,16 +62,3 @@ struct CustomCallView<Factory: ViewFactory>: View {
         }
     }
 }
-```
-
-In the implementation, we are listening to the `callSettings` changes from the view model. Based on that, we decide whether we should listen for sounds from the microphone checker.
-
-Additionally, we are listening to the `@Published` property called `decibels` from the `MicrophoneChecker`, which returns an array of the last 3 decibels. If a value passes our threshold, then we set the `mutedIndicatorShown` to true, which displays a simple text popup. We reset the value to false after 2 seconds, to hide the popup.
-
-Finally, we need to use the custom call view in the custom `ViewFactory`:
-
-```swift
-func makeCallView(viewModel: CallViewModel) -> some View {
-    CustomCallView(viewFactory: self, viewModel: viewModel)
-}
-```

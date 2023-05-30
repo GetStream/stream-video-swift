@@ -273,6 +273,7 @@
 		847B47B12A23EE44000714CE /* CustomWaitingUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B02A23EE44000714CE /* CustomWaitingUserView.swift */; };
 		847B47B32A23F8C6000714CE /* ShareButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B22A23F8C6000714CE /* ShareButtonView.swift */; };
 		847B47B52A249E7E000714CE /* Examples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B42A249E7E000714CE /* Examples.swift */; };
+		847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B62A260CF0000714CE /* CustomCallView.swift */; };
 		847BE09C29DADE0100B55D21 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09B29DADE0100B55D21 /* Call.swift */; };
 		847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D001F29C8AB1E00DD0A50 /* RecordingView.swift */; };
 		848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73BF2926314F0089AA6E /* MinimizedCallView.swift */; };
@@ -893,6 +894,7 @@
 		847B47B02A23EE44000714CE /* CustomWaitingUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWaitingUserView.swift; sourceTree = "<group>"; };
 		847B47B22A23F8C6000714CE /* ShareButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareButtonView.swift; sourceTree = "<group>"; };
 		847B47B42A249E7E000714CE /* Examples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Examples.swift; sourceTree = "<group>"; };
+		847B47B62A260CF0000714CE /* CustomCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCallView.swift; sourceTree = "<group>"; };
 		847BE09B29DADE0100B55D21 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		847D001F29C8AB1E00DD0A50 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
 		848A73BF2926314F0089AA6E /* MinimizedCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimizedCallView.swift; sourceTree = "<group>"; };
@@ -1507,6 +1509,7 @@
 				847B47B22A23F8C6000714CE /* ShareButtonView.swift */,
 				847B47AE2A233AE2000714CE /* DemoAppViewFactory.swift */,
 				847B47B42A249E7E000714CE /* Examples.swift */,
+				847B47B62A260CF0000714CE /* CustomCallView.swift */,
 				84D6493B29E7F5D2002CA428 /* CallsView.swift */,
 				84D6493D29E7F75E002CA428 /* CallsViewModel.swift */,
 				84BD8FF329B0F208002CFBA0 /* HTTPClient.swift */,
@@ -2758,6 +2761,7 @@
 				844299432942484A0037232A /* DemoUsers.swift in Sources */,
 				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
+				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				840A5A5829054F98006A1E4B /* MockUserListProvider.swift in Sources */,
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */,

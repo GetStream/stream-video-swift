@@ -18,6 +18,8 @@ public class MicrophoneChecker: ObservableObject {
     
     private let valueLimit: Int
     
+    private var audioRecorder: AVAudioRecorder?
+    
     private let audioFilename: URL = {
         let documentPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let audioFilename = documentPath.appendingPathComponent("recording.m4a")
@@ -38,6 +40,17 @@ public class MicrophoneChecker: ObservableObject {
             }
         }
         return false
+    }
+    
+    /// Starts listening to audio updates.
+    public func startListening() {
+        captureAudio()
+    }
+    
+    /// Stops listening to audio updates.
+    public func stopListening() {
+        stopTimer()
+        stopAudioRecorder()
     }
     
     //MARK: - private
@@ -69,7 +82,7 @@ public class MicrophoneChecker: ObservableObject {
             let audioRecorder = try AVAudioRecorder(url: audioFilename, settings: settings)
             audioRecorder.record()
             audioRecorder.isMeteringEnabled = true
-            
+            self.audioRecorder = audioRecorder
             timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
                 guard let self = self else { return }
                 audioRecorder.updateMeters()
@@ -86,9 +99,19 @@ public class MicrophoneChecker: ObservableObject {
         }
     }
     
-    deinit {
+    private func stopTimer() {
         timer?.invalidate()
         timer = nil
+    }
+    
+    private func stopAudioRecorder() {
+        self.audioRecorder?.stop()
+        self.audioRecorder = nil
+    }
+    
+    deinit {
+        stopTimer()
+        stopAudioRecorder()
         do {
             try FileManager.default.removeItem(at: audioFilename)
             log.debug("Successfully deleted audio filename")
