@@ -134,3 +134,55 @@ struct CustomVideoCallParticipantView: View {
         participant.shouldDisplayTrack
     }
 }
+
+
+struct CustomParticipantModifier: ViewModifier {
+            
+    var participant: CallParticipant
+    @Binding var pinnedParticipant: CallParticipant?
+    var participantCount: Int
+    var availableSize: CGSize
+    var ratio: CGFloat
+    
+    public init(
+        participant: CallParticipant,
+        pinnedParticipant: Binding<CallParticipant?>,
+        participantCount: Int,
+        availableSize: CGSize,
+        ratio: CGFloat
+    ) {
+        self.participant = participant
+        _pinnedParticipant = pinnedParticipant
+        self.participantCount = participantCount
+        self.availableSize = availableSize
+        self.ratio = ratio
+    }
+    
+    public func body(content: Content) -> some View {
+        content
+            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .overlay(
+                ZStack {
+                    VStack {
+                        Spacer()
+                        HStack {
+                            Text(participant.name)
+                                .foregroundColor(.white)
+                                .bold()
+                            Spacer()
+                            ConnectionQualityIndicator(
+                                connectionQuality: participant.connectionQuality
+                            )
+                        }
+                        .padding(.bottom, 2)
+                    }
+                    .padding()
+                    
+                    if participant.isSpeaking && participantCount > 1 {
+                        Rectangle()
+                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
+                    }
+                }
+            )
+    }
+}

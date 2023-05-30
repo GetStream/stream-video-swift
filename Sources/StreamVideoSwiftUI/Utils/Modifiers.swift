@@ -50,7 +50,7 @@ extension Text {
 
 extension View {
     
-    func adjustVideoFrame(to width: CGFloat, ratio: CGFloat = 0.5) -> some View {
+    public func adjustVideoFrame(to width: CGFloat, ratio: CGFloat = 0.5) -> some View {
         aspectRatio(ratio, contentMode: .fill)
             .frame(width: width)
             .clipped()
@@ -64,7 +64,7 @@ struct ShadowViewModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .background(Color.white)
+            .background(Color(UIColor.systemBackground))
             .cornerRadius(cornerRadius)
             .modifier(ShadowModifier())
             .overlay(
