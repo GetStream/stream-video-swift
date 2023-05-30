@@ -17,6 +17,12 @@ As soon as you join a call, the `Call` object allows you to perform several perm
 - granting and revoking permissions
 - perform a moderation action (for example muting a user)
 
+To create an instance of the `PermissionsController`, you should call `StreamVideo`'s method `makePermissionsController`:
+
+```swift
+let permissionsController = streamVideo.makePermissionsController()
+```
+
 #### Checking for capabilities 
 
 Every user has certain call capabilities, depending on their role in the call. For actions that are beyond the scope of a regular member, you need to check if the user has the appropriate capability, before showing a UI to execute it.

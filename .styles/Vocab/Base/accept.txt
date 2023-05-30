@@ -1,5 +1,6 @@
 100ms
 Your_app_name
+[Ss]creensharing
 Recents app
 boolean
 Boolean

@@ -679,6 +679,9 @@
 		436424A12A118E0300CB4A7B /* APNSRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APNSRequest.swift; sourceTree = "<group>"; };
 		436424A22A118E0300CB4A7B /* CallLiveStartedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallLiveStartedEvent.swift; sourceTree = "<group>"; };
 		436424A32A118E0300CB4A7B /* CallSessionEndedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallSessionEndedEvent.swift; sourceTree = "<group>"; };
+		4A25E98229DC408900A808E6 /* docusaurus */ = {isa = PBXFileReference; lastKnownFileType = folder; path = docusaurus; sourceTree = "<group>"; };
+		4A25E98329DC409F00A808E6 /* CHANGELOG.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = CHANGELOG.md; sourceTree = "<group>"; };
+		4A25E98429DC40AA00A808E6 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAppUIKit.entitlements; sourceTree = "<group>"; };
 		8228CD8C29128CA000F32136 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82392D512993C9E100941435 /* SwiftUIDemoAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftUIDemoAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -1444,6 +1447,9 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
+				4A25E98429DC40AA00A808E6 /* README.md */,
+				4A25E98329DC409F00A808E6 /* CHANGELOG.md */,
+				4A25E98229DC408900A808E6 /* docusaurus */,
 				84F737E7287C137000A363F4 /* Sources */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				8493224D2908378A0013C029 /* DemoAppUIKit */,
@@ -2369,6 +2375,7 @@
 				84F737E9287C13AC00A363F4 /* Sources */,
 				84F737EA287C13AC00A363F4 /* Frameworks */,
 				84F737EB287C13AC00A363F4 /* Resources */,
+				4A25E98529DC410400A808E6 /* Lint Docusaurus */,
 			);
 			buildRules = (
 			);
@@ -2682,6 +2689,25 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		4A25E98529DC410400A808E6 /* Lint Docusaurus */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			name = "Lint Docusaurus";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "./Scripts/vale-lint.sh\n";
+		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
