@@ -63,7 +63,7 @@ final class LobbyTests: StreamTestCase {
         THEN("there are no participants on the call") {
             userRobot
                 .assertCallControls()
-                .assertParticipantsAreVisible(count: 0)
+                .assertEmptyCall()
         }
     }
 }
