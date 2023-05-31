@@ -14,14 +14,18 @@ class AppState: ObservableObject {
     @Published var loading = false
     @Published var voipPushToken: String? {
         didSet {
+            #if !APPCLIP
             UnsecureUserRepository.shared.save(voipPushToken: voipPushToken)
             setVoipToken()
+            #endif // #if !APPCLIP
         }
     }
     @Published var pushToken: String? {
         didSet {
+            #if !APPCLIP
             UnsecureUserRepository.shared.save(pushToken: pushToken)
             setPushToken()
+            #endif // #if !APPCLIP
         }
     }
     @Published var activeCall: Call?
@@ -50,6 +54,7 @@ class AppState: ObservableObject {
     }
     
     func logout() {
+#if !APPCLIP
         Task {
             if let voipPushToken = UnsecureUserRepository.shared.currentVoipPushToken() {
                 try? await streamVideo?.deleteDevice(id: voipPushToken)
@@ -62,6 +67,7 @@ class AppState: ObservableObject {
             streamVideo = nil
             userState = .notLoggedIn
         }
+#endif // #if !APPCLIP
     }
     
     private func setVoipToken() {

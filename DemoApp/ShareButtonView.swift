@@ -7,12 +7,12 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 /// View controller reprensetable which wraps up the activity view controller.
-struct ShareActivityView: UIViewControllerRepresentable {
+public struct ShareActivityView: UIViewControllerRepresentable {
 
-    var activityItems: [Any]
-    var applicationActivities: [UIActivity]? = nil
+    public var activityItems: [Any]
+    public var applicationActivities: [UIActivity]? = nil
 
-    func makeUIViewController(
+    public func makeUIViewController(
         context: UIViewControllerRepresentableContext<ShareActivityView>
     ) -> UIActivityViewController {
         let controller = UIActivityViewController(
@@ -24,7 +24,7 @@ struct ShareActivityView: UIViewControllerRepresentable {
         return controller
     }
 
-    func updateUIViewController(
+    public func updateUIViewController(
         _ uiViewController: UIActivityViewController,
         context: UIViewControllerRepresentableContext<ShareActivityView>
     ) { /* Not needed. */ }

@@ -9,7 +9,7 @@ import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
 
-struct CustomWaitingLocalUserView: View {
+public struct CustomWaitingLocalUserView: View {
     
     @Injected(\.colors) var colors
     
@@ -18,7 +18,7 @@ struct CustomWaitingLocalUserView: View {
     
     @State private var isSharePresented = false
     
-    var body: some View {
+    public var body: some View {
         ZStack {
             WaitingLocalUserView(viewModel: viewModel, viewFactory: viewFactory)
             VStack {
