@@ -1,35 +1,105 @@
 ---
-title: Call Participants
+title: VideoParticipantsView
 ---
 
-When users join a call, they become `CallParticipant`s. The call participants are available from the `CallViewModel`'s `callParticipants` property, as a dictionary.
+The `VideoParticipantsView` is a container view that displays the participants in a call in several different layouts. 
 
-You can use this property to filter participants, based on their properties. Here's a list of the info that is available about the `CallParticipant`:
+The following layouts are supported at the moment:
+- `grid` - the users are displayed in a scrollable grid.
+- `spotlight` - the dominant speaker takes a large section of the view, while the other participants are displayed in a scrollable horizontal list below.
+- `fullScreen` - only the dominant speaker is presented.
 
-- `id`: `String` - The unique call id of the participant.
-- `userId`: `String` - The user's id. This is not necessarily unique, since a user can join from multiple devices.
-- `role`: `String` - The user's role in the call.
-- `name`: `String` - The user's name.
-- `profileImageURL`: `URL?` - The user's profile image URL.
-- `trackLookupPrefix`: `String?` - The id of the track that's connected to the participant.
-- `isOnline`: `Bool` - Returns whether the participant is online.
-- `hasVideo`: `Bool` - Returns whether the participant has video.
-- `hasAudio`: `Bool` - Returns whether the participant has audio.
-- `isScreensharing`: `Bool` - Returns whether the participant is screen sharing.
-- `track`: `RTCVideoTrack?` - Returns the participant's video track.
-- `trackSize`: `CGSize` - Returns the size of the track for the participant.
-- `screenshareTrack`: `RTCVideoTrack?` - Returns the screen sharing track for the participant.
-- `showTrack`: `Bool` - Returns whether the track should be shown.
-- `isSpeaking`: `Bool` - Returns whether the participant is speaking.
-- `sessionId`: `String` - Returns the session id of the participant.
-- `connectionQuality`: `ConnectionQuality` - Returns the connection quality of the participant.
-- `joinedAt`: `Date` - Returns the date when the user joined the call.
-- `isPinned`: `Bool` - Returns whether the current user is pinned.
+The layout for the participants is determined by the `participantsLayout` property in the `CallViewModel`.
 
-These properties can be used to do custom filtering of the participants. For example, if you want to get the first user who is speaking, you can do the following:
+Here's how the default grid UI looks like:
+
+![CallParticipants Grid](https://user-images.githubusercontent.com/17215808/223418304-d21a2018-f0d2-4d37-afd0-87ef071e49b6.png)
+
+### Usage
+
+The `VideoParticipantsView` is a stateful component that requires a `CallViewModel`. Here's an example of how to use it as a standalone component:
 
 ```swift
-var speaker: CallParticipant? {
-    participants.first { $0.isSpeaking }
+VideoParticipantsView(
+    viewFactory: DefaultViewFactory.shared,
+    viewModel: viewModel,
+    availableSize: availableSize,
+    onViewRendering: onViewRendering,
+    onChangeTrackVisibility: onChangeTrackVisibility
+)
+```
+
+The parameters needed for this component are as follows:
+- `viewFactory` - the view factory used for creation of the views
+- `viewModel` - the `CallViewModel`
+- `availableSize` - the available size for the view
+- `onViewRendering` - called when the view is rendered or updated
+- `onChangeTrackVisibility` - called when the track changes its visibility
+
+If you are using our `ViewFactory`, you can swap this component with your implementation by implementing the following method:
+
+```swift
+public func makeVideoParticipantsView(
+    viewModel: CallViewModel,
+    availableSize: CGSize,
+    onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
+    onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+) -> some View {
+    CustomVideoParticipantsView(
+        viewFactory: self,
+        viewModel: viewModel,
+        availableSize: availableSize,
+        onViewRendering: onViewRendering,
+        onChangeTrackVisibility: onChangeTrackVisibility
+    )
 }
+```
+
+The different layouts for this component are also provided as standalone components that you can use to build your own variations of the UI.
+
+#### Grid
+
+Here's an example how to use the grid layout in your views:
+
+```swift
+ParticipantsGridLayout(
+    viewFactory: viewFactory,
+    participants: viewModel.participants,
+    pinnedParticipant: $viewModel.pinnedParticipant,
+    availableSize: availableSize,
+    orientation: orientation,
+    onViewRendering: onViewRendering,
+    onChangeTrackVisibility: onChangeTrackVisibility
+)
+```
+
+#### Spotlight
+
+This example shows the usage of the spotlight layout:
+
+```swift
+ParticipantsSpotlightLayout(
+    viewFactory: viewFactory,
+    participant: first,
+    participants: Array(viewModel.participants.dropFirst()),
+    size: availableSize,
+    pinnedParticipant: $viewModel.pinnedParticipant,
+    onViewRendering: onViewRendering,
+    onChangeTrackVisibility: onChangeTrackVisibility
+)
+```
+
+#### Full Screen
+
+You can use the full screen layout with the code below:
+
+```swift
+ParticipantsFullScreenLayout(
+    viewFactory: viewFactory,
+    participant: first,
+    size: availableSize,
+    pinnedParticipant: $viewModel.pinnedParticipant,
+    onViewRendering: onViewRendering,
+    onChangeTrackVisibility: onChangeTrackVisibility
+)
 ```
