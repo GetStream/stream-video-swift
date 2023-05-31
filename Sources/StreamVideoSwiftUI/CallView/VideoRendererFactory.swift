@@ -7,6 +7,7 @@ import StreamVideo
 import SwiftUI
 
 class VideoRendererFactory {
+    private let queue = DispatchQueue(label: "io.getstream.videoRendererFactory")
     private(set) var views = [String: VideoRenderer]()
     
     init() {
@@ -45,7 +46,9 @@ class VideoRendererFactory {
             return
         }
         log.debug("Removing view for participant \(participantId)")
-        views[participantId] = nil
+        queue.sync {
+            views[participantId] = nil
+        }
     }
     
     @objc func clearViews() {
