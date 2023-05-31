@@ -29,7 +29,7 @@ let defaultScreenSize = CGSize(width: 360, height: 700)
 func AssertSnapshot(
     _ vc: UIViewController,
     isEmbeddedInNavigationController: Bool = false,
-    variants: [SnapshotVariant] = SnapshotVariant.all,
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     screenSize: CGSize = defaultScreenSize,
     suffix: String? = nil,
     record: Bool = false,
@@ -70,7 +70,7 @@ func AssertSnapshot(
 ///   so that the newly captured snapshot is compared with the current reference.
 func AssertSnapshot(
     _ view: UIView,
-    variants: [SnapshotVariant] = [SnapshotVariant.defaultLight],
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     size: CGSize? = nil,
     suffix: String? = nil,
     record: Bool = false,
@@ -103,7 +103,7 @@ func AssertSnapshot(
 func AssertSnapshot<View: UIViewControllerRepresentable>(
     _ view: View,
     isEmbeddedInNavigationController: Bool = false,
-    variants: [SnapshotVariant] = SnapshotVariant.all,
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     screenSize: CGSize = defaultScreenSize,
     suffix: String? = nil,
     record: Bool = false,
@@ -140,7 +140,7 @@ func AssertSnapshot<View: UIViewControllerRepresentable>(
 ///   so that the newly captured snapshot is compared with the current reference.
 func AssertSnapshot<View: SwiftUI.View>(
     _ view: View,
-    variants: [SnapshotVariant] = [SnapshotVariant.defaultLight],
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     device: ViewImageConfig = .iPhoneX,
     size: CGSize? = nil,
     suffix: String? = nil,
