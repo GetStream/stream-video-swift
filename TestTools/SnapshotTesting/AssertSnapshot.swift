@@ -46,7 +46,7 @@ func AssertSnapshot(
     variantsToTest.forEach { variant in
         assertSnapshot(
             matching: viewController,
-            as: .image(perceptualPrecision: 0.96, size: screenSize, traits: variant.traits),
+            as: .image(perceptualPrecision: 0.97, size: screenSize, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
@@ -86,8 +86,8 @@ func AssertSnapshot(
         assertSnapshot(
             matching: view,
             as: size != nil ?
-                .image(perceptualPrecision: 0.96, size: size!, traits: variant.traits)
-                : .image(perceptualPrecision: 0.96, traits: variant.traits),
+                .image(perceptualPrecision: 0.97, size: size!, traits: variant.traits)
+                : .image(perceptualPrecision: 0.97, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
@@ -157,8 +157,8 @@ func AssertSnapshot<View: SwiftUI.View>(
         assertSnapshot(
             matching: view,
             as: size != nil ?
-                .image(perceptualPrecision: 0.96, layout: .sizeThatFits)
-                : .image(perceptualPrecision: 0.96, layout: .device(config: device), traits: variant.traits),
+                .image(perceptualPrecision: 0.97, layout: .sizeThatFits)
+                : .image(perceptualPrecision: 0.97, layout: .device(config: device), traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
