@@ -19,24 +19,12 @@ struct StreamVideoSwiftUIAppClip: App {
 
     init() {
         LogConfig.level = .debug
-
-        Task {
-            let user = User.guest(String(UUID().uuidString.prefix(8)))
-            AppState.shared.deeplinkInfo = .empty
-            AppState.shared.currentUser = user
-            AppState.shared.userState = .loggedIn
-            let streamVideo = try await StreamVideo(apiKey: Config.apiKey, user: user)
-            AppState.shared.streamVideo = streamVideo
-            let utils = Utils(userListProvider: MockUserListProvider())
-            streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
-            AppState.shared.connectUser()
-        }
     }
 
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if appState.streamVideo != nil {
+                if appState.userState == .loggedIn {
                     AppClipCallView(callId: appState.deeplinkInfo.callId)
                 } else {
                     Text("Loading ...")
@@ -56,6 +44,30 @@ struct StreamVideoSwiftUIAppClip: App {
         else {
             return
         }
-        appState.deeplinkInfo = deeplinkInfo
+
+        let user = {
+            guard let currentUser = appState.currentUser, currentUser.id == currentUser.name else {
+                return User.guest(String(UUID().uuidString.prefix(8)))
+            }
+            return currentUser
+        }()
+
+        Task {
+            await MainActor.run {
+                Task {
+                    let streamVideo = try await StreamVideo(
+                        apiKey: Config.apiKey,
+                        user: user
+                    )
+                    appState.deeplinkInfo = deeplinkInfo
+                    appState.currentUser = user
+                    appState.userState = .loggedIn
+                    appState.streamVideo = streamVideo
+                    let utils = Utils(userListProvider: MockUserListProvider())
+                    streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
+                    appState.connectUser()
+                }
+            }
+        }
     }
 }
