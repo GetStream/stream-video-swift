@@ -92,7 +92,7 @@ struct StreamVideoSwiftUIApp: App {
     private func handleGuestUser(deeplinkInfo: DeeplinkInfo) async throws {
         let user = {
             guard let currentUser = appState.currentUser, currentUser.id == currentUser.name else {
-                return User.guest(UUID().uuidString)
+                return User.guest(String(UUID().uuidString.prefix(8)))
             }
             return currentUser
         }()

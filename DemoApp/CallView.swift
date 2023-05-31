@@ -33,16 +33,16 @@ struct CallView: View {
                     }
                 }
             )
-            .onAppear { joinCall(with: callId) }
+            .onAppear { joinCallIfNeeded(with: callId) }
             .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
                 if deeplinkInfo != .empty {
-                    joinCall(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
+                    joinCallIfNeeded(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
                     appState.deeplinkInfo = .empty
                 }
             }
     }
 
-    private func joinCall(with callId: String, callType: String = .default) {
+    private func joinCallIfNeeded(with callId: String, callType: String = .default) {
         guard !callId.isEmpty, viewModel.callingState == .idle else {
             return
         }
