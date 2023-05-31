@@ -28,6 +28,7 @@ struct DeeplinkAdapter {
         }
 
         guard let callId = url.queryParameters["id"] else {
+            log.warning("Unable to handle deeplink because id was missing.")
             return (.empty, nil)
         }
 
@@ -35,6 +36,7 @@ struct DeeplinkAdapter {
         let user = url.queryParameters["user_id"]
             .flatMap { userId in User.builtInUsers.filter({ $0.id == userId }).first }
 
+        log.debug("Deeplink handled was: \(url)")
         return (DeeplinkInfo(callId: callId, callType: callType), user)
     }
 }

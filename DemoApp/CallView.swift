@@ -10,8 +10,8 @@ import Intents
 struct CallView: View {
 
     private var callId: String
+    @Injected(\.streamVideo) var streamVideo
     @StateObject var viewModel: CallViewModel
-    
     @ObservedObject var appState = AppState.shared
     
     init(callId: String) {
@@ -48,8 +48,12 @@ struct CallView: View {
         }
 
         Task {
-            try await appState.streamVideo?.connect()
-            viewModel.joinCall(callId: callId, type: callType)
+            await MainActor.run {
+                Task {
+                    try await streamVideo.connect()
+                    viewModel.joinCall(callId: callId, type: callType)
+                }
+            }
         }
     }
 }

@@ -16,4 +16,22 @@ extension URL {
             result[item.name] = item.value
         }
     }
+
+    public func addQueryParameter(_ key: String, value: String?) -> URL {
+        if #available(iOS 16.0, *) {
+            return appending(queryItems: [.init(name: key, value: value)])
+        } else {
+            guard
+                var components = URLComponents(url: self, resolvingAgainstBaseURL: true)
+            else {
+                return self
+            }
+
+            var queryItems: [URLQueryItem] = components.queryItems ?? []
+            queryItems.append(.init(name: key, value: value))
+            components.queryItems = queryItems
+
+            return components.url ?? self
+        }
+    }
 }

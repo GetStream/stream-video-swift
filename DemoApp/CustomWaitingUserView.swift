@@ -79,9 +79,10 @@ struct CustomWaitingLocalUserView: View {
     
     private var callLink: String {
         Config.baseURL
-            .appendingPathComponent("call")
-            .appendingPathComponent(callType)
-            .appendingPathComponent(callId)
+            .appendingPathComponent("video")
+            .appendingPathComponent("demos")
+            .addQueryParameter("id", value: callId)
+            .addQueryParameter("type", value: callType)
             .absoluteString
     }
     
