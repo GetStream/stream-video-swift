@@ -40,4 +40,6 @@ struct Config {
     static let apiKey = apiKeyStaging
     static let apiKeyStaging = "hd8szvscpxvd"
     static let apiKeyLocal = "892s22ypvt6m"
+    static let baseURL = URL(string: "https://staging.getstream.io/")!
+    static let appURLScheme = "streamvideo"
 }

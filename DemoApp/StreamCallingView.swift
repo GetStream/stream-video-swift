@@ -12,10 +12,11 @@ struct StreamCallingView: View {
     
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
-    
+
     @State var text = ""
     @State var logoutAlertShown = false
-    
+
+    @ObservedObject var appState = AppState.shared
     @ObservedObject var viewModel: CallViewModel
     
     var body: some View {
@@ -110,6 +111,9 @@ struct StreamCallingView: View {
                 secondaryButton: .cancel()
             )
         }
+        .onReceive(appState.$deeplinkInfo, perform: { deeplinkInfo in
+            self.text = deeplinkInfo.callId
+        })
     }
 }
 
@@ -131,3 +135,4 @@ struct CallButtonView: View {
     }
     
 }
+

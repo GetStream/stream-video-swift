@@ -9,7 +9,7 @@ import SwiftUI
 class AppState: ObservableObject {
     
     @Published var userState: UserState = .notLoggedIn
-    @Published var deeplinkCallId: String?
+    @Published var deeplinkInfo: DeeplinkInfo = .empty
     @Published var currentUser: User?
     @Published var loading = false
     @Published var voipPushToken: String? {

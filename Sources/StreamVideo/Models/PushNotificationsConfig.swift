@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct PushNotificationsConfig {
+public struct PushNotificationsConfig: Sendable {
     /// Config for regular push notifications.
     public let pushProviderInfo: PushProviderInfo
     /// Config for voip push notifications.
@@ -36,7 +36,7 @@ public extension PushNotificationsConfig {
     }
 }
 
-public struct PushProviderInfo {
+public struct PushProviderInfo: Sendable {
     public let name: String
     public let pushProvider: PushNotificationsProvider
 }

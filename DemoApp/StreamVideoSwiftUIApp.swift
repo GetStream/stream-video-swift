@@ -5,19 +5,22 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
-import Sentry
 
 @main
 struct StreamVideoSwiftUIApp: App {
-    
-    private let userRepository: UserRepository = UnsecureUserRepository.shared
-    
+
+    // MARK: - State properties
+
     @State var streamVideoUI: StreamVideoUI?
-    
     @ObservedObject var appState = AppState.shared
-    
     @UIApplicationDelegateAdaptor private var appDelegate: AppDelegate
-            
+
+    // MARK: - instance Properties
+
+    private let userRepository: UserRepository = UnsecureUserRepository.shared
+
+    // MARK: - Lifecycle
+
     init() {
         checkLoggedInUser()
         LogConfig.level = .debug
@@ -28,48 +31,53 @@ struct StreamVideoSwiftUIApp: App {
         WindowGroup {
             ZStack {
                 if appState.userState == .loggedIn {
-                    CallView(callId: appState.deeplinkCallId)
+                    CallView(callId: appState.deeplinkInfo.callId)
                 } else {
-                    LoginView() { user in
-                        handleSelectedUser(user)
+                    LoginView() { userCredentials in
+                        handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
                     }
                 }
             }
             .onOpenURL { url in
-                handle(url: url)
+                let (deeplinkInfo, user) = DeeplinkAdapter(baseURL: Config.baseURL).handle(url: url)
+                guard
+                    deeplinkInfo != .empty
+                else {
+                    return
+                }
+                handle(deeplinkInfo: deeplinkInfo, user: user)
+            }
+        }
+    }
+
+    // MARK: - Private Helpers
+
+    private func handle(deeplinkInfo: DeeplinkInfo, user: User?) {
+        Task {
+            if let user = user {
+                try await handleLoggedInUser(user, deeplinkInfo: deeplinkInfo)
+            } else {
+                try await handleGuestUser(deeplinkInfo: deeplinkInfo)
             }
         }
     }
     
-    private func handle(url: URL) {
-        let queryParams = url.queryParameters
-        let users = User.builtInUsers
-        guard let userId = queryParams["user_id"],
-              let callId = queryParams["call_id"] else {
-            return
-        }
-        let user = users.filter { $0.id == userId }.first
-        if let user = user {
-            appState.deeplinkCallId = callId
-            appState.userState = .loggedIn
-            Task {
-                let token = try await TokenService.shared.fetchToken(for: user.id)
-                let credentials = UserCredentials(userInfo: user, token: token)
-                handleSelectedUser(credentials, callId: callId)
-            }
-        }
+    private func handleLoggedInUser(_ user: User, deeplinkInfo: DeeplinkInfo) async throws {
+        let token = try await TokenService.shared.fetchToken(for: user.id)
+        let credentials = UserCredentials(userInfo: user, token: token)
+        handleLoggedInUserCredentials(credentials, deeplinkInfo: deeplinkInfo)
     }
-    
-    private func handleSelectedUser(_ user: UserCredentials, callId: String? = nil) {
+
+    private func handleLoggedInUserCredentials(_ credentials: UserCredentials, deeplinkInfo: DeeplinkInfo) {
         let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
-            user: user.userInfo,
-            token: user.token,
+            user: credentials.userInfo,
+            token: credentials.token,
             videoConfig: VideoConfig(),
             tokenProvider: { result in
                 Task {
                     do {
-                        let token = try await TokenService.shared.fetchToken(for: user.id)
+                        let token = try await TokenService.shared.fetchToken(for: credentials.id)
                         userRepository.save(token: token.rawValue)
                         result(.success(token))
                     } catch {
@@ -78,6 +86,27 @@ struct StreamVideoSwiftUIApp: App {
                 }
             }
         )
+        setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: credentials.userInfo)
+    }
+
+    private func handleGuestUser(deeplinkInfo: DeeplinkInfo) async throws {
+        let user = {
+            guard let currentUser = appState.currentUser, currentUser.id == currentUser.name else {
+                return User.guest(String(UUID().uuidString.prefix(8)))
+            }
+            return currentUser
+        }()
+        let streamVideo = try await StreamVideo(
+            apiKey: Config.apiKey,
+            user: user
+        )
+        setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: user)
+    }
+
+    private func setUp(streamVideo: StreamVideo, deeplinkInfo: DeeplinkInfo, user: User?) {
+        appState.deeplinkInfo = deeplinkInfo
+        appState.currentUser = user
+        appState.userState = .loggedIn
         appState.streamVideo = streamVideo
         let utils = Utils(userListProvider: MockUserListProvider())
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
@@ -85,23 +114,10 @@ struct StreamVideoSwiftUIApp: App {
     }
     
     private func checkLoggedInUser() {
-        if let user = userRepository.loadCurrentUser() {
-            appState.currentUser = user.userInfo
+        if let userCredentials = userRepository.loadCurrentUser() {
+            appState.currentUser = userCredentials.userInfo
             appState.userState = .loggedIn
-            handleSelectedUser(user)
+            handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
         }
     }
-    
-    private func configureSentry() {
-    #if RELEASE
-        // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
-        SentrySDK.start { options in
-            options.dsn = "https://88ee362df1bd400094bfbb587c10ee3b@o14368.ingest.sentry.io/4504356153393152"
-            options.debug = true
-            options.tracesSampleRate = 1.0
-            options.enableAppHangTracking = true
-        }
-    #endif
-    }
-    
 }

@@ -92,8 +92,12 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                         if let code = errorResponse?["code"] as? Int, ClosedRange.tokenInvalidErrorCodes ~= code {
                             log.debug("Access token expired")
                             continuation.resume(throwing: ClientError.InvalidToken())
-                            return
+                        } else {
+                            let requestURLString = request.url?.absoluteString ?? ""
+                            log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))")
+                            continuation.resume(throwing: ClientError.NetworkError(response.description))
                         }
+                        return
                     } else if response.statusCode >= 400 {
                         let requestURLString = request.url?.absoluteString ?? ""
                         let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
