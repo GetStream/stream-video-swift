@@ -10,12 +10,6 @@ struct JoinCallRequestData {
     let joinCallRequest: JoinCallRequest
 }
 
-struct SelectEdgeServerRequestData {
-    let id: String
-    let type: String
-    let getCallEdgeServerRequest: GetCallEdgeServerRequest
-}
-
 struct EventRequestData {
     let id: String
     let type: String

@@ -81,13 +81,6 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/call/\(callType)/\(callId)")
     }
     
-    func getCallEdgeServer(with request: SelectEdgeServerRequestData) async throws -> GetCallEdgeServerResponse {
-        try await execute(
-            request: request.getCallEdgeServerRequest,
-            path: "/call/\(request.type)/\(request.id)/get_edge_server"
-        )
-    }
-    
     func sendEvent(with request: EventRequestData) async throws -> SendEventResponse {
         try await execute(
             request: request.sendEventRequest,

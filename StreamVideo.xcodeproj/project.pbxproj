@@ -422,7 +422,6 @@
 		84DC389629ADFCFD00946713 /* EndCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384529ADFCFC00946713 /* EndCallResponse.swift */; };
 		84DC389729ADFCFD00946713 /* StopLiveResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384629ADFCFC00946713 /* StopLiveResponse.swift */; };
 		84DC389829ADFCFD00946713 /* VideoSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384729ADFCFC00946713 /* VideoSettingsRequest.swift */; };
-		84DC389929ADFCFD00946713 /* GetCallEdgeServerResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384829ADFCFC00946713 /* GetCallEdgeServerResponse.swift */; };
 		84DC389A29ADFCFD00946713 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384929ADFCFC00946713 /* APIError.swift */; };
 		84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384A29ADFCFC00946713 /* PermissionRequestEvent.swift */; };
 		84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC384B29ADFCFC00946713 /* GetOrCreateCallResponse.swift */; };
@@ -466,7 +465,6 @@
 		84DC38C629ADFCFD00946713 /* CallRejectedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387529ADFCFC00946713 /* CallRejectedEvent.swift */; };
 		84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387629ADFCFC00946713 /* UpdateCallResponse.swift */; };
 		84DC38C829ADFCFD00946713 /* Device.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387729ADFCFC00946713 /* Device.swift */; };
-		84DC38C929ADFCFD00946713 /* GetCallEdgeServerRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387829ADFCFC00946713 /* GetCallEdgeServerRequest.swift */; };
 		84DC38CA29ADFCFD00946713 /* UpdateCallRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387929ADFCFC00946713 /* UpdateCallRequest.swift */; };
 		84DC38CB29ADFCFD00946713 /* SortParamRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387A29ADFCFC00946713 /* SortParamRequest.swift */; };
 		84DC38CC29ADFCFD00946713 /* RequestPermissionResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC387B29ADFCFC00946713 /* RequestPermissionResponse.swift */; };
@@ -1029,7 +1027,6 @@
 		84DC384529ADFCFC00946713 /* EndCallResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EndCallResponse.swift; sourceTree = "<group>"; };
 		84DC384629ADFCFC00946713 /* StopLiveResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StopLiveResponse.swift; sourceTree = "<group>"; };
 		84DC384729ADFCFC00946713 /* VideoSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = VideoSettingsRequest.swift; sourceTree = "<group>"; };
-		84DC384829ADFCFC00946713 /* GetCallEdgeServerResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCallEdgeServerResponse.swift; sourceTree = "<group>"; };
 		84DC384929ADFCFC00946713 /* APIError.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIError.swift; sourceTree = "<group>"; };
 		84DC384A29ADFCFC00946713 /* PermissionRequestEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PermissionRequestEvent.swift; sourceTree = "<group>"; };
 		84DC384B29ADFCFC00946713 /* GetOrCreateCallResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetOrCreateCallResponse.swift; sourceTree = "<group>"; };
@@ -1073,7 +1070,6 @@
 		84DC387529ADFCFC00946713 /* CallRejectedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallRejectedEvent.swift; sourceTree = "<group>"; };
 		84DC387629ADFCFC00946713 /* UpdateCallResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallResponse.swift; sourceTree = "<group>"; };
 		84DC387729ADFCFC00946713 /* Device.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Device.swift; sourceTree = "<group>"; };
-		84DC387829ADFCFC00946713 /* GetCallEdgeServerRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = GetCallEdgeServerRequest.swift; sourceTree = "<group>"; };
 		84DC387929ADFCFC00946713 /* UpdateCallRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = UpdateCallRequest.swift; sourceTree = "<group>"; };
 		84DC387A29ADFCFC00946713 /* SortParamRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SortParamRequest.swift; sourceTree = "<group>"; };
 		84DC387B29ADFCFC00946713 /* RequestPermissionResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RequestPermissionResponse.swift; sourceTree = "<group>"; };
@@ -1987,7 +1983,6 @@
 				84DC384529ADFCFC00946713 /* EndCallResponse.swift */,
 				84DC384629ADFCFC00946713 /* StopLiveResponse.swift */,
 				84DC384729ADFCFC00946713 /* VideoSettingsRequest.swift */,
-				84DC384829ADFCFC00946713 /* GetCallEdgeServerResponse.swift */,
 				84DC384929ADFCFC00946713 /* APIError.swift */,
 				84DC384A29ADFCFC00946713 /* PermissionRequestEvent.swift */,
 				84DC384B29ADFCFC00946713 /* GetOrCreateCallResponse.swift */,
@@ -2031,7 +2026,6 @@
 				84DC387529ADFCFC00946713 /* CallRejectedEvent.swift */,
 				84DC387629ADFCFC00946713 /* UpdateCallResponse.swift */,
 				84DC387729ADFCFC00946713 /* Device.swift */,
-				84DC387829ADFCFC00946713 /* GetCallEdgeServerRequest.swift */,
 				84DC387929ADFCFC00946713 /* UpdateCallRequest.swift */,
 				84DC387A29ADFCFC00946713 /* SortParamRequest.swift */,
 				84DC387B29ADFCFC00946713 /* RequestPermissionResponse.swift */,
@@ -2843,7 +2837,6 @@
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				84DC38D829ADFCFD00946713 /* JoinCallRequest.swift in Sources */,
 				843B5C722A1D02430013349E /* StopBroadcastingResponse.swift in Sources */,
-				84DC38C929ADFCFD00946713 /* GetCallEdgeServerRequest.swift in Sources */,
 				84AF64D2287C78E70012A503 /* User.swift in Sources */,
 				84274F482884251600CF8794 /* InternetConnection.swift in Sources */,
 				436424A72A118E0300CB4A7B /* NotificationSettings.swift in Sources */,
@@ -2896,7 +2889,6 @@
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
 				84A737D128F4716E001A6769 /* events.pb.swift in Sources */,
-				84DC389929ADFCFD00946713 /* GetCallEdgeServerResponse.swift in Sources */,
 				84DC38C129ADFCFD00946713 /* CallRequest.swift in Sources */,
 				84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */,
 				8490032629D308A000AD9BB4 /* TranscriptionSettings.swift in Sources */,

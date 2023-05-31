@@ -21,12 +21,14 @@ internal struct CallStateResponseFields: Codable, JSONEncodable, Hashable {
     /** List of call members */
     internal var members: [MemberResponse]
     internal var membership: MemberResponse?
+    internal var ownCapabilities: [OwnCapability]
 
-    internal init(blockedUsers: [UserResponse], call: CallResponse, members: [MemberResponse], membership: MemberResponse? = nil) {
+    internal init(blockedUsers: [UserResponse], call: CallResponse, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
         self.blockedUsers = blockedUsers
         self.call = call
         self.members = members
         self.membership = membership
+        self.ownCapabilities = ownCapabilities
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
@@ -34,6 +36,7 @@ internal struct CallStateResponseFields: Codable, JSONEncodable, Hashable {
         case call
         case members
         case membership
+        case ownCapabilities = "own_capabilities"
     }
 
     // Encodable protocol methods
@@ -44,6 +47,7 @@ internal struct CallStateResponseFields: Codable, JSONEncodable, Hashable {
         try container.encode(call, forKey: .call)
         try container.encode(members, forKey: .members)
         try container.encodeIfPresent(membership, forKey: .membership)
+        try container.encode(ownCapabilities, forKey: .ownCapabilities)
     }
 }
 

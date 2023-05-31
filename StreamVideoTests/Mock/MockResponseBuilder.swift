@@ -41,7 +41,6 @@ class MockResponseBuilder {
             hlsPlaylistUrl: "",
             id: "test",
             ingress: callIngressResponse,
-            ownCapabilities: [.sendAudio, .sendVideo],
             recording: false,
             session: session,
             settings: makeCallSettingsResponse(),

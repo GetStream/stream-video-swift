@@ -56,7 +56,7 @@ class CallCoordinatorController: @unchecked Sendable {
             )
         }
         let callSettings = CallSettingsInfo(
-            callCapabilities: response.call.ownCapabilities.map(\.rawValue),
+            callCapabilities: response.ownCapabilities.map(\.rawValue),
             callSettings: response.call.settings,
             state: response.call.toCallData(
                 members: response.members,

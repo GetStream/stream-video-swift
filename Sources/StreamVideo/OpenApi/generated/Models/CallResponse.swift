@@ -34,8 +34,6 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Call ID */
     internal var id: String
     internal var ingress: CallIngressResponse
-    /** The capabilities of the current user */
-    internal var ownCapabilities: [OwnCapability]
     internal var recording: Bool
     internal var session: CallSessionResponse?
     internal var settings: CallSettingsResponse
@@ -48,7 +46,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, ownCapabilities: [OwnCapability], recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.broadcasting = broadcasting
@@ -61,7 +59,6 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         self.hlsPlaylistUrl = hlsPlaylistUrl
         self.id = id
         self.ingress = ingress
-        self.ownCapabilities = ownCapabilities
         self.recording = recording
         self.session = session
         self.settings = settings
@@ -85,7 +82,6 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         case hlsPlaylistUrl = "hls_playlist_url"
         case id
         case ingress
-        case ownCapabilities = "own_capabilities"
         case recording
         case session
         case settings
@@ -112,7 +108,6 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(hlsPlaylistUrl, forKey: .hlsPlaylistUrl)
         try container.encode(id, forKey: .id)
         try container.encode(ingress, forKey: .ingress)
-        try container.encode(ownCapabilities, forKey: .ownCapabilities)
         try container.encode(recording, forKey: .recording)
         try container.encodeIfPresent(session, forKey: .session)
         try container.encode(settings, forKey: .settings)
