@@ -18,7 +18,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
-        
         AssertSnapshot(layout)
     }
     
@@ -31,7 +30,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
-        
         AssertSnapshot(layout)
     }
     
@@ -45,7 +43,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
-            
             AssertSnapshot(layout, suffix: "\(quality)")
         }
     }
@@ -59,7 +56,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
-        
         AssertSnapshot(layout)
     }
 }

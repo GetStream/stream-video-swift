@@ -16,7 +16,6 @@ final class ScreenSharingView_Tests: StreamVideoUITestCase {
             screenSharing: .init(track: .none, participant: ParticipantFactory.get(2).last!),
             availableSize: defaultScreenSize
         )
-        
         AssertSnapshot(view)
     }
 }

@@ -25,7 +25,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
-            
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
         }
     }
@@ -41,7 +40,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
-            
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
         }
     }
@@ -58,7 +56,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
-            
             AssertSnapshot(layout, suffix: "\(quality)")
         }
     }
@@ -74,7 +71,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
-            
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
         }
     }
