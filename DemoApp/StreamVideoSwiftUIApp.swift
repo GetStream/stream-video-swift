@@ -38,19 +38,22 @@ struct StreamVideoSwiftUIApp: App {
                     }
                 }
             }
-            .onOpenURL { url in
-                let (deeplinkInfo, user) = DeeplinkAdapter(baseURL: Config.baseURL).handle(url: url)
-                guard
-                    deeplinkInfo != .empty
-                else {
-                    return
-                }
-                handle(deeplinkInfo: deeplinkInfo, user: user)
-            }
+            .onOpenURL { handle(url: $0) }
+            .onContinueUserActivity(NSUserActivityTypeBrowsingWeb) { $0.webpageURL.map { url in handle(url: url) } }
         }
     }
 
     // MARK: - Private Helpers
+
+    private func handle(url: URL) {
+        let (deeplinkInfo, user) = DeeplinkAdapter(baseURL: Config.baseURL).handle(url: url)
+        guard
+            deeplinkInfo != .empty
+        else {
+            return
+        }
+        handle(deeplinkInfo: deeplinkInfo, user: user)
+    }
 
     private func handle(deeplinkInfo: DeeplinkInfo, user: User?) {
         Task {
