@@ -138,8 +138,7 @@ public struct CallView<Factory: ViewFactory>: View {
             LocalVideoView(
                 viewFactory: viewFactory,
                 participant: localParticipant,
-                callSettings: viewModel.callSettings,
-                showBackground: false
+                callSettings: viewModel.callSettings
             ) { view in
                 if let track = viewModel.localParticipant?.track {
                     view.add(track: track)
