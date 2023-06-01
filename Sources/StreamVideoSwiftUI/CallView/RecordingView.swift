@@ -2,12 +2,9 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-import StreamVideo
 import SwiftUI
 
 public struct RecordingView: View {
-    
-    @Injected(\.colors) var colors
     
     public init() { /* Public init. */}
     
