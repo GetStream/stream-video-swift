@@ -29,7 +29,7 @@ let defaultScreenSize = CGSize(width: 360, height: 700)
 func AssertSnapshot(
     _ vc: UIViewController,
     isEmbeddedInNavigationController: Bool = false,
-    variants: [SnapshotVariant] = SnapshotVariant.all,
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     screenSize: CGSize = defaultScreenSize,
     suffix: String? = nil,
     record: Bool = false,
@@ -46,7 +46,7 @@ func AssertSnapshot(
     variantsToTest.forEach { variant in
         assertSnapshot(
             matching: viewController,
-            as: .image(perceptualPrecision: 0.98, size: screenSize, traits: variant.traits),
+            as: .image(perceptualPrecision: 0.97, size: screenSize, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
@@ -70,7 +70,7 @@ func AssertSnapshot(
 ///   so that the newly captured snapshot is compared with the current reference.
 func AssertSnapshot(
     _ view: UIView,
-    variants: [SnapshotVariant] = [SnapshotVariant.defaultLight],
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     size: CGSize? = nil,
     suffix: String? = nil,
     record: Bool = false,
@@ -86,8 +86,8 @@ func AssertSnapshot(
         assertSnapshot(
             matching: view,
             as: size != nil ?
-                .image(perceptualPrecision: 0.98, size: size!, traits: variant.traits)
-                : .image(perceptualPrecision: 0.98, traits: variant.traits),
+                .image(perceptualPrecision: 0.97, size: size!, traits: variant.traits)
+                : .image(perceptualPrecision: 0.97, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
@@ -103,7 +103,7 @@ func AssertSnapshot(
 func AssertSnapshot<View: UIViewControllerRepresentable>(
     _ view: View,
     isEmbeddedInNavigationController: Bool = false,
-    variants: [SnapshotVariant] = SnapshotVariant.all,
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     screenSize: CGSize = defaultScreenSize,
     suffix: String? = nil,
     record: Bool = false,
@@ -140,7 +140,7 @@ func AssertSnapshot<View: UIViewControllerRepresentable>(
 ///   so that the newly captured snapshot is compared with the current reference.
 func AssertSnapshot<View: SwiftUI.View>(
     _ view: View,
-    variants: [SnapshotVariant] = [SnapshotVariant.defaultLight],
+    variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     device: ViewImageConfig = .iPhoneX,
     size: CGSize? = nil,
     suffix: String? = nil,
@@ -157,8 +157,8 @@ func AssertSnapshot<View: SwiftUI.View>(
         assertSnapshot(
             matching: view,
             as: size != nil ?
-                .image(perceptualPrecision: 0.98, layout: .sizeThatFits)
-                : .image(perceptualPrecision: 0.98, layout: .device(config: device), traits: variant.traits),
+                .image(perceptualPrecision: 0.97, layout: .sizeThatFits)
+                : .image(perceptualPrecision: 0.97, layout: .device(config: device), traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,

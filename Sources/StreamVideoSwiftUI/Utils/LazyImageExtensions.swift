@@ -26,3 +26,27 @@ extension LazyImage {
         return
     }
 }
+
+@available(iOS 14.0, *)
+struct StreamLazyImage: View {
+    
+    var imageURL: URL?
+    
+    public init(imageURL: URL?) {
+        self.imageURL = imageURL
+    }
+    
+    public var body: some View {
+        #if STREAM_TESTS
+        if let imageURL = imageURL,
+           imageURL.isFileURL,
+           let image = UIImage(contentsOfFile: imageURL.path)  {
+            Image(image)
+        } else {
+            LazyImage(imageURL: imageURL)
+        }
+        #else
+        LazyImage(imageURL: imageURL)
+        #endif
+    }
+}

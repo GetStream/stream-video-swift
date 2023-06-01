@@ -20,7 +20,7 @@ public struct UserAvatar: View {
     }
     
     public var body: some View {
-        LazyImage(imageURL: imageURL)
+        StreamLazyImage(imageURL: imageURL)
             .frame(width: size, height: size)
             .clipShape(Circle())
     }
