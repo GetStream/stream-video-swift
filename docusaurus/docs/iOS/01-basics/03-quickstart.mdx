@@ -169,7 +169,7 @@ In the example, we're also setting a `CallModifier` to the view. With this modif
 Lastly, we are also calling `streamVideo.connect()` in the `.onAppear` modifier. This is necessary, so that the user we've set during initialization of the `StreamVideo` object is connected to the backend.
 
 :::note
-In a production application we would call the `.connect()` function earlier during our login flow. For the sake of this tutorial we're simplifying this here. The way we retrieve the `streamVideo` object here is through the `@Injected` property wrapper (read more on [this page](../ui/injecting-dependencies.md).)
+In a production application we would call the `.connect()` function earlier during our login flow. For the sake of this tutorial we're simplifying this here. The way we retrieve the `streamVideo` object here is through the `@Injected` property wrapper (read more on [this page](../../guides/dependency-injection).)
 :::
 
 ### UI Customizations
@@ -196,7 +196,7 @@ streamVideo = StreamVideoUI(
 )
 ```
 
-If you want to learn about all the possible appearance customizations (fonts, colors, icons and sounds), please check the following [page](../ui/ui-overview.md).
+If you want to learn about all the possible appearance customizations (fonts, colors, icons and sounds), please check the following [page](../../ui-components/overview).
 
 #### View Customizations
 
@@ -253,7 +253,7 @@ struct ContentView: View {
 }
 ```
 
-For the full list of supported view slots that can be swapped, please refer to this [page](../../ui/view-slots.md).
+For the full list of supported view slots that can be swapped, please refer to this [page](../../guides/view-slots).
 
 ### Permissions
 

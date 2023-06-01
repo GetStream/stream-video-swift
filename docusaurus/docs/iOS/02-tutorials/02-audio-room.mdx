@@ -7,12 +7,12 @@ description: How to build an audio room using Stream's video SDKs
 TODO before launch:
 
 - Make the tutorial shorter, it's very big
-- Update the tutorial not to use hardcoded tokens 
+- Update the tutorial not to use hardcoded tokens
 - Update the UI section with "raise hand" features
 - Record demo videos to showcase what is built in this guide
 - Polish the intro with sample video and relevant explanation of it
 - find good way to address repeating installation and setup guide
-:::
+  :::
 
 In this guide, you'll build an audio room experience similar to Twitter Spaces / Clubhouse.m
 
@@ -49,7 +49,7 @@ Select the package that pops up and make sure for _Dependency Rule_ to select _B
 // TODO: record a gif that shows the process
 
 :::note
-The other two packages `StreamVideoSwiftUI` and `StreamVideoUIKit` provide built-in UI elements, ready for you to use and customize. For a tutorial on how to use these take a look [here](./video-call.md). For this one, you'll build out the UI yourself.
+The other two packages `StreamVideoSwiftUI` and `StreamVideoUIKit` provide built-in UI elements, ready for you to use and customize. For a tutorial on how to use these take a look [here](../video-calling). For this one, you'll build out the UI yourself.
 :::
 
 With this, the project is set up and all dependencies are installed.
@@ -519,10 +519,10 @@ class AudioRoomViewModel: ObservableObject {
    @Injected(\.streamVideo) var streamVideo
 
        @Published var callViewModel = CallViewModel()
-    
+
     @Published var hosts = [CallParticipant]()
     @Published var otherUsers = [CallParticipant]()
-    
+
     @Published var hasPermissionsToSpeak = false
     @Published var isUserMuted = true
     @Published var loading = true
@@ -543,13 +543,13 @@ class AudioRoomViewModel: ObservableObject {
             }
         }
     }
-    
+
     var permissionRequest: PermissionRequest? {
         didSet {
             permissionPopupShown = permissionRequest != nil
         }
     }
-    
+
     private let audioRoom: AudioRoom
     private var cancellables = Set<AnyCancellable>()
     private var call: Call {
@@ -596,7 +596,7 @@ private func update(participants: [String: CallParticipant]) {
     }
     .map { $0.value }
     .sorted(by: { $0.name < $1.name })
-    
+
     for (userId, capabilities) in activeCallPermissions {
         if capabilities.contains("send-audio"),
             let participant = findUser(with: userId, in: participants) {
@@ -604,7 +604,7 @@ private func update(participants: [String: CallParticipant]) {
             hostIds.append(userId)
         }
     }
-    
+
     self.otherUsers = participants.filter { (key, participant) in
         !hostIds.contains(participant.userId)
     }
@@ -697,7 +697,7 @@ init(audioRoom: AudioRoom) {
 
 ### Backstage
 
-When you create a call with the call type `audio_room`, by default, it goes to a backstage. Backstage means that only hosts or users with elevated permissions can join the call. In order to make it available for everyone, you will need to go live. 
+When you create a call with the call type `audio_room`, by default, it goes to a backstage. Backstage means that only hosts or users with elevated permissions can join the call. In order to make it available for everyone, you will need to go live.
 
 To do that, you should use the corresponding method from the `Call`:
 
@@ -733,7 +733,7 @@ func raiseHand() {
 }
 ```
 
-When this method is called, a new permission request will be send to the users who can grant these permissions. We have already seen above how to listen to these requests, by calling the method `subscribeForPermissionsRequests`. Next, let's see how to handle these events. 
+When this method is called, a new permission request will be send to the users who can grant these permissions. We have already seen above how to listen to these requests, by calling the method `subscribeForPermissionsRequests`. Next, let's see how to handle these events.
 
 After a request is stored in the view model, it automatically updates a variable that controls the presentation of an alert:
 
@@ -998,7 +998,7 @@ You are done. Run the app and you can enter rooms and speak with other people (o
 
 In this guide, you have built an application that is similar to Clubhouse or Twitter Spaces using the `StreamVideo` SDK from scratch. You've only used the low-level client and built out the UI completely on your own.
 
-There are other options that you have with the `StreamVideo` SDK. You can add video functionality to your application as easily as adding one modifier. Don't believe us? Check out our [guide here](./video-call.md). Want to add live streaming to your application? There is [a guide](./livestream.md) for that as well.
+There are other options that you have with the `StreamVideo` SDK. You can add video functionality to your application as easily as adding one modifier. Don't believe us? Check out our [guide here](../video-calling). Want to add live streaming to your application? There is [a guide](../livestream) for that as well.
 
 The `StreamVideo` SDK is built to be flexible and adjustable to your use case. This might be using the built-in components that have been carefully designed and engineered by our fantastic team. Or this might be a completely custom UI and only use the low-level client for the logic (as you've done in this guide).
 

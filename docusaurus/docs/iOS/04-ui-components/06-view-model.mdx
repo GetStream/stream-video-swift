@@ -13,7 +13,7 @@ The `CallViewModel` is an observable object, and it can be used with both SwiftU
 
 ### Calling State
 
-The `CallViewModel` exposes a `@Published` `callingState` variable, that can be used to track the current state of a call. It should be used to show different UI in your views. You can find more information about the `callingState` [here](./call-state.md).
+The `CallViewModel` exposes a `@Published` `callingState` variable, that can be used to track the current state of a call. It should be used to show different UI in your views. You can find more information about the `callingState` [here](../../guides/call-state).
 
 ### Starting a call
 
@@ -111,6 +111,7 @@ When there is a screen sharing session in progress, it can be accessed via the `
 ### Other properties
 
 Here are some other useful properties from the view model that you can use to build custom calling experiences:
+
 - `error` - optional, has a value if there was an error. You can use it to display more detailed error messages to users.
 - `errorAlertShown` - if the error has a value, it's true. You can use it to control the visibility of an alert presented to the user.
 - `participantsShown` - whether the list of participants is shown during the call.

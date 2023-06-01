@@ -6,9 +6,10 @@ description: An overview of how to create calls and join them
 ### Joining calls
 
 There are several ways to join a call:
+
 - if you know the call id and type
 - if you receive an incoming call event and decide to join it
-- if you have a link to the call (deep linking support required, more info [here](./deep-linking.md))
+- if you have a link to the call (deep linking support required, more info [here](../../advanced/deeplinking))
 
 #### Join with call id and type
 
@@ -27,18 +28,20 @@ try await call.join(ring: ring, callSettings: callSettings)
 ```
 
 The `join` method has two optional parameters:
+
 - `ring` - whether the call should ring
 - `callSettings` - the current user's call settings (whether audio/video is on and camera position).
 
 If you want to just create the call on the server (and not join it), you should use the `getOrCreate` method:
 
 ```swift
-let callData = try await call.getOrCreate(members: members, startsAt: Date(), customData: [:], membersLimit: 100, ring: false)                
+let callData = try await call.getOrCreate(members: members, startsAt: Date(), customData: [:], membersLimit: 100, ring: false)
 ```
 
 This method will either get an already existing call with the call id and call type, or create a new one.
 
 All parameters are optional in this method:
+
 - `members` - the list of members in the call
 - `startsAt` - the starting date of the call
 - `customData` - any custom data you want to pass to the call
