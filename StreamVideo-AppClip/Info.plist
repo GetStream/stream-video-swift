@@ -25,6 +25,10 @@
 		<key>NSAppClipRequestLocationConfirmation</key>
 		<false/>
 	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>DemoApp requires camera access in order to capture and transmit video</string>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>DemoApp requires microphone access in order to capture and transmit audio</string>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIRequiresFullScreen</key>

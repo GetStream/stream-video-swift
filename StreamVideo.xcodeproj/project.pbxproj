@@ -33,6 +33,7 @@
 		40B713992A2786FB00D1FE67 /* ShareButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B22A23F8C6000714CE /* ShareButtonView.swift */; };
 		40B7139A2A27870200D1FE67 /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
 		40B7139C2A2789BA00D1FE67 /* StreamCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47AC2A210C6A000714CE /* StreamCallingView.swift */; };
+		40BE29622A28B866007418E8 /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 40BE29612A28B866007418E8 /* AppIntentVocabulary.plist */; };
 		436424A42A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436424992A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift */; };
 		436424A52A118E0300CB4A7B /* EventNotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4364249A2A118E0300CB4A7B /* EventNotificationSettings.swift */; };
 		436424A62A118E0300CB4A7B /* NotificationSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4364249B2A118E0300CB4A7B /* NotificationSettingsRequest.swift */; };
@@ -761,6 +762,7 @@
 		40B713792A27824000D1FE67 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
 		40B7137B2A27824000D1FE67 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		40B7137C2A27824000D1FE67 /* StreamVideo_AppClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StreamVideo_AppClip.entitlements; sourceTree = "<group>"; };
+		40BE29612A28B866007418E8 /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		436424992A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallSessionParticipantJoinedEvent.swift; sourceTree = "<group>"; };
 		4364249A2A118E0300CB4A7B /* EventNotificationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventNotificationSettings.swift; sourceTree = "<group>"; };
 		4364249B2A118E0300CB4A7B /* NotificationSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationSettingsRequest.swift; sourceTree = "<group>"; };
@@ -1668,6 +1670,7 @@
 				8403C0AE2897D9940092BD43 /* VoipPushService.swift */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
 				842D8BD72865B37800801910 /* Preview Content */,
+				40BE29612A28B866007418E8 /* AppIntentVocabulary.plist */,
 			);
 			path = DemoApp;
 			sourceTree = "<group>";
@@ -2796,6 +2799,7 @@
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
+				40BE29622A28B866007418E8 /* AppIntentVocabulary.plist in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
