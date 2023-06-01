@@ -12,7 +12,6 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     
     private let callSettings: CallSettings
-    private var showBackground: Bool
     private var onLocalVideoUpdate: (VideoRenderer) -> Void
     private var viewFactory: Factory
     private var participant: CallParticipant
@@ -23,14 +22,12 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
         participant: CallParticipant,
         idSuffix: String = "local",
         callSettings: CallSettings,
-        showBackground: Bool = true,
         onLocalVideoUpdate: @escaping (VideoRenderer) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
         self.idSuffix = idSuffix
         self.callSettings = callSettings
-        self.showBackground = showBackground
         self.onLocalVideoUpdate = onLocalVideoUpdate
     }
             
