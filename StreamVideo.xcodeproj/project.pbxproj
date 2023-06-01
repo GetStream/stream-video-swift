@@ -34,6 +34,7 @@
 		40B7139A2A27870200D1FE67 /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
 		40B7139C2A2789BA00D1FE67 /* StreamCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47AC2A210C6A000714CE /* StreamCallingView.swift */; };
 		40BE29622A28B866007418E8 /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 40BE29612A28B866007418E8 /* AppIntentVocabulary.plist */; };
+		40BE29892A28C86D007418E8 /* incoming.aac in Resources */ = {isa = PBXBuildFile; fileRef = 40BE29882A28C86D007418E8 /* incoming.aac */; };
 		436424A42A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 436424992A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift */; };
 		436424A52A118E0300CB4A7B /* EventNotificationSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4364249A2A118E0300CB4A7B /* EventNotificationSettings.swift */; };
 		436424A62A118E0300CB4A7B /* NotificationSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4364249B2A118E0300CB4A7B /* NotificationSettingsRequest.swift */; };
@@ -268,7 +269,6 @@
 		8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872928A3F935002A81BF /* OutgoingCallView.swift */; };
 		8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872D28A4EC1F002A81BF /* CallSettings.swift */; };
 		8458B704290ACF2A00F8E487 /* CallSoundsPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458B703290ACF2A00F8E487 /* CallSoundsPlayer.swift */; };
-		8458B706290ACFE400F8E487 /* incoming.wav in Resources */ = {isa = PBXBuildFile; fileRef = 8458B705290ACFE400F8E487 /* incoming.wav */; };
 		845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
 		8468821328DFA448003BA9EE /* LocalStorage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* LocalStorage.swift */; };
 		8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */; };
@@ -763,6 +763,7 @@
 		40B7137B2A27824000D1FE67 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		40B7137C2A27824000D1FE67 /* StreamVideo_AppClip.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = StreamVideo_AppClip.entitlements; sourceTree = "<group>"; };
 		40BE29612A28B866007418E8 /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
+		40BE29882A28C86D007418E8 /* incoming.aac */ = {isa = PBXFileReference; lastKnownFileType = file; path = incoming.aac; sourceTree = "<group>"; };
 		436424992A118E0300CB4A7B /* CallSessionParticipantJoinedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallSessionParticipantJoinedEvent.swift; sourceTree = "<group>"; };
 		4364249A2A118E0300CB4A7B /* EventNotificationSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EventNotificationSettings.swift; sourceTree = "<group>"; };
 		4364249B2A118E0300CB4A7B /* NotificationSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = NotificationSettingsRequest.swift; sourceTree = "<group>"; };
@@ -952,7 +953,6 @@
 		8458872928A3F935002A81BF /* OutgoingCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView.swift; sourceTree = "<group>"; };
 		8458872D28A4EC1F002A81BF /* CallSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettings.swift; sourceTree = "<group>"; };
 		8458B703290ACF2A00F8E487 /* CallSoundsPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSoundsPlayer.swift; sourceTree = "<group>"; };
-		8458B705290ACFE400F8E487 /* incoming.wav */ = {isa = PBXFileReference; lastKnownFileType = audio.wav; path = incoming.wav; sourceTree = "<group>"; };
 		845C573128DDC57A00D38FCC /* DemoAppUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAppUtils.swift; sourceTree = "<group>"; };
 		8468821228DFA448003BA9EE /* LocalStorage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalStorage.swift; sourceTree = "<group>"; };
 		8469593129BB3D7500134EA0 /* SignalServer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SignalServer_Tests.swift; sourceTree = "<group>"; };
@@ -1713,7 +1713,7 @@
 			isa = PBXGroup;
 			children = (
 				8415D3E0290B2AF2006E53CB /* outgoing.m4a */,
-				8458B705290ACFE400F8E487 /* incoming.wav */,
+				40BE29882A28C86D007418E8 /* incoming.aac */,
 				8434C53D289BBF020001490A /* Localizable.strings */,
 				8434C540289BBF120001490A /* Localizable.stringsdict */,
 				842C7EBD28A2B31400C2AB7F /* Assets.xcassets */,
@@ -2833,8 +2833,8 @@
 			files = (
 				8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */,
 				8434C539289BBBBA0001490A /* L10n_template.stencil in Resources */,
-				8458B706290ACFE400F8E487 /* incoming.wav in Resources */,
 				8434C53B289BBF020001490A /* Localizable.strings in Resources */,
+				40BE29892A28C86D007418E8 /* incoming.aac in Resources */,
 				842C7EBE28A2B31400C2AB7F /* Assets.xcassets in Resources */,
 				8434C53E289BBF120001490A /* Localizable.stringsdict in Resources */,
 			);
@@ -3611,7 +3611,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -3649,7 +3649,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = "UIInterfaceOrientationPortrait UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
