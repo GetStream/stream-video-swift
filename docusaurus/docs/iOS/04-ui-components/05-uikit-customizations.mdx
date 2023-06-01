@@ -6,7 +6,7 @@ In order to enable a smoother video integration in your UIKit projects, we provi
 
 ### View Factory Customizations
 
-As described in the [customizing views](./customizing-views.md) section, we allow swapping of the default UI components with your custom ones. To achieve this, you will need to create your own implementation of the `ViewFactory` protocol.
+As described in the [customizing views](../customizing-views) section, we allow swapping of the default UI components with your custom ones. To achieve this, you will need to create your own implementation of the `ViewFactory` protocol.
 
 In our UIKit components, we expose a `CallViewController` that can be easily used in UIKit based projects. The `CallViewController` uses the default `ViewFactory` implementation from the SwiftUI SDK. However, you can easily inject your own implementation, by subclassing the `CallViewController` and providing your own implementation of the `setupVideoView` method.
 

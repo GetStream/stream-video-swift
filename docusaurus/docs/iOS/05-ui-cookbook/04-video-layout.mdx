@@ -25,10 +25,10 @@ In order to start a call, you will need to know the call's id. Let's add a simpl
 
 ```swift
 struct JoinCallView: View {
-    
+
     @State var callId = ""
     @ObservedObject var viewModel: CallViewModel
-    
+
     var body: some View {
         VStack {
             TextField("Insert call id", text: $callId)
@@ -42,7 +42,7 @@ struct JoinCallView: View {
         }
         .padding()
     }
-    
+
 }
 ```
 
@@ -54,15 +54,15 @@ Next, let's use this view in a container view, called `HomeView`, that will also
 
 ```swift
 struct HomeView: View {
-    
+
     @ObservedObject var appState: AppState
-    
+
     @StateObject var viewModel = CallViewModel()
-        
+
     var body: some View {
         ZStack {
             JoinCallView(viewModel: viewModel)
-            
+
             if viewModel.callingState == .joining {
                 ProgressView()
             } else if viewModel.callingState == .inCall {
@@ -73,7 +73,7 @@ struct HomeView: View {
 }
 ```
 
-In this view, we are creating the `CallViewModel`, that allows us to start a call, but also listen to the `callingState`. We can use this `@Published` variable to update our UI accordingly. 
+In this view, we are creating the `CallViewModel`, that allows us to start a call, but also listen to the `callingState`. We can use this `@Published` variable to update our UI accordingly.
 
 When the call is in the `.joining` state, we can show a `ProgressView`. Whenever it changes to the `.inCall` state (which means the user has joined the call), we can show our custom `CallView`.
 
@@ -99,9 +99,9 @@ There are default sort comparators, that you can use to sort the participants. T
 public let defaultComparators: [Comparator<CallParticipant>] = [
     pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
 ]
-``` 
+```
 
-You can provide your own ordering by calling the `sorted(using: comparators)`  method on the `CallParticipants`.
+You can provide your own ordering by calling the `sorted(using: comparators)` method on the `CallParticipants`.
 
 Additionally, you can access the same properties for the local user, via the `CallViewModel`'s `localParticipant` variable.
 
@@ -123,7 +123,7 @@ var body: some View {
                         }
                     }
                 }
-                
+
                 VStack {
                     Spacer()
                     CustomCallControlsView(viewModel: viewModel)
@@ -134,7 +134,7 @@ var body: some View {
         .cornerRadius(32)
         .padding(.bottom)
         .padding(.horizontal)
-        
+
         ScrollView(.horizontal) {
             HStack {
                 ForEach(participants.dropFirst()) { participant in
@@ -150,7 +150,7 @@ var body: some View {
 }
 ```
 
-Our main container would be a `VStack`, that consists of two parts - the dominant speaker view and the scrollable participant list. 
+Our main container would be a `VStack`, that consists of two parts - the dominant speaker view and the scrollable participant list.
 Additionally, the dominant speaker view also shows the call controls for the current user, which means we can use a `ZStack`.
 
 #### Dominant speaker view
@@ -163,9 +163,9 @@ Next, let's see the `CustomCallControlsView`:
 
 ```swift
 struct CustomCallControlsView: View {
-    
+
     @ObservedObject var viewModel: CallViewModel
-    
+
     var body: some View {
         HStack(spacing: 32) {
             VideoIconView(viewModel: viewModel)
@@ -179,7 +179,7 @@ struct CustomCallControlsView: View {
 }
 ```
 
-In this example, we are building a custom call controls view, using buttons from the SDK, for muting video/audio, toggling camera and hanging up. You can easily add your own UI elements in the `HStack` above. You can use the `CallViewModel` for the standard call-related actions, or use the `Call` object directly for custom events and reactions (as described [here](../advanced/custom-events.md)), and for permissions related actions (as described [here](../advanced/permissions.md)).
+In this example, we are building a custom call controls view, using buttons from the SDK, for muting video/audio, toggling camera and hanging up. You can easily add your own UI elements in the `HStack` above. You can use the `CallViewModel` for the standard call-related actions, or use the `Call` object directly for custom events and reactions (as described [here](../../advanced/events)), and for permissions related actions (as described [here](../../guides/permissions-and-moderation)).
 
 #### Horizontally scrollable list
 
@@ -199,9 +199,9 @@ Here, we drop the first element (that's displayed in the dominant speaker view) 
 
 ```swift
 struct BottomParticipantView: View {
-    
+
     var participant: CallParticipant
-    
+
     var body: some View {
         UserAvatar(imageURL: participant.profileImageURL, size: 80)
             .overlay(
@@ -212,7 +212,7 @@ struct BottomParticipantView: View {
                 : nil
             )
     }
-    
+
 }
 ```
 
@@ -220,7 +220,7 @@ This is a simple view that makes use of our `UserAvatar` view for displaying the
 
 ```swift
 struct MuteIndicatorView: View {
-    
+
     var body: some View {
         Image(systemName: "mic.slash.fill")
             .resizable()

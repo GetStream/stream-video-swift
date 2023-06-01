@@ -37,7 +37,7 @@ let streamVideo = StreamVideo(
 
 ### VoIP Notifications
 
-The VoIP notifications are sent only when a new call is created and the `ring` flag is set to true. You can find more details about the setup in the [CallKit integration guide](./callkit-integration.md).
+The VoIP notifications are sent only when a new call is created and the `ring` flag is set to true. You can find more details about the setup in the [CallKit integration guide](../callkit-integration).
 
 When a VoIP notification is sent, a regular push notification is not delivered. VoIP notifications don't work on the iOS simulator, you would need to use a real device.
 
@@ -72,7 +72,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let deviceToken = deviceToken.map { String(format: "%02x", $0) }.joined()
         AppState.shared.pushToken = deviceToken
     }
-    
+
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
