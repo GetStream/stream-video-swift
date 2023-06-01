@@ -18,7 +18,7 @@ public struct RecordingView: View {
                 .frame(height: 12)
             Text(L10n.Call.Current.recording)
                 .bold()
-                .foregroundColor(colors.text)
+                .foregroundColor(.white)
             Spacer()
         }
         .padding(.horizontal, 8)
