@@ -3,63 +3,118 @@ title: Events
 description: How to listen to events
 ---
 
-//TODO: update this.
+In most cases, you should rely on the `CallViewModel` and its events for building and updating your UI. However, in some cases you might need access to the underlying events.
 
-You can listen to call events if you want to provide your custom handling, that's different then the one implemented in our `CallViewModel`.
+## Call Events
 
-The call events are available as an [AsyncStream](https://developer.apple.com/documentation/swift/asyncstream) of `CallEvent`s. The `CallEvent` enumeration has the following values:
-- `incoming(IncomingCall)` - called when the current user receives an incoming call. Should be used to display an incoming call UI.
-- `accepted(CallEventInfo)` - called when a user has accepted a call initiated by the current user.
-- `rejected(CallEventInfo)` - called when a user has rejected a call initiated by the current user.
-- `canceled(CallEventInfo)` - called when a call was canceled, mostly due to a timeout or if the user that rings decided to hang up.
-- `ended(CallEventInfo)` - called when a call was ended for everyone by an admin.
-- `userBlocked(CallEventInfo)` - called when a user was blocked during a call.
-- `userUnblocked(CallEventInfo)` - called when a user was unblocked during a call.
+The call events are provided as async streams of data. You can subscribe to these streams, to log or perform some action with these events.
 
-### Reacting to Incoming Call events
+### Listening to all events
 
-When the incoming call event is received, you will need to provide handling in your custom implementation. The handling should result into triggering one of the other events (call accepted, rejected or canceled) to the other side.
-
-You should use the methods provided by the `StreamVideo` object to react to incoming call events. 
-
-#### Accepting a call
-
-Accepting a call can be done by calling the `acceptCall(callId: String, callType: String)` method from the `StreamVideo` object. Additionally, when you accept a call, you should also join it, by creating an instance of the `Call` object and calling its `join` method.
-
-Here's an example implementation from our `CallViewModel`:
+You can listen to all raw WS events via the `allEvents` async stream in the call object:
 
 ```swift
-public func acceptCall(callId: String, type: String) {
-    Task {
-        try await streamVideo.acceptCall(callId: callId, callType: type)
-        enterCall(callId: callId, callType: type, members: [])
+Task {
+    for await event in call.allEvents() {
+        print(event)
     }
-}
+} 
+```
 
-private func enterCall(callId: String, callType: String, members: [User], ring: Bool = false) {
-    Task {
-        do {
-            log.debug("Starting call")
-            let call = streamVideo.call(callType: callType, callId: callId, members: members)
-            try await call.join(ring: ring, callSettings: callSettings)
-            save(call: call)
-        } catch {
-            log.error("Error starting a call \(error.localizedDescription)")
-            self.error = error
-            callingState = .idle
-        }
+### Listening to specific events
+
+However, in most cases you will be interested in a specific type of event.
+
+#### Participant Events
+
+In order to listen to the participant events, you should subscribe to the async stream `participantEvents`:
+
+```swift
+Task {
+    for await event in call.participantEvents() {
+        print(event)
     }
 }
 ```
 
-#### Rejecting a call
+#### Permission requests and updates
 
-In order to reject a call, you should call `StreamVideo`'s `rejectCall(callId: String, type: String)` method. This will trigger the `rejected` call event to all involved participants, and you should use this to hide the incoming / outgoing call screens.
+To listen to permission requests, you should subscribe to the `permissionRequests` async stream:
 
 ```swift
-public func rejectCall(callId: String, type: String) {
-    Task {
-        try await streamVideo.rejectCall(callId: callId, callType: type)
+Task {
+    for await event in call.permissionRequests() {
+        print(event)
+    }
+}
+``` 
+
+Similarly, you can listen to permission updates:
+
+```swift
+Task {
+    for await event in call.permissionUpdates() {
+        print(event)
     }
 }
 ```
+
+#### Recording events
+
+Recording events are available via the `recordingEvents` async stream:
+
+```swift
+Task {
+    for await event in call.recordingEvents() {
+        print(event)
+    }
+}
+```
+
+#### Broadcasting events
+
+Broadcasting events are available via the `broadcastingEvents` async stream:
+
+```swift
+Task {
+    for await event in call.broadcastingEvents() {
+        print(event)
+    }
+}
+```
+
+#### Custom events and reactions
+
+You can listen to custom events via the following async stream:
+
+```swift
+Task {
+    for await event in call.customEvents() {
+        print(event)
+    }
+}
+```
+
+Similarly, you can listen to reactions with the following code:
+
+```swift
+Task {
+    for await event in call.reactions() {
+        print(event)
+    }
+}
+```
+
+## Stream Video events
+
+When a call is not created, you can listen to call events from the `StreamVideo` object:
+
+```swift
+Task {
+    for await event in streamVideo.callEvents() {
+        print(event)
+    }
+}
+```
+
+These events are suitable for cases like showing an incoming call screen.
