@@ -16,7 +16,7 @@
 		40B713752A27823F00D1FE67 /* AppClipCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B713742A27823F00D1FE67 /* AppClipCallView.swift */; };
 		40B713772A27824000D1FE67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40B713762A27824000D1FE67 /* Assets.xcassets */; };
 		40B7137A2A27824000D1FE67 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 40B713792A27824000D1FE67 /* Preview Assets.xcassets */; };
-		40B7137F2A27824000D1FE67 /* StreamVideo-AppClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 40B713702A27823F00D1FE67 /* StreamVideo-AppClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		40B7137F2A27824000D1FE67 /* AppClip.app in Embed App Clips */ = {isa = PBXBuildFile; fileRef = 40B713702A27823F00D1FE67 /* AppClip.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		40B713842A27852C00D1FE67 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
 		40B713852A27852C00D1FE67 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		40B713882A27852C00D1FE67 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
@@ -692,11 +692,11 @@
 /* Begin PBXCopyFilesBuildPhase section */
 		40B713802A27824000D1FE67 /* Embed App Clips */ = {
 			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
+			buildActionMask = 12;
 			dstPath = "$(CONTENTS_FOLDER_PATH)/AppClips";
 			dstSubfolderSpec = 16;
 			files = (
-				40B7137F2A27824000D1FE67 /* StreamVideo-AppClip.app in Embed App Clips */,
+				40B7137F2A27824000D1FE67 /* AppClip.app in Embed App Clips */,
 			);
 			name = "Embed App Clips";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -754,7 +754,7 @@
 /* Begin PBXFileReference section */
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamVideoSwiftUIApp+Sentry.swift"; sourceTree = "<group>"; };
-		40B713702A27823F00D1FE67 /* StreamVideo-AppClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = "StreamVideo-AppClip.app"; sourceTree = BUILT_PRODUCTS_DIR; };
+		40B713702A27823F00D1FE67 /* AppClip.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = AppClip.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		40B713722A27823F00D1FE67 /* StreamVideoSwiftUIAppClip.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideoSwiftUIAppClip.swift; sourceTree = "<group>"; };
 		40B713742A27823F00D1FE67 /* AppClipCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppClipCallView.swift; sourceTree = "<group>"; };
 		40B713762A27824000D1FE67 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -1628,7 +1628,7 @@
 				8493224C290837890013C029 /* DemoAppUIKit.app */,
 				82392D512993C9E100941435 /* SwiftUIDemoAppUITests.xctest */,
 				8427FF622A03D1D100AFD2C3 /* CallIntent.appex */,
-				40B713702A27823F00D1FE67 /* StreamVideo-AppClip.app */,
+				40B713702A27823F00D1FE67 /* AppClip.app */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -2434,9 +2434,9 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		40B7136F2A27823F00D1FE67 /* StreamVideo-AppClip */ = {
+		40B7136F2A27823F00D1FE67 /* AppClip */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 40B713832A27824000D1FE67 /* Build configuration list for PBXNativeTarget "StreamVideo-AppClip" */;
+			buildConfigurationList = 40B713832A27824000D1FE67 /* Build configuration list for PBXNativeTarget "AppClip" */;
 			buildPhases = (
 				40B7136C2A27823F00D1FE67 /* Sources */,
 				40B7136D2A27823F00D1FE67 /* Frameworks */,
@@ -2449,12 +2449,12 @@
 				40B713872A27852C00D1FE67 /* PBXTargetDependency */,
 				40B7138B2A27852C00D1FE67 /* PBXTargetDependency */,
 			);
-			name = "StreamVideo-AppClip";
+			name = AppClip;
 			packageProductDependencies = (
 				40B7138D2A27853400D1FE67 /* WebRTC */,
 			);
 			productName = "StreamVideo-AppClip";
-			productReference = 40B713702A27823F00D1FE67 /* StreamVideo-AppClip.app */;
+			productReference = 40B713702A27823F00D1FE67 /* AppClip.app */;
 			productType = "com.apple.product-type.application.on-demand-install-capable";
 		};
 		82392D502993C9E100941435 /* SwiftUIDemoAppUITests */ = {
@@ -2761,7 +2761,7 @@
 				8493224B290837890013C029 /* DemoAppUIKit */,
 				82392D502993C9E100941435 /* SwiftUIDemoAppUITests */,
 				8427FF612A03D1D100AFD2C3 /* CallIntent */,
-				40B7136F2A27823F00D1FE67 /* StreamVideo-AppClip */,
+				40B7136F2A27823F00D1FE67 /* AppClip */,
 			);
 		};
 /* End PBXProject section */
@@ -3487,7 +3487,7 @@
 /* Begin PBXTargetDependency section */
 		40B7137E2A27824000D1FE67 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 40B7136F2A27823F00D1FE67 /* StreamVideo-AppClip */;
+			target = 40B7136F2A27823F00D1FE67 /* AppClip */;
 			targetProxy = 40B7137D2A27824000D1FE67 /* PBXContainerItemProxy */;
 		};
 		40B713872A27852C00D1FE67 /* PBXTargetDependency */ = {
@@ -3592,7 +3592,6 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "StreamVideo-AppClip/StreamVideo_AppClip.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_ASSET_PATHS = "\"StreamVideo-AppClip/Preview Content\"";
@@ -3630,9 +3629,9 @@
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = "StreamVideo-AppClip/StreamVideo_AppClip.entitlements";
-				CODE_SIGN_IDENTITY = "Apple Development";
-				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
+				CODE_SIGN_IDENTITY = "iPhone Distribution";
+				CODE_SIGN_STYLE = Manual;
 				DEVELOPMENT_ASSET_PATHS = "\"StreamVideo-AppClip/Preview Content\"";
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				ENABLE_PREVIEWS = YES;
@@ -3654,7 +3653,7 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.Clip;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				PROVISIONING_PROFILE_SPECIFIER = "";
+				PROVISIONING_PROFILE_SPECIFIER = "match AppStore io.getstream.iOS.VideoDemoApp.Clip";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = APPCLIP;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
@@ -4404,7 +4403,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		40B713832A27824000D1FE67 /* Build configuration list for PBXNativeTarget "StreamVideo-AppClip" */ = {
+		40B713832A27824000D1FE67 /* Build configuration list for PBXNativeTarget "AppClip" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				40B713812A27824000D1FE67 /* Debug */,

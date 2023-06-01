@@ -59,7 +59,8 @@ lane :match_me do |options|
     app_identifier: [
       'io.getstream.iOS.VideoDemoApp',
       'io.getstream.iOS.DemoAppUIKit',
-      'io.getstream.iOS.VideoDemoApp.CallIntent'
+      'io.getstream.iOS.VideoDemoApp.CallIntent',
+      'io.getstream.iOS.VideoDemoApp.Clip'
     ],
     readonly: options[:readonly],
     register_device: options[:register_device]
@@ -82,7 +83,7 @@ private_lane :upload_beta do |options|
     sdk_target: 'StreamVideo',
     app_target: options[:app_target],
     app_identifier: options[:app_identifier],
-    extensions: ['CallIntent']
+    extensions: ['CallIntent', 'AppClip']
   )
 end
 
