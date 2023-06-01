@@ -17,25 +17,41 @@ import AnyCodable
 
 internal struct UpdateCallResponse: Codable, JSONEncodable, Hashable {
 
+    internal var blockedUsers: [UserResponse]
     internal var call: CallResponse
     internal var duration: String
+    internal var members: [MemberResponse]
+    internal var membership: MemberResponse?
+    internal var ownCapabilities: [OwnCapability]
 
-    internal init(call: CallResponse, duration: String) {
+    internal init(blockedUsers: [UserResponse], call: CallResponse, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
+        self.blockedUsers = blockedUsers
         self.call = call
         self.duration = duration
+        self.members = members
+        self.membership = membership
+        self.ownCapabilities = ownCapabilities
     }
 
     internal enum CodingKeys: String, CodingKey, CaseIterable {
+        case blockedUsers = "blocked_users"
         case call
         case duration
+        case members
+        case membership
+        case ownCapabilities = "own_capabilities"
     }
 
     // Encodable protocol methods
 
     internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
+        try container.encode(blockedUsers, forKey: .blockedUsers)
         try container.encode(call, forKey: .call)
         try container.encode(duration, forKey: .duration)
+        try container.encode(members, forKey: .members)
+        try container.encodeIfPresent(membership, forKey: .membership)
+        try container.encode(ownCapabilities, forKey: .ownCapabilities)
     }
 }
 
