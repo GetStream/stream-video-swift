@@ -139,7 +139,8 @@ final class Sorting_Tests: XCTestCase {
             sessionId: id,
             connectionQuality: .unknown,
             joinedAt: Date(),
-            isPinned: false
+            isPinned: false,
+            audioLevel: 0
         )
         return participant
     }

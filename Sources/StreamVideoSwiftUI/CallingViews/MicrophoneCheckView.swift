@@ -36,14 +36,12 @@ public struct MicrophoneCheckView: View {
                 .padding(.trailing, 8)
             
             if microphoneOn && hasDecibelValues {
-                ForEach(decibels, id: \.self) { decibel in
-                    VStack {
-                        RoundedRectangle(cornerRadius: 4)
-                            .fill(colors.primaryButtonBackground)
-                            .frame(width: 2, height: height(for: decibel))
-                    }
-                    .frame(height: CGFloat(maxHeight))
-                }
+                AudioVolumeIndicator(
+                    audioLevels: decibels,
+                    maxHeight: maxHeight,
+                    minValue: -120,
+                    maxValue: 0
+                )
             } else {
                 images.micTurnOff
                     .resizable()
@@ -55,11 +53,71 @@ public struct MicrophoneCheckView: View {
         .padding(.all, 8)
         .background(Color.black.opacity(0.6).cornerRadius(8))
     }
+}
+
+public struct AudioVolumeIndicator: View {
+    
+    @Injected(\.colors) var colors
+    
+    var audioLevels: [Float]
+    var maxHeight: Float
+    var minValue: Float
+    var maxValue: Float
+    
+    public init(
+        audioLevels: [Float],
+        maxHeight: Float = 14,
+        minValue: Float,
+        maxValue: Float
+    ) {
+        self.audioLevels = audioLevels
+        self.maxHeight = maxHeight
+        self.minValue = minValue
+        self.maxValue = maxValue
+    }
+    
+    public var body: some View {
+        HStack(spacing: 2) {
+            ForEach(levels) { level in
+                VStack {
+                    RoundedRectangle(cornerRadius: 4)
+                        .fill(colors.primaryButtonBackground)
+                        .frame(width: 2, height: height(for: level.value))
+                }
+                .frame(height: CGFloat(maxHeight))
+            }
+        }
+    }
+    
+    var levels: [AudioLevel] {
+        var levels = [AudioLevel]()
+        for (index, level) in audioLevels.enumerated() {
+            levels.append(AudioLevel(value: level, index: index))
+        }
+        return levels
+    }
     
     private func height(for decibel: Float) -> CGFloat {
         let value = abs(decibel)
-        let ratio = value / 60.0
-        let height = CGFloat(maxHeight - ratio * maxHeight)
+        let divider = (maxValue - minValue) / 2
+        if divider == 0 {
+            return 0
+        }
+        let ratio = value / divider
+        var height: CGFloat
+        if decibel > 0 {
+            height = CGFloat(ratio * maxHeight)
+        } else {
+            height = CGFloat(maxHeight - ratio * maxHeight)
+        }
         return max(height, 0.5)
     }
+}
+
+struct AudioLevel: Identifiable {
+    var id: String {
+        "\(index)-\(value)"
+    }
+    let value: Float
+    let index: Int
 }
