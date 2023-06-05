@@ -54,7 +54,8 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                     participantCount: 1,
                     pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
-                    ratio: ratio
+                    ratio: ratio,
+                    showAllInfo: true
                 )
             )
             .onAppear {

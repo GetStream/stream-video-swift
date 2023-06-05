@@ -86,7 +86,8 @@ public protocol ViewFactory: AnyObject {
         participantCount: Int,
         pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
-        ratio: CGFloat
+        ratio: CGFloat,
+        showAllInfo: Bool
     ) -> ParticipantViewModifierType
     
     associatedtype CallViewType: View = CallView<Self>
@@ -112,7 +113,7 @@ public protocol ViewFactory: AnyObject {
         availableSize: CGSize
     ) -> CallParticipantsListViewType
     
-    associatedtype ScreenSharingViewType: View = ScreenSharingView
+    associatedtype ScreenSharingViewType: View
     /// Creates a view shown when there's screen sharing session.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
@@ -216,14 +217,16 @@ extension ViewFactory {
         participantCount: Int,
         pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
-        ratio: CGFloat
+        ratio: CGFloat,
+        showAllInfo: Bool
     ) -> some ViewModifier {
         VideoCallParticipantModifier(
             participant: participant,
             pinnedParticipant: pinnedParticipant,
             participantCount: participantCount,
             availableSize: availableSize,
-            ratio: ratio
+            ratio: ratio,
+            showAllInfo: showAllInfo
         )
     }
     

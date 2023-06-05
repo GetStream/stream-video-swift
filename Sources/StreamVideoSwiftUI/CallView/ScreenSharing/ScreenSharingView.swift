@@ -5,13 +5,28 @@
 import StreamVideo
 import SwiftUI
 
-public struct ScreenSharingView: View {
-    
+public struct ScreenSharingView<Factory: ViewFactory>: View {
+
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreensharingSession
     var availableSize: CGSize
+    var viewFactory: Factory
     
-    private let thumbnailSize: CGFloat = 120
+    private var thumbnailSize: CGSize {
+        CGSize(width: 120, height: 120)
+    }
+    
+    public init(
+        viewModel: CallViewModel,
+        screenSharing: ScreensharingSession,
+        availableSize: CGSize,
+        viewFactory: Factory = DefaultViewFactory.shared
+    ) {
+        self.viewModel = viewModel
+        self.screenSharing = screenSharing
+        self.availableSize = availableSize
+        self.viewFactory = viewFactory
+    }
         
     public var body: some View {
         VStack(alignment: .leading) {
@@ -35,10 +50,10 @@ public struct ScreenSharingView: View {
                 ScrollView(.horizontal) {
                     HorizontalContainer {
                         ForEach(viewModel.participants) { participant in
-                            VideoCallParticipantView(
+                            viewFactory.makeVideoParticipantView(
                                 participant: participant,
                                 id: "\(participant.id)-screenshare-participant",
-                                availableSize: .init(width: thumbnailSize, height: thumbnailSize),
+                                availableSize: thumbnailSize,
                                 contentMode: .scaleAspectFill,
                                 customData: [:]
                             ) { participant, view in
@@ -46,7 +61,16 @@ public struct ScreenSharingView: View {
                                     viewModel.updateTrackSize(size, for: participant)
                                 }
                             }
-                            .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                            .modifier(
+                                viewFactory.makeVideoCallParticipantModifier(
+                                    participant: participant,
+                                    participantCount: viewModel.callParticipants.count,
+                                    pinnedParticipant: $viewModel.pinnedParticipant,
+                                    availableSize: thumbnailSize,
+                                    ratio: 1,
+                                    showAllInfo: false
+                                )
+                            )
                             .cornerRadius(8)
                             .accessibility(identifier: "screenSharingParticipantView")
                             .onAppear {
@@ -57,7 +81,7 @@ public struct ScreenSharingView: View {
                             }
                         }
                     }
-                    .frame(height: thumbnailSize)
+                    .frame(height: thumbnailSize.height)
                     .cornerRadius(8)
                 }
                 .padding()
@@ -87,13 +111,6 @@ public struct ScreenSharingView: View {
             width: viewModel.hideUIElements ? videoSize.width : nil,
             height: viewModel.hideUIElements ? videoSize.height : nil
         )
-        .onTapGesture {
-            withAnimation {
-                viewModel.hideUIElements.toggle()
-            }
-        }
-        .id("\(viewModel.hideUIElements)")
-        .rotationEffect(.degrees(viewModel.hideUIElements ? 90 : 0))
     }
     
     private var videoSize: CGSize {

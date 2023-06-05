@@ -296,7 +296,8 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                         participantCount: participants.count,
                         pinnedParticipant: $pinnedParticipant,
                         availableSize: availableSize,
-                        ratio: ratio
+                        ratio: ratio,
+                        showAllInfo: true
                     )
                 )
                 .onAppear {
@@ -342,7 +343,8 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                         participantCount: participants.count,
                         pinnedParticipant: $pinnedParticipant,
                         availableSize: size,
-                        ratio: ratio
+                        ratio: ratio,
+                        showAllInfo: true
                     )
                 )
                 .onAppear {

@@ -55,7 +55,8 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                     participantCount: participants.count,
                     pinnedParticipant: $pinnedParticipant,
                     availableSize: size,
-                    ratio: ratio
+                    ratio: ratio,
+                    showAllInfo: true
                 )
             )
             .onAppear {

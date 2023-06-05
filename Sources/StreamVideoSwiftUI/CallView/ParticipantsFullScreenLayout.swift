@@ -48,7 +48,8 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
                 participantCount: 1,
                 pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
-                ratio: ratio
+                ratio: ratio,
+                showAllInfo: true
             )
         )
         .onAppear {

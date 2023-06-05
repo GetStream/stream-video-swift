@@ -77,19 +77,22 @@ public struct VideoCallParticipantModifier: ViewModifier {
     var participantCount: Int
     var availableSize: CGSize
     var ratio: CGFloat
+    var showAllInfo: Bool
     
     public init(
         participant: CallParticipant,
         pinnedParticipant: Binding<CallParticipant?>,
         participantCount: Int,
         availableSize: CGSize,
-        ratio: CGFloat
+        ratio: CGFloat,
+        showAllInfo: Bool
     ) {
         self.participant = participant
         _pinnedParticipant = pinnedParticipant
         self.participantCount = participantCount
         self.availableSize = availableSize
         self.ratio = ratio
+        self.showAllInfo = showAllInfo
     }
     
     public func body(content: Content) -> some View {
@@ -103,14 +106,17 @@ public struct VideoCallParticipantModifier: ViewModifier {
                                 participant: participant,
                                 isPinned: participant.id == pinnedParticipant?.id
                             )
-                            Spacer()
-                            ConnectionQualityIndicator(
-                                connectionQuality: participant.connectionQuality
-                            )
+                            
+                            if showAllInfo {
+                                Spacer()
+                                ConnectionQualityIndicator(
+                                    connectionQuality: participant.connectionQuality
+                                )
+                            }
                         }
                         .padding(.bottom, 2)
                     })
-                        .padding()
+                    .padding(.all, showAllInfo ? 16 : 8)
                     
                     if participant.isSpeaking && participantCount > 1 {
                         Rectangle()

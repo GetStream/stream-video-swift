@@ -15,14 +15,16 @@ func makeVideoCallParticipantModifier(
     participantCount: Int,
     pinnedParticipant: Binding<CallParticipant?>,
     availableSize: CGSize,
-    ratio: CGFloat
+    ratio: CGFloat,
+    showAllInfo: Bool
 ) -> some ViewModifier {
     CustomParticipantModifier(
         participant: participant,
         pinnedParticipant: pinnedParticipant,
         participantCount: participantCount,
         availableSize: availableSize,
-        ratio: ratio
+        ratio: ratio,
+        showAllInfo: showAllInfo
     )
 }
 ```
