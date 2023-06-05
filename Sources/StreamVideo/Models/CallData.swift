@@ -76,12 +76,12 @@ extension CallSessionResponse {
 extension CallData {
     mutating func applyUpdates(from callResponse: CallResponse) {
         self.backstage = callResponse.backstage
-        self.broadcasting = callResponse.broadcasting
+        self.broadcasting = callResponse.egress.broadcasting
         self.endedAt = callResponse.endedAt
         self.recording = callResponse.recording
         self.startsAt = callResponse.startsAt
         self.updatedAt = callResponse.updatedAt
-        self.hlsPlaylistUrl = callResponse.hlsPlaylistUrl
+        self.hlsPlaylistUrl = callResponse.egress.hls?.playlistUrl ?? ""
         self.session = callResponse.session?.toCallSession()
         self.autoRejectTimeout = callResponse.settings.ring.autoCancelTimeoutMs
         self.createdBy = callResponse.createdBy.toUser

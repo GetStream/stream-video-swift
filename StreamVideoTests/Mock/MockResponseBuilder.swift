@@ -32,13 +32,15 @@ class MockResponseBuilder {
         let callResponse = CallResponse(
             backstage: false,
             blockedUserIds: [],
-            broadcasting: false,
             cid: cid,
             createdAt: Date(),
             createdBy: userResponse,
             currentSessionId: "123",
             custom: [:],
-            hlsPlaylistUrl: "",
+            egress: EgressResponse(
+                broadcasting: false,
+                rtmps: []
+            ),
             id: "test",
             ingress: callIngressResponse,
             recording: false,

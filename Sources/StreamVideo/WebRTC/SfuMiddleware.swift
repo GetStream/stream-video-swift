@@ -71,6 +71,8 @@ class SfuMiddleware: EventMiddleware {
                 await handleAudioLevelsChanged(event)
             } else if let event = event as? Stream_Video_Sfu_Event_DominantSpeakerChanged {
                 await handleDominantSpeakerChanged(event)
+            } else if let event = event as? Stream_Video_Sfu_Event_Error {
+                log.error(event.error.message)
             }
         }
         return event

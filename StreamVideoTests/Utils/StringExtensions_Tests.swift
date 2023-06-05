@@ -16,6 +16,8 @@ final class StringExtensions_Tests: XCTestCase {
 
         a=group:BUNDLE 0
         
+        m=audio 43427 UDP/TLS/RTP/SAVPF 111 63 103 104 9 102 0 8 106 105 13 110 112 113 126
+        
         a=rtpmap:111 opus/48000/2
 
         a=extmap-allow-mixed
@@ -35,13 +37,15 @@ final class StringExtensions_Tests: XCTestCase {
 
         a=group:BUNDLE 0
         
-        a=rtpmap:63 red/48000/2
+        m=audio 43427 UDP/TLS/RTP/SAVPF 63 111 103 104 9 102 0 8 106 105 13 110 112 113 126
         
         a=rtpmap:111 opus/48000/2
 
         a=extmap-allow-mixed
 
         a=fmtp:111 minptime=10;useinbandfec=1;usedtx=1
+
+        a=rtpmap:63 red/48000/2
 
         a=fmtp:63 111/111
         """
@@ -63,6 +67,8 @@ final class StringExtensions_Tests: XCTestCase {
 
         a=group:BUNDLE 0
         
+        m=audio 43427 UDP/TLS/RTP/SAVPF 63 111 103 104 9 102 0 8 106 105 13 110 112 113 126
+        
         a=rtpmap:63 red/48000/2
         
         a=rtpmap:111 opus/48000/2
@@ -81,6 +87,8 @@ final class StringExtensions_Tests: XCTestCase {
         t=0 0
 
         a=group:BUNDLE 0
+        
+        m=audio 43427 UDP/TLS/RTP/SAVPF 63 111 103 104 9 102 0 8 106 105 13 110 112 113 126
         
         a=rtpmap:63 red/48000/2
         
@@ -111,6 +119,8 @@ final class StringExtensions_Tests: XCTestCase {
         a=group:BUNDLE 0
                 
         a=rtpmap:111 opus/48000/2
+        
+        m=audio 43427 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126
 
         a=extmap-allow-mixed
 
@@ -128,6 +138,8 @@ final class StringExtensions_Tests: XCTestCase {
         a=group:BUNDLE 0
                 
         a=rtpmap:111 opus/48000/2
+        
+        m=audio 43427 UDP/TLS/RTP/SAVPF 111 103 104 9 102 0 8 106 105 13 110 112 113 126
 
         a=extmap-allow-mixed
 
@@ -139,7 +151,7 @@ final class StringExtensions_Tests: XCTestCase {
         
         // When
         let updatedSdp = mdp.preferredRedCodec
-        
+
         // Then
         XCTAssert(updatedSdp == expected)
     }
@@ -152,6 +164,8 @@ final class StringExtensions_Tests: XCTestCase {
         t=0 0
 
         a=group:BUNDLE 0
+        
+        m=audio 43427 UDP/TLS/RTP/SAVPF 63 103 104 9 102 0 8 106 105 13 110 112 113 126
         
         a=extmap-allow-mixed
 
@@ -170,6 +184,8 @@ final class StringExtensions_Tests: XCTestCase {
 
         a=group:BUNDLE 0
         
+        m=audio 43427 UDP/TLS/RTP/SAVPF 63 103 104 9 102 0 8 106 105 13 110 112 113 126
+        
         a=extmap-allow-mixed
 
         a=fmtp:111 minptime=10;useinbandfec=1;usedtx=1
@@ -182,7 +198,7 @@ final class StringExtensions_Tests: XCTestCase {
         
         // When
         let updatedSdp = mdp.preferredRedCodec
-        
+
         // Then
         XCTAssert(updatedSdp == expected)
     }

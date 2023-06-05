@@ -458,7 +458,7 @@ class WebRTCClient: NSObject {
         var updatedSdp = initialOffer.sdp
         if audioSettings.opusDtxEnabled {
             log.debug("Setting Opus DTX for the audio")
-            updatedSdp = initialOffer.sdp.replacingOccurrences(
+            updatedSdp = updatedSdp.replacingOccurrences(
                 of: "useinbandfec=1",
                 with: "useinbandfec=1;usedtx=1"
             )

@@ -8,21 +8,41 @@ extension String {
     
     var preferredRedCodec: String {
         let parts = self.components(separatedBy: "\r\n")
-        var result = [String]()
-        var redPrimary = false
-        var opusIndex: Int?
-        for (index, part) in parts.enumerated() {
-            if part.contains(" opus/"), !redPrimary {
-                opusIndex = index
+        var redId: String = ""
+        var opusId: String = ""
+        for part in parts {
+            if part.contains(" opus/") && opusId.isEmpty {
+                opusId = extractId(from: part)
             }
-            if part.contains(" red/48000/2"), let opusIndex, !redPrimary {
-                result.insert(part, at: opusIndex)
-                redPrimary = true
-            } else {
-                result.append(part)
+            if part.contains(" red/48000/2") && redId.isEmpty {
+                redId = extractId(from: part)
+            }
+            if !opusId.isEmpty && !redId.isEmpty {
+                break
             }
         }
-        return result.joined(separator: "\r\n")
+        
+        if !redId.isEmpty && !opusId.isEmpty {
+            let redOpusPair = "\(redId) \(opusId)"
+            let opusRedPair = "\(opusId) \(redId)"
+            let updatedResult = self.replacingOccurrences(
+                of: opusRedPair,
+                with: redOpusPair
+            )
+            
+            return updatedResult
+        } else {
+            return self
+        }
+    }
+    
+    private func extractId(from part: String) -> String {
+        guard let idPart = part.components(separatedBy: " ").first else {
+            return ""
+        }
+        let components = idPart.components(separatedBy: ":")
+        guard components.count > 1 else { return "" }
+        return components[1]
     }
     
 }

@@ -19,7 +19,6 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
 
     internal var backstage: Bool
     internal var blockedUserIds: [String]
-    internal var broadcasting: Bool
     /** The unique identifier for a call (<type>:<id>) */
     internal var cid: String
     /** Date/time of creation */
@@ -28,9 +27,9 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     internal var currentSessionId: String
     /** Custom data for this object */
     internal var custom: [String: AnyCodable]
+    internal var egress: EgressResponse
     /** Date/time when the call ended */
     internal var endedAt: Date?
-    internal var hlsPlaylistUrl: String
     /** Call ID */
     internal var id: String
     internal var ingress: CallIngressResponse
@@ -46,17 +45,16 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     internal var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], broadcasting: Bool, cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], endedAt: Date? = nil, hlsPlaylistUrl: String, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    internal init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
-        self.broadcasting = broadcasting
         self.cid = cid
         self.createdAt = createdAt
         self.createdBy = createdBy
         self.currentSessionId = currentSessionId
         self.custom = custom
+        self.egress = egress
         self.endedAt = endedAt
-        self.hlsPlaylistUrl = hlsPlaylistUrl
         self.id = id
         self.ingress = ingress
         self.recording = recording
@@ -72,14 +70,13 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
     internal enum CodingKeys: String, CodingKey, CaseIterable {
         case backstage
         case blockedUserIds = "blocked_user_ids"
-        case broadcasting
         case cid
         case createdAt = "created_at"
         case createdBy = "created_by"
         case currentSessionId = "current_session_id"
         case custom
+        case egress
         case endedAt = "ended_at"
-        case hlsPlaylistUrl = "hls_playlist_url"
         case id
         case ingress
         case recording
@@ -98,14 +95,13 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(backstage, forKey: .backstage)
         try container.encode(blockedUserIds, forKey: .blockedUserIds)
-        try container.encode(broadcasting, forKey: .broadcasting)
         try container.encode(cid, forKey: .cid)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(createdBy, forKey: .createdBy)
         try container.encode(currentSessionId, forKey: .currentSessionId)
         try container.encode(custom, forKey: .custom)
+        try container.encode(egress, forKey: .egress)
         try container.encodeIfPresent(endedAt, forKey: .endedAt)
-        try container.encode(hlsPlaylistUrl, forKey: .hlsPlaylistUrl)
         try container.encode(id, forKey: .id)
         try container.encode(ingress, forKey: .ingress)
         try container.encode(recording, forKey: .recording)
