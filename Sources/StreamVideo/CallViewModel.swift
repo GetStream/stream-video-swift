@@ -162,7 +162,7 @@ open class CallViewModel: ObservableObject {
     private var ringingTimer: Foundation.Timer?
     
     private var lastLayoutChange = Date()
-    private var enteringCall = false
+    private var enteringCallTask: Task<Void, Never>?
     private var participantsSortComparators = defaultComparators
     
     public var participants: [CallParticipant] {
@@ -418,6 +418,8 @@ open class CallViewModel: ObservableObject {
     /// Leaves the current call.
     private func leaveCall() {
         log.debug("Leaving call")
+        enteringCallTask?.cancel()
+        enteringCallTask = nil
         participantUpdates?.cancel()
         participantUpdates = nil
         callUpdates?.cancel()
@@ -438,27 +440,31 @@ open class CallViewModel: ObservableObject {
     }
     
     private func enterCall(call: Call? = nil, callId: String, callType: String, members: [User], ring: Bool = false) {
-        if enteringCall || callingState == .inCall {
+        if enteringCallTask != nil || callingState == .inCall {
             return
         }
-        enteringCall = true
-        Task {
+        enteringCallTask = Task {
             do {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(callType: callType, callId: callId, members: members)
                 try await call.join(ring: ring, callSettings: callSettings)
                 save(call: call)
-                enteringCall = false
+                enteringCallTask = nil
             } catch {
                 log.error("Error starting a call \(error.localizedDescription)")
                 self.error = error
                 callingState = .idle
-                enteringCall = false
+                enteringCallTask = nil
             }
         }
     }
     
     private func save(call: Call) {
+        guard enteringCallTask != nil else {
+            call.leave()
+            self.call = nil
+            return
+        }
         self.call = call
         updateCallStateIfNeeded()
         listenForParticipantEvents()
@@ -498,7 +504,7 @@ open class CallViewModel: ObservableObject {
                 } else if case let .accepted(callEventInfo) = callEvent {
                     if callingState == .outgoing {
                         enterCall(call: call, callId: callEventInfo.callId, callType: callEventInfo.type, members: [])
-                    } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && !enteringCall {
+                    } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && enteringCallTask == nil {
                         // Accepted on another device.
                         callingState = .idle
                     }
@@ -544,6 +550,7 @@ open class CallViewModel: ObservableObject {
             }
             return
         }
+        guard call != nil || !callParticipants.isEmpty else { return }
         if callingState != .reconnecting {
             callingState = .inCall
         } else {

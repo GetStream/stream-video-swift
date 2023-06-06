@@ -9,13 +9,14 @@ import SwiftUI
 @MainActor
 public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     private let camera: Any
- 
+    var imagesTask: Task<Void, Never>?
+    
     @Published public var viewfinderImage: Image?
     
     public init() {
         if #available(iOS 14, *) {
             camera = Camera()
-            Task {
+            imagesTask = Task {
                 await handleCameraPreviews()
             }
         } else {
@@ -48,7 +49,9 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         }
     }
     
-    func stopCamera() {
+    public func stopCamera() {
+        imagesTask?.cancel()
+        imagesTask = nil
         if #available(iOS 14, *) {
             (camera as? Camera)?.stop()
         }

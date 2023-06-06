@@ -209,10 +209,12 @@ class WebRTCClient: NSObject {
     }
     
     func cleanUp() async {
+        log.debug("Cleaning up WebRTCClient")
         videoCapturer?.stopCameraCapture()
         videoCapturer = nil
         publisher = nil
         subscriber = nil
+        signalChannel?.connectionStateDelegate = nil
         signalChannel?.onWSConnectionEstablished = nil
         signalChannel?.participantCountUpdated = nil
         signalChannel?.disconnect {}
