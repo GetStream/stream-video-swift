@@ -303,30 +303,6 @@ open class CallViewModel: ObservableObject {
         callingState = .lobby(lobbyInfo)
     }
     
-    /// Joins a call from the lobby. `enterLobby` needs to be called first.
-    /// - Parameters:
-    ///  - callId: the id of the call.
-    ///  - type: the type of the call.
-    ///  - members: list of participants that are part of the call.
-    public func joinCallFromLobby(callId: String, type: String, members: [User]) throws {
-        guard case .lobby(_) = callingState else {
-            throw ClientError.Unexpected()
-        }
-        
-        Task {
-            do {
-                log.debug("Starting call")
-                let call = streamVideo.call(callType: type, callId: callId)
-                try await call.join(callSettings: callSettings)
-                save(call: call)
-            } catch {
-                log.error("Error starting a call \(error.localizedDescription)")
-                self.error = error
-                callingState = .idle
-            }
-        }
-    }
-    
     /// Accepts the call with the provided call id and type.
     /// - Parameters:
     ///  - callId: the id of the call.

@@ -291,10 +291,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         try await waitForCallEvent()
-        try callViewModel.joinCallFromLobby(
+        callViewModel.joinCall(
             callId: callId,
-            type: callType,
-            members: participants
+            type: callType
         )
         try await waitForCallEvent()
         

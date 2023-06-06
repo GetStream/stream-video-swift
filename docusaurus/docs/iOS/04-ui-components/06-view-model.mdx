@@ -56,7 +56,7 @@ Button {
 
 If you want to display a lobby screen before the user joins the call, you should use the `enterLobby(callId: String, type: String, members: [User])` method. This will change the calling state to `.lobby`. When that happens, you can either display your custom implementation of a lobby view, or use the one from the SDK.
 
-When the user decides to join the call, you should call the `joinCallFromLobby(callId: String, type: String, members: [User])` method.
+When the user decides to join the call, you should call the `joinCall(callId: String, type: String)` method.
 
 ### Accepting a call
 
