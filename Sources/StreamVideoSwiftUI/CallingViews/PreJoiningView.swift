@@ -182,13 +182,15 @@ struct JoinCallView: View {
     
     var body: some View {
         VStack(spacing: 16) {
-            Text("\(L10n.WaitingRoom.description) \(otherParticipantsCount) \(L10n.WaitingRoom.numberOfParticipants)")
+            Text("\(L10n.WaitingRoom.description)")
                 .font(.headline)
                 .accessibility(identifier: "otherParticipantsCount")
                 .streamAccessibility(value: "\(otherParticipantsCount)")
             
             Button {
-                callViewModel.startCall(callId: callId, type: callType, members: callParticipants)
+                if case .lobby(_) = callViewModel.callingState {
+                    callViewModel.startCall(callId: callId, type: callType, members: callParticipants)
+                }
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()

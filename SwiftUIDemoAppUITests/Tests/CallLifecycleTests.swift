@@ -8,9 +8,7 @@ final class CallLifecycleTests: StreamTestCase {
     
     func testUserLeavesTheCallOnConnection() throws {
         linkToScenario(withId: 1808)
-        
-        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/380")
-        
+                
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId, waitForCompletion: false)
         }

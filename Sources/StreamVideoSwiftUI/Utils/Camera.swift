@@ -84,8 +84,6 @@ class Camera: NSObject, @unchecked Sendable {
         guard let captureDevice = captureDevice else { return false }
         return backCaptureDevices.contains(captureDevice)
     }
-
-    private var addToPhotoStream: ((AVCapturePhoto) -> Void)?
     
     private var addToPreviewStream: ((CIImage) -> Void)?
     
@@ -93,18 +91,11 @@ class Camera: NSObject, @unchecked Sendable {
     
     lazy var previewStream: AsyncStream<CIImage> = {
         AsyncStream { continuation in
-            addToPreviewStream = { ciImage in
+            addToPreviewStream = { [weak self] ciImage in
+                guard let self else { return }
                 if !self.isPreviewPaused {
                     continuation.yield(ciImage)
                 }
-            }
-        }
-    }()
-    
-    lazy var photoStream: AsyncStream<AVCapturePhoto> = {
-        AsyncStream { continuation in
-            addToPhotoStream = { photo in
-                continuation.yield(photo)
             }
         }
     }()
@@ -118,14 +109,6 @@ class Camera: NSObject, @unchecked Sendable {
         sessionQueue = DispatchQueue(label: "session queue")
         
         captureDevice = availableCaptureDevices.first ?? AVCaptureDevice.default(for: .video)
-        
-        UIDevice.current.beginGeneratingDeviceOrientationNotifications()
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(updateForDeviceOrientation),
-            name: UIDevice.orientationDidChangeNotification,
-            object: nil
-        )
     }
     
     private func configureCaptureSession(completionHandler: (_ success: Bool) -> Void) {
@@ -270,9 +253,7 @@ class Camera: NSObject, @unchecked Sendable {
         }
     }
     
-    func stop() {
-        guard isCaptureSessionConfigured else { return }
-        
+    func stop() {        
         if captureSession.isRunning {
             sessionQueue.async {
                 self.captureSession.stopRunning()
@@ -297,11 +278,6 @@ class Camera: NSObject, @unchecked Sendable {
         return orientation
     }
     
-    @objc
-    func updateForDeviceOrientation() {
-        // TODO: Figure out if we need this for anything.
-    }
-    
     private func videoOrientationFor(_ deviceOrientation: UIDeviceOrientation) -> AVCaptureVideoOrientation? {
         switch deviceOrientation {
         case .portrait: return AVCaptureVideoOrientation.portrait
@@ -310,50 +286,6 @@ class Camera: NSObject, @unchecked Sendable {
         case .landscapeRight: return AVCaptureVideoOrientation.landscapeLeft
         default: return nil
         }
-    }
-    
-    func takePhoto() {
-        guard let photoOutput = self.photoOutput else { return }
-        
-        sessionQueue.async {
-        
-            var photoSettings = AVCapturePhotoSettings()
-
-            if photoOutput.availablePhotoCodecTypes.contains(.hevc) {
-                photoSettings = AVCapturePhotoSettings(format: [AVVideoCodecKey: AVVideoCodecType.hevc])
-            }
-            
-            let isFlashAvailable = self.deviceInput?.device.isFlashAvailable ?? false
-            photoSettings.flashMode = isFlashAvailable ? .auto : .off
-            photoSettings.isHighResolutionPhotoEnabled = true
-            if let previewPhotoPixelFormatType = photoSettings.availablePreviewPhotoPixelFormatTypes.first {
-                photoSettings.previewPhotoFormat = [kCVPixelBufferPixelFormatTypeKey as String: previewPhotoPixelFormatType]
-            }
-            photoSettings.photoQualityPrioritization = .balanced
-            
-            if let photoOutputVideoConnection = photoOutput.connection(with: .video) {
-                if photoOutputVideoConnection.isVideoOrientationSupported,
-                   let videoOrientation = self.videoOrientationFor(self.deviceOrientation) {
-                    photoOutputVideoConnection.videoOrientation = videoOrientation
-                }
-            }
-            
-            photoOutput.capturePhoto(with: photoSettings, delegate: self)
-        }
-    }
-}
-
-@available(iOS 14.0, *)
-extension Camera: AVCapturePhotoCaptureDelegate {
-    
-    func photoOutput(_ output: AVCapturePhotoOutput, didFinishProcessingPhoto photo: AVCapturePhoto, error: Error?) {
-        
-        if let error = error {
-            logger.error("Error capturing photo: \(error.localizedDescription)")
-            return
-        }
-        
-        addToPhotoStream?(photo)
     }
 }
 
