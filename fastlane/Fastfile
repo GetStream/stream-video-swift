@@ -298,7 +298,8 @@ end
 desc 'Run source code linting'
 lane :run_linter do
   Dir.chdir('..') do
-    sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi')
+    UI.error('SwiftFormat lint was skipped. Check out https://github.com/GetStream/ios-issues-tracking/issues/465 for more info')
+    # sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi')
   end
 end
 

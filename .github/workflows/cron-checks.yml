@@ -123,13 +123,12 @@ jobs:
         MATRIX_CONTEXT: ${{ toJson(matrix) }}
       if: failure() && github.event_name == 'schedule'
 
-  # TODO:
-  # automated-code-review:
-  #   name: Automated Code Review
-  #   runs-on: macos-13
-  #   steps:
-  #   - uses: actions/checkout@v3.1.0
-  #   - uses: ./.github/actions/bootstrap
-  #   - run: bundle exec fastlane rubocop
-  #   - run: bundle exec fastlane run_linter
-  #   - run: bundle exec fastlane pod_lint
+  automated-code-review:
+    name: Automated Code Review
+    runs-on: macos-13
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - uses: ./.github/actions/bootstrap
+    - run: bundle exec fastlane rubocop
+    - run: bundle exec fastlane run_linter
+    - run: bundle exec fastlane pod_lint
