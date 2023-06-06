@@ -6,7 +6,7 @@
 </p>
 <p align="center">
   <a href="https://getstream.io/video/docs/sdk/ios/"><img src="https://img.shields.io/badge/iOS-11%2B-lightblue" /></a>
-  <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.6-orange.svg" /></a>
+  <a href="https://swift.org"><img src="https://img.shields.io/badge/Swift-5.6%2B-orange.svg" /></a>
   <a href="https://github.com/GetStream/stream-video-swift/actions"><img src="https://github.com/GetStream/stream-video-swift/actions/workflows/cron-checks.yml/badge.svg" /></a>
 </p>
 <p align="center">
