@@ -16,27 +16,38 @@ struct LobbyView_iOS13: View {
     var callId: String
     var callType: String
     var callParticipants: [Member]
-        
+    @Binding var callSettings: CallSettings
+    var onJoinCallTap: () -> ()
+    var onCloseLobby: () -> ()
+    
     public init(
         callViewModel: CallViewModel,
         callId: String,
         callType: String,
-        callParticipants: [Member]
+        callParticipants: [Member],
+        callSettings: Binding<CallSettings>,
+        onJoinCallTap: @escaping () -> (),
+        onCloseLobby: @escaping () -> ()
     ) {
         _callViewModel = ObservedObject(wrappedValue: callViewModel)
+        _callSettings = callSettings
         self.callId = callId
         self.callType = callType
         self.callParticipants = callParticipants
+        self.onJoinCallTap = onJoinCallTap
+        self.onCloseLobby = onCloseLobby
     }
     
     public var body: some View {
         LobbyContentView(
-            callViewModel: callViewModel,
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,
             callId: callId,
             callType: callType,
-            callParticipants: callParticipants
+            callParticipants: callParticipants,
+            callSettings: $callSettings,
+            onJoinCallTap: onJoinCallTap,
+            onCloseLobby: onCloseLobby
         )
     }
 }

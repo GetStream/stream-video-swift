@@ -9,34 +9,42 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LobbyView: View {
     
-    @ObservedObject var callViewModel: CallViewModel
     @StateObject var viewModel = LobbyViewModel()
     @StateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
     var callType: String
     var callParticipants: [Member]
+    @Binding var callSettings: CallSettings
+    var onJoinCallTap: () -> ()
+    var onCloseLobby: () -> ()
         
     public init(
-        callViewModel: CallViewModel,
         callId: String,
         callType: String,
-        callParticipants: [Member]
+        callParticipants: [Member],
+        callSettings: Binding<CallSettings>,
+        onJoinCallTap: @escaping () -> (),
+        onCloseLobby: @escaping () -> ()
     ) {
-        self.callViewModel = callViewModel
         self.callId = callId
         self.callType = callType
         self.callParticipants = callParticipants
+        self.onJoinCallTap = onJoinCallTap
+        self.onCloseLobby = onCloseLobby
+        _callSettings = callSettings
     }
     
     public var body: some View {
         LobbyContentView(
-            callViewModel: callViewModel,
             viewModel: viewModel,
             microphoneChecker: microphoneChecker,
             callId: callId,
             callType: callType,
-            callParticipants: callParticipants
+            callParticipants: callParticipants,
+            callSettings: $callSettings,
+            onJoinCallTap: onJoinCallTap,
+            onCloseLobby: onCloseLobby
         )
     }
 }
@@ -47,13 +55,15 @@ struct LobbyContentView: View {
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
     
-    @ObservedObject var callViewModel: CallViewModel
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
     
     var callId: String
     var callType: String
     var callParticipants: [Member]
+    @Binding var callSettings: CallSettings
+    var onJoinCallTap: () -> ()
+    var onCloseLobby: () -> ()
     
     var body: some View {
         GeometryReader { reader in
@@ -71,8 +81,8 @@ struct LobbyContentView: View {
                     
                     CameraCheckView(
                         viewModel: viewModel,
-                        callViewModel: callViewModel,
                         microphoneChecker: microphoneChecker,
+                        callSettings: callSettings,
                         availableSize: reader.size
                     )
                     
@@ -82,20 +92,20 @@ struct LobbyContentView: View {
                             .foregroundColor(colors.text)
                     }
                                         
-                    CallSettingsView(callViewModel: callViewModel)
+                    CallSettingsView(callSettings: $callSettings)
                     
                     JoinCallView(
-                        callViewModel: callViewModel,
                         callId: callId,
                         callType: callType,
-                        callParticipants: callParticipants
+                        callParticipants: callParticipants,
+                        onJoinCallTap: onJoinCallTap
                     )
                 }
                 .padding()
                 
                 TopRightView {
                     Button {
-                        callViewModel.callingState = .idle
+                        onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")
                             .foregroundColor(colors.text)
@@ -122,13 +132,13 @@ struct CameraCheckView: View {
     @Injected(\.streamVideo) var streamVideo
     
     @ObservedObject var viewModel: LobbyViewModel
-    @ObservedObject var callViewModel: CallViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
+    var callSettings: CallSettings
     var availableSize: CGSize
     
     var body: some View {
         Group {
-            if let image = viewModel.viewfinderImage, callViewModel.callSettings.videoOn {
+            if let image = viewModel.viewfinderImage, callSettings.videoOn {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
@@ -149,7 +159,7 @@ struct CameraCheckView: View {
                             .streamAccessibility(value: "0")
                     }
                 }
-                .opacity(callViewModel.callSettings.videoOn ? 0 : 1)
+                .opacity(callSettings.videoOn ? 0 : 1)
                 .frame(width: availableSize.width - 32, height: availableSize.height / 2)
             }
         }
@@ -159,7 +169,7 @@ struct CameraCheckView: View {
                 HStack {
                     MicrophoneCheckView(
                         decibels: microphoneChecker.decibels,
-                        microphoneOn: callViewModel.callSettings.audioOn,
+                        microphoneOn: callSettings.audioOn,
                         hasDecibelValues: microphoneChecker.hasDecibelValues
                     )
                     .accessibility(identifier: "microphoneCheckView")
@@ -174,11 +184,11 @@ struct CameraCheckView: View {
 struct JoinCallView: View {
     
     @Injected(\.colors) var colors
-    @ObservedObject var callViewModel: CallViewModel
     
     var callId: String
     var callType: String
     var callParticipants: [Member]
+    var onJoinCallTap: () -> ()
     
     var body: some View {
         VStack(spacing: 16) {
@@ -188,9 +198,7 @@ struct JoinCallView: View {
                 .streamAccessibility(value: "\(otherParticipantsCount)")
             
             Button {
-                if case .lobby(_) = callViewModel.callingState {
-                    callViewModel.startCall(callId: callId, type: callType, members: callParticipants)
-                }
+                onJoinCallTap()
             } label: {
                 Text(L10n.WaitingRoom.join)
                     .bold()
@@ -221,44 +229,42 @@ struct CallSettingsView: View {
     
     @Injected(\.images) var images
     
-    @ObservedObject var callViewModel: CallViewModel
+    @Binding var callSettings: CallSettings
     
     private let iconSize: CGFloat = 50
     
     var body: some View {
         HStack(spacing: 32) {
             Button {
-                let callSettings = callViewModel.callSettings
-                callViewModel.callSettings = CallSettings(
+                callSettings = CallSettings(
                     audioOn: !callSettings.audioOn,
                     videoOn: callSettings.videoOn,
                     speakerOn: callSettings.speakerOn
                 )
             } label: {
                 CallIconView(
-                    icon: (callViewModel.callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
+                    icon: (callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
                     size: iconSize,
-                    iconStyle: (callViewModel.callSettings.audioOn ? .primary : .transparent)
+                    iconStyle: (callSettings.audioOn ? .primary : .transparent)
                 )
                 .accessibility(identifier: "microphoneToggle")
-                .streamAccessibility(value: callViewModel.callSettings.audioOn ? "1" : "0")
+                .streamAccessibility(value: callSettings.audioOn ? "1" : "0")
             }
 
             Button {
-                let callSettings = callViewModel.callSettings
-                callViewModel.callSettings = CallSettings(
+                callSettings = CallSettings(
                     audioOn: callSettings.audioOn,
                     videoOn: !callSettings.videoOn,
                     speakerOn: callSettings.speakerOn
                 )
             } label: {
                 CallIconView(
-                    icon: (callViewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
+                    icon: (callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
                     size: iconSize,
-                    iconStyle: (callViewModel.callSettings.videoOn ? .primary : .transparent)
+                    iconStyle: (callSettings.videoOn ? .primary : .transparent)
                 )
                 .accessibility(identifier: "cameraToggle")
-                .streamAccessibility(value: callViewModel.callSettings.videoOn ? "1" : "0")
+                .streamAccessibility(value: callSettings.videoOn ? "1" : "0")
             }
         }
         .padding()

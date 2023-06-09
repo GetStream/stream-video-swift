@@ -14,10 +14,12 @@ final class LobbyView_Tests: StreamVideoUITestCase {
         for count in 1...2 {
             let users = UserFactory.get(count)
             let view = LobbyView(
-                callViewModel: CallViewModel(),
                 callId: callId,
                 callType: callType,
-                callParticipants: users
+                callParticipants: users,
+                callSettings: .constant(CallSettings()),
+                onJoinCallTap: {},
+                onCloseLobby: {}
             )
             AssertSnapshot(view, suffix: "with_\(count)_participants")
         }

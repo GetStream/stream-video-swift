@@ -78,7 +78,11 @@ public struct CallContainer<Factory: ViewFactory>: View {
         } else if viewModel.callingState == .joining {
             viewFactory.makeJoiningCallView(viewModel: viewModel)
         } else if case let .lobby(lobbyInfo) = viewModel.callingState {
-            viewFactory.makeLobbyView(viewModel: viewModel, lobbyInfo: lobbyInfo)
+            viewFactory.makeLobbyView(
+                viewModel: viewModel,
+                lobbyInfo: lobbyInfo,
+                callSettings: $viewModel.callSettings
+            )
         } else {
             EmptyView()
         }

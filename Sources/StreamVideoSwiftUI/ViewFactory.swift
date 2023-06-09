@@ -131,10 +131,12 @@ public protocol ViewFactory: AnyObject {
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
     ///  - lobbyInfo: The waiting room info.
+    ///  - callSettings: The call settings.
     /// - Returns: view shown in the pre-joining slot.
     func makeLobbyView(
         viewModel: CallViewModel,
-        lobbyInfo: LobbyInfo
+        lobbyInfo: LobbyInfo,
+        callSettings: Binding<CallSettings>
     ) -> LobbyViewType
     
     associatedtype ReconnectionViewType: View
@@ -263,21 +265,39 @@ extension ViewFactory {
     
     public func makeLobbyView(
         viewModel: CallViewModel,
-        lobbyInfo: LobbyInfo
+        lobbyInfo: LobbyInfo,
+        callSettings: Binding<CallSettings>
     ) -> some View {
+        let handleJoinCall = {
+            if case .lobby(_) = viewModel.callingState {
+                viewModel.startCall(
+                    callId: lobbyInfo.callId,
+                    type: lobbyInfo.callType,
+                    members: lobbyInfo.participants
+                )
+            }
+        }
+        let handleCloseLobby = {
+            viewModel.callingState = .idle
+        }
         if #available(iOS 14.0, *) {
             return LobbyView(
-                callViewModel: viewModel,
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
-                callParticipants: lobbyInfo.participants
+                callParticipants: lobbyInfo.participants,
+                callSettings: callSettings,
+                onJoinCallTap: handleJoinCall,
+                onCloseLobby: handleCloseLobby
             )
         } else {
             return LobbyView_iOS13(
                 callViewModel: viewModel,
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
-                callParticipants: lobbyInfo.participants
+                callParticipants: lobbyInfo.participants,
+                callSettings: callSettings,
+                onJoinCallTap: handleJoinCall,
+                onCloseLobby: handleCloseLobby
             )
         }
     }
