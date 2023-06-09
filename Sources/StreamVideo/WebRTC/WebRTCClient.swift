@@ -573,11 +573,10 @@ class WebRTCClient: NSObject {
     }
     
     private func handleSocketConnected() async throws {
-        guard let connectOptions = connectOptions,
-              let localVideoTrack = localVideoTrack,
-              let localAudioTrack = localAudioTrack else {
+        guard let connectOptions = connectOptions else {
             return
         }
+        
         let tempPeerConnection = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
             callCid: callCid,
@@ -589,17 +588,22 @@ class WebRTCClient: NSObject {
             reportsStats: false
         )
         
-        tempPeerConnection.addTrack(
-            localAudioTrack,
-            streamIds: ["temp-audio"],
-            trackType: .audio
-        )
-        tempPeerConnection.addTransceiver(
-            localVideoTrack,
-            streamIds: ["temp-video"],
-            direction: .recvOnly,
-            trackType: .video
-        )
+        if let localAudioTrack {
+            tempPeerConnection.addTrack(
+                localAudioTrack,
+                streamIds: ["temp-audio"],
+                trackType: .audio
+            )
+        }
+        
+        if let localVideoTrack {
+            tempPeerConnection.addTransceiver(
+                localVideoTrack,
+                streamIds: ["temp-video"],
+                direction: .recvOnly,
+                trackType: .video
+            )
+        }
         let offer = try await tempPeerConnection.createOffer()
         tempPeerConnection.transceiver?.stopInternal()
         tempPeerConnection.close()
