@@ -34,7 +34,7 @@ class CallCoordinatorController: @unchecked Sendable {
         callType: String,
         callId: String,
         videoOptions: VideoOptions,
-        members: [User],
+        members: [Member],
         ring: Bool,
         notify: Bool
     ) async throws -> EdgeServer {
@@ -123,7 +123,7 @@ class CallCoordinatorController: @unchecked Sendable {
         callType: String,
         updateMembers: [MemberRequest],
         removedIds: [String]
-    ) async throws -> [User] {
+    ) async throws -> [Member] {
         let request = UpdateCallMembersRequest(
             removeMembers: removedIds,
             updateMembers: updateMembers
@@ -134,11 +134,16 @@ class CallCoordinatorController: @unchecked Sendable {
             callType: callType
         )
         return response.members.map { member in
-            User(
+            let user = User(
                 id: member.userId,
                 name: member.user.name,
                 imageURL: URL(string: member.user.image ?? ""),
                 role: member.user.role
+            )
+            return Member(
+                user: user,
+                role: member.role ?? member.user.role,
+                customData: convert(member.custom)
             )
         }
     }
@@ -165,13 +170,14 @@ class CallCoordinatorController: @unchecked Sendable {
         callId: String,
         type: String,
         location: String,
-        participants: [User],
+        participants: [Member],
         ring: Bool,
         notify: Bool
     ) async throws -> JoinCallResponse {
         var members = [MemberRequest]()
         for participant in participants {
             let callMemberRequest = MemberRequest(
+                custom: RawJSON.convert(customData: participant.customData),
                 role: participant.role,
                 userId: participant.id
             )

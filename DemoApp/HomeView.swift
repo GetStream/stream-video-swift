@@ -197,10 +197,10 @@ struct HomeView: View {
         }
     }
     
-    var members: [User] {
-        var members = selectedParticipants
+    var members: [Member] {
+        var members: [Member] = selectedParticipants.map { Member(user: $0, role: $0.role) }
         if !selectedParticipants.contains(streamVideo.user) {
-            members.append(streamVideo.user)            
+            members.append(Member(user: streamVideo.user, role: streamVideo.user.role))            
         }
         return members
     }

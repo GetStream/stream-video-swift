@@ -12,9 +12,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     private let mockResponseBuilder = MockResponseBuilder()
     
-    let firstUser = StreamVideo.mockUser
-    let secondUser = User(id: "test2")
-    let thirdUser = User(id: "test3")
+    let firstUser: Member = Member(user: StreamVideo.mockUser)
+    let secondUser: Member = Member(user: User(id: "test2"))
+    let thirdUser: Member = Member(user: User(id: "test3"))
     let callId = "test"
     let callType: String = .default
     var callCid: String {
@@ -68,7 +68,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             call: callResponse,
             callCid: callCid,
             createdAt: Date(),
-            user: secondUser.toUserResponse()
+            user: secondUser.user.toUserResponse()
         )
         eventNotificationCenter?.process(event)
         
@@ -91,7 +91,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             call: firstCallResponse,
             callCid: callCid,
             createdAt: Date(),
-            user: secondUser.toUserResponse()
+            user: secondUser.user.toUserResponse()
         )
         eventNotificationCenter?.process(firstReject)
         
@@ -107,7 +107,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             call: secondCallResponse,
             callCid: callCid,
             createdAt: Date(),
-            user: thirdUser.toUserResponse()
+            user: thirdUser.user.toUserResponse()
         )
         eventNotificationCenter?.process(secondReject)
         
@@ -137,7 +137,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = BlockedUserEvent(
             callCid: callCid,
             createdAt: Date(),
-            user: firstUser.toUserResponse()
+            user: firstUser.user.toUserResponse()
         )
         eventNotificationCenter?.process(event)
         
@@ -161,12 +161,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = BlockedUserEvent(
             callCid: callCid,
             createdAt: Date(),
-            user: secondUser.toUserResponse()
+            user: secondUser.user.toUserResponse()
         )
         eventNotificationCenter?.process(event)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.call?.state.callData?.blockedUsers.first == secondUser)
+        try await XCTAssertWithDelay(callViewModel.call?.state.callData?.blockedUsers.first == secondUser.user)
     }
     
     func test_outgoingCall_hangUp() async throws {
@@ -484,7 +484,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     //MARK: - private
     
-    private func callViewModelWithRingingCall(participants: [User]) -> CallViewModel {
+    private func callViewModelWithRingingCall(participants: [Member]) -> CallViewModel {
         let callViewModel = CallViewModel()
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(

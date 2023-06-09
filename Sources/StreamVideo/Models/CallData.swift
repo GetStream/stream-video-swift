@@ -9,7 +9,7 @@ public struct CallData: @unchecked Sendable {
     /// The unique identifier for the call.
     public let callCid: String
     /// The members participating in the call.
-    public var members: [User]
+    public var members: [Member]
     /// The users who are blocked from joining the call.
     public var blockedUsers: [User]
     /// The date and time when the call was created.

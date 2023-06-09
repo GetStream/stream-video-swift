@@ -34,7 +34,7 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
         callType: String,
         callId: String,
         videoOptions: VideoOptions,
-        members: [User],
+        members: [Member],
         ring: Bool,
         notify: Bool
     ) async throws -> EdgeServer {

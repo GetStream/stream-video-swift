@@ -9,7 +9,7 @@ struct CallingParticipantsView: View {
     
     @Injected(\.fonts) var fonts
     
-    var participants: [User]
+    var participants: [Member]
     var caller: String = ""
     
     var body: some View {
@@ -24,7 +24,7 @@ struct CallingParticipantsView: View {
         if participants.isEmpty {
             return caller
         } else if participants.count == 1 {
-            return participants[0].name
+            return participants[0].user.name
         } else {
             return multipleParticipantsText
         }
@@ -32,12 +32,12 @@ struct CallingParticipantsView: View {
     
     private var multipleParticipantsText: String {
         if participants.count == 2 {
-            return "\(participants[0].name) and \(participants[1].name)"
+            return "\(participants[0].user.name) and \(participants[1].user.name)"
         } else if participants.count == 3 {
-            return "\(participants[0].name), \(participants[1].name) and \(participants[2].name)"
+            return "\(participants[0].user.name), \(participants[1].user.name) and \(participants[2].user.name)"
         } else {
             let remaining = participants.count - 2
-            return "\(participants[0].name), \(participants[1].name) and +\(remaining) more"
+            return "\(participants[0].user.name), \(participants[1].user.name) and +\(remaining) more"
         }
     }
 }

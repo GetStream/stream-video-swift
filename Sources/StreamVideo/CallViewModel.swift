@@ -70,7 +70,7 @@ open class CallViewModel: ObservableObject {
     @Published public var participantsShown = false
         
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [User]()
+    @Published public var outgoingCallMembers = [Member]()
     
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
@@ -262,7 +262,7 @@ open class CallViewModel: ObservableObject {
     ///  - type: the type of the call.
     ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callId: String, type: String, members: [User], ring: Bool = false) {
+    public func startCall(callId: String, type: String, members: [Member], ring: Bool = false) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
         if !ring {
@@ -298,7 +298,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - type: the type of the call.
     ///  - members: list of members that are part of the call.
-    public func enterLobby(callId: String, type: String, members: [User]) {
+    public func enterLobby(callId: String, type: String, members: [Member]) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: members)
         callingState = .lobby(lobbyInfo)
     }
@@ -439,7 +439,7 @@ open class CallViewModel: ObservableObject {
         localVideoPrimary = false
     }
     
-    private func enterCall(call: Call? = nil, callId: String, callType: String, members: [User], ring: Bool = false) {
+    private func enterCall(call: Call? = nil, callId: String, callType: String, members: [Member], ring: Bool = false) {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
@@ -635,7 +635,7 @@ public enum CallingState: Equatable {
 public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: String
-    public let participants: [User]
+    public let participants: [Member]
 }
 
 public struct ScreensharingSession {

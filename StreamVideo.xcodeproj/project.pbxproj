@@ -233,6 +233,7 @@
 		844299412942394C0037232A /* VideoView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299402942394C0037232A /* VideoView_iOS13.swift */; };
 		844299432942484A0037232A /* DemoUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* DemoUsers.swift */; };
 		844299442942484A0037232A /* DemoUsers.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299422942484A0037232A /* DemoUsers.swift */; };
+		844ECF4F2A33458A0023263C /* Member.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ECF4E2A33458A0023263C /* Member.swift */; };
 		8456E6C2287EB405004E180E /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
 		8456E6C6287EB55F004E180E /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
@@ -868,6 +869,7 @@
 		844299402942394C0037232A /* VideoView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView_iOS13.swift; sourceTree = "<group>"; };
 		844299422942484A0037232A /* DemoUsers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoUsers.swift; sourceTree = "<group>"; };
 		84429945294248A20037232A /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
+		844ECF4E2A33458A0023263C /* Member.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		8456E6C1287EB405004E180E /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8456E6C3287EB43A004E180E /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewModel.swift; sourceTree = "<group>"; };
 		8456E6C5287EB55F004E180E /* AppState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppState.swift; sourceTree = "<group>"; };
@@ -1706,6 +1708,7 @@
 				84E5C51B2A013C440003A27A /* PushNotificationsConfig.swift */,
 				8472604A2A0AF81800713E30 /* CallData.swift */,
 				843B5C782A1F71FC0013349E /* SessionInfo.swift */,
+				844ECF4E2A33458A0023263C /* Member.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2975,6 +2978,7 @@
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				84A8B8912993D3AB003AA570 /* PermissionsMiddleware.swift in Sources */,
+				844ECF4F2A33458A0023263C /* Member.swift in Sources */,
 				8427FF712A05A3D100AFD2C3 /* LivestreamController.swift in Sources */,
 				84AF64D7287C79610012A503 /* Token.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,

@@ -15,13 +15,13 @@ struct LobbyView_iOS13: View {
     
     var callId: String
     var callType: String
-    var callParticipants: [User]
+    var callParticipants: [Member]
         
     public init(
         callViewModel: CallViewModel,
         callId: String,
         callType: String,
-        callParticipants: [User]
+        callParticipants: [Member]
     ) {
         _callViewModel = ObservedObject(wrappedValue: callViewModel)
         self.callId = callId

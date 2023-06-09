@@ -58,7 +58,7 @@ struct IncomingCallViewContent: View {
     @Injected(\.images) var images
     @Injected(\.utils) var utils
     
-    var callParticipants: [User]
+    var callParticipants: [Member]
     var callInfo: IncomingCall
     var onCallAccepted: (String) -> Void
     var onCallRejected: (String) -> Void

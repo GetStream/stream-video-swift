@@ -22,7 +22,15 @@ class CallsMiddleware: EventMiddleware {
                 id: id,
                 caller: caller,
                 type: type,
-                participants: ringEvent.members.map { $0.user.toUser },
+                participants: ringEvent.members.map {
+                    let user = $0.user.toUser
+                    let member = Member(
+                        user: user,
+                        role: $0.role ?? $0.user.role,
+                        customData: convert($0.custom)
+                    )
+                    return member
+                },
                 timeout: TimeInterval(ringEvent.call.settings.ring.autoCancelTimeoutMs / 1000)
             )
             onCallEvent?(.incoming(incomingCall))

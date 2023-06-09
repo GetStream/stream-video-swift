@@ -10,7 +10,7 @@ struct CallingGroupView: View {
     
     let easeGently = Animation.easeOut(duration: 1).repeatForever(autoreverses: true)
     
-    var participants: [User]
+    var participants: [Member]
     @State var isCalling = false
     
     var body: some View {
@@ -96,15 +96,15 @@ struct CallingGroupView: View {
 
 struct IncomingCallParticipantView: View {
         
-    var participant: User
+    var participant: Member
     var size: CGFloat = .expandedAvatarSize
     
     var body: some View {
         ZStack {
-            if #available(iOS 14.0, *), let imageURL = participant.imageURL {
+            if #available(iOS 14.0, *), let imageURL = participant.user.imageURL {
                 UserAvatar(imageURL: imageURL, size: size)
             } else {
-                let name = participant.name.isEmpty ? "Unknown" : participant.name
+                let name = participant.user.name.isEmpty ? "Unknown" : participant.user.name
                 let title = String(name.uppercased().first!)
                 CircledTitleView(title: title, size: size)
             }

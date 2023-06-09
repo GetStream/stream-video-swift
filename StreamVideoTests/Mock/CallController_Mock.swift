@@ -32,7 +32,7 @@ class CallController_Mock: CallController {
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        members: [User],
+        members: [Member],
         ring: Bool = false,
         notify: Bool = false
     ) async throws {

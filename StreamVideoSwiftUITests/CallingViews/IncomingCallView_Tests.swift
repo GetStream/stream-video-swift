@@ -15,7 +15,7 @@ final class IncomingCallView_Tests: StreamVideoUITestCase {
             let users = UserFactory.get(count)
             let callInfo = IncomingCall(
                 id: callCid,
-                caller: users.first!,
+                caller: users.first!.user,
                 type: callType,
                 participants: users,
                 timeout: 15000

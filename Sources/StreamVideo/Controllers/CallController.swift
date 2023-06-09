@@ -66,7 +66,7 @@ class CallController {
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        members: [User],
+        members: [Member],
         ring: Bool = false,
         notify: Bool = false
     ) async throws {
@@ -122,7 +122,7 @@ class CallController {
     /// Gets or creates the call on the backend with the given parameters.
     ///
     /// - Parameters:
-    ///  - members: An optional array of User objects to add to the call.
+    ///  - members: An optional array of Member objects to add to the call.
     ///  - startsAt: An optional Date object representing the time the call is scheduled to start.
     ///  - customData: An optional dictionary of custom data to attach to the call.
     ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
@@ -131,7 +131,7 @@ class CallController {
     /// - Throws: An error if the call creation fails.
     /// - Returns: The call's data.
     func getOrCreateCall(
-        members: [User],
+        members: [Member],
         startsAt: Date?,
         customData: [String: RawJSON],
         membersLimit: Int?,
@@ -203,7 +203,7 @@ class CallController {
     /// Adds members with the specified `ids` to the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to add.
     /// - Throws: An error if the members could not be added to the call.
-    func addMembersToCall(ids: [String]) async throws -> [User] {
+    func addMembersToCall(ids: [String]) async throws -> [Member] {
         try await callCoordinatorController.updateCallMembers(
             callId: callId,
             callType: callType,
@@ -215,7 +215,7 @@ class CallController {
     /// Removes members with the specified `ids` from the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to remove.
     /// - Throws: An error if the members could not be removed from the call.
-    func removeMembersFromCall(ids: [String]) async throws -> [User] {
+    func removeMembersFromCall(ids: [String]) async throws -> [Member] {
         try await callCoordinatorController.updateCallMembers(
             callId: callId,
             callType: callType,

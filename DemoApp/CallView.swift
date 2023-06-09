@@ -29,7 +29,8 @@ struct CallView: View {
                         let contact = callIntent.contacts?.first
 
                         guard let name = contact?.personHandle?.value else { return }
-                        viewModel.startCall(callId: UUID().uuidString, type: .default, members: [.init(id: name)], ring: true)
+                        let member = Member(user: User(id: name), role: "user")
+                        viewModel.startCall(callId: UUID().uuidString, type: .default, members: [member], ring: true)
                     }
                 }
             )

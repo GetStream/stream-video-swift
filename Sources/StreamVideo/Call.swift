@@ -47,7 +47,7 @@ public class Call: @unchecked Sendable {
     private let eventsController: EventsController
     private let permissionsController: PermissionsController
     private let livestreamController: LivestreamController
-    private let members: [User]
+    private let members: [Member]
     private let videoOptions: VideoOptions
     private var allEventsMiddleware: AllEventsMiddleware?
     private var broadcastingTask: Task<Void, Never>?
@@ -60,7 +60,7 @@ public class Call: @unchecked Sendable {
         eventsController: EventsController,
         permissionsController: PermissionsController,
         livestreamController: LivestreamController,
-        members: [User],
+        members: [Member],
         videoOptions: VideoOptions,
         allEventsMiddleWare: AllEventsMiddleware?
     ) {
@@ -148,7 +148,7 @@ public class Call: @unchecked Sendable {
     /// - Throws: An error if the call creation fails.
     /// - Returns: The call's data.
     public func getOrCreate(
-        members: [User] = [],
+        members: [Member] = [],
         startsAt: Date? = nil,
         customData: [String: RawJSON] = [:],
         membersLimit: Int? = nil,
@@ -246,14 +246,14 @@ public class Call: @unchecked Sendable {
     /// Adds members with the specified `ids` to the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to add.
     /// - Throws: An error if the members could not be added to the call.
-    public func addMembers(ids: [String]) async throws -> [User] {
+    public func addMembers(ids: [String]) async throws -> [Member] {
         try await callController.addMembersToCall(ids: ids)
     }
     
     /// Remove members with the specified `ids` from the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to remove.
     /// - Throws: An error if the members could not be removed from the call.
-    public func removeMembers(ids: [String]) async throws -> [User] {
+    public func removeMembers(ids: [String]) async throws -> [Member] {
         try await callController.removeMembersFromCall(ids: ids)
     }
     

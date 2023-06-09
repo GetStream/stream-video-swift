@@ -94,16 +94,17 @@ struct ParticipantFactory {
 }
 
 struct UserFactory {
-    static func get(_ count: Int) -> [User] {
-        var factory: [User] = []
+    static func get(_ count: Int) -> [Member] {
+        var factory: [Member] = []
         guard count > 0 else { return factory }
         
         for i in (1...count) {
-            let participant = User(
+            let user = User(
                 id: "test\(i)",
                 name: "\(i) Test",
                 imageURL: ImageFactory.get(i)
             )
+            let participant = Member(user: user)
             factory.append(participant)
         }
         

@@ -262,7 +262,7 @@ public class StreamVideo {
     public func call(
         callType: String,
         callId: String,
-        members: [User] = []
+        members: [Member] = []
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
         let recordingController = makeRecordingController(

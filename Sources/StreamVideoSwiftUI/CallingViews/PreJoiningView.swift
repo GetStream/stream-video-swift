@@ -15,13 +15,13 @@ public struct LobbyView: View {
     
     var callId: String
     var callType: String
-    var callParticipants: [User]
+    var callParticipants: [Member]
         
     public init(
         callViewModel: CallViewModel,
         callId: String,
         callType: String,
-        callParticipants: [User]
+        callParticipants: [Member]
     ) {
         self.callViewModel = callViewModel
         self.callId = callId
@@ -53,7 +53,7 @@ struct LobbyContentView: View {
     
     var callId: String
     var callType: String
-    var callParticipants: [User]
+    var callParticipants: [Member]
     
     var body: some View {
         GeometryReader { reader in
@@ -178,7 +178,7 @@ struct JoinCallView: View {
     
     var callId: String
     var callType: String
-    var callParticipants: [User]
+    var callParticipants: [Member]
     
     var body: some View {
         VStack(spacing: 16) {

@@ -237,7 +237,13 @@ extension CallResponse {
     ) -> CallData {
         return CallData(
             callCid: cid,
-            members: members.map { $0.user.toUser },
+            members: members.map {
+                Member(
+                    user: $0.user.toUser,
+                    role: $0.role,
+                    customData: convert($0.custom)
+                )                
+            },
             blockedUsers: blockedUsers.map { $0.toUser },
             createdAt: createdAt,
             backstage: backstage,
