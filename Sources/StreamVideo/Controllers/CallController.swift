@@ -247,9 +247,9 @@ class CallController {
         }
     }
     
-    func update(state: CallData) {
-        if state.callCid == call?.cId {
-            call?.update(state: state)
+    func update(callData: CallData) {
+        if callData.callCid == call?.cId {
+            call?.update(callData: callData)
         } else {
             log.warning("Received call info that doesn't match the active call")
         }
@@ -298,7 +298,7 @@ class CallController {
         let sessionId = webRTCClient?.sessionID ?? ""
         call?.sessionId = sessionId
         call?.update(recordingState: edgeServer.callSettings.recording ? .recording : .noRecording)
-        call?.update(state: edgeServer.callSettings.state)
+        call?.update(callData: edgeServer.callSettings.state)
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
@@ -311,7 +311,7 @@ class CallController {
     private func handleParticipantsUpdated() {
         webRTCClient?.onParticipantsUpdated = { [weak self] participants in
             DispatchQueue.main.async {
-                self?.call?.participants = participants
+                self?.call?.state.participants = participants
             }
         }
     }
@@ -325,7 +325,7 @@ class CallController {
     private func handleParticipantCountUpdated() {
         webRTCClient?.onParticipantCountUpdated = { [weak self] participantCount in
             DispatchQueue.main.async {
-                self?.call?.participantCount = participantCount
+                self?.call?.state.participantCount = participantCount
             }
         }
     }
@@ -351,7 +351,7 @@ class CallController {
         isRetry: Bool = false
     ) {
         guard let call = call,
-                (call.reconnectionStatus != .reconnecting || isRetry),
+              (call.state.reconnectionStatus != .reconnecting || isRetry),
                 source != .userInitiated else {
             return            
         }

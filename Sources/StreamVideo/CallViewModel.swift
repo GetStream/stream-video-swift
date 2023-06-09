@@ -16,22 +16,22 @@ open class CallViewModel: ObservableObject {
     @Published public private(set) var call: Call? {
         didSet {
             lastLayoutChange = Date()
-            participantUpdates = call?.$participants
+            participantUpdates = call?.state.$participants
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] participants in
                     self?.callParticipants = participants
             })
-            callUpdates = call?.$state
+            callUpdates = call?.state.$callData
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] state in
                     self?.blockedUsers = state?.blockedUsers ?? []
             })
-            recordingUpdates = call?.$recordingState
+            recordingUpdates = call?.state.$recordingState
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] newState in
                     self?.recordingState = newState
             })
-            reconnectionUpdates = call?.$reconnectionStatus
+            reconnectionUpdates = call?.state.$reconnectionStatus
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
                     if reconnectionStatus == .reconnecting {
@@ -531,8 +531,8 @@ open class CallViewModel: ObservableObject {
     private func handleRejectedEvent(_ callEvent: CallEvent) {
         if case .rejected(_) = callEvent {
             let outgoingMembersCount = outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count
-            let rejections = call?.state?.session?.rejectedBy.count ?? 0
-            let accepted = call?.state?.session?.acceptedBy.count ?? 0
+            let rejections = call?.state.callData?.session?.rejectedBy.count ?? 0
+            let accepted = call?.state.callData?.session?.acceptedBy.count ?? 0
                         
             if rejections >= outgoingMembersCount && accepted == 0 {
                 Task {
@@ -570,7 +570,7 @@ open class CallViewModel: ObservableObject {
                 self.participantEvent = event
                 if event.action == .leave &&
                     callParticipants.count == 1
-                    && call.state?.session?.acceptedBy.isEmpty == false {
+                    && call.state.callData?.session?.acceptedBy.isEmpty == false {
                     leaveCall()
                 } else {
                     // The event is shown for 2 seconds.

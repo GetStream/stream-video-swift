@@ -37,7 +37,7 @@ class CallController_Mock: CallController {
         notify: Bool = false
     ) async throws {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
-            self?.call?.participants = participants
+            self?.call?.state.participants = participants
         }
     }
     

@@ -60,7 +60,7 @@ final class CallController_Tests: ControllerTestCase {
         try await waitForCallEvent()
         
         // Then
-        XCTAssert(callController.call?.reconnectionStatus == .reconnecting)
+        XCTAssert(callController.call?.state.reconnectionStatus == .reconnecting)
      
         // When
         try await waitForCallEvent()
@@ -77,7 +77,7 @@ final class CallController_Tests: ControllerTestCase {
         try await waitForCallEvent()
         
         // Then
-        XCTAssert(callController.call?.reconnectionStatus == .connected)
+        XCTAssert(callController.call?.state.reconnectionStatus == .connected)
     }
     
     func test_callController_reconnectionFailure() async throws {
@@ -107,7 +107,7 @@ final class CallController_Tests: ControllerTestCase {
         try await waitForCallEvent()
         
         // Then
-        XCTAssert(callController.call?.reconnectionStatus == .reconnecting)
+        XCTAssert(callController.call?.state.reconnectionStatus == .reconnecting)
      
         // When
         try await waitForCallEvent(nanoseconds: 5_000_000_000)
@@ -133,7 +133,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         callController.call = call
         callController.update(
-            state: CallData(
+            callData: CallData(
                 callCid: callCid,
                 members: [],
                 blockedUsers: [],
@@ -150,7 +150,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         
         // Then
-        XCTAssert(callController.call?.state?.backstage == true)
+        XCTAssert(callController.call?.state.callData?.backstage == true)
     }
     
     func test_callController_updateCallInfoDifferentCallCid() async throws {
@@ -170,7 +170,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         callController.call = call
         callController.update(
-            state: CallData(
+            callData: CallData(
                 callCid: "default:different",
                 members: [],
                 blockedUsers: [],
@@ -187,7 +187,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         
         // Then
-        XCTAssert(callController.call?.state?.backstage == nil)
+        XCTAssert(callController.call?.state.callData?.backstage == nil)
     }
     
     func test_callController_updateRecordingState() async throws {
@@ -209,7 +209,7 @@ final class CallController_Tests: ControllerTestCase {
         callController.updateCall(from: .init(callCid: callCid, type: "default", action: .started))
         
         // Then
-        XCTAssert(callController.call?.recordingState == .recording)
+        XCTAssert(callController.call?.state.recordingState == .recording)
     }
     
     func test_callController_updateRecordingStateDifferentCallCid() async throws {
@@ -231,7 +231,7 @@ final class CallController_Tests: ControllerTestCase {
         callController.updateCall(from: .init(callCid: "default:different", type: "default", action: .started))
         
         // Then
-        XCTAssert(callController.call?.recordingState == .noRecording)
+        XCTAssert(callController.call?.state.recordingState == .noRecording)
     }
     
     func test_callController_cleanup() async throws {

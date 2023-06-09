@@ -75,7 +75,7 @@ var body: some View {
     VStack {
         HStack {
             Text("Live")
-                .opacity(call.state?.broadcasting == true ? 1 : 0)
+                .opacity(call.state.callData?.broadcasting == true ? 1 : 0)
         }
         
         GeometryReader { reader in
@@ -96,7 +96,7 @@ var body: some View {
         
         ZStack {
             HStack {
-                if call.state?.broadcasting == true {
+                if call.state.callData?.broadcasting == true {
                     Button {
                         Task {
                             loading = true
@@ -129,7 +129,7 @@ var body: some View {
         }
         .padding()
     }
-    .onChange(of: call.state?.broadcasting, perform: { state in
+    .onChange(of: call.state.callData?.broadcasting, perform: { state in
         loading = false
     })
     
@@ -170,7 +170,7 @@ You can also directly listen to the broadcasting events in the call, using the `
 When the call is being broadcasted, we show a "Stop stream" button to the hosts, to allow them to stop broadcasting:
 
 ```swift
-if call.state?.broadcasting == true {
+if call.state.callData?.broadcasting == true {
     Button {
         Task {
             loading = true

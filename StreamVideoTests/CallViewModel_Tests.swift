@@ -153,7 +153,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             cid: callCid
         )
         .toCallData(members: [], blockedUsers: [])
-        call?.update(state: callData)
+        call?.update(callData: callData)
         callViewModel.setActiveCall(call)
         try await waitForCallEvent()
 
@@ -166,7 +166,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(event)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.call?.state?.blockedUsers.first == secondUser)
+        try await XCTAssertWithDelay(callViewModel.call?.state.callData?.blockedUsers.first == secondUser)
     }
     
     func test_outgoingCall_hangUp() async throws {
@@ -491,7 +491,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             cid: callCid
         )
         .toCallData(members: [], blockedUsers: [])
-        call?.update(state: callData)
+        call?.update(callData: callData)
         callViewModel.setActiveCall(call)
         callViewModel.outgoingCallMembers = participants
         callViewModel.callingState = .outgoing

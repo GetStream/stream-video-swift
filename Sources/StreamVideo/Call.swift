@@ -5,22 +5,26 @@
 import Foundation
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
-public class Call: ObservableObject, @unchecked Sendable {
+public class Call: @unchecked Sendable {
     
-    /// The current participants dictionary.
-    @Published public internal(set) var participants = [String: CallParticipant]() {
-        didSet {
-            log.debug("Participants changed: \(participants)")
+    public class State: ObservableObject {
+        /// The current participants dictionary.
+        @Published public internal(set) var participants = [String: CallParticipant]() {
+            didSet {
+                log.debug("Participants changed: \(participants)")
+            }
         }
+        /// The call info published to the participants.
+        @Published public internal(set) var callData: CallData?
+        /// Indicates the reconnection status..
+        @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
+        /// The call recording state.
+        @Published public internal(set) var recordingState: RecordingState = .noRecording
+        /// The total number of participants connected to the call.
+        @Published public internal(set) var participantCount: UInt32 = 0
     }
-    /// The call info published to the participants.
-    @Published public private(set) var state: CallData?
-    /// Indicates the reconnection status..
-    @Published public private(set) var reconnectionStatus = ReconnectionStatus.connected
-    /// The call recording state.
-    @Published public private(set) var recordingState: RecordingState = .noRecording
-    /// The total number of participants connected to the call.
-    @Published public internal(set) var participantCount: UInt32 = 0
+    
+    public internal(set) var state = Call.State()
     
     /// The id of the current session.
     var sessionId: String = ""
@@ -190,17 +194,17 @@ public class Call: ObservableObject, @unchecked Sendable {
     /// Adds the given user to the list of blocked users for the call.
     /// - Parameter blockedUser: The user to add to the list of blocked users.
     public func add(blockedUser: User) {
-        var blockedUsers = state?.blockedUsers ?? []
+        var blockedUsers = state.callData?.blockedUsers ?? []
         if !blockedUsers.contains(blockedUser) {
             blockedUsers.append(blockedUser)
-            state?.blockedUsers = blockedUsers
+            state.callData?.blockedUsers = blockedUsers
         }
     }
     
     /// Removes the given user from the list of blocked users for the call.
     /// - Parameter blockedUser: The user to remove from the list of blocked users.
     public func remove(blockedUser: User) {
-        state?.blockedUsers.removeAll { user in
+        state.callData?.blockedUsers.removeAll { user in
             user.id == blockedUser.id
         }
     }
@@ -480,22 +484,22 @@ public class Call: ObservableObject, @unchecked Sendable {
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        if reconnectionStatus != self.reconnectionStatus {
-            self.reconnectionStatus = reconnectionStatus
+        if reconnectionStatus != self.state.reconnectionStatus {
+            self.state.reconnectionStatus = reconnectionStatus
         }
     }
     
-    internal func update(state: CallData) {
-        var updated = state
-        let members = self.state?.members ?? []
-        if state.members.isEmpty && !members.isEmpty {
+    internal func update(callData: CallData) {
+        var updated = callData
+        let members = self.state.callData?.members ?? []
+        if callData.members.isEmpty && !members.isEmpty {
             updated.members = members
         }
-        self.state = updated
+        self.state.callData = updated
     }
     
     internal func update(recordingState: RecordingState) {
-        self.recordingState = recordingState
+        self.state.recordingState = recordingState
     }
     
     //MARK: - private
@@ -506,9 +510,9 @@ public class Call: ObservableObject, @unchecked Sendable {
                 if event.callCid == cId {
                     await MainActor.run {
                         if event is BroadcastingStoppedEvent {
-                            state?.broadcasting = false
+                            state.callData?.broadcasting = false
                         } else {
-                            state?.broadcasting = true
+                            state.callData?.broadcasting = true
                         }
                     }                    
                 }

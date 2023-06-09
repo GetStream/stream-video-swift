@@ -5,15 +5,15 @@ description: How the state is exposed
 
 ## Call State
 
-When you join a call, we expose the following state from the `Call` object:
+When you join a call, we expose the following observable state from the `Call` object:
 
 - `participants` - dictionary of the participants in the call
-- `state` - the call state
+- `callData` - the call data
 - `reconnectionStatus` - whether the call is reconnecting
 - `recordingState` - the recording state of the call
 - `participantCount - number of participants connected to the call
 
-The `call.state` provides additional information about the call:
+The `call.callData` provides additional information about the call:
 
 - `callCid`: String - the call cid, in the format type:callId.
 - `members`: [User] - the members of the call.
