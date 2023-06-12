@@ -12,6 +12,7 @@ class CallCoordinatorController: @unchecked Sendable {
     var currentCallSettings: CallSettingsInfo?
     private let videoConfig: VideoConfig
     private var user: User
+    private var cachedLocation: String?
     
     init(
         httpClient: HTTPClient,
@@ -28,6 +29,7 @@ class CallCoordinatorController: @unchecked Sendable {
         )
         self.videoConfig = videoConfig
         self.user = user
+        self.prefetchLocation()
     }
     
     func joinCall(
@@ -149,8 +151,17 @@ class CallCoordinatorController: @unchecked Sendable {
     }
 
     // MARK: - private
+    
+    private func prefetchLocation() {
+        Task {
+            self.cachedLocation = try await getLocation()
+        }
+    }
 
     private func getLocation() async throws -> String {
+        if let cachedLocation {
+            return cachedLocation
+        }
         guard let url = URL(string: "https://hint.stream-io-video.com/") else {
             throw URLError(.badURL)
         }
