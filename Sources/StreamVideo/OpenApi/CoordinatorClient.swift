@@ -319,7 +319,7 @@ class CoordinatorClient: @unchecked Sendable {
     }
     
     private func makeURLRequiringConnectionId(with path: String) throws -> URL {
-        guard !connectionId.isEmpty else { throw ClientError.Unexpected() }
+        guard !connectionId.isEmpty else { throw ClientError.MissingConnectionId() }
         let urlString = hostname + pathPrefix + path
         return try self.url(string: urlString, queryItems: connectionQueryParams)
     }

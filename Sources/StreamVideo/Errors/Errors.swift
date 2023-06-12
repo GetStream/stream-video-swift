@@ -68,6 +68,9 @@ extension ClientError {
     
     /// Invalid url error.
     public class InvalidURL: ClientError {}
+    
+    /// Missing connection id.
+    public class MissingConnectionId: ClientError {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable
