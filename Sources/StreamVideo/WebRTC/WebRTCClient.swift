@@ -241,7 +241,7 @@ class WebRTCClient: NSObject {
     }
     
     func setupUserMedia(callSettings: CallSettings) async {
-        if hasCapability(.sendAudio) {
+        if hasCapability(.sendAudio), localAudioTrack == nil {
             await audioSession.configure(callSettings: callSettings)
             
             // Audio
@@ -249,7 +249,7 @@ class WebRTCClient: NSObject {
             localAudioTrack = audioTrack
         }
         
-        if hasCapability(.sendVideo) {
+        if hasCapability(.sendVideo), localVideoTrack == nil {
             // Video
             let videoTrack = await makeVideoTrack()
             localVideoTrack = videoTrack
@@ -403,6 +403,7 @@ class WebRTCClient: NSObject {
                 self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
             }
         }
+        await setupUserMedia(callSettings: callSettings)
         publishUserMedia(callSettings: callSettings)
     }
     
@@ -617,7 +618,10 @@ class WebRTCClient: NSObject {
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
         var tracks = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
         request.sessionID = sessionID
+
         let callParticipants = await state.callParticipants
+            .filter { $0.value.id != sessionID }
+
         for (_, value) in callParticipants {
             if value.id != sessionID {
                 if value.hasVideo {

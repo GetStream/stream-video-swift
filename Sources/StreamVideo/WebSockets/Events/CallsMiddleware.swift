@@ -120,7 +120,15 @@ class CallsMiddleware: EventMiddleware {
                 type: event.type
             )
             onBroadcastingEvent?(broadcastStopped)
-        }
+        } else if let event = event as? CallLiveStartedEvent {
+            let state = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map {
+                    userResponse(from: $0)
+                }
+            )
+            onCallUpdated?(state)
+        } 
         onAnyEvent?(event)
         
         return event

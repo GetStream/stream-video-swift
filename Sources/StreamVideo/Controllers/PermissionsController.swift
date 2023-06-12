@@ -252,11 +252,27 @@ class PermissionsController {
         let requests = AsyncStream(PermissionsUpdated.self) { [weak self] continuation in
             self?.onPermissionsUpdatedEvent = { event in
                 if event.callCid == callCid {
+                    self?.updateCurrentCallSettings(event)
                     continuation.yield(event)
                 }
             }
         }
         return requests
+    }
+
+    private func updateCurrentCallSettings(_ event: PermissionsUpdated) {
+        guard
+            event.user.id == currentUser.id,
+            let currentCallSettings = callCoordinatorController.currentCallSettings
+        else {
+            return
+        }
+        callCoordinatorController.currentCallSettings = .init(
+            callCapabilities: event.ownCapabilities,
+            callSettings: currentCallSettings.callSettings,
+            state: currentCallSettings.state,
+            recording: currentCallSettings.recording
+        )
     }
     
     func cleanUp() {
