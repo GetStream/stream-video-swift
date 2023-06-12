@@ -67,29 +67,32 @@ For reference, here's the default `VideoCallParticipantModifier` implementation,
 
 ```swift
 public struct VideoCallParticipantModifier: ViewModifier {
-
+            
     @State var popoverShown = false
-
+    
     var participant: CallParticipant
     @Binding var pinnedParticipant: CallParticipant?
     var participantCount: Int
     var availableSize: CGSize
     var ratio: CGFloat
-
+    var showAllInfo: Bool
+    
     public init(
         participant: CallParticipant,
         pinnedParticipant: Binding<CallParticipant?>,
         participantCount: Int,
         availableSize: CGSize,
-        ratio: CGFloat
+        ratio: CGFloat,
+        showAllInfo: Bool
     ) {
         self.participant = participant
         _pinnedParticipant = pinnedParticipant
         self.participantCount = participantCount
         self.availableSize = availableSize
         self.ratio = ratio
+        self.showAllInfo = showAllInfo
     }
-
+    
     public func body(content: Content) -> some View {
         content
             .adjustVideoFrame(to: availableSize.width, ratio: ratio)
@@ -101,20 +104,23 @@ public struct VideoCallParticipantModifier: ViewModifier {
                                 participant: participant,
                                 isPinned: participant.id == pinnedParticipant?.id
                             )
-                            Spacer()
-                            ConnectionQualityIndicator(
-                                connectionQuality: participant.connectionQuality
-                            )
+                            
+                            if showAllInfo {
+                                Spacer()
+                                ConnectionQualityIndicator(
+                                    connectionQuality: participant.connectionQuality
+                                )
+                            }
                         }
                         .padding(.bottom, 2)
                     })
-                        .padding()
-
+                    .padding(.all, showAllInfo ? 16 : 8)
+                    
                     if participant.isSpeaking && participantCount > 1 {
                         Rectangle()
                             .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
                     }
-
+                    
                     if popoverShown {
                         Button {
                             if participant.id == pinnedParticipant?.id {
@@ -154,7 +160,7 @@ ForEach(participants) { participant in
         id: participant.id,
         availableSize: availableSize,
         contentMode: .scaleAspectFill,
-        customData: [String: RawJSON],
+        customData: [:],
         onViewUpdate: onViewUpdate
     )
     .modifier(

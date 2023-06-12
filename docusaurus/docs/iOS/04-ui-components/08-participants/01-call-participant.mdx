@@ -25,7 +25,8 @@ VideoCallParticipantView(
         pinnedParticipant: pinnedParticipant,
         participantCount: participantCount,
         availableSize: availableSize,
-        ratio: ratio
+        ratio: ratio,
+        showAllInfo: true
     )
 )
 ```
@@ -92,6 +93,7 @@ For the `VideoCallParticipantModifier` you should provide the following paramete
 - `pinnedParticipant` - optional binding of the pinned participant (if any)
 - `availableSize` - the available size for the view
 - `ratio` - the ratio for the view slot
+- `showAllInfo` - if all information should be shown in the card
 
 If you are using your custom UI without our `ViewFactory`, you can fetch the information needed in these components via the `Call` object and its `participants` property. For example, you can iterate through the participants with `ForEach` and show a grid or any other UI container representation, based on your app's requirements.
 
