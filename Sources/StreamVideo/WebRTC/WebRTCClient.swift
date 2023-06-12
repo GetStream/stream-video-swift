@@ -620,7 +620,6 @@ class WebRTCClient: NSObject {
         request.sessionID = sessionID
 
         let callParticipants = await state.callParticipants
-            .filter { $0.value.id != sessionID }
 
         for (_, value) in callParticipants {
             if value.id != sessionID {
