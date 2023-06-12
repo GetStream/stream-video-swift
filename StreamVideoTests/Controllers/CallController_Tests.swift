@@ -283,7 +283,7 @@ final class CallController_Tests: ControllerTestCase {
             apiKey: StreamVideo.apiKey,
             hostname: "test.com",
             webSocketURLString: "wss://test.com/ws",
-            token: StreamVideo.mockToken.rawValue,
+            token: StreamVideo.mockToken,
             callCid: self.callCid,
             callCoordinatorController: callCoordinator,
             videoConfig: VideoConfig(),

@@ -12,6 +12,9 @@
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		40B7136B2A275F1D00D1FE67 /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
+		4348FD2C2A3346CF001FFC74 /* APIIntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4348FD2B2A3346CF001FFC74 /* APIIntegrationTest.swift */; };
+		4348FD2E2A3372FB001FFC74 /* CallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4348FD2D2A3372FB001FFC74 /* CallState.swift */; };
+		4348FD302A33735E001FFC74 /* CallMember.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4348FD2F2A33735E001FFC74 /* CallMember.swift */; };
 		8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
@@ -692,6 +695,9 @@
 /* Begin PBXFileReference section */
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamVideoSwiftUIApp+Sentry.swift"; sourceTree = "<group>"; };
+		4348FD2B2A3346CF001FFC74 /* APIIntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = APIIntegrationTest.swift; sourceTree = "<group>"; };
+		4348FD2D2A3372FB001FFC74 /* CallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState.swift; sourceTree = "<group>"; };
+		4348FD2F2A33735E001FFC74 /* CallMember.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallMember.swift; sourceTree = "<group>"; };
 		8202215E2A24BB7100F7BAED /* LaunchArgument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchArgument.swift; sourceTree = "<group>"; };
 		8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAppUIKit.entitlements; sourceTree = "<group>"; };
 		8228CD8C29128CA000F32136 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1284,6 +1290,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		4348FD2A2A33469F001FFC74 /* IntegrationTests */ = {
+			isa = PBXGroup;
+			children = (
+				4348FD2B2A3346CF001FFC74 /* APIIntegrationTest.swift */,
+			);
+			path = IntegrationTests;
+			sourceTree = "<group>";
+		};
 		82392D522993C9E100941435 /* SwiftUIDemoAppUITests */ = {
 			isa = PBXGroup;
 			children = (
@@ -1706,6 +1720,7 @@
 				84E5C51B2A013C440003A27A /* PushNotificationsConfig.swift */,
 				8472604A2A0AF81800713E30 /* CallData.swift */,
 				843B5C782A1F71FC0013349E /* SessionInfo.swift */,
+				4348FD2F2A33735E001FFC74 /* CallMember.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2200,6 +2215,7 @@
 				84B57D3A2981645900E4E709 /* OpenApi */,
 				84ED240B286C9500002A3186 /* protobuf */,
 				82B82F2229114001001B5FD7 /* Info.plist */,
+				4348FD2D2A3372FB001FFC74 /* CallState.swift */,
 			);
 			path = StreamVideo;
 			sourceTree = "<group>";
@@ -2207,6 +2223,7 @@
 		84F737F8287C13AD00A363F4 /* StreamVideoTests */ = {
 			isa = PBXGroup;
 			children = (
+				4348FD2A2A33469F001FFC74 /* IntegrationTests */,
 				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
 				84F58B6E29EE911500010C4C /* WebSocketClient */,
 				84D6494529E9F2B7002CA428 /* WebRTC */,
@@ -2877,6 +2894,7 @@
 				842B8E252A2DFED900863A87 /* APNS.swift in Sources */,
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
+				4348FD2E2A3372FB001FFC74 /* CallState.swift in Sources */,
 				843B5C792A1F71FC0013349E /* SessionInfo.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
 				842B8E192A2DFED900863A87 /* StartBroadcastingResponse.swift in Sources */,
@@ -2998,6 +3016,7 @@
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
+				4348FD302A33735E001FFC74 /* CallMember.swift in Sources */,
 				84BD8FFF29B109B5002CFBA0 /* RecordingEventsMiddleware.swift in Sources */,
 				842D3B5929F667660051698A /* ListDevicesResponse.swift in Sources */,
 				84DC38BD29ADFCFD00946713 /* UserResponse.swift in Sources */,
@@ -3126,6 +3145,7 @@
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
 				84F58B8729EEABF700010C4C /* EventBatcher_Mock.swift in Sources */,
+				4348FD2C2A3346CF001FFC74 /* APIIntegrationTest.swift in Sources */,
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
 				8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
 				8414081329F28B5700FF2D7C /* RTCConfiguration_Tests.swift in Sources */,

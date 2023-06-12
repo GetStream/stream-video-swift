@@ -13,7 +13,7 @@ class CallController_Mock: CallController {
         apiKey: "key1",
         hostname: "localhost",
         webSocketURLString: "wss://localhost/ws",
-        token: StreamVideo.mockToken.rawValue,
+        token: StreamVideo.mockToken,
         callCid: "default:test",
         callCoordinatorController: callCoordinatorController,
         videoConfig: VideoConfig(),

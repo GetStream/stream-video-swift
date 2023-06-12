@@ -6,7 +6,8 @@ import Foundation
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
 public class Call: @unchecked Sendable {
-    
+    @Injected(\.streamVideo) var streamVideo
+
     public class State: ObservableObject {
         /// The current participants dictionary.
         @Published public internal(set) var participants = [String: CallParticipant]() {
@@ -26,6 +27,8 @@ public class Call: @unchecked Sendable {
     
     public internal(set) var state = Call.State()
     
+    public internal(set) var newstate = CallState()
+
     /// The id of the current session.
     var sessionId: String = ""
     
@@ -60,7 +63,7 @@ public class Call: @unchecked Sendable {
         eventsController: EventsController,
         permissionsController: PermissionsController,
         livestreamController: LivestreamController,
-        members: [User],
+members: [User],
         videoOptions: VideoOptions,
         allEventsMiddleWare: AllEventsMiddleware?
     ) {
@@ -76,6 +79,7 @@ public class Call: @unchecked Sendable {
         self.allEventsMiddleware = allEventsMiddleWare
         self.callController.call = self
         self.subscribeToBroadcastingEvents()
+        self.eventsToState()
     }
     
     /// Joins the current call.
@@ -163,6 +167,52 @@ public class Call: @unchecked Sendable {
             ring: ring,
             notify: notify
         )
+    }
+
+    func update(
+        custom: [String: RawJSON]? = nil,
+        startsAt: Date? = nil
+    ) async throws -> UpdateCallResponse {
+        // TODO: this is ofc not good, Call should probably hold a ref to the coordinatorClient directly
+        let response = try await callController.callCoordinatorController.coordinatorClient.updateCall(
+            request: UpdateCallRequest(
+                custom: RawJSON.tryConvert(customData: custom)
+            ),
+            callType: callType,
+            callId: callId
+        )
+        // TODO: remove this comment
+//        newstate.updateFrom(response.call)
+        return response
+    }
+
+    func create(
+        members: [CallMember]? = nil,
+        memberIds: [String]? = nil,
+        custom: [String: RawJSON]? = nil,
+        startsAt: Date? = nil,
+        team: String? = nil,
+        ring: Bool = false,
+        notify: Bool = false
+    ) async throws -> GetOrCreateCallResponse {
+        let data = CallRequest(
+            custom: RawJSON.tryConvert(customData: custom),
+            startsAt: startsAt
+        )
+        let request = GetOrCreateCallRequest(
+            data: data,
+            notify: notify,
+            ring: ring
+        )
+        // TODO: this is ofc not good, Call should probably hold a ref to the coordinatorClient directly
+        let response = try await callController.callCoordinatorController.coordinatorClient.getOrCreateCall(
+            with: request,
+            callId: callId,
+            callType: callType
+        )
+        
+        newstate.updateFrom(response)
+        return response
     }
     
     /// Accepts an incoming call.
@@ -504,6 +554,18 @@ public class Call: @unchecked Sendable {
     
     //MARK: - private
     
+    // TODO: ideally this used the same event listening API we expose to customers to sync state
+    private func eventsToState() {
+        Task {
+            for await event in self.streamVideo.watchEvents() {
+                print("debugging: \(event.name)")
+                if let videoEvent = event as? WSCallEvent {
+                    newstate.updateFrom(videoEvent)
+                }
+            }
+        }
+    }
+
     private func subscribeToBroadcastingEvents() {
         broadcastingTask = Task {
             for await event in livestreamController.broadcastingEvents() {

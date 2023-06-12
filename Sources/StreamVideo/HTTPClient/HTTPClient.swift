@@ -44,7 +44,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                 if let onTokenUpdate = onTokenUpdate {
                     onTokenUpdate(token)
                 }
-                let updated = update(request: request, with: token.rawValue)
+                let updated = update(request: request, with: token)
                 log.debug("Retrying failed request with new token")
                 return try await execute(request: updated, isRetry: true)
             } else {

@@ -15,8 +15,9 @@ class CoordinatorClient: @unchecked Sendable {
     let syncQueue = DispatchQueue(label: "io.getstream.CoordinatorClient", qos: .userInitiated)
     let pathPrefix: String = "video"
     
+    // TODO: this needs to be fixed
     private var isAnonymous: Bool {
-        userId.isAnonymousUser
+        false
     }
     
     private var connectionQueryParams: [String: String] {
@@ -177,6 +178,16 @@ class CoordinatorClient: @unchecked Sendable {
         return try await execute(urlRequest: request)
     }
     
+    func updateCall(
+        request: UpdateCallRequest,
+        callType: String,
+        callId: String
+    ) async throws -> UpdateCallResponse {
+        var r = try makeRequest(for: "/call/\(callType)/\(callId)", httpMethod: "PATCH")
+        r.httpBody = try JSONEncoder().encode(request)
+        return try await execute(urlRequest: r)
+    }
+
     func updateCallMembers(
         request: UpdateCallMembersRequest,
         callId: String,

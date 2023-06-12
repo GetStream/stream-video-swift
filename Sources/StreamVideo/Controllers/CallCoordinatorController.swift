@@ -77,7 +77,7 @@ class CallCoordinatorController: @unchecked Sendable {
     }
 
     func update(token: UserToken) {
-        coordinatorClient.update(userToken: token.rawValue)
+        coordinatorClient.update(userToken: token)
     }
     
     func update(connectionId: String) {
@@ -191,7 +191,8 @@ class CallCoordinatorController: @unchecked Sendable {
             members: members,
             settingsOverride: nil
         )
-        let create = !user.id.isAnonymousUser
+        // TODO: this needs to be moved to the method signature
+        let create = true
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,

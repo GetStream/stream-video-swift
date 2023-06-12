@@ -38,6 +38,7 @@ public extension User {
     /// Creates an anonymous user.
     /// - Returns: an anonymous `User`.
     static var anonymous: User {
-        User(id: .anonymous)
+        // TODO: this needs to be fixed, we shold use user.type (internal field to the SDK)
+        User(id: UUID().uuidString)
     }
 }

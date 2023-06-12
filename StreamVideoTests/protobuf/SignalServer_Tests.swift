@@ -21,7 +21,7 @@ final class SignalServer_Tests: XCTestCase {
             httpClient: httpClient,
             apiKey: "key1",
             hostname: "test.com",
-            token: StreamVideo.mockToken.rawValue
+            token: StreamVideo.mockToken
         )
         let testRequest = Stream_Video_Sfu_Signal_SetPublisherRequest()
         
@@ -43,7 +43,7 @@ final class SignalServer_Tests: XCTestCase {
             httpClient: httpClient,
             apiKey: "key1",
             hostname: "test.com",
-            token: StreamVideo.mockToken.rawValue
+            token: StreamVideo.mockToken
         )
         let testRequest = Stream_Video_Sfu_Signal_SetPublisherRequest()
         

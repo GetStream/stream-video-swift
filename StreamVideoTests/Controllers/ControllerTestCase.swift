@@ -23,7 +23,7 @@ class ControllerTestCase: StreamVideoTestCase {
             coordinatorInfo: CoordinatorInfo(
                 apiKey: apiKey,
                 hostname: "test.com",
-                token: StreamVideo.mockToken.rawValue
+                token: StreamVideo.mockToken
             ),
             videoConfig: videoConfig
         )

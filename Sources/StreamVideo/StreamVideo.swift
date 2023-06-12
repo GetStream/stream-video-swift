@@ -6,6 +6,7 @@ import Foundation
 import SwiftProtobuf
 import WebRTC
 
+public typealias UserToken = String
 public typealias UserTokenProvider = (@escaping (Result<UserToken, Error>) -> Void) -> Void
 public typealias UserTokenUpdater = (UserToken) -> Void
 
@@ -173,7 +174,7 @@ public class StreamVideo {
         
         // Fetch the guest token.
         let guestUserResponse = try await callCoordinatorController.createGuestUser(with: user.id)
-        let token = try UserToken(rawValue: guestUserResponse.accessToken)
+        let token = guestUserResponse.accessToken
         callCoordinatorController.update(token: token)
         
         // Update the user and token provider.
@@ -225,7 +226,7 @@ public class StreamVideo {
             user,
             apiKey,
             Self.endpointConfig.hostname,
-            token.rawValue,
+            token,
             videoConfig
         )
         self.httpClient.setTokenUpdater { [weak self] token in
@@ -245,7 +246,8 @@ public class StreamVideo {
         if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
             return
         }
-        if user.id.isAnonymousUser {
+        // TODO: this needs to be changed to properly detect anon auth
+        if user.id == "TODO-ANON" {
             // Anonymous users can't connect to the WS.
             throw ClientError.MissingPermissions()
         }
@@ -512,7 +514,7 @@ public class StreamVideo {
             )
             
             let authRequest = WSAuthMessageRequest(
-                token: self.token.rawValue,
+                token: self.token,
                 userDetails: connectUserRequest
             )
 
@@ -564,7 +566,7 @@ public class StreamVideo {
                 let response = try await callCoordinatorController.createGuestUser(with: userId)
                 let tokenValue = response.accessToken
                 callCoordinatorController.update(user: response.user.toUser)
-                let token = try UserToken(rawValue: tokenValue)
+                let token = tokenValue
                 result(.success(token))
             } catch {
                 result(.failure(error))
@@ -617,4 +619,8 @@ extension StreamVideo: ConnectionStateDelegate {
 /// Returns the current value for the `StreamVideo` instance.
 internal struct StreamVideoProviderKey: InjectionKey {
     static var currentValue: StreamVideo?
+}
+
+extension ClientError {
+    public class InvalidToken: ClientError {}
 }

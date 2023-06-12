@@ -340,9 +340,23 @@ extension RawJSON {
 }
 
 extension RawJSON {
+    // TODO: this function should probably be removed and only use the
+    // optional types version
     static func convert(customData: [String: RawJSON]) -> [String: AnyCodable] {
         var result = [String: AnyCodable]()
         for (key, value) in customData {
+            result[key] = AnyCodable(value)
+        }
+        return result
+    }
+
+    static func tryConvert(customData: [String: RawJSON]?) -> [String: AnyCodable]? {
+        guard let custom = customData else {
+            return nil
+        }
+        // TODO: write a test and make sure we support nested data
+        var result = [String: AnyCodable]()
+        for (key, value) in custom {
             result[key] = AnyCodable(value)
         }
         return result

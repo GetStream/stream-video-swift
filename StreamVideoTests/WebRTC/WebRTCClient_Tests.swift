@@ -453,7 +453,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             coordinatorInfo: CoordinatorInfo(
                 apiKey: StreamVideo.apiKey,
                 hostname: "test.com",
-                token: StreamVideo.mockToken.rawValue
+                token: StreamVideo.mockToken
             ),
             videoConfig: VideoConfig()
         )
@@ -467,7 +467,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             apiKey: StreamVideo.apiKey,
             hostname: "test.com",
             webSocketURLString: "wss://test.com/ws",
-            token: StreamVideo.mockToken.rawValue,
+            token: StreamVideo.mockToken,
             callCid: callCid,
             callCoordinatorController: callCoordinator,
             videoConfig: VideoConfig(),
