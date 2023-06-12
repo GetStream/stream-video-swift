@@ -600,16 +600,10 @@ open class CallViewModel: ObservableObject {
               Date().timeIntervalSince(localParticipant.joinedAt) > 5.0 else {
             return
         }
-        if localParticipant.hasAudio != callSettings.audioOn
-            || localParticipant.hasVideo != callSettings.videoOn {
-            let previous = callSettings
-            callSettings = CallSettings(
-                audioOn: localParticipant.hasAudio,
-                videoOn: localParticipant.hasVideo,
-                speakerOn: previous.speakerOn,
-                audioOutputOn: previous.audioOutputOn,
-                cameraPosition: previous.cameraPosition
-            )
+        if localParticipant.hasAudio != callSettings.audioOn {
+            toggleMicrophoneEnabled()
+        } else if localParticipant.hasVideo != callSettings.videoOn {
+            toggleCameraEnabled()
         }
     }
 }
