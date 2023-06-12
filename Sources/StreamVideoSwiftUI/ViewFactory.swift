@@ -14,13 +14,13 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the call controls slot.
     func makeCallControlsView(viewModel: CallViewModel) -> CallControlsViewType
     
-    associatedtype OutgoingCallViewType: View = OutgoingCallView
+    associatedtype OutgoingCallViewType: View
     /// Creates the outgoing call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the outgoing call slot.
     func makeOutgoingCallView(viewModel: CallViewModel) -> OutgoingCallViewType
     
-    associatedtype JoiningCallViewType: View = JoiningCallView
+    associatedtype JoiningCallViewType: View
     /// Creates the joining call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the joining call slot.
@@ -154,11 +154,16 @@ extension ViewFactory {
     }
     
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
-        OutgoingCallView(viewModel: viewModel)
+        OutgoingCallView(
+            outgoingCallMembers: viewModel.outgoingCallMembers,
+            callControls: makeCallControlsView(viewModel: viewModel)
+        )
     }
     
     public func makeJoiningCallView(viewModel: CallViewModel) -> some View {
-        JoiningCallView(viewModel: viewModel)
+        JoiningCallView(
+            callControls: makeCallControlsView(viewModel: viewModel)
+        )
     }
     
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {

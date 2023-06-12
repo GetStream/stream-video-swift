@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-public struct OutgoingCallView: View {
+public struct OutgoingCallView<CallControls: View>: View {
     
     @Injected(\.streamVideo) var streamVideo
     
@@ -14,16 +14,19 @@ public struct OutgoingCallView: View {
     @Injected(\.images) var images
     @Injected(\.utils) var utils
     
-    @ObservedObject var viewModel: CallViewModel
+    var outgoingCallMembers: [Member]
+    var callControls: CallControls
     
-    public init(viewModel: CallViewModel) {
-        _viewModel = ObservedObject(wrappedValue: viewModel)
+    public init(outgoingCallMembers: [Member], callControls: CallControls) {
+        self.outgoingCallMembers = outgoingCallMembers
+        self.callControls = callControls
     }
     
     public var body: some View {
         CallConnectingView(
-            viewModel: viewModel,
-            title: L10n.Call.Outgoing.title
+            outgoingCallMembers: outgoingCallMembers,
+            title: L10n.Call.Outgoing.title,
+            callControls: callControls
         )
         .onAppear {
             utils.callSoundsPlayer.playOutgoingCallSound()
@@ -38,12 +41,12 @@ struct OutgoingCallBackground: View {
     
     @Injected(\.streamVideo) var streamVideo
     
-    @ObservedObject var viewModel: CallViewModel
+    var outgoingCallMembers: [Member]
     
     var body: some View {
         ZStack {
-            if viewModel.outgoingCallMembers.count == 1 {
-                CallBackground(imageURL: viewModel.outgoingCallMembers.first?.user.imageURL)
+            if outgoingCallMembers.count == 1 {
+                CallBackground(imageURL: outgoingCallMembers.first?.user.imageURL)
             } else {
                 FallbackBackground()
             }

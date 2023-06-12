@@ -11,7 +11,11 @@ import XCTest
 final class OutgoingCallView_Tests: StreamVideoUITestCase {
     
     func test_outgoingCallView_snapshot() throws {
-        let view = OutgoingCallView(viewModel: CallViewModel())
+        let viewModel = CallViewModel()
+        let view = OutgoingCallView(
+            outgoingCallMembers: viewModel.outgoingCallMembers,
+            callControls: DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
+        )
         AssertSnapshot(view)
     }
 }

@@ -4,11 +4,18 @@ The `IncomingCallView` lets you easily build UI when you're being called or ring
 
 ## Usage
 
-In order to create the `IncomingCallView`, you need to instantiate it with the `CallViewModel`:
+In order to create the `IncomingCallView`, you need to instantiate it with the following code:
 
 ```swift
 public var body: some View {
-    IncomingCallView(viewModel: viewModel)
+	IncomingCallView(
+	   callInfo: callInfo, 
+	   onCallAccepted: { _ in
+		// handle call accepted
+       }, onCallRejected: { _ in
+    	// handle call rejected
+       }
+    )
 }
 ```
 

@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-struct CallConnectingView: View {
+struct CallConnectingView<CallControls: View>: View {
     @Injected(\.streamVideo) var streamVideo
     
     @Injected(\.colors) var colors
@@ -13,33 +13,29 @@ struct CallConnectingView: View {
     @Injected(\.images) var images
     @Injected(\.utils) var utils
     
-    @ObservedObject var viewModel: CallViewModel
+    var outgoingCallMembers: [Member]
     var title: String
+    var callControls: CallControls
     
-    public init(viewModel: CallViewModel, title: String) {
-        _viewModel = ObservedObject(wrappedValue: viewModel)
-        self.title = title
-    }
-    
-    public var body: some View {
+    var body: some View {
         ZStack {
             VStack(spacing: 16) {
                 Spacer()
                 
-                if viewModel.outgoingCallMembers.count > 1 {
+                if outgoingCallMembers.count > 1 {
                     CallingGroupView(
-                        participants: viewModel.outgoingCallMembers
+                        participants: outgoingCallMembers
                     )
                     .accessibility(identifier: "callConnectingGroupView")
-                } else if viewModel.outgoingCallMembers.count > 0 {
+                } else if outgoingCallMembers.count > 0 {
                     AnimatingParticipantView(
-                        participant: viewModel.outgoingCallMembers.first
+                        participant: outgoingCallMembers.first
                     )
                     .accessibility(identifier: "callConnectingParticipantView")
                 }
                 
                 CallingParticipantsView(
-                    participants: viewModel.outgoingCallMembers
+                    participants: outgoingCallMembers
                 )
                 .padding()
                 
@@ -52,11 +48,11 @@ struct CallConnectingView: View {
                 
                 Spacer()
                 
-                CallControlsView(viewModel: viewModel)
+                callControls
             }
         }
         .background(
-            OutgoingCallBackground(viewModel: viewModel)
+            OutgoingCallBackground(outgoingCallMembers: outgoingCallMembers)
         )
     }
 }
