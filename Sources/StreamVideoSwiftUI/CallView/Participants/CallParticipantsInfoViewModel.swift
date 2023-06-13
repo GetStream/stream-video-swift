@@ -86,23 +86,23 @@ class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     private func muteAudio(for userId: String) {
-        let muteRequest = MuteRequest(
-            userIds: [userId],
-            muteAllUsers: false,
+        let muteRequest = MuteUsersRequest(
             audio: true,
-            video: false,
-            screenshare: false
+            muteAllUsers: false,
+            screenshare: false,
+            userIds: [userId],
+            video: false
         )
         execute(muteRequest: muteRequest)
     }
     
     private func muteVideo(for userId: String) {
-        let muteRequest = MuteRequest(
-            userIds: [userId],
-            muteAllUsers: false,
+        let muteRequest = MuteUsersRequest(
             audio: false,
-            video: true,
-            screenshare: false
+            muteAllUsers: false,
+            screenshare: false,
+            userIds: [userId],
+            video: true
         )
         execute(muteRequest: muteRequest)
     }
@@ -121,7 +121,7 @@ class CallParticipantsInfoViewModel: ObservableObject {
         }
     }
     
-    private func execute(muteRequest: MuteRequest) {
+    private func execute(muteRequest: MuteUsersRequest) {
         guard let call else { return }
         Task {
             try await call.muteUsers(with: muteRequest)

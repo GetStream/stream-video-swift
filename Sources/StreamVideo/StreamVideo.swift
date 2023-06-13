@@ -265,15 +265,13 @@ public class StreamVideo {
             callId: callId,
             callType: callType
         )
-        let permissionsController = makePermissionsController(callId: callId, callType: callType)
         let livestreamController = makeLivestreamController(callType: callType, callId: callId)
         let call = Call(
             callId: callId,
             callType: callType,
-            coordinatorClient: callCoordinatorController.coordinatorClient,
+            callCoordinatorController: callCoordinatorController,
             callController: callController,
             recordingController: recordingController,
-            permissionsController: permissionsController,
             livestreamController: livestreamController,
             members: members,
             videoOptions: VideoOptions()
@@ -357,24 +355,6 @@ public class StreamVideo {
     }
     
     // MARK: - private
-    
-    /// Creates a permissions controller used for managing permissions.
-    /// - Returns: `PermissionsController`
-    private func makePermissionsController(callId: String, callType: String) -> PermissionsController {
-        let controller = PermissionsController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        permissionsMiddleware.onPermissionRequestEvent = { request in
-            controller.onPermissionRequestEvent?(request)
-        }
-        permissionsMiddleware.onPermissionsUpdatedEvent = { request in
-            controller.onPermissionsUpdatedEvent?(request)
-        }
-        return controller
-    }
     
     /// Creates recording controller used for managing recordings.
     /// - Returns: `RecordingController`

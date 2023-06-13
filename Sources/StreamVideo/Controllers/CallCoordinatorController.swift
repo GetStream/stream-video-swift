@@ -200,12 +200,11 @@ class CallCoordinatorController: @unchecked Sendable {
             notify: notify,
             ring: ring
         )
-        let joinCallRequest = JoinCallRequestData(
-            id: callId,
+        let joinCallResponse = try await coordinatorClient.joinCall(
             type: type,
-            joinCallRequest: joinCall
+            callId: callId,
+            request: joinCall
         )
-        let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
     }
 }
