@@ -248,8 +248,8 @@ public class StreamVideo {
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
         let call = Call(
-            callId: callId,
             callType: callType,
+            callId: callId,
             callCoordinatorController: callCoordinatorController,
             callController: callController,
             videoOptions: VideoOptions()

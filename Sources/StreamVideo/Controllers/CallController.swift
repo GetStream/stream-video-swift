@@ -93,8 +93,8 @@ class CallController {
     /// - Throws: An error if the call doesn't exist.
     /// - Returns: The call's data.
     func getCall(
-        callId: String,
         type: String,
+        callId: String,
         membersLimit: Int?,
         ring: Bool,
         notify: Bool

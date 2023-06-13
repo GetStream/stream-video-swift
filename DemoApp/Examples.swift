@@ -228,7 +228,7 @@ struct CustomIncomingCallView: View {
                 Spacer()
                 
                 Button {
-                    callViewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+                    callViewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
                 } label: {
                     Image(systemName: "phone.down.fill")
                         .foregroundColor(.white)
@@ -242,7 +242,7 @@ struct CustomIncomingCallView: View {
                 .padding(.all, 8)
                                 
                 Button {
-                    callViewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
+                    callViewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
                 } label: {
                     Image(systemName: "phone.fill")
                         .foregroundColor(.white)
@@ -263,7 +263,7 @@ struct CustomIncomingCallView: View {
         .background(Color.white.edgesIgnoringSafeArea(.all))
         .onChange(of: viewModel.hideIncomingCallScreen) { newValue in
             if newValue {
-                callViewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+                callViewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
             }
         }
         .onDisappear {

@@ -30,7 +30,7 @@ struct CallView: View {
 
                         guard let name = contact?.personHandle?.value else { return }
                         let member = Member(user: User(id: name), role: "user")
-                        viewModel.startCall(callId: UUID().uuidString, type: .default, members: [member], ring: true)
+                        viewModel.startCall(callType: .default, callId: UUID().uuidString, members: [member], ring: true)
                     }
                 }
             )
@@ -52,7 +52,7 @@ struct CallView: View {
             await MainActor.run {
                 Task {
                     try await streamVideo.connect()
-                    viewModel.joinCall(callId: callId, type: callType)
+                    viewModel.joinCall(callType: callType, callId: callId)
                 }
             }
         }

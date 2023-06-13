@@ -259,17 +259,17 @@ open class CallViewModel: ObservableObject {
 
     /// Starts a call with the provided info.
     /// - Parameters:
+    ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    ///  - type: the type of the call.
     ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callId: String, type: String, members: [Member], ring: Bool = false) {
+    public func startCall(callType: String, callId: String, members: [Member], ring: Bool = false) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
         if !ring {
-            enterCall(callId: callId, callType: type, members: members, ring: ring)
+            enterCall(callType: callType, callId: callId, members: members, ring: ring)
         } else {
-            let call = streamVideo.call(callType: type, callId: callId)
+            let call = streamVideo.call(callType: callType, callId: callId)
             self.call = call
             Task {
                 do {
@@ -287,33 +287,33 @@ open class CallViewModel: ObservableObject {
     
     /// Joins an existing call with the provided info.
     /// - Parameters:
+    ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    ///  - type: optional type of a call. If not provided, the default would be used.
-    public func joinCall(callId: String, type: String) {
+    public func joinCall(callType: String, callId: String) {
         callingState = .joining
-        enterCall(callId: callId, callType: type, members: [])
+        enterCall(callType: callType, callId: callId, members: [])
     }
     
     /// Enters into a lobby before joining a call.
     /// - Parameters:
+    ///  - callType: the type of the call.
     ///  - callId: the id of the call.
-    ///  - type: the type of the call.
     ///  - members: list of members that are part of the call.
-    public func enterLobby(callId: String, type: String, members: [Member]) {
-        let lobbyInfo = LobbyInfo(callId: callId, callType: type, participants: members)
+    public func enterLobby(callType: String, callId: String, members: [Member]) {
+        let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         callingState = .lobby(lobbyInfo)
     }
     
     /// Accepts the call with the provided call id and type.
     /// - Parameters:
-    ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func acceptCall(callId: String, type: String) {
+    ///  - callId: the id of the call.
+    public func acceptCall(callType: String, callId: String) {
         Task {
-            let call = streamVideo.call(callType: type, callId: callId)
+            let call = streamVideo.call(callType: callType, callId: callId)
             do {
                 try await call.accept()
-                enterCall(call: call, callId: callId, callType: type, members: [])
+                enterCall(call: call, callType: callType, callId: callId, members: [])
             } catch {
                 self.error = error
                 callingState = .idle
@@ -324,11 +324,11 @@ open class CallViewModel: ObservableObject {
     
     /// Rejects the call with the provided call id and type.
     /// - Parameters:
-    ///  - callId: the id of the call.
     ///  - callType: the type of the call.
-    public func rejectCall(callId: String, type: String) {
+    ///  - callId: the id of the call.
+    public func rejectCall(callType: String, callId: String) {
         Task {
-            let call = streamVideo.call(callType: type, callId: callId)
+            let call = streamVideo.call(callType: callType, callId: callId)
             try? await call.reject()
             self.callingState = .idle
         }
@@ -439,7 +439,13 @@ open class CallViewModel: ObservableObject {
         localVideoPrimary = false
     }
     
-    private func enterCall(call: Call? = nil, callId: String, callType: String, members: [Member], ring: Bool = false) {
+    private func enterCall(
+        call: Call? = nil,
+        callType: String,
+        callId: String,
+        members: [Member],
+        ring: Bool = false
+    ) {
         if enteringCallTask != nil || callingState == .inCall {
             return
         }
@@ -503,7 +509,7 @@ open class CallViewModel: ObservableObject {
                         }
                     } else if case let .accepted(callEventInfo) = callEvent {
                         if callingState == .outgoing {
-                            enterCall(call: call, callId: callEventInfo.callId, callType: callEventInfo.type, members: [])
+                            enterCall(call: call, callType: callEventInfo.type, callId: callEventInfo.callId, members: [])
                         } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && enteringCallTask == nil {
                             // Accepted on another device.
                             callingState = .idle

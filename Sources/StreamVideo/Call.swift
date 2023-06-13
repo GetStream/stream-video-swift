@@ -53,8 +53,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     internal init(
-        callId: String,
         callType: String,
+        callId: String,
         callCoordinatorController: CallCoordinatorController,
         callController: CallController,
         videoOptions: VideoOptions
@@ -105,8 +105,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false
     ) async throws -> CallData {
         try await callController.getCall(
-            callId: callId,
             type: callType,
+            callId: callId,
             membersLimit: membersLimit,
             ring: ring,
             notify: notify

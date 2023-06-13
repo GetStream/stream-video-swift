@@ -43,7 +43,7 @@ open class CallViewController: UIViewController {
     }
     
     public func startCall(callId: String, members: [Member], ring: Bool = false) {
-        viewModel.startCall(callId: callId, type: .default, members: members, ring: ring)
+        viewModel.startCall(callType: .default, callId: callId, members: members, ring: ring)
         listenToCallStateChanges()
     }
     
