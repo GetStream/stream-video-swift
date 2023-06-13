@@ -229,6 +229,24 @@ public class CallsController: ObservableObject {
     }
 }
 
+public protocol BroadcastingEvent: Sendable {
+    var callCid: String { get }
+    var type: String { get }
+}
+
+public struct BroadcastingStartedEvent: BroadcastingEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let hlsPlaylistUrl: String
+    public let type: String
+}
+
+public struct BroadcastingStoppedEvent: BroadcastingEvent {
+    public let callCid: String
+    public let createdAt: Date
+    public let type: String
+}
+
 extension CallResponse {
     
     public func toCallData(

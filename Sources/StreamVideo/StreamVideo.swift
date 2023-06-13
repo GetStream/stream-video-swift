@@ -251,13 +251,11 @@ public class StreamVideo {
         members: [Member] = []
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
-        let livestreamController = makeLivestreamController(callType: callType, callId: callId)
         let call = Call(
             callId: callId,
             callType: callType,
             callCoordinatorController: callCoordinatorController,
             callController: callController,
-            livestreamController: livestreamController,
             members: members,
             videoOptions: VideoOptions()
         )
@@ -356,19 +354,6 @@ public class StreamVideo {
             videoConfig
         )
 //        callsMiddleware.onCallUpdated = controller.update(callData:)
-        return controller
-    }
-    
-    private func makeLivestreamController(callType: String, callId: String) -> LivestreamController {
-        let controller = LivestreamController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-//        callsMiddleware.onBroadcastingEvent = { event in
-//            controller.onBroadcastingEvent?(event)
-//        }
         return controller
     }
     

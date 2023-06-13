@@ -163,7 +163,6 @@
 		8427FF642A03D1D100AFD2C3 /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 8427FF632A03D1D100AFD2C3 /* Intents.framework */; };
 		8427FF672A03D1D100AFD2C3 /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8427FF662A03D1D100AFD2C3 /* IntentHandler.swift */; };
 		8427FF6B2A03D1D100AFD2C3 /* CallIntent.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 8427FF622A03D1D100AFD2C3 /* CallIntent.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		8427FF712A05A3D100AFD2C3 /* LivestreamController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8427FF702A05A3D100AFD2C3 /* LivestreamController.swift */; };
 		842B8E162A2DFED900863A87 /* CallRingEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842B8DFA2A2DFED600863A87 /* CallRingEvent.swift */; };
 		842B8E172A2DFED900863A87 /* EgressRTMPResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842B8DFB2A2DFED600863A87 /* EgressRTMPResponse.swift */; };
 		842B8E182A2DFED900863A87 /* TargetResolutionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842B8DFC2A2DFED700863A87 /* TargetResolutionRequest.swift */; };
@@ -794,7 +793,6 @@
 		8427FF632A03D1D100AFD2C3 /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
 		8427FF662A03D1D100AFD2C3 /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
 		8427FF682A03D1D100AFD2C3 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		8427FF702A05A3D100AFD2C3 /* LivestreamController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamController.swift; sourceTree = "<group>"; };
 		842B8DFA2A2DFED600863A87 /* CallRingEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallRingEvent.swift; sourceTree = "<group>"; };
 		842B8DFB2A2DFED600863A87 /* EgressRTMPResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = EgressRTMPResponse.swift; sourceTree = "<group>"; };
 		842B8DFC2A2DFED700863A87 /* TargetResolutionRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = TargetResolutionRequest.swift; sourceTree = "<group>"; };
@@ -2106,7 +2104,6 @@
 				84EA5D3E28C09AAB004D3531 /* CallController.swift */,
 				84EA5D4028C0ABCB004D3531 /* CallCoordinatorController.swift */,
 				843DAB9D29E757B500E0EB63 /* CallsController.swift */,
-				8427FF702A05A3D100AFD2C3 /* LivestreamController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -2964,7 +2961,6 @@
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				844ECF4F2A33458A0023263C /* Member.swift in Sources */,
-				8427FF712A05A3D100AFD2C3 /* LivestreamController.swift in Sources */,
 				84AF64D7287C79610012A503 /* Token.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,

@@ -45,10 +45,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     private let callCoordinatorController: CallCoordinatorController
     internal let callController: CallController
-    private let livestreamController: LivestreamController
     private let members: [Member]
     private let videoOptions: VideoOptions
-    private var broadcastingTask: Task<Void, Never>?
     private var continuation: AsyncStream<Event>.Continuation?
     private var eventHandlers = [EventHandling]()
     private var coordinatorClient: CoordinatorClient {
@@ -60,7 +58,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callType: String,
         callCoordinatorController: CallCoordinatorController,
         callController: CallController,
-        livestreamController: LivestreamController,
         members: [Member],
         videoOptions: VideoOptions
     ) {
@@ -68,7 +65,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
         self.callController = callController
-        self.livestreamController = livestreamController
         self.members = members
         self.videoOptions = videoOptions
         self.callController.call = self
@@ -280,9 +276,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         continuation?.finish()
         continuation = nil
         eventHandlers.removeAll()
-        broadcastingTask?.cancel()
         callController.cleanUp()
-        livestreamController.cleanUp()
     }
     
     //MARK: - Permissions
@@ -472,12 +466,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     /// Starts broadcasting of the call.
     public func startBroadcasting() async throws {
-        try await livestreamController.startBroadcasting()
+        if !currentUserHasCapability(.startBroadcastCall) {
+            throw ClientError.MissingPermissions()
+        }
+        try await coordinatorClient.startBroadcasting(callId: callId, callType: callType)
     }
     
     /// Stops broadcasting of the call.
     public func stopBroadcasting() async throws {
-        try await livestreamController.stopBroadcasting()
+        try await coordinatorClient.stopBroadcasting(callId: callId, callType: callType)
     }
     
     //MARK: - Events
