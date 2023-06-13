@@ -97,7 +97,7 @@ public class CallEventsHandler {
         } else if let event = event as? CallSessionParticipantLeftEvent {
             return ParticipantEvent(
                 id: event.user.id,
-                action: .join,
+                action: .leave,
                 user: event.user.name ?? event.user.id,
                 imageURL: URL(string: event.user.image ?? "")
             )
