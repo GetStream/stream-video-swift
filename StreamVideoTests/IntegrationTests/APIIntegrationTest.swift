@@ -29,6 +29,7 @@ class IntegrationTest: XCTestCase {
 
         let response = try await call.create(custom: ["color": "red"])
         XCTAssertEqual(response.call.custom["color"], "red")
+        print("debugging: \(response.duration)")
 
         await AssertNext(self, call.newstate.$custom) { v in
             return v["color"] == "red"

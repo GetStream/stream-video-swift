@@ -6,8 +6,8 @@
 
 import Foundation
 
-internal struct APIHelper {
-    internal static func rejectNil(_ source: [String: Any?]) -> [String: Any]? {
+public struct APIHelper {
+    public static func rejectNil(_ source: [String: Any?]) -> [String: Any]? {
         let destination = source.reduce(into: [String: Any]()) { result, item in
             if let value = item.value {
                 result[item.key] = value
@@ -20,7 +20,7 @@ internal struct APIHelper {
         return destination
     }
 
-    internal static func rejectNilHeaders(_ source: [String: Any?]) -> [String: String] {
+    public static func rejectNilHeaders(_ source: [String: Any?]) -> [String: String] {
         return source.reduce(into: [String: String]()) { result, item in
             if let collection = item.value as? [Any?] {
                 result[item.key] = collection
@@ -32,7 +32,7 @@ internal struct APIHelper {
         }
     }
 
-    internal static func convertBoolToString(_ source: [String: Any]?) -> [String: Any]? {
+    public static func convertBoolToString(_ source: [String: Any]?) -> [String: Any]? {
         guard let source = source else {
             return nil
         }
@@ -47,7 +47,7 @@ internal struct APIHelper {
         }
     }
 
-    internal static func convertAnyToString(_ value: Any?) -> String? {
+    public static func convertAnyToString(_ value: Any?) -> String? {
         guard let value = value else { return nil }
         if let value = value as? any RawRepresentable {
             return "\(value.rawValue)"
@@ -56,7 +56,7 @@ internal struct APIHelper {
         }
     }
 
-    internal static func mapValueToPathItem(_ source: Any) -> Any {
+    public static func mapValueToPathItem(_ source: Any) -> Any {
         if let collection = source as? [Any?] {
             return collection
                 .compactMap { value in convertAnyToString(value) }
@@ -68,7 +68,7 @@ internal struct APIHelper {
     /// maps all values from source to query parameters
     ///
     /// explode attribute is respected: collection values might be either joined or split up into separate key value pairs
-    internal static func mapValuesToQueryItems(_ source: [String: (wrappedValue: Any?, isExplode: Bool)]) -> [URLQueryItem]? {
+    public static func mapValuesToQueryItems(_ source: [String: (wrappedValue: Any?, isExplode: Bool)]) -> [URLQueryItem]? {
         let destination = source.filter { $0.value.wrappedValue != nil }.reduce(into: [URLQueryItem]()) { result, item in
             if let collection = item.value.wrappedValue as? [Any?] {
 
@@ -97,7 +97,7 @@ internal struct APIHelper {
     /// maps all values from source to query parameters
     ///
     /// collection values are always exploded
-    internal static func mapValuesToQueryItems(_ source: [String: Any?]) -> [URLQueryItem]? {
+    public static func mapValuesToQueryItems(_ source: [String: Any?]) -> [URLQueryItem]? {
         let destination = source.filter { $0.value != nil }.reduce(into: [URLQueryItem]()) { result, item in
             if let collection = item.value as? [Any?] {
                 collection

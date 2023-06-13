@@ -195,26 +195,29 @@ members: [User],
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> GetOrCreateCallResponse {
-        
-        let client = 
-        
-        
-        let data = CallRequest(
-            custom: RawJSON.tryConvert(customData: custom),
-            startsAt: startsAt
+        let transport = URLSessionTransport.init(urlSession: .shared)
+        let client = DefaultAPI.init(
+            basePath: "https://video.stream-io-api.com/video",
+            transport: transport,
+            middlewares: [
+                UserAuth(
+                    token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
+                )
+            ]
         )
         let request = GetOrCreateCallRequest(
-            data: data,
+            data: CallRequest(
+                custom: RawJSON.tryConvert(customData: custom),
+                startsAt: startsAt
+            ),
             notify: notify,
             ring: ring
         )
-        // TODO: this is ofc not good, Call should probably hold a ref to the coordinatorClient directly
-        let response = try await callController.callCoordinatorController.coordinatorClient.getOrCreateCall(
-            with: request,
-            callId: callId,
-            callType: callType
+        let response = try await client.getOrCreateCall(
+            type: callType,
+            id: callId,
+            getOrCreateCallRequest: request
         )
-        
         newstate.updateFrom(response)
         return response
     }

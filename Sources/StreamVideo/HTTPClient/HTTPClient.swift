@@ -15,6 +15,18 @@ protocol HTTPClient: Sendable {
     func update(tokenProvider: @escaping UserTokenProvider)
 }
 
+struct UserAuth: DefaultAPIClientMiddleware {
+    let token: String
+
+    func intercept(_ request: Request, next: (Request) async throws -> (Data, URLResponse)) async throws -> (Data, URLResponse) {
+        var modifiedRequest = request
+        modifiedRequest.queryParams.append(.init(name: "api_key", value: "hd8szvscpxvd"))
+        modifiedRequest.headers["Authorization"] = token
+        modifiedRequest.headers["stream-auth-type"] = "jwt"
+        return try await next(modifiedRequest)
+    }
+}
+
 final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
     private let urlSession: URLSession
     private var tokenProvider: UserTokenProvider?
@@ -80,7 +92,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    log.debug("Error executing request \(error.localizedDescription)")
+                    print("debugging: error is here! \(request.allHTTPHeaderFields)")
                     continuation.resume(throwing: error)
                     return
                 }
@@ -109,7 +121,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                     continuation.resume(throwing: ClientError.NetworkError())
                     return
                 }
-                
+                print("debugging: got here in the execute path :)")
                 continuation.resume(returning: (data, response))
             }
             task.resume()
@@ -134,7 +146,10 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
     }
 
     func execute(request: Request) async throws -> (Data, URLResponse) {
-        return try await execute(request: request.urlRequest())
+        var clone = request
+        clone.headers["Content-Type"] = "application/json"
+        clone.headers["X-Stream-Client"] = "stream-video-swift"
+        return try await execute(request: clone.urlRequest())
     }
 }
 

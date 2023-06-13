@@ -52,7 +52,7 @@ protocol _AnyDecodable {
 extension AnyDecodable: _AnyDecodable {}
 
 extension _AnyDecodable {
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
@@ -82,7 +82,7 @@ extension _AnyDecodable {
 }
 
 extension AnyDecodable: Equatable {
-    static func == (lhs: AnyDecodable, rhs: AnyDecodable) -> Bool {
+    public static func == (lhs: AnyDecodable, rhs: AnyDecodable) -> Bool {
         switch (lhs.value, rhs.value) {
         #if canImport(Foundation)
         case is (NSNull, NSNull), is (Void, Void):
@@ -127,7 +127,7 @@ extension AnyDecodable: Equatable {
 }
 
 extension AnyDecodable: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch value {
         case is Void:
             return String(describing: nil as Any?)
@@ -151,7 +151,7 @@ extension AnyDecodable: CustomDebugStringConvertible {
 }
 
 extension AnyDecodable: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         switch value {
         case let value as Bool:
             hasher.combine(value)
