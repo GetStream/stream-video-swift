@@ -241,12 +241,10 @@ public class StreamVideo {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the all.
-    ///  - members: the members of the call.
     /// - Returns: `Call` object.
     public func call(
         callType: String,
-        callId: String,
-        members: [Member] = []
+        callId: String
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
         let call = Call(
@@ -254,7 +252,6 @@ public class StreamVideo {
             callType: callType,
             callCoordinatorController: callCoordinatorController,
             callController: callController,
-            members: members,
             videoOptions: VideoOptions()
         )
         eventsMiddleware.add(subscriber: call)

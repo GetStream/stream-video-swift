@@ -269,7 +269,7 @@ open class CallViewModel: ObservableObject {
         if !ring {
             enterCall(callId: callId, callType: type, members: members, ring: ring)
         } else {
-            let call = streamVideo.call(callType: type, callId: callId, members: members)
+            let call = streamVideo.call(callType: type, callId: callId)
             self.call = call
             Task {
                 do {
@@ -446,8 +446,8 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = Task {
             do {
                 log.debug("Starting call")
-                let call = call ?? streamVideo.call(callType: callType, callId: callId, members: members)
-                try await call.join(ring: ring, callSettings: callSettings)
+                let call = call ?? streamVideo.call(callType: callType, callId: callId)
+                try await call.join(members: members, ring: ring, callSettings: callSettings)
                 save(call: call)
                 enteringCallTask = nil
             } catch {

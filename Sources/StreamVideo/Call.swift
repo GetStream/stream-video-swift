@@ -45,7 +45,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     private let callCoordinatorController: CallCoordinatorController
     internal let callController: CallController
-    private let members: [Member]
     private let videoOptions: VideoOptions
     private var continuation: AsyncStream<Event>.Continuation?
     private var eventHandlers = [EventHandling]()
@@ -58,25 +57,25 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callType: String,
         callCoordinatorController: CallCoordinatorController,
         callController: CallController,
-        members: [Member],
         videoOptions: VideoOptions
     ) {
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
         self.callController = callController
-        self.members = members
         self.videoOptions = videoOptions
         self.callController.call = self
     }
     
     /// Joins the current call.
     /// - Parameters:
+    ///  - members: the members of the call.
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
     /// - Throws: An error if the call could not be joined.
     public func join(
+        members: [Member] = [],
         ring: Bool = false,
         notify: Bool = false,
         callSettings: CallSettings = CallSettings()
