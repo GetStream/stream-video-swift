@@ -163,7 +163,7 @@ public class StreamVideo {
         
         // Fetch the guest token.
         let guestUserResponse = try await callCoordinatorController.createGuestUser(with: user.id)
-        let token = try UserToken(rawValue: guestUserResponse.accessToken)
+        let token = UserToken(rawValue: guestUserResponse.accessToken)
         callCoordinatorController.update(token: token)
         
         // Update the user and token provider.
@@ -452,7 +452,7 @@ public class StreamVideo {
                 let response = try await callCoordinatorController.createGuestUser(with: userId)
                 let tokenValue = response.accessToken
                 callCoordinatorController.update(user: response.user.toUser)
-                let token = try UserToken(rawValue: tokenValue)
+                let token = UserToken(rawValue: tokenValue)
                 result(.success(token))
             } catch {
                 result(.failure(error))

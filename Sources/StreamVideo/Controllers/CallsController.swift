@@ -181,6 +181,15 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].backstage = false
+        } else if let callEnded = event as? CallEndedEvent {
+            let index = calls.firstIndex { callData in
+                callData.callCid == callEnded.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].endedAt = Date()
         } else if event is WSDisconnected {
             self.socketDisconnected = true
         } else if event is WSConnected {

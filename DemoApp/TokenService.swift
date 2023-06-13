@@ -25,7 +25,7 @@ class TokenService {
             throw ClientError.Unexpected()
         }
         let tokenResponse: TokenResponse = try await httpClient.execute(url: url)
-        let token = try UserToken(rawValue: tokenResponse.token)
+        let token = UserToken(rawValue: tokenResponse.token)
         return token
     }
     
