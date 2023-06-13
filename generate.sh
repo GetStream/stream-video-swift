@@ -22,8 +22,7 @@ OPENAPI_GENERATED_CODE_ROOT="${PROJECT_ROOT}/Sources/StreamVideo/OpenApi/generat
 docker run --rm -v "${OPENAPI_GENERATED_CODE_ROOT}:/local" \
    ghcr.io/getstream/openapi-generator:master \
    generate -g swift5 \
-   -i /openapi/video-openapi.yaml \
-   -t /templates/swift5 \
+   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi.yaml \
    -o /local/tmp \
    --skip-validate-spec \
    --additional-properties=nonPublicApi=true \
