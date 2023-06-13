@@ -73,7 +73,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.members = members
         self.videoOptions = videoOptions
         self.callController.call = self
-        self.subscribeToBroadcastingEvents()
     }
     
     /// Joins the current call.
@@ -396,18 +395,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await permissionsController.stopLive(callId: callId, callType: callType)
     }
     
-    /// Returns an `AsyncStream` of `PermissionRequest` objects that represent the permission requests events.
-    /// - Returns: An `AsyncStream` of `PermissionRequest` objects.
-    public func permissionRequests() -> AsyncStream<PermissionRequest> {
-        permissionsController.permissionRequests()
-    }
-    
-    /// Returns an `AsyncStream` of `PermissionsUpdated` objects that represent the permission updates events.
-    /// - Returns: An `AsyncStream` of `PermissionsUpdated` objects.
-    public func permissionUpdates() -> AsyncStream<PermissionsUpdated> {
-        permissionsController.permissionUpdates()
-    }
-    
     //MARK: - Recording
     
     /// Starts recording for the call.
@@ -429,11 +416,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
-    /// Creates an asynchronous stream of `RecordingEvent` objects.
-    public func recordingEvents() -> AsyncStream<RecordingEvent> {
-        recordingController.recordingEvents()
-    }
-    
     //MARK: - Broadcasting
     
     /// Starts broadcasting of the call.
@@ -444,11 +426,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Stops broadcasting of the call.
     public func stopBroadcasting() async throws {
         try await livestreamController.stopBroadcasting()
-    }
-    
-    /// Listens to broadcasting events.
-    public func broadcastingEvents() -> AsyncStream<BroadcastingEvent> {
-        livestreamController.broadcastingEvents()
     }
     
     //MARK: - Events
@@ -465,18 +442,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the sending fails.
     public func send(reaction: CallReactionRequest) async throws {
         try await eventsController.send(reaction: reaction)
-    }
-    
-    /// Returns an asynchronous stream of custom events received during the call.
-    /// - Returns: An `AsyncStream` of `CustomEvent` objects.
-    public func customEvents() -> AsyncStream<CustomEvent> {
-        eventsController.customEvents()
-    }
-    
-    /// Returns an asynchronous stream of reactions received during the call.
-    /// - Returns: An `AsyncStream` of `CallReaction` objects.
-    public func reactions() -> AsyncStream<CallReaction> {
-        eventsController.reactions()
     }
     
     //MARK: - Internal
@@ -502,6 +467,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     internal func onEvent(_ event: Event) {
+        guard let wsCallEvent = event as? WSCallEvent, wsCallEvent.callCid == cId else {
+            return
+        }
         if let event = event as? CallAcceptedEvent {
             let callData = event.call.toCallData(
                 members: [],
@@ -520,28 +488,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
             )
             update(callData: callData)
+        } else if event is CallRecordingStartedEvent {
+            if self.state.callData?.recording == false {
+                self.state.callData?.recording = true
+                self.state.recordingState = .recording
+            }
+        } else if event is CallRecordingStoppedEvent {
+            if self.state.callData?.recording == true {
+                self.state.callData?.recording = false
+                self.state.recordingState = .noRecording
+            }
         }
         continuation?.yield(event)
         for eventHandler in eventHandlers {
             eventHandler?(event)
-        }
-    }
-    
-    //MARK: - private
-    
-    private func subscribeToBroadcastingEvents() {
-        broadcastingTask = Task {
-            for await event in livestreamController.broadcastingEvents() {
-                if event.callCid == cId {
-                    await MainActor.run {
-                        if event is BroadcastingStoppedEvent {
-                            state.callData?.broadcasting = false
-                        } else {
-                            state.callData?.broadcasting = true
-                        }
-                    }                    
-                }
-            }
         }
     }
 }
