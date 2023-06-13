@@ -45,7 +45,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     private let callCoordinatorController: CallCoordinatorController
     internal let callController: CallController
-    private let recordingController: RecordingController
     private let livestreamController: LivestreamController
     private let members: [Member]
     private let videoOptions: VideoOptions
@@ -61,7 +60,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callType: String,
         callCoordinatorController: CallCoordinatorController,
         callController: CallController,
-        recordingController: RecordingController,
         livestreamController: LivestreamController,
         members: [Member],
         videoOptions: VideoOptions
@@ -70,7 +68,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
         self.callController = callController
-        self.recordingController = recordingController
         self.livestreamController = livestreamController
         self.members = members
         self.videoOptions = videoOptions
@@ -284,7 +281,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         continuation = nil
         eventHandlers.removeAll()
         broadcastingTask?.cancel()
-        recordingController.cleanUp()
         callController.cleanUp()
         livestreamController.cleanUp()
     }
@@ -453,21 +449,23 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     /// Starts recording for the call.
     public func startRecording() async throws {
-        try await recordingController.startRecording(callId: callId, callType: callType)
+        try await coordinatorClient.startRecording(callId: callId, callType: callType)
+        update(recordingState: .requested)
     }
     
     /// Stops recording a call.
     public func stopRecording() async throws {
-        try await recordingController.stopRecording(callId: callId, callType: callType)
+        try await coordinatorClient.stopRecording(callId: callId, callType: callType)
     }
     
     /// Lists recordings for the call.
-    public func listRecordings() async throws -> [CallRecordingInfo] {
-        try await recordingController.listRecordings(
+    public func listRecordings() async throws -> [CallRecording] {
+        let response =  try await coordinatorClient.listRecordings(
             callId: callId,
             callType: callType,
             session: callId
-        )
+        )        
+        return response.recordings
     }
     
     //MARK: - Broadcasting
@@ -615,4 +613,10 @@ public enum ReconnectionStatus {
     case connected
     case reconnecting
     case disconnected
+}
+
+public enum RecordingState {
+    case noRecording
+    case requested
+    case recording
 }

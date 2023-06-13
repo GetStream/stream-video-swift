@@ -31,10 +31,7 @@ public class StreamVideo {
             setupConnectionRecoveryHandler()
         }
     }
-    
-    private let permissionsMiddleware = PermissionsMiddleware()
-    private let recordingEventsMiddleware = RecordingEventsMiddleware()
-    
+        
     private let eventsMiddleware = WSEventsMiddleware()
     private var wsEventsContinuation: AsyncStream<Event>.Continuation?
     
@@ -227,12 +224,6 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleCallEnded),
-            name: Notification.Name(CallNotification.callEnded),
-            object: nil
-        )
     }
     
     /// Connects the current user.
@@ -260,18 +251,12 @@ public class StreamVideo {
         members: [Member] = []
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
-        let recordingController = makeRecordingController(
-            with: callController,
-            callId: callId,
-            callType: callType
-        )
         let livestreamController = makeLivestreamController(callType: callType, callId: callId)
         let call = Call(
             callId: callId,
             callType: callType,
             callCoordinatorController: callCoordinatorController,
             callController: callController,
-            recordingController: recordingController,
             livestreamController: livestreamController,
             members: members,
             videoOptions: VideoOptions()
@@ -355,29 +340,6 @@ public class StreamVideo {
     }
     
     // MARK: - private
-    
-    /// Creates recording controller used for managing recordings.
-    /// - Returns: `RecordingController`
-    private func makeRecordingController(
-        with callController: CallController,
-        callId: String,
-        callType: String
-    ) -> RecordingController {
-        let controller = RecordingController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        controller.onRecordingRequestedEvent = { event in
-            callController.updateCall(from: event)
-        }
-        recordingEventsMiddleware.onRecordingEvent = { event in
-            controller.onRecordingEvent?(event)
-            callController.updateCall(from: event)
-        }
-        return controller
-    }
     
     /// Creates a call controller, used for establishing and managing a call.
     /// - Parameters:
@@ -523,12 +485,6 @@ public class StreamVideo {
                 result(.failure(error))
             }
         }
-    }
-    
-    @objc private func handleCallEnded() {
-        recordingEventsMiddleware.onRecordingEvent = nil
-        permissionsMiddleware.onPermissionRequestEvent = nil
-        permissionsMiddleware.onPermissionsUpdatedEvent = nil
     }
 }
 
