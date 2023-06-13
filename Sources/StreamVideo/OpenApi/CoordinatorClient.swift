@@ -81,10 +81,14 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/call/\(callType)/\(callId)")
     }
     
-    func sendEvent(with request: EventRequestData) async throws -> SendEventResponse {
+    func sendEvent(
+        type: String,
+        callId: String,
+        request: SendEventRequest
+    ) async throws -> SendEventResponse {
         try await execute(
-            request: request.sendEventRequest,
-            path: "/call/\(request.type)/\(request.id)/event"
+            request: request,
+            path: "/call/\(type)/\(callId)/event"
         )
     }
     
@@ -142,10 +146,14 @@ class CoordinatorClient: @unchecked Sendable {
         )
     }
     
-    func sendReaction(with request: SendReactionRequestData) async throws -> SendReactionResponse {
+    func sendReaction(
+        type: String,
+        callId: String,
+        request: SendReactionRequest
+    ) async throws -> SendReactionResponse {
         try await execute(
-            request: request.sendReactionRequest,
-            path: "/call/\(request.type)/\(request.id)/reaction"
+            request: request,
+            path: "/call/\(type)/\(callId)/reaction"
         )
     }
     

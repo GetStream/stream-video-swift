@@ -33,7 +33,6 @@ public class StreamVideo {
     }
     
     private let permissionsMiddleware = PermissionsMiddleware()
-    private let customEventsMiddleware = CustomEventsMiddleware()
     private let recordingEventsMiddleware = RecordingEventsMiddleware()
     
     private let eventsMiddleware = WSEventsMiddleware()
@@ -266,15 +265,14 @@ public class StreamVideo {
             callId: callId,
             callType: callType
         )
-        let eventsController = makeEventsController(callId: callId, callType: callType)
         let permissionsController = makePermissionsController(callId: callId, callType: callType)
         let livestreamController = makeLivestreamController(callType: callType, callId: callId)
         let call = Call(
             callId: callId,
             callType: callType,
+            coordinatorClient: callCoordinatorController.coordinatorClient,
             callController: callController,
             recordingController: recordingController,
-            eventsController: eventsController,
             permissionsController: permissionsController,
             livestreamController: livestreamController,
             members: members,
@@ -397,24 +395,6 @@ public class StreamVideo {
         recordingEventsMiddleware.onRecordingEvent = { event in
             controller.onRecordingEvent?(event)
             callController.updateCall(from: event)
-        }
-        return controller
-    }
-    
-    /// Creates an events controller used for managing events.
-    /// - Returns: `EventsController`
-    private func makeEventsController(callId: String, callType: String) -> EventsController {
-        let controller = EventsController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        customEventsMiddleware.onCustomEvent = { event in
-            controller.onCustomEvent?(event)
-        }
-        customEventsMiddleware.onNewReaction = { event in
-            controller.onNewReaction?(event)
         }
         return controller
     }
@@ -567,8 +547,6 @@ public class StreamVideo {
     
     @objc private func handleCallEnded() {
         recordingEventsMiddleware.onRecordingEvent = nil
-        customEventsMiddleware.onCustomEvent = nil
-        customEventsMiddleware.onNewReaction = nil
         permissionsMiddleware.onPermissionRequestEvent = nil
         permissionsMiddleware.onPermissionsUpdatedEvent = nil
     }

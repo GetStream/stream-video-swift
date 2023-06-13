@@ -41,9 +41,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callCid(from: callId, callType: callType)
     }
     
+    private let coordinatorClient: CoordinatorClient
     internal let callController: CallController
     private let recordingController: RecordingController
-    private let eventsController: EventsController
     private let permissionsController: PermissionsController
     private let livestreamController: LivestreamController
     private let members: [Member]
@@ -55,9 +55,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal init(
         callId: String,
         callType: String,
+        coordinatorClient: CoordinatorClient,
         callController: CallController,
         recordingController: RecordingController,
-        eventsController: EventsController,
         permissionsController: PermissionsController,
         livestreamController: LivestreamController,
         members: [Member],
@@ -65,9 +65,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) {
         self.callId = callId
         self.callType = callType
+        self.coordinatorClient = coordinatorClient
         self.callController = callController
         self.recordingController = recordingController
-        self.eventsController = eventsController
         self.permissionsController = permissionsController
         self.livestreamController = livestreamController
         self.members = members
@@ -283,7 +283,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         eventHandlers.removeAll()
         broadcastingTask?.cancel()
         recordingController.cleanUp()
-        eventsController.cleanUp()
         permissionsController.cleanUp()
         callController.cleanUp()
         livestreamController.cleanUp()
@@ -431,17 +430,27 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - Events
     
     /// Sends a custom event to the call.
-    /// - Parameter event: The `CustomEventRequest` object representing the custom event to send.
+    /// - Parameter event: The `SendEventRequest` object representing the custom event to send.
     /// - Throws: An error if the sending fails.
-    public func send(event: CustomEventRequest) async throws {
-        try await eventsController.send(event: event)
+    @discardableResult
+    public func send(event: SendEventRequest) async throws -> SendEventResponse {
+        return try await coordinatorClient.sendEvent(
+            type: callType,
+            callId: callId,
+            request: event
+        )
     }
     
     /// Sends a reaction to the call.
-    /// - Parameter reaction: The `CallReactionRequest` object representing the reaction to send.
+    /// - Parameter reaction: The `SendReactionRequest` object representing the reaction to send.
     /// - Throws: An error if the sending fails.
-    public func send(reaction: CallReactionRequest) async throws {
-        try await eventsController.send(reaction: reaction)
+    @discardableResult
+    public func send(reaction: SendReactionRequest) async throws -> SendReactionResponse {
+        try await coordinatorClient.sendReaction(
+            type: callType,
+            callId: callId,
+            request: reaction
+        )
     }
     
     //MARK: - Internal

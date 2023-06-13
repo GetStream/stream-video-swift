@@ -10,12 +10,6 @@ struct JoinCallRequestData {
     let joinCallRequest: JoinCallRequest
 }
 
-struct EventRequestData {
-    let id: String
-    let type: String
-    let sendEventRequest: SendEventRequest
-}
-
 struct EndCallRequestData {
     let id: String
     let type: String
@@ -49,50 +43,6 @@ struct UnblockUserRequestData {
     let id: String
     let type: String
     let unblockUserRequest: UnblockUserRequest
-}
-
-struct SendReactionRequestData {
-    let id: String
-    let type: String
-    let sendReactionRequest: SendReactionRequest
-}
-
-public struct CustomEventRequest {
-    public let callId: String
-    public let callType: String
-    public let customData: [String: RawJSON]
-    
-    public init(
-        callId: String,
-        callType: String,
-        customData: [String: RawJSON]
-    ) {
-        self.callId = callId
-        self.callType = callType
-        self.customData = customData
-    }
-}
-
-public struct CallReactionRequest {
-    public let callId: String
-    public let callType: String
-    public let reactionType: String
-    public let emojiCode: String?
-    public let customData: [String: RawJSON]
-    
-    public init(
-        callId: String,
-        callType: String,
-        reactionType: String,
-        emojiCode: String? = nil,
-        customData: [String : RawJSON]
-    ) {
-        self.callId = callId
-        self.callType = callType
-        self.reactionType = reactionType
-        self.emojiCode = emojiCode
-        self.customData = customData
-    }
 }
 
 public struct MuteRequest {

@@ -90,22 +90,6 @@ class CallCoordinatorController: @unchecked Sendable {
         self.user = user
         coordinatorClient.userId = user.id
     }
-
-    func sendEvent(
-        callId: String,
-        callType: String,
-        customData: [String: AnyCodable]? = nil
-    ) async throws {
-        let sendEventRequest = SendEventRequest(
-            custom: customData
-        )
-        let request = EventRequestData(
-            id: callId,
-            type: callType,
-            sendEventRequest: sendEventRequest
-        )
-        _ = try await coordinatorClient.sendEvent(with: request)
-    }
     
     func acceptCall(callId: String, type: String) async throws -> AcceptCallResponse {
         try await coordinatorClient.acceptCall(callId: callId, type: type)
