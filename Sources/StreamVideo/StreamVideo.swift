@@ -341,7 +341,7 @@ public class StreamVideo {
         }
     }
     
-    public func wsEvents() -> AsyncStream<Event> {
+    public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
             self?.wsEventsContinuation = continuation
         }

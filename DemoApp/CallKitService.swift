@@ -189,7 +189,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     private func subscribeToCallEvents() {
         Task {
-            for await wsEvent in streamVideo.wsEvents() {
+            for await wsEvent in streamVideo.subscribe() {
                 guard let event = callEventsHandler.checkForCallEvents(from: wsEvent) else {
                     return
                 }

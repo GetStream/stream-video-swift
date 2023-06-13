@@ -492,7 +492,7 @@ open class CallViewModel: ObservableObject {
     
     private func subscribeToCallEvents() {
         Task {
-            for await event in streamVideo.wsEvents() {
+            for await event in streamVideo.subscribe() {
                 if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
                     if case let .incoming(incomingCall) = callEvent,
                        incomingCall.caller.id != streamVideo.user.id {

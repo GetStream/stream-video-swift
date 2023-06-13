@@ -6,6 +6,8 @@ import Foundation
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
 public class Call: @unchecked Sendable, WSEventsSubscriber {
+    
+    typealias EventHandling = ((Event) -> ())?
 
     public class State: ObservableObject {
         /// The current participants dictionary.
@@ -47,6 +49,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private let members: [Member]
     private let videoOptions: VideoOptions
     private var broadcastingTask: Task<Void, Never>?
+    private var continuation: AsyncStream<Event>.Continuation?
+    private var eventHandlers = [EventHandling]()
     
     internal init(
         callId: String,
@@ -255,9 +259,29 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
     
+    public func subscribe() -> AsyncStream<Event> {
+        AsyncStream(Event.self) { [weak self] continuation in
+            self?.continuation = continuation
+        }
+    }
+
+    public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
+        return AsyncStream(event) { [weak self] continuation in
+            let eventHandler: EventHandling = { event in
+                if let event = event as? WSEvent {
+                    continuation.yield(event)
+                }
+            }
+            self?.eventHandlers.append(eventHandler)
+        }
+    }
+        
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
+        continuation?.finish()
+        continuation = nil
+        eventHandlers.removeAll()
         broadcastingTask?.cancel()
         recordingController.cleanUp()
         eventsController.cleanUp()
@@ -464,6 +488,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     internal func update(callData: CallData) {
+        guard callData.callCid == cId else { return }
         var updated = callData
         let members = self.state.callData?.members ?? []
         if callData.members.isEmpty && !members.isEmpty {
@@ -495,6 +520,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
             )
             update(callData: callData)
+        }
+        continuation?.yield(event)
+        for eventHandler in eventHandlers {
+            eventHandler?(event)
         }
     }
     
