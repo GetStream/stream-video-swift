@@ -195,6 +195,10 @@ members: [User],
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> GetOrCreateCallResponse {
+        
+        let client = 
+        
+        
         let data = CallRequest(
             custom: RawJSON.tryConvert(customData: custom),
             startsAt: startsAt

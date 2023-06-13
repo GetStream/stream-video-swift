@@ -107,7 +107,7 @@ internal class Response<T> {
     }
 }
 
-internal final class RequestTask {
+internal final class RequestTask: @unchecked Sendable {
     private var lock = NSRecursiveLock()
     private var task: URLSessionTask?
 

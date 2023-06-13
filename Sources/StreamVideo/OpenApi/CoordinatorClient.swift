@@ -289,7 +289,8 @@ class CoordinatorClient: @unchecked Sendable {
         guard let url = URL(string: url) else {
             throw ClientError.InvalidURL()
         }
-        var request = URLRequest(url: url)
+        let urlo = URL(string: "")!
+        var request = URLRequest(url: urlo)
         if isAnonymous {
             request.setValue("\(token)", forHTTPHeaderField: "Authorization")
         }
@@ -316,6 +317,21 @@ class CoordinatorClient: @unchecked Sendable {
     ) throws -> URLRequest {
         let url = try makeURL(with: path, queryItems: queryParams)
         return makeURLRequest(url: url, httpMethod: httpMethod)
+    }
+    
+    
+    private func makeURLRequest<T: Encodable>(
+        for path: String,
+        httpMethod: String,
+        request: T,
+        queryParams: [String: String]
+    ) throws -> URLRequest {
+        let url = try makeURL(with: path, queryItems: queryParams)
+        var urlRequest = URLRequest(url: url)
+        urlRequest.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        urlRequest.httpBody = try JSONEncoder().encode(request)
+        urlRequest.httpMethod = httpMethod
+        return urlRequest
     }
     
     private func makeURLRequest(url: URL, httpMethod: String = "POST") -> URLRequest {

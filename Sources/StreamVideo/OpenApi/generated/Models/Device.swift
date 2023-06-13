@@ -14,19 +14,19 @@ import AnyCodable
 
 
 
-public struct Device: Codable, JSONEncodable, Hashable {
+internal struct Device: Codable, JSONEncodable, Hashable {
 
     /** Date/time of creation */
-    public var createdAt: Date
+    internal var createdAt: Date
     /** Whether device is disabled or not */
-    public var disabled: Bool?
+    internal var disabled: Bool?
     /** Reason explaining why device had been disabled */
-    public var disabledReason: String?
-    public var id: String
-    public var pushProvider: String
-    public var pushProviderName: String?
+    internal var disabledReason: String?
+    internal var id: String
+    internal var pushProvider: String
+    internal var pushProviderName: String?
     /** When true the token is for Apple VoIP push notifications */
-    public var voip: Bool?
+    internal var voip: Bool?
 
     internal init(createdAt: Date, disabled: Bool? = nil, disabledReason: String? = nil, id: String, pushProvider: String, pushProviderName: String? = nil, voip: Bool? = nil) {
         self.createdAt = createdAt
@@ -50,7 +50,7 @@ public struct Device: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    public func encode(to encoder: Encoder) throws {
+    internal func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encodeIfPresent(disabled, forKey: .disabled)
