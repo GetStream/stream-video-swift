@@ -28,7 +28,7 @@ public struct Device: Codable, JSONEncodable, Hashable {
     /** When true the token is for Apple VoIP push notifications */
     public var voip: Bool?
 
-    internal init(createdAt: Date, disabled: Bool? = nil, disabledReason: String? = nil, id: String, pushProvider: String, pushProviderName: String? = nil, voip: Bool? = nil) {
+    public init(createdAt: Date, disabled: Bool? = nil, disabledReason: String? = nil, id: String, pushProvider: String, pushProviderName: String? = nil, voip: Bool? = nil) {
         self.createdAt = createdAt
         self.disabled = disabled
         self.disabledReason = disabledReason
@@ -38,7 +38,7 @@ public struct Device: Codable, JSONEncodable, Hashable {
         self.voip = voip
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case createdAt = "created_at"
         case disabled
         case disabledReason = "disabled_reason"

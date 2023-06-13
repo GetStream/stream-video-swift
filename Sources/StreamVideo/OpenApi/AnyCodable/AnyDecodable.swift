@@ -1,7 +1,3 @@
-//
-// Copyright © 2023 Stream.io Inc. All rights reserved.
-//
-
 #if canImport(Foundation)
 import Foundation
 #endif
@@ -35,10 +31,10 @@ import Foundation
      let decoder = JSONDecoder()
      let dictionary = try! decoder.decode([String: AnyDecodable].self, from: json)
  */
-struct AnyDecodable: Decodable {
-    let value: Any
+@frozen public struct AnyDecodable: Decodable {
+    public let value: Any
 
-    init<T>(_ value: T?) {
+    public init<T>(_ value: T?) {
         self.value = value ?? ()
     }
 }
@@ -52,14 +48,14 @@ protocol _AnyDecodable {
 extension AnyDecodable: _AnyDecodable {}
 
 extension _AnyDecodable {
-    init(from decoder: Decoder) throws {
+    public init(from decoder: Decoder) throws {
         let container = try decoder.singleValueContainer()
 
         if container.decodeNil() {
             #if canImport(Foundation)
-            self.init(NSNull())
+                self.init(NSNull())
             #else
-            self.init(Self?.none)
+                self.init(Optional<Self>.none)
             #endif
         } else if let bool = try? container.decode(Bool.self) {
             self.init(bool)
@@ -72,7 +68,7 @@ extension _AnyDecodable {
         } else if let string = try? container.decode(String.self) {
             self.init(string)
         } else if let array = try? container.decode([AnyDecodable].self) {
-            self.init(array.map(\.value))
+            self.init(array.map { $0.value })
         } else if let dictionary = try? container.decode([String: AnyDecodable].self) {
             self.init(dictionary.mapValues { $0.value })
         } else {
@@ -82,12 +78,12 @@ extension _AnyDecodable {
 }
 
 extension AnyDecodable: Equatable {
-    static func == (lhs: AnyDecodable, rhs: AnyDecodable) -> Bool {
+    public static func == (lhs: AnyDecodable, rhs: AnyDecodable) -> Bool {
         switch (lhs.value, rhs.value) {
-        #if canImport(Foundation)
+#if canImport(Foundation)
         case is (NSNull, NSNull), is (Void, Void):
             return true
-        #endif
+#endif
         case let (lhs as Bool, rhs as Bool):
             return lhs == rhs
         case let (lhs as Int, rhs as Int):
@@ -127,7 +123,7 @@ extension AnyDecodable: Equatable {
 }
 
 extension AnyDecodable: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch value {
         case is Void:
             return String(describing: nil as Any?)
@@ -140,7 +136,7 @@ extension AnyDecodable: CustomStringConvertible {
 }
 
 extension AnyDecodable: CustomDebugStringConvertible {
-    var debugDescription: String {
+    public var debugDescription: String {
         switch value {
         case let value as CustomDebugStringConvertible:
             return "AnyDecodable(\(value.debugDescription))"
@@ -151,7 +147,7 @@ extension AnyDecodable: CustomDebugStringConvertible {
 }
 
 extension AnyDecodable: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         switch value {
         case let value as Bool:
             hasher.combine(value)

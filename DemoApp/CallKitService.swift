@@ -6,6 +6,7 @@ import UIKit
 import Foundation
 @preconcurrency import CallKit
 import StreamVideo
+import StreamVideoSwiftUI
 
 enum CallKitState {
     case idle
@@ -21,6 +22,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     var callType: String = ""
     
     private var call: Call?
+    private let callEventsHandler = CallEventsHandler()
     
     private var state: CallKitState = .idle
     private var callKitId: UUID?
@@ -187,7 +189,10 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     private func subscribeToCallEvents() {
         Task {
-            for await event in streamVideo.callEvents() {
+            for await wsEvent in streamVideo.wsEvents() {
+                guard let event = callEventsHandler.checkForCallEvents(from: wsEvent) else {
+                    return
+                }
                 switch event {
                 case .ended(_):
                     endCurrentCall()

@@ -5,7 +5,7 @@
 import Foundation
 
 /// An `Event` object representing an event in the chat system.
-public protocol Event {}
+public protocol Event: Sendable {}
 
 public protocol SendableEvent: Event, ProtoModel {}
 

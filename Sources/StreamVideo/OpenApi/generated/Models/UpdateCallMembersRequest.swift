@@ -14,26 +14,26 @@ import AnyCodable
 
 
 
-internal struct UpdateCallMembersRequest: Codable, JSONEncodable, Hashable {
+public struct UpdateCallMembersRequest: Codable, JSONEncodable, Hashable {
 
     /** List of userID to remove */
-    internal var removeMembers: [String]?
+    public var removeMembers: [String]?
     /** List of members to update or insert */
-    internal var updateMembers: [MemberRequest]?
+    public var updateMembers: [MemberRequest]?
 
-    internal init(removeMembers: [String]? = nil, updateMembers: [MemberRequest]? = nil) {
+    public init(removeMembers: [String]? = nil, updateMembers: [MemberRequest]? = nil) {
         self.removeMembers = removeMembers
         self.updateMembers = updateMembers
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case removeMembers = "remove_members"
         case updateMembers = "update_members"
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(removeMembers, forKey: .removeMembers)
         try container.encodeIfPresent(updateMembers, forKey: .updateMembers)

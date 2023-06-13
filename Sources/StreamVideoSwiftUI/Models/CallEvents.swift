@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 
 /// Represents a call event.
 public enum CallEvent: Sendable {

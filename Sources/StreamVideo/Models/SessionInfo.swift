@@ -14,4 +14,16 @@ public struct SessionInfo: Sendable {
     public var createdAt: Date
     /// The unique identifier for the session.
     public var sessionId: String
+    
+    public init(
+        call: CallData,
+        callCid: String,
+        createdAt: Date,
+        sessionId: String
+    ) {
+        self.call = call
+        self.callCid = callCid
+        self.createdAt = createdAt
+        self.sessionId = sessionId
+    }
 }

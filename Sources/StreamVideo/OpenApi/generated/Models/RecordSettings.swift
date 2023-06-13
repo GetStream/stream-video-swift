@@ -14,14 +14,14 @@ import AnyCodable
 
 
 
-internal struct RecordSettings: Codable, JSONEncodable, Hashable {
+public struct RecordSettings: Codable, JSONEncodable, Hashable {
 
-    internal enum Mode: String, Codable, CaseIterable {
+    public enum Mode: String, Codable, CaseIterable {
         case available = "available"
         case disabled = "disabled"
         case autoOn = "auto-on"
     }
-    internal enum Quality: String, Codable, CaseIterable {
+    public enum Quality: String, Codable, CaseIterable {
         case audioOnly = "audio-only"
         case _360p = "360p"
         case _480p = "480p"
@@ -29,17 +29,17 @@ internal struct RecordSettings: Codable, JSONEncodable, Hashable {
         case _1080p = "1080p"
         case _1440p = "1440p"
     }
-    internal var audioOnly: Bool
-    internal var mode: Mode
-    internal var quality: Quality
+    public var audioOnly: Bool
+    public var mode: Mode
+    public var quality: Quality
 
-    internal init(audioOnly: Bool, mode: Mode, quality: Quality) {
+    public init(audioOnly: Bool, mode: Mode, quality: Quality) {
         self.audioOnly = audioOnly
         self.mode = mode
         self.quality = quality
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case audioOnly = "audio_only"
         case mode
         case quality
@@ -47,7 +47,7 @@ internal struct RecordSettings: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(audioOnly, forKey: .audioOnly)
         try container.encode(mode, forKey: .mode)

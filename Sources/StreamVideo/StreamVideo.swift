@@ -32,26 +32,22 @@ public class StreamVideo {
         }
     }
     
-    private let callsMiddleware = CallsMiddleware()
     private let permissionsMiddleware = PermissionsMiddleware()
     private let customEventsMiddleware = CustomEventsMiddleware()
     private let recordingEventsMiddleware = RecordingEventsMiddleware()
-    private let allEventsMiddleware = AllEventsMiddleware()
+    
+    private let eventsMiddleware = WSEventsMiddleware()
+    private var wsEventsContinuation: AsyncStream<Event>.Continuation?
     
     private var watchContinuation: AsyncStream<Event>.Continuation?
         
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
+        eventsMiddleware.add(subscriber: self)
         var middlewares: [EventMiddleware] = [
-            callsMiddleware,
-            permissionsMiddleware,
-            customEventsMiddleware,
-            recordingEventsMiddleware
+            eventsMiddleware
         ]
-        if videoConfig.listenToAllEvents {
-            middlewares.append(allEventsMiddleware)
-        }
         center.add(middlewares: middlewares)
         return center
     }()
@@ -273,7 +269,7 @@ public class StreamVideo {
         let eventsController = makeEventsController(callId: callId, callType: callType)
         let permissionsController = makePermissionsController(callId: callId, callType: callType)
         let livestreamController = makeLivestreamController(callType: callType, callId: callId)
-        return Call(
+        let call = Call(
             callId: callId,
             callType: callType,
             callController: callController,
@@ -282,9 +278,10 @@ public class StreamVideo {
             permissionsController: permissionsController,
             livestreamController: livestreamController,
             members: members,
-            videoOptions: VideoOptions(),
-            allEventsMiddleWare: videoConfig.listenToAllEvents ? allEventsMiddleware : nil
+            videoOptions: VideoOptions()
         )
+        eventsMiddleware.add(subscriber: call)
+        return call
     }
 
     /// Creates a controller used for querying and watching calls.
@@ -297,15 +294,6 @@ public class StreamVideo {
             callsQuery: callsQuery
         )
         return controller
-    }
-        
-    /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
-    public func callEvents() -> AsyncStream<CallEvent> {
-        AsyncStream(CallEvent.self) { [weak self] continuation in
-            self?.callsMiddleware.onCallEvent = { callEvent in
-                continuation.yield(callEvent)
-            }
-        }
     }
     
     /// Sets a device for push notifications.
@@ -353,14 +341,20 @@ public class StreamVideo {
         }
     }
     
+    public func wsEvents() -> AsyncStream<Event> {
+        AsyncStream(Event.self) { [weak self] continuation in
+            self?.wsEventsContinuation = continuation
+        }
+    }
+    
     // MARK: - internal
     
     func watchEvents() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
             self?.watchContinuation = continuation
-            self?.callsMiddleware.onAnyEvent = { event in
-                continuation.yield(event)
-            }
+//            self?.callsMiddleware.onAnyEvent = { event in
+//                continuation.yield(event)
+//            }
         }
     }
     
@@ -437,10 +431,9 @@ public class StreamVideo {
             callId,
             callType,
             apiKey.apiKeyString,
-            videoConfig,
-            videoConfig.listenToAllEvents ? allEventsMiddleware : nil
+            videoConfig
         )
-        callsMiddleware.onCallUpdated = controller.update(callData:)
+//        callsMiddleware.onCallUpdated = controller.update(callData:)
         return controller
     }
     
@@ -451,9 +444,9 @@ public class StreamVideo {
             callId: callId,
             callType: callType
         )
-        callsMiddleware.onBroadcastingEvent = { event in
-            controller.onBroadcastingEvent?(event)
-        }
+//        callsMiddleware.onBroadcastingEvent = { event in
+//            controller.onBroadcastingEvent?(event)
+//        }
         return controller
     }
     
@@ -574,8 +567,6 @@ public class StreamVideo {
     
     @objc private func handleCallEnded() {
         recordingEventsMiddleware.onRecordingEvent = nil
-        callsMiddleware.onCallUpdated = nil
-        callsMiddleware.onBroadcastingEvent = nil
         customEventsMiddleware.onCustomEvent = nil
         customEventsMiddleware.onNewReaction = nil
         permissionsMiddleware.onPermissionRequestEvent = nil
@@ -612,6 +603,14 @@ extension StreamVideo: ConnectionStateDelegate {
             log.debug("Web socket connection state update \(state)")
         }
     }
+}
+
+extension StreamVideo: WSEventsSubscriber {
+    
+    func onEvent(_ event: Event) {
+        wsEventsContinuation?.yield(event)
+    }
+    
 }
 
 /// Returns the current value for the `StreamVideo` instance.

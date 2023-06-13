@@ -14,21 +14,21 @@ import AnyCodable
 
 
 
-internal struct BackstageSettingsRequest: Codable, JSONEncodable, Hashable {
+public struct BackstageSettingsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var enabled: Bool?
+    public var enabled: Bool?
 
-    internal init(enabled: Bool? = nil) {
+    public init(enabled: Bool? = nil) {
         self.enabled = enabled
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(enabled, forKey: .enabled)
     }

@@ -15,22 +15,22 @@ import AnyCodable
 
 
 
-internal struct UnblockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct UnblockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
-    internal var callCid: String
-    internal var createdAt: Date
+    public var callCid: String
+    public var createdAt: Date
     /** The type of event: \"call.unblocked_user\" in this case */
-    internal var type: String = "call.unblocked_user"
-    internal var user: UserResponse
+    public var type: String = "call.unblocked_user"
+    public var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, type: String = "call.unblocked_user", user: UserResponse) {
+    public init(callCid: String, createdAt: Date, type: String = "call.unblocked_user", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.type = type
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case type
@@ -39,7 +39,7 @@ internal struct UnblockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEven
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)

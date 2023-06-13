@@ -5,8 +5,8 @@
 import Foundation
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
-public class Call: @unchecked Sendable {
-    
+public class Call: @unchecked Sendable, WSEventsSubscriber {
+
     public class State: ObservableObject {
         /// The current participants dictionary.
         @Published public internal(set) var participants = [String: CallParticipant]() {
@@ -27,7 +27,7 @@ public class Call: @unchecked Sendable {
     public internal(set) var state = Call.State()
     
     /// The id of the current session.
-    var sessionId: String = ""
+    public internal(set) var sessionId: String = ""
     
     /// The call id.
     public let callId: String
@@ -39,9 +39,6 @@ public class Call: @unchecked Sendable {
         callCid(from: callId, callType: callType)
     }
     
-    /// The closure that handles the participant events.
-    var onParticipantEvent: ((ParticipantEvent) -> Void)?
-    
     internal let callController: CallController
     private let recordingController: RecordingController
     private let eventsController: EventsController
@@ -49,7 +46,6 @@ public class Call: @unchecked Sendable {
     private let livestreamController: LivestreamController
     private let members: [Member]
     private let videoOptions: VideoOptions
-    private var allEventsMiddleware: AllEventsMiddleware?
     private var broadcastingTask: Task<Void, Never>?
     
     internal init(
@@ -61,8 +57,7 @@ public class Call: @unchecked Sendable {
         permissionsController: PermissionsController,
         livestreamController: LivestreamController,
         members: [Member],
-        videoOptions: VideoOptions,
-        allEventsMiddleWare: AllEventsMiddleware?
+        videoOptions: VideoOptions
     ) {
         self.callId = callId
         self.callType = callType
@@ -73,7 +68,6 @@ public class Call: @unchecked Sendable {
         self.livestreamController = livestreamController
         self.members = members
         self.videoOptions = videoOptions
-        self.allEventsMiddleware = allEventsMiddleWare
         self.callController.call = self
         self.subscribeToBroadcastingEvents()
     }
@@ -181,16 +175,6 @@ public class Call: @unchecked Sendable {
         )
     }
     
-    /// Async stream that publishes participant events.
-    public func participantEvents() -> AsyncStream<ParticipantEvent> {
-        let events = AsyncStream(ParticipantEvent.self) { [weak self] continuation in
-            self?.onParticipantEvent = { event in
-                continuation.yield(event)
-            }
-        }
-        return events
-    }
-    
     /// Adds the given user to the list of blocked users for the call.
     /// - Parameter blockedUser: The user to add to the list of blocked users.
     public func add(blockedUser: User) {
@@ -280,16 +264,6 @@ public class Call: @unchecked Sendable {
         permissionsController.cleanUp()
         callController.cleanUp()
         livestreamController.cleanUp()
-    }
-    
-    /// Listen to all raw WS events. The data is provided as a dictionary.
-    /// `VideoConfig`'s `listenToAllEvents` needs to be true.
-    public func allEvents() -> AsyncStream<PublicWSEvent> {
-        AsyncStream(PublicWSEvent.self) { [weak self] continuation in
-            self?.allEventsMiddleware?.onEvent = { callEvent in
-                continuation.yield(callEvent)
-            }
-        }
     }
     
     //MARK: - Permissions
@@ -500,6 +474,28 @@ public class Call: @unchecked Sendable {
     
     internal func update(recordingState: RecordingState) {
         self.state.recordingState = recordingState
+    }
+    
+    internal func onEvent(_ event: Event) {
+        if let event = event as? CallAcceptedEvent {
+            let callData = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
+            )
+            update(callData: callData)
+        } else if let event = event as? CallRejectedEvent {
+            let callData = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
+            )
+            update(callData: callData)
+        } else if let event = event as? CallUpdatedEvent {
+            let callData = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
+            )
+            update(callData: callData)
+        }
     }
     
     //MARK: - private

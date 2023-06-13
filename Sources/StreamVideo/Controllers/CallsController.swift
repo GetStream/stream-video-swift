@@ -231,7 +231,7 @@ public class CallsController: ObservableObject {
 
 extension CallResponse {
     
-    func toCallData(
+    public func toCallData(
         members: [MemberResponse],
         blockedUsers: [UserResponse]
     ) -> CallData {

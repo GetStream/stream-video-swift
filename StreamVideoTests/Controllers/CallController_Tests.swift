@@ -266,7 +266,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             apiKey: apiKey,
             videoConfig: videoConfig,
-            allEventsMiddleware: nil,
             environment: .mock(with: webRTCClient)
         )
         return callController

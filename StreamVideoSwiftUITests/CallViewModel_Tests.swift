@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 @MainActor
@@ -372,14 +373,19 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     func test_inCall_participantEvents() async throws {
         // Given
         let callViewModel = CallViewModel()
-        
+
         // When
         callViewModel.startCall(callId: callId, type: .default, members: participants)
         try await waitForCallEvent()
-        let event = ParticipantEvent(id: "test", action: .join, user: "test", imageURL: nil)
-        callViewModel.call?.onParticipantEvent?(event)
+        let participantEvent = CallSessionParticipantJoinedEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            sessionId: "123",
+            user: .make(from: "test")
+        )
+        eventNotificationCenter?.process(participantEvent)
         try await waitForCallEvent()
-        
+
         // Then
         try await XCTAssertWithDelay(callViewModel.participantEvent != nil)
         try await Task.sleep(nanoseconds: 2_500_000_000)

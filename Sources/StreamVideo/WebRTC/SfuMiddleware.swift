@@ -14,7 +14,6 @@ class SfuMiddleware: EventMiddleware {
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
-    var onParticipantEvent: ((ParticipantEvent) -> Void)?
     var onSocketConnected: (() -> Void)?
     
     init(
@@ -24,8 +23,7 @@ class SfuMiddleware: EventMiddleware {
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         subscriber: PeerConnection? = nil,
         publisher: PeerConnection? = nil,
-        participantThreshold: Int,
-        onParticipantEvent: ((ParticipantEvent) -> Void)? = nil
+        participantThreshold: Int
     ) {
         self.sessionID = sessionID
         self.user = user
@@ -33,7 +31,6 @@ class SfuMiddleware: EventMiddleware {
         self.signalService = signalService
         self.subscriber = subscriber
         self.publisher = publisher
-        self.onParticipantEvent = onParticipantEvent
         participantsThreshold = participantThreshold
     }
     
@@ -79,7 +76,6 @@ class SfuMiddleware: EventMiddleware {
     }
     
     func cleanUp() {
-        onParticipantEvent = nil
         onSocketConnected = nil
     }
     
@@ -110,14 +106,7 @@ class SfuMiddleware: EventMiddleware {
         let showTrack = callParticipants.count < participantsThreshold
         let participant = event.participant.toCallParticipant(showTrack: showTrack)
         await state.update(callParticipant: participant)
-        let event = ParticipantEvent(
-            id: participant.userId,
-            action: .join,
-            user: participant.name,
-            imageURL: participant.profileImageURL
-        )
         log.debug("Participant \(participant.name) joined the call")
-        onParticipantEvent?(event)
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
@@ -128,18 +117,11 @@ class SfuMiddleware: EventMiddleware {
         let participant = event.participant.toCallParticipant()
         await state.removeCallParticipant(with: participant.id)
         await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
-        let event = ParticipantEvent(
-            id: participant.userId,
-            action: .leave,
-            user: participant.name,
-            imageURL: participant.profileImageURL
-        )
         log.debug("Participant \(participant.name) left the call")
         postNotification(
             with: CallNotification.participantLeft,
             userInfo: ["id": participant.id]
         )
-        onParticipantEvent?(event)
     }
     
     private func handleChangePublishQualityEvent(

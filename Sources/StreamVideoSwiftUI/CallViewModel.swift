@@ -3,6 +3,7 @@
 //
 
 import Combine
+import StreamVideo
 import SwiftUI
 import WebRTC
 
@@ -157,13 +158,13 @@ open class CallViewModel: ObservableObject {
     private var callUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?
     private var recordingUpdates: AnyCancellable?
-    private var currentEventsTask: Task<Void, Never>?
         
     private var ringingTimer: Foundation.Timer?
     
     private var lastLayoutChange = Date()
     private var enteringCallTask: Task<Void, Never>?
     private var participantsSortComparators = defaultComparators
+    private let callEventsHandler = CallEventsHandler()
     
     public var participants: [CallParticipant] {
         callParticipants
@@ -184,7 +185,7 @@ open class CallViewModel: ObservableObject {
         participantsLayout: ParticipantsLayout = .grid
     ) {
         self.participantsLayout = participantsLayout
-        subscribeToCallEvents()
+        self.subscribeToCallEvents()
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -409,7 +410,7 @@ open class CallViewModel: ObservableObject {
 
     /// Updates the participants sorting.
     /// - Parameter participantsSortComparators: the new sort comparators.
-    public func update(participantsSortComparators: [Comparator<CallParticipant>]) {
+    public func update(participantsSortComparators: [StreamSortComparator<CallParticipant>]) {
         self.participantsSortComparators = participantsSortComparators
     }
     
@@ -433,7 +434,6 @@ open class CallViewModel: ObservableObject {
         call = nil
         callParticipants = [:]
         outgoingCallMembers = []
-        currentEventsTask?.cancel()
         callingState = .idle
         isMinimized = false
         localVideoPrimary = false
@@ -467,7 +467,6 @@ open class CallViewModel: ObservableObject {
         }
         self.call = call
         updateCallStateIfNeeded()
-        listenForParticipantEvents()
         log.debug("Started call")
     }
     
@@ -493,36 +492,49 @@ open class CallViewModel: ObservableObject {
     
     private func subscribeToCallEvents() {
         Task {
-            for await callEvent in streamVideo.callEvents() {
-                if case let .incoming(incomingCall) = callEvent,
-                   incomingCall.caller.id != streamVideo.user.id {
-                    let isAppActive = UIApplication.shared.applicationState == .active
-                    // TODO: implement holding a call.
-                    if callingState == .idle && isAppActive {
-                        callingState = .incoming(incomingCall)
-                    }
-                } else if case let .accepted(callEventInfo) = callEvent {
-                    if callingState == .outgoing {
-                        enterCall(call: call, callId: callEventInfo.callId, callType: callEventInfo.type, members: [])
-                    } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && enteringCallTask == nil {
-                        // Accepted on another device.
-                        callingState = .idle
-                    }
-                } else if case .rejected = callEvent {
-                    handleRejectedEvent(callEvent)
-                } else if case .ended = callEvent {
-                    leaveCall()
-                } else if case let .userBlocked(callEventInfo) = callEvent {
-                    if callEventInfo.user?.id == streamVideo.user.id {
+            for await event in streamVideo.wsEvents() {
+                if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
+                    if case let .incoming(incomingCall) = callEvent,
+                       incomingCall.caller.id != streamVideo.user.id {
+                        let isAppActive = UIApplication.shared.applicationState == .active
+                        // TODO: implement holding a call.
+                        if callingState == .idle && isAppActive {
+                            callingState = .incoming(incomingCall)
+                        }
+                    } else if case let .accepted(callEventInfo) = callEvent {
+                        if callingState == .outgoing {
+                            enterCall(call: call, callId: callEventInfo.callId, callType: callEventInfo.type, members: [])
+                        } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && enteringCallTask == nil {
+                            // Accepted on another device.
+                            callingState = .idle
+                        }
+                    } else if case .rejected = callEvent {
+                        handleRejectedEvent(callEvent)
+                    } else if case .ended = callEvent {
                         leaveCall()
-                    } else if let user = callEventInfo.user {
-                        call?.add(blockedUser: user)
+                    } else if case let .userBlocked(callEventInfo) = callEvent {
+                        if callEventInfo.user?.id == streamVideo.user.id {
+                            leaveCall()
+                        } else if let user = callEventInfo.user {
+                            call?.add(blockedUser: user)
+                        }
+                    } else if case let .userUnblocked(callEventInfo) = callEvent,
+                                let user = callEventInfo.user {
+                        call?.remove(blockedUser: user)
+                    } else {
+                        log.debug("Received call event \(callEvent)")
                     }
-                } else if case let .userUnblocked(callEventInfo) = callEvent,
-                            let user = callEventInfo.user {
-                    call?.remove(blockedUser: user)
-                } else {
-                    log.debug("Received call event \(callEvent)")
+                } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
+                    self.participantEvent = participantEvent
+                    if participantEvent.action == .leave &&
+                        callParticipants.count == 1
+                        && call?.state.callData?.session?.acceptedBy.isEmpty == false {
+                        leaveCall()
+                    } else {
+                        // The event is shown for 2 seconds.
+                        try? await Task.sleep(nanoseconds: 2_000_000_000)
+                    }
+                    self.participantEvent = nil
                 }
             }
         }
@@ -557,26 +569,6 @@ open class CallViewModel: ObservableObject {
             let shouldGoInCall = callParticipants.count > 1
             if shouldGoInCall {
                 callingState = .inCall
-            }
-        }
-    }
-    
-    private func listenForParticipantEvents() {
-        guard let call = call else {
-            return
-        }
-        currentEventsTask = Task {
-            for await event in call.participantEvents() {
-                self.participantEvent = event
-                if event.action == .leave &&
-                    callParticipants.count == 1
-                    && call.state.callData?.session?.acceptedBy.isEmpty == false {
-                    leaveCall()
-                } else {
-                    // The event is shown for 2 seconds.
-                    try? await Task.sleep(nanoseconds: 2_000_000_000)
-                }
-                self.participantEvent = nil
             }
         }
     }

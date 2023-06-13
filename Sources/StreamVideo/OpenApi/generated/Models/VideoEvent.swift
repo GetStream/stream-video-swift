@@ -18,7 +18,7 @@ internal class VideoEventMapping: Decodable {
     let type: String
 }
 
-internal enum VideoEvent: Codable, JSONEncodable, Hashable {
+public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
     case typeCallBroadcastingStartedEvent(CallBroadcastingStartedEvent)

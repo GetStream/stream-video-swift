@@ -41,3 +41,18 @@ public extension User {
         User(id: .anonymous)
     }
 }
+
+public extension UserResponse {
+    
+    static func make(from id: String) -> UserResponse {
+        UserResponse(
+            createdAt: Date(),
+            custom: [:],
+            id: id,
+            role: "user",
+            teams: [],
+            updatedAt: Date()
+        )
+    }
+    
+}

@@ -11,11 +11,7 @@ class CallController {
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleParticipantsUpdated()
-            handleParticipantEvent()
             handleParticipantCountUpdated()
-            if let allEventsMiddleware {
-                webRTCClient?.eventNotificationCenter.add(middleware: allEventsMiddleware)
-            }
         }
     }
 
@@ -28,7 +24,6 @@ class CallController {
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat
     private var reconnectionDate: Date?
-    private var allEventsMiddleware: AllEventsMiddleware?
     private let environment: CallController.Environment
     
     init(
@@ -38,14 +33,12 @@ class CallController {
         callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
-        allEventsMiddleware: AllEventsMiddleware?,
         environment: CallController.Environment = .init()
     ) {
         self.user = user
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
-        self.allEventsMiddleware = allEventsMiddleware
         self.apiKey = apiKey
         self.videoConfig = videoConfig
         self.sfuReconnectionTime = environment.sfuReconnectionTime
@@ -313,12 +306,6 @@ class CallController {
             DispatchQueue.main.async {
                 self?.call?.state.participants = participants
             }
-        }
-    }
-    
-    private func handleParticipantEvent() {
-        webRTCClient?.onParticipantEvent = { [weak self] event in
-            self?.call?.onParticipantEvent?(event)
         }
     }
     

@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 
 /// Represents an incoming call.
 public struct IncomingCall: Identifiable, Sendable, Equatable {

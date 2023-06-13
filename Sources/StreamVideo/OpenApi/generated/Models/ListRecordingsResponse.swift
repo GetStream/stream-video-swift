@@ -14,24 +14,24 @@ import AnyCodable
 
 
 
-internal struct ListRecordingsResponse: Codable, JSONEncodable, Hashable {
+public struct ListRecordingsResponse: Codable, JSONEncodable, Hashable {
 
-    internal var duration: String
-    internal var recordings: [CallRecording]
+    public var duration: String
+    public var recordings: [CallRecording]
 
-    internal init(duration: String, recordings: [CallRecording]) {
+    public init(duration: String, recordings: [CallRecording]) {
         self.duration = duration
         self.recordings = recordings
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case duration
         case recordings
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(duration, forKey: .duration)
         try container.encode(recordings, forKey: .recordings)

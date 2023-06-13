@@ -14,20 +14,20 @@ import AnyCodable
 
 
 
-internal struct EdgeResponse: Codable, JSONEncodable, Hashable {
+public struct EdgeResponse: Codable, JSONEncodable, Hashable {
 
-    internal var continentCode: String
-    internal var countryIsoCode: String
-    internal var green: Int
-    internal var id: String
-    internal var latencyTestUrl: String
-    internal var latitude: Float
-    internal var longitude: Float
-    internal var red: Int
-    internal var subdivisionIsoCode: String
-    internal var yellow: Int
+    public var continentCode: String
+    public var countryIsoCode: String
+    public var green: Int
+    public var id: String
+    public var latencyTestUrl: String
+    public var latitude: Float
+    public var longitude: Float
+    public var red: Int
+    public var subdivisionIsoCode: String
+    public var yellow: Int
 
-    internal init(continentCode: String, countryIsoCode: String, green: Int, id: String, latencyTestUrl: String, latitude: Float, longitude: Float, red: Int, subdivisionIsoCode: String, yellow: Int) {
+    public init(continentCode: String, countryIsoCode: String, green: Int, id: String, latencyTestUrl: String, latitude: Float, longitude: Float, red: Int, subdivisionIsoCode: String, yellow: Int) {
         self.continentCode = continentCode
         self.countryIsoCode = countryIsoCode
         self.green = green
@@ -40,7 +40,7 @@ internal struct EdgeResponse: Codable, JSONEncodable, Hashable {
         self.yellow = yellow
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case continentCode = "continent_code"
         case countryIsoCode = "country_iso_code"
         case green
@@ -55,7 +55,7 @@ internal struct EdgeResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(continentCode, forKey: .continentCode)
         try container.encode(countryIsoCode, forKey: .countryIsoCode)

@@ -14,18 +14,18 @@ import AnyCodable
 
 
 
-internal struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
+public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var audio: AudioSettingsRequest?
-    internal var backstage: BackstageSettingsRequest?
-    internal var geofencing: GeofenceSettingsRequest?
-    internal var recording: RecordSettingsRequest?
-    internal var ring: RingSettingsRequest?
-    internal var screensharing: ScreensharingSettingsRequest?
-    internal var transcription: TranscriptionSettingsRequest?
-    internal var video: VideoSettingsRequest?
+    public var audio: AudioSettingsRequest?
+    public var backstage: BackstageSettingsRequest?
+    public var geofencing: GeofenceSettingsRequest?
+    public var recording: RecordSettingsRequest?
+    public var ring: RingSettingsRequest?
+    public var screensharing: ScreensharingSettingsRequest?
+    public var transcription: TranscriptionSettingsRequest?
+    public var video: VideoSettingsRequest?
 
-    internal init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
+    public init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
         self.audio = audio
         self.backstage = backstage
         self.geofencing = geofencing
@@ -36,7 +36,7 @@ internal struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
         self.video = video
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case audio
         case backstage
         case geofencing
@@ -49,7 +49,7 @@ internal struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(audio, forKey: .audio)
         try container.encodeIfPresent(backstage, forKey: .backstage)

@@ -14,29 +14,29 @@ import AnyCodable
 
 
 
-internal struct TranscriptionSettings: Codable, JSONEncodable, Hashable {
+public struct TranscriptionSettings: Codable, JSONEncodable, Hashable {
 
-    internal enum Mode: String, Codable, CaseIterable {
+    public enum Mode: String, Codable, CaseIterable {
         case available = "available"
         case disabled = "disabled"
         case autoOn = "auto-on"
     }
-    internal var closedCaptionMode: String
-    internal var mode: Mode
+    public var closedCaptionMode: String
+    public var mode: Mode
 
-    internal init(closedCaptionMode: String, mode: Mode) {
+    public init(closedCaptionMode: String, mode: Mode) {
         self.closedCaptionMode = closedCaptionMode
         self.mode = mode
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case closedCaptionMode = "closed_caption_mode"
         case mode
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(closedCaptionMode, forKey: .closedCaptionMode)
         try container.encode(mode, forKey: .mode)

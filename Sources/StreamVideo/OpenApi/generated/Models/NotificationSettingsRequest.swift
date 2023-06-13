@@ -14,15 +14,15 @@ import AnyCodable
 
 
 
-internal struct NotificationSettingsRequest: Codable, JSONEncodable, Hashable {
+public struct NotificationSettingsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var callLiveStarted: EventNotificationSettingsRequest?
-    internal var callNotification: EventNotificationSettingsRequest?
-    internal var callRing: EventNotificationSettingsRequest?
-    internal var enabled: Bool?
-    internal var sessionStarted: EventNotificationSettingsRequest?
+    public var callLiveStarted: EventNotificationSettingsRequest?
+    public var callNotification: EventNotificationSettingsRequest?
+    public var callRing: EventNotificationSettingsRequest?
+    public var enabled: Bool?
+    public var sessionStarted: EventNotificationSettingsRequest?
 
-    internal init(callLiveStarted: EventNotificationSettingsRequest? = nil, callNotification: EventNotificationSettingsRequest? = nil, callRing: EventNotificationSettingsRequest? = nil, enabled: Bool? = nil, sessionStarted: EventNotificationSettingsRequest? = nil) {
+    public init(callLiveStarted: EventNotificationSettingsRequest? = nil, callNotification: EventNotificationSettingsRequest? = nil, callRing: EventNotificationSettingsRequest? = nil, enabled: Bool? = nil, sessionStarted: EventNotificationSettingsRequest? = nil) {
         self.callLiveStarted = callLiveStarted
         self.callNotification = callNotification
         self.callRing = callRing
@@ -30,7 +30,7 @@ internal struct NotificationSettingsRequest: Codable, JSONEncodable, Hashable {
         self.sessionStarted = sessionStarted
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callLiveStarted = "call_live_started"
         case callNotification = "call_notification"
         case callRing = "call_ring"
@@ -40,7 +40,7 @@ internal struct NotificationSettingsRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(callLiveStarted, forKey: .callLiveStarted)
         try container.encodeIfPresent(callNotification, forKey: .callNotification)

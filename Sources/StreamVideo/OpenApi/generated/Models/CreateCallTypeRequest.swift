@@ -14,21 +14,21 @@ import AnyCodable
 
 
 
-internal struct CreateCallTypeRequest: Codable, JSONEncodable, Hashable {
+public struct CreateCallTypeRequest: Codable, JSONEncodable, Hashable {
 
-    internal var grants: [String: [String]]?
-    internal var name: String
-    internal var notificationSettings: NotificationSettingsRequest?
-    internal var settings: CallSettingsRequest?
+    public var grants: [String: [String]]?
+    public var name: String
+    public var notificationSettings: NotificationSettingsRequest?
+    public var settings: CallSettingsRequest?
 
-    internal init(grants: [String: [String]]? = nil, name: String, notificationSettings: NotificationSettingsRequest? = nil, settings: CallSettingsRequest? = nil) {
+    public init(grants: [String: [String]]? = nil, name: String, notificationSettings: NotificationSettingsRequest? = nil, settings: CallSettingsRequest? = nil) {
         self.grants = grants
         self.name = name
         self.notificationSettings = notificationSettings
         self.settings = settings
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case grants
         case name
         case notificationSettings = "notification_settings"
@@ -37,7 +37,7 @@ internal struct CreateCallTypeRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(grants, forKey: .grants)
         try container.encode(name, forKey: .name)

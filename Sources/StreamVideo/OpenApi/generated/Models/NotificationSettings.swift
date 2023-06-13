@@ -14,15 +14,15 @@ import AnyCodable
 
 
 
-internal struct NotificationSettings: Codable, JSONEncodable, Hashable {
+public struct NotificationSettings: Codable, JSONEncodable, Hashable {
 
-    internal var callLiveStarted: EventNotificationSettings
-    internal var callNotification: EventNotificationSettings
-    internal var callRing: EventNotificationSettings
-    internal var enabled: Bool
-    internal var sessionStarted: EventNotificationSettings
+    public var callLiveStarted: EventNotificationSettings
+    public var callNotification: EventNotificationSettings
+    public var callRing: EventNotificationSettings
+    public var enabled: Bool
+    public var sessionStarted: EventNotificationSettings
 
-    internal init(callLiveStarted: EventNotificationSettings, callNotification: EventNotificationSettings, callRing: EventNotificationSettings, enabled: Bool, sessionStarted: EventNotificationSettings) {
+    public init(callLiveStarted: EventNotificationSettings, callNotification: EventNotificationSettings, callRing: EventNotificationSettings, enabled: Bool, sessionStarted: EventNotificationSettings) {
         self.callLiveStarted = callLiveStarted
         self.callNotification = callNotification
         self.callRing = callRing
@@ -30,7 +30,7 @@ internal struct NotificationSettings: Codable, JSONEncodable, Hashable {
         self.sessionStarted = sessionStarted
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callLiveStarted = "call_live_started"
         case callNotification = "call_notification"
         case callRing = "call_ring"
@@ -40,7 +40,7 @@ internal struct NotificationSettings: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callLiveStarted, forKey: .callLiveStarted)
         try container.encode(callNotification, forKey: .callNotification)

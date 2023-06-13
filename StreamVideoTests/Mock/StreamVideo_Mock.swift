@@ -32,15 +32,14 @@ extension StreamVideo {
     static func mockEnvironment(_ httpClient: HTTPClient) -> Environment {
         return Environment(httpClientBuilder: { _ in
             httpClient
-        }, callControllerBuilder: { callCoordinatorController, user, callId, callType, apiKey, videoConfig, eventsMiddleware in
+        }, callControllerBuilder: { callCoordinatorController, user, callId, callType, apiKey, videoConfig in
             CallController_Mock(
                 callCoordinatorController: callCoordinatorController,
                 user: user,
                 callId: callId,
                 callType: callType,
                 apiKey: apiKey,
-                videoConfig: videoConfig,
-                allEventsMiddleware: eventsMiddleware
+                videoConfig: videoConfig
             )
         }, callCoordinatorControllerBuilder: { httpClient, user, apiKey, hostname, token, videoConfig in
             CallCoordinatorController_Mock(

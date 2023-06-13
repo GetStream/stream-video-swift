@@ -14,20 +14,20 @@ import AnyCodable
 
 
 
-internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
+public struct OwnUserResponse: Codable, JSONEncodable, Hashable {
 
-    internal var createdAt: Date
-    internal var custom: [String: AnyCodable]
-    internal var deletedAt: Date?
-    internal var devices: [Device]
-    internal var id: String
-    internal var image: String?
-    internal var name: String?
-    internal var role: String
-    internal var teams: [String]
-    internal var updatedAt: Date
+    public var createdAt: Date
+    public var custom: [String: AnyCodable]
+    public var deletedAt: Date?
+    public var devices: [Device]
+    public var id: String
+    public var image: String?
+    public var name: String?
+    public var role: String
+    public var teams: [String]
+    public var updatedAt: Date
 
-    internal init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, devices: [Device], id: String, image: String? = nil, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
+    public init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, devices: [Device], id: String, image: String? = nil, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
         self.createdAt = createdAt
         self.custom = custom
         self.deletedAt = deletedAt
@@ -40,7 +40,7 @@ internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
         self.updatedAt = updatedAt
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case createdAt = "created_at"
         case custom
         case deletedAt = "deleted_at"
@@ -55,7 +55,7 @@ internal struct OwnUserResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(custom, forKey: .custom)
