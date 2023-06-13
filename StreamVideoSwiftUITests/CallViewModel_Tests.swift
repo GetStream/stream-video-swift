@@ -506,15 +506,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
 }
 
-@MainActor
-func XCTAssertWithDelay(
-    _ expression: @autoclosure () throws -> Bool,
-    nanoseconds: UInt64 = 500_000_000
-) async throws {
-    try await Task.sleep(nanoseconds: nanoseconds)
-    XCTAssert(try expression())
-}
-
 extension User {
     func toUserResponse() -> UserResponse {
         UserResponse(

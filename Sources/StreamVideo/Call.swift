@@ -550,11 +550,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         } else if event is CallRecordingStartedEvent {
             if self.state.callData?.recording == false {
                 self.state.callData?.recording = true
+            }
+            if self.state.recordingState != .recording {
                 self.state.recordingState = .recording
             }
         } else if event is CallRecordingStoppedEvent {
             if self.state.callData?.recording == true {
                 self.state.callData?.recording = false
+            }
+            if self.state.recordingState != .noRecording {
                 self.state.recordingState = .noRecording
             }
         } else if let event = event as? UpdatedCallPermissionsEvent {
