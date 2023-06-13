@@ -229,7 +229,7 @@ public class StreamVideo {
         if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
             return
         }
-        if user.id.isAnonymousUser {
+        if user.type == .anonymous {
             // Anonymous users can't connect to the WS.
             throw ClientError.MissingPermissions()
         }

@@ -12,11 +12,12 @@ class CoordinatorClient: @unchecked Sendable {
     let apiKey: String
     var userId: String
     var connectionId = ""
+    var authType: UserAuthType
     let syncQueue = DispatchQueue(label: "io.getstream.CoordinatorClient", qos: .userInitiated)
     let pathPrefix: String = "video"
     
     private var isAnonymous: Bool {
-        userId.isAnonymousUser
+        authType == .anonymous
     }
     
     private var connectionQueryParams: [String: String] {
@@ -39,13 +40,15 @@ class CoordinatorClient: @unchecked Sendable {
         apiKey: String,
         hostname: String,
         token: String,
-        userId: String
+        userId: String,
+        type: UserAuthType
     ) {
         self.httpClient = httpClient
         self.hostname = hostname
         self.token = token
         self.apiKey = apiKey
         self.userId = userId
+        self.authType = type
     }
     
     func joinCall(type: String, callId: String, request: JoinCallRequest) async throws -> JoinCallResponse {

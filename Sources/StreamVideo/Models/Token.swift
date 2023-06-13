@@ -32,17 +32,3 @@ public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral, Sendabl
 extension ClientError {
     public class InvalidToken: ClientError {}
 }
-
-extension String {
-    /// The prefix used for anonymous user ids
-    private static let anonymousIdPrefix = "__anonymous__"
-    
-    /// Creates a new anonymous User id.
-    static var anonymous: String {
-        anonymousIdPrefix + UUID().uuidString
-    }
-    
-    var isAnonymousUser: Bool {
-        hasPrefix(Self.anonymousIdPrefix)
-    }
-}

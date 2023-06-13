@@ -25,7 +25,8 @@ class CallCoordinatorController: @unchecked Sendable {
             apiKey: coordinatorInfo.apiKey,
             hostname: coordinatorInfo.hostname,
             token: coordinatorInfo.token,
-            userId: user.id
+            userId: user.id,
+            type: user.type
         )
         self.videoConfig = videoConfig
         self.user = user
@@ -192,7 +193,7 @@ class CallCoordinatorController: @unchecked Sendable {
             members: members,
             settingsOverride: nil
         )
-        let create = !user.id.isAnonymousUser
+        let create = user.type != .anonymous
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
