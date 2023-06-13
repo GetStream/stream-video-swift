@@ -33,10 +33,8 @@ public class StreamVideo {
     }
         
     private let eventsMiddleware = WSEventsMiddleware()
-    private var wsEventsContinuation: AsyncStream<Event>.Continuation?
-    
-    private var watchContinuation: AsyncStream<Event>.Continuation?
-        
+    private var continuations = [AsyncStream<Event>.Continuation]()
+            
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
@@ -311,8 +309,10 @@ public class StreamVideo {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        self.watchContinuation?.finish()
-        self.watchContinuation = nil
+        for continuation in continuations {
+            continuation.finish()
+        }
+        continuations.removeAll()
         await withCheckedContinuation { continuation in
             webSocketClient?.disconnect {
                 continuation.resume(returning: ())
@@ -322,18 +322,7 @@ public class StreamVideo {
     
     public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
-            self?.wsEventsContinuation = continuation
-        }
-    }
-    
-    // MARK: - internal
-    
-    func watchEvents() -> AsyncStream<Event> {
-        AsyncStream(Event.self) { [weak self] continuation in
-            self?.watchContinuation = continuation
-//            self?.callsMiddleware.onAnyEvent = { event in
-//                continuation.yield(event)
-//            }
+            self?.continuations.append(continuation)
         }
     }
     
@@ -353,7 +342,6 @@ public class StreamVideo {
             apiKey.apiKeyString,
             videoConfig
         )
-//        callsMiddleware.onCallUpdated = controller.update(callData:)
         return controller
     }
     
@@ -492,12 +480,16 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            self.watchContinuation?.yield(WSDisconnected())
+            for continuation in continuations {
+                continuation.yield(WSDisconnected())
+            }
         case let .connected(healthCheckInfo: healtCheckInfo):
             if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
                 callCoordinatorController.update(connectionId: healthCheck.connectionId)
             }
-            self.watchContinuation?.yield(WSConnected())
+            for continuation in continuations {
+                continuation.yield(WSConnected())
+            }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -507,7 +499,9 @@ extension StreamVideo: ConnectionStateDelegate {
 extension StreamVideo: WSEventsSubscriber {
     
     func onEvent(_ event: Event) {
-        wsEventsContinuation?.yield(event)
+        for continuation in continuations {
+            continuation.yield(event)
+        }
     }
     
 }

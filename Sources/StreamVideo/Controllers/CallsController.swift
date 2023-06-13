@@ -35,9 +35,7 @@ public class CallsController: ObservableObject {
     
     private var watchTask: Task<Void, Error>?
     private var socketDisconnected = false
-    
-    private var broadcastEventsContinuation: AsyncStream<BroadcastingEvent>.Continuation?
-    
+        
     init(streamVideo: StreamVideo, coordinatorClient: CoordinatorClient, callsQuery: CallsQuery) {
         self.coordinatorClient = coordinatorClient
         self.callsQuery = callsQuery
@@ -48,12 +46,6 @@ public class CallsController: ObservableObject {
     /// Loads the next page of calls.
     public func loadNextCalls() async throws {
         try await loadCalls()
-    }
-    
-    public func broadcastEvents() -> AsyncStream<BroadcastingEvent> {
-        AsyncStream { continuation in
-            self.broadcastEventsContinuation = continuation
-        }
     }
     
     public func cleanUp() {
@@ -171,14 +163,6 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].broadcasting = true
-            broadcastEventsContinuation?.yield(
-                BroadcastingStartedEvent(
-                    callCid: broadcastingStarted.callCid,
-                    createdAt: broadcastingStarted.createdAt,
-                    hlsPlaylistUrl: broadcastingStarted.hlsPlaylistUrl,
-                    type: broadcastingStarted.type
-                )
-            )
         } else if let broadcastingStopped = event as? CallBroadcastingStoppedEvent {
             let index = calls.firstIndex { callData in
                 callData.callCid == broadcastingStopped.callCid
@@ -188,13 +172,15 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].broadcasting = false
-            broadcastEventsContinuation?.yield(
-                BroadcastingStoppedEvent(
-                    callCid: broadcastingStopped.callCid,
-                    createdAt: broadcastingStopped.createdAt,
-                    type: broadcastingStopped.type
-                )
-            )
+        } else if let liveStarted = event as? CallLiveStartedEvent {
+            let index = calls.firstIndex { callData in
+                callData.callCid == liveStarted.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].backstage = false
         } else if event is WSDisconnected {
             self.socketDisconnected = true
         } else if event is WSConnected {
@@ -218,7 +204,7 @@ public class CallsController: ObservableObject {
     
     private func subscribeToWatchEvents() {
         watchTask = Task {
-            for await event in streamVideo.watchEvents() {
+            for await event in streamVideo.subscribe() {
                 handle(event: event)
             }
         }
@@ -227,24 +213,6 @@ public class CallsController: ObservableObject {
     deinit {
         cleanUp()
     }
-}
-
-public protocol BroadcastingEvent: Sendable {
-    var callCid: String { get }
-    var type: String { get }
-}
-
-public struct BroadcastingStartedEvent: BroadcastingEvent {
-    public let callCid: String
-    public let createdAt: Date
-    public let hlsPlaylistUrl: String
-    public let type: String
-}
-
-public struct BroadcastingStoppedEvent: BroadcastingEvent {
-    public let callCid: String
-    public let createdAt: Date
-    public let type: String
 }
 
 extension CallResponse {
