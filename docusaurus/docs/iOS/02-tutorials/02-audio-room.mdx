@@ -36,28 +36,36 @@ This tutorial will teach you how to build an audio room experience like Twitter 
 |![step_1](../assets/audio-rooms-add-dependency-step-1.png)|![step_2](../assets/audio-rooms-add-dependency-step-2.png)|![step_3](../assets/audio-rooms-add-dependency-step-3.png)|
 
 ```swift
-import SwiftUI
+mport SwiftUI
 import StreamVideo
 
 @main
 struct AudioRoomsApp: App {
     @State var call: Call?
+    @State private var participants: [CallParticipant] = []
+    @State private var isCallLive: Bool = false
+
     private let currentUser: User
     private var streamVideo: StreamVideo?
+
+    private let apiKey: String = "" // The API key can be found in the Credentials section
+    private let userId: String = "" // The User Id can be found in the Credentials section
+    private let token: String = "" // The Token can be found in the Credentials section
+    private let callId: String = "" // The CallId can be found in the Credentials section
 
     init() {
         // create a user.
         self.currentUser = User(
-            id: "tutorial@getstream.io", // The User Id can be found in the Credentials section
-            name: "Tutorial", // The name is used in the UI
+            id: userId,
+            name: "Tutorial", // name is used in the UI
             role: "admin" // user roles are important for an audio room
         )
 
         // initialize StreamVideo
         self.streamVideo = StreamVideo(
-            apiKey: "hd8szvscpxvd", // The API Key can be found in the Credentials section
+            apiKey: apiKey,
             user: currentUser,
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODY3NDY4MDksImV4cCI6MTY4NzM1MTYxNH0.j14I3udGgr_pfkS0_Jz8s7xR7gRzitP58fjTjLkbnk8" // The token can be found in the Credentials section
+            token: .init(stringLiteral: token)
         )
     }
 
@@ -121,32 +129,55 @@ struct ParticipantView: View {
 
 Next we'll create 
 ```swift
-Group {
-   if let call = call {
-      VStack {
-         Text("Room: \(call.state.callData?.customData["title"]?.stringValue ?? "") - \(participants.count) - id \(call.callId)")
-         Text("\(call.state.callData?.customData["description"]?.stringValue ?? "")")
-         List(participants) { participant in
-               ParticipantView(participant: participant)
+   Group {
+      if let call = call {
+         VStack {
+            VStack {
+                  Text("\(call.state.callData?.customData["title"]?.stringValue ?? "")")
+                     .font(.title)
+                     .frame(maxWidth: .infinity, alignment: .leading)
+                     .lineLimit(1)
+                     .padding([.bottom], 8)
+
+                  Text("\(call.state.callData?.customData["description"]?.stringValue ?? "")")
+                     .font(.body)
+                     .frame(maxWidth: .infinity, alignment: .leading)
+                     .lineLimit(1)
+                     .padding([.bottom], 4)
+
+                  Text("CallID: \(call.callId), \(participants.count) participants")
+                     .font(.caption)
+                     .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .padding([.leading, .trailing])
+
+            List(participants) { participant in
+                  ParticipantView(participant: participant)
+            }
+
+            if !isCallLive {
+                  Button {
+                     Task {
+                        try await call.goLive()
+                     }
+                  } label: {
+                     Text("Go Live")
+                        .frame(maxWidth: .infinity)
+                  }
+                  .padding([.leading, .trailing])
+                  .buttonStyle(.borderedProminent)
+            }
          }
-         Button {
-               Task {
-                  try await call.goLive()
-               }
-         } label: {
-               Text("Go Live")
-                  .frame(maxWidth: .infinity)
+         .onReceive(call.state.$participants) {
+            self.participants = Array($0.values).sorted(by: { $0.name < $1.name })
          }
-         .padding([.leading, .trailing])
-         .buttonStyle(.borderedProminent)
+         .onReceive(call.state.$callData) { callData in
+            isCallLive = callData.map { !$0.backstage } ?? false
+         }
+      } else {
+         Text("loading...")
       }
-      .onReceive(call.state.$participants) {
-         self.participants = Array($0.values).sorted(by: { $0.name < $1.name })
-      }
-   } else {
-      Text("loading...")
    }
-}
 ```
 
 ### Step 4 - Go live and join from the browser
