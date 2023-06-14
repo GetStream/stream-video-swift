@@ -4,7 +4,7 @@
 
 import Foundation
 
-class WSEventsMiddleware: EventMiddleware {
+final class WSEventsMiddleware: EventMiddleware {
     
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
     
