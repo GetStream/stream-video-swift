@@ -6,32 +6,25 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct RingSettingsRequest: Codable, JSONEncodable, Hashable {
+    public var autoCancelTimeoutMs: Int?
+    public var incomingCallTimeoutMs: Int?
 
-
-
-internal struct RingSettingsRequest: Codable, JSONEncodable, Hashable {
-
-    internal var autoCancelTimeoutMs: Int?
-    internal var incomingCallTimeoutMs: Int?
-
-    internal init(autoCancelTimeoutMs: Int? = nil, incomingCallTimeoutMs: Int? = nil) {
+    public init(autoCancelTimeoutMs: Int? = nil, incomingCallTimeoutMs: Int? = nil) {
         self.autoCancelTimeoutMs = autoCancelTimeoutMs
         self.incomingCallTimeoutMs = incomingCallTimeoutMs
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
         case incomingCallTimeoutMs = "incoming_call_timeout_ms"
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(autoCancelTimeoutMs, forKey: .autoCancelTimeoutMs)
         try container.encodeIfPresent(incomingCallTimeoutMs, forKey: .incomingCallTimeoutMs)

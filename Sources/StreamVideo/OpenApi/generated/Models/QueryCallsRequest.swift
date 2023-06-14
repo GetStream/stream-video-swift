@@ -6,25 +6,17 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
+    public var filterConditions: [String: RawJSON]?
+    public var limit: Int?
+    public var next: String?
+    public var prev: String?
+    public var sort: [SortParamRequest]
+    public var watch: Bool?
 
-
-
-internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
-
-    static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
-    internal var filterConditions: [String: AnyCodable]?
-    internal var limit: Int?
-    internal var next: String?
-    internal var prev: String?
-    internal var sort: [SortParamRequest]
-    internal var watch: Bool?
-
-    internal init(filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
+    public init(filterConditions: [String: RawJSON]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
         self.filterConditions = filterConditions
         self.limit = limit
         self.next = next
@@ -33,7 +25,7 @@ internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
         self.watch = watch
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case filterConditions = "filter_conditions"
         case limit
         case next
@@ -44,7 +36,7 @@ internal struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
         try container.encodeIfPresent(limit, forKey: .limit)

@@ -6,27 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct SFUResponse: Codable, JSONEncodable, Hashable {
+    public var edgeName: String
+    public var url: String
+    public var wsEndpoint: String
 
-
-
-internal struct SFUResponse: Codable, JSONEncodable, Hashable {
-
-    internal var edgeName: String
-    internal var url: String
-    internal var wsEndpoint: String
-
-    internal init(edgeName: String, url: String, wsEndpoint: String) {
+    public init(edgeName: String, url: String, wsEndpoint: String) {
         self.edgeName = edgeName
         self.url = url
         self.wsEndpoint = wsEndpoint
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case edgeName = "edge_name"
         case url
         case wsEndpoint = "ws_endpoint"
@@ -34,7 +27,7 @@ internal struct SFUResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(edgeName, forKey: .edgeName)
         try container.encode(url, forKey: .url)

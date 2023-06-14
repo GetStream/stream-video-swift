@@ -6,29 +6,21 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
-
-    static let membersLimitRule = NumericRule<Int>(minimum: nil, exclusiveMinimum: false, maximum: 100, exclusiveMaximum: false, multipleOf: nil)
+public struct JoinCallRequest: Codable, JSONEncodable, Hashable {
     /** if true the call will be created if it doesn't exist */
-    internal var create: Bool?
-    internal var data: CallRequest?
-    internal var location: String
-    internal var membersLimit: Int?
+    public var create: Bool?
+    public var data: CallRequest?
+    public var location: String
+    public var membersLimit: Int?
     /** If the participant is migrating from another SFU, then this is the ID of the previous SFU */
-    internal var migratingFrom: String?
-    internal var notify: Bool?
+    public var migratingFrom: String?
+    public var notify: Bool?
     /** if true and the call is created, the notification will include ring=true */
-    internal var ring: Bool?
+    public var ring: Bool?
 
-    internal init(create: Bool? = nil, data: CallRequest? = nil, location: String, membersLimit: Int? = nil, migratingFrom: String? = nil, notify: Bool? = nil, ring: Bool? = nil) {
+    public init(create: Bool? = nil, data: CallRequest? = nil, location: String, membersLimit: Int? = nil, migratingFrom: String? = nil, notify: Bool? = nil, ring: Bool? = nil) {
         self.create = create
         self.data = data
         self.location = location
@@ -38,7 +30,7 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
         self.ring = ring
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case create
         case data
         case location
@@ -50,7 +42,7 @@ internal struct JoinCallRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(create, forKey: .create)
         try container.encodeIfPresent(data, forKey: .data)

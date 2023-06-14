@@ -92,7 +92,6 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    print("debugging: error is here! \(request.allHTTPHeaderFields)")
                     continuation.resume(throwing: error)
                     return
                 }
@@ -121,7 +120,6 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                     continuation.resume(throwing: ClientError.NetworkError())
                     return
                 }
-                print("debugging: got here in the execute path :)")
                 continuation.resume(returning: (data, response))
             }
             task.resume()

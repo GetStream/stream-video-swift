@@ -6,32 +6,25 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct EventNotificationSettings: Codable, JSONEncodable, Hashable {
+    public var apns: APNS
+    public var enabled: Bool
 
-
-
-internal struct EventNotificationSettings: Codable, JSONEncodable, Hashable {
-
-    internal var apns: APNS
-    internal var enabled: Bool
-
-    internal init(apns: APNS, enabled: Bool) {
+    public init(apns: APNS, enabled: Bool) {
         self.apns = apns
         self.enabled = enabled
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case apns
         case enabled
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(apns, forKey: .apns)
         try container.encode(enabled, forKey: .enabled)

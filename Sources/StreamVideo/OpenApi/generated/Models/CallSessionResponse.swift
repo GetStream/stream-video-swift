@@ -6,25 +6,18 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
+    public var acceptedBy: [String: Date]
+    public var endedAt: Date?
+    public var id: String
+    public var participants: [CallParticipantResponse]
+    public var participantsCountByRole: [String: Int]
+    public var rejectedBy: [String: Date]
+    public var startedAt: Date?
 
-
-
-internal struct CallSessionResponse: Codable, JSONEncodable, Hashable {
-
-    internal var acceptedBy: [String: Date]
-    internal var endedAt: Date?
-    internal var id: String
-    internal var participants: [CallParticipantResponse]
-    internal var participantsCountByRole: [String: Int]
-    internal var rejectedBy: [String: Date]
-    internal var startedAt: Date?
-
-    internal init(acceptedBy: [String: Date], endedAt: Date? = nil, id: String, participants: [CallParticipantResponse], participantsCountByRole: [String: Int], rejectedBy: [String: Date], startedAt: Date? = nil) {
+    public init(acceptedBy: [String: Date], endedAt: Date? = nil, id: String, participants: [CallParticipantResponse], participantsCountByRole: [String: Int], rejectedBy: [String: Date], startedAt: Date? = nil) {
         self.acceptedBy = acceptedBy
         self.endedAt = endedAt
         self.id = id
@@ -34,7 +27,7 @@ internal struct CallSessionResponse: Codable, JSONEncodable, Hashable {
         self.startedAt = startedAt
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case acceptedBy = "accepted_by"
         case endedAt = "ended_at"
         case id
@@ -46,7 +39,7 @@ internal struct CallSessionResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(acceptedBy, forKey: .acceptedBy)
         try container.encodeIfPresent(endedAt, forKey: .endedAt)

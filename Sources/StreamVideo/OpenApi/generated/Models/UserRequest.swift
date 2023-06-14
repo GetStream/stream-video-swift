@@ -6,26 +6,19 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct UserRequest: Codable, JSONEncodable, Hashable {
-
-    internal var custom: [String: AnyCodable]?
+public struct UserRequest: Codable, JSONEncodable, Hashable {
+    public var custom: [String: RawJSON]?
     /** User ID */
-    internal var id: String
-    internal var image: String?
+    public var id: String
+    public var image: String?
     /** Optional name of user */
-    internal var name: String?
-    internal var role: String?
-    internal var teams: [String]?
+    public var name: String?
+    public var role: String?
+    public var teams: [String]?
 
-    internal init(custom: [String: AnyCodable]? = nil, id: String, image: String? = nil, name: String? = nil, role: String? = nil, teams: [String]? = nil) {
+    public init(custom: [String: RawJSON]? = nil, id: String, image: String? = nil, name: String? = nil, role: String? = nil, teams: [String]? = nil) {
         self.custom = custom
         self.id = id
         self.image = image
@@ -34,7 +27,7 @@ internal struct UserRequest: Codable, JSONEncodable, Hashable {
         self.teams = teams
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
         case id
         case image
@@ -45,7 +38,7 @@ internal struct UserRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encode(id, forKey: .id)

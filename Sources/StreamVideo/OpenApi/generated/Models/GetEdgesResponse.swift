@@ -6,33 +6,26 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct GetEdgesResponse: Codable, JSONEncodable, Hashable {
-
+public struct GetEdgesResponse: Codable, JSONEncodable, Hashable {
     /** Duration of the request in human-readable format */
-    internal var duration: String
-    internal var edges: [EdgeResponse]
+    public var duration: String
+    public var edges: [EdgeResponse]
 
-    internal init(duration: String, edges: [EdgeResponse]) {
+    public init(duration: String, edges: [EdgeResponse]) {
         self.duration = duration
         self.edges = edges
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case duration
         case edges
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(duration, forKey: .duration)
         try container.encode(edges, forKey: .edges)

@@ -6,27 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct ICEServer: Codable, JSONEncodable, Hashable {
+    public var password: String
+    public var urls: [String]
+    public var username: String
 
-
-
-internal struct ICEServer: Codable, JSONEncodable, Hashable {
-
-    internal var password: String
-    internal var urls: [String]
-    internal var username: String
-
-    internal init(password: String, urls: [String], username: String) {
+    public init(password: String, urls: [String], username: String) {
         self.password = password
         self.urls = urls
         self.username = username
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case password
         case urls
         case username
@@ -34,7 +27,7 @@ internal struct ICEServer: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(password, forKey: .password)
         try container.encode(urls, forKey: .urls)

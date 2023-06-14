@@ -6,29 +6,22 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
-
+public struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
     /** The connection_id for this client */
-    internal var connectionId: String
-    internal var createdAt: Date
+    public var connectionId: String
+    public var createdAt: Date
     /** The type of event: \"health.check\" in this case */
-    internal var type: String = "health.check"
+    public var type: String = "health.check"
 
-    internal init(connectionId: String, createdAt: Date, type: String = "health.check") {
+    public init(connectionId: String, createdAt: Date, type: String = "health.check") {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.type = type
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case connectionId = "connection_id"
         case createdAt = "created_at"
         case type
@@ -36,7 +29,7 @@ internal struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEven
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(connectionId, forKey: .connectionId)
         try container.encode(createdAt, forKey: .createdAt)

@@ -92,7 +92,7 @@ class CallCoordinatorController: @unchecked Sendable {
     func sendEvent(
         callId: String,
         callType: String,
-        customData: [String: AnyCodable]? = nil
+        customData: [String: RawJSON]? = nil
     ) async throws {
         let sendEventRequest = SendEventRequest(
             custom: customData

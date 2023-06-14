@@ -6,32 +6,25 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct ListCallTypeResponse: Codable, JSONEncodable, Hashable {
+    public var callTypes: [String: CallTypeResponse]
+    public var duration: String
 
-
-
-internal struct ListCallTypeResponse: Codable, JSONEncodable, Hashable {
-
-    internal var callTypes: [String: CallTypeResponse]
-    internal var duration: String
-
-    internal init(callTypes: [String: CallTypeResponse], duration: String) {
+    public init(callTypes: [String: CallTypeResponse], duration: String) {
         self.callTypes = callTypes
         self.duration = duration
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callTypes = "call_types"
         case duration
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callTypes, forKey: .callTypes)
         try container.encode(duration, forKey: .duration)

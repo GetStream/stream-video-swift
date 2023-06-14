@@ -6,28 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct SendReactionRequest: Codable, JSONEncodable, Hashable {
+    public var custom: [String: RawJSON]?
+    public var emojiCode: String?
+    public var type: String
 
-
-
-internal struct SendReactionRequest: Codable, JSONEncodable, Hashable {
-
-    static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
-    internal var custom: [String: AnyCodable]?
-    internal var emojiCode: String?
-    internal var type: String
-
-    internal init(custom: [String: AnyCodable]? = nil, emojiCode: String? = nil, type: String) {
+    public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String) {
         self.custom = custom
         self.emojiCode = emojiCode
         self.type = type
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
         case emojiCode = "emoji_code"
         case type
@@ -35,7 +27,7 @@ internal struct SendReactionRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encodeIfPresent(emojiCode, forKey: .emojiCode)

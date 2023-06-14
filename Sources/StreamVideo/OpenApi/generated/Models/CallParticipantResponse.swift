@@ -6,32 +6,25 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct CallParticipantResponse: Codable, JSONEncodable, Hashable {
+    public var joinedAt: Date
+    public var user: UserResponse
 
-
-
-internal struct CallParticipantResponse: Codable, JSONEncodable, Hashable {
-
-    internal var joinedAt: Date
-    internal var user: UserResponse
-
-    internal init(joinedAt: Date, user: UserResponse) {
+    public init(joinedAt: Date, user: UserResponse) {
         self.joinedAt = joinedAt
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case joinedAt = "joined_at"
         case user
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(joinedAt, forKey: .joinedAt)
         try container.encode(user, forKey: .user)

@@ -29,10 +29,12 @@ class IntegrationTest: XCTestCase {
 
         let response = try await call.create(custom: ["color": "red"])
         XCTAssertEqual(response.call.custom["color"], "red")
-        print("debugging: \(response.duration)")
 
         await AssertNext(self, call.newstate.$custom) { v in
-            return v["color"] == "red"
+            guard let newColor = v["color"]?.stringValue else {
+                return false
+            }
+            return newColor == "red"
         }
 
         let updateResponse = try await call.update(custom: ["color": "blue"])
@@ -52,16 +54,31 @@ class IntegrationTest: XCTestCase {
 }
 
 func AssertNext<Output>(_ t: XCTestCase, _ p: some Publisher<Output, Never>, _ assertion: @escaping (Output) -> Bool) async -> Void {
+    let expectation = XCTestExpectation(description: "NextValue")
+    var assertionSucceded = false
+    var values = [Output]()
+
+    DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        expectation.fulfill()
+    }
+
     var bag = Set<AnyCancellable>()
     defer {
         bag.forEach { $0.cancel() }
     }
-    let expectation = XCTestExpectation(description: "NextValue")
+
     p.sink {
-        log.info("received new value: \($0)")
+        values.append($0)
         if assertion($0) {
             expectation.fulfill()
+            assertionSucceded = true
         }
     }.store(in: &bag)
     await t.fulfillment(of: [expectation], timeout: 1)
+    
+    if assertionSucceded {
+        return
+    }
+
+    XCTFail("unable to fulfill assertion, collected values on the publishers were: \(values)")
 }

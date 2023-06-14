@@ -176,13 +176,13 @@ members: [User],
         // TODO: this is ofc not good, Call should probably hold a ref to the coordinatorClient directly
         let response = try await callController.callCoordinatorController.coordinatorClient.updateCall(
             request: UpdateCallRequest(
-                custom: RawJSON.tryConvert(customData: custom)
+                custom: custom
             ),
             callType: callType,
             callId: callId
         )
         // TODO: remove this comment
-//        newstate.updateFrom(response.call)
+        newstate.updateFrom(response.call)
         return response
     }
 
@@ -207,7 +207,7 @@ members: [User],
         )
         let request = GetOrCreateCallRequest(
             data: CallRequest(
-                custom: RawJSON.tryConvert(customData: custom),
+                custom: custom,
                 startsAt: startsAt
             ),
             notify: notify,
@@ -216,7 +216,9 @@ members: [User],
         let response = try await client.getOrCreateCall(
             type: callType,
             id: callId,
-            getOrCreateCallRequest: request
+            getOrCreateCallRequest: request,
+            // TODO: we need something like this
+//            connectionId: await streamVideo.getConnectionID(),
         )
         newstate.updateFrom(response)
         return response
@@ -565,7 +567,6 @@ members: [User],
     private func eventsToState() {
         Task {
             for await event in self.streamVideo.watchEvents() {
-                print("debugging: \(event.name)")
                 if let videoEvent = event as? WSCallEvent {
                     newstate.updateFrom(videoEvent)
                 }

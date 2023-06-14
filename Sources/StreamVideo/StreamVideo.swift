@@ -507,7 +507,7 @@ public class StreamVideo {
             guard let self = self else { return }
             
             let connectUserRequest = ConnectUserDetailsRequest(
-                custom: RawJSON.convert(customData: self.user.customData),
+                custom: self.user.customData,
                 id: self.user.id,
                 image: self.user.imageURL?.absoluteString,
                 name: self.user.name

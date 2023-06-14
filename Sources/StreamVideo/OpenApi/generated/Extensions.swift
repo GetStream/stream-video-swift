@@ -5,9 +5,6 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 extension Bool: JSONEncodable {
     func encodeToJSON() -> Any { self }
@@ -221,10 +218,4 @@ extension KeyedDecodingContainerProtocol {
         return decimalValue
     }
 
-}
-
-extension HTTPURLResponse {
-    var isStatusCodeSuccessful: Bool {
-        return Configuration.successfulStatusCodeRange.contains(statusCode)
-    }
 }

@@ -6,23 +6,16 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
+    public var accessRequestEnabled: Bool?
+    public var micDefaultOn: Bool?
+    public var opusDtxEnabled: Bool?
+    public var redundantCodingEnabled: Bool?
+    public var speakerDefaultOn: Bool?
 
-
-
-internal struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
-
-    internal var accessRequestEnabled: Bool?
-    internal var micDefaultOn: Bool?
-    internal var opusDtxEnabled: Bool?
-    internal var redundantCodingEnabled: Bool?
-    internal var speakerDefaultOn: Bool?
-
-    internal init(accessRequestEnabled: Bool? = nil, micDefaultOn: Bool? = nil, opusDtxEnabled: Bool? = nil, redundantCodingEnabled: Bool? = nil, speakerDefaultOn: Bool? = nil) {
+    public init(accessRequestEnabled: Bool? = nil, micDefaultOn: Bool? = nil, opusDtxEnabled: Bool? = nil, redundantCodingEnabled: Bool? = nil, speakerDefaultOn: Bool? = nil) {
         self.accessRequestEnabled = accessRequestEnabled
         self.micDefaultOn = micDefaultOn
         self.opusDtxEnabled = opusDtxEnabled
@@ -30,7 +23,7 @@ internal struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
         self.speakerDefaultOn = speakerDefaultOn
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
         case micDefaultOn = "mic_default_on"
         case opusDtxEnabled = "opus_dtx_enabled"
@@ -40,7 +33,7 @@ internal struct AudioSettingsRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(accessRequestEnabled, forKey: .accessRequestEnabled)
         try container.encodeIfPresent(micDefaultOn, forKey: .micDefaultOn)

@@ -6,30 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct TargetResolution: Codable, JSONEncodable, Hashable {
+    public var bitrate: Int
+    public var height: Int
+    public var width: Int
 
-
-
-internal struct TargetResolution: Codable, JSONEncodable, Hashable {
-
-    static let bitrateRule = NumericRule<Int>(minimum: nil, exclusiveMinimum: false, maximum: 6000000, exclusiveMaximum: false, multipleOf: nil)
-    static let heightRule = NumericRule<Int>(minimum: 240, exclusiveMinimum: false, maximum: 2560, exclusiveMaximum: false, multipleOf: nil)
-    static let widthRule = NumericRule<Int>(minimum: 240, exclusiveMinimum: false, maximum: 2560, exclusiveMaximum: false, multipleOf: nil)
-    internal var bitrate: Int
-    internal var height: Int
-    internal var width: Int
-
-    internal init(bitrate: Int, height: Int, width: Int) {
+    public init(bitrate: Int, height: Int, width: Int) {
         self.bitrate = bitrate
         self.height = height
         self.width = width
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case bitrate
         case height
         case width
@@ -37,7 +27,7 @@ internal struct TargetResolution: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(bitrate, forKey: .bitrate)
         try container.encode(height, forKey: .height)

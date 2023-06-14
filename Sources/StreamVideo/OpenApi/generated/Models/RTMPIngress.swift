@@ -6,30 +6,22 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** RTMP input settings */
 
+public struct RTMPIngress: Codable, JSONEncodable, Hashable {
+    public var address: String
 
-
-
-internal struct RTMPIngress: Codable, JSONEncodable, Hashable {
-
-    internal var address: String
-
-    internal init(address: String) {
+    public init(address: String) {
         self.address = address
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case address
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(address, forKey: .address)
     }

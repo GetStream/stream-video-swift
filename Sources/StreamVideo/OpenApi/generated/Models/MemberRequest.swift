@@ -6,29 +6,21 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct MemberRequest: Codable, JSONEncodable, Hashable {
-
-    static let userIdRule = StringRule(minLength: 1, maxLength: nil, pattern: nil)
+public struct MemberRequest: Codable, JSONEncodable, Hashable {
     /** Custom data for this object */
-    internal var custom: [String: AnyCodable]?
-    internal var role: String?
-    internal var userId: String
+    public var custom: [String: RawJSON]?
+    public var role: String?
+    public var userId: String
 
-    internal init(custom: [String: AnyCodable]? = nil, role: String? = nil, userId: String) {
+    public init(custom: [String: RawJSON]? = nil, role: String? = nil, userId: String) {
         self.custom = custom
         self.role = role
         self.userId = userId
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
         case role
         case userId = "user_id"
@@ -36,7 +28,7 @@ internal struct MemberRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encodeIfPresent(role, forKey: .role)

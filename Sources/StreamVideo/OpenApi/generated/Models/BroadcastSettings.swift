@@ -6,32 +6,25 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct BroadcastSettings: Codable, JSONEncodable, Hashable {
+    public var enabled: Bool
+    public var hls: HLSSettings
 
-
-
-internal struct BroadcastSettings: Codable, JSONEncodable, Hashable {
-
-    internal var enabled: Bool
-    internal var hls: HLSSettings
-
-    internal init(enabled: Bool, hls: HLSSettings) {
+    public init(enabled: Bool, hls: HLSSettings) {
         self.enabled = enabled
         self.hls = hls
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
         case hls
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(enabled, forKey: .enabled)
         try container.encode(hls, forKey: .hls)

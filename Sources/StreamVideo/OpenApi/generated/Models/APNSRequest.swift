@@ -6,32 +6,25 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct APNSRequest: Codable, JSONEncodable, Hashable {
+    public var body: String?
+    public var title: String?
 
-
-
-internal struct APNSRequest: Codable, JSONEncodable, Hashable {
-
-    internal var body: String?
-    internal var title: String?
-
-    internal init(body: String? = nil, title: String? = nil) {
+    public init(body: String? = nil, title: String? = nil) {
         self.body = body
         self.title = title
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case body
         case title
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(body, forKey: .body)
         try container.encodeIfPresent(title, forKey: .title)

@@ -6,46 +6,38 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** Represents a call */
 
-
-
-
-internal struct CallResponse: Codable, JSONEncodable, Hashable {
-
-    internal var backstage: Bool
-    internal var blockedUserIds: [String]
+public struct CallResponse: Codable, JSONEncodable, Hashable {
+    public var backstage: Bool
+    public var blockedUserIds: [String]
     /** The unique identifier for a call (<type>:<id>) */
-    internal var cid: String
+    public var cid: String
     /** Date/time of creation */
-    internal var createdAt: Date
-    internal var createdBy: UserResponse
-    internal var currentSessionId: String
+    public var createdAt: Date
+    public var createdBy: UserResponse
+    public var currentSessionId: String
     /** Custom data for this object */
-    internal var custom: [String: AnyCodable]
-    internal var egress: EgressResponse
+    public var custom: [String: RawJSON]
+    public var egress: EgressResponse
     /** Date/time when the call ended */
-    internal var endedAt: Date?
+    public var endedAt: Date?
     /** Call ID */
-    internal var id: String
-    internal var ingress: CallIngressResponse
-    internal var recording: Bool
-    internal var session: CallSessionResponse?
-    internal var settings: CallSettingsResponse
+    public var id: String
+    public var ingress: CallIngressResponse
+    public var recording: Bool
+    public var session: CallSessionResponse?
+    public var settings: CallSettingsResponse
     /** Date/time when the call will start */
-    internal var startsAt: Date?
-    internal var team: String?
-    internal var transcribing: Bool
+    public var startsAt: Date?
+    public var team: String?
+    public var transcribing: Bool
     /** The type of call */
-    internal var type: String
+    public var type: String
     /** Date/time of the last update */
-    internal var updatedAt: Date
+    public var updatedAt: Date
 
-    internal init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: RawJSON], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.cid = cid
@@ -67,7 +59,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
         self.updatedAt = updatedAt
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case backstage
         case blockedUserIds = "blocked_user_ids"
         case cid
@@ -91,7 +83,7 @@ internal struct CallResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(backstage, forKey: .backstage)
         try container.encode(blockedUserIds, forKey: .blockedUserIds)

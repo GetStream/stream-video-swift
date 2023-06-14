@@ -12,7 +12,7 @@ extension MemberResponse {
         CallMember(
             user: user.toUser,
             role: role ?? "",
-            customData: convert(custom),
+            customData: custom,
             updatedAt: updatedAt
         )
     }

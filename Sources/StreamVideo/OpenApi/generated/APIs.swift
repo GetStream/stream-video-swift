@@ -10,7 +10,6 @@ open class OpenAPIClientAPI {
     public static var basePath = "https://video.stream-io-api.com"
     public static var customHeaders: [String: String] = [:]
     public static var credential: URLCredential?
-    public static var requestBuilderFactory: RequestBuilderFactory = URLSessionRequestBuilderFactory()
     public static var apiResponseQueue: DispatchQueue = .main
 }
 

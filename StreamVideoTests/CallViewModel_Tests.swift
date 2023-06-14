@@ -513,7 +513,7 @@ extension User {
     func toUserResponse() -> UserResponse {
         UserResponse(
             createdAt: Date(),
-            custom: RawJSON.convert(customData: customData),
+            custom: customData,
             id: id,
             image: imageURL?.absoluteString,
             name: name,

@@ -6,28 +6,21 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct VideoSettings: Codable, JSONEncodable, Hashable {
-
-    internal enum CameraFacing: String, Codable, CaseIterable {
+public struct VideoSettings: Codable, JSONEncodable, Hashable {
+    public enum CameraFacing: String, Codable, CaseIterable {
         case front = "front"
         case back = "back"
         case external = "external"
     }
-    internal var accessRequestEnabled: Bool
-    internal var cameraDefaultOn: Bool
-    internal var cameraFacing: CameraFacing
-    internal var enabled: Bool
-    internal var targetResolution: TargetResolution
+    public var accessRequestEnabled: Bool
+    public var cameraDefaultOn: Bool
+    public var cameraFacing: CameraFacing
+    public var enabled: Bool
+    public var targetResolution: TargetResolution
 
-    internal init(accessRequestEnabled: Bool, cameraDefaultOn: Bool, cameraFacing: CameraFacing, enabled: Bool, targetResolution: TargetResolution) {
+    public init(accessRequestEnabled: Bool, cameraDefaultOn: Bool, cameraFacing: CameraFacing, enabled: Bool, targetResolution: TargetResolution) {
         self.accessRequestEnabled = accessRequestEnabled
         self.cameraDefaultOn = cameraDefaultOn
         self.cameraFacing = cameraFacing
@@ -35,7 +28,7 @@ internal struct VideoSettings: Codable, JSONEncodable, Hashable {
         self.targetResolution = targetResolution
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
         case cameraDefaultOn = "camera_default_on"
         case cameraFacing = "camera_facing"
@@ -45,7 +38,7 @@ internal struct VideoSettings: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
         try container.encode(cameraDefaultOn, forKey: .cameraDefaultOn)

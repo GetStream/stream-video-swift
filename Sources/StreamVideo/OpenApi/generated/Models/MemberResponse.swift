@@ -6,29 +6,22 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct MemberResponse: Codable, JSONEncodable, Hashable {
-
+public struct MemberResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of creation */
-    internal var createdAt: Date
+    public var createdAt: Date
     /** Custom member response data */
-    internal var custom: [String: AnyCodable]
+    public var custom: [String: RawJSON]
     /** Date/time of deletion */
-    internal var deletedAt: Date?
-    internal var role: String?
+    public var deletedAt: Date?
+    public var role: String?
     /** Date/time of the last update */
-    internal var updatedAt: Date
-    internal var user: UserResponse
-    internal var userId: String
+    public var updatedAt: Date
+    public var user: UserResponse
+    public var userId: String
 
-    internal init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, role: String? = nil, updatedAt: Date, user: UserResponse, userId: String) {
+    public init(createdAt: Date, custom: [String: RawJSON], deletedAt: Date? = nil, role: String? = nil, updatedAt: Date, user: UserResponse, userId: String) {
         self.createdAt = createdAt
         self.custom = custom
         self.deletedAt = deletedAt
@@ -38,7 +31,7 @@ internal struct MemberResponse: Codable, JSONEncodable, Hashable {
         self.userId = userId
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case createdAt = "created_at"
         case custom
         case deletedAt = "deleted_at"
@@ -50,7 +43,7 @@ internal struct MemberResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(custom, forKey: .custom)

@@ -6,25 +6,18 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct GetOrCreateCallResponse: Codable, JSONEncodable, Hashable {
+    public var blockedUsers: [UserResponse]
+    public var call: CallResponse
+    public var created: Bool
+    public var duration: String
+    public var members: [MemberResponse]
+    public var membership: MemberResponse?
+    public var ownCapabilities: [OwnCapability]
 
-
-
-internal struct GetOrCreateCallResponse: Codable, JSONEncodable, Hashable {
-
-    internal var blockedUsers: [UserResponse]
-    internal var call: CallResponse
-    internal var created: Bool
-    internal var duration: String
-    internal var members: [MemberResponse]
-    internal var membership: MemberResponse?
-    internal var ownCapabilities: [OwnCapability]
-
-    internal init(blockedUsers: [UserResponse], call: CallResponse, created: Bool, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
+    public init(blockedUsers: [UserResponse], call: CallResponse, created: Bool, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
         self.blockedUsers = blockedUsers
         self.call = call
         self.created = created
@@ -34,7 +27,7 @@ internal struct GetOrCreateCallResponse: Codable, JSONEncodable, Hashable {
         self.ownCapabilities = ownCapabilities
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case blockedUsers = "blocked_users"
         case call
         case created
@@ -46,7 +39,7 @@ internal struct GetOrCreateCallResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(blockedUsers, forKey: .blockedUsers)
         try container.encode(call, forKey: .call)

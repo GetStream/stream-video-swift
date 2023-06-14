@@ -6,29 +6,22 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct CallRecording: Codable, JSONEncodable, Hashable {
+    public var endTime: Date
+    public var filename: String
+    public var startTime: Date
+    public var url: String
 
-
-
-internal struct CallRecording: Codable, JSONEncodable, Hashable {
-
-    internal var endTime: Date
-    internal var filename: String
-    internal var startTime: Date
-    internal var url: String
-
-    internal init(endTime: Date, filename: String, startTime: Date, url: String) {
+    public init(endTime: Date, filename: String, startTime: Date, url: String) {
         self.endTime = endTime
         self.filename = filename
         self.startTime = startTime
         self.url = url
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case endTime = "end_time"
         case filename
         case startTime = "start_time"
@@ -37,7 +30,7 @@ internal struct CallRecording: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(endTime, forKey: .endTime)
         try container.encode(filename, forKey: .filename)

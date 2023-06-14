@@ -63,8 +63,7 @@ public class CallState: ObservableObject {
     }
 
     internal func updateFrom(_ response: CallResponse) {
-        print("debugging: custom \(custom) response.custom \(response.custom)")
-        custom = convert(response.custom)
+        custom = response.custom
         createdAt = response.createdAt
         updatedAt = response.updatedAt
         startsAt = response.startsAt
@@ -125,7 +124,6 @@ public class CallState: ObservableObject {
         case _ as CallSessionStartedEvent:
             break
         case let e as CallUpdatedEvent:
-            print("debugging: call updated event handling")
             updateFrom(e.call)
         case _ as CustomVideoEvent:
             break

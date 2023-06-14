@@ -6,31 +6,23 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
-
-    internal enum PushProvider: String, Codable, CaseIterable {
+public struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
+    public enum PushProvider: String, Codable, CaseIterable {
         case firebase = "firebase"
         case apn = "apn"
         case huawei = "huawei"
         case xiaomi = "xiaomi"
     }
-    static let idRule = StringRule(minLength: 1, maxLength: 255, pattern: nil)
-    internal var id: String?
-    internal var pushProvider: PushProvider?
-    internal var pushProviderName: String?
-    internal var user: UserRequest?
-    internal var userId: String?
-    internal var voipToken: Bool?
+    public var id: String?
+    public var pushProvider: PushProvider?
+    public var pushProviderName: String?
+    public var user: UserRequest?
+    public var userId: String?
+    public var voipToken: Bool?
 
-    internal init(id: String? = nil, pushProvider: PushProvider? = nil, pushProviderName: String? = nil, user: UserRequest? = nil, userId: String? = nil, voipToken: Bool? = nil) {
+    public init(id: String? = nil, pushProvider: PushProvider? = nil, pushProviderName: String? = nil, user: UserRequest? = nil, userId: String? = nil, voipToken: Bool? = nil) {
         self.id = id
         self.pushProvider = pushProvider
         self.pushProviderName = pushProviderName
@@ -39,7 +31,7 @@ internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         self.voipToken = voipToken
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case id
         case pushProvider = "push_provider"
         case pushProviderName = "push_provider_name"
@@ -50,7 +42,7 @@ internal struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(id, forKey: .id)
         try container.encodeIfPresent(pushProvider, forKey: .pushProvider)

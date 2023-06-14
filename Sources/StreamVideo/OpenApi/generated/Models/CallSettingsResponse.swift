@@ -6,27 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
+    public var audio: AudioSettings
+    public var backstage: BackstageSettings
+    public var broadcasting: BroadcastSettings
+    public var geofencing: GeofenceSettings
+    public var recording: RecordSettings
+    public var ring: RingSettings
+    public var screensharing: ScreensharingSettings
+    public var transcription: TranscriptionSettings
+    public var video: VideoSettings
 
-
-
-internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
-
-    internal var audio: AudioSettings
-    internal var backstage: BackstageSettings
-    internal var broadcasting: BroadcastSettings
-    internal var geofencing: GeofenceSettings
-    internal var recording: RecordSettings
-    internal var ring: RingSettings
-    internal var screensharing: ScreensharingSettings
-    internal var transcription: TranscriptionSettings
-    internal var video: VideoSettings
-
-    internal init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettings, geofencing: GeofenceSettings, recording: RecordSettings, ring: RingSettings, screensharing: ScreensharingSettings, transcription: TranscriptionSettings, video: VideoSettings) {
+    public init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettings, geofencing: GeofenceSettings, recording: RecordSettings, ring: RingSettings, screensharing: ScreensharingSettings, transcription: TranscriptionSettings, video: VideoSettings) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
@@ -38,7 +31,7 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         self.video = video
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case audio
         case backstage
         case broadcasting
@@ -52,7 +45,7 @@ internal struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(audio, forKey: .audio)
         try container.encode(backstage, forKey: .backstage)

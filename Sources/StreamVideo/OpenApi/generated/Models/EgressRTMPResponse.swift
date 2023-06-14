@@ -6,27 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct EgressRTMPResponse: Codable, JSONEncodable, Hashable {
+    public var name: String
+    public var streamKey: String
+    public var url: String
 
-
-
-internal struct EgressRTMPResponse: Codable, JSONEncodable, Hashable {
-
-    internal var name: String
-    internal var streamKey: String
-    internal var url: String
-
-    internal init(name: String, streamKey: String, url: String) {
+    public init(name: String, streamKey: String, url: String) {
         self.name = name
         self.streamKey = streamKey
         self.url = url
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case name
         case streamKey = "stream_key"
         case url
@@ -34,7 +27,7 @@ internal struct EgressRTMPResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(name, forKey: .name)
         try container.encode(streamKey, forKey: .streamKey)

@@ -6,29 +6,22 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct BackstageSettings: Codable, JSONEncodable, Hashable {
+    public var enabled: Bool
 
-
-
-internal struct BackstageSettings: Codable, JSONEncodable, Hashable {
-
-    internal var enabled: Bool
-
-    internal init(enabled: Bool) {
+    public init(enabled: Bool) {
         self.enabled = enabled
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(enabled, forKey: .enabled)
     }

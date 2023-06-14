@@ -6,17 +6,10 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
-
-
-
-internal struct APIError: Codable, JSONEncodable, Hashable {
-
-    internal enum Code: String, Codable, CaseIterable {
+public struct APIError: Codable, JSONEncodable, Hashable {
+    public enum Code: String, Codable, CaseIterable {
         case internalError = "internal-error"
         case accessKeyError = "access-key-error"
         case inputError = "input-error"
@@ -51,21 +44,21 @@ internal struct APIError: Codable, JSONEncodable, Hashable {
         case queryCallsPermissionsMismatch = "query-calls-permissions-mismatch"
     }
     /** Response HTTP status code */
-    internal var statusCode: Int
+    public var statusCode: Int
     /** API error code */
-    internal var code: Code
+    public var code: Code
     /** Additional error-specific information */
-    internal var details: [Int]
+    public var details: [Int]
     /** Request duration */
-    internal var duration: String
+    public var duration: String
     /** Additional error info */
-    internal var exceptionFields: [String: String]?
+    public var exceptionFields: [String: String]?
     /** Message describing an error */
-    internal var message: String
+    public var message: String
     /** URL with additional information */
-    internal var moreInfo: String
+    public var moreInfo: String
 
-    internal init(statusCode: Int, code: Code, details: [Int], duration: String, exceptionFields: [String: String]? = nil, message: String, moreInfo: String) {
+    public init(statusCode: Int, code: Code, details: [Int], duration: String, exceptionFields: [String: String]? = nil, message: String, moreInfo: String) {
         self.statusCode = statusCode
         self.code = code
         self.details = details
@@ -75,7 +68,7 @@ internal struct APIError: Codable, JSONEncodable, Hashable {
         self.moreInfo = moreInfo
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case statusCode = "StatusCode"
         case code
         case details
@@ -87,7 +80,7 @@ internal struct APIError: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(statusCode, forKey: .statusCode)
         try container.encode(code, forKey: .code)

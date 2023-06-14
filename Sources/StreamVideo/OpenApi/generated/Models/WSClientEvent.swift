@@ -6,12 +6,7 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This is just a placeholder for all client events */
-
 internal protocol WSClientEvent {
     var connectionId: String { get }
 }

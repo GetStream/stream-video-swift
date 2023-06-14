@@ -6,26 +6,18 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user */
 
-
-
-
-internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
-    internal var callCid: String
-    internal var createdAt: Date
+public struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+    public var callCid: String
+    public var createdAt: Date
     /** The list of permissions requested by the user */
-    internal var permissions: [String]
+    public var permissions: [String]
     /** The type of event: \"call.permission_request\" in this case */
-    internal var type: String = "call.permission_request"
-    internal var user: UserResponse
+    public var type: String = "call.permission_request"
+    public var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, permissions: [String], type: String = "call.permission_request", user: UserResponse) {
+    public init(callCid: String, createdAt: Date, permissions: [String], type: String = "call.permission_request", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.permissions = permissions
@@ -33,7 +25,7 @@ internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCall
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case permissions
@@ -43,7 +35,7 @@ internal struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCall
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)

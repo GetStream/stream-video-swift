@@ -6,29 +6,22 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct CallIngressResponse: Codable, JSONEncodable, Hashable {
+    public var rtmp: RTMPIngress
 
-
-
-internal struct CallIngressResponse: Codable, JSONEncodable, Hashable {
-
-    internal var rtmp: RTMPIngress
-
-    internal init(rtmp: RTMPIngress) {
+    public init(rtmp: RTMPIngress) {
         self.rtmp = rtmp
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case rtmp
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(rtmp, forKey: .rtmp)
     }

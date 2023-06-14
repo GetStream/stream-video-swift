@@ -6,27 +6,20 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
 
 
+public struct EgressResponse: Codable, JSONEncodable, Hashable {
+    public var broadcasting: Bool
+    public var hls: EgressHLSResponse?
+    public var rtmps: [EgressRTMPResponse]
 
-
-
-internal struct EgressResponse: Codable, JSONEncodable, Hashable {
-
-    internal var broadcasting: Bool
-    internal var hls: EgressHLSResponse?
-    internal var rtmps: [EgressRTMPResponse]
-
-    internal init(broadcasting: Bool, hls: EgressHLSResponse? = nil, rtmps: [EgressRTMPResponse]) {
+    public init(broadcasting: Bool, hls: EgressHLSResponse? = nil, rtmps: [EgressRTMPResponse]) {
         self.broadcasting = broadcasting
         self.hls = hls
         self.rtmps = rtmps
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case broadcasting
         case hls
         case rtmps
@@ -34,7 +27,7 @@ internal struct EgressResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(broadcasting, forKey: .broadcasting)
         try container.encodeIfPresent(hls, forKey: .hls)
