@@ -190,6 +190,30 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].endedAt = Date()
+        } else if let event = event as? CallSessionParticipantJoinedEvent {
+            let index = calls.firstIndex { callData in
+                callData.callCid == event.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            let participant = CallParticipantResponse(
+                joinedAt: event.createdAt,
+                user: event.user
+            )
+            calls[index].session?.participants.append(participant)
+        } else if let event = event as? CallSessionParticipantLeftEvent {
+            let index = calls.firstIndex { callData in
+                callData.callCid == event.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].session?.participants.removeAll(where: { participant in
+                participant.user.id == event.user.id
+            })
         } else if event is WSDisconnected {
             self.socketDisconnected = true
         } else if event is WSConnected {
@@ -249,7 +273,7 @@ extension CallResponse {
             hlsPlaylistUrl: egress.hls?.playlistUrl ?? "",
             autoRejectTimeout: settings.ring.autoCancelTimeoutMs,
             customData: convert(custom),
-            session: session?.toCallSession(),
+            session: session,
             createdBy: createdBy.toUser
         )
     }

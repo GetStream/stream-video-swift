@@ -67,20 +67,9 @@ public class CallEventsHandler {
                 action: .unblock
             )
             return .userUnblocked(callEventInfo)
-        } else if let event = event as? CallSessionStartedEvent {
-            let call = event.call.toCallData(
-                members: [],
-                blockedUsers: event.call.blockedUserIds.map {
-                    UserResponse.make(from: $0)
-                }
-            )
-            let sessionInfo = SessionInfo(
-                call: call,
-                callCid: event.callCid,
-                createdAt: event.createdAt,
-                sessionId: event.sessionId
-            )
-            return .sessionStarted(sessionInfo)
+        } else if let event = event as? CallSessionStartedEvent,
+                    let session = event.call.session {
+            return .sessionStarted(session)
         }
         
         return nil

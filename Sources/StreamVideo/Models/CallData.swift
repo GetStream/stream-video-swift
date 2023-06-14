@@ -33,44 +33,9 @@ public struct CallData: @unchecked Sendable {
     /// Custom data associated with the call.
     public var customData: [String: RawJSON]
     /// The session associated with the call.
-    public var session: CallSession?
+    public var session: CallSessionResponse?
     /// The user who created the call.
     public var createdBy: User
-}
-
-/// Represents a session associated with a call.
-public struct CallSession: Sendable {
-    /// The users who accepted the call and the date when they accepted.
-    public var acceptedBy: [String: Date]
-    /// The date and time when the session ended, if applicable.
-    public var endedAt: Date?
-    /// The unique identifier for the session.
-    public var id: String
-    /// The participants in the session.
-    public var participants: [User]
-    /// The count of participants categorized by role.
-    public var participantsCountByRole: [String: Int]
-    /// The users who rejected the call and the date when they rejected.
-    public var rejectedBy: [String: Date]
-    /// The date and time when the session started.
-    public var startedAt: Date?
-}
-
-
-extension CallSessionResponse {
-    
-    func toCallSession() -> CallSession {
-        CallSession(
-            acceptedBy: acceptedBy,
-            endedAt: endedAt,
-            id: id,
-            participants: participants.map { $0.user.toUser },
-            participantsCountByRole: participantsCountByRole,
-            rejectedBy: rejectedBy,
-            startedAt: startedAt
-        )
-    }
-    
 }
 
 extension CallData {
@@ -82,7 +47,7 @@ extension CallData {
         self.startsAt = callResponse.startsAt
         self.updatedAt = callResponse.updatedAt
         self.hlsPlaylistUrl = callResponse.egress.hls?.playlistUrl ?? ""
-        self.session = callResponse.session?.toCallSession()
+        self.session = callResponse.session
         self.autoRejectTimeout = callResponse.settings.ring.autoCancelTimeoutMs
         self.createdBy = callResponse.createdBy.toUser
     }

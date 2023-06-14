@@ -20,8 +20,10 @@ public enum CallEvent: Sendable {
     /// A user was unblocked.
     case userUnblocked(CallEventInfo)
     /// Session started.
-    case sessionStarted(SessionInfo)
+    case sessionStarted(CallSessionResponse)
 }
+
+extension CallSessionResponse: @unchecked Sendable {}
 
 public enum CallEventAction: Sendable {
     case accept
