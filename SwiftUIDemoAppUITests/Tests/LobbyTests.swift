@@ -23,7 +23,7 @@ final class LobbyTests: StreamTestCase {
                 .joinCall(callId)
             
             userRobot
-                .assertParticipantJoinCall()
+                .waitForParticipantsToJoin(participants)
                 .endCall()
         }
         WHEN("user enters lobby") {

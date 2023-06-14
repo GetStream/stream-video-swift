@@ -29,11 +29,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
         WHEN("participant joins the call") {
             participantRobot.joinCall(callId)
+            userRobot.waitForParticipantsToJoin(1)
         }
         AND("user leaves the call") {
-            userRobot
-                .assertParticipantJoinCall()
-                .endCall()
+            userRobot.endCall()
         }
         THEN("call is ended for the user") {
             userRobot
@@ -88,10 +87,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
+            userRobot.waitForParticipantsToJoin(1)
         }
         WHEN("user re-enters the call as the same user") {
             userRobot
-                .assertParticipantJoinCall()
                 .endCall()
                 .tapOnStartCallButton(withDelay: true)
         }
@@ -113,10 +112,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
+            userRobot.waitForParticipantsToJoin(1)
         }
         WHEN("user re-enters the call as the same user") {
             userRobot
-                .assertParticipantJoinCall()
                 .endCall()
                 .logout()
                 .login(userIndex: 0, waitForLoginPage: true)
@@ -140,10 +139,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
+            userRobot.waitForParticipantsToJoin(1)
         }
         WHEN("user re-enters the call as another user") {
             userRobot
-                .waitForParticipantsToJoin(1)
                 .endCall()
                 .logout()
                 .login(userIndex: 1, waitForLoginPage: true)
@@ -188,11 +187,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("participant joins the call with the user") {
             participantRobot.setUserCount(participantCountOnFirstCall).joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participantCountOnFirstCall)
         }
         WHEN("user leaves the call") {
-            userRobot
-                .assertParticipantJoinCall()
-                .endCall()
+            userRobot.endCall()
         }
         AND("user joins another call") {
             userRobot.joinCall(anotherCallId, clearTextField: true)
