@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a call session ends */
 
-
-
-
 public struct CallSessionEndedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

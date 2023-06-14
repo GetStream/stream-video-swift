@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct Device: Codable, JSONEncodable, Hashable {
-
     /** Date/time of creation */
     public var createdAt: Date
     /** Whether device is disabled or not */

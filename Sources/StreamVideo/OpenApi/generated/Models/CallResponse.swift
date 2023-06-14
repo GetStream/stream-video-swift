@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** Represents a call */
 
-
-
-
 public struct CallResponse: Codable, JSONEncodable, Hashable {
-
     public var backstage: Bool
     public var blockedUserIds: [String]
     /** The unique identifier for a call (<type>:<id>) */
@@ -26,7 +18,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
     public var createdBy: UserResponse
     public var currentSessionId: String
     /** Custom data for this object */
-    public var custom: [String: AnyCodable]
+    public var custom: [String: RawJSON]
     public var egress: EgressResponse
     /** Date/time when the call ended */
     public var endedAt: Date?
@@ -45,7 +37,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     public var updatedAt: Date
 
-    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: AnyCodable], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: RawJSON], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.cid = cid

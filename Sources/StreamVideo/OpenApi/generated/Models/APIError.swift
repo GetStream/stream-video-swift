@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct APIError: Codable, JSONEncodable, Hashable {
-
     public enum Code: String, Codable, CaseIterable {
         case internalError = "internal-error"
         case accessKeyError = "access-key-error"

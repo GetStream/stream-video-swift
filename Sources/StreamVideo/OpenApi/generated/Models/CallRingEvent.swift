@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent to all call members to notify they are getting called */
 
-
-
-
 public struct CallRingEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

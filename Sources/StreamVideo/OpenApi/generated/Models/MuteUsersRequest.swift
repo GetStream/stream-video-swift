@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
-
     public var audio: Bool?
     public var muteAllUsers: Bool?
     public var screenshare: Bool?

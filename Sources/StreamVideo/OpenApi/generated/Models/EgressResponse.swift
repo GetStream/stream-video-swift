@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct EgressResponse: Codable, JSONEncodable, Hashable {
-
     public var broadcasting: Bool
     public var hls: EgressHLSResponse?
     public var rtmps: [EgressRTMPResponse]

@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct HLSSettings: Codable, JSONEncodable, Hashable {
-
     public var autoOn: Bool
     public var enabled: Bool
     public var qualityTracks: [String]

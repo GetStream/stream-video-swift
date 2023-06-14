@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct ICEServer: Codable, JSONEncodable, Hashable {
-
     public var password: String
     public var urls: [String]
     public var username: String

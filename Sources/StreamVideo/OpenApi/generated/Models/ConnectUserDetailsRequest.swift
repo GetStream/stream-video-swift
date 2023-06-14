@@ -6,22 +6,15 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct ConnectUserDetailsRequest: Codable, JSONEncodable, Hashable {
-
-    public var custom: [String: AnyCodable]?
+    public var custom: [String: RawJSON]?
     public var id: String
     public var image: String?
     public var name: String?
 
-    public init(custom: [String: AnyCodable]? = nil, id: String, image: String? = nil, name: String? = nil) {
+    public init(custom: [String: RawJSON]? = nil, id: String, image: String? = nil, name: String? = nil) {
         self.custom = custom
         self.id = id
         self.image = image

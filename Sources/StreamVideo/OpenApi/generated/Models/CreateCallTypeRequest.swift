@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CreateCallTypeRequest: Codable, JSONEncodable, Hashable {
-
     public var grants: [String: [String]]?
     public var name: String
     public var notificationSettings: NotificationSettingsRequest?

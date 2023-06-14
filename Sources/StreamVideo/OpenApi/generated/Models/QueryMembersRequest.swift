@@ -6,20 +6,10 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
-
-    static let idRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
-    static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
-    static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
-    public var filterConditions: [String: AnyCodable]?
+    public var filterConditions: [String: RawJSON]?
     public var id: String?
     public var limit: Int?
     public var next: String?
@@ -27,7 +17,7 @@ public struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
     public var sort: [SortParamRequest]?
     public var type: String
 
-    public init(filterConditions: [String: AnyCodable]? = nil, id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
+    public init(filterConditions: [String: RawJSON]? = nil, id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
         self.filterConditions = filterConditions
         self.id = id
         self.limit = limit

@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a call is started. Clients receiving this event should start the call. */
 
-
-
-
 public struct CallLiveStartedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

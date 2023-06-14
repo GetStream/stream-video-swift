@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct UpdateCallMembersRequest: Codable, JSONEncodable, Hashable {
-
     /** List of userID to remove */
     public var removeMembers: [String]?
     /** List of members to update or insert */

@@ -6,22 +6,14 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct SendReactionRequest: Codable, JSONEncodable, Hashable {
-
-    static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
-    public var custom: [String: AnyCodable]?
+    public var custom: [String: RawJSON]?
     public var emojiCode: String?
     public var type: String
 
-    public init(custom: [String: AnyCodable]? = nil, emojiCode: String? = nil, type: String) {
+    public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String) {
         self.custom = custom
         self.emojiCode = emojiCode
         self.type = type

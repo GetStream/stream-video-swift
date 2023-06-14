@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal class CodableHelper {
+open class CodableHelper {
     private static var customDateFormatter: DateFormatter?
     private static var defaultDateFormatter: DateFormatter = OpenISO8601DateFormatter()
 
@@ -26,24 +26,24 @@ internal class CodableHelper {
         return encoder
     }()
 
-    internal static var dateFormatter: DateFormatter {
+    public static var dateFormatter: DateFormatter {
         get { return customDateFormatter ?? defaultDateFormatter }
         set { customDateFormatter = newValue }
     }
-    internal static var jsonDecoder: JSONDecoder {
+    public static var jsonDecoder: JSONDecoder {
         get { return customJSONDecoder ?? defaultJSONDecoder }
         set { customJSONDecoder = newValue }
     }
-    internal static var jsonEncoder: JSONEncoder {
+    public static var jsonEncoder: JSONEncoder {
         get { return customJSONEncoder ?? defaultJSONEncoder }
         set { customJSONEncoder = newValue }
     }
 
-    internal class func decode<T>(_ type: T.Type, from data: Data) -> Swift.Result<T, Error> where T: Decodable {
+    open class func decode<T>(_ type: T.Type, from data: Data) -> Swift.Result<T, Error> where T: Decodable {
         return Swift.Result { try jsonDecoder.decode(type, from: data) }
     }
 
-    internal class func encode<T>(_ value: T) -> Swift.Result<Data, Error> where T: Encodable {
+    open class func encode<T>(_ value: T) -> Swift.Result<Data, Error> where T: Encodable {
         return Swift.Result { try jsonEncoder.encode(value) }
     }
 }

@@ -6,25 +6,17 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct QueryCallsRequest: Codable, JSONEncodable, Hashable {
-
-    static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
-    public var filterConditions: [String: AnyCodable]?
+    public var filterConditions: [String: RawJSON]?
     public var limit: Int?
     public var next: String?
     public var prev: String?
     public var sort: [SortParamRequest]
     public var watch: Bool?
 
-    public init(filterConditions: [String: AnyCodable]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
+    public init(filterConditions: [String: RawJSON]? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest], watch: Bool? = nil) {
         self.filterConditions = filterConditions
         self.limit = limit
         self.next = next

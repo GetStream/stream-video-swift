@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when call recording has started */
 
-
-
-
 public struct CallRecordingStartedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     /** The type of event: \"call.recording_started\" in this case */

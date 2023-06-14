@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct StopLiveResponse: Codable, JSONEncodable, Hashable {
-
     public var call: CallResponse
     /** Duration of the request in human-readable format */
     public var duration: String

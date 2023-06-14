@@ -6,22 +6,15 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct ReactionResponse: Codable, JSONEncodable, Hashable {
-
-    public var custom: [String: AnyCodable]?
+    public var custom: [String: RawJSON]?
     public var emojiCode: String?
     public var type: String
     public var user: UserResponse
 
-    public init(custom: [String: AnyCodable]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
+    public init(custom: [String: RawJSON]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
         self.custom = custom
         self.emojiCode = emojiCode
         self.type = type

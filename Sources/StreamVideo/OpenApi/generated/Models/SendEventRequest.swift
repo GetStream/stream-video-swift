@@ -6,19 +6,12 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct SendEventRequest: Codable, JSONEncodable, Hashable {
+    public var custom: [String: RawJSON]?
 
-    public var custom: [String: AnyCodable]?
-
-    public init(custom: [String: AnyCodable]? = nil) {
+    public init(custom: [String: RawJSON]? = nil) {
         self.custom = custom
     }
 

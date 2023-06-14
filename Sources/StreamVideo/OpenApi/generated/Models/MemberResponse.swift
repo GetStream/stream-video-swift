@@ -6,20 +6,13 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct MemberResponse: Codable, JSONEncodable, Hashable {
-
     /** Date/time of creation */
     public var createdAt: Date
     /** Custom member response data */
-    public var custom: [String: AnyCodable]
+    public var custom: [String: RawJSON]
     /** Date/time of deletion */
     public var deletedAt: Date?
     public var role: String?
@@ -28,7 +21,7 @@ public struct MemberResponse: Codable, JSONEncodable, Hashable {
     public var user: UserResponse
     public var userId: String
 
-    public init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, role: String? = nil, updatedAt: Date, user: UserResponse, userId: String) {
+    public init(createdAt: Date, custom: [String: RawJSON], deletedAt: Date? = nil, role: String? = nil, updatedAt: Date, user: UserResponse, userId: String) {
         self.createdAt = createdAt
         self.custom = custom
         self.deletedAt = deletedAt

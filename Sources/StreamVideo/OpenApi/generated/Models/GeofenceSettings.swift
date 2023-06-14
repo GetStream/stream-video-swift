@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct GeofenceSettings: Codable, JSONEncodable, Hashable {
-
     public var names: [String]
 
     public init(names: [String]) {

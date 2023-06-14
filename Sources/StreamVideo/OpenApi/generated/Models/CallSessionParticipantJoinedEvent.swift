@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a participant joins a call session */
 
-
-
-
 public struct CallSessionParticipantJoinedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     /** Call session ID */

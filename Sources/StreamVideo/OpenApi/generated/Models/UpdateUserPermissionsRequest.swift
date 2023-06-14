@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct UpdateUserPermissionsRequest: Codable, JSONEncodable, Hashable {
-
     public var grantPermissions: [String]?
     public var revokePermissions: [String]?
     public var userId: String

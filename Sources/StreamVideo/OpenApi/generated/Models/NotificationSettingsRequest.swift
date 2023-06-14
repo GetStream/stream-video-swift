@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct NotificationSettingsRequest: Codable, JSONEncodable, Hashable {
-
     public var callLiveStarted: EventNotificationSettingsRequest?
     public var callNotification: EventNotificationSettingsRequest?
     public var callRing: EventNotificationSettingsRequest?

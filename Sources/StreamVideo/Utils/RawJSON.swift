@@ -338,13 +338,3 @@ extension RawJSON {
         }
     }
 }
-
-extension RawJSON {
-    static func convert(customData: [String: RawJSON]) -> [String: AnyCodable] {
-        var result = [String: AnyCodable]()
-        for (key, value) in customData {
-            result[key] = AnyCodable(value)
-        }
-        return result
-    }
-}

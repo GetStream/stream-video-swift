@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct EdgeResponse: Codable, JSONEncodable, Hashable {
-
     public var continentCode: String
     public var countryIsoCode: String
     public var green: Int

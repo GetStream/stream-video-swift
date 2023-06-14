@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct UnblockUserRequest: Codable, JSONEncodable, Hashable {
-
     /** the user to unblock */
     public var userId: String
 

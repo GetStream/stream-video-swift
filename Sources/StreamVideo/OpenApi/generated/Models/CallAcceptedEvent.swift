@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a user accepts a notification to join a call. */
 
-
-
-
 public struct CallAcceptedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

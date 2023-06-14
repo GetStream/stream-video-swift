@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct StartBroadcastingResponse: Codable, JSONEncodable, Hashable {
-
     /** Duration of the request in human-readable format */
     public var duration: String
     public var playlistUrl: String

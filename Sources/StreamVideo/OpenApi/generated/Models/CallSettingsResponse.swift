@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
-
     public var audio: AudioSettings
     public var backstage: BackstageSettings
     public var broadcasting: BroadcastSettings

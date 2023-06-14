@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct EgressHLSResponse: Codable, JSONEncodable, Hashable {
-
     public var playlistUrl: String
 
     public init(playlistUrl: String) {

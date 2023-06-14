@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CallRecording: Codable, JSONEncodable, Hashable {
-
     public var endTime: Date
     public var filename: String
     public var startTime: Date

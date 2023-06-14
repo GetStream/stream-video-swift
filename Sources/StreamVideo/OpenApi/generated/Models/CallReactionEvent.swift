@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a reaction is sent in a call, clients should use this to show the reaction in the call screen */
 
-
-
-
 public struct CallReactionEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     public var reaction: ReactionResponse

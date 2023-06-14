@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct RecordSettings: Codable, JSONEncodable, Hashable {
-
     public enum Mode: String, Codable, CaseIterable {
         case available = "available"
         case disabled = "disabled"

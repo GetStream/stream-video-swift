@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct EventNotificationSettings: Codable, JSONEncodable, Hashable {
-
     public var apns: APNS
     public var enabled: Bool
 

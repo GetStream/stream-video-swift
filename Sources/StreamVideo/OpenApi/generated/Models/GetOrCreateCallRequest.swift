@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct GetOrCreateCallRequest: Codable, JSONEncodable, Hashable {
-
-    static let membersLimitRule = NumericRule<Int>(minimum: nil, exclusiveMinimum: false, maximum: 100, exclusiveMaximum: false, multipleOf: nil)
     public var data: CallRequest?
     public var membersLimit: Int?
     /** if provided it sends a notification event to the members for this call */

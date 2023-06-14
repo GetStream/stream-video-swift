@@ -7,7 +7,7 @@
 
 import Foundation
 
-internal struct JSONDataEncoding {
+public struct JSONDataEncoding {
 
     // MARK: Properties
 
@@ -24,7 +24,7 @@ internal struct JSONDataEncoding {
     /// - throws: An `Error` if the encoding process encounters an error.
     ///
     /// - returns: The encoded request.
-    internal func encode(_ urlRequest: URLRequest, with parameters: [String: Any]?) -> URLRequest {
+    public func encode(_ urlRequest: URLRequest, with parameters: [String: Any]?) -> URLRequest {
         var urlRequest = urlRequest
 
         guard let jsonData = parameters?[JSONDataEncoding.jsonDataKey] as? Data, !jsonData.isEmpty else {
@@ -40,7 +40,7 @@ internal struct JSONDataEncoding {
         return urlRequest
     }
 
-    internal static func encodingParameters(jsonData: Data?) -> [String: Any]? {
+    public static func encodingParameters(jsonData: Data?) -> [String: Any]? {
         var returnedParams: [String: Any]?
         if let jsonData = jsonData, !jsonData.isEmpty {
             var params: [String: Any] = [:]

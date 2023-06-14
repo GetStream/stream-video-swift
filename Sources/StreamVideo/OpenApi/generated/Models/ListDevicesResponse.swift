@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct ListDevicesResponse: Codable, JSONEncodable, Hashable {
-
     /** List of devices */
     public var devices: [Device]
     public var duration: String

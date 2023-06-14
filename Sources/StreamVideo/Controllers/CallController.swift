@@ -132,10 +132,10 @@ class CallController {
         notify: Bool
     ) async throws -> CallData {
         let data = CallRequest(
-            custom: RawJSON.convert(customData: customData),
+            custom: customData,
             members: members.map {
                 MemberRequest(
-                    custom: RawJSON.convert(customData: $0.customData),
+                    custom: $0.customData,
                     role: $0.role,
                     userId: $0.id
                 )

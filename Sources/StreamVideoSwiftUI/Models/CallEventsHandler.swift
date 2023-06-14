@@ -25,7 +25,7 @@ public class CallEventsHandler {
                     let member = Member(
                         user: user,
                         role: $0.role ?? $0.user.role,
-                        customData: convert($0.custom)
+                        customData: $0.custom
                     )
                     return member
                 },

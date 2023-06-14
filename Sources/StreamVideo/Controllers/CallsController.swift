@@ -118,12 +118,12 @@ public class CallsController: ObservableObject {
         return sortParams
     }
     
-    private func makeFilterConditions() -> [String: AnyCodable]? {
-        var filterConditions: [String: AnyCodable]?
+    private func makeFilterConditions() -> [String: RawJSON]? {
+        var filterConditions: [String: RawJSON]?
         if let filters = callsQuery.filters {
-            filterConditions = [String: AnyCodable]()
+            filterConditions = [String: RawJSON]()
             for (key, filter) in filters {
-                filterConditions?[key] = AnyCodable(filter)
+                filterConditions?[key] = filter
             }
         }
         return filterConditions
@@ -260,7 +260,7 @@ extension CallResponse {
                 Member(
                     user: $0.user.toUser,
                     role: $0.role,
-                    customData: convert($0.custom)
+                    customData: $0.custom
                 )                
             },
             blockedUsers: blockedUsers.map { $0.toUser },
@@ -272,7 +272,7 @@ extension CallResponse {
             updatedAt: updatedAt,
             hlsPlaylistUrl: egress.hls?.playlistUrl ?? "",
             autoRejectTimeout: settings.ring.autoCancelTimeoutMs,
-            customData: convert(custom),
+            customData: custom,
             session: session,
             createdBy: createdBy.toUser
         )

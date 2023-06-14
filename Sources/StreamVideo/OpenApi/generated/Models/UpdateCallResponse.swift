@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** Represents a call */
 
-
-
-
 public struct UpdateCallResponse: Codable, JSONEncodable, Hashable {
-
     public var blockedUsers: [UserResponse]
     public var call: CallResponse
     public var duration: String

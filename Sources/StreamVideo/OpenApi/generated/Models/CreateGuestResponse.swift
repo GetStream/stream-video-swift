@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CreateGuestResponse: Codable, JSONEncodable, Hashable {
-
     /** the access token to authenticate the user */
     public var accessToken: String
     public var duration: String

@@ -6,19 +6,12 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct UserResponse: Codable, JSONEncodable, Hashable {
-
     /** Date/time of creation */
     public var createdAt: Date
-    public var custom: [String: AnyCodable]
+    public var custom: [String: RawJSON]
     /** Date/time of deletion */
     public var deletedAt: Date?
     public var id: String
@@ -29,7 +22,7 @@ public struct UserResponse: Codable, JSONEncodable, Hashable {
     /** Date/time of the last update */
     public var updatedAt: Date
 
-    public init(createdAt: Date, custom: [String: AnyCodable], deletedAt: Date? = nil, id: String, image: String? = nil, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
+    public init(createdAt: Date, custom: [String: RawJSON], deletedAt: Date? = nil, id: String, image: String? = nil, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
         self.createdAt = createdAt
         self.custom = custom
         self.deletedAt = deletedAt

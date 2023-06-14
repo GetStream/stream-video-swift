@@ -6,25 +6,18 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CallRequest: Codable, JSONEncodable, Hashable {
-
     public var createdBy: UserRequest?
     public var createdById: String?
-    public var custom: [String: AnyCodable]?
+    public var custom: [String: RawJSON]?
     public var members: [MemberRequest]?
     public var settingsOverride: CallSettingsRequest?
     public var startsAt: Date?
     public var team: String?
 
-    public init(createdBy: UserRequest? = nil, createdById: String? = nil, custom: [String: AnyCodable]? = nil, members: [MemberRequest]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil, team: String? = nil) {
+    public init(createdBy: UserRequest? = nil, createdById: String? = nil, custom: [String: RawJSON]? = nil, members: [MemberRequest]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil, team: String? = nil) {
         self.createdBy = createdBy
         self.createdById = createdById
         self.custom = custom

@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct GetCallTypeResponse: Codable, JSONEncodable, Hashable {
-
     public var createdAt: Date
     public var duration: String
     public var grants: [String: [String]]

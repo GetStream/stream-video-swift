@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct AudioSettings: Codable, JSONEncodable, Hashable {
-
     public var accessRequestEnabled: Bool
     public var micDefaultOn: Bool
     public var opusDtxEnabled: Bool

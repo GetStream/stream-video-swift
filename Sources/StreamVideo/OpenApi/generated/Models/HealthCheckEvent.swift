@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
-
     /** The connection_id for this client */
     public var connectionId: String
     public var createdAt: Date

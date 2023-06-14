@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when call broadcasting has stopped */
 
-
-
-
 public struct CallBroadcastingStoppedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     /** The type of event: \"call.broadcasting_stopped\" in this case */

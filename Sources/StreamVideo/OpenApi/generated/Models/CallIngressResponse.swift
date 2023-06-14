@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CallIngressResponse: Codable, JSONEncodable, Hashable {
-
     public var rtmp: RTMPIngress
 
     public init(rtmp: RTMPIngress) {

@@ -6,23 +6,16 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct UpdateCallRequest: Codable, JSONEncodable, Hashable {
-
     /** Custom data for this object */
-    public var custom: [String: AnyCodable]?
+    public var custom: [String: RawJSON]?
     public var settingsOverride: CallSettingsRequest?
     /** the time the call is scheduled to start */
     public var startsAt: Date?
 
-    public init(custom: [String: AnyCodable]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil) {
+    public init(custom: [String: RawJSON]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil) {
         self.custom = custom
         self.settingsOverride = settingsOverride
         self.startsAt = startsAt

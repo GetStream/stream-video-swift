@@ -575,7 +575,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 Member(
                     user: $0.user.toUser,
                     role: $0.role,
-                    customData: convert($0.custom)
+                    customData: $0.custom
                 )
             }
             var members = self.state.callData?.members ?? []
@@ -597,7 +597,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                     members[index] = Member(
                         user: update.user.toUser,
                         role: update.role,
-                        customData: convert(update.custom)
+                        customData: update.custom
                     )
                 }
             }

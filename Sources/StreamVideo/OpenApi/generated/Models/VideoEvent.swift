@@ -6,13 +6,7 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** The discriminator object for all websocket events, you should use this to map event payloads to their own type */
-
-
 
 internal class VideoEventMapping: Decodable {
     let type: String

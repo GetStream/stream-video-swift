@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct Credentials: Codable, JSONEncodable, Hashable {
-
     public var iceServers: [ICEServer]
     public var server: SFUResponse
     public var token: String

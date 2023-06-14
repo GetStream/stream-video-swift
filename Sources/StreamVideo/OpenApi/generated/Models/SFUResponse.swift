@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct SFUResponse: Codable, JSONEncodable, Hashable {
-
     public var edgeName: String
     public var url: String
     public var wsEndpoint: String

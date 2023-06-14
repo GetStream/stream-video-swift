@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a participant leaves a call session */
 
-
-
-
 public struct CallSessionParticipantLeftEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     /** Call session ID */

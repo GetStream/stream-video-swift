@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct SortParamRequest: Codable, JSONEncodable, Hashable {
-
     public var direction: Int?
     public var field: String?
 

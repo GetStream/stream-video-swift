@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct BroadcastSettings: Codable, JSONEncodable, Hashable {
-
     public var enabled: Bool
     public var hls: HLSSettings
 

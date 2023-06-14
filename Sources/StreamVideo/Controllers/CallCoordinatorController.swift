@@ -130,7 +130,7 @@ class CallCoordinatorController: @unchecked Sendable {
             return Member(
                 user: user,
                 role: member.role ?? member.user.role,
-                customData: convert(member.custom)
+                customData: member.custom
             )
         }
     }
@@ -173,7 +173,7 @@ class CallCoordinatorController: @unchecked Sendable {
         var members = [MemberRequest]()
         for participant in participants {
             let callMemberRequest = MemberRequest(
-                custom: RawJSON.convert(customData: participant.customData),
+                custom: participant.customData,
                 role: participant.role,
                 userId: participant.id
             )

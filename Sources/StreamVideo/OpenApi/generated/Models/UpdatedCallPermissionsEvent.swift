@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly */
 
-
-
-
 public struct UpdatedCallPermissionsEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     /** The capabilities of the current user */

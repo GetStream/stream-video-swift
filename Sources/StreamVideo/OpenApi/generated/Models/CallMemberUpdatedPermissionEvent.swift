@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when one or more members get its role updated */
 
-
-
-
 public struct CallMemberUpdatedPermissionEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var call: CallResponse
     public var callCid: String
     /** The capabilities by role for this call */

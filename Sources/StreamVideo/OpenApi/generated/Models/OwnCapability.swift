@@ -6,14 +6,7 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** All possibility of string to use */
-
-
-
 
 public enum OwnCapability: String, Codable, CaseIterable {
     case blockUsers = "block-users"

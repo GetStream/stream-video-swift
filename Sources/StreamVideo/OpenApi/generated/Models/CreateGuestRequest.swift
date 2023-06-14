@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CreateGuestRequest: Codable, JSONEncodable, Hashable {
-
     public var user: UserRequest
 
     public init(user: UserRequest) {

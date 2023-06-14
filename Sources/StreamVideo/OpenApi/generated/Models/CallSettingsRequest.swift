@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
-
     public var audio: AudioSettingsRequest?
     public var backstage: BackstageSettingsRequest?
     public var geofencing: GeofenceSettingsRequest?

@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct EgressRTMPResponse: Codable, JSONEncodable, Hashable {
-
     public var name: String
     public var streamKey: String
     public var url: String

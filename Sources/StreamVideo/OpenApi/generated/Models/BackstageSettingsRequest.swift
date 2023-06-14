@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct BackstageSettingsRequest: Codable, JSONEncodable, Hashable {
-
     public var enabled: Bool?
 
     public init(enabled: Bool? = nil) {

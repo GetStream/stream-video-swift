@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct RingSettingsRequest: Codable, JSONEncodable, Hashable {
-
     public var autoCancelTimeoutMs: Int?
     public var incomingCallTimeoutMs: Int?
 

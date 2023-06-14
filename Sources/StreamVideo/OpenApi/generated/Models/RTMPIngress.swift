@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** RTMP input settings */
 
-
-
-
 public struct RTMPIngress: Codable, JSONEncodable, Hashable {
-
     public var address: String
 
     public init(address: String) {

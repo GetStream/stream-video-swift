@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct APNS: Codable, JSONEncodable, Hashable {
-
     public var body: String
     public var title: String
 

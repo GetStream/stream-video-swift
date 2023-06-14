@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct WSAuthMessageRequest: Codable, JSONEncodable, Hashable {
-
     public var token: String
     public var userDetails: ConnectUserDetailsRequest
 

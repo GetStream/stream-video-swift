@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct RequestPermissionResponse: Codable, JSONEncodable, Hashable {
-
     public var duration: String
 
     public init(duration: String) {

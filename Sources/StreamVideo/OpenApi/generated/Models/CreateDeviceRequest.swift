@@ -6,23 +6,15 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
-
     public enum PushProvider: String, Codable, CaseIterable {
         case firebase = "firebase"
         case apn = "apn"
         case huawei = "huawei"
         case xiaomi = "xiaomi"
     }
-    static let idRule = StringRule(minLength: 1, maxLength: 255, pattern: nil)
     public var id: String?
     public var pushProvider: PushProvider?
     public var pushProviderName: String?

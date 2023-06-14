@@ -6,23 +6,15 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct MemberRequest: Codable, JSONEncodable, Hashable {
-
-    static let userIdRule = StringRule(minLength: 1, maxLength: nil, pattern: nil)
     /** Custom data for this object */
-    public var custom: [String: AnyCodable]?
+    public var custom: [String: RawJSON]?
     public var role: String?
     public var userId: String
 
-    public init(custom: [String: AnyCodable]? = nil, role: String? = nil, userId: String) {
+    public init(custom: [String: RawJSON]? = nil, role: String? = nil, userId: String) {
         self.custom = custom
         self.role = role
         self.userId = userId

@@ -6,19 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct TargetResolutionRequest: Codable, JSONEncodable, Hashable {
-
-    static let bitrateRule = NumericRule<Int>(minimum: nil, exclusiveMinimum: false, maximum: 6000000, exclusiveMaximum: false, multipleOf: nil)
-    static let heightRule = NumericRule<Int>(minimum: 240, exclusiveMinimum: false, maximum: 2560, exclusiveMaximum: false, multipleOf: nil)
-    static let widthRule = NumericRule<Int>(minimum: 240, exclusiveMinimum: false, maximum: 2560, exclusiveMaximum: false, multipleOf: nil)
     public var bitrate: Int?
     public var height: Int?
     public var width: Int?

@@ -6,16 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
-
-
 
 
 public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
-
     public var acceptedBy: [String: Date]
     public var endedAt: Date?
     public var id: String

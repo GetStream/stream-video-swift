@@ -6,17 +6,9 @@
 //
 
 import Foundation
-#if canImport(AnyCodable)
-import AnyCodable
-#endif
-
 /** This event is sent when a call is mark as ended for all its participants. Clients receiving this event should leave the call screen */
 
-
-
-
 public struct CallEndedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
-
     public var callCid: String
     public var createdAt: Date
     /** The type of event: \"call.ended\" in this case */
