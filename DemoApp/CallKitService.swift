@@ -190,24 +190,23 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private func subscribeToCallEvents() {
         Task {
             for await wsEvent in streamVideo.subscribe() {
-                guard let event = callEventsHandler.checkForCallEvents(from: wsEvent) else {
-                    return
-                }
-                switch event {
-                case .ended(_):
-                    endCurrentCall()
-                case .rejected(let callInfo):
-                    if callInfo.user?.id == streamVideo.user.id {
+                if let event = callEventsHandler.checkForCallEvents(from: wsEvent) {
+                    switch event {
+                    case .ended(_):
                         endCurrentCall()
-                    } else if callInfo.user?.id == createdBy?.id {
-                        endCurrentCall()
+                    case .rejected(let callInfo):
+                        if callInfo.user?.id == streamVideo.user.id {
+                            endCurrentCall()
+                        } else if callInfo.user?.id == createdBy?.id {
+                            endCurrentCall()
+                        }
+                    case .accepted(let callInfo):
+                        if callInfo.user?.id == streamVideo.user.id && state == .idle {
+                            endCurrentCall()
+                        }
+                    default:
+                        log.debug("received call event")
                     }
-                case .accepted(let callInfo):
-                    if callInfo.user?.id == streamVideo.user.id && state == .idle {
-                        endCurrentCall()
-                    }
-                default:
-                    log.debug("received call event")
                 }
             }
         }
