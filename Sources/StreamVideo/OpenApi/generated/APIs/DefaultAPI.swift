@@ -223,34 +223,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
-     Create Call Type
-     
-     - parameter createCallTypeRequest: (body)  
-     - returns: CreateCallTypeResponse
-     */
-
-    open func createCallType(createCallTypeRequest: CreateCallTypeRequest) async throws -> CreateCallTypeResponse {
-        let localVariablePath = "/calltypes"
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "POST",
-            request: createCallTypeRequest
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(CreateCallTypeResponse.self, from: $0)
-        }
-    }
-    /**
-     Create Call Type
-     - POST /calltypes
-     -  
-     - parameter createCallTypeRequest: (body)  
-     - returns: RequestBuilder<CreateCallTypeResponse> 
-     */
-
-
-    /**
      Create device
      
      - parameter createDeviceRequest: (body)  
@@ -303,36 +275,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      -  
      - parameter createGuestRequest: (body)  
      - returns: RequestBuilder<CreateGuestResponse> 
-     */
-
-
-    /**
-     Delete Call Type
-     
-     - parameter name: (path)  
-     - returns: ModelResponse
-     */
-
-    open func deleteCallType(name: String) async throws -> ModelResponse {
-        var localVariablePath = "/calltypes/{name}"
-        let namePreEscape = "\(APIHelper.mapValueToPathItem(name))"
-        let namePostEscape = namePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{name}", with: namePostEscape, options: .literal, range: nil)
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "DELETE"
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(ModelResponse.self, from: $0)
-        }
-    }
-    /**
-     Delete Call Type
-     - DELETE /calltypes/{name}
-     -  
-     - parameter name: (path)  
-     - returns: RequestBuilder<ModelResponse> 
      */
 
 
@@ -450,36 +392,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      - parameter ring: (query)  (optional)
      - parameter notify: (query)  (optional)
      - returns: RequestBuilder<GetCallResponse> 
-     */
-
-
-    /**
-     Get Call Type
-     
-     - parameter name: (path)  
-     - returns: GetCallTypeResponse
-     */
-
-    open func getCallType(name: String) async throws -> GetCallTypeResponse {
-        var localVariablePath = "/calltypes/{name}"
-        let namePreEscape = "\(APIHelper.mapValueToPathItem(name))"
-        let namePostEscape = namePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{name}", with: namePostEscape, options: .literal, range: nil)
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "GET"
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(GetCallTypeResponse.self, from: $0)
-        }
-    }
-    /**
-     Get Call Type
-     - GET /calltypes/{name}
-     -  
-     - parameter name: (path)  
-     - returns: RequestBuilder<GetCallTypeResponse> 
      */
 
 
@@ -1367,39 +1279,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
-     Update Call Type
-     
-     - parameter name: (path)  
-     - parameter updateCallTypeRequest: (body)  
-     - returns: UpdateCallTypeResponse
-     */
-
-    open func updateCallType(name: String, updateCallTypeRequest: UpdateCallTypeRequest) async throws -> UpdateCallTypeResponse {
-        var localVariablePath = "/calltypes/{name}"
-        let namePreEscape = "\(APIHelper.mapValueToPathItem(name))"
-        let namePostEscape = namePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{name}", with: namePostEscape, options: .literal, range: nil)
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "PUT",
-            request: updateCallTypeRequest
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(UpdateCallTypeResponse.self, from: $0)
-        }
-    }
-    /**
-     Update Call Type
-     - PUT /calltypes/{name}
-     -  
-     - parameter name: (path)  
-     - parameter updateCallTypeRequest: (body)  
-     - returns: RequestBuilder<UpdateCallTypeResponse> 
-     */
-
-
-    /**
      Update user permissions
      
      - parameter type: (path)  
@@ -1447,16 +1326,10 @@ protocol DefaultAPIEndpoints {
         func blockUser(type: String, id: String, blockUserRequest: BlockUserRequest) async throws -> BlockUserResponse
 
 
-        func createCallType(createCallTypeRequest: CreateCallTypeRequest) async throws -> CreateCallTypeResponse
-
-
         func createDevice(createDeviceRequest: CreateDeviceRequest) async throws -> ModelResponse
 
 
         func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse
-
-
-        func deleteCallType(name: String) async throws -> ModelResponse
 
 
         func deleteDevice(id: String?, userId: String?) async throws -> ModelResponse
@@ -1466,9 +1339,6 @@ protocol DefaultAPIEndpoints {
 
 
         func getCall(type: String, id: String, connectionId: String?, membersLimit: Int?, ring: Bool?, notify: Bool?) async throws -> GetCallResponse
-
-
-        func getCallType(name: String) async throws -> GetCallTypeResponse
 
 
         func getEdges() async throws -> GetEdgesResponse
@@ -1544,9 +1414,6 @@ protocol DefaultAPIEndpoints {
 
 
         func updateCallMembers(type: String, id: String, updateCallMembersRequest: UpdateCallMembersRequest) async throws -> UpdateCallMembersResponse
-
-
-        func updateCallType(name: String, updateCallTypeRequest: UpdateCallTypeRequest) async throws -> UpdateCallTypeResponse
 
 
         func updateUserPermissions(type: String, id: String, updateUserPermissionsRequest: UpdateUserPermissionsRequest) async throws -> UpdateUserPermissionsResponse

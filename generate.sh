@@ -9,7 +9,7 @@ OPENAPI_GENERATED_CODE_ROOT="${PROJECT_ROOT}/Sources/StreamVideo/OpenApi/generat
 #docker run --rm -v "${OPENAPI_GENERATED_CODE_ROOT}:/local" \
 #   -v "/Users/tommaso/src/protocol/openapi:/openapi" \
 #   -v "/Users/tommaso/src/openapi-generator/modules/openapi-generator/src/main/resources:/templates" \
-#   ghcr.io/getstream/openapi-generator:master \
+#   openapidev \
 #   generate -g swift5 \
 #   -i /openapi/video-openapi.yaml \
 #   -t /templates/swift5 \
@@ -27,12 +27,12 @@ docker run --rm -v "${OPENAPI_GENERATED_CODE_ROOT}:/local" \
    --additional-properties=responseAs=AsyncAwait
 
 # move generated code from tmp to generated code root path
-rm -rf ${OPENAPI_GENERATED_CODE_ROOT}/APIs
+rm -rf ${OPENAPI_GENERATED_CODE_ROOT}/APIs/*
 rm -rf ${OPENAPI_GENERATED_CODE_ROOT}/Models
 rm -rf ${OPENAPI_GENERATED_CODE_ROOT}/*.swift
 
 cp ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/*.swift ${OPENAPI_GENERATED_CODE_ROOT}
-mv ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/APIs ${OPENAPI_GENERATED_CODE_ROOT}
+cp ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/APIs/DefaultAPI.swift ${OPENAPI_GENERATED_CODE_ROOT}/APIs/
 mv ${OPENAPI_GENERATED_CODE_ROOT}/tmp/OpenAPIClient/Classes/OpenAPIs/Models ${OPENAPI_GENERATED_CODE_ROOT}
 
 # delete the tmp path
