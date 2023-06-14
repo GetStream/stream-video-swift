@@ -288,7 +288,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
     open func deleteDevice(id: String? = nil, userId: String? = nil) async throws -> ModelResponse {
         let localVariablePath = "/devices"
-        var queryParams = APIHelper.mapValuesToQueryItems([
+        let queryParams = APIHelper.mapValuesToQueryItems([
             "id": (wrappedValue: id?.encodeToJSON(), isExplode: false),
             "user_id": (wrappedValue: userId?.encodeToJSON(), isExplode: false),
         ])
@@ -366,7 +366,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
-        var queryParams = APIHelper.mapValuesToQueryItems([
+        let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: false),
             "members_limit": (wrappedValue: membersLimit?.encodeToJSON(), isExplode: false),
             "ring": (wrappedValue: ring?.encodeToJSON(), isExplode: false),
@@ -438,7 +438,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
-        var queryParams = APIHelper.mapValuesToQueryItems([
+        let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: false),
         ])
         let urlRequest = try makeRequest(
@@ -516,7 +516,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
-        var queryParams = APIHelper.mapValuesToQueryItems([
+        let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: false),
         ])
         let urlRequest = try makeRequest(
@@ -575,7 +575,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
     open func listDevices(userId: String? = nil) async throws -> ListDevicesResponse {
         let localVariablePath = "/devices"
-        var queryParams = APIHelper.mapValuesToQueryItems([
+        let queryParams = APIHelper.mapValuesToQueryItems([
             "user_id": (wrappedValue: userId?.encodeToJSON(), isExplode: false),
         ])
         let urlRequest = try makeRequest(
@@ -719,7 +719,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
     open func queryCalls(queryCallsRequest: QueryCallsRequest, connectionId: String? = nil) async throws -> QueryCallsResponse {
         let localVariablePath = "/calls"
-        var queryParams = APIHelper.mapValuesToQueryItems([
+        let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: false),
         ])
         let urlRequest = try makeRequest(

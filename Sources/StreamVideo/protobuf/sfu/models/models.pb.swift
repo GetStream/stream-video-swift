@@ -218,12 +218,15 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   case publishTrackOutOfOrder // = 102
   case publishTrackVideoLayerNotFound // = 103
   case participantNotFound // = 200
+  case participantMigratingOut // = 201
+  case participantMigrationFailed // = 202
   case callNotFound // = 300
   case requestValidationFailed // = 400
   case unauthenticated // = 401
   case permissionDenied // = 403
   case tooManyRequests // = 429
   case internalServerError // = 500
+  case sfuShuttingDown // = 600
   case UNRECOGNIZED(Int)
 
   init() {
@@ -238,12 +241,15 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case 102: self = .publishTrackOutOfOrder
     case 103: self = .publishTrackVideoLayerNotFound
     case 200: self = .participantNotFound
+    case 201: self = .participantMigratingOut
+    case 202: self = .participantMigrationFailed
     case 300: self = .callNotFound
     case 400: self = .requestValidationFailed
     case 401: self = .unauthenticated
     case 403: self = .permissionDenied
     case 429: self = .tooManyRequests
     case 500: self = .internalServerError
+    case 600: self = .sfuShuttingDown
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -256,12 +262,15 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case .publishTrackOutOfOrder: return 102
     case .publishTrackVideoLayerNotFound: return 103
     case .participantNotFound: return 200
+    case .participantMigratingOut: return 201
+    case .participantMigrationFailed: return 202
     case .callNotFound: return 300
     case .requestValidationFailed: return 400
     case .unauthenticated: return 401
     case .permissionDenied: return 403
     case .tooManyRequests: return 429
     case .internalServerError: return 500
+    case .sfuShuttingDown: return 600
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -279,12 +288,15 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     .publishTrackOutOfOrder,
     .publishTrackVideoLayerNotFound,
     .participantNotFound,
+    .participantMigratingOut,
+    .participantMigrationFailed,
     .callNotFound,
     .requestValidationFailed,
     .unauthenticated,
     .permissionDenied,
     .tooManyRequests,
     .internalServerError,
+    .sfuShuttingDown,
   ]
 }
 
@@ -412,12 +424,103 @@ extension Stream_Video_Sfu_Models_TrackUnpublishReason: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+enum Stream_Video_Sfu_Models_GoAwayReason: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case shuttingDown // = 1
+  case rebalance // = 2
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .shuttingDown
+    case 2: self = .rebalance
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .shuttingDown: return 1
+    case .rebalance: return 2
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_GoAwayReason: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_GoAwayReason] = [
+    .unspecified,
+    .shuttingDown,
+    .rebalance,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+/// CallState is the current state of the call
+/// as seen by an SFU.
 struct Stream_Video_Sfu_Models_CallState {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
+  /// participants is the list of participants in the call.
+  /// In large calls, the list could be truncated in which
+  /// case, the list of participants contains fewer participants
+  /// than the counts returned in participant_count. Anonymous
+  /// participants are **NOT** included in the list.
   var participants: [Stream_Video_Sfu_Models_Participant] = []
+
+  /// started_at is the time the call session actually started.
+  var startedAt: SwiftProtobuf.Google_Protobuf_Timestamp {
+    get {return _startedAt ?? SwiftProtobuf.Google_Protobuf_Timestamp()}
+    set {_startedAt = newValue}
+  }
+  /// Returns true if `startedAt` has been explicitly set.
+  var hasStartedAt: Bool {return self._startedAt != nil}
+  /// Clears the value of `startedAt`. Subsequent reads from it will return its default value.
+  mutating func clearStartedAt() {self._startedAt = nil}
+
+  /// participant_count contains the summary of the counts.
+  var participantCount: Stream_Video_Sfu_Models_ParticipantCount {
+    get {return _participantCount ?? Stream_Video_Sfu_Models_ParticipantCount()}
+    set {_participantCount = newValue}
+  }
+  /// Returns true if `participantCount` has been explicitly set.
+  var hasParticipantCount: Bool {return self._participantCount != nil}
+  /// Clears the value of `participantCount`. Subsequent reads from it will return its default value.
+  mutating func clearParticipantCount() {self._participantCount = nil}
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _startedAt: SwiftProtobuf.Google_Protobuf_Timestamp? = nil
+  fileprivate var _participantCount: Stream_Video_Sfu_Models_ParticipantCount? = nil
+}
+
+struct Stream_Video_Sfu_Models_ParticipantCount {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// Total number of participants in the call including
+  /// the anonymous participants.
+  var total: UInt32 = 0
+
+  /// Total number of anonymous participants in the call.
+  var anonymous: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -810,7 +913,9 @@ extension Stream_Video_Sfu_Models_TrackType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ErrorCode: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_GoAwayReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoDimension: @unchecked Sendable {}
@@ -875,12 +980,15 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     102: .same(proto: "ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER"),
     103: .same(proto: "ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND"),
     200: .same(proto: "ERROR_CODE_PARTICIPANT_NOT_FOUND"),
+    201: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATING_OUT"),
+    202: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATION_FAILED"),
     300: .same(proto: "ERROR_CODE_CALL_NOT_FOUND"),
     400: .same(proto: "ERROR_CODE_REQUEST_VALIDATION_FAILED"),
     401: .same(proto: "ERROR_CODE_UNAUTHENTICATED"),
     403: .same(proto: "ERROR_CODE_PERMISSION_DENIED"),
     429: .same(proto: "ERROR_CODE_TOO_MANY_REQUESTS"),
     500: .same(proto: "ERROR_CODE_INTERNAL_SERVER_ERROR"),
+    600: .same(proto: "ERROR_CODE_SFU_SHUTTING_DOWN"),
   ]
 }
 
@@ -905,10 +1013,20 @@ extension Stream_Video_Sfu_Models_TrackUnpublishReason: SwiftProtobuf._ProtoName
   ]
 }
 
+extension Stream_Video_Sfu_Models_GoAwayReason: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "GO_AWAY_REASON_UNSPECIFIED"),
+    1: .same(proto: "GO_AWAY_REASON_SHUTTING_DOWN"),
+    2: .same(proto: "GO_AWAY_REASON_REBALANCE"),
+  ]
+}
+
 extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".CallState"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .same(proto: "participants"),
+    2: .standard(proto: "started_at"),
+    3: .standard(proto: "participant_count"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -918,20 +1036,72 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.participants) }()
+      case 2: try { try decoder.decodeSingularMessageField(value: &self._startedAt) }()
+      case 3: try { try decoder.decodeSingularMessageField(value: &self._participantCount) }()
       default: break
       }
     }
   }
 
   func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
     if !self.participants.isEmpty {
       try visitor.visitRepeatedMessageField(value: self.participants, fieldNumber: 1)
     }
+    try { if let v = self._startedAt {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 2)
+    } }()
+    try { if let v = self._participantCount {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
+    } }()
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Models_CallState, rhs: Stream_Video_Sfu_Models_CallState) -> Bool {
     if lhs.participants != rhs.participants {return false}
+    if lhs._startedAt != rhs._startedAt {return false}
+    if lhs._participantCount != rhs._participantCount {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_ParticipantCount: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ParticipantCount"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "total"),
+    2: .same(proto: "anonymous"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularUInt32Field(value: &self.total) }()
+      case 2: try { try decoder.decodeSingularUInt32Field(value: &self.anonymous) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.total != 0 {
+      try visitor.visitSingularUInt32Field(value: self.total, fieldNumber: 1)
+    }
+    if self.anonymous != 0 {
+      try visitor.visitSingularUInt32Field(value: self.anonymous, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_ParticipantCount, rhs: Stream_Video_Sfu_Models_ParticipantCount) -> Bool {
+    if lhs.total != rhs.total {return false}
+    if lhs.anonymous != rhs.anonymous {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
