@@ -3,6 +3,14 @@ title: Audio Room Tutorial
 description: How to build an audio room using Stream's video SDKs
 ---
 
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
+
+## Credentials
+
+For this tutorial we will use the information below to create and join an AudioRoom
+
+<TokenSnippet sampleApp='audio-rooms'/>
+
 ## Audio Room Tutorial
 
 This tutorial will teach you how to build an audio room experience like Twitter Spaces or Clubhouse.
@@ -40,16 +48,16 @@ struct AudioRoomsApp: App {
     init() {
         // create a user.
         self.currentUser = User(
-            id: "tutorial@getstream.io", // any string
-            name: "Tutorial", // name and image are used in the UI
+            id: "tutorial@getstream.io", // The User Id can be found in the Credentials section
+            name: "Tutorial", // The name is used in the UI
             role: "admin" // user roles are important for an audio room
         )
 
         // initialize StreamVideo
         self.streamVideo = StreamVideo(
-            apiKey: "hd8szvscpxvd", // demo API key
+            apiKey: "hd8szvscpxvd", // The API Key can be found in the Credentials section
             user: currentUser,
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODY3NDY4MDksImV4cCI6MTY4NzM1MTYxNH0.j14I3udGgr_pfkS0_Jz8s7xR7gRzitP58fjTjLkbnk8"
+            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidHV0b3JpYWxAZ2V0c3RyZWFtLmlvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci90dXRvcmlhbEBnZXRzdHJlYW0uaW8iLCJpYXQiOjE2ODY3NDY4MDksImV4cCI6MTY4NzM1MTYxNH0.j14I3udGgr_pfkS0_Jz8s7xR7gRzitP58fjTjLkbnk8" // The token can be found in the Credentials section
         )
     }
 
@@ -67,7 +75,7 @@ struct AudioRoomsApp: App {
                 Task {
                     guard call == nil else { return }
                     try await streamVideo?.connect()
-                    call = streamVideo?.call(callType: .audioRoom, callId: "123")
+                    call = streamVideo?.call(callType: .audioRoom, callId: "123") // The callId can be found in the Credentials section
                     try await call?.join()
                 }
             }
@@ -142,6 +150,7 @@ Group {
 ```
 
 ### Step 4 - Go live and join from the browser
+
 Run the sample app now and you'll see 1 participant. Click the go live button to allow participants to join.
 
 To make this a little more interactive let's join the call from your browser. Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call. On your iOS emulator you'll see the text update to 2 participants.
