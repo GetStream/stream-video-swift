@@ -528,6 +528,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard let wsCallEvent = event as? WSCallEvent, wsCallEvent.callCid == cId else {
             return
         }
+        updateState(from: event)
+        continuation?.yield(event)
+        for eventHandler in eventHandlers {
+            eventHandler?(event)
+        }
+    }
+    
+    internal func updateState(from event: Event) {
         if let event = event as? CallAcceptedEvent {
             let callData = event.call.toCallData(
                 members: [],
@@ -562,10 +570,38 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         } else if let event = event as? UpdatedCallPermissionsEvent {
             updateCurrentCallSettings(event)
-        }
-        continuation?.yield(event)
-        for eventHandler in eventHandlers {
-            eventHandler?(event)
+        } else if let event = event as? CallMemberAddedEvent {
+            let addedMembers = event.members.map {
+                Member(
+                    user: $0.user.toUser,
+                    role: $0.role,
+                    customData: convert($0.custom)
+                )
+            }
+            var members = self.state.callData?.members ?? []
+            for added in addedMembers {
+                if !members.contains(added) {
+                    members.append(added)
+                }
+            }
+            self.state.callData?.members = members
+        } else if let event = event as? CallMemberRemovedEvent {
+            let members = (self.state.callData?.members ?? [])
+                .filter { !event.members.contains($0.id) }
+            self.state.callData?.members = members
+        } else if let event = event as? CallMemberUpdatedEvent {
+            var members = (self.state.callData?.members ?? [])
+            let updated = event.members
+            for update in updated {
+                if let index = members.firstIndex(where: { $0.id == update.userId }) {
+                    members[index] = Member(
+                        user: update.user.toUser,
+                        role: update.role,
+                        customData: convert(update.custom)
+                    )
+                }
+            }
+            self.state.callData?.members = members
         }
     }
     
@@ -607,16 +643,4 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             recording: currentCallSettings.recording
         )
     }
-}
-
-public enum ReconnectionStatus {
-    case connected
-    case reconnecting
-    case disconnected
-}
-
-public enum RecordingState {
-    case noRecording
-    case requested
-    case recording
 }

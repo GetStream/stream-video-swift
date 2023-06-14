@@ -35,3 +35,9 @@ struct CoordinatorInfo {
 }
 
 public struct FetchingLocationError: Error {}
+
+public enum RecordingState {
+    case noRecording
+    case requested
+    case recording
+}

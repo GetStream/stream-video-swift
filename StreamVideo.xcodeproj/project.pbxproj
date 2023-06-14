@@ -504,6 +504,7 @@
 		84DCA2122A389167000C3411 /* AssertDelay.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2102A389160000C3411 /* AssertDelay.swift */; };
 		84DCA2142A38A428000C3411 /* CoordinatorModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2132A38A428000C3411 /* CoordinatorModels.swift */; };
 		84DCA2152A38A79E000C3411 /* Token.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84AF64D6287C79610012A503 /* Token.swift */; };
+		84DCA2182A398C53000C3411 /* Call_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2172A398C53000C3411 /* Call_Tests.swift */; };
 		84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7912947476300DD4CE3 /* CallViewHelper.swift */; };
 		84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */; };
 		84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */; };
@@ -1119,6 +1120,7 @@
 		84DCA20D2A3885FE000C3411 /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
 		84DCA2102A389160000C3411 /* AssertDelay.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AssertDelay.swift; sourceTree = "<group>"; };
 		84DCA2132A38A428000C3411 /* CoordinatorModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorModels.swift; sourceTree = "<group>"; };
+		84DCA2172A398C53000C3411 /* Call_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Call_Tests.swift; sourceTree = "<group>"; };
 		84E4F7912947476300DD4CE3 /* CallViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewHelper.swift; sourceTree = "<group>"; };
 		84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQuality.swift; sourceTree = "<group>"; };
 		84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQualityIndicator.swift; sourceTree = "<group>"; };
@@ -2099,6 +2101,14 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		84DCA2162A398BFD000C3411 /* Call */ = {
+			isa = PBXGroup;
+			children = (
+				84DCA2172A398C53000C3411 /* Call_Tests.swift */,
+			);
+			path = Call;
+			sourceTree = "<group>";
+		};
 		84EA5D3D28C09A95004D3531 /* Controllers */ = {
 			isa = PBXGroup;
 			children = (
@@ -2198,6 +2208,7 @@
 			isa = PBXGroup;
 			children = (
 				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
+				84DCA2162A398BFD000C3411 /* Call */,
 				84F58B6E29EE911500010C4C /* WebSocketClient */,
 				84D6494529E9F2B7002CA428 /* WebRTC */,
 				84D114D829F092B200BCCB0C /* Controllers */,
@@ -3095,6 +3106,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				84F58B7829EE945900010C4C /* RetryStrategy_Tests.swift in Sources */,
+				84DCA2182A398C53000C3411 /* Call_Tests.swift in Sources */,
 				84F58B7029EE914400010C4C /* BackgroundTaskScheduler_Tests.swift in Sources */,
 				842747F329EED8D900E063AD /* InternetConnection_Mock.swift in Sources */,
 				8478A0EC29F2604A0001F860 /* ControllerTestCase.swift in Sources */,

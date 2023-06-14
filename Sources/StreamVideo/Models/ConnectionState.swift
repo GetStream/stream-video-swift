@@ -25,3 +25,9 @@ public enum DisconnectionReason: Equatable, Sendable {
     case user // User initiated
     case networkError(_ error: Error)
 }
+
+public enum ReconnectionStatus {
+    case connected
+    case reconnecting
+    case disconnected
+}
