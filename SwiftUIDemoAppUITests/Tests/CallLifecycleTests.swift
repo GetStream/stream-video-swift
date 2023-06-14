@@ -143,7 +143,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
         WHEN("user re-enters the call as another user") {
             userRobot
-                .assertParticipantJoinCall()
+                .waitForParticipantsToJoin(1)
                 .endCall()
                 .logout()
                 .login(userIndex: 1, waitForLoginPage: true)
