@@ -15,17 +15,17 @@ import AnyCodable
 
 
 
-internal struct CallMemberUpdatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallMemberUpdatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
-    internal var call: CallResponse
-    internal var callCid: String
-    internal var createdAt: Date
+    public var call: CallResponse
+    public var callCid: String
+    public var createdAt: Date
     /** The list of members that were updated */
-    internal var members: [MemberResponse]
+    public var members: [MemberResponse]
     /** The type of event: \"call.member_updated\" in this case */
-    internal var type: String = "call.member_updated"
+    public var type: String = "call.member_updated"
 
-    internal init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String = "call.member_updated") {
+    public init(call: CallResponse, callCid: String, createdAt: Date, members: [MemberResponse], type: String = "call.member_updated") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
@@ -33,7 +33,7 @@ internal struct CallMemberUpdatedEvent: Codable, JSONEncodable, Hashable, WSCall
         self.type = type
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"
@@ -43,7 +43,7 @@ internal struct CallMemberUpdatedEvent: Codable, JSONEncodable, Hashable, WSCall
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(call, forKey: .call)
         try container.encode(callCid, forKey: .callCid)

@@ -11,11 +11,7 @@ class CallController {
     private var webRTCClient: WebRTCClient? {
         didSet {
             handleParticipantsUpdated()
-            handleParticipantEvent()
             handleParticipantCountUpdated()
-            if let allEventsMiddleware {
-                webRTCClient?.eventNotificationCenter.add(middleware: allEventsMiddleware)
-            }
         }
     }
 
@@ -28,7 +24,6 @@ class CallController {
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat
     private var reconnectionDate: Date?
-    private var allEventsMiddleware: AllEventsMiddleware?
     private let environment: CallController.Environment
     
     init(
@@ -38,14 +33,12 @@ class CallController {
         callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
-        allEventsMiddleware: AllEventsMiddleware?,
         environment: CallController.Environment = .init()
     ) {
         self.user = user
         self.callId = callId
         self.callType = callType
         self.callCoordinatorController = callCoordinatorController
-        self.allEventsMiddleware = allEventsMiddleware
         self.apiKey = apiKey
         self.videoConfig = videoConfig
         self.sfuReconnectionTime = environment.sfuReconnectionTime
@@ -93,22 +86,22 @@ class CallController {
     ///
     /// - Parameters:
     ///  - callId: the id of the call.
-    ///  - type: the type of the call.
+    ///  - callType: the type of the call.
     ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
     ///  - notify: A boolean value indicating whether members should be notified about the call.
     ///  - ring: A boolean value indicating whether to ring the call.
     /// - Throws: An error if the call doesn't exist.
     /// - Returns: The call's data.
     func getCall(
+        callType: String,
         callId: String,
-        type: String,
         membersLimit: Int?,
         ring: Bool,
         notify: Bool
     ) async throws -> CallData {
         let response = try await callCoordinatorController.coordinatorClient.getCall(
             callId: callId,
-            type: type,
+            type: callType,
             membersLimit: membersLimit,
             ring: ring,
             notify: notify
@@ -255,14 +248,6 @@ class CallController {
         }
     }
     
-    func updateCall(from recordingEvent: RecordingEvent) {
-        if recordingEvent.callCid == call?.cId {
-            call?.update(recordingState: recordingEvent.action.toState)
-        } else {
-            log.warning("Received recording event that doesn't match the active call")
-        }
-    }
-    
     // MARK: - private
     
     private func connectToEdge(
@@ -313,12 +298,6 @@ class CallController {
             DispatchQueue.main.async {
                 self?.call?.state.participants = participants
             }
-        }
-    }
-    
-    private func handleParticipantEvent() {
-        webRTCClient?.onParticipantEvent = { [weak self] event in
-            self?.call?.onParticipantEvent?(event)
         }
     }
     

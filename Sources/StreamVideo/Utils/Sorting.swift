@@ -4,41 +4,41 @@
 
 import Foundation
 
-public typealias Comparator<Value> = (Value, Value) -> ComparisonResult
+public typealias StreamSortComparator<Value> = (Value, Value) -> ComparisonResult
 
-public let defaultComparators: [Comparator<CallParticipant>] = [
+public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
 ]
 
-public let livestreamComparators: [Comparator<CallParticipant>] = [
+public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
     dominantSpeaker, isSpeaking, publishingVideo, publishingAudio, roles, userId
 ]
 
-public var pinned: Comparator<CallParticipant> = { (p1, p2) in
+public var pinned: StreamSortComparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.isPinned)
 }
 
-public var screensharing: Comparator<CallParticipant> = { (p1, p2) in
+public var screensharing: StreamSortComparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.isScreensharing)
 }
 
-public var dominantSpeaker: Comparator<CallParticipant> = { (p1, p2) in
+public var dominantSpeaker: StreamSortComparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.isDominantSpeaker)
 }
 
-public var isSpeaking: Comparator<CallParticipant> = { (p1, p2) in
+public var isSpeaking: StreamSortComparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.isSpeaking)
 }
 
-public var publishingVideo: Comparator<CallParticipant> = { (p1, p2) in
+public var publishingVideo: StreamSortComparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.hasVideo)
 }
 
-public var publishingAudio: Comparator<CallParticipant> = { (p1, p2) in
+public var publishingAudio: StreamSortComparator<CallParticipant> = { (p1, p2) in
     booleanComparison(first: p1, second: p2, \.hasAudio)
 }
 
-public var roles: Comparator<CallParticipant> = { (p1, p2) in
+public var roles: StreamSortComparator<CallParticipant> = { (p1, p2) in
     if p1.roles == p2.roles { return .orderedSame }
     let prioRoles = ["admin", "host", "speaker"]
     for role in prioRoles {
@@ -52,12 +52,12 @@ public var roles: Comparator<CallParticipant> = { (p1, p2) in
     return .orderedSame
 }
 
-public var userId: Comparator<CallParticipant> = { (p1, p2) in
+public var userId: StreamSortComparator<CallParticipant> = { (p1, p2) in
     p1.id >= p2.id ? .orderedDescending : .orderedAscending
 }
 
 public extension Sequence {
-    func sorted(using comparators: [Comparator<Element>], order: SortOrder = .descending) -> [Element] {
+    func sorted(using comparators: [StreamSortComparator<Element>], order: SortOrder = .descending) -> [Element] {
         sorted { valueA, valueB in
             for comparator in comparators {
                 let result = comparator(valueA, valueB)

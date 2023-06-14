@@ -14,24 +14,24 @@ import AnyCodable
 
 
 
-internal struct RingSettings: Codable, JSONEncodable, Hashable {
+public struct RingSettings: Codable, JSONEncodable, Hashable {
 
-    internal var autoCancelTimeoutMs: Int
-    internal var incomingCallTimeoutMs: Int
+    public var autoCancelTimeoutMs: Int
+    public var incomingCallTimeoutMs: Int
 
-    internal init(autoCancelTimeoutMs: Int, incomingCallTimeoutMs: Int) {
+    public init(autoCancelTimeoutMs: Int, incomingCallTimeoutMs: Int) {
         self.autoCancelTimeoutMs = autoCancelTimeoutMs
         self.incomingCallTimeoutMs = incomingCallTimeoutMs
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case autoCancelTimeoutMs = "auto_cancel_timeout_ms"
         case incomingCallTimeoutMs = "incoming_call_timeout_ms"
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(autoCancelTimeoutMs, forKey: .autoCancelTimeoutMs)
         try container.encode(incomingCallTimeoutMs, forKey: .incomingCallTimeoutMs)

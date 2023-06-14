@@ -122,7 +122,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(track: RTCVideoTrack?) -> CallParticipant {
+    public func withUpdated(track: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -147,7 +147,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(screensharingTrack: RTCVideoTrack?) -> CallParticipant {
+    public func withUpdated(screensharingTrack: RTCVideoTrack?) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -172,7 +172,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(audio: Bool) -> CallParticipant {
+    public func withUpdated(audio: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -197,7 +197,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
 
-    func withUpdated(video: Bool) -> CallParticipant {
+    public func withUpdated(video: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -222,7 +222,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(screensharing: Bool) -> CallParticipant {
+    public func withUpdated(screensharing: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -247,7 +247,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
 
-    func withUpdated(showTrack: Bool) -> CallParticipant {
+    public func withUpdated(showTrack: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -272,7 +272,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
 
-    func withUpdated(
+    public func withUpdated(
         isSpeaking: Bool,
         audioLevel: Float
     ) -> CallParticipant {
@@ -300,7 +300,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(dominantSpeaker: Bool) -> CallParticipant {
+    public func withUpdated(dominantSpeaker: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -325,7 +325,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(connectionQuality: ConnectionQuality) -> CallParticipant {
+    public func withUpdated(connectionQuality: ConnectionQuality) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -350,7 +350,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         )
     }
     
-    func withUpdated(pinState: Bool) -> CallParticipant {
+    public func withUpdated(pinState: Bool) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,

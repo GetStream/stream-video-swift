@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideo
+@testable import StreamVideoSwiftUI
 import XCTest
 
 @MainActor
@@ -35,7 +36,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
@@ -47,7 +48,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants, ring: true)
         
         // Then
         XCTAssert(callViewModel.outgoingCallMembers == participants)
@@ -174,7 +175,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants, ring: true)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants, ring: true)
         try await waitForCallEvent()
         callViewModel.hangUp()
         
@@ -214,7 +215,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         XCTAssert(call.id == callId)
         
         // When
-        callViewModel.acceptCall(callId: callId, type: callType)
+        callViewModel.acceptCall(callType: callType, callId: callId)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .inCall)
@@ -255,7 +256,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         XCTAssert(call.id == callId)
         
         // When
-        callViewModel.rejectCall(callId: callId, type: callType)
+        callViewModel.rejectCall(callType: callType, callId: callId)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -266,7 +267,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.joinCall(callId: callId, type: callType)
+        callViewModel.joinCall(callType: callType, callId: callId)
         
         // Then
         XCTAssert(callViewModel.callingState == .joining)
@@ -278,7 +279,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.enterLobby(callId: callId, type: callType, members: participants)
+        callViewModel.enterLobby(callType: callType, callId: callId, members: participants)
         
         // Then
         guard case let .lobby(lobbyInfo) = callViewModel.callingState else {
@@ -292,8 +293,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         try await waitForCallEvent()
         callViewModel.joinCall(
-            callId: callId,
-            type: callType
+            callType: callType,
+            callId: callId
         )
         try await waitForCallEvent()
         
@@ -306,7 +307,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.enterLobby(callId: callId, type: callType, members: participants)
+        callViewModel.enterLobby(callType: callType, callId: callId, members: participants)
         
         // Then
         guard case let .lobby(lobbyInfo) = callViewModel.callingState else {
@@ -332,7 +333,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         callViewModel.toggleCameraEnabled()
         
@@ -345,7 +346,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         callViewModel.toggleMicrophoneEnabled()
         
@@ -358,7 +359,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         callViewModel.toggleCameraPosition()
         
@@ -372,14 +373,19 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     func test_inCall_participantEvents() async throws {
         // Given
         let callViewModel = CallViewModel()
-        
+
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
-        let event = ParticipantEvent(id: "test", action: .join, user: "test", imageURL: nil)
-        callViewModel.call?.onParticipantEvent?(event)
+        let participantEvent = CallSessionParticipantJoinedEvent(
+            callCid: callCid,
+            createdAt: Date(),
+            sessionId: "123",
+            user: .make(from: "test")
+        )
+        eventNotificationCenter?.process(participantEvent)
         try await waitForCallEvent()
-        
+
         // Then
         try await XCTAssertWithDelay(callViewModel.participantEvent != nil)
         try await Task.sleep(nanoseconds: 2_500_000_000)
@@ -391,7 +397,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -420,7 +426,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -442,7 +448,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -464,7 +470,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
 
         // When
-        callViewModel.startCall(callId: callId, type: .default, members: participants)
+        callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
@@ -498,15 +504,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         return callViewModel
     }
     
-}
-
-@MainActor
-func XCTAssertWithDelay(
-    _ expression: @autoclosure () throws -> Bool,
-    nanoseconds: UInt64 = 500_000_000
-) async throws {
-    try await Task.sleep(nanoseconds: nanoseconds)
-    XCTAssert(try expression())
 }
 
 extension User {

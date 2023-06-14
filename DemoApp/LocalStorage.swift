@@ -65,7 +65,7 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler, PushTokenHandler
                 guard let tokenValue = defaults.value(forKey: tokenKey) as? String else {
                     throw ClientError.Unexpected()
                 }
-                let token = try UserToken(rawValue: tokenValue)
+                let token = UserToken(rawValue: tokenValue)
                 return UserCredentials(userInfo: loadedUser, token: token)
             } catch {
                 log.error("Error while decoding user: \(String(describing: error))")

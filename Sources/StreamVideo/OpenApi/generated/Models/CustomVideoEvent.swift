@@ -15,17 +15,17 @@ import AnyCodable
 
 
 
-internal struct CustomVideoEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CustomVideoEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
-    internal var callCid: String
-    internal var createdAt: Date
+    public var callCid: String
+    public var createdAt: Date
     /** Custom data for this object */
-    internal var custom: [String: AnyCodable]
+    public var custom: [String: AnyCodable]
     /** The type of event, \"custom\" in this case */
-    internal var type: String = "custom"
-    internal var user: UserResponse
+    public var type: String = "custom"
+    public var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, custom: [String: AnyCodable], type: String = "custom", user: UserResponse) {
+    public init(callCid: String, createdAt: Date, custom: [String: AnyCodable], type: String = "custom", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.custom = custom
@@ -33,7 +33,7 @@ internal struct CustomVideoEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case custom
@@ -43,7 +43,7 @@ internal struct CustomVideoEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)

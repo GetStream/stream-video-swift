@@ -14,19 +14,19 @@ import AnyCodable
 
 
 
-internal struct UpdateUserPermissionsRequest: Codable, JSONEncodable, Hashable {
+public struct UpdateUserPermissionsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var grantPermissions: [String]?
-    internal var revokePermissions: [String]?
-    internal var userId: String
+    public var grantPermissions: [String]?
+    public var revokePermissions: [String]?
+    public var userId: String
 
-    internal init(grantPermissions: [String]? = nil, revokePermissions: [String]? = nil, userId: String) {
+    public init(grantPermissions: [String]? = nil, revokePermissions: [String]? = nil, userId: String) {
         self.grantPermissions = grantPermissions
         self.revokePermissions = revokePermissions
         self.userId = userId
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case grantPermissions = "grant_permissions"
         case revokePermissions = "revoke_permissions"
         case userId = "user_id"
@@ -34,7 +34,7 @@ internal struct UpdateUserPermissionsRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(grantPermissions, forKey: .grantPermissions)
         try container.encodeIfPresent(revokePermissions, forKey: .revokePermissions)

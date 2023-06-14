@@ -82,7 +82,7 @@ struct HomeView: View {
                 } else {
                     Button {
                         resignFirstResponder()
-                        viewModel.joinCall(callId: callId, type: .default)
+                        viewModel.joinCall(callType: .default, callId: callId)
                     } label: {
                         Text("Join a call")
                             .padding()
@@ -176,11 +176,11 @@ struct HomeView: View {
             Button {
                 resignFirstResponder()
                 if callFlow == .lobby {
-                    viewModel.enterLobby(callId: callId, type: .default, members: members)
+                    viewModel.enterLobby(callType: .default, callId: callId, members: members)
                 } else {
                     viewModel.startCall(
+                        callType: .default,
                         callId: callId,
-                        type: .default,
                         members: members,
                         ring: callFlow == .ringEvents
                     )

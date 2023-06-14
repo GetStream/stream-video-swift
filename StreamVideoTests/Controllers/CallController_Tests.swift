@@ -10,6 +10,8 @@ final class CallController_Tests: ControllerTestCase {
 
     private var webRTCClient: WebRTCClient!
     
+    lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
+    
     public override func setUp() {
         super.setUp()
         streamVideo = StreamVideo(apiKey: apiKey, user: user, token: StreamVideo.mockToken, videoConfig: videoConfig)
@@ -190,6 +192,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.callData?.backstage == nil)
     }
     
+    @MainActor
     func test_callController_updateRecordingState() async throws {
         // Given
         let callCoordinator = makeCallCoordinatorController()
@@ -206,12 +209,14 @@ final class CallController_Tests: ControllerTestCase {
             members: []
         )
         callController.call = call
-        callController.updateCall(from: .init(callCid: callCid, type: "default", action: .started))
+        let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
+        eventNotificationCenter?.process(event)
         
         // Then
-        XCTAssert(callController.call?.state.recordingState == .recording)
+        try await XCTAssertWithDelay(callController.call?.state.recordingState == .recording)
     }
     
+    @MainActor
     func test_callController_updateRecordingStateDifferentCallCid() async throws {
         // Given
         let callCoordinator = makeCallCoordinatorController()
@@ -228,10 +233,11 @@ final class CallController_Tests: ControllerTestCase {
             members: []
         )
         callController.call = call
-        callController.updateCall(from: .init(callCid: "default:different", type: "default", action: .started))
+        let event = CallRecordingStartedEvent(callCid: "test", createdAt: Date())
+        eventNotificationCenter?.process(event)
         
         // Then
-        XCTAssert(callController.call?.state.recordingState == .noRecording)
+        try await XCTAssertWithDelay(callController.call?.state.recordingState == .noRecording)
     }
     
     func test_callController_cleanup() async throws {
@@ -266,7 +272,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             apiKey: apiKey,
             videoConfig: videoConfig,
-            allEventsMiddleware: nil,
             environment: .mock(with: webRTCClient)
         )
         return callController

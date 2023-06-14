@@ -11,14 +11,7 @@ class MockResponseBuilder {
         acceptedBy: [String: Date] = [:],
         rejectedBy: [String: Date] = [:]
     ) -> CallResponse {
-        let userResponse = UserResponse(
-            createdAt: Date(),
-            custom: [:],
-            id: "test",
-            role: "user",
-            teams: [],
-            updatedAt: Date()
-        )
+        let userResponse = makeUserResponse()
         let callIngressResponse = CallIngressResponse(
             rtmp: RTMPIngress(address: "test")
         )
@@ -51,6 +44,27 @@ class MockResponseBuilder {
             updatedAt: Date()
         )
         return callResponse
+    }
+    
+    func makeMemberResponse(id: String = "test") -> MemberResponse {
+        MemberResponse(
+            createdAt: Date(),
+            custom: [:],
+            updatedAt: Date(),
+            user: makeUserResponse(id: id),
+            userId: id
+        )
+    }
+    
+    func makeUserResponse(id: String = "test") -> UserResponse {
+        UserResponse(
+            createdAt: Date(),
+            custom: [:],
+            id: id,
+            role: "user",
+            teams: [],
+            updatedAt: Date()
+        )
     }
     
     func makeCallSettingsResponse() -> CallSettingsResponse {

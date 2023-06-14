@@ -31,27 +31,17 @@ public class StreamVideo {
             setupConnectionRecoveryHandler()
         }
     }
-    
-    private let callsMiddleware = CallsMiddleware()
-    private let permissionsMiddleware = PermissionsMiddleware()
-    private let customEventsMiddleware = CustomEventsMiddleware()
-    private let recordingEventsMiddleware = RecordingEventsMiddleware()
-    private let allEventsMiddleware = AllEventsMiddleware()
-    
-    private var watchContinuation: AsyncStream<Event>.Continuation?
         
+    private let eventsMiddleware = WSEventsMiddleware()
+    private var continuations = [AsyncStream<Event>.Continuation]()
+            
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
+        eventsMiddleware.add(subscriber: self)
         var middlewares: [EventMiddleware] = [
-            callsMiddleware,
-            permissionsMiddleware,
-            customEventsMiddleware,
-            recordingEventsMiddleware
+            eventsMiddleware
         ]
-        if videoConfig.listenToAllEvents {
-            middlewares.append(allEventsMiddleware)
-        }
         center.add(middlewares: middlewares)
         return center
     }()
@@ -173,7 +163,7 @@ public class StreamVideo {
         
         // Fetch the guest token.
         let guestUserResponse = try await callCoordinatorController.createGuestUser(with: user.id)
-        let token = try UserToken(rawValue: guestUserResponse.accessToken)
+        let token = UserToken(rawValue: guestUserResponse.accessToken)
         callCoordinatorController.update(token: token)
         
         // Update the user and token provider.
@@ -232,12 +222,6 @@ public class StreamVideo {
             self?.token = token
         }
         StreamVideoProviderKey.currentValue = self
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleCallEnded),
-            name: Notification.Name(CallNotification.callEnded),
-            object: nil
-        )
     }
     
     /// Connects the current user.
@@ -245,7 +229,7 @@ public class StreamVideo {
         if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
             return
         }
-        if user.id.isAnonymousUser {
+        if user.type == .anonymous {
             // Anonymous users can't connect to the WS.
             throw ClientError.MissingPermissions()
         }
@@ -257,34 +241,21 @@ public class StreamVideo {
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the all.
-    ///  - members: the members of the call.
     /// - Returns: `Call` object.
     public func call(
         callType: String,
-        callId: String,
-        members: [Member] = []
+        callId: String
     ) -> Call {
         let callController = makeCallController(callType: callType, callId: callId)
-        let recordingController = makeRecordingController(
-            with: callController,
-            callId: callId,
-            callType: callType
-        )
-        let eventsController = makeEventsController(callId: callId, callType: callType)
-        let permissionsController = makePermissionsController(callId: callId, callType: callType)
-        let livestreamController = makeLivestreamController(callType: callType, callId: callId)
-        return Call(
-            callId: callId,
+        let call = Call(
             callType: callType,
+            callId: callId,
+            callCoordinatorController: callCoordinatorController,
             callController: callController,
-            recordingController: recordingController,
-            eventsController: eventsController,
-            permissionsController: permissionsController,
-            livestreamController: livestreamController,
-            members: members,
-            videoOptions: VideoOptions(),
-            allEventsMiddleWare: videoConfig.listenToAllEvents ? allEventsMiddleware : nil
+            videoOptions: VideoOptions()
         )
+        eventsMiddleware.add(subscriber: call)
+        return call
     }
 
     /// Creates a controller used for querying and watching calls.
@@ -297,15 +268,6 @@ public class StreamVideo {
             callsQuery: callsQuery
         )
         return controller
-    }
-        
-    /// Async stream that reports all call events (incoming, rejected, canceled calls etc).
-    public func callEvents() -> AsyncStream<CallEvent> {
-        AsyncStream(CallEvent.self) { [weak self] continuation in
-            self?.callsMiddleware.onCallEvent = { callEvent in
-                continuation.yield(callEvent)
-            }
-        }
     }
     
     /// Sets a device for push notifications.
@@ -344,8 +306,10 @@ public class StreamVideo {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        self.watchContinuation?.finish()
-        self.watchContinuation = nil
+        for continuation in continuations {
+            continuation.finish()
+        }
+        continuations.removeAll()
         await withCheckedContinuation { continuation in
             webSocketClient?.disconnect {
                 continuation.resume(returning: ())
@@ -353,77 +317,13 @@ public class StreamVideo {
         }
     }
     
-    // MARK: - internal
-    
-    func watchEvents() -> AsyncStream<Event> {
+    public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
-            self?.watchContinuation = continuation
-            self?.callsMiddleware.onAnyEvent = { event in
-                continuation.yield(event)
-            }
+            self?.continuations.append(continuation)
         }
     }
     
     // MARK: - private
-    
-    /// Creates a permissions controller used for managing permissions.
-    /// - Returns: `PermissionsController`
-    private func makePermissionsController(callId: String, callType: String) -> PermissionsController {
-        let controller = PermissionsController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        permissionsMiddleware.onPermissionRequestEvent = { request in
-            controller.onPermissionRequestEvent?(request)
-        }
-        permissionsMiddleware.onPermissionsUpdatedEvent = { request in
-            controller.onPermissionsUpdatedEvent?(request)
-        }
-        return controller
-    }
-    
-    /// Creates recording controller used for managing recordings.
-    /// - Returns: `RecordingController`
-    private func makeRecordingController(
-        with callController: CallController,
-        callId: String,
-        callType: String
-    ) -> RecordingController {
-        let controller = RecordingController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        controller.onRecordingRequestedEvent = { event in
-            callController.updateCall(from: event)
-        }
-        recordingEventsMiddleware.onRecordingEvent = { event in
-            controller.onRecordingEvent?(event)
-            callController.updateCall(from: event)
-        }
-        return controller
-    }
-    
-    /// Creates an events controller used for managing events.
-    /// - Returns: `EventsController`
-    private func makeEventsController(callId: String, callType: String) -> EventsController {
-        let controller = EventsController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        customEventsMiddleware.onCustomEvent = { event in
-            controller.onCustomEvent?(event)
-        }
-        customEventsMiddleware.onNewReaction = { event in
-            controller.onNewReaction?(event)
-        }
-        return controller
-    }
     
     /// Creates a call controller, used for establishing and managing a call.
     /// - Parameters:
@@ -437,23 +337,8 @@ public class StreamVideo {
             callId,
             callType,
             apiKey.apiKeyString,
-            videoConfig,
-            videoConfig.listenToAllEvents ? allEventsMiddleware : nil
+            videoConfig
         )
-        callsMiddleware.onCallUpdated = controller.update(callData:)
-        return controller
-    }
-    
-    private func makeLivestreamController(callType: String, callId: String) -> LivestreamController {
-        let controller = LivestreamController(
-            callCoordinatorController: callCoordinatorController,
-            currentUser: user,
-            callId: callId,
-            callType: callType
-        )
-        callsMiddleware.onBroadcastingEvent = { event in
-            controller.onBroadcastingEvent?(event)
-        }
         return controller
     }
     
@@ -564,22 +449,12 @@ public class StreamVideo {
                 let response = try await callCoordinatorController.createGuestUser(with: userId)
                 let tokenValue = response.accessToken
                 callCoordinatorController.update(user: response.user.toUser)
-                let token = try UserToken(rawValue: tokenValue)
+                let token = UserToken(rawValue: tokenValue)
                 result(.success(token))
             } catch {
                 result(.failure(error))
             }
         }
-    }
-    
-    @objc private func handleCallEnded() {
-        recordingEventsMiddleware.onRecordingEvent = nil
-        callsMiddleware.onCallUpdated = nil
-        callsMiddleware.onBroadcastingEvent = nil
-        customEventsMiddleware.onCustomEvent = nil
-        customEventsMiddleware.onNewReaction = nil
-        permissionsMiddleware.onPermissionRequestEvent = nil
-        permissionsMiddleware.onPermissionsUpdatedEvent = nil
     }
 }
 
@@ -602,16 +477,30 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            self.watchContinuation?.yield(WSDisconnected())
+            for continuation in continuations {
+                continuation.yield(WSDisconnected())
+            }
         case let .connected(healthCheckInfo: healtCheckInfo):
             if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
                 callCoordinatorController.update(connectionId: healthCheck.connectionId)
             }
-            self.watchContinuation?.yield(WSConnected())
+            for continuation in continuations {
+                continuation.yield(WSConnected())
+            }
         default:
             log.debug("Web socket connection state update \(state)")
         }
     }
+}
+
+extension StreamVideo: WSEventsSubscriber {
+    
+    func onEvent(_ event: Event) {
+        for continuation in continuations {
+            continuation.yield(event)
+        }
+    }
+    
 }
 
 /// Returns the current value for the `StreamVideo` instance.

@@ -5,8 +5,12 @@
 import Foundation
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
-public class Call: @unchecked Sendable {
+public class Call: @unchecked Sendable, WSEventsSubscriber {
     
+    @Injected(\.streamVideo) var streamVideo
+    
+    typealias EventHandling = ((Event) -> ())?
+
     public class State: ObservableObject {
         /// The current participants dictionary.
         @Published public internal(set) var participants = [String: CallParticipant]() {
@@ -27,7 +31,8 @@ public class Call: @unchecked Sendable {
     public internal(set) var state = Call.State()
     
     /// The id of the current session.
-    var sessionId: String = ""
+    /// When a call is started, a unique session identifier is assigned to the user in the call.
+    public internal(set) var sessionId: String = ""
     
     /// The call id.
     public let callId: String
@@ -39,52 +44,38 @@ public class Call: @unchecked Sendable {
         callCid(from: callId, callType: callType)
     }
     
-    /// The closure that handles the participant events.
-    var onParticipantEvent: ((ParticipantEvent) -> Void)?
-    
+    private let callCoordinatorController: CallCoordinatorController
     internal let callController: CallController
-    private let recordingController: RecordingController
-    private let eventsController: EventsController
-    private let permissionsController: PermissionsController
-    private let livestreamController: LivestreamController
-    private let members: [Member]
     private let videoOptions: VideoOptions
-    private var allEventsMiddleware: AllEventsMiddleware?
-    private var broadcastingTask: Task<Void, Never>?
+    private var eventHandlers = [EventHandling]()
+    private var coordinatorClient: CoordinatorClient {
+        callCoordinatorController.coordinatorClient
+    }
     
     internal init(
-        callId: String,
         callType: String,
+        callId: String,
+        callCoordinatorController: CallCoordinatorController,
         callController: CallController,
-        recordingController: RecordingController,
-        eventsController: EventsController,
-        permissionsController: PermissionsController,
-        livestreamController: LivestreamController,
-        members: [Member],
-        videoOptions: VideoOptions,
-        allEventsMiddleWare: AllEventsMiddleware?
+        videoOptions: VideoOptions
     ) {
         self.callId = callId
         self.callType = callType
+        self.callCoordinatorController = callCoordinatorController
         self.callController = callController
-        self.recordingController = recordingController
-        self.eventsController = eventsController
-        self.permissionsController = permissionsController
-        self.livestreamController = livestreamController
-        self.members = members
         self.videoOptions = videoOptions
-        self.allEventsMiddleware = allEventsMiddleWare
         self.callController.call = self
-        self.subscribeToBroadcastingEvents()
     }
     
     /// Joins the current call.
     /// - Parameters:
+    ///  - members: the members of the call.
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
     /// - Throws: An error if the call could not be joined.
     public func join(
+        members: [Member] = [],
         ring: Bool = false,
         notify: Bool = false,
         callSettings: CallSettings = CallSettings()
@@ -114,8 +105,8 @@ public class Call: @unchecked Sendable {
         notify: Bool = false
     ) async throws -> CallData {
         try await callController.getCall(
+            callType: callType,
             callId: callId,
-            type: callType,
             membersLimit: membersLimit,
             ring: ring,
             notify: notify
@@ -179,16 +170,6 @@ public class Call: @unchecked Sendable {
             callId: callId,
             type: callType
         )
-    }
-    
-    /// Async stream that publishes participant events.
-    public func participantEvents() -> AsyncStream<ParticipantEvent> {
-        let events = AsyncStream(ParticipantEvent.self) { [weak self] continuation in
-            self?.onParticipantEvent = { event in
-                continuation.yield(event)
-            }
-        }
-        return events
     }
     
     /// Adds the given user to the list of blocked users for the call.
@@ -271,25 +252,31 @@ public class Call: @unchecked Sendable {
         callController.setVideoFilter(videoFilter)
     }
     
+    public func subscribe() -> AsyncStream<Event> {
+        AsyncStream(Event.self) { [weak self] continuation in
+            let eventHandler: EventHandling = { event in
+                continuation.yield(event)
+            }
+            self?.eventHandlers.append(eventHandler)
+        }
+    }
+
+    public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
+        return AsyncStream(event) { [weak self] continuation in
+            let eventHandler: EventHandling = { event in
+                if let event = event as? WSEvent {
+                    continuation.yield(event)
+                }
+            }
+            self?.eventHandlers.append(eventHandler)
+        }
+    }
+        
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
-        broadcastingTask?.cancel()
-        recordingController.cleanUp()
-        eventsController.cleanUp()
-        permissionsController.cleanUp()
+        eventHandlers.removeAll()
         callController.cleanUp()
-        livestreamController.cleanUp()
-    }
-    
-    /// Listen to all raw WS events. The data is provided as a dictionary.
-    /// `VideoConfig`'s `listenToAllEvents` needs to be true.
-    public func allEvents() -> AsyncStream<PublicWSEvent> {
-        AsyncStream(PublicWSEvent.self) { [weak self] continuation in
-            self?.allEventsMiddleware?.onEvent = { callEvent in
-                continuation.yield(callEvent)
-            }
-        }
     }
     
     //MARK: - Permissions
@@ -298,22 +285,52 @@ public class Call: @unchecked Sendable {
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
     public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
-        permissionsController.currentUserCanRequestPermissions(permissions)
+        guard let callSettings = callCoordinatorController.currentCallSettings?.callSettings else {
+            return false
+        }
+        for permission in permissions {
+            if permission.rawValue == Permission.sendAudio.rawValue
+                && callSettings.audio.accessRequestEnabled == false {
+                return false
+            } else if permission.rawValue == Permission.sendVideo.rawValue
+                && callSettings.video.accessRequestEnabled == false {
+                return false
+            } else if permission.rawValue == Permission.screenshare.rawValue
+                && callSettings.screensharing.accessRequestEnabled == false {
+                return false
+            }
+        }
+        return true
     }
     
     /// Requests permissions for a call.
     /// - Parameters:
     ///   - permissions: The permissions to request.
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
-    public func request(permissions: [Permission]) async throws {
-        try await permissionsController.request(permissions: permissions, callId: callId, callType: callType)
+    @discardableResult
+    public func request(permissions: [Permission]) async throws -> RequestPermissionResponse {
+        guard currentUserCanRequestPermissions(permissions) else {
+            throw ClientError.MissingPermissions()
+        }
+        let request = RequestPermissionRequest(
+            permissions: permissions.map(\.rawValue)
+        )
+        
+        return try await coordinatorClient.requestPermission(
+            type: callType,
+            callId: callId,
+            request: request
+        )
     }
     
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
     public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
-        permissionsController.currentUserHasCapability(capability)
+        let currentCallCapabilities = callCoordinatorController.currentCallSettings?.callCapabilities
+        return currentCallCapabilities?.contains(
+            capability.rawValue
+        ) == true
     }
     
     /// Grants permissions to a user for a call.
@@ -321,15 +338,17 @@ public class Call: @unchecked Sendable {
     ///   - permissions: The permissions to grant.
     ///   - userId: The ID of the user to grant permissions to.
     /// - Throws: An error if the operation fails.
+    @discardableResult
     public func grant(
         permissions: [Permission],
         for userId: String
-    ) async throws {
-        try await permissionsController.grant(
-            permissions: permissions,
+    ) async throws -> UpdateUserPermissionsResponse {
+        try await updatePermissions(
             for: userId,
             callId: callId,
-            callType: callType
+            callType: callType,
+            granted: permissions,
+            revoked: []
         )
     }
     
@@ -338,15 +357,17 @@ public class Call: @unchecked Sendable {
     ///   - permissions: The list of permissions to revoke.
     ///   - userId: The ID of the user to revoke the permissions from.
     /// - Throws: error if the permission update fails.
+    @discardableResult
     public func revoke(
         permissions: [Permission],
         for userId: String
-    ) async throws {
-        try await permissionsController.revoke(
-            permissions: permissions,
+    ) async throws -> UpdateUserPermissionsResponse {
+        try await updatePermissions(
             for: userId,
             callId: callId,
-            callType: callType
+            callType: callType,
+            granted: [],
+            revoked: permissions
         )
     }
     
@@ -354,131 +375,132 @@ public class Call: @unchecked Sendable {
     /// - Parameters:
     ///   - request: The mute request.
     /// - Throws: error if muting the users fails.
+    @discardableResult
     public func muteUsers(
-        with request: MuteRequest
-    ) async throws {
-        try await permissionsController.muteUsers(
-            with: request,
+        with request: MuteUsersRequest
+    ) async throws -> MuteUsersResponse {
+        try await coordinatorClient.muteUsers(
+            type: callType,
             callId: callId,
-            callType: callType
+            request: request
         )
     }
     
     /// Ends a call.
     /// - Throws: error if ending the call fails.
-    public func end() async throws {
-        try await permissionsController.endCall(callId: callId, callType: callType)
+    @discardableResult
+    public func end() async throws -> EndCallResponse {
+        try await coordinatorClient.endCall(type: callType, callId: callId)
     }
     
     /// Blocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to block.
     /// - Throws: error if blocking the user fails.
-    public func blockUser(with userId: String) async throws {
-        try await permissionsController.blockUser(with: userId, callId: callId, callType: callType)
+    @discardableResult
+    public func blockUser(with userId: String) async throws -> BlockUserResponse {
+        try await coordinatorClient.blockUser(
+            type: callType,
+            callId: callId,
+            request: BlockUserRequest(userId: userId)
+        )
     }
     
     /// Unblocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to unblock.
     /// - Throws: error if unblocking the user fails.
-    public func unblockUser(with userId: String) async throws {
-        try await permissionsController.unblockUser(with: userId, callId: callId, callType: callType)
+    @discardableResult
+    public func unblockUser(with userId: String) async throws -> UnblockUserResponse {
+        try await coordinatorClient.unblockUser(
+            type: callType,
+            callId: callId,
+            request: UnblockUserRequest(userId: userId)
+        )
     }
     
     /// Starts a live call.
     /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
-    public func goLive() async throws {
-        try await permissionsController.goLive(callId: callId, callType: callType)
+    @discardableResult
+    public func goLive() async throws -> GoLiveResponse {
+        guard currentUserHasCapability(.updateCall) else {
+            throw ClientError.MissingPermissions()
+        }
+        return try await coordinatorClient.goLive(callId: callId, callType: callType)
     }
     
     /// Stops an ongoing live call.
     /// - Throws: `ClientError.MissingPermissions` if the current user doesn't have the capability to update the call.
-    public func stopLive() async throws {
-        try await permissionsController.stopLive(callId: callId, callType: callType)
-    }
-    
-    /// Returns an `AsyncStream` of `PermissionRequest` objects that represent the permission requests events.
-    /// - Returns: An `AsyncStream` of `PermissionRequest` objects.
-    public func permissionRequests() -> AsyncStream<PermissionRequest> {
-        permissionsController.permissionRequests()
-    }
-    
-    /// Returns an `AsyncStream` of `PermissionsUpdated` objects that represent the permission updates events.
-    /// - Returns: An `AsyncStream` of `PermissionsUpdated` objects.
-    public func permissionUpdates() -> AsyncStream<PermissionsUpdated> {
-        permissionsController.permissionUpdates()
+    @discardableResult
+    public func stopLive() async throws -> StopLiveResponse {
+        guard currentUserHasCapability(.updateCall) else {
+            throw ClientError.MissingPermissions()
+        }
+        return try await coordinatorClient.stopLive(callId: callId, callType: callType)
     }
     
     //MARK: - Recording
     
     /// Starts recording for the call.
     public func startRecording() async throws {
-        try await recordingController.startRecording(callId: callId, callType: callType)
+        try await coordinatorClient.startRecording(callId: callId, callType: callType)
+        update(recordingState: .requested)
     }
     
     /// Stops recording a call.
     public func stopRecording() async throws {
-        try await recordingController.stopRecording(callId: callId, callType: callType)
+        try await coordinatorClient.stopRecording(callId: callId, callType: callType)
     }
     
     /// Lists recordings for the call.
-    public func listRecordings() async throws -> [CallRecordingInfo] {
-        try await recordingController.listRecordings(
+    public func listRecordings() async throws -> [CallRecording] {
+        let response =  try await coordinatorClient.listRecordings(
             callId: callId,
             callType: callType,
             session: callId
-        )
-    }
-    
-    /// Creates an asynchronous stream of `RecordingEvent` objects.
-    public func recordingEvents() -> AsyncStream<RecordingEvent> {
-        recordingController.recordingEvents()
+        )        
+        return response.recordings
     }
     
     //MARK: - Broadcasting
     
     /// Starts broadcasting of the call.
     public func startBroadcasting() async throws {
-        try await livestreamController.startBroadcasting()
+        if !currentUserHasCapability(.startBroadcastCall) {
+            throw ClientError.MissingPermissions()
+        }
+        try await coordinatorClient.startBroadcasting(callId: callId, callType: callType)
     }
     
     /// Stops broadcasting of the call.
     public func stopBroadcasting() async throws {
-        try await livestreamController.stopBroadcasting()
-    }
-    
-    /// Listens to broadcasting events.
-    public func broadcastingEvents() -> AsyncStream<BroadcastingEvent> {
-        livestreamController.broadcastingEvents()
+        try await coordinatorClient.stopBroadcasting(callId: callId, callType: callType)
     }
     
     //MARK: - Events
     
     /// Sends a custom event to the call.
-    /// - Parameter event: The `CustomEventRequest` object representing the custom event to send.
+    /// - Parameter event: The `SendEventRequest` object representing the custom event to send.
     /// - Throws: An error if the sending fails.
-    public func send(event: CustomEventRequest) async throws {
-        try await eventsController.send(event: event)
+    @discardableResult
+    public func send(event: SendEventRequest) async throws -> SendEventResponse {
+        return try await coordinatorClient.sendEvent(
+            type: callType,
+            callId: callId,
+            request: event
+        )
     }
     
     /// Sends a reaction to the call.
-    /// - Parameter reaction: The `CallReactionRequest` object representing the reaction to send.
+    /// - Parameter reaction: The `SendReactionRequest` object representing the reaction to send.
     /// - Throws: An error if the sending fails.
-    public func send(reaction: CallReactionRequest) async throws {
-        try await eventsController.send(reaction: reaction)
-    }
-    
-    /// Returns an asynchronous stream of custom events received during the call.
-    /// - Returns: An `AsyncStream` of `CustomEvent` objects.
-    public func customEvents() -> AsyncStream<CustomEvent> {
-        eventsController.customEvents()
-    }
-    
-    /// Returns an asynchronous stream of reactions received during the call.
-    /// - Returns: An `AsyncStream` of `CallReaction` objects.
-    public func reactions() -> AsyncStream<CallReaction> {
-        eventsController.reactions()
+    @discardableResult
+    public func send(reaction: SendReactionRequest) async throws -> SendReactionResponse {
+        try await coordinatorClient.sendReaction(
+            type: callType,
+            callId: callId,
+            request: reaction
+        )
     }
     
     //MARK: - Internal
@@ -490,6 +512,7 @@ public class Call: @unchecked Sendable {
     }
     
     internal func update(callData: CallData) {
+        guard callData.callCid == cId else { return }
         var updated = callData
         let members = self.state.callData?.members ?? []
         if callData.members.isEmpty && !members.isEmpty {
@@ -502,27 +525,122 @@ public class Call: @unchecked Sendable {
         self.state.recordingState = recordingState
     }
     
-    //MARK: - private
-    
-    private func subscribeToBroadcastingEvents() {
-        broadcastingTask = Task {
-            for await event in livestreamController.broadcastingEvents() {
-                if event.callCid == cId {
-                    await MainActor.run {
-                        if event is BroadcastingStoppedEvent {
-                            state.callData?.broadcasting = false
-                        } else {
-                            state.callData?.broadcasting = true
-                        }
-                    }                    
-                }
-            }
+    internal func onEvent(_ event: Event) {
+        guard let wsCallEvent = event as? WSCallEvent, wsCallEvent.callCid == cId else {
+            return
+        }
+        updateState(from: event)
+        for eventHandler in eventHandlers {
+            eventHandler?(event)
         }
     }
-}
-
-public enum ReconnectionStatus {
-    case connected
-    case reconnecting
-    case disconnected
+    
+    internal func updateState(from event: Event) {
+        if let event = event as? CallAcceptedEvent {
+            let callData = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
+            )
+            update(callData: callData)
+        } else if let event = event as? CallRejectedEvent {
+            let callData = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
+            )
+            update(callData: callData)
+        } else if let event = event as? CallUpdatedEvent {
+            let callData = event.call.toCallData(
+                members: [],
+                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
+            )
+            update(callData: callData)
+        } else if event is CallRecordingStartedEvent {
+            if self.state.callData?.recording == false {
+                self.state.callData?.recording = true
+            }
+            if self.state.recordingState != .recording {
+                self.state.recordingState = .recording
+            }
+        } else if event is CallRecordingStoppedEvent {
+            if self.state.callData?.recording == true {
+                self.state.callData?.recording = false
+            }
+            if self.state.recordingState != .noRecording {
+                self.state.recordingState = .noRecording
+            }
+        } else if let event = event as? UpdatedCallPermissionsEvent {
+            updateCurrentCallSettings(event)
+        } else if let event = event as? CallMemberAddedEvent {
+            let addedMembers = event.members.map {
+                Member(
+                    user: $0.user.toUser,
+                    role: $0.role,
+                    customData: convert($0.custom)
+                )
+            }
+            var members = self.state.callData?.members ?? []
+            for added in addedMembers {
+                if !members.contains(added) {
+                    members.append(added)
+                }
+            }
+            self.state.callData?.members = members
+        } else if let event = event as? CallMemberRemovedEvent {
+            let members = (self.state.callData?.members ?? [])
+                .filter { !event.members.contains($0.id) }
+            self.state.callData?.members = members
+        } else if let event = event as? CallMemberUpdatedEvent {
+            var members = (self.state.callData?.members ?? [])
+            let updated = event.members
+            for update in updated {
+                if let index = members.firstIndex(where: { $0.id == update.userId }) {
+                    members[index] = Member(
+                        user: update.user.toUser,
+                        role: update.role,
+                        customData: convert(update.custom)
+                    )
+                }
+            }
+            self.state.callData?.members = members
+        }
+    }
+    
+    //MARK: - private
+    
+    private func updatePermissions(
+        for userId: String,
+        callId: String,
+        callType: String,
+        granted: [Permission],
+        revoked: [Permission]
+    ) async throws -> UpdateUserPermissionsResponse {
+        if !currentUserHasCapability(.updateCallPermissions) {
+            throw ClientError.MissingPermissions()
+        }
+        let updatePermissionsRequest = UpdateUserPermissionsRequest(
+            grantPermissions: granted.map(\.rawValue),
+            revokePermissions: revoked.map(\.rawValue),
+            userId: userId
+        )
+        return try await coordinatorClient.updateUserPermissions(
+            type: callType,
+            callId: callId,
+            request: updatePermissionsRequest
+        )
+    }
+    
+    private func updateCurrentCallSettings(_ event: UpdatedCallPermissionsEvent) {
+        guard
+            event.user.id == streamVideo.user.id,
+            let currentCallSettings = callCoordinatorController.currentCallSettings
+        else {
+            return
+        }
+        callCoordinatorController.currentCallSettings = .init(
+            callCapabilities: event.ownCapabilities.map(\.rawValue),
+            callSettings: currentCallSettings.callSettings,
+            state: currentCallSettings.state,
+            recording: currentCallSettings.recording
+        )
+    }
 }

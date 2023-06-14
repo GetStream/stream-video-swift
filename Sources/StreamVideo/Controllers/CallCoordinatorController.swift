@@ -25,7 +25,8 @@ class CallCoordinatorController: @unchecked Sendable {
             apiKey: coordinatorInfo.apiKey,
             hostname: coordinatorInfo.hostname,
             token: coordinatorInfo.token,
-            userId: user.id
+            userId: user.id,
+            type: user.type
         )
         self.videoConfig = videoConfig
         self.user = user
@@ -89,22 +90,6 @@ class CallCoordinatorController: @unchecked Sendable {
     func update(user: User) {
         self.user = user
         coordinatorClient.userId = user.id
-    }
-
-    func sendEvent(
-        callId: String,
-        callType: String,
-        customData: [String: AnyCodable]? = nil
-    ) async throws {
-        let sendEventRequest = SendEventRequest(
-            custom: customData
-        )
-        let request = EventRequestData(
-            id: callId,
-            type: callType,
-            sendEventRequest: sendEventRequest
-        )
-        _ = try await coordinatorClient.sendEvent(with: request)
     }
     
     func acceptCall(callId: String, type: String) async throws -> AcceptCallResponse {
@@ -208,7 +193,7 @@ class CallCoordinatorController: @unchecked Sendable {
             members: members,
             settingsOverride: nil
         )
-        let create = !user.id.isAnonymousUser
+        let create = user.type != .anonymous
         let joinCall = JoinCallRequest(
             create: create,
             data: callRequest,
@@ -216,44 +201,11 @@ class CallCoordinatorController: @unchecked Sendable {
             notify: notify,
             ring: ring
         )
-        let joinCallRequest = JoinCallRequestData(
-            id: callId,
+        let joinCallResponse = try await coordinatorClient.joinCall(
             type: type,
-            joinCallRequest: joinCall
+            callId: callId,
+            request: joinCall
         )
-        let joinCallResponse = try await coordinatorClient.joinCall(with: joinCallRequest)
         return joinCallResponse
     }
 }
-
-public struct EdgeServer: Sendable {
-    let url: String
-    let webSocketURL: String
-    let token: String
-    let iceServers: [IceServer]
-    let callSettings: CallSettingsInfo
-    public let latencyURL: String?
-}
-
-struct CallSettingsInfo: Sendable {
-    let callCapabilities: [String]
-    let callSettings: CallSettingsResponse
-    let state: CallData
-    let recording: Bool
-}
-
-extension CallSettingsResponse: @unchecked Sendable {}
-
-public struct IceServer: Sendable {
-    let urls: [String]
-    let username: String
-    let password: String
-}
-
-struct CoordinatorInfo {
-    let apiKey: String
-    let hostname: String
-    let token: String
-}
-
-public struct FetchingLocationError: Error {}

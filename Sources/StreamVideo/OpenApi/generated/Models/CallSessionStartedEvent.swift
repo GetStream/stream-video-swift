@@ -15,17 +15,17 @@ import AnyCodable
 
 
 
-internal struct CallSessionStartedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallSessionStartedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
-    internal var call: CallResponse
-    internal var callCid: String
-    internal var createdAt: Date
+    public var call: CallResponse
+    public var callCid: String
+    public var createdAt: Date
     /** Call session ID */
-    internal var sessionId: String
+    public var sessionId: String
     /** The type of event: \"call.session_started\" in this case */
-    internal var type: String = "call.session_started"
+    public var type: String = "call.session_started"
 
-    internal init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_started") {
+    public init(call: CallResponse, callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_started") {
         self.call = call
         self.callCid = callCid
         self.createdAt = createdAt
@@ -33,7 +33,7 @@ internal struct CallSessionStartedEvent: Codable, JSONEncodable, Hashable, WSCal
         self.type = type
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case call
         case callCid = "call_cid"
         case createdAt = "created_at"
@@ -43,7 +43,7 @@ internal struct CallSessionStartedEvent: Codable, JSONEncodable, Hashable, WSCal
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(call, forKey: .call)
         try container.encode(callCid, forKey: .callCid)

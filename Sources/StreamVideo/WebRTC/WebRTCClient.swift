@@ -122,11 +122,6 @@ class WebRTCClient: NSObject {
     private let environment: WebSocketClient.Environment
     
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
-    var onParticipantEvent: ((ParticipantEvent) -> Void)? {
-        didSet {
-            sfuMiddleware.onParticipantEvent = onParticipantEvent
-        }
-    }
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
     var onParticipantCountUpdated: ((UInt32) -> ())?
     
@@ -145,8 +140,7 @@ class WebRTCClient: NSObject {
         signalService: signalService,
         subscriber: subscriber,
         publisher: publisher,
-        participantThreshold: participantsThreshold,
-        onParticipantEvent: onParticipantEvent
+        participantThreshold: participantsThreshold
     )
     
     init(
@@ -225,7 +219,6 @@ class WebRTCClient: NSObject {
         await state.cleanUp()
         sfuMiddleware.cleanUp()
         onParticipantsUpdated = nil
-        onParticipantEvent = nil
         onSignalConnectionStateChange = nil
         onParticipantCountUpdated = nil
     }

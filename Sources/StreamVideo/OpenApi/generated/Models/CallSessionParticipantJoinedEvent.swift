@@ -15,17 +15,17 @@ import AnyCodable
 
 
 
-internal struct CallSessionParticipantJoinedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallSessionParticipantJoinedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
-    internal var callCid: String
-    internal var createdAt: Date
+    public var callCid: String
+    public var createdAt: Date
     /** Call session ID */
-    internal var sessionId: String
+    public var sessionId: String
     /** The type of event: \"call.session_participant_joined\" in this case */
-    internal var type: String = "call.session_participant_joined"
-    internal var user: UserResponse
+    public var type: String = "call.session_participant_joined"
+    public var user: UserResponse
 
-    internal init(callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_participant_joined", user: UserResponse) {
+    public init(callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_participant_joined", user: UserResponse) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.sessionId = sessionId
@@ -33,7 +33,7 @@ internal struct CallSessionParticipantJoinedEvent: Codable, JSONEncodable, Hasha
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
         case sessionId = "session_id"
@@ -43,7 +43,7 @@ internal struct CallSessionParticipantJoinedEvent: Codable, JSONEncodable, Hasha
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)

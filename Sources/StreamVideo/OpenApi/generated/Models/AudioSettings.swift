@@ -14,15 +14,15 @@ import AnyCodable
 
 
 
-internal struct AudioSettings: Codable, JSONEncodable, Hashable {
+public struct AudioSettings: Codable, JSONEncodable, Hashable {
 
-    internal var accessRequestEnabled: Bool
-    internal var micDefaultOn: Bool
-    internal var opusDtxEnabled: Bool
-    internal var redundantCodingEnabled: Bool
-    internal var speakerDefaultOn: Bool
+    public var accessRequestEnabled: Bool
+    public var micDefaultOn: Bool
+    public var opusDtxEnabled: Bool
+    public var redundantCodingEnabled: Bool
+    public var speakerDefaultOn: Bool
 
-    internal init(accessRequestEnabled: Bool, micDefaultOn: Bool, opusDtxEnabled: Bool, redundantCodingEnabled: Bool, speakerDefaultOn: Bool) {
+    public init(accessRequestEnabled: Bool, micDefaultOn: Bool, opusDtxEnabled: Bool, redundantCodingEnabled: Bool, speakerDefaultOn: Bool) {
         self.accessRequestEnabled = accessRequestEnabled
         self.micDefaultOn = micDefaultOn
         self.opusDtxEnabled = opusDtxEnabled
@@ -30,7 +30,7 @@ internal struct AudioSettings: Codable, JSONEncodable, Hashable {
         self.speakerDefaultOn = speakerDefaultOn
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
         case micDefaultOn = "mic_default_on"
         case opusDtxEnabled = "opus_dtx_enabled"
@@ -40,7 +40,7 @@ internal struct AudioSettings: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
         try container.encode(micDefaultOn, forKey: .micDefaultOn)

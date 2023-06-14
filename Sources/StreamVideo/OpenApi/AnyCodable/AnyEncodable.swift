@@ -1,7 +1,3 @@
-//
-// Copyright © 2023 Stream.io Inc. All rights reserved.
-//
-
 #if canImport(Foundation)
 import Foundation
 #endif
@@ -33,10 +29,10 @@ import Foundation
      let encoder = JSONEncoder()
      let json = try! encoder.encode(dictionary)
  */
-struct AnyEncodable: Encodable {
-    let value: Any
+@frozen public struct AnyEncodable: Encodable {
+    public let value: Any
 
-    init<T>(_ value: T?) {
+    public init<T>(_ value: T?) {
         self.value = value ?? ()
     }
 }
@@ -52,7 +48,7 @@ extension AnyEncodable: _AnyEncodable {}
 // MARK: - Encodable
 
 extension _AnyEncodable {
-    func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
 
         switch value {
@@ -105,17 +101,14 @@ extension _AnyEncodable {
         case let encodable as Encodable:
             try encodable.encode(to: encoder)
         default:
-            let context = EncodingError.Context(
-                codingPath: container.codingPath,
-                debugDescription: "AnyEncodable value cannot be encoded"
-            )
+            let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "AnyEncodable value cannot be encoded")
             throw EncodingError.invalidValue(value, context)
         }
     }
 
     #if canImport(Foundation)
     private func encode(nsnumber: NSNumber, into container: inout SingleValueEncodingContainer) throws {
-        switch Character(Unicode.Scalar(UInt8(nsnumber.objCType.pointee))) {
+        switch Character(Unicode.Scalar(UInt8(nsnumber.objCType.pointee)))  {
         case "B":
             try container.encode(nsnumber.boolValue)
         case "c":
@@ -139,10 +132,7 @@ extension _AnyEncodable {
         case "d":
             try container.encode(nsnumber.doubleValue)
         default:
-            let context = EncodingError.Context(
-                codingPath: container.codingPath,
-                debugDescription: "NSNumber cannot be encoded because its type is not handled"
-            )
+            let context = EncodingError.Context(codingPath: container.codingPath, debugDescription: "NSNumber cannot be encoded because its type is not handled")
             throw EncodingError.invalidValue(nsnumber, context)
         }
     }
@@ -150,7 +140,7 @@ extension _AnyEncodable {
 }
 
 extension AnyEncodable: Equatable {
-    static func == (lhs: AnyEncodable, rhs: AnyEncodable) -> Bool {
+    public static func == (lhs: AnyEncodable, rhs: AnyEncodable) -> Bool {
         switch (lhs.value, rhs.value) {
         case is (Void, Void):
             return true
@@ -193,7 +183,7 @@ extension AnyEncodable: Equatable {
 }
 
 extension AnyEncodable: CustomStringConvertible {
-    var description: String {
+    public var description: String {
         switch value {
         case is Void:
             return String(describing: nil as Any?)
@@ -206,7 +196,7 @@ extension AnyEncodable: CustomStringConvertible {
 }
 
 extension AnyEncodable: CustomDebugStringConvertible {
-    var debugDescription: String {
+    public var debugDescription: String {
         switch value {
         case let value as CustomDebugStringConvertible:
             return "AnyEncodable(\(value.debugDescription))"
@@ -226,41 +216,41 @@ extension AnyEncodable: ExpressibleByArrayLiteral {}
 extension AnyEncodable: ExpressibleByDictionaryLiteral {}
 
 extension _AnyEncodable {
-    init(nilLiteral _: ()) {
+    public init(nilLiteral _: ()) {
         self.init(nil as Any?)
     }
 
-    init(booleanLiteral value: Bool) {
+    public init(booleanLiteral value: Bool) {
         self.init(value)
     }
 
-    init(integerLiteral value: Int) {
+    public init(integerLiteral value: Int) {
         self.init(value)
     }
 
-    init(floatLiteral value: Double) {
+    public init(floatLiteral value: Double) {
         self.init(value)
     }
 
-    init(extendedGraphemeClusterLiteral value: String) {
+    public init(extendedGraphemeClusterLiteral value: String) {
         self.init(value)
     }
 
-    init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self.init(value)
     }
 
-    init(arrayLiteral elements: Any...) {
+    public init(arrayLiteral elements: Any...) {
         self.init(elements)
     }
 
-    init(dictionaryLiteral elements: (AnyHashable, Any)...) {
+    public init(dictionaryLiteral elements: (AnyHashable, Any)...) {
         self.init([AnyHashable: Any](elements, uniquingKeysWith: { first, _ in first }))
     }
 }
 
 extension AnyEncodable: Hashable {
-    func hash(into hasher: inout Hasher) {
+    public func hash(into hasher: inout Hasher) {
         switch value {
         case let value as Bool:
             hasher.combine(value)

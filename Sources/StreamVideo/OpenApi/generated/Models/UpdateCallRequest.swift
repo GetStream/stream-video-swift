@@ -14,21 +14,21 @@ import AnyCodable
 
 
 
-internal struct UpdateCallRequest: Codable, JSONEncodable, Hashable {
+public struct UpdateCallRequest: Codable, JSONEncodable, Hashable {
 
     /** Custom data for this object */
-    internal var custom: [String: AnyCodable]?
-    internal var settingsOverride: CallSettingsRequest?
+    public var custom: [String: AnyCodable]?
+    public var settingsOverride: CallSettingsRequest?
     /** the time the call is scheduled to start */
-    internal var startsAt: Date?
+    public var startsAt: Date?
 
-    internal init(custom: [String: AnyCodable]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil) {
+    public init(custom: [String: AnyCodable]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil) {
         self.custom = custom
         self.settingsOverride = settingsOverride
         self.startsAt = startsAt
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
         case settingsOverride = "settings_override"
         case startsAt = "starts_at"
@@ -36,7 +36,7 @@ internal struct UpdateCallRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encodeIfPresent(settingsOverride, forKey: .settingsOverride)

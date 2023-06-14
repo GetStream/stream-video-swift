@@ -14,20 +14,20 @@ import AnyCodable
 
 
 
-internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
+public struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
 
     static let idRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
     static let limitRule = NumericRule<Int>(minimum: 0, exclusiveMinimum: false, maximum: 25, exclusiveMaximum: false, multipleOf: nil)
     static let typeRule = StringRule(minLength: nil, maxLength: 64, pattern: nil)
-    internal var filterConditions: [String: AnyCodable]?
-    internal var id: String?
-    internal var limit: Int?
-    internal var next: String?
-    internal var prev: String?
-    internal var sort: [SortParamRequest]?
-    internal var type: String
+    public var filterConditions: [String: AnyCodable]?
+    public var id: String?
+    public var limit: Int?
+    public var next: String?
+    public var prev: String?
+    public var sort: [SortParamRequest]?
+    public var type: String
 
-    internal init(filterConditions: [String: AnyCodable]? = nil, id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
+    public init(filterConditions: [String: AnyCodable]? = nil, id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
         self.filterConditions = filterConditions
         self.id = id
         self.limit = limit
@@ -37,7 +37,7 @@ internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
         self.type = type
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case filterConditions = "filter_conditions"
         case id
         case limit
@@ -49,7 +49,7 @@ internal struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
         try container.encodeIfPresent(id, forKey: .id)

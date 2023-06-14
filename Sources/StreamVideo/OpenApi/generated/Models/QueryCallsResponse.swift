@@ -14,21 +14,21 @@ import AnyCodable
 
 
 
-internal struct QueryCallsResponse: Codable, JSONEncodable, Hashable {
+public struct QueryCallsResponse: Codable, JSONEncodable, Hashable {
 
-    internal var calls: [CallStateResponseFields]
-    internal var duration: String
-    internal var next: String?
-    internal var prev: String?
+    public var calls: [CallStateResponseFields]
+    public var duration: String
+    public var next: String?
+    public var prev: String?
 
-    internal init(calls: [CallStateResponseFields], duration: String, next: String? = nil, prev: String? = nil) {
+    public init(calls: [CallStateResponseFields], duration: String, next: String? = nil, prev: String? = nil) {
         self.calls = calls
         self.duration = duration
         self.next = next
         self.prev = prev
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case calls
         case duration
         case next
@@ -37,7 +37,7 @@ internal struct QueryCallsResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(calls, forKey: .calls)
         try container.encode(duration, forKey: .duration)

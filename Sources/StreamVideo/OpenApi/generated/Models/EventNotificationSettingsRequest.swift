@@ -14,24 +14,24 @@ import AnyCodable
 
 
 
-internal struct EventNotificationSettingsRequest: Codable, JSONEncodable, Hashable {
+public struct EventNotificationSettingsRequest: Codable, JSONEncodable, Hashable {
 
-    internal var apns: APNSRequest?
-    internal var enabled: Bool?
+    public var apns: APNSRequest?
+    public var enabled: Bool?
 
-    internal init(apns: APNSRequest? = nil, enabled: Bool? = nil) {
+    public init(apns: APNSRequest? = nil, enabled: Bool? = nil) {
         self.apns = apns
         self.enabled = enabled
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case apns
         case enabled
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(apns, forKey: .apns)
         try container.encodeIfPresent(enabled, forKey: .enabled)

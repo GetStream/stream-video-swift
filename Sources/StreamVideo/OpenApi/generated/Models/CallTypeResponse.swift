@@ -14,16 +14,16 @@ import AnyCodable
 
 
 
-internal struct CallTypeResponse: Codable, JSONEncodable, Hashable {
+public struct CallTypeResponse: Codable, JSONEncodable, Hashable {
 
-    internal var createdAt: Date
-    internal var grants: [String: [String]]
-    internal var name: String
-    internal var notificationSettings: NotificationSettings
-    internal var settings: CallSettingsResponse
-    internal var updatedAt: Date
+    public var createdAt: Date
+    public var grants: [String: [String]]
+    public var name: String
+    public var notificationSettings: NotificationSettings
+    public var settings: CallSettingsResponse
+    public var updatedAt: Date
 
-    internal init(createdAt: Date, grants: [String: [String]], name: String, notificationSettings: NotificationSettings, settings: CallSettingsResponse, updatedAt: Date) {
+    public init(createdAt: Date, grants: [String: [String]], name: String, notificationSettings: NotificationSettings, settings: CallSettingsResponse, updatedAt: Date) {
         self.createdAt = createdAt
         self.grants = grants
         self.name = name
@@ -32,7 +32,7 @@ internal struct CallTypeResponse: Codable, JSONEncodable, Hashable {
         self.updatedAt = updatedAt
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case createdAt = "created_at"
         case grants
         case name
@@ -43,7 +43,7 @@ internal struct CallTypeResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(createdAt, forKey: .createdAt)
         try container.encode(grants, forKey: .grants)

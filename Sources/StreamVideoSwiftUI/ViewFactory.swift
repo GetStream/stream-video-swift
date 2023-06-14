@@ -169,15 +169,15 @@ extension ViewFactory {
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
         if #available(iOS 14.0, *) {
             return IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
-                viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
+                viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
             }, onCallRejected: { _ in
-                viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+                viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
             })
         } else {
             return IncomingCallView_iOS13(callInfo: callInfo, onCallAccepted: { _ in
-                viewModel.acceptCall(callId: callInfo.id, type: callInfo.type)
+                viewModel.acceptCall(callType: callInfo.type, callId: callInfo.id)
             }, onCallRejected: { _ in
-                viewModel.rejectCall(callId: callInfo.id, type: callInfo.type)
+                viewModel.rejectCall(callType: callInfo.type, callId: callInfo.id)
             })
         }
     }
@@ -276,8 +276,8 @@ extension ViewFactory {
         let handleJoinCall = {
             if case .lobby(_) = viewModel.callingState {
                 viewModel.startCall(
+                    callType: lobbyInfo.callType,
                     callId: lobbyInfo.callId,
-                    type: lobbyInfo.callType,
                     members: lobbyInfo.participants
                 )
             }

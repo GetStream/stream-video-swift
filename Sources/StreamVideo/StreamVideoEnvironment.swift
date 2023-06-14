@@ -21,8 +21,7 @@ extension StreamVideo {
             _ callId: String,
             _ callType: String,
             _ apiKey: String,
-            _ videoConfig: VideoConfig,
-            _ allEventsMiddleware: AllEventsMiddleware?
+            _ videoConfig: VideoConfig
         ) -> CallController = {
             CallController(
                 callCoordinatorController: $0,
@@ -30,8 +29,7 @@ extension StreamVideo {
                 callId: $2,
                 callType: $3,
                 apiKey: $4,
-                videoConfig: $5,
-                allEventsMiddleware: $6
+                videoConfig: $5
             )
         }
         

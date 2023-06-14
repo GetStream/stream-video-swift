@@ -14,24 +14,24 @@ import AnyCodable
 
 
 
-internal struct APNS: Codable, JSONEncodable, Hashable {
+public struct APNS: Codable, JSONEncodable, Hashable {
 
-    internal var body: String
-    internal var title: String
+    public var body: String
+    public var title: String
 
-    internal init(body: String, title: String) {
+    public init(body: String, title: String) {
         self.body = body
         self.title = title
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case body
         case title
     }
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(body, forKey: .body)
         try container.encode(title, forKey: .title)

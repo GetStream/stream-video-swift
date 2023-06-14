@@ -6,6 +6,7 @@ import UIKit
 import Foundation
 @preconcurrency import CallKit
 import StreamVideo
+import StreamVideoSwiftUI
 
 enum CallKitState {
     case idle
@@ -21,6 +22,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     var callType: String = ""
     
     private var call: Call?
+    private let callEventsHandler = CallEventsHandler()
     
     private var state: CallKitState = .idle
     private var callKitId: UUID?
@@ -187,22 +189,24 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
     private func subscribeToCallEvents() {
         Task {
-            for await event in streamVideo.callEvents() {
-                switch event {
-                case .ended(_):
-                    endCurrentCall()
-                case .rejected(let callInfo):
-                    if callInfo.user?.id == streamVideo.user.id {
+            for await wsEvent in streamVideo.subscribe() {
+                if let event = callEventsHandler.checkForCallEvents(from: wsEvent) {
+                    switch event {
+                    case .ended(_):
                         endCurrentCall()
-                    } else if callInfo.user?.id == createdBy?.id {
-                        endCurrentCall()
+                    case .rejected(let callInfo):
+                        if callInfo.user?.id == streamVideo.user.id {
+                            endCurrentCall()
+                        } else if callInfo.user?.id == createdBy?.id {
+                            endCurrentCall()
+                        }
+                    case .accepted(let callInfo):
+                        if callInfo.user?.id == streamVideo.user.id && state == .idle {
+                            endCurrentCall()
+                        }
+                    default:
+                        log.debug("received call event")
                     }
-                case .accepted(let callInfo):
-                    if callInfo.user?.id == streamVideo.user.id && state == .idle {
-                        endCurrentCall()
-                    }
-                default:
-                    log.debug("received call event")
                 }
             }
         }

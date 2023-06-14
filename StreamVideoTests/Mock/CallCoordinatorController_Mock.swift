@@ -8,14 +8,6 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
     
     var error: Error?
     
-    override func sendEvent(
-        callId: String,
-        callType: String,
-        customData: [String: AnyCodable]? = nil
-    ) async throws {
-        // No op
-    }
-    
     override func createGuestUser(with id: String) async throws -> CreateGuestResponse {
         CreateGuestResponse(
             accessToken: StreamVideo.mockToken.rawValue,

@@ -35,11 +35,11 @@ public final class CallSettings: ObservableObject, Sendable {
         #endif
     }
     
-    var shouldPublish: Bool {
+    public var shouldPublish: Bool {
         audioOn || videoOn
     }
     
-    func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
+    public func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
             videoOn: videoOn,
@@ -55,7 +55,7 @@ public enum CameraPosition: Sendable {
     case front
     case back
     
-    func next() -> CameraPosition {
+    public func next() -> CameraPosition {
         self == .front ? .back : .front
     }
 }

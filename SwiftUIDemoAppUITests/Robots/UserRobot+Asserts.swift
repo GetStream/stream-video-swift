@@ -60,9 +60,11 @@ extension UserRobot {
     private func assertToogle(_ toogle: XCUIElement, state: UserControls) -> Self {
         switch state {
         case .enable:
-            XCTAssertTrue(toogle.wait().waitForValue("1").isOn, "Toggle should be on")
+            XCTAssertTrue(toogle.wait().waitForValue("1", timeout: UserRobot.defaultTimeout).isOn,
+                          "Toggle should be on")
         case .disable:
-            XCTAssertTrue(toogle.wait().waitForValue("0").isOff, "Toggle should be off")
+            XCTAssertTrue(toogle.wait().waitForValue("0", timeout: UserRobot.defaultTimeout).isOff,
+                          "Toggle should be off")
         }
         return self
     }

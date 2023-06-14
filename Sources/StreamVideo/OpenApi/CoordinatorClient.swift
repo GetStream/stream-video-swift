@@ -12,11 +12,12 @@ class CoordinatorClient: @unchecked Sendable {
     let apiKey: String
     var userId: String
     var connectionId = ""
+    var authType: UserAuthType
     let syncQueue = DispatchQueue(label: "io.getstream.CoordinatorClient", qos: .userInitiated)
     let pathPrefix: String = "video"
     
     private var isAnonymous: Bool {
-        userId.isAnonymousUser
+        authType == .anonymous
     }
     
     private var connectionQueryParams: [String: String] {
@@ -39,19 +40,21 @@ class CoordinatorClient: @unchecked Sendable {
         apiKey: String,
         hostname: String,
         token: String,
-        userId: String
+        userId: String,
+        type: UserAuthType
     ) {
         self.httpClient = httpClient
         self.hostname = hostname
         self.token = token
         self.apiKey = apiKey
         self.userId = userId
+        self.authType = type
     }
     
-    func joinCall(with request: JoinCallRequestData) async throws -> JoinCallResponse {
+    func joinCall(type: String, callId: String, request: JoinCallRequest) async throws -> JoinCallResponse {
         try await execute(
-            request: request.joinCallRequest,
-            path: "/call/\(request.type)/\(request.id)/join"
+            request: request,
+            path: "/call/\(type)/\(callId)/join"
         )
     }
     
@@ -81,10 +84,14 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/call/\(callType)/\(callId)")
     }
     
-    func sendEvent(with request: EventRequestData) async throws -> SendEventResponse {
+    func sendEvent(
+        type: String,
+        callId: String,
+        request: SendEventRequest
+    ) async throws -> SendEventResponse {
         try await execute(
-            request: request.sendEventRequest,
-            path: "/call/\(request.type)/\(request.id)/event"
+            request: request,
+            path: "/call/\(type)/\(callId)/event"
         )
     }
     
@@ -98,29 +105,37 @@ class CoordinatorClient: @unchecked Sendable {
         return try await execute(urlRequest: request)
     }
     
-    func endCall(with request: EndCallRequestData) async throws -> EndCallResponse {
-        let request = try makeRequest(for: "/call/\(request.type)/\(request.id)/mark_ended")
+    func endCall(type: String, callId: String) async throws -> EndCallResponse {
+        let request = try makeRequest(for: "/call/\(type)/\(callId)/mark_ended")
         return try await execute(urlRequest: request)
     }
     
-    func requestPermission(with request: RequestPermissionsRequestData) async throws -> RequestPermissionResponse {
+    func requestPermission(
+        type: String,
+        callId: String,
+        request: RequestPermissionRequest
+    ) async throws -> RequestPermissionResponse {
         try await execute(
-            request: request.requestPermissionRequest,
-            path: "/call/\(request.type)/\(request.id)/request_permission"
+            request: request,
+            path: "/call/\(type)/\(callId)/request_permission"
         )
     }
     
-    func updateUserPermissions(with request: UpdatePermissionsRequestData) async throws -> UpdateUserPermissionsResponse {
+    func updateUserPermissions(
+        type: String,
+        callId: String,
+        request: UpdateUserPermissionsRequest
+    ) async throws -> UpdateUserPermissionsResponse {
         try await execute(
-            request: request.updateUserPermissionsRequest,
-            path: "/call/\(request.type)/\(request.id)/user_permissions"
+            request: request,
+            path: "/call/\(type)/\(callId)/user_permissions"
         )
     }
     
-    func muteUsers(with request: MuteUsersRequestData) async throws -> MuteUsersResponse {
+    func muteUsers(type: String, callId: String, request: MuteUsersRequest) async throws -> MuteUsersResponse {
         try await execute(
-            request: request.muteUsersRequest,
-            path: "/call/\(request.type)/\(request.id)/mute_users"
+            request: request,
+            path: "/call/\(type)/\(callId)/mute_users"
         )
     }
     
@@ -128,24 +143,32 @@ class CoordinatorClient: @unchecked Sendable {
         try await execute(request: request, path: "/call/members")
     }
     
-    func blockUser(with request: BlockUserRequestData) async throws -> BlockUserResponse {
+    func blockUser(type: String, callId: String, request: BlockUserRequest) async throws -> BlockUserResponse {
         try await execute(
-            request: request.blockUserRequest,
-            path: "/call/\(request.type)/\(request.id)/block"
+            request: request,
+            path: "/call/\(type)/\(callId)/block"
         )
     }
     
-    func unblockUser(with request: UnblockUserRequestData) async throws -> UnblockUserResponse {
+    func unblockUser(
+        type: String,
+        callId: String,
+        request: UnblockUserRequest
+    ) async throws -> UnblockUserResponse {
         try await execute(
-            request: request.unblockUserRequest,
-            path: "/call/\(request.type)/\(request.id)/unblock"
+            request: request,
+            path: "/call/\(type)/\(callId)/unblock"
         )
     }
     
-    func sendReaction(with request: SendReactionRequestData) async throws -> SendReactionResponse {
+    func sendReaction(
+        type: String,
+        callId: String,
+        request: SendReactionRequest
+    ) async throws -> SendReactionResponse {
         try await execute(
-            request: request.sendReactionRequest,
-            path: "/call/\(request.type)/\(request.id)/reaction"
+            request: request,
+            path: "/call/\(type)/\(callId)/reaction"
         )
     }
     

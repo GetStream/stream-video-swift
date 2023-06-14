@@ -27,9 +27,3 @@ public enum ParticipantAction: Sendable {
         }
     }
 }
-
-public enum RecordingState {
-    case noRecording
-    case requested
-    case recording
-}

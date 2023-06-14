@@ -14,15 +14,15 @@ import AnyCodable
 
 
 
-internal struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
+public struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
 
-    internal var audio: Bool?
-    internal var muteAllUsers: Bool?
-    internal var screenshare: Bool?
-    internal var userIds: [String]?
-    internal var video: Bool?
+    public var audio: Bool?
+    public var muteAllUsers: Bool?
+    public var screenshare: Bool?
+    public var userIds: [String]?
+    public var video: Bool?
 
-    internal init(audio: Bool? = nil, muteAllUsers: Bool? = nil, screenshare: Bool? = nil, userIds: [String]? = nil, video: Bool? = nil) {
+    public init(audio: Bool? = nil, muteAllUsers: Bool? = nil, screenshare: Bool? = nil, userIds: [String]? = nil, video: Bool? = nil) {
         self.audio = audio
         self.muteAllUsers = muteAllUsers
         self.screenshare = screenshare
@@ -30,7 +30,7 @@ internal struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
         self.video = video
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case audio
         case muteAllUsers = "mute_all_users"
         case screenshare
@@ -40,7 +40,7 @@ internal struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(audio, forKey: .audio)
         try container.encodeIfPresent(muteAllUsers, forKey: .muteAllUsers)

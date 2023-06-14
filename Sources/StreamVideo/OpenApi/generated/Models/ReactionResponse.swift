@@ -14,21 +14,21 @@ import AnyCodable
 
 
 
-internal struct ReactionResponse: Codable, JSONEncodable, Hashable {
+public struct ReactionResponse: Codable, JSONEncodable, Hashable {
 
-    internal var custom: [String: AnyCodable]?
-    internal var emojiCode: String?
-    internal var type: String
-    internal var user: UserResponse
+    public var custom: [String: AnyCodable]?
+    public var emojiCode: String?
+    public var type: String
+    public var user: UserResponse
 
-    internal init(custom: [String: AnyCodable]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
+    public init(custom: [String: AnyCodable]? = nil, emojiCode: String? = nil, type: String, user: UserResponse) {
         self.custom = custom
         self.emojiCode = emojiCode
         self.type = type
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case custom
         case emojiCode = "emoji_code"
         case type
@@ -37,7 +37,7 @@ internal struct ReactionResponse: Codable, JSONEncodable, Hashable {
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encodeIfPresent(emojiCode, forKey: .emojiCode)

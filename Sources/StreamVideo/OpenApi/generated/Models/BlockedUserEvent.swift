@@ -15,16 +15,16 @@ import AnyCodable
 
 
 
-internal struct BlockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct BlockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
 
-    internal var blockedByUser: UserResponse?
-    internal var callCid: String
-    internal var createdAt: Date
+    public var blockedByUser: UserResponse?
+    public var callCid: String
+    public var createdAt: Date
     /** The type of event: \"call.blocked_user\" in this case */
-    internal var type: String = "call.blocked_user"
-    internal var user: UserResponse
+    public var type: String = "call.blocked_user"
+    public var user: UserResponse
 
-    internal init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, type: String = "call.blocked_user", user: UserResponse) {
+    public init(blockedByUser: UserResponse? = nil, callCid: String, createdAt: Date, type: String = "call.blocked_user", user: UserResponse) {
         self.blockedByUser = blockedByUser
         self.callCid = callCid
         self.createdAt = createdAt
@@ -32,7 +32,7 @@ internal struct BlockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
         self.user = user
     }
 
-    internal enum CodingKeys: String, CodingKey, CaseIterable {
+    public enum CodingKeys: String, CodingKey, CaseIterable {
         case blockedByUser = "blocked_by_user"
         case callCid = "call_cid"
         case createdAt = "created_at"
@@ -42,7 +42,7 @@ internal struct BlockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent 
 
     // Encodable protocol methods
 
-    internal func encode(to encoder: Encoder) throws {
+    public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(blockedByUser, forKey: .blockedByUser)
         try container.encode(callCid, forKey: .callCid)

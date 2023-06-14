@@ -72,7 +72,7 @@ struct StreamCallingView: View {
                     )
                 Button {
                     resignFirstResponder()
-                    viewModel.enterLobby(callId: text, type: .default, members: [])
+                    viewModel.enterLobby(callType: .default, callId: text, members: [])
                 } label: {
                     CallButtonView(title: "Join Call", maxWidth: 120)
                 }
@@ -88,7 +88,7 @@ struct StreamCallingView: View {
             
             Button {
                 resignFirstResponder()
-                viewModel.startCall(callId: UUID().uuidString, type: .default, members: [])
+                viewModel.startCall(callType: .default, callId: UUID().uuidString, members: [])
             } label: {
                 CallButtonView(title: "Start New Call")
             }
