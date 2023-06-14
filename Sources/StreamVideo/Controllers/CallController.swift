@@ -86,14 +86,14 @@ class CallController {
     ///
     /// - Parameters:
     ///  - callId: the id of the call.
-    ///  - type: the type of the call.
+    ///  - callType: the type of the call.
     ///  - membersLimit: An optional integer specifying the maximum number of members allowed in the call.
     ///  - notify: A boolean value indicating whether members should be notified about the call.
     ///  - ring: A boolean value indicating whether to ring the call.
     /// - Throws: An error if the call doesn't exist.
     /// - Returns: The call's data.
     func getCall(
-        type: String,
+        callType: String,
         callId: String,
         membersLimit: Int?,
         ring: Bool,
@@ -101,7 +101,7 @@ class CallController {
     ) async throws -> CallData {
         let response = try await callCoordinatorController.coordinatorClient.getCall(
             callId: callId,
-            type: type,
+            type: callType,
             membersLimit: membersLimit,
             ring: ring,
             notify: notify

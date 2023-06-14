@@ -31,6 +31,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public internal(set) var state = Call.State()
     
     /// The id of the current session.
+    /// When a call is started, a unique session identifier is assigned to the user in the call.
     public internal(set) var sessionId: String = ""
     
     /// The call id.
@@ -46,7 +47,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private let callCoordinatorController: CallCoordinatorController
     internal let callController: CallController
     private let videoOptions: VideoOptions
-    private var continuation: AsyncStream<Event>.Continuation?
     private var eventHandlers = [EventHandling]()
     private var coordinatorClient: CoordinatorClient {
         callCoordinatorController.coordinatorClient
@@ -105,7 +105,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false
     ) async throws -> CallData {
         try await callController.getCall(
-            type: callType,
+            callType: callType,
             callId: callId,
             membersLimit: membersLimit,
             ring: ring,
@@ -254,7 +254,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
-            self?.continuation = continuation
+            let eventHandler: EventHandling = { event in
+                continuation.yield(event)
+            }
+            self?.eventHandlers.append(eventHandler)
         }
     }
 
@@ -272,8 +275,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
-        continuation?.finish()
-        continuation = nil
         eventHandlers.removeAll()
         callController.cleanUp()
     }
@@ -529,7 +530,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
         updateState(from: event)
-        continuation?.yield(event)
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }

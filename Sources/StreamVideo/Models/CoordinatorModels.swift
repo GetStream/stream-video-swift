@@ -4,13 +4,13 @@
 
 import Foundation
 
-public struct EdgeServer: Sendable {
+struct EdgeServer: Sendable {
     let url: String
     let webSocketURL: String
     let token: String
     let iceServers: [IceServer]
     let callSettings: CallSettingsInfo
-    public let latencyURL: String?
+    let latencyURL: String?
 }
 
 struct CallSettingsInfo: Sendable {
@@ -22,7 +22,7 @@ struct CallSettingsInfo: Sendable {
 
 extension CallSettingsResponse: @unchecked Sendable {}
 
-public struct IceServer: Sendable {
+struct IceServer: Sendable {
     let urls: [String]
     let username: String
     let password: String
