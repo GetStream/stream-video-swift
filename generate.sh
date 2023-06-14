@@ -18,6 +18,8 @@ OPENAPI_GENERATED_CODE_ROOT="${PROJECT_ROOT}/Sources/StreamVideo/OpenApi/generat
 #   --additional-properties=responseAs=AsyncAwait
 
 # build openapi using latest manifest available
+docker pull ghcr.io/getstream/openapi-generator:master
+
 docker run --rm -v "${OPENAPI_GENERATED_CODE_ROOT}:/local" \
    ghcr.io/getstream/openapi-generator:master \
    generate -g swift5 \

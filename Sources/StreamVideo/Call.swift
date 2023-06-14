@@ -216,7 +216,7 @@ members: [User],
         let response = try await client.getOrCreateCall(
             type: callType,
             id: callId,
-            getOrCreateCallRequest: request,
+            getOrCreateCallRequest: request
             // TODO: we need something like this
 //            connectionId: await streamVideo.getConnectionID(),
         )
