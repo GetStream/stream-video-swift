@@ -294,24 +294,24 @@ lane :sync_xcodeproj_references do
 
     sh('git add .')
     untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
-    deleted_files = untracked_files.select { |f| f.start_with?('D ') }.map { |f| f.split.drop(1).join }
-    new_files = untracked_files.select { |f| f.start_with?('A ', '?? ') }.map { |f| f.split.drop(1).join }
-    renamed_files = untracked_files.select { |f| f.start_with?('R ') }.map { |f| f.split.drop(1).join }
+    deleted_swift_files = untracked_files.select { |f| f.start_with?('D ') }.map { |f| f.split.drop(1).join }.select { |f| f.end_with?('.swift') }
+    new_swift_files = untracked_files.select { |f| f.start_with?('A ', '?? ') }.map { |f| f.split.drop(1).join }.select { |f| f.end_with?('.swift') }
+    renamed_swift_files = untracked_files.select { |f| f.start_with?('R ') }.map { |f| f.split.drop(1).join }.select { |f| f.end_with?('.swift') }
 
-    renamed_files.each do |renamed_file|
+    renamed_swift_files.each do |renamed_file|
       content = renamed_file.split.drop(1).join.split('->').map(&:strip)
       deleted_files << content.first
       new_files << content.last
     end
 
-    deleted_files.select { |f| f.end_with?('.swift') }.each do |file_path|
+    deleted_swift_files.each do |file_path|
       file = project.files.find { |f| f.full_path.to_s == file_path }
       next if file.nil?
 
       file.remove_from_project if file
     end
 
-    new_files.select { |f| f.end_with?('.swift') }.each do |file_path|
+    new_swift_files.each do |file_path|
       file = project.files.find { |f| f.full_path.to_s == file_path }
       next unless file.nil?
 
