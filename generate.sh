@@ -53,3 +53,6 @@ rm -rf ${PROTOBUF_GENERATED_CODE_ROOT}/sfu
 
 # put back what we care about
 mv ${PROTOBUF_GENERATED_CODE_ROOT}/tmp/video/sfu ${PROTOBUF_GENERATED_CODE_ROOT}
+
+# sync xcodeproj references
+bundle exec fastlane sync_xcodeproj_references
