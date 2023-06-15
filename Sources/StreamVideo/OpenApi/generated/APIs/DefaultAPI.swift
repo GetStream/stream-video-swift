@@ -133,6 +133,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         return Request(
             url: url,
             method: .init(stringValue: httpMethod),
+            queryParams: queryParams,
             headers: ["Content-Type": "application/json"]
         )
     }

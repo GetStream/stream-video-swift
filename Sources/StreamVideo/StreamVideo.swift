@@ -419,6 +419,12 @@ public class StreamVideo {
         if let connectionId = loadConnectionIdFromHealthcheck() {
             return connectionId
         }
+        
+        guard webSocketClient?.connectionState == .connecting
+                || webSocketClient?.connectionState == .authenticating else {
+            return ""
+        }
+        
         var timeout = false
         let control = DefaultTimer.schedule(timeInterval: 5, queue: .sdk) {
             timeout = true
