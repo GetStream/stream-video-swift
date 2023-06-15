@@ -28,3 +28,4 @@ extension Stream_Video_Sfu_Event_TrackPublished: Event {}
 extension Stream_Video_Sfu_Event_TrackUnpublished: Event {}
 extension Stream_Video_Sfu_Event_Error: Event {}
 extension Stream_Video_Sfu_Event_CallGrantsUpdated: Event {}
+extension Stream_Video_Sfu_Event_GoAway: Event {}
