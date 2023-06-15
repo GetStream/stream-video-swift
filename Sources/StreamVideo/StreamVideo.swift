@@ -416,13 +416,36 @@ public class StreamVideo {
     }
     
     private func loadConnectionId() async -> String {
+        if let connectionId = loadConnectionIdFromHealthcheck() {
+            return connectionId
+        }
+        var timeout = false
+        let control = DefaultTimer.schedule(timeInterval: 5, queue: .sdk) {
+            timeout = true
+        }
+        log.debug("Waiting for connection id")
+
+        while (loadConnectionIdFromHealthcheck() == nil && !timeout) {
+            try? await Task.sleep(nanoseconds: 100_000)
+        }
+        
+        control.cancel()
+        
+        if let connectionId = loadConnectionIdFromHealthcheck() {
+            log.debug("Connection id available from the WS")
+            return connectionId
+        }
+        
+        return ""
+    }
+    
+    private func loadConnectionIdFromHealthcheck() -> String? {
         if case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState {
             if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
                 return healthCheck.connectionId
             }
         }
-        //TODO: implement waiting for connection.
-        return ""
+        return nil
     }
     
     private func setDevice(
