@@ -17,16 +17,6 @@ public class StreamVideo {
     public let videoConfig: VideoConfig
     
     var token: UserToken
-    //TODO: delete this
-//    {
-//        didSet {
-//            if var authMiddleware = defaultAPI.middlewares.first(where: { $0 is UserAuth }) as? UserAuth {
-//                authMiddleware.token = token.rawValue
-//                //TODO: better solution
-//                defaultAPI.middlewares = [authMiddleware]
-//            }
-//        }
-//    }
 
     private let tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
@@ -208,7 +198,7 @@ public class StreamVideo {
         )
         let defaultParams = DefaultParams(apiKey: apiKey)
         self.defaultAPI = DefaultAPI(
-            basePath: "https://video.stream-io-api.com/video",
+            basePath: Self.endpointConfig.baseVideoURL,
             transport: apiTransport,
             middlewares: [defaultParams]
         )
@@ -221,6 +211,9 @@ public class StreamVideo {
             videoConfig
         )
         StreamVideoProviderKey.currentValue = self
+        self.apiTransport.setTokenUpdater { [weak self] userToken in
+            self?.token = userToken
+        }
         if user.type != .anonymous {
             let userAuth = UserAuth { [unowned self] in
                 self.token.rawValue
@@ -470,7 +463,7 @@ public class StreamVideo {
     ) async throws -> CreateGuestResponse {
         let transport = URLSessionTransport(urlSession: Environment.makeURLSession())
         let defaultAPI = DefaultAPI(
-            basePath: "https://video.stream-io-api.com/video",
+            basePath: Self.endpointConfig.baseVideoURL,
             transport: transport,
             middlewares: [DefaultParams(apiKey: apiKey)]
         )
