@@ -22,6 +22,8 @@ struct CallSettingsInfo: Sendable {
 
 extension CallSettingsResponse: @unchecked Sendable {}
 extension ModelResponse: @unchecked Sendable {}
+extension AcceptCallResponse: @unchecked Sendable {}
+extension RejectCallResponse: @unchecked Sendable {}
 
 struct IceServer: Sendable {
     let urls: [String]

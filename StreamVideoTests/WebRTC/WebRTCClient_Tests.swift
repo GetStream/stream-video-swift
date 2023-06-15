@@ -452,20 +452,6 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             transport: URLSessionTransport(urlSession: URLSession.shared),
             middlewares: [DefaultParams(apiKey: "key1")]
         )
-        let callCoordinator = CallCoordinatorController_Mock(
-            defaultAPI: defaultAPI,
-            user: StreamVideo.mockUser,
-            coordinatorInfo: CoordinatorInfo(
-                apiKey: StreamVideo.apiKey,
-                hostname: "test.com",
-                token: StreamVideo.mockToken.rawValue
-            ),
-            videoConfig: VideoConfig()
-        )
-        
-        if let callSettings {
-            callCoordinator.update(callSettings: callSettings)
-        }
         
         let webRTCClient = WebRTCClient(
             user: StreamVideo.mockUser,
@@ -474,7 +460,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: callCid,
-            callCoordinatorController: callCoordinator,
+            currentCallSettings: callSettings,
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,

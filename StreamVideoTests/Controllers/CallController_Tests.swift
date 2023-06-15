@@ -19,9 +19,8 @@ final class CallController_Tests: ControllerTestCase {
 
     func test_callController_joinCall_webRTCClientSignalChannelUsesTheExpectedConnectURL() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
 
         // When
         try await callController.joinCall(
@@ -38,9 +37,8 @@ final class CallController_Tests: ControllerTestCase {
 
     func test_callController_reconnectionSuccess() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -84,9 +82,8 @@ final class CallController_Tests: ControllerTestCase {
     
     func test_callController_reconnectionFailure() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -105,7 +102,6 @@ final class CallController_Tests: ControllerTestCase {
         engine.simulateConnectionSuccess()
         try await waitForCallEvent()
         engine.simulateDisconnect()
-        callCoordinator.error = ClientError.NetworkError()
         try await waitForCallEvent()
         
         // Then
@@ -120,9 +116,8 @@ final class CallController_Tests: ControllerTestCase {
     
     func test_callController_updateCallInfo() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -157,9 +152,8 @@ final class CallController_Tests: ControllerTestCase {
     
     func test_callController_updateCallInfoDifferentCallCid() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -195,9 +189,8 @@ final class CallController_Tests: ControllerTestCase {
     @MainActor
     func test_callController_updateRecordingState() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -219,9 +212,8 @@ final class CallController_Tests: ControllerTestCase {
     @MainActor
     func test_callController_updateRecordingStateDifferentCallCid() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -242,9 +234,8 @@ final class CallController_Tests: ControllerTestCase {
     
     func test_callController_cleanup() async throws {
         // Given
-        let callCoordinator = makeCallCoordinatorController()
-        webRTCClient = makeWebRTCClient(callCoordinator: callCoordinator)
-        let callController = makeCallController(callCoordinator: callCoordinator)
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -264,7 +255,7 @@ final class CallController_Tests: ControllerTestCase {
     
     // MARK: - private
     
-    private func makeCallController(callCoordinator: CallCoordinatorController_Mock) -> CallController {
+    private func makeCallController() -> CallController {
         let defaultAPI = DefaultAPI(
             basePath: "example.com",
             transport: URLSessionTransport(urlSession: URLSession.shared),
@@ -272,18 +263,18 @@ final class CallController_Tests: ControllerTestCase {
         )
         let callController = CallController(
             defaultAPI: defaultAPI,
-            callCoordinatorController: callCoordinator,
             user: user,
             callId: callId,
             callType: callType,
             apiKey: apiKey,
             videoConfig: videoConfig,
+            cachedLocation: nil,
             environment: .mock(with: webRTCClient)
         )
         return callController
     }
     
-    private func makeWebRTCClient(callCoordinator: CallCoordinatorController_Mock) -> WebRTCClient {
+    private func makeWebRTCClient() -> WebRTCClient {
         let time = VirtualTime()
         VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
@@ -296,7 +287,7 @@ final class CallController_Tests: ControllerTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: self.callCid,
-            callCoordinatorController: callCoordinator,
+            currentCallSettings: nil,
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,

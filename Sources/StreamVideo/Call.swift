@@ -44,8 +44,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callCid(from: callId, callType: callType)
     }
     
-    private let callCoordinatorController: CallCoordinatorController
     internal let callController: CallController
+    internal var currentCallSettings: CallSettingsInfo?
     private let videoOptions: VideoOptions
     private var eventHandlers = [EventHandling]()
     private let defaultAPI: DefaultAPI
@@ -54,14 +54,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callType: String,
         callId: String,
         defaultAPI: DefaultAPI,
-        callCoordinatorController: CallCoordinatorController,
         callController: CallController,
         videoOptions: VideoOptions
     ) {
         self.callId = callId
         self.callType = callType
         self.defaultAPI = defaultAPI
-        self.callCoordinatorController = callCoordinatorController
         self.callController = callController
         self.videoOptions = videoOptions
         self.callController.call = self
@@ -69,18 +67,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     /// Joins the current call.
     /// - Parameters:
+    ///  - create: whether the call should be created if it doesn't exist.
     ///  - members: the members of the call.
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
     /// - Throws: An error if the call could not be joined.
     public func join(
+        create: Bool = true,
         members: [Member] = [],
         ring: Bool = false,
         notify: Bool = false,
         callSettings: CallSettings = CallSettings()
     ) async throws {
         try await callController.joinCall(
+            create: create,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
@@ -157,19 +158,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     /// Accepts an incoming call.
-    public func accept() async throws {
-        _ = try await callController.callCoordinatorController.acceptCall(
-            callId: callId,
-            type: callType
-        )
+    @discardableResult
+    public func accept() async throws -> AcceptCallResponse {
+        try await defaultAPI.acceptCall(type: callType, id: callId)
     }
     
     /// Rejects a call.
-    public func reject() async throws {
-        _ = try await callController.callCoordinatorController.rejectCall(
-            callId: callId,
-            type: callType
-        )
+    @discardableResult
+    public func reject() async throws -> RejectCallResponse {
+        try await defaultAPI.rejectCall(type: callType, id: callId)
     }
     
     /// Adds the given user to the list of blocked users for the call.
@@ -228,14 +225,24 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter ids: An array of `String` values representing the member IDs to add.
     /// - Throws: An error if the members could not be added to the call.
     public func addMembers(ids: [String]) async throws -> [Member] {
-        try await callController.addMembersToCall(ids: ids)
+        try await self.updateCallMembers(
+            callId: callId,
+            callType: callType,
+            updateMembers: ids.map { MemberRequest(userId: $0) },
+            removedIds: []
+        )
     }
     
     /// Remove members with the specified `ids` from the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to remove.
     /// - Throws: An error if the members could not be removed from the call.
     public func removeMembers(ids: [String]) async throws -> [Member] {
-        try await callController.removeMembersFromCall(ids: ids)
+        try await self.updateCallMembers(
+            callId: callId,
+            callType: callType,
+            updateMembers: [],
+            removedIds: ids
+        )
     }
     
     /// Updates the track size for the provided participant.
@@ -285,7 +292,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
     public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
-        guard let callSettings = callCoordinatorController.currentCallSettings?.callSettings else {
+        guard let callSettings = currentCallSettings?.callSettings else {
             return false
         }
         for permission in permissions {
@@ -327,7 +334,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
     public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
-        let currentCallCapabilities = callCoordinatorController.currentCallSettings?.callCapabilities
+        let currentCallCapabilities = currentCallSettings?.callCapabilities
         return currentCallCapabilities?.contains(
             capability.rawValue
         ) == true
@@ -636,15 +643,45 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     private func updateCurrentCallSettings(_ event: UpdatedCallPermissionsEvent) {
         guard
             event.user.id == streamVideo.user.id,
-            let currentCallSettings = callCoordinatorController.currentCallSettings
+            let currentCallSettings = currentCallSettings
         else {
             return
         }
-        callCoordinatorController.currentCallSettings = .init(
+        self.currentCallSettings = .init(
             callCapabilities: event.ownCapabilities.map(\.rawValue),
             callSettings: currentCallSettings.callSettings,
             state: currentCallSettings.state,
             recording: currentCallSettings.recording
         )
+    }
+    
+    private func updateCallMembers(
+        callId: String,
+        callType: String,
+        updateMembers: [MemberRequest],
+        removedIds: [String]
+    ) async throws -> [Member] {
+        let request = UpdateCallMembersRequest(
+            removeMembers: removedIds,
+            updateMembers: updateMembers
+        )
+        let response = try await defaultAPI.updateCallMembers(
+            type: callType,
+            id: callId,
+            updateCallMembersRequest: request
+        )
+        return response.members.map { member in
+            let user = User(
+                id: member.userId,
+                name: member.user.name,
+                imageURL: URL(string: member.user.image ?? ""),
+                role: member.user.role
+            )
+            return Member(
+                user: user,
+                role: member.role ?? member.user.role,
+                customData: member.custom
+            )
+        }
     }
 }

@@ -143,42 +143,31 @@ final class Call_Tests: StreamVideoTestCase {
             transport: URLSessionTransport(urlSession: URLSession.shared),
             middlewares: [DefaultParams(apiKey: "key1")]
         )
-        let coordinatorController = CallCoordinatorController(
-            defaultAPI: defaultAPI,
-            user: userResponse.toUser,
-            coordinatorInfo: CoordinatorInfo(
-                apiKey: "key1",
-                hostname: "hostname",
-                token: "some_token"
-            ),
-            videoConfig: videoConfig
-        )
         let callController = CallController_Mock(
             defaultAPI: defaultAPI,
-            callCoordinatorController: coordinatorController,
             user: userResponse.toUser,
             callId: callId,
             callType: callType,
             apiKey: "key1",
-            videoConfig: videoConfig
+            videoConfig: videoConfig,
+            cachedLocation: nil
         )
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
         let callData = callResponse.toCallData(members: [], blockedUsers: [])
-        coordinatorController.currentCallSettings = CallSettingsInfo(
-            callCapabilities: [],
-            callSettings: mockResponseBuilder.makeCallSettingsResponse(),
-            state: callData,
-            recording: false
-        )
         let call = Call(
             callType: callType,
             callId: callId,
             defaultAPI: defaultAPI,
-            callCoordinatorController: coordinatorController,
             callController: callController,
             videoOptions: VideoOptions()
+        )
+        call.currentCallSettings = CallSettingsInfo(
+            callCapabilities: [],
+            callSettings: mockResponseBuilder.makeCallSettingsResponse(),
+            state: callData,
+            recording: false
         )
         call.state.callData = callData
         let event = UpdatedCallPermissionsEvent(

@@ -19,33 +19,33 @@ class CallController {
     private let user: User
     private let callId: String
     private let callType: String
-    internal let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
     private let defaultAPI: DefaultAPI
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat
     private var reconnectionDate: Date?
     private let environment: CallController.Environment
+    private var cachedLocation: String?
     
     init(
         defaultAPI: DefaultAPI,
-        callCoordinatorController: CallCoordinatorController,
         user: User,
         callId: String,
         callType: String,
         apiKey: String,
         videoConfig: VideoConfig,
+        cachedLocation: String?,
         environment: CallController.Environment = .init()
     ) {
         self.user = user
         self.callId = callId
         self.callType = callType
-        self.callCoordinatorController = callCoordinatorController
         self.apiKey = apiKey
         self.videoConfig = videoConfig
         self.sfuReconnectionTime = environment.sfuReconnectionTime
         self.environment = environment
         self.defaultAPI = defaultAPI
+        self.cachedLocation = cachedLocation
     }
     
     /// Joins a call with the provided information.
@@ -58,6 +58,7 @@ class CallController {
     ///  - ring: whether ringing events should be handled
     /// - Returns: a newly created `Call`.
     func joinCall(
+        create: Bool = true,
         callType: String,
         callId: String,
         callSettings: CallSettings,
@@ -66,7 +67,8 @@ class CallController {
         ring: Bool = false,
         notify: Bool = false
     ) async throws {
-        let edgeServer = try await callCoordinatorController.joinCall(
+        let edgeServer = try await joinCall(
+            create: create,
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
@@ -199,30 +201,6 @@ class CallController {
         await webRTCClient?.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
-    /// Adds members with the specified `ids` to the current call.
-    /// - Parameter ids: An array of `String` values representing the member IDs to add.
-    /// - Throws: An error if the members could not be added to the call.
-    func addMembersToCall(ids: [String]) async throws -> [Member] {
-        try await callCoordinatorController.updateCallMembers(
-            callId: callId,
-            callType: callType,
-            updateMembers: ids.map { MemberRequest(userId: $0) },
-            removedIds: []
-        )
-    }
-    
-    /// Removes members with the specified `ids` from the current call.
-    /// - Parameter ids: An array of `String` values representing the member IDs to remove.
-    /// - Throws: An error if the members could not be removed from the call.
-    func removeMembersFromCall(ids: [String]) async throws -> [Member] {
-        try await callCoordinatorController.updateCallMembers(
-            callId: callId,
-            callType: callType,
-            updateMembers: [],
-            removedIds: ids
-        )
-    }
-    
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
@@ -271,7 +249,7 @@ class CallController {
             edgeServer.webSocketURL,
             edgeServer.token,
             callCid(from: callId, callType: callType),
-            callCoordinatorController,
+            edgeServer.callSettings,
             videoConfig,
             edgeServer.callSettings.callSettings.audio,
             .init()
@@ -288,6 +266,7 @@ class CallController {
         )
         let sessionId = webRTCClient?.sessionID ?? ""
         call?.sessionId = sessionId
+        call?.currentCallSettings = edgeServer.callSettings
         call?.update(recordingState: edgeServer.callSettings.recording ? .recording : .noRecording)
         call?.update(callData: edgeServer.callSettings.state)
     }
@@ -358,6 +337,7 @@ class CallController {
                 log.debug("Retrying to connect to the call")
                 self.call?.update(reconnectionStatus: .reconnecting)
                 try await joinCall(
+                    create: false,
                     callType: call.callType,
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
@@ -381,6 +361,113 @@ class CallController {
         self.cleanUp()
     }
     
+    private func joinCall(
+        create: Bool,
+        callType: String,
+        callId: String,
+        videoOptions: VideoOptions,
+        members: [Member],
+        ring: Bool,
+        notify: Bool
+    ) async throws -> EdgeServer {
+        let location = try await getLocation()
+        let response = try await joinCall(
+            callId: callId,
+            type: callType,
+            location: location,
+            participants: members,
+            create: create,
+            ring: ring,
+            notify: notify
+        )
+        let iceServersResponse: [ICEServer] = response.credentials.iceServers
+        let iceServers = iceServersResponse.map { iceServer in
+            IceServer(
+                urls: iceServer.urls,
+                username: iceServer.username,
+                password: iceServer.password
+            )
+        }
+        let callSettings = CallSettingsInfo(
+            callCapabilities: response.ownCapabilities.map(\.rawValue),
+            callSettings: response.call.settings,
+            state: response.call.toCallData(
+                members: response.members,
+                blockedUsers: response.blockedUsers
+            ),
+            recording: response.call.recording
+        )
+        let edgeServer = EdgeServer(
+            url: response.credentials.server.url,
+            webSocketURL: response.credentials.server.wsEndpoint,
+            token: response.credentials.token,
+            iceServers: iceServers,
+            callSettings: callSettings,
+            latencyURL: nil
+        )
+        return edgeServer
+    }
+    
+    private func prefetchLocation() {
+        Task {
+            self.cachedLocation = try await getLocation()
+        }
+    }
+
+    private func getLocation() async throws -> String {
+        if let cachedLocation {
+            return cachedLocation
+        }
+        return try await LocationFetcher.getLocation()
+    }
+
+    private func joinCall(
+        callId: String,
+        type: String,
+        location: String,
+        participants: [Member],
+        create: Bool,
+        ring: Bool,
+        notify: Bool
+    ) async throws -> JoinCallResponse {
+        var members = [MemberRequest]()
+        for participant in participants {
+            let callMemberRequest = MemberRequest(
+                custom: participant.customData,
+                role: participant.role,
+                userId: participant.id
+            )
+            members.append(callMemberRequest)
+        }
+        
+        let currentUserRole = participants.filter { user.id == $0.id }.first?.role ?? user.role
+        let userRequest = UserRequest(
+            id: user.id,
+            image: user.imageURL?.absoluteString,
+            name: user.name,
+            role: currentUserRole
+        )
+        let callRequest = CallRequest(
+            createdBy: userRequest,
+            createdById: user.id,
+            members: members,
+            settingsOverride: nil
+        )
+        let joinCall = JoinCallRequest(
+            create: create,
+            data: callRequest,
+            location: location,
+            notify: notify,
+            ring: ring
+        )
+        let joinCallResponse = try await defaultAPI.joinCall(
+            type: type,
+            id: callId,
+            joinCallRequest: joinCall
+        )
+        return joinCallResponse
+    }
+    
 }
 
 extension CallController {
@@ -392,7 +479,7 @@ extension CallController {
             _ webSocketURLString: String,
             _ token: String,
             _ callCid: String,
-            _ callCoordinatorController: CallCoordinatorController,
+            _ currentCallSettings: CallSettingsInfo?,
             _ videoConfig: VideoConfig,
             _ audioSettings: AudioSettings,
             _ environment: WebSocketClient.Environment
@@ -404,7 +491,7 @@ extension CallController {
                 webSocketURLString: $3,
                 token: $4,
                 callCid: $5,
-                callCoordinatorController: $6,
+                currentCallSettings: $6,
                 videoConfig: $7,
                 audioSettings: $8,
                 environment: $9

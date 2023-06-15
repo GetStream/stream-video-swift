@@ -8,41 +8,21 @@ extension StreamVideo {
     struct Environment {        
         var callControllerBuilder: (
             _ defaultAPI: DefaultAPI,
-            _ callCoordinatorController: CallCoordinatorController,
             _ user: User,
             _ callId: String,
             _ callType: String,
             _ apiKey: String,
-            _ videoConfig: VideoConfig
+            _ videoConfig: VideoConfig,
+            _ cachedLocation: String?
         ) -> CallController = {
             CallController(
                 defaultAPI: $0,
-                callCoordinatorController: $1,
-                user: $2,
-                callId: $3,
-                callType: $4,
-                apiKey: $5,
-                videoConfig: $6
-            )
-        }
-        
-        var callCoordinatorControllerBuilder: (
-            _ defaultAPI: DefaultAPI,
-            _ user: User,
-            _ apiKey: String,
-            _ hostname: String,
-            _ token: String,
-            _ videoConfig: VideoConfig
-        ) -> CallCoordinatorController = {
-            CallCoordinatorController(
-                defaultAPI: $0,
                 user: $1,
-                coordinatorInfo: CoordinatorInfo(
-                    apiKey: $2,
-                    hostname: $3,
-                    token: $4
-                ),
-                videoConfig: $5
+                callId: $2,
+                callType: $3,
+                apiKey: $4,
+                videoConfig: $5,
+                cachedLocation: $6
             )
         }
         

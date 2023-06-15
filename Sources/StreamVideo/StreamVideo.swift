@@ -31,6 +31,7 @@ public class StreamVideo {
         
     private let eventsMiddleware = WSEventsMiddleware()
     private var continuations = [AsyncStream<Event>.Continuation]()
+    private var cachedLocation: String?
             
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -51,7 +52,6 @@ public class StreamVideo {
     var tokenExpirationRetryStrategy: RetryStrategy = DefaultRetryStrategy()
         
     private let apiKey: APIKey
-    private let callCoordinatorController: CallCoordinatorController
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
     
@@ -202,14 +202,6 @@ public class StreamVideo {
             transport: apiTransport,
             middlewares: [defaultParams]
         )
-        self.callCoordinatorController = environment.callCoordinatorControllerBuilder(
-            self.defaultAPI,
-            user,
-            apiKey,
-            Self.endpointConfig.hostname,
-            token.rawValue,
-            videoConfig
-        )
         StreamVideoProviderKey.currentValue = self
         self.apiTransport.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
@@ -225,6 +217,7 @@ public class StreamVideo {
             let anonymousAuth = AnonymousAuth(token: token.rawValue)
             defaultAPI.middlewares.append(anonymousAuth)
         }
+        self.prefetchLocation()
     }
     
     /// Connects the current user.
@@ -254,7 +247,6 @@ public class StreamVideo {
             callType: callType,
             callId: callId,
             defaultAPI: defaultAPI,
-            callCoordinatorController: callCoordinatorController,
             callController: callController,
             videoOptions: VideoOptions()
         )
@@ -343,12 +335,12 @@ public class StreamVideo {
     private func makeCallController(callType: String, callId: String) -> CallController {
         let controller = environment.callControllerBuilder(
             defaultAPI,
-            callCoordinatorController,
             user,
             callId,
             callType,
             apiKey.apiKeyString,
-            videoConfig
+            videoConfig,
+            cachedLocation
         )
         return controller
     }
@@ -517,6 +509,12 @@ public class StreamVideo {
             } catch {
                 result(.failure(error))
             }
+        }
+    }
+    
+    private func prefetchLocation() {
+        Task {
+            self.cachedLocation = try await LocationFetcher.getLocation()
         }
     }
     

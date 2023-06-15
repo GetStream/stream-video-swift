@@ -329,7 +329,7 @@ open class CallViewModel: ObservableObject {
     public func rejectCall(callType: String, callId: String) {
         Task {
             let call = streamVideo.call(callType: callType, callId: callId)
-            try? await call.reject()
+            _ = try? await call.reject()
             self.callingState = .idle
         }
     }
@@ -377,7 +377,7 @@ open class CallViewModel: ObservableObject {
     public func hangUp() {
         if callingState == .outgoing {
             Task {
-                try? await call?.reject()
+                _ = try? await call?.reject()
                 leaveCall()
             }
         } else {
@@ -554,7 +554,7 @@ open class CallViewModel: ObservableObject {
                         
             if rejections >= outgoingMembersCount && accepted == 0 {
                 Task {
-                    try? await call?.reject()
+                    _ = try? await call?.reject()
                     leaveCall()
                 }
             }
