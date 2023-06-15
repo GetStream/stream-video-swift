@@ -24,14 +24,26 @@ final class StreamVideo_Tests: XCTestCase {
         }
     }
     
-    //TODO: fix the test.
-    /*
     func test_streamVideo_guestUser() async throws {
         // Given
+        let httpClient = HTTPClient_Mock()
+        let response = CreateGuestResponse(
+            accessToken: StreamVideo.mockToken.rawValue,
+            duration: "",
+            user: UserResponse(
+                createdAt: Date(),
+                custom: [:],
+                id: StreamVideo.mockUser.id,
+                role: "", teams: [],
+                updatedAt: Date()
+            )
+        )
+        let data = try! JSONEncoder.default.encode(response)
+        httpClient.dataResponses = [data]
         let streamVideo = try await StreamVideo(
             apiKey: "key1",
             user: .guest("martin"),
-            environment: StreamVideo.mockEnvironment(HTTPClient_Mock())
+            environment: StreamVideo.mockEnvironment(httpClient)
         )
                 
         // Then
@@ -41,7 +53,6 @@ final class StreamVideo_Tests: XCTestCase {
         // Guest users are assigned ids from the backend.
         XCTAssert(user.id != "martin")
     }
-     */
     
     func test_streamVideo_makeCall() {
         // Given

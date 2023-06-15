@@ -26,6 +26,15 @@ extension StreamVideo {
             )
         }
         
+        var apiTransportBuilder: (
+            _ tokenProvider: @escaping UserTokenProvider
+        ) -> DefaultAPITransport = {
+            URLSessionTransport(
+                urlSession: Self.makeURLSession(),
+                tokenProvider: $0
+            )
+        }
+        
         var connectionRecoveryHandlerBuilder: (
             _ webSocketClient: WebSocketClient,
             _ eventNotificationCenter: EventNotificationCenter

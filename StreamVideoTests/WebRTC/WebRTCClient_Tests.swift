@@ -446,13 +446,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
         environment.timerType = VirtualTimeTimer.self
-        
-        let defaultAPI = DefaultAPI(
-            basePath: "https://example.com",
-            transport: URLSessionTransport(urlSession: URLSession.shared),
-            middlewares: [DefaultParams(apiKey: "key1")]
-        )
-        
+
         let webRTCClient = WebRTCClient(
             user: StreamVideo.mockUser,
             apiKey: StreamVideo.apiKey,

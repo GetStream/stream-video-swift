@@ -21,7 +21,7 @@ public class StreamVideo {
     private let tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
     private let defaultAPI: DefaultAPI
-    private let apiTransport: URLSessionTransport
+    private let apiTransport: DefaultAPITransport
     
     private var webSocketClient: WebSocketClient? {
         didSet {
@@ -150,7 +150,8 @@ public class StreamVideo {
     ) async throws {
         let guestUserResponse = try await Self.createGuestUser(
             id: user.id,
-            apiKey: apiKey
+            apiKey: apiKey,
+            environment: environment
         )
         let token = UserToken(rawValue: guestUserResponse.accessToken)
         
@@ -160,6 +161,7 @@ public class StreamVideo {
             Self.loadGuestToken(
                 userId: user.id,
                 apiKey: apiKey,
+                environment: environment,
                 result: result
             )
         }
@@ -192,10 +194,7 @@ public class StreamVideo {
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
         
-        self.apiTransport = URLSessionTransport(
-            urlSession: Environment.makeURLSession(),
-            tokenProvider: tokenProvider
-        )
+        self.apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
         self.defaultAPI = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
@@ -203,7 +202,7 @@ public class StreamVideo {
             middlewares: [defaultParams]
         )
         StreamVideoProviderKey.currentValue = self
-        self.apiTransport.setTokenUpdater { [weak self] userToken in
+        (self.apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
         }
         if user.type != .anonymous {
@@ -483,9 +482,10 @@ public class StreamVideo {
     
     private static func createGuestUser(
         id: String,
-        apiKey: String
+        apiKey: String,
+        environment: Environment
     ) async throws -> CreateGuestResponse {
-        let transport = URLSessionTransport(urlSession: Environment.makeURLSession())
+        let transport = environment.apiTransportBuilder { _ in }
         let defaultAPI = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
             transport: transport,
@@ -498,11 +498,16 @@ public class StreamVideo {
     private static func loadGuestToken(
         userId: String,
         apiKey: String,
+        environment: Environment,
         result: @escaping (Result<UserToken, Error>) -> Void
     )  {
         Task {
             do {
-                let response = try await createGuestUser(id: userId, apiKey: apiKey)
+                let response = try await createGuestUser(
+                    id: userId,
+                    apiKey: apiKey,
+                    environment: environment
+                )
                 let tokenValue = response.accessToken
                 let token = UserToken(rawValue: tokenValue)
                 result(.success(token))
@@ -531,6 +536,7 @@ extension StreamVideo: ConnectionStateDelegate {
             if let serverError = source.serverError, serverError.isInvalidTokenError {
                 Task {
                     do {
+                        guard let apiTransport = apiTransport as? URLSessionTransport else { return }
                         self.token = try await apiTransport.refreshToken()
                         log.debug("user token updated, will reconnect ws")
                         webSocketClient?.connect()

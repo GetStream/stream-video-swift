@@ -41,7 +41,9 @@ extension StreamVideo {
                 videoConfig: videoConfig,
                 cachedLocation: cachedLocation
             )
-        })
+            }) { tokenProvider in
+                httpClient as! any DefaultAPITransport
+            }
     }
     
 }

@@ -38,7 +38,7 @@ final class CallController_Tests: ControllerTestCase {
     func test_callController_reconnectionSuccess() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
-        let callController = makeCallController()
+        let callController = makeCallController(shouldReconnect: true)
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -255,10 +255,18 @@ final class CallController_Tests: ControllerTestCase {
     
     // MARK: - private
     
-    private func makeCallController() -> CallController {
+    private func makeCallController(shouldReconnect: Bool = false) -> CallController {
+        let httpClient = HTTPClient_Mock()
+        let joinCallResponse = MockResponseBuilder().makeJoinCallResponse(cid: callCid)
+        let data = try! JSONEncoder.default.encode(joinCallResponse)
+        var responses = [data]
+        if shouldReconnect {
+            responses.append(data)
+        }
+        httpClient.dataResponses = responses
         let defaultAPI = DefaultAPI(
             basePath: "example.com",
-            transport: URLSessionTransport(urlSession: URLSession.shared),
+            transport: httpClient,
             middlewares: []
         )
         let callController = CallController(
