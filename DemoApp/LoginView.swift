@@ -22,25 +22,50 @@ struct LoginView: View {
             Text("Select a user")
                 .font(.title)
                 .bold()
-            List(viewModel.users) { user in
-                Button {
-                    viewModel.login(user: user, completion: completion)
-                } label: {
-                    Text(user.name)
-                        .accessibility(identifier: "userName")
+
+            List {
+                Section {
+                    ForEach(viewModel.users) { user in
+                        Button {
+                            viewModel.login(user: user, completion: completion)
+                        } label: {
+                            Text(user.name)
+                                .accessibility(identifier: "userName")
+                        }
+                        .padding(8)
+                    }
+
+                    Button {
+                        addUserShown = true
+                    } label: {
+                        HStack {
+                            Image(systemName: "plus")
+                            Text("Add user")
+                        }
+                    }
+                    .padding(8)
                 }
-                .padding(.all, 8)
+
+                Section {
+                    Button {
+                        viewModel.login(user: .guest(UUID().uuidString), completion: completion)
+                    } label: {
+                        Text("Guest User")
+                            .accessibility(identifier: "Login as Guest")
+                    }
+                    .padding(.all, 8)
+
+                    Button {
+                        viewModel.login(user: .anonymous, completion: completion)
+                    } label: {
+                        Text("Anonymous User")
+                            .accessibility(identifier: "Login as Anonymous")
+                    }
+                    .padding(.all, 8)
+                } header: {
+                    Text("Other")
+                }
             }
-         
-            Button {
-                addUserShown = true
-            } label: {
-                Text("Add user")
-                    .padding()
-            }
-            .foregroundColor(Color.white)
-            .background(Color.blue)
-            .cornerRadius(16)
         }
         .foregroundColor(.primary)
         .overlay(

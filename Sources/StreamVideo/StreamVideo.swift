@@ -313,13 +313,16 @@ public class StreamVideo {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        for continuation in continuations {
-            continuation.finish()
-        }
+        continuations.forEach { $0.finish() }
         continuations.removeAll()
-        await withCheckedContinuation { continuation in
-            webSocketClient?.disconnect {
-                continuation.resume(returning: ())
+
+        await withCheckedContinuation { [webSocketClient] continuation in
+            if let webSocketClient = webSocketClient {
+                webSocketClient.disconnect {
+                    continuation.resume()
+                }
+            } else {
+                continuation.resume()
             }
         }
     }
