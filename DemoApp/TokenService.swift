@@ -9,26 +9,62 @@ import Foundation
 import StreamVideo
 
 class TokenService {
-    
-    lazy var tokenURL = "\(baseURL)/api/auth/create-token?user_id="
-    let baseURL = "https://stream-calls-dogfood.vercel.app"
-    
+
+    enum TokenServiceError: Error, CustomStringConvertible {
+        case unableToCreateURL
+        case unableToCreateURLFromComponents
+
+        var description: String {
+            switch self {
+            case .unableToCreateURL:
+                return "We were unable to construct the URL to fetch a new auth token."
+            case .unableToCreateURLFromComponents:
+                return "We were unable to construct the URL (from URLComponents) to fetch a new auth token."
+            }
+        }
+    }
+
     private let httpClient: HTTPClient = URLSessionClient()
     
     static let shared = TokenService()
     
     private init() {}
-    
-    func fetchToken(for userId: String) async throws -> UserToken {
-        let urlString = tokenURL + userId + "&api_key=\(Config.apiKey)"
-        guard let url = URL(string: urlString) else {
-            throw ClientError.Unexpected()
+
+    private lazy var url: URL = URL(string: "https://stream-calls-dogfood.vercel.app")!
+        .appendingPathComponent("api")
+        .appendingPathComponent("auth")
+        .appendingPathComponent("create-token")
+
+    private func url(with queryParameters: [String: String]) throws -> URL {
+        guard var components = URLComponents(url: url, resolvingAgainstBaseURL: false) else {
+            throw TokenServiceError.unableToCreateURL
         }
+
+        components.queryItems = queryParameters
+            .map { URLQueryItem(name: $0.key, value: $0.value) }
+
+        guard let result = components.url else {
+            throw TokenServiceError.unableToCreateURLFromComponents
+        }
+
+        return result
+    }
+
+    func fetchToken(for userId: String, callIds: [String] = []) async throws -> UserToken {
+        var parameters: [String: String] = [
+            "user_id": userId,
+            "api_key": Config.apiKey
+        ]
+
+        if !callIds.isEmpty {
+            parameters["call_cids"] = callIds.joined(separator: ",")
+        }
+
+        let url = try url(with: parameters)
         let tokenResponse: TokenResponse = try await httpClient.execute(url: url)
         let token = UserToken(rawValue: tokenResponse.token)
         return token
     }
-    
 }
 
 struct TokenResponse: Codable {

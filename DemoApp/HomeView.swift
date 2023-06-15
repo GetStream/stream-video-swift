@@ -20,7 +20,7 @@ struct HomeView: View {
     @State private var callAction = CallAction.startCall
     
     @State private var callFlow: CallFlow = .joinImmediately
-    
+
     var participants: [User] {
         var participants = User.builtInUsers
         participants.removeAll { userInfo in
@@ -117,8 +117,19 @@ struct HomeView: View {
         .background(
             viewModel.callingState == .inCall && !viewModel.isMinimized ? Color.black.edgesIgnoringSafeArea(.all) : nil
         )
+        .onChange(of: viewModel.call?.callId, perform: { [callId = viewModel.call?.callId] newValue in
+            if newValue == nil, callId != nil, !appState.activeAnonymousCallId.isEmpty {
+                appState.activeAnonymousCallId = ""
+                appState.logout()
+            }
+        })
         .onReceive(appState.$activeCall) { call in
             viewModel.setActiveCall(call)
+        }
+        .onReceive(appState.$activeAnonymousCallId) { callId in
+            guard !callId.isEmpty else { return }
+            self.callId = callId
+            viewModel.joinCall(callType: .default, callId: callId)
         }
     }
     

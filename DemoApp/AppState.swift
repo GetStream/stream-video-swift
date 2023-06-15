@@ -25,6 +25,8 @@ class AppState: ObservableObject {
         }
     }
     @Published var activeCall: Call?
+
+    @Published var activeAnonymousCallId: String = ""
     
     var streamVideo: StreamVideo? {
         didSet {

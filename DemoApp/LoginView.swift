@@ -11,6 +11,7 @@ struct LoginView: View {
     var completion: (UserCredentials) -> ()
     
     @State var addUserShown = false
+    @State private var showJoinCallPopup = false
     
     init(completion: @escaping (UserCredentials) -> ()) {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
@@ -55,13 +56,15 @@ struct LoginView: View {
                     }
                     .padding(.all, 8)
 
+                    #if DEBUG
                     Button {
-                        viewModel.login(user: .anonymous, completion: completion)
+                        showJoinCallPopup.toggle()
                     } label: {
                         Text("Anonymous User")
                             .accessibility(identifier: "Login as Anonymous")
                     }
                     .padding(.all, 8)
+                    #endif // #if DEBUG
                 } header: {
                     Text("Other")
                 }
@@ -76,5 +79,45 @@ struct LoginView: View {
         }) {
             AddUserView()
         }
+        .sheet(isPresented: $showJoinCallPopup) {
+            JoinCallView(viewModel: viewModel, completion: completion)
+        }
+    }
+}
+
+struct JoinCallView: View {
+
+    @Environment(\.presentationMode) var presentationMode
+    @StateObject var viewModel: LoginViewModel
+    var completion: (UserCredentials) -> ()
+
+    @State private var callId = ""
+
+    var body: some View {
+        VStack {
+            Text("Join Call")
+                .font(.title)
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .padding([.bottom])
+
+            VStack(spacing: 16) {
+                TextField("Enter call id", text: $callId)
+
+                Button {
+                    presentationMode.wrappedValue.dismiss()
+                    viewModel.joinCallAnonymously(callId: callId, completion: completion)
+                } label: {
+                    Text("Join call")
+                }
+                .frame(maxWidth: .infinity, minHeight: 50)
+                .background(Color.blue)
+                .foregroundColor(Color.white)
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+            }
+
+            Spacer()
+        }
+        .padding()
+        .overlay( viewModel.loading ? ProgressView() : nil)
     }
 }
