@@ -293,7 +293,7 @@ lane :sync_xcodeproj_references do
     project = Xcodeproj::Project.open(xcode_project)
 
     untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
-    deleted_files = untracked_files.select { |f| f.start_with?('D ') && f.end_with?('.swift') }.map { |f| f.split.drop(1).join }
+    deleted_files = untracked_files.select { |f| f.start_with?('D ') }.map { |f| f.split.drop(1).join }
     new_files = untracked_files.reject { |f| f.start_with?('M ', 'D ') }.map { |f| f.split.drop(1).join }
 
     deleted_files.select { |f| f.end_with?('.swift') }.each do |file_path|
