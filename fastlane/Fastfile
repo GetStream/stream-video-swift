@@ -292,9 +292,17 @@ lane :sync_xcodeproj_references do
   Dir.chdir('..') do
     project = Xcodeproj::Project.open(xcode_project)
 
+    sh('git add .')
     untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
     deleted_files = untracked_files.select { |f| f.start_with?('D ') }.map { |f| f.split.drop(1).join }
-    new_files = untracked_files.reject { |f| f.start_with?('M ', 'D ') }.map { |f| f.split.drop(1).join }
+    new_files = untracked_files.select { |f| f.start_with?('A ', '?? ') }.map { |f| f.split.drop(1).join }
+    renamed_files = untracked_files.select { |f| f.start_with?('R ') }.map { |f| f.split.drop(1).join }
+
+    renamed_files.each do |renamed_file|
+      content = renamed_file.split.drop(1).join.split('->').map(&:strip)
+      deleted_files << content.first
+      new_files << content.last
+    end
 
     deleted_files.select { |f| f.end_with?('.swift') }.each do |file_path|
       file = project.files.find { |f| f.full_path.to_s == file_path }
@@ -307,28 +315,22 @@ lane :sync_xcodeproj_references do
       file = project.files.find { |f| f.full_path.to_s == file_path }
       next unless file.nil?
 
-      group = find_group_in_pbxproj(name: 'generated', parent: project.main_group)
-      if group
-        file_reference = group.new_file(file_path)
-        project.targets.find { |n| n.name == 'StreamVideo' }.resources_build_phase.add_file_reference(file_reference)
+      group = project.main_group
+      file_path.split('/').tap(&:pop).each do |subfolder|
+        if group[subfolder]
+          group = group[subfolder]
+        else
+          group = group.new_group(subfolder)
+          group.path = subfolder
+        end
       end
+      file_reference = group.new_file(file_path)
+      file_reference.path = file_path.split('/').last
+      project.targets.find { |n| n.name == 'StreamVideo' }.source_build_phase.add_file_reference(file_reference)
     end
 
     project.save
   end
-end
-
-def find_group_in_pbxproj(name:, parent:)
-  return group if group.display_name == name
-
-  group.children.each do |child|
-    next unless child.respond_to?(:children)
-
-    result = find_group_in_pbxproj(name: name, parent: child)
-    return result if result
-  end
-
-  nil
 end
 
 desc 'Run fastlane linting'
