@@ -71,6 +71,9 @@ extension ClientError {
     
     /// Missing connection id.
     public class MissingConnectionId: ClientError {}
+    
+    /// Error when bad input is passed by the caller.
+    public class BadInput: ClientError {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable

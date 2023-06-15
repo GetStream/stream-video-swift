@@ -8,26 +8,19 @@ import WebRTC
 /// Handles communication with the Coordinator API for determining the best SFU for a call.
 class CallCoordinatorController: @unchecked Sendable {
     
-    let coordinatorClient: CoordinatorClient
     var currentCallSettings: CallSettingsInfo?
     private let videoConfig: VideoConfig
     private var user: User
     private var cachedLocation: String?
+    private let defaultAPI: DefaultAPI
     
     init(
-        httpClient: HTTPClient,
+        defaultAPI: DefaultAPI,
         user: User,
         coordinatorInfo: CoordinatorInfo,
         videoConfig: VideoConfig
     ) {
-        coordinatorClient = CoordinatorClient(
-            httpClient: httpClient,
-            apiKey: coordinatorInfo.apiKey,
-            hostname: coordinatorInfo.hostname,
-            token: coordinatorInfo.token,
-            userId: user.id,
-            type: user.type
-        )
+        self.defaultAPI = defaultAPI
         self.videoConfig = videoConfig
         self.user = user
         self.prefetchLocation()
@@ -78,31 +71,18 @@ class CallCoordinatorController: @unchecked Sendable {
         currentCallSettings = edgeServer.callSettings
         return edgeServer
     }
-
-    func update(token: UserToken) {
-        coordinatorClient.update(userToken: token.rawValue)
-    }
-    
-    func update(connectionId: String) {
-        coordinatorClient.connectionId = connectionId
-    }
-    
-    func update(user: User) {
-        self.user = user
-        coordinatorClient.userId = user.id
-    }
     
     func acceptCall(callId: String, type: String) async throws -> AcceptCallResponse {
-        try await coordinatorClient.acceptCall(callId: callId, type: type)
+        try await defaultAPI.acceptCall(type: type, id: callId)
     }
     
     func rejectCall(callId: String, type: String) async throws -> RejectCallResponse {
-        try await coordinatorClient.rejectCall(callId: callId, type: type)
+        try await defaultAPI.rejectCall(type: type, id: callId)
     }
     
     func createGuestUser(with id: String) async throws -> CreateGuestResponse {
         let request = CreateGuestRequest(user: .init(id: id, name: id))
-        return try await coordinatorClient.createGuestUser(request: request)
+        return try await defaultAPI.createGuest(createGuestRequest: request)
     }
     
     func updateCallMembers(
@@ -115,10 +95,10 @@ class CallCoordinatorController: @unchecked Sendable {
             removeMembers: removedIds,
             updateMembers: updateMembers
         )
-        let response = try await coordinatorClient.updateCallMembers(
-            request: request,
-            callId: callId,
-            callType: callType
+        let response = try await defaultAPI.updateCallMembers(
+            type: callType,
+            id: callId,
+            updateCallMembersRequest: request
         )
         return response.members.map { member in
             let user = User(
@@ -193,6 +173,7 @@ class CallCoordinatorController: @unchecked Sendable {
             members: members,
             settingsOverride: nil
         )
+        //TODO: make it parameter
         let create = user.type != .anonymous
         let joinCall = JoinCallRequest(
             create: create,
@@ -201,10 +182,10 @@ class CallCoordinatorController: @unchecked Sendable {
             notify: notify,
             ring: ring
         )
-        let joinCallResponse = try await coordinatorClient.joinCall(
+        let joinCallResponse = try await defaultAPI.joinCall(
             type: type,
-            callId: callId,
-            request: joinCall
+            id: callId,
+            joinCallRequest: joinCall
         )
         return joinCallResponse
     }

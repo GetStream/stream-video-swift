@@ -16,7 +16,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     private let signalService: Stream_Video_Sfu_Signal_SignalServer
-    private let coordinatorClient: CoordinatorClient
     private let sessionId: String
     private let callCid: String
     private let type: PeerConnectionType
@@ -39,14 +38,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         callCid: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
-        coordinatorClient: CoordinatorClient,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         videoOptions: VideoOptions,
         reportStats: Bool = false
     ) {
         self.sessionId = sessionId
         self.pc = pc
-        self.coordinatorClient = coordinatorClient
         self.signalService = signalService
         self.type = type
         self.reportStats = reportStats

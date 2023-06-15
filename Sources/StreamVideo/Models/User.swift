@@ -12,8 +12,25 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
     public let role: String
     public let type: UserAuthType
     public let customData: [String: RawJSON]
-
+    
     public init(
+        id: String,
+        name: String? = nil,
+        imageURL: URL? = nil,
+        role: String = "user",
+        customData: [String: RawJSON] = [:]
+    ) {
+        self.init(
+            id: id,
+            name: name,
+            imageURL: imageURL,
+            role: role,
+            type: .regular,
+            customData: customData
+        )
+    }
+
+    init(
         id: String,
         name: String? = nil,
         imageURL: URL? = nil,

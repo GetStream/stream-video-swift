@@ -355,7 +355,6 @@
 		84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A737AF28F4716E001A6769 /* signal.twirp.swift */; };
 		84A737D028F4716E001A6769 /* models.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A737B128F4716E001A6769 /* models.pb.swift */; };
 		84A737D128F4716E001A6769 /* events.pb.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A737B328F4716E001A6769 /* events.pb.swift */; };
-		84A7E1792881922400526C98 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
 		84A7E1802883629700526C98 /* WebSocketClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17C2883629700526C98 /* WebSocketClient.swift */; };
 		84A7E1812883629700526C98 /* WebSocketPingController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17D2883629700526C98 /* WebSocketPingController.swift */; };
 		84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E17E2883629700526C98 /* RetryStrategy.swift */; };
@@ -381,7 +380,6 @@
 		84B57D33297F278500E4E709 /* MicrophoneChecker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D32297F278500E4E709 /* MicrophoneChecker.swift */; };
 		84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D36297F406400E4E709 /* MicrophoneCheckView.swift */; };
 		84B57D39297FFF8300E4E709 /* PreJoiningView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57D38297FFF8300E4E709 /* PreJoiningView_iOS13.swift */; };
-		84B57E1729817A5900E4E709 /* CoordinatorClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B57E1629817A5900E4E709 /* CoordinatorClient.swift */; };
 		84B9A56D29112F39004DE31A /* EndpointConfig.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84B9A56C29112F39004DE31A /* EndpointConfig.swift */; };
 		84B9A58F29140D3D004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A58E29140D3D004DE31A /* Nuke */; };
 		84B9A59329140D44004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59229140D44004DE31A /* Nuke */; };
@@ -500,6 +498,9 @@
 		84DCA2182A398C53000C3411 /* Call_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2172A398C53000C3411 /* Call_Tests.swift */; };
 		84DCA21C2A39D950000C3411 /* DefaultAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA21A2A39D950000C3411 /* DefaultAPI.swift */; };
 		84DCA21F2A39DA15000C3411 /* APIHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA21E2A39DA15000C3411 /* APIHelper.swift */; };
+		84DCA2212A39E380000C3411 /* URLSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2202A39E380000C3411 /* URLSessionTransport.swift */; };
+		84DCA2232A39E432000C3411 /* AuthMiddlewares.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */; };
+		84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
 		84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7912947476300DD4CE3 /* CallViewHelper.swift */; };
 		84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */; };
 		84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */; };
@@ -999,7 +1000,6 @@
 		84B57D32297F278500E4E709 /* MicrophoneChecker.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker.swift; sourceTree = "<group>"; };
 		84B57D36297F406400E4E709 /* MicrophoneCheckView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCheckView.swift; sourceTree = "<group>"; };
 		84B57D38297FFF8300E4E709 /* PreJoiningView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PreJoiningView_iOS13.swift; sourceTree = "<group>"; };
-		84B57E1629817A5900E4E709 /* CoordinatorClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoordinatorClient.swift; sourceTree = "<group>"; };
 		84B9A56C29112F39004DE31A /* EndpointConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EndpointConfig.swift; sourceTree = "<group>"; };
 		84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping_Tests.swift; sourceTree = "<group>"; };
 		84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
@@ -1111,6 +1111,8 @@
 		84DCA2172A398C53000C3411 /* Call_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Call_Tests.swift; sourceTree = "<group>"; };
 		84DCA21A2A39D950000C3411 /* DefaultAPI.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DefaultAPI.swift; sourceTree = "<group>"; };
 		84DCA21E2A39DA15000C3411 /* APIHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
+		84DCA2202A39E380000C3411 /* URLSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionTransport.swift; sourceTree = "<group>"; };
+		84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMiddlewares.swift; sourceTree = "<group>"; };
 		84E4F7912947476300DD4CE3 /* CallViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewHelper.swift; sourceTree = "<group>"; };
 		84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQuality.swift; sourceTree = "<group>"; };
 		84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQualityIndicator.swift; sourceTree = "<group>"; };
@@ -1901,7 +1903,8 @@
 			isa = PBXGroup;
 			children = (
 				84A8B79E29927830003AA570 /* generated */,
-				84B57E1629817A5900E4E709 /* CoordinatorClient.swift */,
+				84DCA2202A39E380000C3411 /* URLSessionTransport.swift */,
+				84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */,
 			);
 			path = OpenApi;
 			sourceTree = "<group>";
@@ -2865,6 +2868,7 @@
 				8490DD21298D4ADF007E53D2 /* StreamJsonDecoder.swift in Sources */,
 				84C4004229E3F446007B69C2 /* ConnectedEvent.swift in Sources */,
 				84DC389C29ADFCFD00946713 /* GetOrCreateCallResponse.swift in Sources */,
+				84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */,
 				842B8E192A2DFED900863A87 /* StartBroadcastingResponse.swift in Sources */,
 				842B8E2B2A2DFED900863A87 /* EventNotificationSettings.swift in Sources */,
 				84A737CE28F4716E001A6769 /* signal.pb.swift in Sources */,
@@ -2947,6 +2951,7 @@
 				84DC389A29ADFCFD00946713 /* APIError.swift in Sources */,
 				84AF64DB287C7A2C0012A503 /* ErrorPayload.swift in Sources */,
 				84A7E1812883629700526C98 /* WebSocketPingController.swift in Sources */,
+				84DCA2232A39E432000C3411 /* AuthMiddlewares.swift in Sources */,
 				84DC389329ADFCFD00946713 /* ScreensharingSettingsRequest.swift in Sources */,
 				84DC38BC29ADFCFD00946713 /* BroadcastSettings.swift in Sources */,
 				84DC389F29ADFCFD00946713 /* JoinCallResponse.swift in Sources */,
@@ -2999,6 +3004,7 @@
 				8406266B2A379CC5004B8748 /* WSEventsMiddleware.swift in Sources */,
 				8490032729D308A000AD9BB4 /* TranscriptionSettingsRequest.swift in Sources */,
 				84DC38D029ADFCFD00946713 /* OwnUserResponse.swift in Sources */,
+				84DCA2212A39E380000C3411 /* URLSessionTransport.swift in Sources */,
 				84A7E1922883647200526C98 /* Event.swift in Sources */,
 				84DC38D629ADFCFD00946713 /* GeofenceSettingsRequest.swift in Sources */,
 				84DC38BB29ADFCFD00946713 /* UnblockUserRequest.swift in Sources */,
@@ -3027,7 +3033,6 @@
 				842B8E222A2DFED900863A87 /* CallNotificationEvent.swift in Sources */,
 				842B8E1E2A2DFED900863A87 /* APNSRequest.swift in Sources */,
 				84DC38DA29ADFCFD00946713 /* Extensions.swift in Sources */,
-				84B57E1729817A5900E4E709 /* CoordinatorClient.swift in Sources */,
 				8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */,
 				84DC38B629ADFCFD00946713 /* QueryMembersResponse.swift in Sources */,
 				84DC38D429ADFCFD00946713 /* CallSettingsResponse.swift in Sources */,
@@ -3045,7 +3050,6 @@
 				8490DD23298D5330007E53D2 /* Data+Gzip.swift in Sources */,
 				84DC38B829ADFCFD00946713 /* UpdateUserPermissionsResponse.swift in Sources */,
 				84DC38C029ADFCFD00946713 /* UserRequest.swift in Sources */,
-				84A7E1792881922400526C98 /* HTTPClient.swift in Sources */,
 				84DC389629ADFCFD00946713 /* EndCallResponse.swift in Sources */,
 				847BE09C29DADE0100B55D21 /* Call.swift in Sources */,
 				84FC2C2228ACF2E000181490 /* PeerConnection.swift in Sources */,

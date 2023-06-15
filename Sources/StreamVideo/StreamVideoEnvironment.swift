@@ -5,17 +5,9 @@
 import Foundation
 
 extension StreamVideo {
-    struct Environment {
-        var httpClientBuilder: (
-            _ tokenProvider: @escaping UserTokenProvider
-        ) -> HTTPClient = {
-            URLSessionClient(
-                urlSession: Self.makeURLSession(),
-                tokenProvider: $0
-            )
-        }
-        
+    struct Environment {        
         var callControllerBuilder: (
+            _ defaultAPI: DefaultAPI,
             _ callCoordinatorController: CallCoordinatorController,
             _ user: User,
             _ callId: String,
@@ -24,17 +16,18 @@ extension StreamVideo {
             _ videoConfig: VideoConfig
         ) -> CallController = {
             CallController(
-                callCoordinatorController: $0,
-                user: $1,
-                callId: $2,
-                callType: $3,
-                apiKey: $4,
-                videoConfig: $5
+                defaultAPI: $0,
+                callCoordinatorController: $1,
+                user: $2,
+                callId: $3,
+                callType: $4,
+                apiKey: $5,
+                videoConfig: $6
             )
         }
         
         var callCoordinatorControllerBuilder: (
-            _ httpClient: HTTPClient,
+            _ defaultAPI: DefaultAPI,
             _ user: User,
             _ apiKey: String,
             _ hostname: String,
@@ -42,7 +35,7 @@ extension StreamVideo {
             _ videoConfig: VideoConfig
         ) -> CallCoordinatorController = {
             CallCoordinatorController(
-                httpClient: $0,
+                defaultAPI: $0,
                 user: $1,
                 coordinatorInfo: CoordinatorInfo(
                     apiKey: $2,

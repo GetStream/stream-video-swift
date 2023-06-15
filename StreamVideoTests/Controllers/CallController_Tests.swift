@@ -265,7 +265,13 @@ final class CallController_Tests: ControllerTestCase {
     // MARK: - private
     
     private func makeCallController(callCoordinator: CallCoordinatorController_Mock) -> CallController {
+        let defaultAPI = DefaultAPI(
+            basePath: "example.com",
+            transport: URLSessionTransport(urlSession: URLSession.shared),
+            middlewares: []
+        )
         let callController = CallController(
+            defaultAPI: defaultAPI,
             callCoordinatorController: callCoordinator,
             user: user,
             callId: callId,

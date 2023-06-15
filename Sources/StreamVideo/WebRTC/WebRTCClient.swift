@@ -364,7 +364,6 @@ class WebRTCClient: NSObject {
             callCid: callCid,
             configuration: configuration,
             type: .subscriber,
-            coordinatorClient: callCoordinatorController.coordinatorClient,
             signalService: signalService,
             videoOptions: videoOptions
         )
@@ -387,7 +386,6 @@ class WebRTCClient: NSObject {
                 callCid: callCid,
                 configuration: configuration,
                 type: .publisher,
-                coordinatorClient: callCoordinatorController.coordinatorClient,
                 signalService: signalService,
                 videoOptions: videoOptions
             )
@@ -576,7 +574,6 @@ class WebRTCClient: NSObject {
             callCid: callCid,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
-            coordinatorClient: callCoordinatorController.coordinatorClient,
             signalService: signalService,
             videoOptions: videoOptions,
             reportsStats: false

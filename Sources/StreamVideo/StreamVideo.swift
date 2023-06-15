@@ -16,15 +16,22 @@ public class StreamVideo {
     public let user: User
     public let videoConfig: VideoConfig
     
-    var token: UserToken {
-        didSet {
-            callCoordinatorController.update(token: token)
-        }
-    }
+    var token: UserToken
+    //TODO: delete this
+//    {
+//        didSet {
+//            if var authMiddleware = defaultAPI.middlewares.first(where: { $0 is UserAuth }) as? UserAuth {
+//                authMiddleware.token = token.rawValue
+//                //TODO: better solution
+//                defaultAPI.middlewares = [authMiddleware]
+//            }
+//        }
+//    }
 
     private let tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
-    private let httpClient: HTTPClient
+    private let defaultAPI: DefaultAPI
+    private let apiTransport: URLSessionTransport
     
     private var webSocketClient: WebSocketClient? {
         didSet {
@@ -132,6 +139,9 @@ public class StreamVideo {
         videoConfig: VideoConfig = VideoConfig(),
         pushNotificationsConfig: PushNotificationsConfig = .default
     ) async throws {
+        if user.type != .guest {
+            throw ClientError.BadInput("User auth type should be guest")
+        }
         try await self.init(
             apiKey: apiKey,
             user: user,
@@ -148,35 +158,21 @@ public class StreamVideo {
         pushNotificationsConfig: PushNotificationsConfig = .default,
         environment: Environment
     ) async throws {
-        var tokenProvider: UserTokenProvider = { _ in }
-        
-        // Create the call coordinator to fetch a guest token.
-        let httpClient = environment.httpClientBuilder(tokenProvider)
-        let callCoordinatorController = environment.callCoordinatorControllerBuilder(
-            httpClient,
-            user,
-            apiKey,
-            Self.endpointConfig.hostname,
-            "",
-            videoConfig
+        let guestUserResponse = try await Self.createGuestUser(
+            id: user.id,
+            apiKey: apiKey
         )
-        
-        // Fetch the guest token.
-        let guestUserResponse = try await callCoordinatorController.createGuestUser(with: user.id)
         let token = UserToken(rawValue: guestUserResponse.accessToken)
-        callCoordinatorController.update(token: token)
         
         // Update the user and token provider.
         let updatedUser = guestUserResponse.user.toUser
-        callCoordinatorController.update(user: updatedUser)
-        tokenProvider = { result in
+        let tokenProvider = { result in
             Self.loadGuestToken(
                 userId: user.id,
-                callCoordinatorController: callCoordinatorController,
+                apiKey: apiKey,
                 result: result
             )
         }
-        httpClient.update(tokenProvider: tokenProvider)
         
         self.init(
             apiKey: apiKey,
@@ -184,8 +180,6 @@ public class StreamVideo {
             token: token,
             videoConfig: videoConfig,
             tokenProvider: tokenProvider,
-            httpClient: httpClient,
-            callCoordinatorController: callCoordinatorController,
             pushNotificationsConfig: pushNotificationsConfig,
             environment: environment
         )
@@ -197,8 +191,6 @@ public class StreamVideo {
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping UserTokenProvider,
-        httpClient: HTTPClient? = nil,
-        callCoordinatorController: CallCoordinatorController? = nil,
         pushNotificationsConfig: PushNotificationsConfig,
         environment: Environment
     ) {
@@ -209,19 +201,37 @@ public class StreamVideo {
         self.videoConfig = videoConfig
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
-        self.httpClient = httpClient ?? environment.httpClientBuilder(tokenProvider)
-        self.callCoordinatorController = callCoordinatorController ?? environment.callCoordinatorControllerBuilder(
-            self.httpClient,
+        
+        self.apiTransport = URLSessionTransport(
+            urlSession: Environment.makeURLSession(),
+            tokenProvider: tokenProvider
+        )
+        let defaultParams = DefaultParams(apiKey: apiKey)
+        self.defaultAPI = DefaultAPI(
+            basePath: "https://video.stream-io-api.com/video",
+            transport: apiTransport,
+            middlewares: [defaultParams]
+        )
+        self.callCoordinatorController = environment.callCoordinatorControllerBuilder(
+            self.defaultAPI,
             user,
             apiKey,
             Self.endpointConfig.hostname,
             token.rawValue,
             videoConfig
         )
-        self.httpClient.setTokenUpdater { [weak self] token in
-            self?.token = token
-        }
         StreamVideoProviderKey.currentValue = self
+        if user.type != .anonymous {
+            let userAuth = UserAuth { [unowned self] in
+                self.token.rawValue
+            } connectionId: { [unowned self] in
+                await self.loadConnectionId()
+            }
+            defaultAPI.middlewares.append(userAuth)
+        } else {
+            let anonymousAuth = AnonymousAuth(token: token.rawValue)
+            defaultAPI.middlewares.append(anonymousAuth)
+        }
     }
     
     /// Connects the current user.
@@ -250,6 +260,7 @@ public class StreamVideo {
         let call = Call(
             callType: callType,
             callId: callId,
+            defaultAPI: defaultAPI,
             callCoordinatorController: callCoordinatorController,
             callController: callController,
             videoOptions: VideoOptions()
@@ -264,7 +275,7 @@ public class StreamVideo {
     public func makeCallsController(callsQuery: CallsQuery) -> CallsController {
         let controller = CallsController(
             streamVideo: self,
-            coordinatorClient: self.callCoordinatorController.coordinatorClient,
+            defaultAPI: defaultAPI,
             callsQuery: callsQuery
         )
         return controller
@@ -272,7 +283,8 @@ public class StreamVideo {
     
     /// Sets a device for push notifications.
     /// - Parameter id: the id of the device (token) for push notifications.
-    public func setDevice(id: String) async throws {
+    @discardableResult
+    public func setDevice(id: String) async throws -> ModelResponse {
         try await setDevice(
             id: id,
             pushProvider: pushNotificationsConfig.pushProviderInfo.pushProvider,
@@ -283,7 +295,8 @@ public class StreamVideo {
     
     /// Sets a device for VoIP push notifications.
     /// - Parameter id: the id of the device (token) for VoIP push notifications.
-    public func setVoipDevice(id: String) async throws {
+    @discardableResult
+    public func setVoipDevice(id: String) async throws -> ModelResponse {
         try await setDevice(
             id: id,
             pushProvider: pushNotificationsConfig.voipPushProviderInfo.pushProvider,
@@ -294,14 +307,15 @@ public class StreamVideo {
     
     /// Deletes the device with the provided id.
     /// - Parameter id: the id of the device that will be deleted.
-    public func deleteDevice(id: String) async throws {
-        try await callCoordinatorController.coordinatorClient.deleteDevice(with: id)
+    @discardableResult
+    public func deleteDevice(id: String) async throws -> ModelResponse {
+        try await defaultAPI.deleteDevice(id: id, userId: user.id)
     }
     
     /// Lists the devices registered for the user.
     /// - Returns: an array of `Device`s.
     public func listDevices() async throws -> [Device] {
-        try await callCoordinatorController.coordinatorClient.listDevices().devices
+        try await defaultAPI.listDevices().devices
     }
     
     /// Disconnects the current `StreamVideo` client.
@@ -332,6 +346,7 @@ public class StreamVideo {
     /// - Returns: `CallController`
     private func makeCallController(callType: String, callId: String) -> CallController {
         let controller = environment.callControllerBuilder(
+            defaultAPI,
             callCoordinatorController,
             user,
             callId,
@@ -407,12 +422,22 @@ public class StreamVideo {
         return webSocketClient
     }
     
+    private func loadConnectionId() async -> String {
+        if case let .connected(healthCheckInfo: healtCheckInfo) = webSocketClient?.connectionState {
+            if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
+                return healthCheck.connectionId
+            }
+        }
+        //TODO: implement waiting for connection.
+        return ""
+    }
+    
     private func setDevice(
         id: String,
         pushProvider: PushNotificationsProvider,
         name: String,
         isVoip: Bool
-    ) async throws {
+    ) async throws -> ModelResponse {
         let createDeviceRequest = CreateDeviceRequest(
             id: id,
             pushProvider: .init(rawValue: pushProvider.rawValue),
@@ -424,7 +449,7 @@ public class StreamVideo {
         
         log.debug("Sending request to save device")
 
-        try await callCoordinatorController.coordinatorClient.createDevice(request: createDeviceRequest)
+        return try await defaultAPI.createDevice(createDeviceRequest: createDeviceRequest)
     }
     
     private func setupConnectionRecoveryHandler() {
@@ -439,16 +464,29 @@ public class StreamVideo {
         )
     }
     
+    private static func createGuestUser(
+        id: String,
+        apiKey: String
+    ) async throws -> CreateGuestResponse {
+        let transport = URLSessionTransport(urlSession: Environment.makeURLSession())
+        let defaultAPI = DefaultAPI(
+            basePath: "https://video.stream-io-api.com/video",
+            transport: transport,
+            middlewares: [DefaultParams(apiKey: apiKey)]
+        )
+        let request = CreateGuestRequest(user: UserRequest(id: id))
+        return try await defaultAPI.createGuest(createGuestRequest: request)
+    }
+    
     private static func loadGuestToken(
         userId: String,
-        callCoordinatorController: CallCoordinatorController,
+        apiKey: String,
         result: @escaping (Result<UserToken, Error>) -> Void
     )  {
         Task {
             do {
-                let response = try await callCoordinatorController.createGuestUser(with: userId)
+                let response = try await createGuestUser(id: userId, apiKey: apiKey)
                 let tokenValue = response.accessToken
-                callCoordinatorController.update(user: response.user.toUser)
                 let token = UserToken(rawValue: tokenValue)
                 result(.success(token))
             } catch {
@@ -456,6 +494,7 @@ public class StreamVideo {
             }
         }
     }
+    
 }
 
 extension StreamVideo: ConnectionStateDelegate {
@@ -469,7 +508,7 @@ extension StreamVideo: ConnectionStateDelegate {
             if let serverError = source.serverError, serverError.isInvalidTokenError {
                 Task {
                     do {
-                        self.token = try await httpClient.refreshToken()
+                        self.token = try await apiTransport.refreshToken()
                         log.debug("user token updated, will reconnect ws")
                         webSocketClient?.connect()
                     } catch {
@@ -480,10 +519,7 @@ extension StreamVideo: ConnectionStateDelegate {
             for continuation in continuations {
                 continuation.yield(WSDisconnected())
             }
-        case let .connected(healthCheckInfo: healtCheckInfo):
-            if let healthCheck = healtCheckInfo.coordinatorHealthCheck {
-                callCoordinatorController.update(connectionId: healthCheck.connectionId)
-            }
+        case .connected(healthCheckInfo: _):
             for continuation in continuations {
                 continuation.yield(WSConnected())
             }

@@ -138,8 +138,13 @@ final class Call_Tests: StreamVideoTestCase {
         // Given
         let videoConfig = VideoConfig()
         let userResponse = mockResponseBuilder.makeUserResponse(id: "testuser")
+        let defaultAPI = DefaultAPI(
+            basePath: "https://example.com",
+            transport: URLSessionTransport(urlSession: URLSession.shared),
+            middlewares: [DefaultParams(apiKey: "key1")]
+        )
         let coordinatorController = CallCoordinatorController(
-            httpClient: HTTPClient_Mock(),
+            defaultAPI: defaultAPI,
             user: userResponse.toUser,
             coordinatorInfo: CoordinatorInfo(
                 apiKey: "key1",
@@ -149,6 +154,7 @@ final class Call_Tests: StreamVideoTestCase {
             videoConfig: videoConfig
         )
         let callController = CallController_Mock(
+            defaultAPI: defaultAPI,
             callCoordinatorController: coordinatorController,
             user: userResponse.toUser,
             callId: callId,
@@ -169,6 +175,7 @@ final class Call_Tests: StreamVideoTestCase {
         let call = Call(
             callType: callType,
             callId: callId,
+            defaultAPI: defaultAPI,
             callCoordinatorController: coordinatorController,
             callController: callController,
             videoOptions: VideoOptions()

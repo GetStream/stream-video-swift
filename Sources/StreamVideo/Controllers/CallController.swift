@@ -21,12 +21,14 @@ class CallController {
     private let callType: String
     internal let callCoordinatorController: CallCoordinatorController
     private let apiKey: String
+    private let defaultAPI: DefaultAPI
     private let videoConfig: VideoConfig
     private let sfuReconnectionTime: CGFloat
     private var reconnectionDate: Date?
     private let environment: CallController.Environment
     
     init(
+        defaultAPI: DefaultAPI,
         callCoordinatorController: CallCoordinatorController,
         user: User,
         callId: String,
@@ -43,6 +45,7 @@ class CallController {
         self.videoConfig = videoConfig
         self.sfuReconnectionTime = environment.sfuReconnectionTime
         self.environment = environment
+        self.defaultAPI = defaultAPI
     }
     
     /// Joins a call with the provided information.
@@ -99,9 +102,12 @@ class CallController {
         ring: Bool,
         notify: Bool
     ) async throws -> CallData {
-        let response = try await callCoordinatorController.coordinatorClient.getCall(
-            callId: callId,
+        let userAuth = defaultAPI.middlewares.first { $0 is UserAuth } as? UserAuth
+        let connectionId = try await userAuth?.connectionId() ?? ""
+        let response = try await defaultAPI.getCall(
             type: callType,
+            id: callId,
+            connectionId: connectionId,
             membersLimit: membersLimit,
             ring: ring,
             notify: notify
@@ -148,10 +154,10 @@ class CallController {
             notify: notify,
             ring: ring
         )
-        let response = try await callCoordinatorController.coordinatorClient.getOrCreateCall(
-            with: request,
-            callId: callId,
-            callType: callType
+        let response = try await defaultAPI.getOrCreateCall(
+            type: callType,
+            id: callId,
+            getOrCreateCallRequest: request
         )
         return response.call.toCallData(members: response.members, blockedUsers: response.blockedUsers)
     }
