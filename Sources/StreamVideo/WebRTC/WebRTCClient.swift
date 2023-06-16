@@ -114,7 +114,7 @@ class WebRTCClient: NSObject {
     private let audioSession = AudioSession()
     private let participantsThreshold = 10
     private var connectOptions: ConnectOptions?
-    private var ownCapabilities: [OwnCapability]
+    internal var ownCapabilities: [OwnCapability]
     private let videoConfig: VideoConfig
     private let audioSettings: AudioSettings
     private(set) var callSettings = CallSettings()

@@ -506,6 +506,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
         state.updateState(from: event)
+        callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }

@@ -212,6 +212,12 @@ class CallController {
         await webRTCClient?.updateTrackSize(trackSize, for: participant)
     }
     
+    func updateOwnCapabilities(ownCapabilities: [OwnCapability]) {
+        if ownCapabilities != webRTCClient?.ownCapabilities {
+            webRTCClient?.ownCapabilities = ownCapabilities
+        }
+    }
+    
     /// Cleans up the call controller.
     func cleanUp() {
         call = nil
@@ -254,6 +260,7 @@ class CallController {
         let sessionId = webRTCClient?.sessionID ?? ""
         call?.sessionId = sessionId
         call?.update(recordingState: response.call.recording ? .recording : .noRecording)
+        call?.state.ownCapabilities = response.ownCapabilities
         call?.state.update(from: response.call)
     }
     
