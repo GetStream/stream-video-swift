@@ -8,26 +8,7 @@ import Foundation
 public struct ConnectOptions: Sendable {
     let rtcConfiguration: RTCConfiguration
     
-    public init(iceServers: [ICEServerConfig]) {
+    public init(iceServers: [ICEServer]) {
         rtcConfiguration = RTCConfiguration.makeConfiguration(with: iceServers)
-    }
-}
-
-public struct ICEServerConfig {
-    public let urls: [String]
-    public let username: String?
-    public let password: String?
-    
-    public init(urls: [String], username: String? = nil, password: String? = nil) {
-        self.urls = urls
-        self.username = username
-        self.password = password
-    }
-}
-
-extension IceServer {
-    
-    func toICEServerConfig() -> ICEServerConfig {
-        ICEServerConfig(urls: urls, username: username, password: password)
     }
 }

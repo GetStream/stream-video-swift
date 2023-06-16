@@ -17,20 +17,20 @@ struct CallsView: View {
                 ForEach(viewModel.calls) { call in
                     HStack {
                         VStack(alignment: .leading) {
-                            Text(call.callCid)
+                            Text(call.call.cid)
                                 .bold()
-                            Text("\(call.members.map(\.id).joined(separator: ","))")
+                            Text("\(call.members.map(\.userId).joined(separator: ","))")
                                 .font(.caption)
                         }
                         Spacer()
                         VStack(alignment: .trailing) {
-                            if !call.backstage {
+                            if !call.call.backstage {
                                 Text("Live")
                                     .bold()
                                     .foregroundColor(.green)
                             }
                             if #available(iOS 15, *) {
-                                Text(call.createdAt.formatted(date: .abbreviated, time: .shortened))
+                                Text(call.call.createdAt.formatted(date: .abbreviated, time: .shortened))
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }

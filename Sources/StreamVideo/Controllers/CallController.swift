@@ -67,7 +67,7 @@ class CallController {
         ring: Bool = false,
         notify: Bool = false
     ) async throws {
-        let edgeServer = try await joinCall(
+        let response = try await joinCall(
             create: create,
             callType: callType,
             callId: callId,
@@ -78,7 +78,7 @@ class CallController {
         )
         
         try await connectToEdge(
-            edgeServer,
+            response,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
@@ -103,7 +103,7 @@ class CallController {
         membersLimit: Int?,
         ring: Bool,
         notify: Bool
-    ) async throws -> CallData {
+    ) async throws -> CallResponse {
         let userAuth = defaultAPI.middlewares.first { $0 is UserAuth } as? UserAuth
         let connectionId = try await userAuth?.connectionId() ?? ""
         let response = try await defaultAPI.getCall(
@@ -114,10 +114,7 @@ class CallController {
             ring: ring,
             notify: notify
         )
-        return response.call.toCallData(
-            members: response.members,
-            blockedUsers: response.blockedUsers
-        )
+        return response.call
     }
     
     /// Gets or creates the call on the backend with the given parameters.
@@ -138,7 +135,7 @@ class CallController {
         membersLimit: Int?,
         ring: Bool,
         notify: Bool
-    ) async throws -> CallData {
+    ) async throws -> CallResponse {
         let data = CallRequest(
             custom: customData,
             members: members.map {
@@ -161,7 +158,7 @@ class CallController {
             id: callId,
             getOrCreateCallRequest: request
         )
-        return response.call.toCallData(members: response.members, blockedUsers: response.blockedUsers)
+        return response.call
     }
     
     /// Changes the audio state for the current user.
@@ -224,18 +221,10 @@ class CallController {
         }
     }
     
-    func update(callData: CallData) {
-        if callData.callCid == call?.cId {
-            call?.update(callData: callData)
-        } else {
-            log.warning("Received call info that doesn't match the active call")
-        }
-    }
-    
     // MARK: - private
     
     private func connectToEdge(
-        _ edgeServer: EdgeServer,
+        _ response: JoinCallResponse,
         callType: String,
         callId: String,
         callSettings: CallSettings,
@@ -245,20 +234,18 @@ class CallController {
         webRTCClient = environment.webRTCBuilder(
             user,
             apiKey,
-            edgeServer.url,
-            edgeServer.webSocketURL,
-            edgeServer.token,
+            response.credentials.server.url,
+            response.credentials.server.wsEndpoint,
+            response.credentials.token,
             callCid(from: callId, callType: callType),
-            edgeServer.callSettings,
+            response.ownCapabilities,
             videoConfig,
-            edgeServer.callSettings.callSettings.audio,
+            response.call.settings.audio,
             .init()
         )
         webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
         
-        let connectOptions = ConnectOptions(
-            iceServers: edgeServer.iceServers.map { $0.toICEServerConfig() }
-        )
+        let connectOptions = ConnectOptions(iceServers: response.credentials.iceServers)
         try await webRTCClient?.connect(
             callSettings: callSettings,
             videoOptions: videoOptions,
@@ -266,9 +253,8 @@ class CallController {
         )
         let sessionId = webRTCClient?.sessionID ?? ""
         call?.sessionId = sessionId
-        call?.currentCallSettings = edgeServer.callSettings
-        call?.update(recordingState: edgeServer.callSettings.recording ? .recording : .noRecording)
-        call?.update(callData: edgeServer.callSettings.state)
+        call?.update(recordingState: response.call.recording ? .recording : .noRecording)
+        call?.state.update(from: response.call)
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
@@ -369,7 +355,7 @@ class CallController {
         members: [Member],
         ring: Bool,
         notify: Bool
-    ) async throws -> EdgeServer {
+    ) async throws -> JoinCallResponse {
         let location = try await getLocation()
         let response = try await joinCall(
             callId: callId,
@@ -380,32 +366,7 @@ class CallController {
             ring: ring,
             notify: notify
         )
-        let iceServersResponse: [ICEServer] = response.credentials.iceServers
-        let iceServers = iceServersResponse.map { iceServer in
-            IceServer(
-                urls: iceServer.urls,
-                username: iceServer.username,
-                password: iceServer.password
-            )
-        }
-        let callSettings = CallSettingsInfo(
-            callCapabilities: response.ownCapabilities.map(\.rawValue),
-            callSettings: response.call.settings,
-            state: response.call.toCallData(
-                members: response.members,
-                blockedUsers: response.blockedUsers
-            ),
-            recording: response.call.recording
-        )
-        let edgeServer = EdgeServer(
-            url: response.credentials.server.url,
-            webSocketURL: response.credentials.server.wsEndpoint,
-            token: response.credentials.token,
-            iceServers: iceServers,
-            callSettings: callSettings,
-            latencyURL: nil
-        )
-        return edgeServer
+        return response
     }
     
     private func prefetchLocation() {
@@ -479,7 +440,7 @@ extension CallController {
             _ webSocketURLString: String,
             _ token: String,
             _ callCid: String,
-            _ currentCallSettings: CallSettingsInfo?,
+            _ ownCapabilities: [OwnCapability],
             _ videoConfig: VideoConfig,
             _ audioSettings: AudioSettings,
             _ environment: WebSocketClient.Environment
@@ -491,7 +452,7 @@ extension CallController {
                 webSocketURLString: $3,
                 token: $4,
                 callCid: $5,
-                currentCallSettings: $6,
+                ownCapabilities: $6,
                 videoConfig: $7,
                 audioSettings: $8,
                 environment: $9

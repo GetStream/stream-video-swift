@@ -7,7 +7,7 @@ import WebRTC
 
 extension RTCConfiguration {
         
-    static func makeConfiguration(with iceServersConfig: [ICEServerConfig]) -> RTCConfiguration {
+    static func makeConfiguration(with iceServersConfig: [ICEServer]) -> RTCConfiguration {
         let configuration = RTCConfiguration()
         var iceServers = [RTCIceServer]()
         for iceServerConfig in iceServersConfig {

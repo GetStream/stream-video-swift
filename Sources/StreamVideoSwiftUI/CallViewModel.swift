@@ -22,10 +22,10 @@ open class CallViewModel: ObservableObject {
                 .sink(receiveValue: { [weak self] participants in
                     self?.callParticipants = participants
             })
-            callUpdates = call?.state.$callData
+            callUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] state in
-                    self?.blockedUsers = state?.blockedUsers ?? []
+                .sink(receiveValue: { [weak self] blockedUserIds in
+                    self?.blockedUsers = blockedUserIds.map { User(id: $0) }
             })
             recordingUpdates = call?.state.$recordingState
                 .receive(on: RunLoop.main)
@@ -274,7 +274,9 @@ open class CallViewModel: ObservableObject {
             Task {
                 do {
                     let callData = try await call.getOrCreate(members: members, ring: ring)
-                    let timeoutSeconds = TimeInterval(callData.autoRejectTimeout / 1000)
+                    let timeoutSeconds = TimeInterval(
+                        callData.settings.ring.autoCancelTimeoutMs / 1000
+                    )
                     startTimer(timeout: timeoutSeconds)
                 } catch {
                     self.error = error
@@ -534,7 +536,7 @@ open class CallViewModel: ObservableObject {
                     self.participantEvent = participantEvent
                     if participantEvent.action == .leave &&
                         callParticipants.count == 1
-                        && call?.state.callData?.session?.acceptedBy.isEmpty == false {
+                        && call?.state.session?.acceptedBy.isEmpty == false {
                         leaveCall()
                     } else {
                         // The event is shown for 2 seconds.
@@ -549,8 +551,8 @@ open class CallViewModel: ObservableObject {
     private func handleRejectedEvent(_ callEvent: CallEvent) {
         if case .rejected(_) = callEvent {
             let outgoingMembersCount = outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count
-            let rejections = call?.state.callData?.session?.rejectedBy.count ?? 0
-            let accepted = call?.state.callData?.session?.acceptedBy.count ?? 0
+            let rejections = call?.state.session?.rejectedBy.count ?? 0
+            let accepted = call?.state.session?.acceptedBy.count ?? 0
                         
             if rejections >= outgoingMembersCount && accepted == 0 {
                 Task {

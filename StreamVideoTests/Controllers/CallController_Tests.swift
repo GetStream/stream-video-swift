@@ -129,61 +129,12 @@ final class CallController_Tests: ControllerTestCase {
             members: []
         )
         callController.call = call
-        callController.update(
-            callData: CallData(
-                callCid: callCid,
-                members: [],
-                blockedUsers: [],
-                createdAt: Date(),
-                backstage: true,
-                broadcasting: false,
-                recording: false,
-                updatedAt: Date(),
-                hlsPlaylistUrl: "",
-                autoRejectTimeout: 15000,
-                customData: [:],
-                createdBy: .anonymous
-            )
-        )
+        var callResponse = MockResponseBuilder().makeCallResponse(cid: callCid)
+        callResponse.backstage = true
+        call?.state.update(from: callResponse)
         
         // Then
-        XCTAssert(callController.call?.state.callData?.backstage == true)
-    }
-    
-    func test_callController_updateCallInfoDifferentCallCid() async throws {
-        // Given
-        webRTCClient = makeWebRTCClient()
-        let callController = makeCallController()
-        let call = streamVideo?.call(callType: callType, callId: callId)
-        
-        // When
-        try await callController.joinCall(
-            callType: callType,
-            callId: callId,
-            callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
-            members: []
-        )
-        callController.call = call
-        callController.update(
-            callData: CallData(
-                callCid: "default:different",
-                members: [],
-                blockedUsers: [],
-                createdAt: Date(),
-                backstage: true,
-                broadcasting: false,
-                recording: false,
-                updatedAt: Date(),
-                hlsPlaylistUrl: "",
-                autoRejectTimeout: 15000,
-                customData: [:],
-                createdBy: .anonymous
-            )
-        )
-        
-        // Then
-        XCTAssert(callController.call?.state.callData?.backstage == nil)
+        XCTAssert(callController.call?.state.backstage == true)
     }
     
     @MainActor
@@ -295,7 +246,7 @@ final class CallController_Tests: ControllerTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: self.callCid,
-            currentCallSettings: nil,
+            ownCapabilities: [.sendAudio, .sendVideo],
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,

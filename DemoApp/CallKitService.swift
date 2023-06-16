@@ -91,9 +91,9 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             if (isAccepted || isRejected) && state == .idle {
                 endCurrentCall()
             } else {
-                createdBy = callState.createdBy
+                createdBy = callState.createdBy.toUser
                 await MainActor.run {
-                    startTimer(timeout: TimeInterval(callState.autoRejectTimeout / 1000))
+                    startTimer(timeout: TimeInterval(callState.settings.ring.autoCancelTimeoutMs / 1000))
                 }
             }
         }

@@ -114,7 +114,7 @@ class WebRTCClient: NSObject {
     private let audioSession = AudioSession()
     private let participantsThreshold = 10
     private var connectOptions: ConnectOptions?
-    private var currentCallSettings: CallSettingsInfo?
+    private var ownCapabilities: [OwnCapability]
     private let videoConfig: VideoConfig
     private let audioSettings: AudioSettings
     private(set) var callSettings = CallSettings()
@@ -150,7 +150,7 @@ class WebRTCClient: NSObject {
         webSocketURLString: String,
         token: String,
         callCid: String,
-        currentCallSettings: CallSettingsInfo?,
+        ownCapabilities: [OwnCapability],
         videoConfig: VideoConfig,
         audioSettings: AudioSettings,
         environment: WebSocketClient.Environment
@@ -161,7 +161,7 @@ class WebRTCClient: NSObject {
         self.callCid = callCid
         self.audioSettings = audioSettings
         self.videoConfig = videoConfig
-        self.currentCallSettings = currentCallSettings
+        self.ownCapabilities = ownCapabilities
         self.environment = environment
         httpClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession()
@@ -719,9 +719,7 @@ class WebRTCClient: NSObject {
     }
     
     private func hasCapability(_ ownCapability: OwnCapability) -> Bool {
-        currentCallSettings?
-            .callCapabilities
-            .contains(ownCapability.rawValue) == true
+        ownCapabilities.contains(ownCapability)
     }
 }
 
