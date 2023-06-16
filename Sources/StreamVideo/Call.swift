@@ -11,24 +11,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     typealias EventHandling = ((Event) -> ())?
 
-    public class State: ObservableObject {
-        /// The current participants dictionary.
-        @Published public internal(set) var participants = [String: CallParticipant]() {
-            didSet {
-                log.debug("Participants changed: \(participants)")
-            }
-        }
-        /// The call info published to the participants.
-        @Published public internal(set) var callData: CallData?
-        /// Indicates the reconnection status..
-        @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
-        /// The call recording state.
-        @Published public internal(set) var recordingState: RecordingState = .noRecording
-        /// The total number of participants connected to the call.
-        @Published public internal(set) var participantCount: UInt32 = 0
-    }
-    
-    public internal(set) var state = Call.State()
+    public internal(set) var state = CallState()
     
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
@@ -45,7 +28,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     internal let callController: CallController
-    internal var currentCallSettings: CallSettingsInfo?
     private let videoOptions: VideoOptions
     private var eventHandlers = [EventHandling]()
     private let defaultAPI: DefaultAPI
@@ -104,7 +86,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         membersLimit: Int? = nil,
         ring: Bool = false,
         notify: Bool = false
-    ) async throws -> CallData {
+    ) async throws -> CallResponse {
         try await callController.getCall(
             callType: callType,
             callId: callId,
@@ -117,14 +99,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Rings the call (sends call notification to members).
     /// - Returns: The call's data.
     @discardableResult
-    public func ring() async throws -> CallData {
+    public func ring() async throws -> CallResponse {
         try await get(ring: true)
     }
     
     /// Notifies the users of the call, by sending push notification.
     /// - Returns: The call's data.
     @discardableResult
-    public func notify() async throws -> CallData {
+    public func notify() async throws -> CallResponse {
         try await get(notify: true)
     }
     
@@ -146,7 +128,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         membersLimit: Int? = nil,
         notify: Bool = false,
         ring: Bool = false
-    ) async throws -> CallData {
+    ) async throws -> CallResponse {
         try await callController.getOrCreateCall(
             members: members,
             startsAt: startsAt,
@@ -172,19 +154,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Adds the given user to the list of blocked users for the call.
     /// - Parameter blockedUser: The user to add to the list of blocked users.
     public func add(blockedUser: User) {
-        var blockedUsers = state.callData?.blockedUsers ?? []
-        if !blockedUsers.contains(blockedUser) {
-            blockedUsers.append(blockedUser)
-            state.callData?.blockedUsers = blockedUsers
+        if !state.blockedUserIds.contains(blockedUser.id) {
+            state.blockedUserIds.insert(blockedUser.id)
         }
     }
     
     /// Removes the given user from the list of blocked users for the call.
     /// - Parameter blockedUser: The user to remove from the list of blocked users.
     public func remove(blockedUser: User) {
-        state.callData?.blockedUsers.removeAll { user in
-            user.id == blockedUser.id
-        }
+        state.blockedUserIds.remove(blockedUser.id)
     }
     
     /// Changes the audio state for the current user.
@@ -292,7 +270,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
     public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
-        guard let callSettings = currentCallSettings?.callSettings else {
+        guard let callSettings = state.settings else {
             return false
         }
         for permission in permissions {
@@ -334,10 +312,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
     public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
-        let currentCallCapabilities = currentCallSettings?.callCapabilities
-        return currentCallCapabilities?.contains(
-            capability.rawValue
-        ) == true
+        return state.ownCapabilities.contains(capability)
     }
     
     /// Grants permissions to a user for a call.
@@ -522,16 +497,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
     
-    internal func update(callData: CallData) {
-        guard callData.callCid == cId else { return }
-        var updated = callData
-        let members = self.state.callData?.members ?? []
-        if callData.members.isEmpty && !members.isEmpty {
-            updated.members = members
-        }
-        self.state.callData = updated
-    }
-    
     internal func update(recordingState: RecordingState) {
         self.state.recordingState = recordingState
     }
@@ -540,81 +505,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard let wsCallEvent = event as? WSCallEvent, wsCallEvent.callCid == cId else {
             return
         }
-        updateState(from: event)
+        state.updateState(from: event)
+        callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }
-    }
-    
-    internal func updateState(from event: Event) {
-        if let event = event as? CallAcceptedEvent {
-            let callData = event.call.toCallData(
-                members: [],
-                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
-            )
-            update(callData: callData)
-        } else if let event = event as? CallRejectedEvent {
-            let callData = event.call.toCallData(
-                members: [],
-                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
-            )
-            update(callData: callData)
-        } else if let event = event as? CallUpdatedEvent {
-            let callData = event.call.toCallData(
-                members: [],
-                blockedUsers: event.call.blockedUserIds.map { UserResponse.make(from: $0) }
-            )
-            update(callData: callData)
-        } else if event is CallRecordingStartedEvent {
-            if self.state.callData?.recording == false {
-                self.state.callData?.recording = true
-            }
-            if self.state.recordingState != .recording {
-                self.state.recordingState = .recording
-            }
-        } else if event is CallRecordingStoppedEvent {
-            if self.state.callData?.recording == true {
-                self.state.callData?.recording = false
-            }
-            if self.state.recordingState != .noRecording {
-                self.state.recordingState = .noRecording
-            }
-        } else if let event = event as? UpdatedCallPermissionsEvent {
-            updateCurrentCallSettings(event)
-        } else if let event = event as? CallMemberAddedEvent {
-            let addedMembers = event.members.map {
-                Member(
-                    user: $0.user.toUser,
-                    role: $0.role,
-                    customData: $0.custom
-                )
-            }
-            var members = self.state.callData?.members ?? []
-            for added in addedMembers {
-                if !members.contains(added) {
-                    members.append(added)
-                }
-            }
-            self.state.callData?.members = members
-        } else if let event = event as? CallMemberRemovedEvent {
-            let members = (self.state.callData?.members ?? [])
-                .filter { !event.members.contains($0.id) }
-            self.state.callData?.members = members
-        } else if let event = event as? CallMemberUpdatedEvent {
-            var members = (self.state.callData?.members ?? [])
-            let updated = event.members
-            for update in updated {
-                if let index = members.firstIndex(where: { $0.id == update.userId }) {
-                    members[index] = Member(
-                        user: update.user.toUser,
-                        role: update.role,
-                        customData: update.custom
-                    )
-                }
-            }
-            self.state.callData?.members = members
-        }
-    }
+    }    
     
     //MARK: - private
     
@@ -638,21 +534,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             updateUserPermissionsRequest: updatePermissionsRequest
         )        
-    }
-    
-    private func updateCurrentCallSettings(_ event: UpdatedCallPermissionsEvent) {
-        guard
-            event.user.id == streamVideo.user.id,
-            let currentCallSettings = currentCallSettings
-        else {
-            return
-        }
-        self.currentCallSettings = .init(
-            callCapabilities: event.ownCapabilities.map(\.rawValue),
-            callSettings: currentCallSettings.callSettings,
-            state: currentCallSettings.state,
-            recording: currentCallSettings.recording
-        )
     }
     
     private func updateCallMembers(

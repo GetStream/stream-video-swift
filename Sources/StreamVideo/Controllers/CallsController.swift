@@ -8,7 +8,7 @@ import Foundation
 public class CallsController: ObservableObject {
     
     /// Observable list of calls.
-    @Published public var calls = [CallData]()
+    @Published public var calls = [CallStateResponseFields]()
     
     actor State {
         var loading = false
@@ -72,12 +72,7 @@ public class CallsController: ObservableObject {
             }
             prev = response.prev
             next = response.next
-            let calls = response.calls.map {
-                $0.call.toCallData(
-                    members: $0.members,
-                    blockedUsers: $0.blockedUsers
-                )
-            }
+            let calls = response.calls
             if shouldRefresh {
                 self.calls = calls
             } else {
@@ -132,67 +127,60 @@ public class CallsController: ObservableObject {
     private func handle(event: Event) {
         if let callUpdated = event as? CallUpdatedEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == callUpdated.callCid
+                callData.call.cid == callUpdated.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
                 return
             }
-            var call = calls[index]
-            call.applyUpdates(from: callUpdated.call)
-            calls[index] = call
+            calls[index].call = callUpdated.call
         } else if let callCreated = event as? CallCreatedEvent {
-            let callData = callCreated.call.toCallData(
-                members: callCreated.members,
-                blockedUsers: callCreated.call.blockedUserIds.map { UserResponse(
-                    createdAt: Date(),
-                    custom: [:],
-                    id: $0,
-                    role: "user",
-                    teams: [],
-                    updatedAt: Date())
-                }
+            let call = CallStateResponseFields(
+                blockedUsers: [],
+                call: callCreated.call,
+                members: [],
+                ownCapabilities: []
             )
-            calls.insert(callData, at: 0)
+            calls.insert(call, at: 0)
         } else if let broadcastingStarted = event as? CallBroadcastingStartedEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == broadcastingStarted.callCid
+                callData.call.cid == broadcastingStarted.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
                 return
             }
-            calls[index].broadcasting = true
+            calls[index].call.egress.broadcasting = true
         } else if let broadcastingStopped = event as? CallBroadcastingStoppedEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == broadcastingStopped.callCid
+                callData.call.cid == broadcastingStopped.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
                 return
             }
-            calls[index].broadcasting = false
+            calls[index].call.egress.broadcasting = false
         } else if let liveStarted = event as? CallLiveStartedEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == liveStarted.callCid
+                callData.call.cid == liveStarted.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
                 return
             }
-            calls[index].backstage = false
+            calls[index].call.backstage = false
         } else if let callEnded = event as? CallEndedEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == callEnded.callCid
+                callData.call.cid == callEnded.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
                 return
             }
-            calls[index].endedAt = Date()
+            calls[index].call.endedAt = Date()
         } else if let event = event as? CallSessionParticipantJoinedEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == event.callCid
+                callData.call.cid == event.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
@@ -202,16 +190,16 @@ public class CallsController: ObservableObject {
                 joinedAt: event.createdAt,
                 user: event.user
             )
-            calls[index].session?.participants.append(participant)
+            calls[index].call.session?.participants.append(participant)
         } else if let event = event as? CallSessionParticipantLeftEvent {
             let index = calls.firstIndex { callData in
-                callData.callCid == event.callCid
+                callData.call.cid == event.callCid
             }
             guard let index else {
                 log.warning("Received an event for call that's not available")
                 return
             }
-            calls[index].session?.participants.removeAll(where: { participant in
+            calls[index].call.session?.participants.removeAll(where: { participant in
                 participant.user.id == event.user.id
             })
         } else if event is WSDisconnected {
@@ -246,36 +234,4 @@ public class CallsController: ObservableObject {
     deinit {
         cleanUp()
     }
-}
-
-extension CallResponse {
-    
-    public func toCallData(
-        members: [MemberResponse],
-        blockedUsers: [UserResponse]
-    ) -> CallData {
-        return CallData(
-            callCid: cid,
-            members: members.map {
-                Member(
-                    user: $0.user.toUser,
-                    role: $0.role,
-                    customData: $0.custom
-                )                
-            },
-            blockedUsers: blockedUsers.map { $0.toUser },
-            createdAt: createdAt,
-            backstage: backstage,
-            broadcasting: egress.broadcasting,
-            endedAt: endedAt,
-            recording: recording,
-            updatedAt: updatedAt,
-            hlsPlaylistUrl: egress.hls?.playlistUrl ?? "",
-            autoRejectTimeout: settings.ring.autoCancelTimeoutMs,
-            customData: custom,
-            session: session,
-            createdBy: createdBy.toUser
-        )
-    }
-    
 }

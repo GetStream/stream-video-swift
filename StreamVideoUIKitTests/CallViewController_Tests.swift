@@ -18,7 +18,7 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         ]
         
         // When
-        callViewController.startCall(callId: "1234", members: participants, ring: true)
+        callViewController.startCall(callType: "default", callId: "1234", members: participants, ring: true)
         
         // Then
         AssertSnapshot(callViewController.view)

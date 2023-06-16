@@ -31,22 +31,5 @@ final class Mapping_Tests: XCTestCase {
         XCTAssert(user.role == userResponse.role)
         XCTAssert(user.imageURL?.absoluteString == userResponse.image)
     }
-    
-    func test_callResponse_toCallData() {
-        // Given
-        let mockResponseBuilder = MockResponseBuilder()
-        let callResponse = mockResponseBuilder.makeCallResponse(cid: "default:test")
-        
-        // When
-        let callData = callResponse.toCallData(members: [], blockedUsers: [])
-        
-        // Then
-        XCTAssert(callData.backstage == false)
-        XCTAssert(callData.broadcasting == false)
-        XCTAssert(callData.recording == false)
-        XCTAssert(callData.autoRejectTimeout == 15000)
-        XCTAssert(callData.callCid == "default:test")
-        XCTAssert(callData.createdBy.id == "test")
-    }
 
 }

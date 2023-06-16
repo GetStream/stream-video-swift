@@ -29,43 +29,18 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     }()
     
     private var webRTCClient: WebRTCClient!
-    private var callSettings: CallSettingsInfo?
-    
-    override func setUp() {
-        super.setUp()
-        let state = CallData(
-            callCid: callCid,
-            members: [],
-            blockedUsers: [],
-            createdAt: Date(),
-            backstage: false,
-            broadcasting: false,
-            recording: false,
-            updatedAt: Date(),
-            hlsPlaylistUrl: "",
-            autoRejectTimeout: 15000,
-            customData: [:],
-            createdBy: .anonymous
-        )
-        callSettings = CallSettingsInfo(
-            callCapabilities: ["send-audio", "send-video"],
-            callSettings: mockResponseBuilder.makeCallSettingsResponse(),
-            state: state,
-            recording: false
-        )
-    }
 
     func test_webRTCClient_init_signalChannelIsUsingTheExpectedConnectURL() {
         // Given
-        webRTCClient = makeWebRTCClient(callSettings: callSettings)
+        webRTCClient = makeWebRTCClient(ownCapabilities: [.sendAudio, .sendVideo])
 
         // Then
         XCTAssertEqual(webRTCClient.signalChannel?.connectURL.absoluteString, "wss://test.com/ws")
     }
 
-    func test_webRTCClient_connectionFlow() async throws {
+    func test_webRTCClient_connectionFlow(ownCapabilities: [OwnCapability] = [.sendAudio, .sendVideo]) async throws {
         // Given
-        webRTCClient = makeWebRTCClient(callSettings: callSettings)
+        webRTCClient = makeWebRTCClient(ownCapabilities: ownCapabilities)
         
         // When
         try await webRTCClient.connect(
@@ -109,8 +84,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     func test_webRTCClient_callCapabilitiesNoAudioAndVideo() async throws {
         // Given
-        callSettings = nil
-        try await test_webRTCClient_connectionFlow()
+        try await test_webRTCClient_connectionFlow(ownCapabilities: [])
      
         // Then
         XCTAssert(webRTCClient.localAudioTrack == nil)
@@ -441,7 +415,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     
     // MARK: - private
     
-    func makeWebRTCClient(callSettings: CallSettingsInfo? = nil) -> WebRTCClient {
+    func makeWebRTCClient(ownCapabilities: [OwnCapability] = []) -> WebRTCClient {
         let time = VirtualTime()
         VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
@@ -454,7 +428,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: callCid,
-            currentCallSettings: callSettings,
+            ownCapabilities: ownCapabilities,
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,

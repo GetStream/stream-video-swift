@@ -27,20 +27,17 @@ final class Call_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: userResponse
         )
-        
-        // Then
-        XCTAssert(call?.state.callData == nil)
-        
+                
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
-        XCTAssert(call?.state.callData?.callCid == callCid)
-        XCTAssert(call?.state.callData?.session?.acceptedBy[userId] != nil)
-        XCTAssert(call?.state.callData?.backstage == false)
-        XCTAssert(call?.state.callData?.broadcasting == false)
-        XCTAssert(call?.state.callData?.recording == false)
-        XCTAssert(call?.state.callData?.session != nil)
+        XCTAssert(call?.cId == callCid)
+        XCTAssert(call?.state.session?.acceptedBy[userId] != nil)
+        XCTAssert(call?.state.backstage == false)
+        XCTAssert(call?.state.egress?.broadcasting == false)
+        XCTAssert(call?.state.recordingState == .noRecording)
+        XCTAssert(call?.state.session != nil)
     }
     
     func test_updateState_fromCallRejectedEvent() {
@@ -58,19 +55,16 @@ final class Call_Tests: StreamVideoTestCase {
             user: userResponse
         )
         
-        // Then
-        XCTAssert(call?.state.callData == nil)
-        
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
-        XCTAssert(call?.state.callData?.callCid == callCid)
-        XCTAssert(call?.state.callData?.session?.rejectedBy[userId] != nil)
-        XCTAssert(call?.state.callData?.backstage == false)
-        XCTAssert(call?.state.callData?.broadcasting == false)
-        XCTAssert(call?.state.callData?.recording == false)
-        XCTAssert(call?.state.callData?.session != nil)
+        XCTAssert(call?.cId == callCid)
+        XCTAssert(call?.state.session?.rejectedBy[userId] != nil)
+        XCTAssert(call?.state.backstage == false)
+        XCTAssert(call?.state.egress?.broadcasting == false)
+        XCTAssert(call?.state.recordingState == .noRecording)
+        XCTAssert(call?.state.session != nil)
     }
     
     func test_updateState_fromCallUpdatedEvent() {
@@ -86,52 +80,39 @@ final class Call_Tests: StreamVideoTestCase {
             createdAt: Date()
         )
         
-        // Then
-        XCTAssert(call?.state.callData == nil)
-        
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
-        XCTAssert(call?.state.callData?.callCid == callCid)
-        XCTAssert(call?.state.callData?.backstage == false)
-        XCTAssert(call?.state.callData?.broadcasting == false)
-        XCTAssert(call?.state.callData?.recording == false)
-        XCTAssert(call?.state.callData?.session != nil)
+        XCTAssert(call?.cId == callCid)
+        XCTAssert(call?.state.backstage == false)
+        XCTAssert(call?.state.egress?.broadcasting == false)
+        XCTAssert(call?.state.recordingState == .noRecording)
+        XCTAssert(call?.state.session != nil)
     }
     
     func test_updateState_fromRecordingStartedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
-        let callResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid
-        )
-        call?.state.callData = callResponse.toCallData(members: [], blockedUsers: [])
         let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
         
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
         XCTAssert(call?.state.recordingState == .recording)
-        XCTAssert(call?.state.callData?.recording == true)
     }
     
     func test_updateState_fromRecordingStoppedEvent() {
         // Given
         let call = streamVideo?.call(callType: callType, callId: callId)
-        let callResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid
-        )
-        call?.state.callData = callResponse.toCallData(members: [], blockedUsers: [])
         let event = CallRecordingStoppedEvent(callCid: callCid, createdAt: Date())
         
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
         XCTAssert(call?.state.recordingState == .noRecording)
-        XCTAssert(call?.state.callData?.recording == false)
     }
     
     func test_updateState_fromPermissionsEvent() {
@@ -155,7 +136,6 @@ final class Call_Tests: StreamVideoTestCase {
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
-        let callData = callResponse.toCallData(members: [], blockedUsers: [])
         let call = Call(
             callType: callType,
             callId: callId,
@@ -163,13 +143,6 @@ final class Call_Tests: StreamVideoTestCase {
             callController: callController,
             videoOptions: VideoOptions()
         )
-        call.currentCallSettings = CallSettingsInfo(
-            callCapabilities: [],
-            callSettings: mockResponseBuilder.makeCallSettingsResponse(),
-            state: callData,
-            recording: false
-        )
-        call.state.callData = callData
         let event = UpdatedCallPermissionsEvent(
             callCid: callCid,
             createdAt: Date(),
@@ -178,7 +151,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call.updateState(from: event)
+        call.state.updateState(from: event)
         
         // Then
         XCTAssert(call.currentUserHasCapability(.sendAudio) == true)
@@ -191,7 +164,6 @@ final class Call_Tests: StreamVideoTestCase {
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
-        call?.state.callData = callResponse.toCallData(members: [], blockedUsers: [])
         let userId = "test"
         let member = mockResponseBuilder.makeMemberResponse(id: userId)
         let event = CallMemberAddedEvent(
@@ -202,21 +174,20 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
-        XCTAssert(call?.state.callData?.members.first?.id == userId)
+        XCTAssert(call?.state.members.first?.id == userId)
     }
     
     func test_updateState_fromMemberRemovedEvent() {
         // Given
+        let userId = "test"
         let call = streamVideo?.call(callType: callType, callId: callId)
+        call?.state.members = [Member(user: .init(id: userId))]
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
-        let userId = "test"
-        let member = mockResponseBuilder.makeMemberResponse(id: userId)
-        call?.state.callData = callResponse.toCallData(members: [member], blockedUsers: [])
         let event = CallMemberRemovedEvent(
             call: callResponse,
             callCid: callCid,
@@ -225,21 +196,21 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
-        XCTAssert(call?.state.callData?.members.isEmpty == true)
+        XCTAssert(call?.state.members.isEmpty == true)
     }
 
     func test_updateState_fromMemberUpdatedEvent() {
         // Given
+        let userId = "test"
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
-        let userId = "test"
+        call?.state.members = [Member(user: .init(id: userId))]
         var member = mockResponseBuilder.makeMemberResponse(id: userId)
-        call?.state.callData = callResponse.toCallData(members: [member], blockedUsers: [])
         member.user.name = "newname"
         let event = CallMemberUpdatedEvent(
             call: callResponse,
@@ -249,10 +220,10 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.updateState(from: event)
+        call?.state.updateState(from: event)
         
         // Then
-        XCTAssert(call?.state.callData?.members.first?.user.name == "newname")
+        XCTAssert(call?.state.members.first?.user.name == "newname")
     }
     
 }

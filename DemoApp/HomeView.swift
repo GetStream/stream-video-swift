@@ -59,6 +59,13 @@ struct HomeView: View {
                         ZStack {
                             if appState.loading {
                                 ProgressView()
+                            } else {
+                                NavigationLink {
+                                    CallsView()
+                                } label: {
+                                    Text("Calls")
+                                }
+
                             }
                         }
                         .padding()

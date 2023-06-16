@@ -4,38 +4,12 @@
 
 import Foundation
 
-struct EdgeServer: Sendable {
-    let url: String
-    let webSocketURL: String
-    let token: String
-    let iceServers: [IceServer]
-    let callSettings: CallSettingsInfo
-    let latencyURL: String?
-}
-
-struct CallSettingsInfo: Sendable {
-    let callCapabilities: [String]
-    let callSettings: CallSettingsResponse
-    let state: CallData
-    let recording: Bool
-}
-
 extension CallSettingsResponse: @unchecked Sendable {}
 extension ModelResponse: @unchecked Sendable {}
 extension AcceptCallResponse: @unchecked Sendable {}
 extension RejectCallResponse: @unchecked Sendable {}
-
-struct IceServer: Sendable {
-    let urls: [String]
-    let username: String
-    let password: String
-}
-
-struct CoordinatorInfo {
-    let apiKey: String
-    let hostname: String
-    let token: String
-}
+extension CallResponse: @unchecked Sendable {}
+extension OwnCapability: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 

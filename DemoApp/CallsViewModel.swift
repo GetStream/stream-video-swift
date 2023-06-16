@@ -14,7 +14,7 @@ class CallsViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     
-    @Published var calls = [CallData]()
+    @Published var calls = [CallStateResponseFields]()
     
     private var cancellables = Set<AnyCancellable>()
     
@@ -30,9 +30,9 @@ class CallsViewModel: ObservableObject {
         loadCalls()
     }
     
-    func onCallAppear(_ call: CallData) {
+    func onCallAppear(_ call: CallStateResponseFields) {
         let index = calls.firstIndex { callData in
-            callData.callCid == call.callCid
+            callData.call.cid == call.call.cid
         }
         guard let index else { return }
         
@@ -60,8 +60,8 @@ class CallsViewModel: ObservableObject {
     
 }
 
-extension CallData: Identifiable {
+extension CallStateResponseFields: Identifiable {
     public var id: String {
-        callCid
+        call.cid
     }
 }

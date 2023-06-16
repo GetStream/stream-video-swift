@@ -10,10 +10,10 @@ final class RTCConfiguration_Tests: XCTestCase {
 
     func test_rtcConfiguration_default() {
         // Given
-        let iceServer = ICEServerConfig(
+        let iceServer = ICEServer(
+            password: "martin",
             urls: ["test.com"],
-            username: "martin",
-            password: "martin"
+            username: "martin"
         )
         
         // When
