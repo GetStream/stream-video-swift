@@ -102,7 +102,11 @@ class HomeViewController: UIViewController {
     
     @objc private func didTapStartButton() {
         let next = CallViewController.make(with: callViewModel)
-        next.startCall(callId: text, members: selectedParticipants.map { Member(user: $0) })
+        next.startCall(
+            callType: "default",
+            callId: text,
+            members: selectedParticipants.map { Member(user: $0) }
+        )
         CallViewHelper.shared.add(callView: next.view)
     }
     
