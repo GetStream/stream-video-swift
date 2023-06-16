@@ -20,7 +20,7 @@ struct CallView: View {
     }
         
     var body: some View {
-        HomeView(viewModel: viewModel)
+        CallHomeView(viewModel: viewModel)
             .modifier(CallModifier(viewFactory: DemoAppViewFactory.shared, viewModel: viewModel))
             .onContinueUserActivity(NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
                     let interaction = userActivity.interaction
