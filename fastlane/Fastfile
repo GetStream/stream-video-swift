@@ -308,8 +308,6 @@ lane :sync_xcodeproj_references do
       next unless file_path =~ %r{(/OpenApi/|/protobuf/)}
 
       file = project.files.find { |f| f.full_path.to_s == file_path }
-      next if file.nil?
-
       file.remove_from_project if file
     end
 
