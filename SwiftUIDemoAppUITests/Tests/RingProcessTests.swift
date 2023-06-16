@@ -13,7 +13,9 @@ final class RingProcessTests: StreamTestCase {
         let user = 1
 
         WHEN("user opens connecting screen") {
-            userRobot.enterRingEvents(callId)
+            userRobot
+                .login()
+                .enterRingEvents(callId)
         }
         THEN("all required elements are on the screen") {
             userRobot
@@ -30,6 +32,7 @@ final class RingProcessTests: StreamTestCase {
         
         WHEN("user calls to participant") {
             userRobot
+                .login()
                 .selectParticipants(count: participants)
                 .enterRingEvents(callId)
         }
@@ -48,6 +51,7 @@ final class RingProcessTests: StreamTestCase {
         
         WHEN("user calls to participant") {
             userRobot
+                .login()
                 .selectParticipants(count: participants)
                 .enterRingEvents(callId)
         }

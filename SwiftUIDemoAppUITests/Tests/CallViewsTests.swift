@@ -302,7 +302,7 @@ final class CallViewsTests: StreamTestCase {
         
         sleep(1) // wait for the view to settle
         let newCoordinates = CallPage.minimizedCallView.centralCoordinates
-        THEN("video view is in the bottom right corner") {
+        THEN("video view is in the top left corner") {
             XCTAssertLessThan(newCoordinates.x, initialCoordinates.x)
         }
     }

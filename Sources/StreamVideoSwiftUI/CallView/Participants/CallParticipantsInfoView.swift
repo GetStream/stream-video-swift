@@ -162,7 +162,7 @@ struct CallParticipantsViewContainer: View {
                         images.xmark
                             .foregroundColor(colors.tintColor)
                     }
-                    .accessibility(identifier: "closeButton")
+                    .accessibility(identifier: "Close")
                 }
             })
             .accessibility(identifier: "participantsScrollView")

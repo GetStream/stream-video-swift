@@ -113,6 +113,7 @@ extension UserRobot {
     
     @discardableResult
     func selectParticipants(count: Int) -> Self {
+        CallDetailsPage.participants.waitCount(1)
         for i in 0...count - 1 {
             CallDetailsPage.participants.element(boundBy: i).tap()
         }
@@ -197,7 +198,7 @@ extension UserRobot {
     
     @discardableResult
     func maximizeVideoView() -> Self {
-        CallPage.minimizedCallView.wait().safeTap()
+        CallPage.minimizedCallView.wait().tapFrameCenter()
         return self
     }
     

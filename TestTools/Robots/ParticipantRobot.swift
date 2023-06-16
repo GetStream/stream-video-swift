@@ -18,7 +18,6 @@ public class ParticipantRobot {
         case withCamera = "camera"
         case withMicrophone = "mic"
         case beSilent = "silent"
-        case beFrozen = "frozen"
     }
     
     public enum Actions: String {

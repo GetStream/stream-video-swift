@@ -49,7 +49,7 @@ final class LobbyTests: StreamTestCase {
         linkToScenario(withId: 1786)
         
         WHEN("user enters lobby") {
-            userRobot.enterLobby(callId)
+            userRobot.login().enterLobby(callId)
         }
         THEN("all required elements are on the screen") {
             userRobot.assertLobby()

@@ -17,6 +17,12 @@ enum CallDetailsPage {
     static var joinImmediatelyTab: XCUIElement { app.buttons["Join immediately"] }
     static var ringEventsTab: XCUIElement { app.buttons["Ring events"] }
     static var signOutButton: XCUIElement { app.alerts.buttons["Sign out"] }
-    static var participantList: XCUIElement { app.collectionViews["participantList"] }
+    static var participantList: XCUIElement {
+        if ProcessInfo().operatingSystemVersion.majorVersion < 16 {
+            return app.tables["participantList"]
+        } else {
+            return app.collectionViews["participantList"]
+        }
+    }
     static var participants: XCUIElementQuery { participantList.buttons }
 }
