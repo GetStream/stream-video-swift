@@ -14,9 +14,9 @@ class LoginViewModel: ObservableObject {
     
     let tokenService = TokenService.shared
     
-    func login(user: User, completion: @escaping (UserCredentials) -> ()) {
+    func login(user: User, callId: String = "", completion: @escaping (UserCredentials) -> ()) {
         Task {
-            let token = try await self.tokenService.fetchToken(for: user.id)
+            let token = try await self.tokenService.fetchToken(for: user.id, callIds: [callId])
             let credentials = UserCredentials(userInfo: user, token: token)
             UnsecureUserRepository.shared.save(user: credentials)
             AppState.shared.currentUser = user
@@ -25,5 +25,16 @@ class LoginViewModel: ObservableObject {
             completion(credentials)
         }
     }
-    
+
+    func joinCallAnonymously(callId: String, completion: @escaping (UserCredentials) -> ()) {
+        Task {
+            let token = try await self.tokenService.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
+            let credentials = UserCredentials(userInfo: User.anonymous, token: token)
+            AppState.shared.currentUser = .anonymous
+            AppState.shared.userState = .loggedIn
+            // Perform login
+            completion(credentials)
+            AppState.shared.activeAnonymousCallId = callId
+        }
+    }
 }

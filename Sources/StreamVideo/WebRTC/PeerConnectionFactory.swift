@@ -35,7 +35,6 @@ actor PeerConnectionFactory {
         callCid: String,
         configuration: RTCConfiguration,
         type: PeerConnectionType,
-        coordinatorClient: CoordinatorClient,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints,
         videoOptions: VideoOptions,
@@ -51,7 +50,6 @@ actor PeerConnectionFactory {
             callCid: callCid,
             pc: pc,
             type: type,
-            coordinatorClient: coordinatorClient,
             signalService: signalService,
             videoOptions: videoOptions,
             reportStats: reportsStats

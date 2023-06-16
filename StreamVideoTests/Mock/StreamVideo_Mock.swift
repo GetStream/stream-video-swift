@@ -30,29 +30,20 @@ extension StreamVideo {
     }
     
     static func mockEnvironment(_ httpClient: HTTPClient) -> Environment {
-        return Environment(httpClientBuilder: { _ in
-            httpClient
-        }, callControllerBuilder: { callCoordinatorController, user, callId, callType, apiKey, videoConfig in
+        return Environment(
+            callControllerBuilder: { defaultAPI, user, callId, callType, apiKey, videoConfig, cachedLocation  in
             CallController_Mock(
-                callCoordinatorController: callCoordinatorController,
+                defaultAPI: defaultAPI,
                 user: user,
                 callId: callId,
                 callType: callType,
                 apiKey: apiKey,
-                videoConfig: videoConfig
+                videoConfig: videoConfig,
+                cachedLocation: cachedLocation
             )
-        }, callCoordinatorControllerBuilder: { httpClient, user, apiKey, hostname, token, videoConfig in
-            CallCoordinatorController_Mock(
-                httpClient: httpClient,
-                user: user,
-                coordinatorInfo: CoordinatorInfo(
-                    apiKey: apiKey,
-                    hostname: hostname,
-                    token: token
-                ),
-                videoConfig: videoConfig
-            )
-        })
+            }) { tokenProvider in
+                httpClient as! any DefaultAPITransport
+            }
     }
     
 }

@@ -42,6 +42,8 @@ struct WebRTCEventDecoder: AnyEventDecoder {
             return value
         case let .callGrantsUpdated(value):
             return value
+        case let .goAway(value):
+            return value
         }
     }
 }

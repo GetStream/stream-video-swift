@@ -6,6 +6,26 @@
 
 class MockResponseBuilder {
     
+    func makeJoinCallResponse(cid: String) -> JoinCallResponse {
+        JoinCallResponse(
+            blockedUsers: [],
+            call: makeCallResponse(cid: cid),
+            created: true,
+            credentials: Credentials(
+                iceServers: [],
+                server: SFUResponse(
+                    edgeName: "test",
+                    url: "test.com",
+                    wsEndpoint: "wss://test.com"
+                ),
+                token: "test")
+            ,
+            duration: "1.0",
+            members: [],
+            ownCapabilities: [.sendAudio, .sendVideo]
+        )
+    }
+    
     func makeCallResponse(
         cid: String,
         acceptedBy: [String: Date] = [:],

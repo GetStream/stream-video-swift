@@ -16,17 +16,4 @@ class ControllerTestCase: StreamVideoTestCase {
         "\(callType):\(callId)"
     }
 
-    func makeCallCoordinatorController() -> CallCoordinatorController_Mock {
-        let callCoordinator = CallCoordinatorController_Mock(
-            httpClient: HTTPClient_Mock(),
-            user: user,
-            coordinatorInfo: CoordinatorInfo(
-                apiKey: apiKey,
-                hostname: "test.com",
-                token: StreamVideo.mockToken.rawValue
-            ),
-            videoConfig: videoConfig
-        )
-        return callCoordinator
-    }
 }

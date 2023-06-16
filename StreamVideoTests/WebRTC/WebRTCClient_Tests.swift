@@ -446,22 +446,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
         environment.timerType = VirtualTimeTimer.self
-        
-        let callCoordinator = CallCoordinatorController_Mock(
-            httpClient: HTTPClient_Mock(),
-            user: StreamVideo.mockUser,
-            coordinatorInfo: CoordinatorInfo(
-                apiKey: StreamVideo.apiKey,
-                hostname: "test.com",
-                token: StreamVideo.mockToken.rawValue
-            ),
-            videoConfig: VideoConfig()
-        )
-        
-        if let callSettings {
-            callCoordinator.update(callSettings: callSettings)
-        }
-        
+
         let webRTCClient = WebRTCClient(
             user: StreamVideo.mockUser,
             apiKey: StreamVideo.apiKey,
@@ -469,7 +454,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: callCid,
-            callCoordinatorController: callCoordinator,
+            currentCallSettings: callSettings,
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,

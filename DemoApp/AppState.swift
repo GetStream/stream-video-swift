@@ -25,6 +25,8 @@ class AppState: ObservableObject {
         }
     }
     @Published var activeCall: Call?
+
+    @Published var activeAnonymousCallId: String = ""
     
     var streamVideo: StreamVideo? {
         didSet {
@@ -52,10 +54,10 @@ class AppState: ObservableObject {
     func logout() {
         Task {
             if let voipPushToken = UnsecureUserRepository.shared.currentVoipPushToken() {
-                try? await streamVideo?.deleteDevice(id: voipPushToken)
+                _ = try? await streamVideo?.deleteDevice(id: voipPushToken)
             }
             if let pushToken = UnsecureUserRepository.shared.currentPushToken() {
-                try? await streamVideo?.deleteDevice(id: pushToken)
+                _ = try? await streamVideo?.deleteDevice(id: pushToken)
             }
             await streamVideo?.disconnect()
             UnsecureUserRepository.shared.removeCurrentUser()

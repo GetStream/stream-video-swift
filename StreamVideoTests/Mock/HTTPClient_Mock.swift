@@ -4,8 +4,8 @@
 
 @testable import StreamVideo
 
-final class HTTPClient_Mock: @unchecked Sendable, HTTPClient {
-    
+final class HTTPClient_Mock: @unchecked Sendable, HTTPClient, DefaultAPITransport {
+            
     var dataResponses = [Data]()
     var requestCounter = 0
     
@@ -15,6 +15,21 @@ final class HTTPClient_Mock: @unchecked Sendable, HTTPClient {
             throw ClientError.Unexpected("Please setup responses")
         }
         return dataResponses.removeFirst()
+    }
+    
+    func execute(request: Request) async throws -> (Data, URLResponse) {
+        requestCounter += 1
+        if dataResponses.isEmpty {
+            throw ClientError.Unexpected("Please setup responses")
+        }
+        let data = dataResponses.removeFirst()
+        let response = HTTPURLResponse(
+            url: request.url,
+            statusCode: 200,
+            httpVersion: nil,
+            headerFields: nil
+        )!
+        return (data, response)
     }
     
     func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater) {}

@@ -15,7 +15,7 @@ class CallController_Mock: CallController {
         webSocketURLString: "wss://localhost/ws",
         token: StreamVideo.mockToken.rawValue,
         callCid: "default:test",
-        callCoordinatorController: callCoordinatorController,
+        currentCallSettings: nil,
         videoConfig: VideoConfig(),
         audioSettings: AudioSettings(
             accessRequestEnabled: true,
@@ -28,6 +28,7 @@ class CallController_Mock: CallController {
     )
 
     override func joinCall(
+        create: Bool = true,
         callType: String,
         callId: String,
         callSettings: CallSettings,

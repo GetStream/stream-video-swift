@@ -23,7 +23,7 @@ public class CallsController: ObservableObject {
         }
     }
     
-    private let coordinatorClient: CoordinatorClient
+    private let defaultAPI: DefaultAPI
     
     private var next: String?
     private var prev: String?
@@ -36,8 +36,8 @@ public class CallsController: ObservableObject {
     private var watchTask: Task<Void, Error>?
     private var socketDisconnected = false
         
-    init(streamVideo: StreamVideo, coordinatorClient: CoordinatorClient, callsQuery: CallsQuery) {
-        self.coordinatorClient = coordinatorClient
+    init(streamVideo: StreamVideo, defaultAPI: DefaultAPI, callsQuery: CallsQuery) {
+        self.defaultAPI = defaultAPI
         self.callsQuery = callsQuery
         self.streamVideo = streamVideo
         self.subscribeToWatchEvents()
@@ -66,7 +66,7 @@ public class CallsController: ObservableObject {
         let request = makeQueryCallsRequest()
         
         do {
-            let response = try await coordinatorClient.queryCalls(request: request)
+            let response = try await defaultAPI.queryCalls(queryCallsRequest: request)
             if response.next == nil {
                 await state.update(loadedAllCalls: true)
             }

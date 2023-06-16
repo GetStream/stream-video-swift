@@ -6,7 +6,10 @@ import Foundation
 
 struct EndpointConfig {
     let hostname: String
-    let wsEndpoint: String
+    let wsEndpoint: String    
+    var baseVideoURL: String {
+        "\(hostname)video"
+    }
 }
 
 extension EndpointConfig {
