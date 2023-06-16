@@ -305,6 +305,8 @@ lane :sync_xcodeproj_references do
     end
 
     deleted_swift_files.each do |file_path|
+      next unless file_path =~ %r{(/OpenApi/|/protobuf/)}
+
       file = project.files.find { |f| f.full_path.to_s == file_path }
       next if file.nil?
 
@@ -312,6 +314,8 @@ lane :sync_xcodeproj_references do
     end
 
     new_swift_files.each do |file_path|
+      next unless file_path =~ %r{(/OpenApi/|/protobuf/)}
+
       file = project.files.find { |f| f.full_path.to_s == file_path }
       next unless file.nil?
 
