@@ -143,7 +143,7 @@ final class CallViewsTests: StreamTestCase {
                 .microphone(.disable)
         }
         WHEN("six participants joins the call") {
-            let timeout = UserRobot.defaultTimeout * 2
+            let timeout = UserRobot.defaultTimeout * 3
             participantRobot
                 .setUserCount(participants)
                 .setCallDuration(timeout)

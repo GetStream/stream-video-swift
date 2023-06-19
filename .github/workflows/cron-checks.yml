@@ -21,7 +21,7 @@ jobs:
       matrix:
         include:
           - ios: latest
-            device: "iPad Air (5th generation)"
+            device: "iPhone 14 Pro Max"
             xcode: 14.3
             os: macos-13
           - ios: 15.4

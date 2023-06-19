@@ -282,7 +282,7 @@ extension UserRobot {
         let user = 1
         let expectedCount = participantCount + user
         _ = CallPage.ParticipantMenu.participantCount.waitForValue("\(expectedCount)", timeout: timeout)
-        CallPage.ParticipantMenu.closeButton.tap()
+        CallPage.ParticipantMenu.closeButton.tapFrameCenter()
         return self
     }
 }
