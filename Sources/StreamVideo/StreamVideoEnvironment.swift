@@ -5,7 +5,26 @@
 import Foundation
 
 extension StreamVideo {
-    struct Environment {        
+    struct Environment {
+        var webSocketClientBuilder: (
+            _ eventNotificationCenter: EventNotificationCenter,
+            _ url: URL
+        ) -> WebSocketClient = {
+            let config = URLSessionConfiguration.default
+            config.waitsForConnectivity = false
+            
+            // Create a WebSocketClient.
+            let webSocketClient = WebSocketClient(
+                sessionConfiguration: config,
+                eventDecoder: JsonEventDecoder(),
+                eventNotificationCenter: $0,
+                webSocketClientType: .coordinator,
+                connectURL: $1
+            )
+            
+            return webSocketClient
+        }
+        
         var callControllerBuilder: (
             _ defaultAPI: DefaultAPI,
             _ user: User,

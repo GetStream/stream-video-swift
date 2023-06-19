@@ -35,7 +35,9 @@ struct AnonymousAuth: DefaultAPIClientMiddleware {
         next: (Request) async throws -> (Data, URLResponse)
     ) async throws -> (Data, URLResponse) {
         var modifiedRequest = request
-        modifiedRequest.headers["Authorization"] = token
+        if !token.isEmpty {
+            modifiedRequest.headers["Authorization"] = token
+        }
         modifiedRequest.headers["stream-auth-type"] = "anonymous"
         return try await next(modifiedRequest)
     }

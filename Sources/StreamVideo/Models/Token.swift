@@ -32,3 +32,9 @@ public struct UserToken: Codable, Equatable, ExpressibleByStringLiteral, Sendabl
 extension ClientError {
     public class InvalidToken: ClientError {}
 }
+
+public extension UserToken {
+    
+    static let empty = UserToken(rawValue: "")
+    
+}

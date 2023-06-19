@@ -14,7 +14,13 @@ final class CallController_Tests: ControllerTestCase {
     
     public override func setUp() {
         super.setUp()
-        streamVideo = StreamVideo(apiKey: apiKey, user: user, token: StreamVideo.mockToken, videoConfig: videoConfig)
+        streamVideo = StreamVideo(
+            apiKey: apiKey,
+            user: user,
+            token: StreamVideo.mockToken,
+            videoConfig: videoConfig,
+            tokenProvider: { _ in }
+        )
     }
 
     func test_callController_joinCall_webRTCClientSignalChannelUsesTheExpectedConnectURL() async throws {

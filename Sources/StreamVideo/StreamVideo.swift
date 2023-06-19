@@ -11,14 +11,16 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
-public class StreamVideo {
+public class StreamVideo: ObservableObject {
     
-    public let user: User
+    @Published public var connectionStatus: ConnectionStatus = .initialized
+    
+    public private(set) var user: User
     public let videoConfig: VideoConfig
     
     var token: UserToken
 
-    private let tokenProvider: UserTokenProvider
+    private var tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
     private let defaultAPI: DefaultAPI
     private let apiTransport: DefaultAPITransport
@@ -32,6 +34,7 @@ public class StreamVideo {
     private let eventsMiddleware = WSEventsMiddleware()
     private var continuations = [AsyncStream<Event>.Continuation]()
     private var cachedLocation: String?
+    private var connectTask: Task<Void, Error>?
             
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -81,101 +84,7 @@ public class StreamVideo {
             pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
-    }
-    
-    /// Initializes a new instance of `StreamVideo` with the specified parameters.
-    /// - Parameters:
-    ///   - apiKey: The API key.
-    ///   - user: The `User` who is logged in.
-    ///   - token: The `UserToken` used to authenticate the user.
-    ///   - videoConfig: A `VideoConfig` instance representing the current video config.
-    ///   - pushNotificationsConfig: Config for push notifications.
-    /// - Returns: A new instance of `StreamVideo`.
-    public convenience init(
-        apiKey: String,
-        user: User,
-        token: UserToken,
-        videoConfig: VideoConfig = VideoConfig(),
-        pushNotificationsConfig: PushNotificationsConfig = .default
-    ) {
-        let tokenProvider: UserTokenProvider = { result in
-            log.error("Provide a token provider, since the token has expiry date")
-            result(
-                .failure(ClientError.MissingToken())
-            )
-        }
-        self.init(
-            apiKey: apiKey,
-            user: user,
-            token: token,
-            videoConfig: videoConfig,
-            tokenProvider: tokenProvider,
-            pushNotificationsConfig: pushNotificationsConfig,
-            environment: Environment()
-        )
-    }
-    
-    /// Initializes a new instance of `StreamVideo` as a guest user, with the specified parameters.
-    /// This method is async and throwing, since it loads a guest token first.
-    /// - Parameters:
-    ///   - apiKey: The API key.
-    ///   - user: The guest user.
-    ///   - videoConfig: A `VideoConfig` instance representing the current video config.
-    ///   - pushNotificationsConfig: Config for push notifications.
-    /// - Returns: A new instance of `StreamVideo`.
-    public convenience init(
-        apiKey: String,
-        user: User,
-        videoConfig: VideoConfig = VideoConfig(),
-        pushNotificationsConfig: PushNotificationsConfig = .default
-    ) async throws {
-        if user.type != .guest {
-            throw ClientError.BadInput("User auth type should be guest")
-        }
-        try await self.init(
-            apiKey: apiKey,
-            user: user,
-            videoConfig: videoConfig,
-            pushNotificationsConfig: pushNotificationsConfig,
-            environment: Environment()
-        )
-    }
-    
-    convenience init(
-        apiKey: String,
-        user: User,
-        videoConfig: VideoConfig = VideoConfig(),
-        pushNotificationsConfig: PushNotificationsConfig = .default,
-        environment: Environment
-    ) async throws {
-        let guestUserResponse = try await Self.createGuestUser(
-            id: user.id,
-            apiKey: apiKey,
-            environment: environment
-        )
-        let token = UserToken(rawValue: guestUserResponse.accessToken)
-        
-        // Update the user and token provider.
-        let updatedUser = guestUserResponse.user.toUser
-        let tokenProvider = { result in
-            Self.loadGuestToken(
-                userId: user.id,
-                apiKey: apiKey,
-                environment: environment,
-                result: result
-            )
-        }
-        
-        self.init(
-            apiKey: apiKey,
-            user: updatedUser,
-            token: token,
-            videoConfig: videoConfig,
-            tokenProvider: tokenProvider,
-            pushNotificationsConfig: pushNotificationsConfig,
-            environment: environment
-        )
-    }
+    }    
         
     init(
         apiKey: String,
@@ -217,18 +126,26 @@ public class StreamVideo {
             defaultAPI.middlewares.append(anonymousAuth)
         }
         self.prefetchLocation()
+        connectTask = Task {
+            if user.type == .guest {
+                do {
+                    let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
+                    self.user = guestInfo.user
+                    self.token = guestInfo.token
+                    self.tokenProvider = guestInfo.tokenProvider
+                    try await self.connectUser(isInitial: true)
+                } catch {
+                    log.error("Error connecting as guest \(error.localizedDescription)")
+                }
+            } else {
+                try await self.connectUser(isInitial: true)
+            }
+        }
     }
     
     /// Connects the current user.
     public func connect() async throws {
-        if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
-            return
-        }
-        if user.type == .anonymous {
-            // Anonymous users can't connect to the WS.
-            throw ClientError.MissingPermissions()
-        }
-        try await connectWebSocketClient()
+        try await connectUser()
     }
     
     /// Creates a call with the provided call id, type and members.
@@ -375,17 +292,7 @@ public class StreamVideo {
     }
     
     private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {
-        let config = URLSessionConfiguration.default
-        config.waitsForConnectivity = false
-        
-        // Create a WebSocketClient.
-        let webSocketClient = WebSocketClient(
-            sessionConfiguration: config,
-            eventDecoder: JsonEventDecoder(),
-            eventNotificationCenter: eventNotificationCenter,
-            webSocketClientType: .coordinator,
-            connectURL: url
-        )
+        let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
         
         webSocketClient.connectionStateDelegate = self
         webSocketClient.onWSConnectionEstablished = { [weak self] in
@@ -448,6 +355,30 @@ public class StreamVideo {
         return nil
     }
     
+    private func loadGuestUserInfo(
+        for user: User,
+        apiKey: String
+    ) async throws -> (user: User, token: UserToken, tokenProvider: UserTokenProvider) {
+        let guestUserResponse = try await Self.createGuestUser(
+            id: user.id,
+            apiKey: apiKey,
+            environment: environment
+        )
+        let token = UserToken(rawValue: guestUserResponse.accessToken)
+        
+        // Update the user and token provider.
+        let updatedUser = guestUserResponse.user.toUser
+        let tokenProvider = { [environment = self.environment] result in
+            Self.loadGuestToken(
+                userId: user.id,
+                apiKey: apiKey,
+                environment: environment,
+                result: result
+            )
+        }
+        return (user: updatedUser, token: token, tokenProvider: tokenProvider)
+    }
+    
     private func setDevice(
         id: String,
         pushProvider: PushNotificationsProvider,
@@ -480,6 +411,21 @@ public class StreamVideo {
         )
     }
     
+    private func connectUser(isInitial: Bool = false) async throws {
+        if !isInitial && connectTask != nil {
+            log.debug("Waiting for already running connect task")
+            _ = await connectTask?.result
+        }
+        if case .connected(healthCheckInfo: _) = webSocketClient?.connectionState {
+            return
+        }
+        if user.type == .anonymous {
+            // Anonymous users can't connect to the WS.
+            throw ClientError.MissingPermissions()
+        }
+        try await connectWebSocketClient()
+    }
+    
     private static func createGuestUser(
         id: String,
         apiKey: String,
@@ -489,7 +435,7 @@ public class StreamVideo {
         let defaultAPI = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
             transport: transport,
-            middlewares: [DefaultParams(apiKey: apiKey)]
+            middlewares: [DefaultParams(apiKey: apiKey), AnonymousAuth(token: "")]
         )
         let request = CreateGuestRequest(user: UserRequest(id: id))
         return try await defaultAPI.createGuest(createGuestRequest: request)
@@ -531,6 +477,7 @@ extension StreamVideo: ConnectionStateDelegate {
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
+        self.connectionStatus = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
             if let serverError = source.serverError, serverError.isInvalidTokenError {
