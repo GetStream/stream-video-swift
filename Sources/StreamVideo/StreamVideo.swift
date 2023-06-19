@@ -128,9 +128,9 @@ public class StreamVideo {
             if user.type == .guest {
                 do {
                     let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
-                    self.user = guestInfo.0
-                    self.token = guestInfo.1
-                    self.tokenProvider = guestInfo.2
+                    self.user = guestInfo.user
+                    self.token = guestInfo.token
+                    self.tokenProvider = guestInfo.tokenProvider
                     try await self.connectUser(isInitial: true)
                 } catch {
                     log.error("Error connecting as guest \(error.localizedDescription)")
@@ -356,7 +356,7 @@ public class StreamVideo {
     private func loadGuestUserInfo(
         for user: User,
         apiKey: String
-    ) async throws -> (User, UserToken, UserTokenProvider) {
+    ) async throws -> (user: User, token: UserToken, tokenProvider: UserTokenProvider) {
         let guestUserResponse = try await Self.createGuestUser(
             id: user.id,
             apiKey: apiKey,
@@ -374,7 +374,7 @@ public class StreamVideo {
                 result: result
             )
         }
-        return (updatedUser, token, tokenProvider)
+        return (user: updatedUser, token: token, tokenProvider: tokenProvider)
     }
     
     private func setDevice(
