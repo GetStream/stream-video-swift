@@ -9,7 +9,6 @@ import Foundation
 
 
 public struct ModelResponse: Codable, JSONEncodable, Hashable {
-    /** Duration of the request in human-readable format */
     public var duration: String
 
     public init(duration: String) {

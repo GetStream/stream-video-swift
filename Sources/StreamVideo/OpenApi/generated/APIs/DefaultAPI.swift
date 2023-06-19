@@ -543,31 +543,6 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
-     List Call Type
-     
-     - returns: ListCallTypeResponse
-     */
-
-    open func listCallTypes() async throws -> ListCallTypeResponse {
-        let localVariablePath = "/calltypes"
-        
-        let urlRequest = try makeRequest(
-            uriPath: localVariablePath,
-            httpMethod: "GET"
-        )
-        return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(ListCallTypeResponse.self, from: $0)
-        }
-    }
-    /**
-     List Call Type
-     - GET /calltypes
-     -  
-     - returns: RequestBuilder<ListCallTypeResponse> 
-     */
-
-
-    /**
      List devices
      
      - parameter userId: (query)  (optional)
@@ -1352,9 +1327,6 @@ protocol DefaultAPIEndpoints {
 
 
         func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest, connectionId: String?) async throws -> JoinCallResponse
-
-
-        func listCallTypes() async throws -> ListCallTypeResponse
 
 
         func listDevices(userId: String?) async throws -> ListDevicesResponse

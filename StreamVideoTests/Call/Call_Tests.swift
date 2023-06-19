@@ -184,7 +184,7 @@ final class Call_Tests: StreamVideoTestCase {
         // Given
         let userId = "test"
         let call = streamVideo?.call(callType: callType, callId: callId)
-        call?.state.members = [Member(user: .init(id: userId))]
+        call?.state.members = [Member(user: .init(id: userId), updatedAt: .now)]
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
@@ -209,7 +209,7 @@ final class Call_Tests: StreamVideoTestCase {
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid
         )
-        call?.state.members = [Member(user: .init(id: userId))]
+        call?.state.members = [Member(user: .init(id: userId), updatedAt: .now)]
         var member = mockResponseBuilder.makeMemberResponse(id: userId)
         member.user.name = "newname"
         let event = CallMemberUpdatedEvent(

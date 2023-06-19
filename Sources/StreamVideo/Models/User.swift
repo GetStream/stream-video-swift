@@ -63,7 +63,6 @@ public extension User {
 }
 
 public extension UserResponse {
-    
     static func make(from id: String) -> UserResponse {
         UserResponse(
             createdAt: Date(),
@@ -74,7 +73,6 @@ public extension UserResponse {
             updatedAt: Date()
         )
     }
-    
 }
 
 public enum UserAuthType: Sendable, Codable {

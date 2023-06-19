@@ -16,10 +16,23 @@ public struct Member: Identifiable, Equatable, Sendable, Codable {
     public let role: String
     /// Custom data of the member in the call.
     public let customData: [String: RawJSON]
-    
-    public init(user: User, role: String? = nil, customData: [String : RawJSON] = [:]) {
+    public let updatedAt: Date
+
+    public init(user: User, role: String? = nil, customData: [String : RawJSON] = [:], updatedAt: Date) {
         self.user = user
         self.role = role ?? user.role
         self.customData = customData
+        self.updatedAt = updatedAt
+    }
+}
+
+extension MemberResponse {
+    var toMember: Member {
+        Member(
+            user: user.toUser,
+            role: role ?? "",
+            customData: custom,
+            updatedAt: updatedAt
+        )
     }
 }

@@ -20,12 +20,14 @@ public class CallEventsHandler {
                 id: id,
                 caller: caller,
                 type: type,
+                // TODO: use helper to map to members + why do we call this participants?
                 participants: ringEvent.members.map {
                     let user = $0.user.toUser
                     let member = Member(
                         user: user,
                         role: $0.role ?? $0.user.role,
-                        customData: $0.custom
+                        customData: $0.custom,
+                        updatedAt: $0.updatedAt
                     )
                     return member
                 },

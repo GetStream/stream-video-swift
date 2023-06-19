@@ -22,6 +22,7 @@ public class StreamVideo: ObservableObject {
 
     private var tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
+    // TODO: rename this into coordinatorClient
     private let defaultAPI: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
