@@ -366,11 +366,11 @@ public class StreamVideo {
         
         // Update the user and token provider.
         let updatedUser = guestUserResponse.user.toUser
-        let tokenProvider = { [unowned self] result in
+        let tokenProvider = { [environment = self.environment] result in
             Self.loadGuestToken(
                 userId: user.id,
                 apiKey: apiKey,
-                environment: self.environment,
+                environment: environment,
                 result: result
             )
         }
