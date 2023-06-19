@@ -33,6 +33,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
     @StateObject var viewModel: CallViewModel
+    @State private var participantsCount: UInt32 = 0
     
     private let padding: CGFloat = 16
     
@@ -44,7 +45,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     public var body: some View {
         ZStack {
             if shouldShowCallView {
-                if viewModel.callParticipants.count > 1 {
+                if participantsCount > 1 {
                     if viewModel.isMinimized {
                         MinimizedCallView(viewModel: viewModel)
                     } else {
@@ -67,6 +68,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
                 utils.callSoundsPlayer.stopOngoingSound()
             }
         }
+        .onReceive(viewModel.call?.state.$participantCount) { participantsCount = $0 }
     }
     
     @ViewBuilder
