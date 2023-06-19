@@ -13,9 +13,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     private let mockResponseBuilder = MockResponseBuilder()
     
-    let firstUser: Member = Member(user: StreamVideo.mockUser)
-    let secondUser: Member = Member(user: User(id: "test2"))
-    let thirdUser: Member = Member(user: User(id: "test3"))
+    let firstUser: Member = Member(user: StreamVideo.mockUser, updatedAt: .now)
+    let secondUser: Member = Member(user: User(id: "test2"), updatedAt: .now)
+    let thirdUser: Member = Member(user: User(id: "test3"), updatedAt: .now)
     let callId = "test"
     let callType: String = .default
     var callCid: String {

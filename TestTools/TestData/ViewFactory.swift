@@ -104,7 +104,7 @@ struct UserFactory {
                 name: "\(i) Test",
                 imageURL: ImageFactory.get(i)
             )
-            let participant = Member(user: user)
+            let participant = Member(user: user, updatedAt: .now)
             factory.append(participant)
         }
         
