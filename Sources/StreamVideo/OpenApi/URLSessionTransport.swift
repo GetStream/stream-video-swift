@@ -73,28 +73,13 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                     return
                 }
                 if let response = response as? HTTPURLResponse {
-                    if (response.statusCode == 401 || response.statusCode == 403) && !isRetry {
-                        let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
-                        if let code = errorResponse?["code"] as? Int, ClosedRange.tokenInvalidErrorCodes ~= code {
-                            log.debug("Access token expired")
-                            continuation.resume(throwing: ClientError.InvalidToken())
-                        } else {
-                            let requestURLString = request.url?.absoluteString ?? ""
-                            log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))")
-                            continuation.resume(throwing: ClientError.NetworkError(response.description))
-                        }
-                        return
-                    } else if response.statusCode >= 400 {
-                        let requestURLString = request.url?.absoluteString ?? ""
-                        let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
-                        log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))")
-                        continuation.resume(throwing: ClientError.NetworkError(response.description))
+                    if response.statusCode >= 400 || data == nil {
+                        continuation.resume(throwing: Self.apiError(from: data, response: response))
                         return
                     }
                 }
                 guard let data = data, let response = response else {
-                    log.debug("Received empty response")
-                    continuation.resume(throwing: ClientError.NetworkError())
+                    continuation.resume(throwing: ClientError.NetworkError("HTTP request failed without response data, URL: \(request.url?.absoluteString ?? "-")"))
                     return
                 }
                 continuation.resume(returning: (data, response))
@@ -109,14 +94,15 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         return updated
     }
     
-    private static func errorResponse(from data: Data?, response: HTTPURLResponse) -> Any {
+    private static func apiError(from data: Data?, response: HTTPURLResponse) -> Error {
         guard let data = data else {
-            return response.description
+            return ClientError.NetworkError("HTTP status code: \(response.statusCode) URL: \(response.url?.absoluteString ?? "-")")
         }
+
         do {
-            return try JSONSerialization.jsonObject(with: data)
+            return try JSONDecoder.default.decode(APIError.self, from: data)
         } catch {
-            return response.description
+            return ClientError.NetworkError(response.description)
         }
     }
 

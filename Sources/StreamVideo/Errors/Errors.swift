@@ -4,22 +4,30 @@
 
 import Foundation
 
+extension APIError: Error {}
+
 /// A Client error.
 public class ClientError: Error, CustomStringConvertible {
     public struct Location: Equatable {
         public let file: String
         public let line: Int
     }
-    
+
     /// The file and line number which emitted the error.
     public let location: Location?
     
     private var message: String?
-    
+    public let apiError: APIError?
+
     /// An underlying error.
     public let underlyingError: Error?
     
-    var errorDescription: String? { underlyingError.map(String.init(describing:)) }
+    var errorDescription: String? {
+        if apiError != nil {
+            return apiError.map(String.init(describing:))
+        }
+        return underlyingError.map(String.init(describing:))
+    }
     
     /// Retrieve the localized description for this error.
     public var localizedDescription: String { message ?? errorDescription ?? "" }
@@ -36,6 +44,11 @@ public class ClientError: Error, CustomStringConvertible {
     public init(with error: Error? = nil, _ file: StaticString = #file, _ line: UInt = #line) {
         underlyingError = error
         location = .init(file: "\(file)", line: Int(line))
+        if let aErr = error as? APIError {
+            apiError = aErr
+        } else {
+            apiError = nil
+        }
     }
     
     /// An error based on a message.
@@ -47,13 +60,16 @@ public class ClientError: Error, CustomStringConvertible {
         self.message = message
         location = .init(file: "\(file)", line: Int(line))
         underlyingError = nil
+        apiError = nil
     }
 }
 
 extension ClientError {
     /// An unexpected error.
     public class Unexpected: ClientError {}
-    
+
+    public class APIError: ClientError {}
+
     /// An unknown error.
     public class Unknown: ClientError {}
     
