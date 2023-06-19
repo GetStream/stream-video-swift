@@ -13,6 +13,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
+    // TODO: make sure we need createdBy to be optional (ideally not)
     @Published public internal(set) var createdBy: User?
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var transcribing: Bool = false
@@ -49,39 +50,52 @@ public class CallState: ObservableObject {
         } else if let event = event as? UpdatedCallPermissionsEvent {
             updateOwnCapabilities(event)
         } else if let event = event as? CallMemberAddedEvent {
-            let addedMembers = event.members.map {
-                Member(
-                    user: $0.user.toUser,
-                    role: $0.role,
-                    customData: $0.custom
-                )
-            }
-            var updated = self.members
-            for added in addedMembers {
-                if !updated.contains(added) {
-                    updated.append(added)
-                }
-            }
-            self.members = updated
+            mergeMembers(event.members)
         } else if let event = event as? CallMemberRemovedEvent {
             let updated = members.filter { !event.members.contains($0.id) }
             self.members = updated
         } else if let event = event as? CallMemberUpdatedEvent {
-            var current = self.members
-            let updated = event.members
-            for update in updated {
-                if let index = members.firstIndex(where: { $0.id == update.userId }) {
-                    current[index] = Member(
-                        user: update.user.toUser,
-                        role: update.role,
-                        customData: update.custom
-                    )
-                }
-            }
-            self.members = current
+            mergeMembers(event.members)
         }
     }
     
+    internal func blockUser(id: String) {
+        if !blockedUserIds.contains(id) {
+            blockedUserIds.insert(id)
+        }
+    }
+
+    internal func unblockUser(id: String) {
+        blockedUserIds.remove(id)
+    }
+
+    internal func mergeMembers(_ response: [MemberResponse]) {
+        var current = members
+        var changed = false
+        let membersDict = Dictionary(uniqueKeysWithValues: members.lazy.map { ($0.id, $0) })
+        response.forEach {
+            guard let m = membersDict[$0.userId] else {
+                members.insert($0.toMember, at: 0)
+                changed = true
+                return
+            }
+            if m.updatedAt != $0.updatedAt {
+                if let index = members.firstIndex(where: { $0.id == m.id }) {
+                    members[index] = $0.toMember
+                }
+                changed = true
+            }
+        }
+        if changed {
+            members = current
+        }
+    }
+
+    internal func update(from response: GetOrCreateCallResponse) {
+        update(from: response.call)
+        mergeMembers(response.members)
+    }
+
     internal func update(from response: CallResponse) {
         custom = response.custom
         createdAt = response.createdAt

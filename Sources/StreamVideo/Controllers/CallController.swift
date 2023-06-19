@@ -407,17 +407,7 @@ class CallController {
             )
             members.append(callMemberRequest)
         }
-        
-        let currentUserRole = participants.filter { user.id == $0.id }.first?.role ?? user.role
-        let userRequest = UserRequest(
-            id: user.id,
-            image: user.imageURL?.absoluteString,
-            name: user.name,
-            role: currentUserRole
-        )
         let callRequest = CallRequest(
-            createdBy: userRequest,
-            createdById: user.id,
             members: members,
             settingsOverride: nil
         )

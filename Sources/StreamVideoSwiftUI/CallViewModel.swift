@@ -273,7 +273,7 @@ open class CallViewModel: ObservableObject {
             self.call = call
             Task {
                 do {
-                    let callData = try await call.getOrCreate(members: members, ring: ring)
+                    let callData = try await call.create(members: members, ring: ring)
                     let timeoutSeconds = TimeInterval(
                         callData.settings.ring.autoCancelTimeoutMs / 1000
                     )
@@ -455,7 +455,7 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(callType: callType, callId: callId)
-                try await call.join(members: members, ring: ring, callSettings: callSettings)
+                try await call.join(create: true, members: members, ring: ring, callSettings: callSettings)
                 save(call: call)
                 enteringCallTask = nil
             } catch {
@@ -523,14 +523,7 @@ open class CallViewModel: ObservableObject {
                     } else if case let .userBlocked(callEventInfo) = callEvent {
                         if callEventInfo.user?.id == streamVideo.user.id {
                             leaveCall()
-                        } else if let user = callEventInfo.user {
-                            call?.add(blockedUser: user)
                         }
-                    } else if case let .userUnblocked(callEventInfo) = callEvent,
-                                let user = callEventInfo.user {
-                        call?.remove(blockedUser: user)
-                    } else {
-                        log.debug("Received call event \(callEvent)")
                     }
                 } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
                     self.participantEvent = participantEvent

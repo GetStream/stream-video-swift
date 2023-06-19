@@ -10,9 +10,7 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
 	let apiKey: String
     let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_Signal_SignalServer", qos: .userInitiated)
 	let pathPrefix: String = "/stream.video.sfu.signal.SignalServer/"
-    var httpConfig = HTTPConfig.default //TODO: move this
-    
-    init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
+	init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
         self.httpClient = httpClient
 		self.hostname = hostname
 		self.token = token
@@ -45,26 +43,12 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         }
     }
 
-    private func execute<Request: ProtoModel, Response: ProtoModelResponse>(request: Request, path: String, retries: Int = 0) async throws -> Response {
+    private func execute<Request: ProtoModel, Response: ProtoModel>(request: Request, path: String) async throws -> Response {
         let requestData = try request.serializedData()
-        var urlRequest = try makeRequest(for: path)
-        urlRequest.httpBody = requestData
-        let responseData = try await httpClient.execute(request: urlRequest)
+        var request = try makeRequest(for: path)
+        request.httpBody = requestData
+        let responseData = try await httpClient.execute(request: request)
         let response = try Response.init(serializedData: responseData)
-        if response.hasError {
-            if response.error.shouldRetry && retries < httpConfig.maxRetries {
-                let delay = httpConfig.retryStrategy.getDelayAfterTheFailure()
-                let delayNanoseconds = UInt64(delay * 1_000_000_000)
-                log.debug("Delaying retry for \(delay) seconds")
-                try await Task.sleep(nanoseconds: delayNanoseconds)
-                log.debug("Retrying request for path \(path)")
-                return try await execute(request: request, path: path, retries: retries + 1)
-            } else {
-                httpConfig.retryStrategy.resetConsecutiveFailures()
-                throw NSError(domain: "stream", code: response.error.code.rawValue)
-            }
-        }
-        httpConfig.retryStrategy.resetConsecutiveFailures()        
         return response
     }
 
