@@ -75,13 +75,13 @@ public class CallState: ObservableObject {
         let membersDict = Dictionary(uniqueKeysWithValues: members.lazy.map { ($0.id, $0) })
         response.forEach {
             guard let m = membersDict[$0.userId] else {
-                members.insert($0.toMember, at: 0)
+                current.insert($0.toMember, at: 0)
                 changed = true
                 return
             }
             if m.updatedAt != $0.updatedAt {
                 if let index = members.firstIndex(where: { $0.id == m.id }) {
-                    members[index] = $0.toMember
+                    current[index] = $0.toMember
                 }
                 changed = true
             }
