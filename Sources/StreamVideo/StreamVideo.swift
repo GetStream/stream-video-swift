@@ -11,7 +11,9 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
-public class StreamVideo {
+public class StreamVideo: ObservableObject {
+    
+    @Published var connectionStatus: ConnectionStatus = .initialized
     
     public private(set) var user: User
     public let videoConfig: VideoConfig
@@ -475,6 +477,7 @@ extension StreamVideo: ConnectionStateDelegate {
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
+        self.connectionStatus = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
             if let serverError = source.serverError, serverError.isInvalidTokenError {
