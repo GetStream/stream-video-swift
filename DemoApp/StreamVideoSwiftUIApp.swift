@@ -99,9 +99,11 @@ struct StreamVideoSwiftUIApp: App {
             }
             return currentUser
         }()
-        let streamVideo = try await StreamVideo(
+        let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
-            user: user
+            user: user,
+            token: .empty,
+            tokenProvider: { _ in }
         )
         setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: user)
     }
@@ -113,7 +115,6 @@ struct StreamVideoSwiftUIApp: App {
         appState.streamVideo = streamVideo
         let utils = Utils(userListProvider: MockUserListProvider())
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
-        appState.connectUser()
     }
     
     private func checkLoggedInUser() {

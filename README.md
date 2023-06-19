@@ -16,7 +16,50 @@
 
 This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repository includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
 
-## Introduction
+## What is Stream?
+
+Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
+
+With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
+
+- Video & Audio Calling Tutorial
+- Audio Rooms Tutorial
+- Livestreaming Tutorial
+
+Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
+
+## 👩‍💻 Free for Makers 👨‍💻
+
+Stream is free for most side and hobby projects. To qualify, your project/company needs to have < 5 team members and < $10k in monthly revenue. Makers get $100 in monthly credit for video for free.
+
+## 💡Supported Features💡
+
+Here are some of the features we support:
+
+- Developer experience: Great SDKs, docs, tutorials and support so you can build quickly
+- Edge network: Servers around the world ensure optimal latency and reliability
+- Chat: Stored chat, reactions, threads, typing indicators, URL previews etc
+- Security & Privacy: Based in USA and EU, Soc2 certified, GDPR compliant
+- Dynascale: Automatically switch resolutions, fps, bitrate, codecs and paginate video on large calls
+- Screen sharing
+- Picture in picture support
+- Active speaker
+- Custom events
+- Geofencing
+- Notifications and ringing calls
+- Opus DTX & Red for reliable audio
+- Webhooks & SQS
+- Backstage mode
+- Flexible permissions system
+- Joining calls by ID, link or invite
+- Enabling and disabling audio and video when in calls
+- Flipping, Enabling and disabling camera in calls
+- Enabling and disabling speakerphone in calls
+- Push notification providers support
+- Call recording
+- Broadcasting to HLS
+
+## Repo Overview 😎
 
 This repository contains the following parts:
 - low-level client for calling (can be used standalone if you want to build your own UI)

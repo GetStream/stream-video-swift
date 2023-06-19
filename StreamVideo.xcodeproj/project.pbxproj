@@ -4209,7 +4209,7 @@
 /* Begin XCRemoteSwiftPackageReference section */
 		82392D622993CD4700941435 /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/GetStream/stream-chat-swift-test-helpers.git";
+			repositoryURL = "https://github.com/GetStream/stream-chat-swift-test-helpers";
 			requirement = {
 				kind = exactVersion;
 				version = 0.2.11;
@@ -4217,7 +4217,7 @@
 		};
 		8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kean/Nuke.git";
+			repositoryURL = "https://github.com/kean/Nuke";
 			requirement = {
 				kind = exactVersion;
 				version = 11.3.1;
@@ -4225,7 +4225,7 @@
 		};
 		8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/getsentry/sentry-cocoa.git";
+			repositoryURL = "https://github.com/getsentry/sentry-cocoa";
 			requirement = {
 				branch = 8.0.0;
 				kind = branch;
@@ -4233,7 +4233,7 @@
 		};
 		8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing.git";
+			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
 			requirement = {
 				kind = exactVersion;
 				version = 1.11.0;
@@ -4241,7 +4241,7 @@
 		};
 		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/webrtc-sdk/Specs.git";
+			repositoryURL = "https://github.com/webrtc-sdk/Specs";
 			requirement = {
 				kind = exactVersion;
 				version = 104.5112.11;
@@ -4249,7 +4249,7 @@
 		};
 		84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/apple/swift-protobuf.git";
+			repositoryURL = "https://github.com/apple/swift-protobuf";
 			requirement = {
 				kind = upToNextMajorVersion;
 				minimumVersion = 1.18.0;

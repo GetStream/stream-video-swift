@@ -288,6 +288,70 @@ private_lane :emerge_upload do |options|
   )
 end
 
+lane :code_generation do
+  Dir.chdir('..') { sh('sh Scripts/generateCode.sh') }
+  sync_xcodeproj_references
+end
+
+lane :sync_xcodeproj_references do
+  Dir.chdir('..') do
+    project = Xcodeproj::Project.open(xcode_project)
+
+    sh('git add .')
+
+    untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
+    deleted_swift_files = select_swift_files_from(files: untracked_files, that_start_with: ['D '])
+    new_swift_files = select_swift_files_from(files: untracked_files, that_start_with: ['A ', '?? '])
+    renamed_swift_files = select_swift_files_from(files: untracked_files, that_start_with: ['R '])
+
+    renamed_swift_files.each do |renamed_file|
+      content = renamed_file.split.drop(1).join.split('->').map(&:strip)
+      deleted_files << content.first
+      new_files << content.last
+    end
+
+    deleted_swift_files.each do |file_path|
+      next if file_path !~ %r{(/OpenApi/|/protobuf/)}
+
+      file = project.files.find { |f| f.full_path.to_s == file_path }
+      file.remove_from_project if file
+    end
+
+    new_swift_files.each do |file_path|
+      next if file_path !~ %r{(/OpenApi/|/protobuf/)} || project.files.find { |f| f.full_path.to_s == file_path }
+
+      group = project.main_group
+      split_file_path = file_path.split('/')
+      file_name = split_file_path.pop
+
+      split_file_path.each do |subfolder|
+        if group[subfolder]
+          group = group[subfolder]
+        else
+          group = group.new_group(subfolder)
+          group.path = subfolder
+        end
+      end
+
+      file_reference = group.new_file(file_path)
+      file_reference.path = file_name
+      project.targets.find { |n| n.name == 'StreamVideo' }.source_build_phase.add_file_reference(file_reference)
+    end
+
+    project.save
+  end
+end
+
+def select_swift_files_from(files:, that_start_with:)
+  files.select do |f|
+    f.start_with?(*that_start_with)
+  end.map do |f|
+    f.split.drop(1).join
+  end.select do |f|
+    f.end_with?('.swift')
+  end
+end
+
 desc 'Run fastlane linting'
 lane :rubocop do
   next unless is_check_required(sources: sources_matrix[:ruby])

@@ -12,7 +12,8 @@ final class StreamVideo_Tests: XCTestCase {
         let streamVideo = StreamVideo(
             apiKey: "key1",
             user: .anonymous,
-            token: StreamVideo.mockToken
+            token: StreamVideo.mockToken,
+            tokenProvider: { _ in }
         )
         
         // Then
@@ -24,42 +25,13 @@ final class StreamVideo_Tests: XCTestCase {
         }
     }
     
-    func test_streamVideo_guestUser() async throws {
-        // Given
-        let httpClient = HTTPClient_Mock()
-        let response = CreateGuestResponse(
-            accessToken: StreamVideo.mockToken.rawValue,
-            duration: "",
-            user: UserResponse(
-                createdAt: Date(),
-                custom: [:],
-                id: StreamVideo.mockUser.id,
-                role: "", teams: [],
-                updatedAt: Date()
-            )
-        )
-        let data = try! JSONEncoder.default.encode(response)
-        httpClient.dataResponses = [data]
-        let streamVideo = try await StreamVideo(
-            apiKey: "key1",
-            user: .guest("martin"),
-            environment: StreamVideo.mockEnvironment(httpClient)
-        )
-                
-        // Then
-        let user = streamVideo.user
-        // Update the user when the guest response comes.
-        XCTAssert(user.id == StreamVideo.mockUser.id)
-        // Guest users are assigned ids from the backend.
-        XCTAssert(user.id != "martin")
-    }
-    
     func test_streamVideo_makeCall() {
         // Given
         let streamVideo = StreamVideo(
             apiKey: "key1",
             user: StreamVideo.mockUser,
-            token: StreamVideo.mockToken
+            token: StreamVideo.mockToken,
+            tokenProvider: { _ in }
         )
         
         // When
