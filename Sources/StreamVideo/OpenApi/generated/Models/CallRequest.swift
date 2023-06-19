@@ -9,15 +9,13 @@ import Foundation
 
 
 public struct CallRequest: Codable, JSONEncodable, Hashable {
-    public var createdBy: UserRequest?
     public var custom: [String: RawJSON]?
     public var members: [MemberRequest]?
     public var settingsOverride: CallSettingsRequest?
     public var startsAt: Date?
     public var team: String?
 
-    public init(createdBy: UserRequest? = nil, custom: [String: RawJSON]? = nil, members: [MemberRequest]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil, team: String? = nil) {
-        self.createdBy = createdBy
+    public init(custom: [String: RawJSON]? = nil, members: [MemberRequest]? = nil, settingsOverride: CallSettingsRequest? = nil, startsAt: Date? = nil, team: String? = nil) {
         self.custom = custom
         self.members = members
         self.settingsOverride = settingsOverride
@@ -26,7 +24,6 @@ public struct CallRequest: Codable, JSONEncodable, Hashable {
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
-        case createdBy = "created_by"
         case custom
         case members
         case settingsOverride = "settings_override"
@@ -38,7 +35,6 @@ public struct CallRequest: Codable, JSONEncodable, Hashable {
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
-        try container.encodeIfPresent(createdBy, forKey: .createdBy)
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encodeIfPresent(members, forKey: .members)
         try container.encodeIfPresent(settingsOverride, forKey: .settingsOverride)

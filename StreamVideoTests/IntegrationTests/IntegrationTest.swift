@@ -26,6 +26,8 @@ class IntegrationTest: XCTestCase {
         try await client.connect()
     }
 
+    public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}
+
     public func assertNext<Output>(_ p: some Publisher<Output, Never>, _ assertion: @escaping (Output) -> Bool) async -> Void {
         let expectation = XCTestExpectation(description: "NextValue")
         var assertionSucceded = false

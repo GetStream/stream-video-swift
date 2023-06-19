@@ -115,7 +115,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @discardableResult
     public func create(
-        members: [Member]? = nil,
+        members: [MemberRequest]? = nil,
         memberIds: [String]? = nil,
         custom: [String: RawJSON]? = nil,
         startsAt: Date? = nil,
@@ -123,9 +123,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> CallResponse {
+        var membersRequest = [MemberRequest]()
+        memberIds?.forEach {
+            membersRequest.append(.init(userId: $0))
+        }
+        members?.forEach {
+            membersRequest.append($0)
+        }
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,
+                members: membersRequest,
                 startsAt: startsAt
             ),
             notify: notify,
@@ -266,6 +274,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
     
+    // TODO: ideally handlers receive a VideoEvent event instead of the Event container
     public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in

@@ -59,6 +59,48 @@ class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(apiErr.code, 16)
         XCTAssertTrue(apiErr.message.localizedStandardContains("call type does not exist"))
     }
+    
+    func test_send_custom_event() async throws {
+        let call = client.call(callType: "default", callId: UUID().uuidString)
+        try await call.create()
+        try await call.send(event: SendEventRequest(custom: ["test": .string("asd")]))
+        
+        // TODO: we need to expose the VideoEvent before adding tests for event listening
+        let eventSubscriber = call.subscribe()
+        await assertNext(eventSubscriber) { ev in
+            return false
+        }
+    }
+    
+    func test_create_call_with_members() async throws {
+        let call = client.call(callType: "default", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry"])
+
+        await assertNext(call.state.$members) { v in
+            return v.count == 1 && v[0].id == "thierry"
+        }
+
+        try await call.updateMembers(members: [.init(custom: ["stars" : .number(3)], userId: "thierry")])
+        await assertNext(call.state.$members) { v in
+            guard let member = v.first else {
+                return false
+            }
+            return member.id == "thierry" && member.customData["stars"]?.numberValue == 3
+        }
+        
+        try await call.removeMembers(ids: ["thierry"])
+        await assertNext(call.state.$members) { v in
+            return v.count == 0
+        }
+        
+        try await call.addMembers(members: [.init(custom: ["role" : .string("CEO")], userId: "thierry")])
+        await assertNext(call.state.$members) { v in
+            guard let member = v.first else {
+                return false
+            }
+            return member.id == "thierry" && member.customData["role"]?.stringValue == "CEO"
+        }
+    }
 
 }
 
