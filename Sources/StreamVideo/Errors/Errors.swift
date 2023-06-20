@@ -68,28 +68,17 @@ extension ClientError {
     /// An unexpected error.
     public class Unexpected: ClientError {}
 
-    public class APIError: ClientError {}
-
     /// An unknown error.
     public class Unknown: ClientError {}
     
     /// Networking error.
     public class NetworkError: ClientError {}
     
-    /// Token missing error.
-    public class MissingToken: ClientError {}
-    
     /// Permissions error.
     public class MissingPermissions: ClientError {}
     
     /// Invalid url error.
     public class InvalidURL: ClientError {}
-    
-    /// Missing connection id.
-    public class MissingConnectionId: ClientError {}
-    
-    /// Error when bad input is passed by the caller.
-    public class BadInput: ClientError {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable
@@ -116,4 +105,21 @@ extension Error {
         }
         return false
     }
+}
+
+extension Error {
+    var isTokenExpiredError: Bool {
+        if let error = self as? APIError, ClosedRange.tokenInvalidErrorCodes ~= error.code {
+            return true
+        }
+        return false
+    }
+}
+
+extension ClosedRange where Bound == Int {
+    /// The error codes for token-related errors. Typically, a refreshed token is required to recover.
+    static let tokenInvalidErrorCodes: Self = 40...42
+    
+    /// The range of HTTP request status codes for client errors.
+    static let clientErrorCodes: Self = 400...499
 }

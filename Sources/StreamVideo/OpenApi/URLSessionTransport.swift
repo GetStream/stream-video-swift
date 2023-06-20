@@ -33,6 +33,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         }
     }
 
+    // TODO: there should be a barrier in front of this method to ensure the tokenProvider fn never executes more than once at a time
     func refreshToken() async throws -> UserToken {
         try await withCheckedThrowingContinuation { continuation in
             tokenProvider? { result in
@@ -48,9 +49,9 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
 
     func execute(request: URLRequest) async throws -> (Data, URLResponse) {
         do {
-            return try await execute(request: request, isRetry: false)
+            return try await executeInner(request: request)
         } catch {
-            if error is ClientError.InvalidToken && tokenProvider != nil {
+            if error.isTokenExpiredError && tokenProvider != nil {
                 log.debug("Refreshing user token")
                 let token = try await refreshToken()
                 if let onTokenUpdate = onTokenUpdate {
@@ -58,16 +59,17 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                 }
                 let updated = update(request: request, with: token.rawValue)
                 log.debug("Retrying failed request with new token")
-                return try await execute(request: updated, isRetry: true)
+                return try await executeInner(request: updated)
             } else {
                 throw error
             }
         }
     }
 
-    private func execute(request: URLRequest, isRetry: Bool) async throws -> (Data, URLResponse) {
+    private func executeInner(request: URLRequest) async throws -> (Data, URLResponse) {
         try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) { data, response, error in
+                // TODO: we should probably do some wrapping here to add more request context
                 if let error = error {
                     continuation.resume(throwing: error)
                     return
@@ -93,7 +95,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         updated.setValue(token, forHTTPHeaderField: "authorization")
         return updated
     }
-    
+
     private static func apiError(from data: Data?, response: HTTPURLResponse) -> Error {
         guard let data = data else {
             return ClientError.NetworkError("HTTP status code: \(response.statusCode) URL: \(response.url?.absoluteString ?? "-")")

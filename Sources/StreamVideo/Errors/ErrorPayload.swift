@@ -39,11 +39,3 @@ extension ErrorPayload {
         ClosedRange.clientErrorCodes ~= statusCode
     }
 }
-
-extension ClosedRange where Bound == Int {
-    /// The error codes for token-related errors. Typically, a refreshed token is required to recover.
-    static let tokenInvalidErrorCodes: Self = 40...43
-    
-    /// The range of HTTP request status codes for client errors.
-    static let clientErrorCodes: Self = 400...499
-}
