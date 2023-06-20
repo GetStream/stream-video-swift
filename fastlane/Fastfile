@@ -295,7 +295,7 @@ end
 
 lane :sync_xcodeproj_references do
   Dir.chdir('..') do
-    sh('git add **/OpenApi/ **/protobuf/')
+    sh('git add Sources/StreamVideo/OpenApi/ Sources/StreamVideo/protobuf/')
 
     project = Xcodeproj::Project.open(xcode_project)
 
