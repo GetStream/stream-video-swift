@@ -178,14 +178,14 @@ extension UserRobot {
     
     @discardableResult
     func setView(mode: View) -> Self {
-        CallPage.viewMenu.wait().safeTap()
+        CallPage.viewMenu.wait().tapFrameCenter()
         switch mode {
         case .grid:
-            CallPage.ViewMenu.grid.safeTap()
+            CallPage.ViewMenu.grid.tapFrameCenter()
         case .fullscreen:
-            CallPage.ViewMenu.fullscreen.safeTap()
+            CallPage.ViewMenu.fullscreen.tapFrameCenter()
         case .spotlight:
-            CallPage.ViewMenu.spotlight.safeTap()
+            CallPage.ViewMenu.spotlight.tapFrameCenter()
         }
         return self
     }
@@ -282,7 +282,7 @@ extension UserRobot {
         let user = 1
         let expectedCount = participantCount + user
         _ = CallPage.ParticipantMenu.participantCount.waitForValue("\(expectedCount)", timeout: timeout)
-        CallPage.ParticipantMenu.closeButton.tapFrameCenter()
+        CallPage.ParticipantMenu.closeButton.waitForHitPoint().tapFrameCenter()
         return self
     }
 }

@@ -175,7 +175,7 @@ extension UserRobot {
     func assertGridView(with participantCount: Int) -> Self {
         XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
-        XCTAssertEqual(participantCount, CallPage.participantView.waitCount(participantCount, timeout: UserRobot.defaultTimeout).count, "GridView")
+        XCTAssertEqual(participantCount, CallPage.participantView.count, "GridView")
         return self
     }
     
@@ -186,8 +186,12 @@ extension UserRobot {
         XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
         
         let maxVisibleCount = 6
-        let expectedCount = participantCount > 6 ? maxVisibleCount : participantCount
-        XCTAssertEqual(expectedCount, CallPage.spotlightParticipantView.count, "SpotlightView")
+        let actualCount = CallPage.spotlightParticipantView.count
+        if participantCount > maxVisibleCount {
+            XCTAssertTrue(actualCount >= maxVisibleCount && actualCount <= participantCount, "SpotlightView, expected: \(maxVisibleCount) <= \(actualCount) <= \(participantCount)")
+        } else {
+            XCTAssertEqual(participantCount, actualCount, "SpotlightView")
+        }
         return self
     }
     

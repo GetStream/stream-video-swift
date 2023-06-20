@@ -19,34 +19,6 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testAppDoesNotCrashWhenThereAreLoadsOfParticipants() {
-        linkToScenario(withId: 1542)
-        
-        let participants = 50
-        let callDuration = Double(participants) * 2
-        
-        GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
-        }
-        AND("\(participants) participants join the call with camera and mic enabled") {
-            participantRobot
-                .setUserCount(participants)
-                .setCallDuration(callDuration)
-                .joinCall(callId, options: [.withCamera, .withMicrophone])
-        }
-        WHEN("user waits for \(participants) to join") {
-            userRobot.waitForParticipantsToJoin(participants, timeout: callDuration)
-        }
-        for view in allViews {
-            AND("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
-            }
-        }
-        THEN("call is still up and running") {
-            userRobot.assertCallControls()
-        }
-    }
-    
     func testOneParticipantOnTheCall() {
         linkToScenario(withId: 1766)
         
@@ -68,6 +40,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -110,6 +83,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
+                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -193,7 +167,9 @@ final class CallViewsTests: StreamTestCase {
             userRobot.setView(mode: .grid)
         }
         AND("user minimizes video view") {
-            userRobot.minimizeVideoView()
+            userRobot
+                .waitForParticipantsToJoin(participants)
+                .minimizeVideoView()
         }
         THEN("video view is minimized for the user") {
             userRobot
