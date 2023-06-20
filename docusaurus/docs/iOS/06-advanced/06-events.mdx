@@ -19,7 +19,7 @@ Task {
 You can also subscribe for a specific call.
 ```swift
 Task {
-    val call = streamVideo.call("default", "123")
+    let call = streamVideo.call("default", "123")
     for await event in call.subscribe {
         print(event)
     }
@@ -29,7 +29,7 @@ Task {
 Or listen to a specific event
 ```swift
 Task {
-    val call = streamVideo.call("default", "123")
+    let call = streamVideo.call("default", "123")
     for await event in call.subscribe(for: ConnectedEvent.self) {
         print(event)
     }
