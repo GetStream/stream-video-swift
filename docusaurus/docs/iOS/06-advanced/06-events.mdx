@@ -6,7 +6,7 @@ description: How to listen to events
 In most cases, you should rely on the `StreamVideo` or `CallViewModel` and its events for building and updating your UI. However for some customizations you'll want to listen to the underlying events that power these objects.
 
 ## Listening to events
-Both the call and streamVideo object allow you to subscribe to events. You can listen to a specific event or all of them. This example shows how to listen to all events
+Both the call and streamVideo object allow you to subscribe to events. You can listen to a specific event or all of them. This example shows how to listen to all events.
 
 ```swift
 Task {
@@ -28,6 +28,22 @@ Task {
 
 :::note
 When subscribing to all events either on the client or a call, you will be receiving events of type `VideoEvent`. `VideoEvent` is the discriminator object for all websocket events, you should use this to map event payloads to their own type.
+
+```swift
+Task {
+    let call = streamVideo.call("default", "123")
+    for await event in call.subscribe() {
+        switch event {
+        case .typeBlockedUserEvent(let blockedUserEvent):
+            print(blockedUserEvent)
+        case .typeCallAcceptedEvent(let callAcceptedEvent):
+            print(callAcceptedEvent)
+        default:
+            break
+        }
+    }
+}
+```
 :::
 
 Or listen to a specific event
@@ -70,11 +86,12 @@ The following events are triggered by the client:
 |`CallSessionStartedEvent`|This event is sent when a call session starts|
 |`CallUpdatedEvent`|This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current.|
 |`ConnectedEvent`|This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server|
+|`ConnectionErrorEvent`|This event is sent when the WS connection fails|
 |`CustomVideoEvent`|A custom event, this event is used to send custom events to other participants in the call.|
 |`HealthCheckEvent`|-|
 |`PermissionRequestEvent`|This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user|
 |`UnblockedUserEvent`|This event is sent when a user is unblocked on a call,  this can be useful to notify the user that they can now join the call again|
 |`UpdatedCallPermissionsEvent`|This event is sent to notify about permission changes for a user, clients receiving this event should update their UI accordingly|
 |`VideoEvent`|The discriminator object for all websocket events, you should use this to map event payloads to their own type|
-|`WSCallEvent`|This is just a placeholder for all client events|
-|`WSClientEvent`|This is just a placeholder for all client events|
+|`WSCallEvent`|This is just a placeholder for all call events|
+|`WSClientEvent`|This is just a placeholder for all call events|
