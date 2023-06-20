@@ -10,7 +10,7 @@ Both the call and streamVideo object allow you to subscribe to events. You can l
 
 ```swift
 Task {
-    for await event in streamVideo.subscribe {
+    for await event in streamVideo.subscribe() {
         print(event)
     }
 }
@@ -20,11 +20,15 @@ You can also subscribe for a specific call.
 ```swift
 Task {
     let call = streamVideo.call("default", "123")
-    for await event in call.subscribe {
+    for await event in call.subscribe() {
         print(event)
     }
 }
 ```
+
+:::note
+When subscribing to all events either on the client or a call, you will be receiving events of type `VideoEvent`. `VideoEvent` is the discriminator object for all websocket events, you should use this to map event payloads to their own type.
+:::
 
 Or listen to a specific event
 ```swift
