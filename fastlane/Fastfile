@@ -295,14 +295,14 @@ end
 
 lane :sync_xcodeproj_references do
   Dir.chdir('..') do
+    sh('git add **/OpenApi/ **/protobuf/')
+
     project = Xcodeproj::Project.open(xcode_project)
 
-    sh('git add .')
-
     untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
-    deleted_swift_files = select_swift_files_from(files: untracked_files, that_start_with: ['D '])
-    new_swift_files = select_swift_files_from(files: untracked_files, that_start_with: ['A ', '?? '])
-    renamed_swift_files = select_swift_files_from(files: untracked_files, that_start_with: ['R '])
+    deleted_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'D')
+    new_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'A')
+    renamed_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'R')
 
     renamed_swift_files.each do |renamed_file|
       content = renamed_file.split.drop(1).join.split('->').map(&:strip)
@@ -344,7 +344,7 @@ end
 
 def select_swift_files_from(files:, that_start_with:)
   files.select do |f|
-    f.start_with?(*that_start_with)
+    f.start_with?(that_start_with)
   end.map do |f|
     f.split.drop(1).join
   end.select do |f|
