@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Controller used for querying and watching calls.
 public class CallsController: ObservableObject {
@@ -35,12 +36,14 @@ public class CallsController: ObservableObject {
     
     private var watchTask: Task<Void, Error>?
     private var socketDisconnected = false
+    private var cancellables = Set<AnyCancellable>()
         
     init(streamVideo: StreamVideo, defaultAPI: DefaultAPI, callsQuery: CallsQuery) {
         self.defaultAPI = defaultAPI
         self.callsQuery = callsQuery
         self.streamVideo = streamVideo
         self.subscribeToWatchEvents()
+        self.subscribeToConnectionUpdates()
     }
     
     /// Loads the next page of calls.
@@ -51,9 +54,27 @@ public class CallsController: ObservableObject {
     public func cleanUp() {
         watchTask?.cancel()
         watchTask = nil
+        for cancellable in cancellables {
+            cancellable.cancel()
+        }
+        cancellables.removeAll()
     }
     
     // MARK: - private
+    
+    private func subscribeToConnectionUpdates() {
+        streamVideo.$connectionStatus.sink { [weak self] status in
+            guard let self = self else { return }
+            if case .disconnected(_) = status {
+                self.socketDisconnected = true
+            } else if status == .disconnecting {
+                self.socketDisconnected = true
+            } else if status == .connected && socketDisconnected {
+                reWatchCalls()
+            }
+        }
+        .store(in: &cancellables)
+    }
     
     private func loadCalls(shouldRefresh: Bool = false) async throws {
         let isLoading = await state.loading
@@ -124,25 +145,9 @@ public class CallsController: ObservableObject {
         return filterConditions
     }
     
-    private func handle(event: Event) {
-        if let callUpdated = event as? CallUpdatedEvent {
-            let index = calls.firstIndex { callData in
-                callData.call.cid == callUpdated.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call = callUpdated.call
-        } else if let callCreated = event as? CallCreatedEvent {
-            let call = CallStateResponseFields(
-                blockedUsers: [],
-                call: callCreated.call,
-                members: [],
-                ownCapabilities: []
-            )
-            calls.insert(call, at: 0)
-        } else if let broadcastingStarted = event as? CallBroadcastingStartedEvent {
+    private func handle(event: VideoEvent) {
+        switch event {
+        case .typeCallBroadcastingStartedEvent(let broadcastingStarted):
             let index = calls.firstIndex { callData in
                 callData.call.cid == broadcastingStarted.callCid
             }
@@ -151,7 +156,7 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].call.egress.broadcasting = true
-        } else if let broadcastingStopped = event as? CallBroadcastingStoppedEvent {
+        case .typeCallBroadcastingStoppedEvent(let broadcastingStopped):
             let index = calls.firstIndex { callData in
                 callData.call.cid == broadcastingStopped.callCid
             }
@@ -160,16 +165,15 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].call.egress.broadcasting = false
-        } else if let liveStarted = event as? CallLiveStartedEvent {
-            let index = calls.firstIndex { callData in
-                callData.call.cid == liveStarted.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call.backstage = false
-        } else if let callEnded = event as? CallEndedEvent {
+        case .typeCallCreatedEvent(let callCreated):
+            let call = CallStateResponseFields(
+                blockedUsers: [],
+                call: callCreated.call,
+                members: [],
+                ownCapabilities: []
+            )
+            calls.insert(call, at: 0)
+        case .typeCallEndedEvent(let callEnded):
             let index = calls.firstIndex { callData in
                 callData.call.cid == callEnded.callCid
             }
@@ -178,7 +182,16 @@ public class CallsController: ObservableObject {
                 return
             }
             calls[index].call.endedAt = Date()
-        } else if let event = event as? CallSessionParticipantJoinedEvent {
+        case .typeCallLiveStartedEvent(let liveStarted):
+            let index = calls.firstIndex { callData in
+                callData.call.cid == liveStarted.callCid
+            }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].call.backstage = false
+        case .typeCallSessionParticipantJoinedEvent(let event):
             let index = calls.firstIndex { callData in
                 callData.call.cid == event.callCid
             }
@@ -191,7 +204,7 @@ public class CallsController: ObservableObject {
                 user: event.user
             )
             calls[index].call.session?.participants.append(participant)
-        } else if let event = event as? CallSessionParticipantLeftEvent {
+        case .typeCallSessionParticipantLeftEvent(let event):
             let index = calls.firstIndex { callData in
                 callData.call.cid == event.callCid
             }
@@ -202,12 +215,17 @@ public class CallsController: ObservableObject {
             calls[index].call.session?.participants.removeAll(where: { participant in
                 participant.user.id == event.user.id
             })
-        } else if event is WSDisconnected {
-            self.socketDisconnected = true
-        } else if event is WSConnected {
-            if socketDisconnected {
-                reWatchCalls()
+        case .typeCallUpdatedEvent(let callUpdated):
+            let index = calls.firstIndex { callData in
+                callData.call.cid == callUpdated.callCid
             }
+            guard let index else {
+                log.warning("Received an event for call that's not available")
+                return
+            }
+            calls[index].call = callUpdated.call
+        default:
+            log.debug("Receivend an event \(event)")
         }
     }
     
