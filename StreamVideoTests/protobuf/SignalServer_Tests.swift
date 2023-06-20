@@ -29,8 +29,8 @@ final class SignalServer_Tests: XCTestCase {
         let response = try? await signalServer.setPublisher(setPublisherRequest: testRequest)
         
         // Then
-        XCTAssert(httpClient.requestCounter == 6)
-        XCTAssert(response == nil)
+        XCTAssertEqual(httpClient.requestCounter, 6)
+        XCTAssertNil(response)
     }
     
     func test_signalServer_nonRetryingRequest() async throws {
@@ -51,8 +51,8 @@ final class SignalServer_Tests: XCTestCase {
         let response = try? await signalServer.setPublisher(setPublisherRequest: testRequest)
         
         // Then
-        XCTAssert(httpClient.requestCounter == 3)
-        XCTAssert(response == nil)
+        XCTAssertEqual(httpClient.requestCounter, 3)
+        XCTAssertNil(response)
     }
     
     private func generateRetryResponses(_ count: Int) -> [Data] {

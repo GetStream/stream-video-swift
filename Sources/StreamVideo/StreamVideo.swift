@@ -496,7 +496,8 @@ extension StreamVideo: ConnectionStateDelegate {
         self.connectionStatus = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
-            if let serverError = source.serverError, serverError.isInvalidTokenError {
+            if let serverError = source.serverError, serverError.isInvalidTokenError
+                || (source.serverError as? APIError)?.isTokenExpiredError == true {
                 Task {
                     do {
                         guard let apiTransport = apiTransport as? URLSessionTransport else { return }

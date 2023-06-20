@@ -1,8 +1,5 @@
 //
-//  IntegrationTest.swift
-//  StreamVideoTests
-//
-//  Created by tommaso barbugli on 19/06/2023.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -25,6 +22,8 @@ class IntegrationTest: XCTestCase {
         try await super.setUp()
         try await client.connect()
     }
+
+    public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}
 
     public func assertNext<Output>(_ p: some Publisher<Output, Never>, _ assertion: @escaping (Output) -> Bool) async -> Void {
         let expectation = XCTestExpectation(description: "NextValue")

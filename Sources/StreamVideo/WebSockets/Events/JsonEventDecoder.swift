@@ -71,6 +71,8 @@ struct JsonEventDecoder: AnyEventDecoder {
             return value
         case .typeCallRingEvent(let value):
             return value
+        case .typeConnectionErrorEvent(let value):
+            return value
         }
     }
 }
@@ -109,6 +111,7 @@ extension CallSessionParticipantLeftEvent: @unchecked Sendable, Event {}
 extension CallSessionStartedEvent: @unchecked Sendable, Event {}
 extension CallNotificationEvent: @unchecked Sendable, Event {}
 extension CallRingEvent: @unchecked Sendable, Event {}
+extension ConnectionErrorEvent: @unchecked Sendable, Event {}
 
 extension UserResponse {
     public var toUser: User {

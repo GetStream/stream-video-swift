@@ -186,6 +186,9 @@ extension WebSocketClient: WebSocketEngineDelegate {
             log.debug("Event decoded: \(event)")
             if let healthCheckEvent = event as? (any HealthCheck) {
                 handle(healthCheckEvent: healthCheckEvent)
+            } else if let errorEvent = event as? ConnectionErrorEvent {
+                let error = ClientError(with: errorEvent.error)
+                connectionState = .disconnecting(source: .serverInitiated(error: error))
             } else {
                 eventsBatcher.append(decoded)
             }
