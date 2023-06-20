@@ -12,7 +12,7 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo: ObservableObject {
-    
+
     @Published public var connectionStatus: ConnectionStatus = .initialized
     
     public private(set) var user: User
@@ -32,9 +32,9 @@ public class StreamVideo: ObservableObject {
     }
         
     private let eventsMiddleware = WSEventsMiddleware()
-    private var continuations = [AsyncStream<Event>.Continuation]()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
+    private var eventHandlers = [EventHandling]()
             
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -221,8 +221,7 @@ public class StreamVideo: ObservableObject {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        continuations.forEach { $0.finish() }
-        continuations.removeAll()
+        eventHandlers.removeAll()
 
         await withCheckedContinuation { [webSocketClient] continuation in
             if let webSocketClient = webSocketClient {
@@ -237,10 +236,24 @@ public class StreamVideo: ObservableObject {
     
     public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
-            self?.continuations.append(continuation)
+            let eventHandler: EventHandling = { event in
+                continuation.yield(event)
+            }
+            self?.eventHandlers.append(eventHandler)
         }
     }
-    
+
+    public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
+        return AsyncStream(event) { [weak self] continuation in
+            let eventHandler: EventHandling = { event in
+                if let event = event as? WSEvent {
+                    continuation.yield(event)
+                }
+            }
+            self?.eventHandlers.append(eventHandler)
+        }
+    }
+
     // MARK: - private
     
     /// Creates a call controller, used for establishing and managing a call.
@@ -492,13 +505,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            for continuation in continuations {
-                continuation.yield(WSDisconnected())
-            }
+            eventHandlers.forEach { $0?(WSDisconnected()) }
         case .connected(healthCheckInfo: _):
-            for continuation in continuations {
-                continuation.yield(WSConnected())
-            }
+            eventHandlers.forEach { $0?(WSConnected()) }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -508,8 +517,8 @@ extension StreamVideo: ConnectionStateDelegate {
 extension StreamVideo: WSEventsSubscriber {
     
     func onEvent(_ event: Event) {
-        for continuation in continuations {
-            continuation.yield(event)
+        for eventHandler in eventHandlers {
+            eventHandler?(event)
         }
     }
     

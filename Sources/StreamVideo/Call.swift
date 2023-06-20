@@ -8,8 +8,6 @@ import Foundation
 public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     @Injected(\.streamVideo) var streamVideo
-    
-    typealias EventHandling = ((Event) -> ())?
 
     public internal(set) var state = CallState()
     
