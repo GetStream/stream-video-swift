@@ -401,15 +401,16 @@ class CallController {
         ring: Bool,
         notify: Bool
     ) async throws -> JoinCallResponse {
-        var members = options?.members
-        if members == nil {
-            for id in options?.memberIds ?? [] {
-                members?.append(MemberRequest(userId: id))
-            }
+        var membersRequest = [MemberRequest]()
+        options?.memberIds?.forEach {
+            membersRequest.append(.init(userId: $0))
+        }
+        options?.members?.forEach {
+            membersRequest.append($0)
         }
         let callRequest = CallRequest(
             custom: options?.custom,
-            members: members,
+            members: membersRequest,
             settingsOverride: options?.settings,
             startsAt: options?.startsAt,
             team: options?.team

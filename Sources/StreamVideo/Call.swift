@@ -123,10 +123,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> CallResponse {
+        var membersRequest = [MemberRequest]()
+        memberIds?.forEach {
+            membersRequest.append(.init(userId: $0))
+        }
+        members?.forEach {
+            membersRequest.append($0)
+        }
         let request = GetOrCreateCallRequest(
             data: CallRequest(
                 custom: custom,
-                startsAt: startsAt
+                members: membersRequest,
+                settingsOverride: nil,
+                startsAt: startsAt,
+                team: team
             ),
             notify: notify,
             ring: ring
