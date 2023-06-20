@@ -71,7 +71,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(event)
+        let videoEvent = VideoEvent.typeCallRejectedEvent(event)
+        let container = CoordinatorEvent(wrapped: videoEvent, event: event)
+        eventNotificationCenter?.process(container)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -94,7 +96,11 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(firstReject)
+        let first = CoordinatorEvent(
+            wrapped: .typeCallRejectedEvent(firstReject),
+            event: firstReject
+        )
+        eventNotificationCenter?.process(first)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .outgoing)
@@ -110,7 +116,11 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: thirdUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(secondReject)
+        let second = CoordinatorEvent(
+            wrapped: .typeCallRejectedEvent(secondReject),
+            event: secondReject
+        )
+        eventNotificationCenter?.process(second)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -123,7 +133,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         let event = CallEndedEvent(callCid: callCid, createdAt: Date())
-        eventNotificationCenter?.process(event)
+        let container = CoordinatorEvent(wrapped: .typeCallEndedEvent(event), event: event)
+        eventNotificationCenter?.process(container)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -140,7 +151,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: firstUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(event)
+        let container = CoordinatorEvent(wrapped: .typeBlockedUserEvent(event), event: event)
+        eventNotificationCenter?.process(container)
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -206,7 +218,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 updatedAt: Date()
             )
         )
-        eventNotificationCenter?.process(event)
+        let container = CoordinatorEvent(wrapped: .typeCallRingEvent(event), event: event)
+        eventNotificationCenter?.process(container)
         
         // Then
         try await waitForCallEvent()
@@ -247,7 +260,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 updatedAt: Date()
             )
         )
-        eventNotificationCenter?.process(event)
+        let container = CoordinatorEvent(wrapped: .typeCallRingEvent(event), event: event)
+        eventNotificationCenter?.process(container)
         
         // Then
         try await waitForCallEvent()
@@ -385,7 +399,11 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             sessionId: "123",
             user: .make(from: "test")
         )
-        eventNotificationCenter?.process(participantEvent)
+        let container = CoordinatorEvent(
+            wrapped: .typeCallSessionParticipantJoinedEvent(participantEvent),
+            event: participantEvent
+        )
+        eventNotificationCenter?.process(container)
         try await waitForCallEvent()
 
         // Then
