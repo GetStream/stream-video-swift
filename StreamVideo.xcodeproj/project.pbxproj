@@ -548,6 +548,7 @@
 		84FC2C2228ACF2E000181490 /* PeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C2128ACF2E000181490 /* PeerConnection.swift */; };
 		84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */; };
 		84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C2728AD350100181490 /* WebRTCEvents.swift */; };
+		FD1D733E5052D7103850A7A7 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 11DAC12258B242FEDAAD1B40 /* ConnectionErrorEvent.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -670,6 +671,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		11DAC12258B242FEDAAD1B40 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ConnectionErrorEvent.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamVideoSwiftUIApp+Sentry.swift"; sourceTree = "<group>"; };
 		4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTest.swift; sourceTree = "<group>"; };
@@ -2053,6 +2055,7 @@
 				84DC388529ADFCFC00946713 /* GeofenceSettingsRequest.swift */,
 				84DC388629ADFCFC00946713 /* RecordSettings.swift */,
 				84DC388729ADFCFC00946713 /* JoinCallRequest.swift */,
+				11DAC12258B242FEDAAD1B40 /* ConnectionErrorEvent.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -3046,6 +3049,7 @@
 				842B8E272A2DFED900863A87 /* CallSessionEndedEvent.swift in Sources */,
 				84DC38CF29ADFCFD00946713 /* QueryCallsRequest.swift in Sources */,
 				84A7E1822883629700526C98 /* RetryStrategy.swift in Sources */,
+				FD1D733E5052D7103850A7A7 /* ConnectionErrorEvent.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

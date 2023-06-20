@@ -36,6 +36,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallSessionStartedEvent(CallSessionStartedEvent)
     case typeCallUpdatedEvent(CallUpdatedEvent)
     case typeConnectedEvent(ConnectedEvent)
+    case typeConnectionErrorEvent(ConnectionErrorEvent)
     case typeCustomVideoEvent(CustomVideoEvent)
     case typeHealthCheckEvent(HealthCheckEvent)
     case typePermissionRequestEvent(PermissionRequestEvent)
@@ -90,6 +91,8 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallUpdatedEvent(let value):
             try container.encode(value)
         case .typeConnectedEvent(let value):
+            try container.encode(value)
+        case .typeConnectionErrorEvent(let value):
             try container.encode(value)
         case .typeCustomVideoEvent(let value):
             try container.encode(value)
@@ -182,6 +185,9 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.updated" {
             let value = try container.decode(CallUpdatedEvent.self)
             self = .typeCallUpdatedEvent(value)
+        } else if dto.type == "connection.error" {
+            let value = try container.decode(ConnectionErrorEvent.self)
+            self = .typeConnectionErrorEvent(value)
         } else if dto.type == "connection.ok" {
             let value = try container.decode(ConnectedEvent.self)
             self = .typeConnectedEvent(value)
