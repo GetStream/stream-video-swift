@@ -267,10 +267,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
     
-    public func subscribe() -> AsyncStream<Event> {
-        AsyncStream(Event.self) { [weak self] continuation in
+    public func subscribe() -> AsyncStream<VideoEvent> {
+        AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                continuation.yield(event)
+                if let event = event as? CoordinatorEvent {
+                    continuation.yield(event.wrapped)
+                }
             }
             self?.eventHandlers.append(eventHandler)
         }
@@ -279,8 +281,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? WSEvent {
-                    continuation.yield(event)
+                if let event = event as? CoordinatorEvent,
+                    let rawEvent = event.event as? WSEvent {
+                    continuation.yield(rawEvent)
                 }
             }
             self?.eventHandlers.append(eventHandler)
@@ -513,10 +516,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     internal func onEvent(_ event: Event) {
-        guard let wsCallEvent = event as? WSCallEvent, wsCallEvent.callCid == cId else {
+        var rawEvent = event
+        if let coordinatorEvent = event as? CoordinatorEvent {
+            rawEvent = coordinatorEvent.event
+        }
+        guard let wsCallEvent = rawEvent as? WSCallEvent, wsCallEvent.callCid == cId else {
             return
         }
-        state.updateState(from: event)
+        state.updateState(from: rawEvent)
         callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
         for eventHandler in eventHandlers {
             eventHandler?(event)

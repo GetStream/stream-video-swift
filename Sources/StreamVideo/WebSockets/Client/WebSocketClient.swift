@@ -178,12 +178,16 @@ extension WebSocketClient: WebSocketEngineDelegate {
         do {
             let messageData = data
             log.debug("Event received")
-            let event = try eventDecoder.decode(from: messageData)
+            let decoded = try eventDecoder.decode(from: messageData)
+            var event = decoded
+            if let container = event as? CoordinatorEvent {
+                event = container.event
+            }
             log.debug("Event decoded: \(event)")
             if let healthCheckEvent = event as? (any HealthCheck) {
                 handle(healthCheckEvent: healthCheckEvent)
             } else {
-                eventsBatcher.append(event)
+                eventsBatcher.append(decoded)
             }
         } catch is ClientError.UnsupportedEventType {
             log.info("Skipping unsupported event type", subsystems: .webSocket)
