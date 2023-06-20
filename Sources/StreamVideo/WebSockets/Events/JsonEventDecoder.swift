@@ -8,8 +8,12 @@ struct JsonEventDecoder: AnyEventDecoder {
     
     func decode(from data: Data) throws -> Event {
         let decoder = JSONDecoder.stream
-        let event = try decoder.decode(VideoEvent.self, from: data)
-        
+        let videoEvent = try decoder.decode(VideoEvent.self, from: data)
+        let event = unpack(event: videoEvent)
+        return CoordinatorEvent(wrapped: videoEvent, event: event)
+    }
+    
+    private func unpack(event: VideoEvent) -> Event {
         switch event {
         case .typeBlockedUserEvent(let callBlocked):
             return callBlocked
@@ -69,6 +73,11 @@ struct JsonEventDecoder: AnyEventDecoder {
             return value
         }
     }
+}
+
+struct CoordinatorEvent: Event {
+    let wrapped: VideoEvent
+    let event: Event
 }
 
 extension CallCreatedEvent: @unchecked Sendable, Event {}

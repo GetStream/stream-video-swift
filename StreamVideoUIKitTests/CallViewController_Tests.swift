@@ -13,8 +13,8 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         // Given
         let callViewController = CallViewController.make()
         let participants = [
-            Member(user: User(id: "Test1"), updatedAt: .now),
-            Member(user: User(id: "Test2"), updatedAt: .now)
+            MemberRequest(userId: "Test1"),
+            MemberRequest(userId: "Test2")
         ]
         
         // When
