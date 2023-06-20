@@ -13,8 +13,6 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo: ObservableObject {
 
-    typealias EventHandling = ((Event) -> ())?
-
     @Published public var connectionStatus: ConnectionStatus = .initialized
     
     public private(set) var user: User

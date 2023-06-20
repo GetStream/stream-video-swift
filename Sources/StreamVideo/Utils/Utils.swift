@@ -21,3 +21,5 @@ public enum CallNotification {
     public static let callEnded = "StreamVideo.Call.Ended"
     public static let participantLeft = "StreamVideo.Call.ParticipantLeft"
 }
+
+typealias EventHandling = ((Event) -> ())?
