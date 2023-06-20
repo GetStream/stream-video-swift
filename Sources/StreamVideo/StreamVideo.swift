@@ -35,7 +35,6 @@ public class StreamVideo: ObservableObject {
     }
         
     private let eventsMiddleware = WSEventsMiddleware()
-    private var continuations = [AsyncStream<Event>.Continuation]()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
     private var eventHandlers = [EventHandling]()
@@ -225,8 +224,6 @@ public class StreamVideo: ObservableObject {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
-        continuations.forEach { $0.finish() }
-        continuations.removeAll()
         eventHandlers.removeAll()
 
         await withCheckedContinuation { [webSocketClient] continuation in
@@ -242,7 +239,10 @@ public class StreamVideo: ObservableObject {
     
     public func subscribe() -> AsyncStream<Event> {
         AsyncStream(Event.self) { [weak self] continuation in
-            self?.continuations.append(continuation)
+            let eventHandler: EventHandling = { event in
+                continuation.yield(event)
+            }
+            self?.eventHandlers.append(eventHandler)
         }
     }
 
@@ -508,13 +508,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            for continuation in continuations {
-                continuation.yield(WSDisconnected())
-            }
+            eventHandlers.forEach { $0?(WSDisconnected()) }
         case .connected(healthCheckInfo: _):
-            for continuation in continuations {
-                continuation.yield(WSConnected())
-            }
+            eventHandlers.forEach { $0?(WSConnected()) }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -524,10 +520,6 @@ extension StreamVideo: ConnectionStateDelegate {
 extension StreamVideo: WSEventsSubscriber {
     
     func onEvent(_ event: Event) {
-        for continuation in continuations {
-            continuation.yield(event)
-        }
-
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }
