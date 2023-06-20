@@ -4,6 +4,7 @@
 
 import Foundation
 
+// TODO: replace ErrorPayload with APIError
 /// A parsed server response error.
 public struct ErrorPayload: LocalizedError, Codable, CustomDebugStringConvertible, Equatable {
     private enum CodingKeys: String, CodingKey {
