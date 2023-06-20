@@ -61,10 +61,12 @@ class CallCRUDTest: IntegrationTest {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create()
         try await call.send(event: SendEventRequest(custom: ["test": .string("asd")]))
-        
-        // TODO: we need to expose the VideoEvent before adding tests for event listening
+
         let eventSubscriber = call.subscribe()
         await assertNext(eventSubscriber) { ev in
+            if case let .typeCustomVideoEvent(data) = ev {
+                return data.custom["test"]?.stringValue == "asd"
+            }
             return false
         }
     }

@@ -4,40 +4,38 @@ import SwiftProtobuf;
 
 
 class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
-    private let httpClient: HTTPClient
-    let hostname: String
-    var token: String
-    let apiKey: String
+	private let httpClient: HTTPClient
+	let hostname: String
+	var token: String
+	let apiKey: String
     let syncQueue = DispatchQueue(label: "Stream_Video_Sfu_Signal_SignalServer", qos: .userInitiated)
-    let pathPrefix: String = "/stream.video.sfu.signal.SignalServer/"
-    var httpConfig = HTTPConfig.default //TODO: move this
-    
-    init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
+	let pathPrefix: String = "/stream.video.sfu.signal.SignalServer/"
+	init(httpClient: HTTPClient, apiKey: String, hostname: String, token: String) {
         self.httpClient = httpClient
-        self.hostname = hostname
-        self.token = token
+		self.hostname = hostname
+		self.token = token
         self.apiKey = apiKey
-    }
+	}
     
-    func setPublisher(setPublisherRequest: Stream_Video_Sfu_Signal_SetPublisherRequest) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
+	func setPublisher(setPublisherRequest: Stream_Video_Sfu_Signal_SetPublisherRequest) async throws -> Stream_Video_Sfu_Signal_SetPublisherResponse {
         return try await execute(request: setPublisherRequest, path: "SetPublisher")
-    }
+	}
     
-    func sendAnswer(sendAnswerRequest: Stream_Video_Sfu_Signal_SendAnswerRequest) async throws -> Stream_Video_Sfu_Signal_SendAnswerResponse {
+	func sendAnswer(sendAnswerRequest: Stream_Video_Sfu_Signal_SendAnswerRequest) async throws -> Stream_Video_Sfu_Signal_SendAnswerResponse {
         return try await execute(request: sendAnswerRequest, path: "SendAnswer")
-    }
+	}
     
-    func iceTrickle(iCETrickle: Stream_Video_Sfu_Models_ICETrickle) async throws -> Stream_Video_Sfu_Signal_ICETrickleResponse {
+	func iceTrickle(iCETrickle: Stream_Video_Sfu_Models_ICETrickle) async throws -> Stream_Video_Sfu_Signal_ICETrickleResponse {
         return try await execute(request: iCETrickle, path: "IceTrickle")
-    }
+	}
     
-    func updateSubscriptions(updateSubscriptionsRequest: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest) async throws -> Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse {
+	func updateSubscriptions(updateSubscriptionsRequest: Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest) async throws -> Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse {
         return try await execute(request: updateSubscriptionsRequest, path: "UpdateSubscriptions")
-    }
+	}
     
-    func updateMuteStates(updateMuteStatesRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest) async throws -> Stream_Video_Sfu_Signal_UpdateMuteStatesResponse {
+	func updateMuteStates(updateMuteStatesRequest: Stream_Video_Sfu_Signal_UpdateMuteStatesRequest) async throws -> Stream_Video_Sfu_Signal_UpdateMuteStatesResponse {
         return try await execute(request: updateMuteStatesRequest, path: "UpdateMuteStates")
-    }
+	}
     
     func update(userToken: String) {
         syncQueue.async { [weak self] in
@@ -45,31 +43,17 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         }
     }
 
-    private func execute<Request: ProtoModel, Response: ProtoModelResponse>(request: Request, path: String, retries: Int = 0) async throws -> Response {
+    private func execute<Request: ProtoModel, Response: ProtoModel>(request: Request, path: String) async throws -> Response {
         let requestData = try request.serializedData()
-        var urlRequest = try makeRequest(for: path)
-        urlRequest.httpBody = requestData
-        let responseData = try await httpClient.execute(request: urlRequest)
+        var request = try makeRequest(for: path)
+        request.httpBody = requestData
+        let responseData = try await httpClient.execute(request: request)
         let response = try Response.init(serializedData: responseData)
-        if response.hasError {
-            if response.error.shouldRetry && retries < httpConfig.maxRetries {
-                let delay = httpConfig.retryStrategy.getDelayAfterTheFailure()
-                let delayNanoseconds = UInt64(delay * 1_000_000_000)
-                log.debug("Delaying retry for \(delay) seconds")
-                try await Task.sleep(nanoseconds: delayNanoseconds)
-                log.debug("Retrying request for path \(path)")
-                return try await execute(request: request, path: path, retries: retries + 1)
-            } else {
-                httpConfig.retryStrategy.resetConsecutiveFailures()
-                throw NSError(domain: "stream", code: response.error.code.rawValue)
-            }
-        }
-        httpConfig.retryStrategy.resetConsecutiveFailures()
         return response
     }
 
     private func makeRequest(for path: String) throws -> URLRequest {
-        let url = hostname + pathPrefix + path + "?api_key=\(apiKey)"
+    	let url = hostname + pathPrefix + path + "?api_key=\(apiKey)"
         guard let url = URL(string: url) else {
             throw NSError(domain: "stream", code: 123)
         }
