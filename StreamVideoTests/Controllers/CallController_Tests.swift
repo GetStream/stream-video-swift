@@ -34,7 +34,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
 
         // Then
@@ -53,7 +53,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
         callController.call = call
         webRTCClient.signalChannel?.connect()
@@ -98,7 +98,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
         callController.call = call
         webRTCClient.signalChannel?.connect()
@@ -132,7 +132,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
         callController.call = call
         var callResponse = MockResponseBuilder().makeCallResponse(cid: callCid)
@@ -156,7 +156,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
         callController.call = call
         let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
@@ -179,7 +179,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
         callController.call = call
         let event = CallRecordingStartedEvent(callCid: "test", createdAt: Date())
@@ -201,7 +201,7 @@ final class CallController_Tests: ControllerTestCase {
             callId: callId,
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            members: []
+            options: nil
         )
         callController.call = call
         callController.cleanUp()

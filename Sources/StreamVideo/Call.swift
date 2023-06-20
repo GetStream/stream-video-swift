@@ -30,19 +30,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     internal let callController: CallController
     private let videoOptions: VideoOptions
     private var eventHandlers = [EventHandling]()
-    // TODO: rename this into coordinatorClient
-    private let defaultAPI: DefaultAPI
+    private let coordinatorClient: DefaultAPI
 
     internal init(
         callType: String,
         callId: String,
-        defaultAPI: DefaultAPI,
+        coordinatorClient: DefaultAPI,
         callController: CallController,
         videoOptions: VideoOptions
     ) {
         self.callId = callId
         self.callType = callType
-        self.defaultAPI = defaultAPI
+        self.coordinatorClient = coordinatorClient
         self.callController = callController
         self.videoOptions = videoOptions
         self.callController.call = self
@@ -56,25 +55,26 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
     /// - Throws: An error if the call could not be joined.
+    @discardableResult
     public func join(
         create: Bool = false,
-        // TODO: replace members with a CreateCallOptions struct that contains memberIds, [Members], custom, settings, startsAt and team
-        // TODO: sync state using the response from this method
-        members: [Member] = [],
+        options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
         callSettings: CallSettings = CallSettings()
-    ) async throws {
-        try await callController.joinCall(
+    ) async throws -> JoinCallResponse {
+        let response = try await callController.joinCall(
             create: create,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
             videoOptions: videoOptions,
-            members: members,
+            options: options,
             ring: ring,
             notify: notify
         )
+        state.update(from: response.call)
+        return response
     }
     
     /// Gets the call on the backend with the given parameters.
@@ -90,7 +90,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> CallResponse {
-        let response = try await defaultAPI.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
+        let response = try await coordinatorClient.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
         state.update(from: response.call)
         return response.call
     }
@@ -115,7 +115,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     @discardableResult
     public func create(
-        members: [Member]? = nil,
+        members: [MemberRequest]? = nil,
         memberIds: [String]? = nil,
         custom: [String: RawJSON]? = nil,
         startsAt: Date? = nil,
@@ -131,7 +131,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             notify: notify,
             ring: ring
         )
-        let response = try await defaultAPI.getOrCreateCall(
+        let response = try await coordinatorClient.getOrCreateCall(
             type: callType,
             id: callId,
             getOrCreateCallRequest: request
@@ -146,23 +146,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         startsAt: Date? = nil
     ) async throws -> UpdateCallResponse {
         let request = UpdateCallRequest(custom: custom, startsAt: startsAt)
-        let response = try await defaultAPI.updateCall(type: callType, id: callId, updateCallRequest: request)
+        let response = try await coordinatorClient.updateCall(type: callType, id: callId, updateCallRequest: request)
         state.update(from: response.call)
         return response
     }
 
     /// Accepts an incoming call.
     @discardableResult
-    // TODO: sync state using the response from this method
     public func accept() async throws -> AcceptCallResponse {
-        try await defaultAPI.acceptCall(type: callType, id: callId)
+        try await coordinatorClient.acceptCall(type: callType, id: callId)
     }
     
     /// Rejects a call.
     @discardableResult
-    // TODO: sync state using the response from this method
     public func reject() async throws -> RejectCallResponse {
-        try await defaultAPI.rejectCall(type: callType, id: callId)
+        try await coordinatorClient.rejectCall(type: callType, id: callId)
     }
     
     /// Adds the given user to the list of blocked users for the call.
@@ -213,17 +211,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await callController.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
     
-    // TODO: return the response object instead of members
     @discardableResult
-    public func addMembers(members: [MemberRequest]) async throws -> [Member] {
+    public func addMembers(members: [MemberRequest]) async throws -> UpdateCallMembersResponse {
         try await self.updateCallMembers(
             updateMembers: members
         )
     }
 
-    // TODO: return the response object instead of members
     @discardableResult
-    public func updateMembers(members: [MemberRequest]) async throws -> [Member] {
+    public func updateMembers(members: [MemberRequest]) async throws -> UpdateCallMembersResponse {
         try await self.updateCallMembers(
             updateMembers: members
         )
@@ -232,10 +228,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Adds members with the specified `ids` to the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to add.
     /// - Throws: An error if the members could not be added to the call.
-    // TODO: return the response object instead of members
-    // TODO: update state object directly here
     @discardableResult
-    public func addMembers(ids: [String]) async throws -> [Member] {
+    public func addMembers(ids: [String]) async throws -> UpdateCallMembersResponse {
         try await self.updateCallMembers(
             updateMembers: ids.map { MemberRequest(userId: $0) }
         )
@@ -244,9 +238,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Remove members with the specified `ids` from the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to remove.
     /// - Throws: An error if the members could not be removed from the call.
-    // TODO: return the response object instead of members
     @discardableResult
-    public func removeMembers(ids: [String]) async throws -> [Member] {
+    public func removeMembers(ids: [String]) async throws -> UpdateCallMembersResponse {
         try await self.updateCallMembers(
             removedIds: ids
         )
@@ -330,7 +323,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             permissions: permissions.map(\.rawValue)
         )
         
-        return try await defaultAPI.requestPermission(
+        return try await coordinatorClient.requestPermission(
             type: callType,
             id: callId,
             requestPermissionRequest: request
@@ -386,7 +379,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func muteUsers(
         with request: MuteUsersRequest
     ) async throws -> MuteUsersResponse {
-        try await defaultAPI.muteUsers(
+        try await coordinatorClient.muteUsers(
             type: callType,
             id: callId,
             muteUsersRequest: request
@@ -397,7 +390,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: error if ending the call fails.
     @discardableResult
     public func end() async throws -> EndCallResponse {
-        try await defaultAPI.endCall(type: callType, id: callId)
+        try await coordinatorClient.endCall(type: callType, id: callId)
     }
     
     /// Blocks a user in a call.
@@ -406,7 +399,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: error if blocking the user fails.
     @discardableResult
     public func blockUser(with userId: String) async throws -> BlockUserResponse {
-        let response = try await defaultAPI.blockUser(type: callType, id: callId, blockUserRequest: BlockUserRequest(userId: userId))
+        let response = try await coordinatorClient.blockUser(type: callType, id: callId, blockUserRequest: BlockUserRequest(userId: userId))
         state.blockUser(id: userId)
         return response
     }
@@ -417,7 +410,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: error if unblocking the user fails.
     @discardableResult
     public func unblockUser(with userId: String) async throws -> UnblockUserResponse {
-        let response = try await defaultAPI.unblockUser(type: callType, id: callId, unblockUserRequest: UnblockUserRequest(userId: userId))
+        let response = try await coordinatorClient.unblockUser(type: callType, id: callId, unblockUserRequest: UnblockUserRequest(userId: userId))
         state.unblockUser(id: userId)
         return response
     }
@@ -425,13 +418,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Starts a live call.
     @discardableResult
     public func goLive() async throws -> GoLiveResponse {
-        return try await defaultAPI.goLive(type: callType, id: callId)
+        return try await coordinatorClient.goLive(type: callType, id: callId)
     }
     
     /// Stops an ongoing live call.
     @discardableResult
     public func stopLive() async throws -> StopLiveResponse {
-        return try await defaultAPI.stopLive(type: callType, id: callId)
+        return try await coordinatorClient.stopLive(type: callType, id: callId)
     }
     
     //MARK: - Recording
@@ -439,7 +432,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Starts recording for the call.
     @discardableResult
     public func startRecording() async throws -> StartRecordingResponse {
-        let response = try await defaultAPI.startRecording(type: callType, id: callId)
+        let response = try await coordinatorClient.startRecording(type: callType, id: callId)
         update(recordingState: .requested)
         return response
     }
@@ -447,12 +440,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Stops recording a call.
     @discardableResult
     public func stopRecording() async throws -> StopRecordingResponse {
-        try await defaultAPI.stopRecording(type: callType, id: callId)
+        try await coordinatorClient.stopRecording(type: callType, id: callId)
     }
     
     /// Lists recordings for the call.
     public func listRecordings() async throws -> [CallRecording] {
-        let response = try await defaultAPI.listRecordingsTypeId0(
+        let response = try await coordinatorClient.listRecordingsTypeId0(
             type: callType,
             id: callId
         )
@@ -464,13 +457,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Starts broadcasting of the call.
     @discardableResult
     public func startBroadcasting() async throws -> StartBroadcastingResponse {
-        return try await defaultAPI.startBroadcasting(type: callType, id: callId)
+        return try await coordinatorClient.startBroadcasting(type: callType, id: callId)
     }
     
     /// Stops broadcasting of the call.
     @discardableResult
     public func stopBroadcasting() async throws -> StopBroadcastingResponse {
-        try await defaultAPI.stopBroadcasting(type: callType, id: callId)
+        try await coordinatorClient.stopBroadcasting(type: callType, id: callId)
     }
     
     //MARK: - Events
@@ -480,7 +473,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the sending fails.
     @discardableResult
     public func send(event: SendEventRequest) async throws -> SendEventResponse {
-        try await defaultAPI.sendEvent(
+        try await coordinatorClient.sendEvent(
             type: callType,
             id: callId,
             sendEventRequest: event
@@ -492,7 +485,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the sending fails.
     @discardableResult
     public func send(reaction: SendReactionRequest) async throws -> SendReactionResponse {
-        try await defaultAPI.sendVideoReaction(
+        try await coordinatorClient.sendVideoReaction(
             type: callType,
             id: callId,
             sendReactionRequest: reaction
@@ -523,7 +516,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }    
     
     //MARK: - private
-    // TODO: update state object with response
     private func updatePermissions(
         for userId: String,
         granted: [Permission],
@@ -537,41 +529,27 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             revokePermissions: revoked.map(\.rawValue),
             userId: userId
         )
-        return try await defaultAPI.updateUserPermissions(
+        return try await coordinatorClient.updateUserPermissions(
             type: callType,
             id: callId,
             updateUserPermissionsRequest: updatePermissionsRequest
         )        
     }
     
-    // TODO: update state object with response
     private func updateCallMembers(
         updateMembers: [MemberRequest] = [],
         removedIds: [String] = []
-    ) async throws -> [Member] {
+    ) async throws -> UpdateCallMembersResponse {
         let request = UpdateCallMembersRequest(
             removeMembers: removedIds,
             updateMembers: updateMembers
         )
-        let response = try await defaultAPI.updateCallMembers(
+        let response = try await coordinatorClient.updateCallMembers(
             type: callType,
             id: callId,
             updateCallMembersRequest: request
         )
-        // TODO: create an map function to convert MemberResponse into Member so we avoid duplicated code and bugs
-        return response.members.map { member in
-            let user = User(
-                id: member.userId,
-                name: member.user.name,
-                imageURL: URL(string: member.user.image ?? ""),
-                role: member.user.role
-            )
-            return Member(
-                user: user,
-                role: member.role ?? member.user.role,
-                customData: member.custom,
-                updatedAt: member.updatedAt
-            )
-        }
+        state.mergeMembers(response.members)
+        return response
     }
 }

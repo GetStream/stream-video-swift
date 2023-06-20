@@ -13,7 +13,7 @@ final class OutgoingCallView_Tests: StreamVideoUITestCase {
     func test_outgoingCallView_snapshot() throws {
         let viewModel = CallViewModel()
         let view = OutgoingCallView(
-            outgoingCallMembers: viewModel.outgoingCallMembers,
+            outgoingCallMembers: viewModel.outgoingCallMembers.map(\.toMember),
             callControls: DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
         )
         AssertSnapshot(view)

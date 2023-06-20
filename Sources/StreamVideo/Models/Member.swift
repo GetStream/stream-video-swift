@@ -26,13 +26,34 @@ public struct Member: Identifiable, Equatable, Sendable, Codable {
     }
 }
 
-extension MemberResponse {
+public extension MemberResponse {
     var toMember: Member {
         Member(
             user: user.toUser,
             role: role ?? "",
             customData: custom,
             updatedAt: updatedAt
+        )
+    }
+}
+
+public extension Member {
+    var toMemberRequest: MemberRequest {
+        MemberRequest(
+            custom: customData,
+            role: role,
+            userId: user.id
+        )
+    }
+}
+
+public extension MemberRequest {
+    var toMember: Member {
+        Member(
+            user: User(id: userId),
+            role: role,
+            customData: custom ?? [:],
+            updatedAt: Date()
         )
     }
 }

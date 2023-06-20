@@ -71,7 +71,7 @@ open class CallViewModel: ObservableObject {
     @Published public var participantsShown = false
         
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [Member]()
+    @Published public var outgoingCallMembers = [MemberRequest]()
     
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
@@ -263,7 +263,7 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callType: String, callId: String, members: [Member], ring: Bool = false) {
+    public func startCall(callType: String, callId: String, members: [MemberRequest], ring: Bool = false) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
         if !ring {
@@ -301,7 +301,7 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
     ///  - members: list of members that are part of the call.
-    public func enterLobby(callType: String, callId: String, members: [Member]) {
+    public func enterLobby(callType: String, callId: String, members: [MemberRequest]) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         callingState = .lobby(lobbyInfo)
     }
@@ -445,7 +445,7 @@ open class CallViewModel: ObservableObject {
         call: Call? = nil,
         callType: String,
         callId: String,
-        members: [Member],
+        members: [MemberRequest],
         ring: Bool = false
     ) {
         if enteringCallTask != nil || callingState == .inCall {
@@ -455,7 +455,8 @@ open class CallViewModel: ObservableObject {
             do {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(callType: callType, callId: callId)
-                try await call.join(create: true, members: members, ring: ring, callSettings: callSettings)
+                let options = CreateCallOptions(members: members)
+                try await call.join(create: true, options: options, ring: ring, callSettings: callSettings)
                 save(call: call)
                 enteringCallTask = nil
             } catch {
@@ -543,7 +544,7 @@ open class CallViewModel: ObservableObject {
     
     private func handleRejectedEvent(_ callEvent: CallEvent) {
         if case .rejected(_) = callEvent {
-            let outgoingMembersCount = outgoingCallMembers.filter({ $0.id != streamVideo.user.id }).count
+            let outgoingMembersCount = outgoingCallMembers.filter({ $0.userId != streamVideo.user.id }).count
             let rejections = call?.state.session?.rejectedBy.count ?? 0
             let accepted = call?.state.session?.acceptedBy.count ?? 0
                         
@@ -628,7 +629,7 @@ public enum CallingState: Equatable {
 public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: String
-    public let participants: [Member]
+    public let participants: [MemberRequest]
 }
 
 public struct ScreensharingSession {

@@ -16,7 +16,8 @@ class IntegrationTest: XCTestCase {
         return StreamVideo(
             apiKey: "hd8szvscpxvd",
             user: User(id: "thierry"),
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g"
+            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g",
+            tokenProvider: { _ in }
         )
     }()
 

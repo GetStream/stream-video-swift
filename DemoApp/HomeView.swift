@@ -215,12 +215,18 @@ struct HomeView: View {
         }
     }
     
-    var members: [Member] {
-        // TODO: member request type here
-        var members: [Member] = selectedParticipants.map { Member(user: $0, role: $0.role, updatedAt: .init()) }
+    var members: [MemberRequest] {
+        var members: [MemberRequest] = selectedParticipants.map {
+            MemberRequest(custom: $0.customData, role: $0.role, userId: $0.id)
+        }
         if !selectedParticipants.contains(streamVideo.user) {
-            // TODO: member request type here
-            members.append(Member(user: streamVideo.user, role: streamVideo.user.role, updatedAt: .init()))
+            let currentUser = streamVideo.user
+            let member = MemberRequest(
+                custom: currentUser.customData,
+                role: currentUser.role,
+                userId: currentUser.id
+            )
+            members.append(member)
         }
         return members
     }

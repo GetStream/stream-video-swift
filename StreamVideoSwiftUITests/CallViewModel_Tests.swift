@@ -13,9 +13,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     private let mockResponseBuilder = MockResponseBuilder()
     
-    let firstUser: Member = Member(user: StreamVideo.mockUser, updatedAt: .now)
-    let secondUser: Member = Member(user: User(id: "test2"), updatedAt: .now)
-    let thirdUser: Member = Member(user: User(id: "test3"), updatedAt: .now)
+    let firstUser: MemberRequest = Member(user: StreamVideo.mockUser, updatedAt: .now).toMemberRequest
+    let secondUser: MemberRequest = Member(user: User(id: "test2"), updatedAt: .now).toMemberRequest
+    let thirdUser: MemberRequest = Member(user: User(id: "test3"), updatedAt: .now).toMemberRequest
     let callId = "test"
     let callType: String = .default
     var callCid: String {
@@ -63,13 +63,13 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         let callResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid,
-            rejectedBy: [secondUser.id: Date()]
+            rejectedBy: [secondUser.userId: Date()]
         )
         let event = CallRejectedEvent(
             call: callResponse,
             callCid: callCid,
             createdAt: Date(),
-            user: secondUser.user.toUserResponse()
+            user: User(id: secondUser.userId).toUserResponse()
         )
         eventNotificationCenter?.process(event)
         
@@ -86,13 +86,13 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         let firstCallResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid,
-            rejectedBy: [secondUser.id: Date()]
+            rejectedBy: [secondUser.userId: Date()]
         )
         let firstReject = CallRejectedEvent(
             call: firstCallResponse,
             callCid: callCid,
             createdAt: Date(),
-            user: secondUser.user.toUserResponse()
+            user: User(id: secondUser.userId).toUserResponse()
         )
         eventNotificationCenter?.process(firstReject)
         
@@ -102,13 +102,13 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         let secondCallResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid,
-            rejectedBy: [secondUser.id: Date(), thirdUser.id: Date()]
+            rejectedBy: [secondUser.userId: Date(), thirdUser.userId: Date()]
         )
         let secondReject = CallRejectedEvent(
             call: secondCallResponse,
             callCid: callCid,
             createdAt: Date(),
-            user: thirdUser.user.toUserResponse()
+            user: User(id: thirdUser.userId).toUserResponse()
         )
         eventNotificationCenter?.process(secondReject)
         
@@ -138,7 +138,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = BlockedUserEvent(
             callCid: callCid,
             createdAt: Date(),
-            user: firstUser.user.toUserResponse()
+            user: User(id: firstUser.userId).toUserResponse()
         )
         eventNotificationCenter?.process(event)
         
@@ -161,12 +161,12 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = BlockedUserEvent(
             callCid: callCid,
             createdAt: Date(),
-            user: secondUser.user.toUserResponse()
+            user: User(id: secondUser.userId).toUserResponse()
         )
         eventNotificationCenter?.process(event)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.call?.state.blockedUserIds.first == secondUser.user.id)
+        try await XCTAssertWithDelay(callViewModel.call?.state.blockedUserIds.first == secondUser.userId)
     }
     
     func test_outgoingCall_hangUp() async throws {
@@ -200,7 +200,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             user: UserResponse(
                 createdAt: Date(),
                 custom: [:],
-                id: secondUser.id,
+                id: secondUser.userId,
                 role: "user",
                 teams: [],
                 updatedAt: Date()
@@ -232,7 +232,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let event = CallRingEvent(
             call: mockResponseBuilder.makeCallResponse(
                 cid: callCid,
-                rejectedBy: [firstUser.id: Date()]
+                rejectedBy: [firstUser.userId: Date()]
             ),
             callCid: callCid,
             createdAt: Date(),
@@ -241,7 +241,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             user: UserResponse(
                 createdAt: Date(),
                 custom: [:],
-                id: secondUser.id,
+                id: secondUser.userId,
                 role: "user",
                 teams: [],
                 updatedAt: Date()
@@ -404,14 +404,14 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
         var participant = Stream_Video_Sfu_Models_Participant()
-        participant.userID = secondUser.id
+        participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
         let controller = callViewModel.call!.callController as! CallController_Mock
         controller.webRTCClient.eventNotificationCenter.process(participantJoined)
 
         // Then
-        try await XCTAssertWithDelay(callViewModel.participants.map(\.userId).contains(secondUser.id))
+        try await XCTAssertWithDelay(callViewModel.participants.map(\.userId).contains(secondUser.userId))
 
         // When
         var participantLeft = Stream_Video_Sfu_Event_ParticipantLeft()
@@ -433,7 +433,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
         var participant = Stream_Video_Sfu_Models_Participant()
-        participant.userID = secondUser.id
+        participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
         let controller = callViewModel.call!.callController as! CallController_Mock
@@ -455,7 +455,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
         var participant = Stream_Video_Sfu_Models_Participant()
-        participant.userID = secondUser.id
+        participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
         let controller = callViewModel.call!.callController as! CallController_Mock
@@ -477,7 +477,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
         var participant = Stream_Video_Sfu_Models_Participant()
-        participant.userID = secondUser.id
+        participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
         let controller = callViewModel.call!.callController as! CallController_Mock
@@ -492,7 +492,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     //MARK: - private
     
-    private func callViewModelWithRingingCall(participants: [Member]) -> CallViewModel {
+    private func callViewModelWithRingingCall(participants: [MemberRequest]) -> CallViewModel {
         let callViewModel = CallViewModel()
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(

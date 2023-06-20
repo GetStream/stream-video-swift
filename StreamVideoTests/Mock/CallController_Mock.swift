@@ -33,13 +33,14 @@ class CallController_Mock: CallController {
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        members: [Member],
+        options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false
-    ) async throws {
+    ) async throws -> JoinCallResponse {
         webRTCClient.onParticipantsUpdated = { [weak self] participants in
             self?.call?.state.participants = participants
         }
+        return mockResponseBuilder.makeJoinCallResponse(cid: "\(callType):\(callId)")
     }
     
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }

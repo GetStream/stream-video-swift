@@ -22,8 +22,7 @@ public class StreamVideo: ObservableObject {
 
     private var tokenProvider: UserTokenProvider
     private static let endpointConfig: EndpointConfig = .production
-    // TODO: rename this into coordinatorClient
-    private let defaultAPI: DefaultAPI
+    private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
     private var webSocketClient: WebSocketClient? {
@@ -106,7 +105,7 @@ public class StreamVideo: ObservableObject {
         
         self.apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
-        self.defaultAPI = DefaultAPI(
+        self.coordinatorClient = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
             transport: apiTransport,
             middlewares: [defaultParams]
@@ -121,10 +120,10 @@ public class StreamVideo: ObservableObject {
             } connectionId: { [unowned self] in
                 await self.loadConnectionId()
             }
-            defaultAPI.middlewares.append(userAuth)
+            coordinatorClient.middlewares.append(userAuth)
         } else {
             let anonymousAuth = AnonymousAuth(token: token.rawValue)
-            defaultAPI.middlewares.append(anonymousAuth)
+            coordinatorClient.middlewares.append(anonymousAuth)
         }
         self.prefetchLocation()
         connectTask = Task {
@@ -163,7 +162,7 @@ public class StreamVideo: ObservableObject {
         let call = Call(
             callType: callType,
             callId: callId,
-            defaultAPI: defaultAPI,
+            coordinatorClient: coordinatorClient,
             callController: callController,
             videoOptions: VideoOptions()
         )
@@ -177,7 +176,7 @@ public class StreamVideo: ObservableObject {
     public func makeCallsController(callsQuery: CallsQuery) -> CallsController {
         let controller = CallsController(
             streamVideo: self,
-            defaultAPI: defaultAPI,
+            defaultAPI: coordinatorClient,
             callsQuery: callsQuery
         )
         return controller
@@ -211,13 +210,13 @@ public class StreamVideo: ObservableObject {
     /// - Parameter id: the id of the device that will be deleted.
     @discardableResult
     public func deleteDevice(id: String) async throws -> ModelResponse {
-        try await defaultAPI.deleteDevice(id: id, userId: user.id)
+        try await coordinatorClient.deleteDevice(id: id, userId: user.id)
     }
     
     /// Lists the devices registered for the user.
     /// - Returns: an array of `Device`s.
     public func listDevices() async throws -> [Device] {
-        try await defaultAPI.listDevices().devices
+        try await coordinatorClient.listDevices().devices
     }
     
     /// Disconnects the current `StreamVideo` client.
@@ -251,7 +250,7 @@ public class StreamVideo: ObservableObject {
     /// - Returns: `CallController`
     private func makeCallController(callType: String, callId: String) -> CallController {
         let controller = environment.callControllerBuilder(
-            defaultAPI,
+            coordinatorClient,
             user,
             callId,
             callType,
@@ -397,7 +396,7 @@ public class StreamVideo: ObservableObject {
         
         log.debug("Sending request to save device")
 
-        return try await defaultAPI.createDevice(createDeviceRequest: createDeviceRequest)
+        return try await coordinatorClient.createDevice(createDeviceRequest: createDeviceRequest)
     }
     
     private func setupConnectionRecoveryHandler() {

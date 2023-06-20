@@ -13,7 +13,6 @@ public class CallState: ObservableObject {
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
-    // TODO: make sure we need createdBy to be optional (ideally not)
     @Published public internal(set) var createdBy: User?
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var transcribing: Bool = false
@@ -56,6 +55,10 @@ public class CallState: ObservableObject {
             self.members = updated
         } else if let event = event as? CallMemberUpdatedEvent {
             mergeMembers(event.members)
+        } else if let event = event as? BlockedUserEvent {
+            blockUser(id: event.user.id)
+        } else if let event = event as? UnblockedUserEvent {
+            unblockUser(id: event.user.id)
         }
     }
     

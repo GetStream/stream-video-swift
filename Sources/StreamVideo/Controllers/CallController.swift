@@ -57,22 +57,23 @@ class CallController {
     ///  - participantIds: array of the ids of the participants
     ///  - ring: whether ringing events should be handled
     /// - Returns: a newly created `Call`.
+    @discardableResult
     func joinCall(
         create: Bool = true,
         callType: String,
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        members: [Member],
+        options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false
-    ) async throws {
+    ) async throws -> JoinCallResponse {
         let response = try await joinCall(
             create: create,
             callType: callType,
             callId: callId,
             videoOptions: videoOptions,
-            members: members,
+            options: options,
             ring: ring,
             notify: notify
         )
@@ -85,6 +86,8 @@ class CallController {
             videoOptions: videoOptions,
             ring: ring
         )
+        
+        return response
     }
     
     /// Gets the call on the backend with the given parameters.
@@ -329,13 +332,13 @@ class CallController {
                 try? await Task.sleep(nanoseconds: 250_000_000)
                 log.debug("Retrying to connect to the call")
                 self.call?.update(reconnectionStatus: .reconnecting)
-                try await joinCall(
+                _ = try await joinCall(
                     create: false,
                     callType: call.callType,
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
-                    members: []
+                    options: nil
                 )
             } catch {
                 if diff > sfuReconnectionTime {
@@ -359,7 +362,7 @@ class CallController {
         callType: String,
         callId: String,
         videoOptions: VideoOptions,
-        members: [Member],
+        options: CreateCallOptions? = nil,
         ring: Bool,
         notify: Bool
     ) async throws -> JoinCallResponse {
@@ -368,7 +371,7 @@ class CallController {
             callId: callId,
             type: callType,
             location: location,
-            participants: members,
+            options: options,
             create: create,
             ring: ring,
             notify: notify
@@ -393,23 +396,23 @@ class CallController {
         callId: String,
         type: String,
         location: String,
-        participants: [Member],
+        options: CreateCallOptions? = nil,
         create: Bool,
         ring: Bool,
         notify: Bool
     ) async throws -> JoinCallResponse {
-        var members = [MemberRequest]()
-        for participant in participants {
-            let callMemberRequest = MemberRequest(
-                custom: participant.customData,
-                role: participant.role,
-                userId: participant.id
-            )
-            members.append(callMemberRequest)
+        var members = options?.members
+        if members == nil {
+            for id in options?.memberIds ?? [] {
+                members?.append(MemberRequest(userId: id))
+            }
         }
         let callRequest = CallRequest(
+            custom: options?.custom,
             members: members,
-            settingsOverride: nil
+            settingsOverride: options?.settings,
+            startsAt: options?.startsAt,
+            team: options?.team
         )
         let joinCall = JoinCallRequest(
             create: create,

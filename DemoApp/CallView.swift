@@ -29,8 +29,7 @@ struct CallView: View {
                         let contact = callIntent.contacts?.first
 
                         guard let name = contact?.personHandle?.value else { return }
-                        // TODO: use member request type
-                        let member = Member(user: User(id: name), role: "user", updatedAt: .init())
+                        let member = MemberRequest(userId: name)
                         viewModel.startCall(callType: .default, callId: UUID().uuidString, members: [member], ring: true)
                     }
                 }

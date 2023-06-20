@@ -133,13 +133,10 @@ final class Call_Tests: StreamVideoTestCase {
             videoConfig: videoConfig,
             cachedLocation: nil
         )
-        let callResponse = mockResponseBuilder.makeCallResponse(
-            cid: callCid
-        )
         let call = Call(
             callType: callType,
             callId: callId,
-            defaultAPI: defaultAPI,
+            coordinatorClient: defaultAPI,
             callController: callController,
             videoOptions: VideoOptions()
         )

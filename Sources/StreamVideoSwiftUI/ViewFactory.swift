@@ -155,7 +155,7 @@ extension ViewFactory {
     
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         OutgoingCallView(
-            outgoingCallMembers: viewModel.outgoingCallMembers,
+            outgoingCallMembers: viewModel.outgoingCallMembers.map(\.toMember),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
     }
@@ -289,7 +289,7 @@ extension ViewFactory {
             return LobbyView(
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
-                callParticipants: lobbyInfo.participants,
+                callParticipants: lobbyInfo.participants.map(\.toMember),
                 callSettings: callSettings,
                 onJoinCallTap: handleJoinCall,
                 onCloseLobby: handleCloseLobby
@@ -299,7 +299,7 @@ extension ViewFactory {
                 callViewModel: viewModel,
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
-                callParticipants: lobbyInfo.participants,
+                callParticipants: lobbyInfo.participants.map(\.toMember),
                 callSettings: callSettings,
                 onJoinCallTap: handleJoinCall,
                 onCloseLobby: handleCloseLobby
