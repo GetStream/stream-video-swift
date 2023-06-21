@@ -93,3 +93,6 @@ Dependencies/
 
 # Environment Variables
 .env
+
+# Local file with test credentials
+Credentials.xcconfig

@@ -1,0 +1,34 @@
+{
+  "configurations" : [
+    {
+      "id" : "EB280F40-C06E-40F4-8933-F08B352955B9",
+      "name" : "Configuration 1",
+      "options" : {
+
+      }
+    }
+  ],
+  "defaultOptions" : {
+    "environmentVariableEntries" : [
+      {
+        "key" : "STREAM_DEMO_APP_SECRET",
+        "value" : "$(STREAM_DEMO_APP_SECRET)"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:StreamVideo.xcodeproj",
+      "identifier" : "8222577A2A41ECD800CFFD96",
+      "name" : "StreamVideoIntegrationTests"
+    }
+  },
+  "testTargets" : [
+    {
+      "target" : {
+        "containerPath" : "container:StreamVideo.xcodeproj",
+        "identifier" : "8222577A2A41ECD800CFFD96",
+        "name" : "StreamVideoIntegrationTests"
+      }
+    }
+  ],
+  "version" : 1
+}

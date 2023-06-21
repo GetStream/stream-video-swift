@@ -32,6 +32,9 @@
             reference = "container:StreamVideoTests/StreamVideo.xctestplan"
             default = "YES">
          </TestPlanReference>
+         <TestPlanReference
+            reference = "container:StreamVideoIntegrationTests/StreamVideoIntegration.xctestplan">
+         </TestPlanReference>
       </TestPlans>
       <Testables>
          <TestableReference
