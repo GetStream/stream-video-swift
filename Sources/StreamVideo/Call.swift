@@ -513,17 +513,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         state.mergeMembers(response.members)
         return response
     }
-    
+
     public func queryMembers(
         filters: [String : RawJSON]? = nil,
         sort: [SortParamRequest] = [SortParamRequest.descending("created_at")],
-        limit: Int = 100
+        limit: Int = 25
     ) async throws -> QueryMembersResponse {
         try await queryMembers(filters: filters, limit: limit, sort: sort)
     }
-    
+
     public func queryMembers(next: String) async throws -> QueryMembersResponse {
-        try await queryMembers(next: next)
+        try await queryMembers(filters: nil, limit: nil, next: next, sort: nil)
     }
     
     //MARK: - Internal
