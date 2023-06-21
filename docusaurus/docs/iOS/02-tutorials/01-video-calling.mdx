@@ -5,12 +5,11 @@ description: How to build a video call similar to Zoom or facebook messenger
 
 ### Video Call quickstart
 
-In this quickstart you'll build a video call experience similar to Zoom or messenger.
+In this quickstart you'll build a video call experience similar to Zoom or Messenger.
 
 - Stream's video edge network ensures a reliable call experience with low latency
 - You can scale to thousands of participants
-- Our Dynascale technology automatically adjusts the quality of video, codecs and resolutions.
-- This saves you months of work compared to other providers.
+- Our Dynascale technology automatically adjusts the quality of video, codecs and resolutions. This saves you months of work compared to other providers.
 - Opus RED creates a reliable audio connection
 
 IMAGE PREVIEW HERE
@@ -80,13 +79,6 @@ struct VideoTutorialApp: App {
                 result(.success(userCredentials.token))
             }
         )
-        connectUser()
-    }
-
-    private func connectUser() {
-        Task {
-            try await streamVideo?.connect()
-        }
     }
 
     var body: some Scene {
@@ -113,8 +105,7 @@ extension UserCredentials {
             imageURL: URL(string: "https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg")!,
             customData: [:]
         ),
-        token: try! UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0"
-        )
+        token: UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0")
     )
 }
 ```
@@ -167,6 +158,14 @@ Making a video call requires the usage of the camera and the microphone of the d
 `Privacy - Camera Usage Description` - "Your_app_name requires camera access in order to capture and transmit video"
 `Privacy - Microphone Usage Description` - "Your_app_name requires microphone access in order to capture and transmit audio"
 
-Note that you should replace "Your_app_name" (or also use your custom strings instead).
+![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
-With this, you should be able to test a video call between two devices. Note that you need to specify the participants list in the `startCall` method. Also, the call id should be the same on the different devices that are part of the call.
+:::note
+You should replace "Your_app_name" (or also use your custom strings instead).
+:::
+
+With this, you should be able to test a video call between two devices.
+
+:::note
+The call id should be the same on the different devices that are part of the call.
+:::
