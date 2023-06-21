@@ -145,7 +145,7 @@ class CallCRUDTest: IntegrationTest {
         XCTAssertEqual("thierry", membersResponse.members.first?.userId)
         
         await assertNext(call2.state.$members) { v in
-            return v.count == 2 && v.first.id == "tommaso"
+            return v.count == 2 && v.first?.id == "tommaso"
         }
     }
 
