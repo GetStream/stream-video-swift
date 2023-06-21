@@ -302,13 +302,13 @@ lane :sync_xcodeproj_references do
 
     untracked_files = sh('git status -s', log: false).split("\n").map(&:strip)
     deleted_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'D')
-    new_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'A')
+    created_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'A')
     renamed_swift_files = select_swift_files_from(files: untracked_files, that_start_with: 'R')
 
     renamed_swift_files.each do |renamed_file|
       content = renamed_file.split.drop(1).join.split('->').map(&:strip)
-      deleted_files << content.first
-      new_files << content.last
+      deleted_swift_files << content.first
+      created_swift_files << content.last
     end
 
     deleted_swift_files.each do |file_path|
@@ -318,7 +318,7 @@ lane :sync_xcodeproj_references do
       file.remove_from_project if file
     end
 
-    new_swift_files.each do |file_path|
+    created_swift_files.each do |file_path|
       next if file_path !~ %r{(/OpenApi/|/protobuf/)} || project.files.find { |f| f.full_path.to_s == file_path }
 
       group = project.main_group
