@@ -7,39 +7,38 @@ description: How the state is exposed
 
 When you join a call, we expose the following observable `state` from the `Call` object:
 
-- `participants` - dictionary of the participants in the call
-- `callData` - the call data
-- `reconnectionStatus` - whether the call is reconnecting
-- `recordingState` - the recording state of the call
-- `participantCount` - number of participants connected to the call
-
-The `state.callData` provides additional information about the call:
-
-- `callCid`: `String` - the call cid, in the format type:callId.
-- `members`: `[Member]` - the members of the call.
-- `blockedUsers`: `[User]` - the blocked users.
-- `createdAt`: `Date` - the creation date of the call.
-- `backstage`: `Bool` - whether the call is in backstage.
-- `broadcasting`: `Bool` - whether the call is being broadcasted.
-- `endedAt`: `Date?` - optional end date of the call.
-- `recording`: `Bool` - whether the call is being recorded.
-- `startsAt`: `Date?` - the starting date of the call.
-- `updatedAt`: `Date` - the update date of a call.
-- `hlsPlaylistUrl`: `String` - hls playlist url if the call is being broadcasted.
-- `customData`: `[String: Any]` - any custom data that you passed while creating the call.
-- `autoRejectTimeout`: `Int` - the auto reject timeout, if it's a ringing call.
-- `session`: `CallSession?` - the session associated with the call.
-- `createdBy`: `User` - the user who created the call.
+- `createdAt` - the creation date of the call.
+- `updatedAt` - the update date of a call.
+- `startsAt` - the starting date of the call.
+- `endedAt` - the end date of the call.
+- `endedBy` - the user who ended the call.
+- `createdBy` - the user who created the call.
+- `backstage` - whether the call is in backstage.
+- `transcribing` - a boolean indicating if transciptions are active or or not for this call.
+- `blockedUserIds` - the blocked user ids.
+- `custom` - any custom data that you passed while creating the call.
+- `members` - the members of the call.
+- `team: ` - The team that this call is owned by.
+- `ownCapabilities` - current user's capabilities (e.g. send audio, video etc).
+- `capabilitiesByRole` - the capabilities that come with a role.
+- `ingress` - contains an address URL that you can use to stream.
+- `egress` - contains URL for playlist of recording.
+- `settings` - current call settings.
+- `session` - the session associated with the call.
+- `participants` - dictionary of the participants in the call.
+- `reconnectionStatus` - whether the call is reconnecting.
+- `recordingState` - the recording state of the call.
+- `participantCount` - number of participants connected to the call.
 
 ## Call Participant
 
-When users join a call, they become `CallParticipant`s. The call participants are available from the `CallViewModel`'s `callParticipants` property, as a dictionary, or directly from the `call`'s `state` observable object.
+When users join a call, they become CallParticipants. The call participants are available from the CallViewModel's `callParticipants` property, as a dictionary, or directly from the call's `state` observable object.
 
 You can use this property to filter participants, based on their properties. Here's a list of the info that is available about the `CallParticipant`:
 
 - `id`: `String` - The unique call id of the participant.
 - `userId`: `String` - The user's id. This is not necessarily unique, since a user can join from multiple devices.
-- `role`: `String` - The user's role in the call.
+- `roles`: `[String]` - The user's roles in the call.
 - `name`: `String` - The user's name.
 - `profileImageURL`: `URL?` - The user's profile image URL.
 - `trackLookupPrefix`: `String?` - The id of the track that's connected to the participant.
@@ -51,16 +50,17 @@ You can use this property to filter participants, based on their properties. Her
 - `screenshareTrack`: `RTCVideoTrack?` - Returns the screen sharing track for the participant.
 - `showTrack`: `Bool` - Returns whether the track should be shown.
 - `isSpeaking`: `Bool` - Returns whether the participant is speaking.
+- `isDominantSpeaker`: `Bool` - Returns whether the participant is a dominant speaker.
 - `sessionId`: `String` - Returns the session id of the participant.
 - `connectionQuality`: `ConnectionQuality` - Returns the connection quality of the participant.
 - `joinedAt`: `Date` - Returns the date when the user joined the call.
 - `isPinned`: `Bool` - Returns whether the current user is pinned.
 - `audioLevel`: `Float` - The audio level of the current participant.
 
-These properties can be used to do custom filtering of the participants. For example, if you want to get the first user who is speaking, you can do the following:
+These properties can be used to do custom filtering of the participants. For example, if you want to get the first user who is dominant speaker, you can do the following:
 
 ```swift
 var speaker: CallParticipant? {
-    participants.first { $0.isSpeaking }
+    participants.first { $0.isDominantSpeaker }
 }
 ```

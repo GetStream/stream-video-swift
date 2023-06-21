@@ -263,18 +263,15 @@ private func setupStreamVideoIfNeeded() {
     }
 }
 
-private func connectStreamVideo() {
-    Task {
-        try await streamVideo.connect()
-        subscribeToCallEvents()
-    }
-}
-
 private func subscribeToCallEvents() {
     Task {
-        for await event in streamVideo.callEvents() {
+        for await videoEvent in streamVideo.subscribe() {
+            guard let event = CallEventsHandler().checkForCallEvents(from: videoEvent) else {
+                return
+            }
+
             switch event {
-            case .canceled(_), .ended(_):
+            case .ended(_):
                 endCurrentCall()
             default:
                 log.debug("received call event")
@@ -294,7 +291,6 @@ func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
         Task {
             await MainActor.run {
                 Task {
-                    try await streamVideo.connect()
                     self.call = streamVideo.call(callType: callType, callId: callId)
                     AppState.shared.activeCall = call
                     subscribeToCallEvents()

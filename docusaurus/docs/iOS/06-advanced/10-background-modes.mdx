@@ -9,9 +9,9 @@ Background modes are services an app offers that require it to execute tasks whe
 
 ### How Background Modes Work in Your VoIP App
 
-In the case of your app, assuming user **A** has audio unmuted, video on, and is in an active call with user **B.** When user **A** suspends the app to go into the background, iOS device capabilities, such as the camera and microphone, will not be accessible. In this case, the system will mute user **A**'s audio, and the picture-in-picture (video) feature will not be available when the app is in the background. The app's inability to access audio and PIP from the background is a default behavior on iOS. To override this default behavior, specify the background modes below so that audio and picture-in-picture become accessible when the app goes to the background.
+In the case of your app, assuming user **A** has audio unmuted, video on, and is in an active call with user **B.** When user **A** suspends the app to go into the background, iOS device capabilities, such as the camera and microphone, will not be accessible. In this case, the system will mute user **A**'s audio, and the picture-in-picture (video) feature will not be available when the app is in the background. The app's inability to access audio and PIP from the background is a default behavior on iOS. To override this default behavior, specify the background modes below so that audio and picture-in-picture become accessible when the app goes to the background.
 
-1. Click the app's name in the Project Navigator, select your target, and go to the **Signing & Capabilities** tab.
+1. Click the app's name in the Project Navigator, select your target, and go to the **Signing & Capabilities** tab.
 2. Enable these capabilities by selecting the following checkboxes.
 
 ![Configure background modes](../assets/callkit_01.png)
