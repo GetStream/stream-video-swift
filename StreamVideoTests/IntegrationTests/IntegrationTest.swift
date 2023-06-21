@@ -32,6 +32,10 @@ class IntegrationTest: XCTestCase {
         try await super.setUp()
         try await client.connect()
     }
+    
+    public func fetchToken(for userId: String, expiration: Double = 0) -> UserToken? {
+        return TokenGenerator.shared.generateUserToken(userId: userId, tokenDurationInMinutes: expiration)
+    }
 
     public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}
 
