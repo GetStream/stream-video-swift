@@ -61,10 +61,12 @@ class CallCRUDTest: IntegrationTest {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create()
         try await call.send(event: SendEventRequest(custom: ["test": .string("asd")]))
-        
-        // TODO: we need to expose the VideoEvent before adding tests for event listening
+
         let eventSubscriber = call.subscribe()
         await assertNext(eventSubscriber) { ev in
+            if case let .typeCustomVideoEvent(data) = ev {
+                return data.custom["test"]?.stringValue == "asd"
+            }
             return false
         }
     }
@@ -96,6 +98,54 @@ class CallCRUDTest: IntegrationTest {
                 return false
             }
             return member.id == "thierry" && member.customData["role"]?.stringValue == "CEO"
+        }
+    }
+    
+    func test_paginate_call_with_members() async throws {
+        let call = client.call(callType: "default", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry"])
+
+        let call2 = client.call(callType: call.callType, callId: call.callId)
+        let _ = try await call2.get(membersLimit: 0)
+
+        XCTAssertEqual(0, call2.state.members.count)
+
+        let _ = try await call2.get(membersLimit: 1)
+        await assertNext(call.state.$members) { v in
+            return v.count == 1
+        }
+        
+        var membersResponse = try await call2.queryMembers()
+        XCTAssertEqual(1, membersResponse.members.count)
+        
+        membersResponse = try await call2.queryMembers(filters: ["user_id": .string("thierry")])
+        XCTAssertEqual(1, membersResponse.members.count)
+        
+        membersResponse = try await call2.queryMembers(filters: ["user_id": .string("tommaso")])
+        XCTAssertEqual(0, membersResponse.members.count)
+        
+        let tommasoClient = getUserClient(id: "tommaso")
+        try await tommasoClient.connect()
+        
+        // add to call2 so we can test that the other call object is updated via WS events
+        try await call2.addMembers(ids: ["tommaso"])
+        await assertNext(call.state.$members) { v in
+            return v.count == 2
+        }
+        
+        membersResponse = try await call2.queryMembers(filters: ["user_id": .string("tommaso")])
+        XCTAssertEqual(1, membersResponse.members.count)
+        
+        membersResponse = try await call2.queryMembers(limit:1)
+        XCTAssertEqual(1, membersResponse.members.count)
+        XCTAssertEqual("tommaso", membersResponse.members.first?.userId)
+        
+        membersResponse = try await call2.queryMembers(next: membersResponse.next)
+        XCTAssertEqual(1, membersResponse.members.count)
+        XCTAssertEqual("thierry", membersResponse.members.first?.userId)
+        
+        await assertNext(call2.state.$members) { v in
+            return v.count == 2 && v.first?.id == "tommaso"
         }
     }
 

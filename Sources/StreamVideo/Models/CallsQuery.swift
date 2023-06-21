@@ -87,3 +87,13 @@ public extension CallSortField {
     /// The sort field for the call cid.
     static let cid: Self = "cid"
 }
+
+public extension SortParamRequest {
+    static func ascending(_ field: String) -> SortParamRequest {
+        .init(direction: 1, field: field)
+    }
+
+    static func descending(_ field: String) -> SortParamRequest {
+        .init(direction: -1, field: field)
+    }
+}

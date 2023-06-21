@@ -39,3 +39,4 @@ public struct ConnectionErrorEvent: Codable, JSONEncodable, Hashable, WSClientEv
         try container.encode(type, forKey: .type)
     }
 }
+

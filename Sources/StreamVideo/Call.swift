@@ -503,6 +503,29 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
+    //MARK: - Query members methods
+
+    internal func queryMembers(
+        filters: [String: RawJSON]? = nil, limit: Int? = nil, next: String? = nil, sort: [SortParamRequest]? = nil
+    ) async throws -> QueryMembersResponse {
+        let request = QueryMembersRequest(filterConditions: filters, id: callId, limit: limit, next: next, sort: sort, type: callType)
+        let response = try await coordinatorClient.queryMembers(queryMembersRequest: request)
+        state.mergeMembers(response.members)
+        return response
+    }
+
+    public func queryMembers(
+        filters: [String : RawJSON]? = nil,
+        sort: [SortParamRequest] = [SortParamRequest.descending("created_at")],
+        limit: Int = 25
+    ) async throws -> QueryMembersResponse {
+        try await queryMembers(filters: filters, limit: limit, sort: sort)
+    }
+
+    public func queryMembers(next: String) async throws -> QueryMembersResponse {
+        try await queryMembers(filters: nil, limit: nil, next: next, sort: nil)
+    }
+    
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {

@@ -10,14 +10,14 @@ import Foundation
 
 public struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
     public var filterConditions: [String: RawJSON]?
-    public var id: String?
+    public var id: String
     public var limit: Int?
     public var next: String?
     public var prev: String?
     public var sort: [SortParamRequest]?
     public var type: String
 
-    public init(filterConditions: [String: RawJSON]? = nil, id: String? = nil, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
+    public init(filterConditions: [String: RawJSON]? = nil, id: String, limit: Int? = nil, next: String? = nil, prev: String? = nil, sort: [SortParamRequest]? = nil, type: String) {
         self.filterConditions = filterConditions
         self.id = id
         self.limit = limit
@@ -42,7 +42,7 @@ public struct QueryMembersRequest: Codable, JSONEncodable, Hashable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encodeIfPresent(filterConditions, forKey: .filterConditions)
-        try container.encodeIfPresent(id, forKey: .id)
+        try container.encode(id, forKey: .id)
         try container.encodeIfPresent(limit, forKey: .limit)
         try container.encodeIfPresent(next, forKey: .next)
         try container.encodeIfPresent(prev, forKey: .prev)

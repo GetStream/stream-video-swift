@@ -18,6 +18,16 @@ class IntegrationTest: XCTestCase {
         )
     }()
 
+    // TODO: wire this up with utils
+    public func getUserClient(id: String) -> StreamVideo {
+        return StreamVideo(
+            apiKey: "hd8szvscpxvd",
+            user: User(id: id),
+            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.9BvijGcp9ga7AHsqd3pz9PIVSqq4moCVFSDwRnNx3qI",
+            tokenProvider: { _ in }
+        )
+    }
+
     public override func setUp() async throws {
         try await super.setUp()
         try await client.connect()
