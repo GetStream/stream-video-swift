@@ -9,7 +9,9 @@ import Foundation
 
 
 public struct SortParamRequest: Codable, JSONEncodable, Hashable {
+    /** Direction of sorting, -1 for descending, 1 for ascending */
     public var direction: Int?
+    /** Name of field to sort by */
     public var field: String?
 
     public init(direction: Int? = nil, field: String? = nil) {
