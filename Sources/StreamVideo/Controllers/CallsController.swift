@@ -69,7 +69,7 @@ public class CallsController: ObservableObject {
                 self.socketDisconnected = true
             } else if status == .disconnecting {
                 self.socketDisconnected = true
-            } else if status == .connected && socketDisconnected {
+            } else if status == .connected && self.socketDisconnected {
                 self.reWatchCalls()
             }
         }
