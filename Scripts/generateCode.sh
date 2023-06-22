@@ -22,9 +22,12 @@ PROTOBUF_GENERATED_CODE_ROOT="${PROJECT_ROOT}/Sources/StreamVideo/protobuf"
 docker pull ghcr.io/getstream/openapi-generator:master
 
 docker run --rm -v "${OPENAPI_GENERATED_CODE_ROOT}:/local" \
+   -v "/Users/tommaso/src/protocol/openapi:/openapi" \
+   -v "/Users/tommaso/src/openapi-generator/modules/openapi-generator/src/main/resources:/templates" \
    ghcr.io/getstream/openapi-generator:master \
    generate -g swift5 \
-   -i https://raw.githubusercontent.com/GetStream/protocol/main/openapi/video-openapi-clientside.yaml \
+   -t /templates/swift5 \
+   -i /openapi/video-openapi-clientside.yaml \
    -o /local/tmp \
    --skip-validate-spec \
    --additional-properties=responseAs=AsyncAwait

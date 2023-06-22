@@ -71,6 +71,10 @@ class CallCRUDTest: IntegrationTest {
         }
     }
     
+    func test_send_custom_reaction() async throws {
+        
+    }
+
     func test_create_call_with_members() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create(memberIds: ["thierry"])

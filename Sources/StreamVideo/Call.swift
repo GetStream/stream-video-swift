@@ -61,6 +61,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings = CallSettings()
     ) async throws -> JoinCallResponse {
+        
+        // do the API request
+        // update state
+        // call callController.joinCall (location: client.location
+        
+        
+        
         let response = try await callController.joinCall(
             create: create,
             callType: callType,
@@ -528,31 +535,31 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     //MARK: - Internal
     
+    // TODO: remove
     internal func update(reconnectionStatus: ReconnectionStatus) {
         if reconnectionStatus != self.state.reconnectionStatus {
             self.state.reconnectionStatus = reconnectionStatus
         }
     }
     
+    // TODO: remove
     internal func update(recordingState: RecordingState) {
         self.state.recordingState = recordingState
     }
     
     internal func onEvent(_ event: Event) {
-        var rawEvent = event
-        if let coordinatorEvent = event as? CoordinatorEvent {
-            rawEvent = coordinatorEvent.event
+        switch event {
+        case .coordinatorEvent(let coordinatorEvent):
+            state.updateState(from: coordinatorEvent)
+        case .sfuEvent(let sfuEvent):
+            state.updateState(from: sfuEvent)
         }
-        guard let wsCallEvent = rawEvent as? WSCallEvent, wsCallEvent.callCid == cId else {
-            return
-        }
-        state.updateState(from: rawEvent)
         callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }
     }    
-    
+
     //MARK: - private
     private func updatePermissions(
         for userId: String,

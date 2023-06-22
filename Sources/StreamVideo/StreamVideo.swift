@@ -237,15 +237,15 @@ public class StreamVideo: ObservableObject {
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent {
-                    continuation.yield(event.wrapped)
+                if case let .coordinatorEvent(event) = event {
+                    continuation.yield(event)
                 }
             }
             self?.eventHandlers.append(eventHandler)
         }
     }
 
-    public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
+    public func subscribe<WSEvent: WSCallEvent>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
                 if let event = event as? CoordinatorEvent,

@@ -31,35 +31,149 @@ public class CallState: ObservableObject {
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var participantCount: UInt32 = 0
         
-    internal func updateState(from event: Event) {
-        if let event = event as? CallAcceptedEvent {
+    
+    // TODO: hook this one to something
+    internal func updateState(from event: Stream_Video_Sfu_Event_SfuEvent) {
+        guard let payload = event.eventPayload else {
+            return
+        }
+        switch payload {
+        case .subscriberOffer(_):
+            // TODO:
+            break
+        case .publisherAnswer(_):
+            // TODO:
+            break
+        case .connectionQualityChanged(_):
+            // TODO:
+            break
+        case .audioLevelChanged(_):
+            // TODO:
+            break
+        case .iceTrickle(_):
+            // TODO:
+            break
+        case .changePublishQuality(_):
+            // TODO:
+            break
+        case .participantJoined(_):
+            // TODO:
+            break
+        case .participantLeft(_):
+            // TODO:
+            break
+        case .dominantSpeakerChanged(_):
+            // TODO:
+            break
+        case .joinResponse(_):
+            // TODO:
+            break
+        case .healthCheckResponse(_):
+            // TODO:
+            break
+        case .trackPublished(_):
+            // TODO:
+            break
+        case .trackUnpublished(_):
+            // TODO:
+            break
+        case .error(_):
+            // TODO:
+            break
+        case .callGrantsUpdated(_):
+            // TODO:
+            break
+        case .goAway(_):
+            // TODO:
+            break
+        }
+    }
+
+    internal func updateState(from event: VideoEvent) {
+        switch event {
+        case .typeBlockedUserEvent(let event):
+            blockUser(id: event.user.id)
+        case .typeCallAcceptedEvent(let event):
             update(from: event.call)
-        } else if let event = event as? CallRejectedEvent {
-            update(from: event.call)
-        } else if let event = event as? CallUpdatedEvent {
-            update(from: event.call)
-        } else if event is CallRecordingStartedEvent {
+        case .typeCallBroadcastingStartedEvent(_):
+            // TODO:
+            break
+        case .typeCallBroadcastingStoppedEvent(_):
+            // TODO:
+            break
+        case .typeCallCreatedEvent(_):
+            // TODO:
+            break
+        case .typeCallEndedEvent(_):
+            // TODO:
+            break
+        case .typeCallLiveStartedEvent(_):
+            // TODO:
+            break
+        case .typeCallMemberAddedEvent(let event):
+            mergeMembers(event.members)
+        case .typeCallMemberRemovedEvent(let event):
+            let updated = members.filter { !event.members.contains($0.id) }
+            self.members = updated
+        case .typeCallMemberUpdatedEvent(let event):
+            mergeMembers(event.members)
+        case .typeCallMemberUpdatedPermissionEvent(_):
+            // TODO:
+            break
+        case .typeCallNotificationEvent(_):
+            // TODO:
+            break
+        case .typeCallReactionEvent(_):
+            // TODO:
+            break
+        case .typeCallRecordingStartedEvent(_):
             if recordingState != .recording {
                 recordingState = .recording
             }
-        } else if event is CallRecordingStoppedEvent {
+        case .typeCallRecordingStoppedEvent(_):
             if recordingState != .noRecording {
                 recordingState = .noRecording
             }
-        } else if let event = event as? UpdatedCallPermissionsEvent {
-            updateOwnCapabilities(event)
-        } else if let event = event as? CallMemberAddedEvent {
-            mergeMembers(event.members)
-        } else if let event = event as? CallMemberRemovedEvent {
-            let updated = members.filter { !event.members.contains($0.id) }
-            self.members = updated
-        } else if let event = event as? CallMemberUpdatedEvent {
-            mergeMembers(event.members)
-        } else if let event = event as? BlockedUserEvent {
-            blockUser(id: event.user.id)
-        } else if let event = event as? UnblockedUserEvent {
+        case .typeCallRejectedEvent(let event):
+            update(from: event.call)
+        case .typeCallRingEvent(_):
+            // TODO:
+            break
+        case .typeCallSessionEndedEvent(_):
+            // TODO:
+            break
+        case .typeCallSessionParticipantJoinedEvent(_):
+            // TODO:
+            break
+        case .typeCallSessionParticipantLeftEvent(_):
+            // TODO:
+            break
+        case .typeCallSessionStartedEvent(_):
+            // TODO:
+            break
+        case .typeCallUpdatedEvent(let event):
+            update(from: event.call)
+        case .typeConnectedEvent(_):
+            // TODO:
+            break
+        case .typeConnectionErrorEvent(_):
+            // TODO:
+            break
+        case .typeCustomVideoEvent(_):
+            // TODO:
+            break
+        case .typeHealthCheckEvent(_):
+            // TODO:
+            break
+        case .typePermissionRequestEvent(_):
+            // TODO:
+            break
+        case .typeUnblockedUserEvent(let event):
             unblockUser(id: event.user.id)
+        case .typeUpdatedCallPermissionsEvent(let event):
+            updateOwnCapabilities(event)
         }
+        
     }
     
     internal func blockUser(id: String) {

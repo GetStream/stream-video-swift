@@ -26,7 +26,9 @@ class CallController {
     private var reconnectionDate: Date?
     private let environment: CallController.Environment
     private var cachedLocation: String?
-    
+    // TODO: move up to StreamVideo
+    //    private var location: () async throws -> String
+
     init(
         defaultAPI: DefaultAPI,
         user: User,
@@ -357,6 +359,7 @@ class CallController {
         self.cleanUp()
     }
     
+    // TODO: kill this one (move get location and rest call to the caller)
     private func joinCall(
         create: Bool,
         callType: String,
@@ -392,6 +395,7 @@ class CallController {
         return try await LocationFetcher.getLocation()
     }
 
+    // TODO: rename this into something else
     private func joinCall(
         callId: String,
         type: String,
