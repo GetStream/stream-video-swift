@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when the WS connection is established and authenticated, this event contains the full user object as it is stored on the server */
 
-public struct ConnectedEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
+public struct ConnectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSClientEvent {
     /** The connection_id for this client */
     public var connectionId: String
     public var createdAt: Date

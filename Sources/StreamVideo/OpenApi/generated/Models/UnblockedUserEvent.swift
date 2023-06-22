@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when a user is unblocked on a call,  this can be useful to notify the user that they can now join the call again */
 
-public struct UnblockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct UnblockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /** The type of event: \"call.unblocked_user\" in this case */

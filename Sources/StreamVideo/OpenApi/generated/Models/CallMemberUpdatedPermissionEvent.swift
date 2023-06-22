@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when one or more members get its role updated */
 
-public struct CallMemberUpdatedPermissionEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     /** The capabilities by role for this call */

@@ -82,36 +82,7 @@ struct CoordinatorEvent: Event {
     let event: Event
 }
 
-extension CallCreatedEvent: @unchecked Sendable, Event {}
-extension CallRejectedEvent: @unchecked Sendable, Event {}
-extension CallAcceptedEvent: @unchecked Sendable, Event {}
-extension CallEndedEvent: @unchecked Sendable, Event {}
-extension PermissionRequestEvent: @unchecked Sendable, Event {}
-extension UpdatedCallPermissionsEvent: @unchecked Sendable, Event {}
-extension CustomVideoEvent: @unchecked Sendable, Event {}
-extension HealthCheckEvent: @unchecked Sendable, HealthCheck {}
-extension CallReactionEvent: @unchecked Sendable, Event {}
-extension CallRecordingStartedEvent: @unchecked Sendable, Event {}
-extension CallRecordingStoppedEvent: @unchecked Sendable, Event {}
-extension CallUpdatedEvent: @unchecked Sendable, Event {}
-extension BlockedUserEvent: @unchecked Sendable, Event {}
-extension CallMemberAddedEvent: @unchecked Sendable, Event {}
-extension CallMemberRemovedEvent: @unchecked Sendable, Event {}
-extension CallMemberUpdatedPermissionEvent: @unchecked Sendable, Event {}
-extension CallMemberUpdatedEvent: @unchecked Sendable, Event {}
-extension UnblockedUserEvent: @unchecked Sendable, Event {}
-extension ConnectedEvent: @unchecked Sendable, HealthCheck {}
 extension VideoEvent: @unchecked Sendable, Event {}
-extension CallBroadcastingStartedEvent: @unchecked Sendable, Event {}
-extension CallBroadcastingStoppedEvent: @unchecked Sendable, Event {}
-extension CallLiveStartedEvent: @unchecked Sendable, Event {}
-extension CallSessionEndedEvent: @unchecked Sendable, Event {}
-extension CallSessionParticipantJoinedEvent: @unchecked Sendable, Event {}
-extension CallSessionParticipantLeftEvent: @unchecked Sendable, Event {}
-extension CallSessionStartedEvent: @unchecked Sendable, Event {}
-extension CallNotificationEvent: @unchecked Sendable, Event {}
-extension CallRingEvent: @unchecked Sendable, Event {}
-extension ConnectionErrorEvent: @unchecked Sendable, Event {}
 
 extension UserResponse {
     public var toUser: User {
