@@ -2430,6 +2430,7 @@
 			buildPhases = (
 				84F737F0287C13AD00A363F4 /* Sources */,
 				84F737F1287C13AD00A363F4 /* Frameworks */,
+				827297E42A4585EA00774306 /* ShellScript */,
 				84F737F2287C13AD00A363F4 /* Resources */,
 			);
 			buildRules = (
@@ -2724,6 +2725,23 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		827297E42A4585EA00774306 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "touch TestTools/Resources/Credentials.xcconfig\n";
+		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;

@@ -227,7 +227,6 @@ end
 
 private_lane :update_testplan_on_ci do |options|
   update_testplan(path: options[:path], env_vars: { key: 'CI', value: 'TRUE' }) if is_ci || options[:force]
-  FileUtils.touch('../TestTools/Resources/Credentials.xcconfig')
 end
 
 desc 'Builds SwiftUI Demo app'
