@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when a user requests access to a feature on a call, clients receiving this event should display a permission request to the user */
 
-public struct PermissionRequestEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct PermissionRequestEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /** The list of permissions requested by the user */

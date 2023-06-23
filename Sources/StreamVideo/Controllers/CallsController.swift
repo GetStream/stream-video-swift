@@ -69,8 +69,8 @@ public class CallsController: ObservableObject {
                 self.socketDisconnected = true
             } else if status == .disconnecting {
                 self.socketDisconnected = true
-            } else if status == .connected && socketDisconnected {
-                reWatchCalls()
+            } else if status == .connected && self.socketDisconnected {
+                self.reWatchCalls()
             }
         }
         .store(in: &cancellables)

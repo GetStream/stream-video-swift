@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when one or more members are added to a call */
 
-public struct CallMemberAddedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallMemberAddedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

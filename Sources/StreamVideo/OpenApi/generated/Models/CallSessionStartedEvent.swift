@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when a call session starts */
 
-public struct CallSessionStartedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallSessionStartedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

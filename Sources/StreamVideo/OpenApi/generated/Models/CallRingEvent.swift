@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent to all call members to notify they are getting called */
 
-public struct CallRingEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallRingEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when a call is updated, clients should use this update the local state of the call.  This event also contains the capabilities by role for the call, clients should update the own_capability for the current. */
 
-public struct CallUpdatedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallUpdatedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     /** The capabilities by role for this call */
