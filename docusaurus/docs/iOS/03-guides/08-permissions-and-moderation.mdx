@@ -104,7 +104,7 @@ Both of these actions will trigger permission events, that you should handle to 
 
 ```swift
 Task {
-	for await update in call.permissionUpdates() {
+	for await update in call.subscribe(for: UpdatedCallPermissionsEvent.self) { update in
         let userId = update.user.id
         self.activeCallPermissions[userId] = update.ownCapabilities
         if userId == streamVideo.user.id

@@ -10,16 +10,16 @@ The StreamVideo SDK has support for broadcasting calls. You can find a tutorial 
 First, you need to create a call with a user that has the capability to start broadcasting calls (`start-broadcast-call`).
 
 ```swift
-let call = streamVideo.call(callType: .default, callId: callId, members: [currentUser])
+let call = streamVideo.call(callType: .default, callId: callId)
 Task {
     try await call.join()
 }
 ```
 
-The code above will create and join the call. If you just want to create it (and not join it), you can use the method `getOrCreateCall`:
+The code above will create and join the call. If you just want to create it (and not join it), you can use the method `create`:
 
 ```swift
-let call = try await call.getOrCreate(members: members, startsAt: Date(), customData: [:], membersLimit: 100, ring: false)    
+let call = try await call.create(members: members, startsAt: Date(), custom: [:], ring: false)    
 ```
 
 ### Start broadcasting
@@ -35,8 +35,17 @@ After few seconds of setup, the call would be broadcasted, and you will receive 
 You can listen to the broadcasting events on the call by subscribing to its `AsyncStream`:
 
 ```swift
-for await event in call.broadcastingEvents() {
-    print(event)
+for await event in call.subscribe() {
+    switch event {
+        case .typeCallBroadcastingStartedEvent(let broadcastingStartedEvent):
+            log.debug("received an event \(broadcastingStartedEvent)")
+            /* handle recording event */
+        case .typeCallBroadcastingStoppedEvent(let broadcastingStoppedEvent):
+            log.debug("received an event \(broadcastingStoppedEvent)")
+            /* handle recording event */
+        default:
+            break
+    }
 }
 ```
 
