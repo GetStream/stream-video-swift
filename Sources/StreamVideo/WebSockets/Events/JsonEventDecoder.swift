@@ -82,6 +82,9 @@ struct CoordinatorEvent: Event {
     let event: Event
 }
 
+extension HealthCheckEvent: HealthCheck {}
+extension ConnectedEvent: HealthCheck {}
+
 extension VideoEvent: @unchecked Sendable, Event {}
 
 extension UserResponse {
