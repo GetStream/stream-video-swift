@@ -70,7 +70,9 @@ class SfuMiddleware: EventMiddleware {
             case .joinResponse(let event):
                 onSocketConnected?()
                 await loadParticipants(from: event)
-            case .healthCheckResponse(_):
+            case .healthCheckResponse(let event):
+                // TODO: yay! we can update it here but I have no idea about how
+                //                event.participantCount
                 break
             case .trackPublished(let event):
                 await handleTrackPublishedEvent(event)

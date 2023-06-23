@@ -32,7 +32,6 @@ extension Event {
             return false
         }
         guard let wsCallEvent = videoEvent.rawValue as? WSCallEvent else {
-            print("debugging: not a WSCallEvent event")
             return false
         }
         return wsCallEvent.callCid == cid

@@ -21,6 +21,16 @@ final class EventLogger {
 
     @objc
     func handleNewEvent(_ notification: Notification) {
-        events.append(notification.event!)
+        guard let event = notification.event else {
+            return
+        }
+        switch event {
+        case .internalEvent(let event):
+            events.append(event)
+        case .coordinatorEvent(let event):
+            events.append(event)
+        case .sfuEvent(_):
+            break
+        }
     }
 }

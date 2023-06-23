@@ -289,8 +289,8 @@ extension Notification {
         self.init(name: .NewEventReceived, object: sender, userInfo: [Self.eventKey: event])
     }
     
-    var event: Event? {
-        userInfo?[Self.eventKey] as? Event
+    var event: WrappedEvent? {
+        userInfo?[Self.eventKey] as? WrappedEvent
     }
 }
 
