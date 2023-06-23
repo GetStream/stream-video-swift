@@ -8,7 +8,7 @@
 import Foundation
 /** A custom event, this event is used to send custom events to other participants in the call. */
 
-public struct CustomVideoEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CustomVideoEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /** Custom data for this object */

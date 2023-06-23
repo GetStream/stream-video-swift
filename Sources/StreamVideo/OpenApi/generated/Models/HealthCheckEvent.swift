@@ -8,7 +8,7 @@
 import Foundation
 
 
-public struct HealthCheckEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
+public struct HealthCheckEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSClientEvent {
     /** The connection_id for this client */
     public var connectionId: String
     public var createdAt: Date

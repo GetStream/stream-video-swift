@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when a participant leaves a call session */
 
-public struct CallSessionParticipantLeftEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallSessionParticipantLeftEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /** Call session ID */

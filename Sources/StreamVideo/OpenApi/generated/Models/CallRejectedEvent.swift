@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when a user rejects a notification to join a call. */
 
-public struct CallRejectedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallRejectedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

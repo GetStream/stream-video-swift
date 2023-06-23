@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when the WS connection fails */
 
-public struct ConnectionErrorEvent: Codable, JSONEncodable, Hashable, WSClientEvent {
+public struct ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSClientEvent {
     public var connectionId: String
     public var createdAt: Date
     public var error: APIError?

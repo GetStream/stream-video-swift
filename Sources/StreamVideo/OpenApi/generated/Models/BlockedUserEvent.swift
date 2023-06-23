@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent to call participants to notify when a user is blocked on a call, clients can use this event to show a notification.  If the user is the current user, the client should leave the call screen as well */
 
-public struct BlockedUserEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct BlockedUserEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var blockedByUser: UserResponse?
     public var callCid: String
     public var createdAt: Date

@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when one or more members are removed from a call */
 
-public struct CallMemberRemovedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallMemberRemovedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var call: CallResponse
     public var callCid: String
     public var createdAt: Date

@@ -8,7 +8,7 @@
 import Foundation
 /** This event is sent when call broadcasting has stopped */
 
-public struct CallBroadcastingStoppedEvent: Codable, JSONEncodable, Hashable, WSCallEvent {
+public struct CallBroadcastingStoppedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
     /** The type of event: \"call.broadcasting_stopped\" in this case */
