@@ -29,5 +29,6 @@ public enum DisconnectionReason: Equatable, Sendable {
 public enum ReconnectionStatus {
     case connected
     case reconnecting
+    case migrating
     case disconnected
 }

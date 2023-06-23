@@ -26,6 +26,11 @@ class CallController {
     private var reconnectionDate: Date?
     private let environment: CallController.Environment
     private var cachedLocation: String?
+    private var currentSFU: String? {
+        didSet {
+            print("===== \(currentSFU)")
+        }
+    }
     
     init(
         defaultAPI: DefaultAPI,
@@ -54,8 +59,10 @@ class CallController {
     ///  - callId: the id of the call
     ///  - callSettings: the current call settings
     ///  - videoOptions: configuration options about the video
-    ///  - participantIds: array of the ids of the participants
+    ///  - options: create call options
+    ///  - migratingFrom: if SFU migration is being performed
     ///  - ring: whether ringing events should be handled
+    ///  - notify: whether uses should be notified about the call
     /// - Returns: a newly created `Call`.
     @discardableResult
     func joinCall(
@@ -65,6 +72,7 @@ class CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
+        migratingFrom: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
@@ -74,17 +82,19 @@ class CallController {
             callId: callId,
             videoOptions: videoOptions,
             options: options,
+            migratingFrom: migratingFrom,
             ring: ring,
             notify: notify
         )
-        
+        self.currentSFU = response.credentials.server.edgeName
         try await connectToEdge(
             response,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
             videoOptions: videoOptions,
-            ring: ring
+            ring: ring,
+            migrating: migratingFrom != nil
         )
         
         return response
@@ -238,27 +248,42 @@ class CallController {
         callId: String,
         callSettings: CallSettings,
         videoOptions: VideoOptions,
-        ring: Bool
+        ring: Bool,
+        migrating: Bool
     ) async throws {
-        webRTCClient = environment.webRTCBuilder(
-            user,
-            apiKey,
-            response.credentials.server.url,
-            response.credentials.server.wsEndpoint,
-            response.credentials.token,
-            callCid(from: callId, callType: callType),
-            response.ownCapabilities,
-            videoConfig,
-            response.call.settings.audio,
-            .init()
-        )
-        webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
+        if !migrating {
+            webRTCClient = environment.webRTCBuilder(
+                user,
+                apiKey,
+                response.credentials.server.url,
+                response.credentials.server.wsEndpoint,
+                response.credentials.token,
+                callCid(from: callId, callType: callType),
+                response.ownCapabilities,
+                videoConfig,
+                response.call.settings.audio,
+                .init()
+            )
+            webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
+            webRTCClient?.onSessionMigrationEvent = handleSessionMigrationEvent
+            webRTCClient?.onSessionMigrationCompleted = { [weak self] in
+                self?.call?.update(reconnectionStatus: .connected)
+            }
+        } else {
+            call?.state.reconnectionStatus = .migrating
+            webRTCClient?.prepareForMigration(
+                url: response.credentials.server.url,
+                token: response.credentials.token,
+                webSocketURL: response.credentials.server.wsEndpoint
+            )
+        }
         
         let connectOptions = ConnectOptions(iceServers: response.credentials.iceServers)
         try await webRTCClient?.connect(
             callSettings: callSettings,
             videoOptions: videoOptions,
-            connectOptions: connectOptions
+            connectOptions: connectOptions,
+            migrating: migrating
         )
         let sessionId = webRTCClient?.sessionID ?? ""
         call?.sessionId = sessionId
@@ -310,45 +335,48 @@ class CallController {
         source: WebSocketConnectionState.DisconnectionSource,
         isRetry: Bool = false
     ) {
-        guard let call = call,
-              (call.state.reconnectionStatus != .reconnecting || isRetry),
-                source != .userInitiated else {
-            return            
-        }
-        if reconnectionDate == nil {
-            reconnectionDate = Date()
-        }
-        let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
-        if diff > sfuReconnectionTime {
-            log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
-            handleReconnectionError()
-            reconnectionDate = nil
-            return
-        }
-        Task {
-            do {
-                await webRTCClient?.cleanUp()
-                log.debug("Waiting to reconnect")
-                try? await Task.sleep(nanoseconds: 250_000_000)
-                log.debug("Retrying to connect to the call")
-                self.call?.update(reconnectionStatus: .reconnecting)
-                _ = try await joinCall(
-                    create: false,
-                    callType: call.callType,
-                    callId: call.callId,
-                    callSettings: webRTCClient?.callSettings ?? CallSettings(),
-                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
-                    options: nil
-                )
-            } catch {
-                if diff > sfuReconnectionTime {
-                    self.handleReconnectionError()
-                } else {
-                    try? await Task.sleep(nanoseconds: 1_000_000_000)
-                    self.handleSignalChannelDisconnect(source: source, isRetry: true)
-                }
-            }
-        }
+//        guard let call = call, call.state.reconnectionStatus != .migrating else {
+//            return
+//        }
+//        guard (call.state.reconnectionStatus != .reconnecting || isRetry),
+//                source != .userInitiated else {
+//            return            
+//        }
+//        if reconnectionDate == nil {
+//            reconnectionDate = Date()
+//        }
+//        let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
+//        if diff > sfuReconnectionTime {
+//            log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
+//            handleReconnectionError()
+//            reconnectionDate = nil
+//            return
+//        }
+//        Task {
+//            do {
+//                await webRTCClient?.cleanUp()
+//                log.debug("Waiting to reconnect")
+//                try? await Task.sleep(nanoseconds: 250_000_000)
+//                log.debug("Retrying to connect to the call")
+//                self.call?.update(reconnectionStatus: .reconnecting)
+//                _ = try await joinCall(
+//                    create: false,
+//                    callType: call.callType,
+//                    callId: call.callId,
+//                    callSettings: webRTCClient?.callSettings ?? CallSettings(),
+//                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
+//                    options: nil,
+//                    migratingFrom: nil
+//                )
+//            } catch {
+//                if diff > sfuReconnectionTime {
+//                    self.handleReconnectionError()
+//                } else {
+//                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+//                    self.handleSignalChannelDisconnect(source: source, isRetry: true)
+//                }
+//            }
+//        }
     }
     
     private func handleReconnectionError() {
@@ -357,12 +385,27 @@ class CallController {
         self.cleanUp()
     }
     
+    private func handleSessionMigrationEvent() {
+        Task {
+            try await joinCall(
+                callType: callType,
+                callId: callId,
+                callSettings: webRTCClient?.callSettings ?? CallSettings(),
+                videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
+                migratingFrom: currentSFU,
+                ring: false,
+                notify: false
+            )
+        }
+    }
+    
     private func joinCall(
         create: Bool,
         callType: String,
         callId: String,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
+        migratingFrom: String?,
         ring: Bool,
         notify: Bool
     ) async throws -> JoinCallResponse {
@@ -372,6 +415,7 @@ class CallController {
             type: callType,
             location: location,
             options: options,
+            migratingFrom: migratingFrom,
             create: create,
             ring: ring,
             notify: notify
@@ -397,6 +441,7 @@ class CallController {
         type: String,
         location: String,
         options: CreateCallOptions? = nil,
+        migratingFrom: String?,
         create: Bool,
         ring: Bool,
         notify: Bool
@@ -419,6 +464,7 @@ class CallController {
             create: create,
             data: callRequest,
             location: location,
+            migratingFrom: migratingFrom,
             notify: notify,
             ring: ring
         )

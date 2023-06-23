@@ -15,6 +15,7 @@ class SfuMiddleware: EventMiddleware {
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onSocketConnected: (() -> Void)?
+    var onSessionMigrationEvent: (() -> Void)?
     
     init(
         sessionID: String,
@@ -32,6 +33,19 @@ class SfuMiddleware: EventMiddleware {
         self.subscriber = subscriber
         self.publisher = publisher
         participantsThreshold = participantThreshold
+        //TODO: remove this
+        NotificationCenter.default.addObserver(
+            self, selector: #selector(testingGoAway),
+            name: NSNotification.Name("simulateGoAway"),
+            object: nil
+        )
+    }
+    
+    //TODO: remove this
+    @objc private func testingGoAway() {
+        var event = Stream_Video_Sfu_Event_GoAway()
+        event.reason = .rebalance
+        _ = handle(event: event)
     }
     
     func update(subscriber: PeerConnection?) {
@@ -70,6 +84,9 @@ class SfuMiddleware: EventMiddleware {
                 await handleDominantSpeakerChanged(event)
             } else if let event = event as? Stream_Video_Sfu_Event_Error {
                 log.error(event.error.message)
+            } else if let event = event as? Stream_Video_Sfu_Event_GoAway {
+                log.info("Received go away event with reason: \(event.reason.rawValue)")
+                onSessionMigrationEvent?()
             }
         }
         return event
@@ -110,6 +127,9 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
+        if event.participant.sessionID == sessionID {
+            return
+        }
         guard event.participant.userID != recordingUserId else {
             log.debug("Recording user has left the call")
             return
@@ -192,6 +212,8 @@ class SfuMiddleware: EventMiddleware {
             let updated = participant.withUpdated(audio: true)
             await state.update(callParticipant: updated)
         } else if event.type == .video {
+            let track = await state.tracks[event.sessionID]
+            track?.isEnabled = true
             let updated = participant.withUpdated(video: true)
             await state.update(callParticipant: updated)
         } else if event.type == .screenShare {

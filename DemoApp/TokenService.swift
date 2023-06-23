@@ -73,7 +73,7 @@ struct TokenResponse: Codable {
 }
 
 struct Config {
-    static let apiKey = apiKeyStaging
+    static let apiKey = apiKeyLocal
     static let apiKeyStaging = "hd8szvscpxvd"
     static let apiKeyLocal = "892s22ypvt6m"
     static let baseURL = URL(string: "https://staging.getstream.io/")!

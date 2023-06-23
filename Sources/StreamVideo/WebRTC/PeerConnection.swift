@@ -15,7 +15,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-    private let signalService: Stream_Video_Sfu_Signal_SignalServer
+    var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let callCid: String
     private let type: PeerConnectionType
@@ -62,9 +62,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         publishedTracks.contains(.video)
     }
     
-    func createOffer() async throws -> RTCSessionDescription {
+    func createOffer(constraints: RTCMediaConstraints = .defaultConstraints) async throws -> RTCSessionDescription {
         try await withCheckedThrowingContinuation { continuation in
-            pc.offer(for: .defaultConstraints) { sdp, error in
+            pc.offer(for: constraints) { sdp, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else if let sdp = sdp {
@@ -179,7 +179,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)")
+        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue) state: \(stream.videoTracks.first?.readyState.rawValue)")
         if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
             screensharingStreams.append(stream)
         }
@@ -237,6 +237,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
         return nil
+    }
+    
+    func update(configuration: RTCConfiguration?) {
+        guard let configuration else { return }
+        self.pc.setConfiguration(configuration)
     }
     
     // MARK: - private
