@@ -39,7 +39,7 @@ let streamVideo = StreamVideo(
 ```
 
 :::note
-The `fetchToken` method you will need to provide your own implementation, that will load a new token for the current user. As soon as you provide the token in the `result`, the SDK will be notified about the new token and retry the failed request.
+You will need the `fetchToken` method to provide your own implementation, that will load a new token for the current user. As soon as you provide the token in the `result`, the SDK will be notified about the new token and retry the failed request.
 :::
 
 #### Guest users

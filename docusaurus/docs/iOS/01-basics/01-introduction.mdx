@@ -53,7 +53,7 @@ Here are parameters that the `StreamVideo` class expects:
 - `user` - the logged in user, represented by the `User` struct.
 - `token` - the user's token.
 - `videoConfig` - configuration for the type of calls.
-- `pushNotificationsConfig` - Config for push notifications.
+- `pushNotificationsConfig` - the config for push notifications.
 - `tokenProvider` - called when the token expires. Use it to load a new token from your networking service.
 
 The `StreamVideo` object should be kept alive throughout the app lifecycle. You can store it in your `App` or `AppDelegate`, or any other class whose lifecycle is tied to the one of the logged in user.
