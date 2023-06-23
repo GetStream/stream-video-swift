@@ -35,12 +35,11 @@ In our sample app, we provide a UI to allow the user to enter the call id, and a
 ```swift
 func createLivestream() {
     guard !callId.isEmpty else { return }
-    let currentUser = streamVideo.user
-    let call = streamVideo.call(callType: .default, callId: callId, members: [currentUser])
+    let call = streamVideo.call(callType: .default, callId: callId)
     Task {
         do {
             loading = true
-            try await call.join()
+            try await call.join(create: true)
             loading = false
             self.call = call
         } catch {
@@ -75,7 +74,7 @@ var body: some View {
     VStack {
         HStack {
             Text("Live")
-                .opacity(call.state.callData?.broadcasting == true ? 1 : 0)
+                .opacity(isBroadcasting == true ? 1 : 0)
         }
         
         GeometryReader { reader in
@@ -96,7 +95,7 @@ var body: some View {
         
         ZStack {
             HStack {
-                if call.state.callData?.broadcasting == true {
+                if isBroadcasting {
                     Button {
                         Task {
                             loading = true
@@ -129,10 +128,20 @@ var body: some View {
         }
         .padding()
     }
-    .onChange(of: call.state.callData?.broadcasting, perform: { state in
-        loading = false
-    })
-    
+    .task {
+        for await videoEvent in streamVideo.subscribe() {
+            switch videoEvent {
+            case .typeCallBroadcastingStartedEvent:
+                self.isBroadcasting = true
+                self.isLoading = false
+            case .typeCallBroadcastingStoppedEvent:
+                self.isBroadcasting = false
+                self.isLoading = false
+            default:
+                break
+            }
+        }
+    }
 }
 ```
 
@@ -157,20 +166,37 @@ VideoCallParticipantView(
 }
 ```
 
+We are listening for changes to the broadcasting state of the call by setting up a subscription task on `call`s event `AsyncStream`. We are interested only for the events that relate to broadcasting (`typeCallBroadcastingStartedEvent` & `typeCallBroadcastingStoppedEvent`).
+
+```swift
+.task {
+    for await videoEvent in call.subscribe() {
+        switch videoEvent {
+        case .typeCallBroadcastingStartedEvent:
+            self.isBroadcasting = true
+            self.isLoading = false
+        case .typeCallBroadcastingStoppedEvent:
+            self.isBroadcasting = false
+            self.isLoading = false
+        default:
+            break
+        }
+    }
+}
+```
+
 When the call is started, there's still no livestream available. We need to explicitly start it, by calling the `startBroadcasting` method from the `call` object:
 
 ```swift
 try await call.startBroadcasting()
 ```
 
-When this method is called, it takes few seconds until the broadcasting is started. You can show a loading spinner until the `call`'s state is updated to `broadcasting`.
-
-You can also directly listen to the broadcasting events in the call, using the `AsyncStream` of `broadcastingEvents` in the `call` object.
+When this method is called, it takes few seconds until the broadcasting is started. You can show a loading spinner until you receive the `.typeCallBroadcastingStartedEvent` event.
 
 When the call is being broadcasted, we show a "Stop stream" button to the hosts, to allow them to stop broadcasting:
 
 ```swift
-if call.state.callData?.broadcasting == true {
+if isBroadcasting {
     Button {
         Task {
             loading = true
@@ -247,14 +273,16 @@ Additionally, we listen to the broadcasting events, in case the broadcasting was
 ```swift
 private func subscribeForBroadcastEvents() {
     broadcastEventsTask?.cancel()
-    guard let callsController else { return }
     broadcastEventsTask = Task {
-        for await event in callsController.broadcastEvents() {
-            if let event = event as? BroadcastingStartedEvent {
-                let url = event.hlsPlaylistUrl
+        for await videoEvent in streamVideo.subscribe() {
+            switch videoEvent {
+            case .typeCallBroadcastingStartedEvent(let event) where event.callCid == watchedCallId:
+                let url = event.hlsPlaylistUrl.replacingOccurrences(of: "\\u0026", with: "&")
                 self.hlsURL = URL(string: url)
-            } else if event is BroadcastingStoppedEvent {
+            case .typeCallBroadcastingStoppedEvent:
                 self.hlsURL = nil
+            default:
+                break
             }
         }
     }
