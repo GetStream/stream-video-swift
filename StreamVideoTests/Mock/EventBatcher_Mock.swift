@@ -7,21 +7,21 @@ import Foundation
 import protocol StreamVideo.Timer
 
 final class EventBatcher_Mock: EventBatcher {
-    var currentBatch: [Event] = []
+    var currentBatch: [WrappedEvent] = []
 
-    let handler: (_ batch: [Event], _ completion: @escaping () -> Void) -> Void
+    let handler: (_ batch: [WrappedEvent], _ completion: @escaping () -> Void) -> Void
 
     init(
         period: TimeInterval = 0,
         timerType: Timer.Type = DefaultTimer.self,
-        handler: @escaping (_ batch: [Event], _ completion: @escaping () -> Void) -> Void
+        handler: @escaping (_ batch: [WrappedEvent], _ completion: @escaping () -> Void) -> Void
     ) {
         self.handler = handler
     }
 
     lazy var mock_append = MockFunc.mock(for: append)
 
-    func append(_ event: Event) {
+    func append(_ event: WrappedEvent) {
         mock_append.call(with: (event))
 
         handler([event]) {}

@@ -61,7 +61,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let eventLogger = EventLogger(center)
 
         // Simulate incoming event
-        center.process(TestEvent())
+        center.process(.internalEvent(TestEvent()))
 
         // Assert event is published as it is
         AssertAsync.staysTrue(eventLogger.equatableEvents.isEmpty)
@@ -76,7 +76,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Simulate incoming event
         let event = TestEvent()
-        center.process(event)
+        center.process(.internalEvent(TestEvent()))
 
         // Assert event is published as it is
         AssertAsync.willBeEqual(eventLogger.events as? [TestEvent], [event])
@@ -94,7 +94,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Feed events that should be posted and catch the completion
         var completionCalled = false
-        center.process(events, postNotifications: true) {
+        center.process(events.map { .internalEvent($0)}, postNotifications: true) {
             completionCalled = true
         }
 
@@ -117,7 +117,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Feed events that should not be posted and catch the completion
         var completionCalled = false
-        center.process(events, postNotifications: false) {
+        center.process(events.map { .internalEvent($0)}, postNotifications: false) {
             completionCalled = true
         }
 
@@ -157,7 +157,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         }
 
         // Process test event and post when processing is completed
-        center.process([testEvent], postNotifications: true)
+        center.process([.internalEvent(testEvent)], postNotifications: true)
 
         // Wait for observer to be called
         AssertAsync.willBeTrue(observerTriggered)
@@ -182,14 +182,14 @@ final class EventNotificationCenter_Tests: XCTestCase {
         // Add event swapping middleware
         center.add(middleware: EventMiddleware_Mock { event in
             // Assert expected event is received
-            XCTAssertEqual(event as? TestEvent, originalEvent)
-
-            // Simulate event swapping
-            return outputEvent
+            if case let .internalEvent(event) = event {
+                XCTAssertEqual(event as? TestEvent, originalEvent)
+            }
+            return event
         })
 
         // Start processing of original event
-        center.process(originalEvent, postNotification: true)
+        center.process(.internalEvent(originalEvent), postNotification: true)
 
         // Assert event returned from middleware is posted
         AssertAsync.willBeEqual(

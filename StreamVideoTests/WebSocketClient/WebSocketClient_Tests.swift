@@ -115,7 +115,7 @@ final class WebSocketClient_Tests: XCTestCase {
         AssertAsync.willBeEqual(webSocketClient.connectionState, .authenticating)
 
         // Simulate a health check event is received and the connection state is updated
-        decoder.decodedEvent = .success(HealthCheckEvent(connectionId: connectionId, createdAt: createdAt))
+        decoder.decodedEvent = .success(.coordinatorEvent(.typeHealthCheckEvent(HealthCheckEvent(connectionId: connectionId, createdAt: createdAt))))
         engine!.simulateMessageReceived()
 
         AssertAsync.willBeEqual(webSocketClient.connectionState, .connected(healthCheckInfo: healthCheckInfo))
@@ -244,7 +244,11 @@ final class WebSocketClient_Tests: XCTestCase {
         assert(pingController.pongReceivedCount == 1)
 
         // Simulate a health check (pong) event is received
-        decoder.decodedEvent = .success(HealthCheckEvent(connectionId: connectionId, createdAt: createdAt))
+        decoder.decodedEvent = .success(.coordinatorEvent(
+            .typeHealthCheckEvent(
+                HealthCheckEvent(connectionId: connectionId, createdAt: createdAt)
+            ))
+        )
         engine!.simulateMessageReceived()
 
         AssertAsync.willBeEqual(pingController.pongReceivedCount, 2)
@@ -281,7 +285,7 @@ final class WebSocketClient_Tests: XCTestCase {
 
         // Simulate received health check event
         let healthCheckEvent = HealthCheckEvent(connectionId: .unique, createdAt: createdAt)
-        decoder.decodedEvent = .success(healthCheckEvent)
+        decoder.decodedEvent = .success(.coordinatorEvent(.typeHealthCheckEvent(healthCheckEvent)))
         engine!.simulateMessageReceived()
 
         // Assert healtch check event does not get batched
@@ -291,7 +295,7 @@ final class WebSocketClient_Tests: XCTestCase {
         // Assert health check event was processed
         let (_, postNotification, _) = try XCTUnwrap(
             eventNotificationCenter.mock_process.calls.first(where: { events, _, _ in
-                events.first is HealthCheckEvent
+                events.first?.healthcheck() != nil
             })
         )
 
@@ -320,7 +324,7 @@ final class WebSocketClient_Tests: XCTestCase {
                 teams: [],
                 updatedAt: Date())
         )
-        decoder.decodedEvent = .success(incomingEvent)
+        decoder.decodedEvent = .success(.coordinatorEvent(.typeCustomVideoEvent(incomingEvent)))
         engine!.simulateMessageReceived()
 
         // Assert event gets batched

@@ -42,6 +42,132 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typePermissionRequestEvent(PermissionRequestEvent)
     case typeUnblockedUserEvent(UnblockedUserEvent)
     case typeUpdatedCallPermissionsEvent(UpdatedCallPermissionsEvent)
+    
+    public var type: String {
+        switch self {
+        case .typeBlockedUserEvent(let value):
+            return value.type
+        case .typeCallAcceptedEvent(let value):
+            return value.type
+        case .typeCallBroadcastingStartedEvent(let value):
+            return value.type
+        case .typeCallBroadcastingStoppedEvent(let value):
+            return value.type
+        case .typeCallCreatedEvent(let value):
+            return value.type
+        case .typeCallEndedEvent(let value):
+            return value.type
+        case .typeCallLiveStartedEvent(let value):
+            return value.type
+        case .typeCallMemberAddedEvent(let value):
+            return value.type
+        case .typeCallMemberRemovedEvent(let value):
+            return value.type
+        case .typeCallMemberUpdatedEvent(let value):
+            return value.type
+        case .typeCallMemberUpdatedPermissionEvent(let value):
+            return value.type
+        case .typeCallNotificationEvent(let value):
+            return value.type
+        case .typeCallReactionEvent(let value):
+            return value.type
+        case .typeCallRecordingStartedEvent(let value):
+            return value.type
+        case .typeCallRecordingStoppedEvent(let value):
+            return value.type
+        case .typeCallRejectedEvent(let value):
+            return value.type
+        case .typeCallRingEvent(let value):
+            return value.type
+        case .typeCallSessionEndedEvent(let value):
+            return value.type
+        case .typeCallSessionParticipantJoinedEvent(let value):
+            return value.type
+        case .typeCallSessionParticipantLeftEvent(let value):
+            return value.type
+        case .typeCallSessionStartedEvent(let value):
+            return value.type
+        case .typeCallUpdatedEvent(let value):
+            return value.type
+        case .typeConnectedEvent(let value):
+            return value.type
+        case .typeConnectionErrorEvent(let value):
+            return value.type
+        case .typeCustomVideoEvent(let value):
+            return value.type
+        case .typeHealthCheckEvent(let value):
+            return value.type
+        case .typePermissionRequestEvent(let value):
+            return value.type
+        case .typeUnblockedUserEvent(let value):
+            return value.type
+        case .typeUpdatedCallPermissionsEvent(let value):
+            return value.type
+        }
+    }
+    
+    public var rawValue: Event {
+        switch self {
+        case .typeBlockedUserEvent(let value):
+            return value
+        case .typeCallAcceptedEvent(let value):
+            return value
+        case .typeCallBroadcastingStartedEvent(let value):
+            return value
+        case .typeCallBroadcastingStoppedEvent(let value):
+            return value
+        case .typeCallCreatedEvent(let value):
+            return value
+        case .typeCallEndedEvent(let value):
+            return value
+        case .typeCallLiveStartedEvent(let value):
+            return value
+        case .typeCallMemberAddedEvent(let value):
+            return value
+        case .typeCallMemberRemovedEvent(let value):
+            return value
+        case .typeCallMemberUpdatedEvent(let value):
+            return value
+        case .typeCallMemberUpdatedPermissionEvent(let value):
+            return value
+        case .typeCallNotificationEvent(let value):
+            return value
+        case .typeCallReactionEvent(let value):
+            return value
+        case .typeCallRecordingStartedEvent(let value):
+            return value
+        case .typeCallRecordingStoppedEvent(let value):
+            return value
+        case .typeCallRejectedEvent(let value):
+            return value
+        case .typeCallRingEvent(let value):
+            return value
+        case .typeCallSessionEndedEvent(let value):
+            return value
+        case .typeCallSessionParticipantJoinedEvent(let value):
+            return value
+        case .typeCallSessionParticipantLeftEvent(let value):
+            return value
+        case .typeCallSessionStartedEvent(let value):
+            return value
+        case .typeCallUpdatedEvent(let value):
+            return value
+        case .typeConnectedEvent(let value):
+            return value
+        case .typeConnectionErrorEvent(let value):
+            return value
+        case .typeCustomVideoEvent(let value):
+            return value
+        case .typeHealthCheckEvent(let value):
+            return value
+        case .typePermissionRequestEvent(let value):
+            return value
+        case .typeUnblockedUserEvent(let value):
+            return value
+        case .typeUpdatedCallPermissionsEvent(let value):
+            return value
+        }
+    }
 
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()

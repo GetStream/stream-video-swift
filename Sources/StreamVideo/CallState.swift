@@ -31,34 +31,85 @@ public class CallState: ObservableObject {
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var participantCount: UInt32 = 0
         
-    internal func updateState(from event: Event) {
-        if let event = event as? CallAcceptedEvent {
+    internal func updateState(from event: VideoEvent) {
+        switch event {
+        case .typeBlockedUserEvent(let event):
+            blockUser(id: event.user.id)
+        case .typeCallAcceptedEvent(let event):
             update(from: event.call)
-        } else if let event = event as? CallRejectedEvent {
-            update(from: event.call)
-        } else if let event = event as? CallUpdatedEvent {
-            update(from: event.call)
-        } else if event is CallRecordingStartedEvent {
+        case .typeCallBroadcastingStartedEvent(_):
+            // TODO
+            break
+        case .typeCallBroadcastingStoppedEvent(_):
+            // TODO
+            break
+        case .typeCallCreatedEvent(_):
+            // TODO
+            break
+        case .typeCallEndedEvent(_):
+            // TODO
+            break
+        case .typeCallLiveStartedEvent(_):
+            // TODO
+            break
+        case .typeCallMemberAddedEvent(let event):
+            mergeMembers(event.members)
+        case .typeCallMemberRemovedEvent(let event):
+            let updated = members.filter { !event.members.contains($0.id) }
+            self.members = updated
+        case .typeCallMemberUpdatedEvent(let event):
+            mergeMembers(event.members)
+        case .typeCallMemberUpdatedPermissionEvent(_):
+            // TODO
+            break
+        case .typeCallNotificationEvent(_):
+            // TODO
+            break
+        case .typeCallReactionEvent(_):
+            // TODO
+            break
+        case .typeCallRecordingStartedEvent(_):
             if recordingState != .recording {
                 recordingState = .recording
             }
-        } else if event is CallRecordingStoppedEvent {
+        case .typeCallRecordingStoppedEvent(_):
             if recordingState != .noRecording {
                 recordingState = .noRecording
             }
-        } else if let event = event as? UpdatedCallPermissionsEvent {
-            updateOwnCapabilities(event)
-        } else if let event = event as? CallMemberAddedEvent {
-            mergeMembers(event.members)
-        } else if let event = event as? CallMemberRemovedEvent {
-            let updated = members.filter { !event.members.contains($0.id) }
-            self.members = updated
-        } else if let event = event as? CallMemberUpdatedEvent {
-            mergeMembers(event.members)
-        } else if let event = event as? BlockedUserEvent {
-            blockUser(id: event.user.id)
-        } else if let event = event as? UnblockedUserEvent {
+        case .typeCallRejectedEvent(let event):
+            update(from: event.call)
+        case .typeCallRingEvent(_):
+            // TODO
+            break
+        case .typeCallSessionEndedEvent(_):
+            // TODO
+            break
+        case .typeCallSessionParticipantJoinedEvent(_):
+            // TODO
+            break
+        case .typeCallSessionParticipantLeftEvent(_):
+            // TODO
+            break
+        case .typeCallSessionStartedEvent(_):
+            // TODO
+            break
+        case .typeCallUpdatedEvent(let event):
+            update(from: event.call)
+        case .typeConnectedEvent(_):
+            break
+        case .typeConnectionErrorEvent(_):
+            break
+        case .typeCustomVideoEvent(_):
+            break
+        case .typeHealthCheckEvent(_):
+            break
+        case .typePermissionRequestEvent(_):
+            // TODO
+            break
+        case .typeUnblockedUserEvent(let event):
             unblockUser(id: event.user.id)
+        case .typeUpdatedCallPermissionsEvent(let event):
+            updateOwnCapabilities(event)
         }
     }
     

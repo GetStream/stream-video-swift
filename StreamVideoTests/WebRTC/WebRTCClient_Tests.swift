@@ -65,7 +65,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // When
         let eventNotificationCenter = webRTCClient.eventNotificationCenter
         let event = Stream_Video_Sfu_Event_JoinResponse()
-        eventNotificationCenter.process(event)
+        eventNotificationCenter.process(.sfuEvent(.joinResponse(event)))
         try await waitForCallEvent()
         
         // Then
@@ -194,7 +194,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         webRTCClient = makeWebRTCClient()
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         
         // Then
         try await waitForCallEvent()
@@ -206,7 +206,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         var participantLeft = Stream_Video_Sfu_Event_ParticipantLeft()
         participantLeft.callCid = callCid
         participantLeft.participant = participant
-        webRTCClient.eventNotificationCenter.process(participantLeft)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantLeft(participantLeft)))
         
         // Then
         try await waitForCallEvent()
@@ -222,9 +222,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         dominantSpeakerChanged.userID = userId
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(dominantSpeakerChanged)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.dominantSpeakerChanged(dominantSpeakerChanged)))
         try await waitForCallEvent()
         
         // Then
@@ -244,9 +244,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         audioLevelsChanged.audioLevels = [audioLevel]
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(audioLevelsChanged)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.audioLevelChanged(audioLevelsChanged)))
         try await waitForCallEvent()
         
         // Then
@@ -266,9 +266,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         connectionQualityChanged.connectionQualityUpdates = [update]
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(connectionQualityChanged)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.connectionQualityChanged(connectionQualityChanged)))
         try await waitForCallEvent()
         
         // Then
@@ -284,7 +284,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         joinResponse.callState.participants = [participant]
         
         // When
-        webRTCClient.eventNotificationCenter.process(joinResponse)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.joinResponse(joinResponse)))
         try await waitForCallEvent()
         
         // Then
@@ -302,9 +302,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         trackPublished.type = .audio
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(trackPublished)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackPublished(trackPublished)))
         try await waitForCallEvent()
         
         // Then
@@ -322,9 +322,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         trackPublished.type = .video
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(trackPublished)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackPublished(trackPublished)))
         try await waitForCallEvent()
         
         // Then
@@ -342,9 +342,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         trackPublished.type = .screenShare
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(trackPublished)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackPublished(trackPublished)))
         try await waitForCallEvent()
         
         // Then
@@ -362,9 +362,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         trackUnpublished.type = .audio
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(trackUnpublished)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackUnpublished(trackUnpublished)))
         try await waitForCallEvent()
         
         // Then
@@ -382,9 +382,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         trackUnpublished.type = .video
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(trackUnpublished)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackUnpublished(trackUnpublished)))
         try await waitForCallEvent()
         
         // Then
@@ -402,9 +402,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         trackUnpublished.type = .screenShare
         
         // When
-        webRTCClient.eventNotificationCenter.process(participantJoined)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         try await waitForCallEvent()
-        webRTCClient.eventNotificationCenter.process(trackUnpublished)
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackUnpublished(trackUnpublished)))
         try await waitForCallEvent()
         
         // Then

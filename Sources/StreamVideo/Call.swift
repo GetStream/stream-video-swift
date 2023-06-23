@@ -270,9 +270,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent {
-                    continuation.yield(event.wrapped)
+                guard case let .coordinatorEvent(event) = event else {
+                    return
                 }
+                continuation.yield(event)
             }
             self?.eventHandlers.append(eventHandler)
         }
@@ -281,9 +282,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent,
-                    let rawEvent = event.event as? WSEvent {
-                    continuation.yield(rawEvent)
+                guard case let .coordinatorEvent(event) = event else {
+                    return
+                }
+                if let event = event.rawValue as? WSEvent {
+                    continuation.yield(event)
                 }
             }
             self?.eventHandlers.append(eventHandler)
@@ -538,20 +541,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.state.recordingState = recordingState
     }
     
-    internal func onEvent(_ event: Event) {
-        var rawEvent = event
-        if let coordinatorEvent = event as? CoordinatorEvent {
-            rawEvent = coordinatorEvent.event
-        }
-        guard let wsCallEvent = rawEvent as? WSCallEvent, wsCallEvent.callCid == cId else {
+    internal func onEvent(_ event: WrappedEvent) {
+        guard case let .coordinatorEvent(videoEvent) = event else {
             return
         }
-        state.updateState(from: rawEvent)
+        guard videoEvent.forCall(cid: cId) else {
+            return
+        }
+        state.updateState(from: videoEvent)
         callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }
-    }    
+    }
     
     //MARK: - private
     private func updatePermissions(

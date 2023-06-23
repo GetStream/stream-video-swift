@@ -7,13 +7,13 @@ import Foundation
 
 /// A test middleware that can be initiated with a closure
 final class EventMiddleware_Mock: EventMiddleware {
-    var closure: (Event) -> Event?
+    var closure: (WrappedEvent) -> WrappedEvent?
 
-    init(closure: @escaping (Event) -> Event? = { event in event }) {
+    init(closure: @escaping (WrappedEvent) -> WrappedEvent? = { event in event }) {
         self.closure = closure
     }
 
-    func handle(event: Event) -> Event? {
+    func handle(event: WrappedEvent) -> WrappedEvent? {
         closure(event)
     }
 }

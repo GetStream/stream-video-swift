@@ -8,10 +8,10 @@ import Foundation
 /// Mock implementation of `EventNotificationCenter`
 final class EventNotificationCenter_Mock: EventNotificationCenter {
 
-    lazy var mock_process = MockFunc<([Event], Bool, (() -> Void)?), Void>.mock(for: process)
+    lazy var mock_process = MockFunc<([WrappedEvent], Bool, (() -> Void)?), Void>.mock(for: process)
 
     override func process(
-        _ events: [Event],
+        _ events: [WrappedEvent],
         postNotifications: Bool = true,
         completion: (() -> Void)? = nil
     ) {

@@ -11,7 +11,7 @@ protocol EventMiddleware {
     /// - Parameters:
     ///   - event: The incoming `Event`.
     /// - Returns: The original `event` passed via params OR `nil` if the incoming event was consumed by the middleware.
-    func handle(event: Event) -> Event?
+    func handle(event: WrappedEvent) -> WrappedEvent?
 }
 
 extension Array where Element == EventMiddleware {
@@ -21,8 +21,8 @@ extension Array where Element == EventMiddleware {
     /// - Parameters:
     ///   - event: The event to be pre-processed.
     /// - Returns: The processed event. It will return `nil` if the event was consumed by some middleware.
-    func process(event: Event) -> Event? {
-        var output: Event? = event
+    func process(event: WrappedEvent) -> WrappedEvent? {
+        var output: WrappedEvent? = event
 
         for middleware in self {
             guard let input = output else { break }

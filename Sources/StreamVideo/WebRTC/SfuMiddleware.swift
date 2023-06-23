@@ -42,34 +42,46 @@ class SfuMiddleware: EventMiddleware {
         self.publisher = publisher
     }
     
-    func handle(event: Event) -> Event? {
+    func handle(event: WrappedEvent) -> WrappedEvent? {
         log.debug("Received an event \(event)")
         Task {
-            if let event = event as? Stream_Video_Sfu_Event_SubscriberOffer {
+            guard case let .sfuEvent(event) = event else {
+                return
+            }
+            switch event {
+            case .subscriberOffer(let event):
                 await handleSubscriberEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_ParticipantJoined {
-                await handleParticipantJoined(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_ParticipantLeft {
-                await handleParticipantLeft(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_ChangePublishQuality {
-                handleChangePublishQualityEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_Models_ICETrickle {
+            case .publisherAnswer(_):
+                log.error("TODO: publisher answer")
+            case .connectionQualityChanged(let event):
+                await handleConnectionQualityChangedEvent(event)
+            case .audioLevelChanged(let event):
+                await handleAudioLevelsChanged(event)
+            case .iceTrickle(let event):
                 try await handleICETrickle(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_JoinResponse {
+            case .changePublishQuality(let event):
+                handleChangePublishQualityEvent(event)
+            case .participantJoined(let event):
+                await handleParticipantJoined(event)
+            case .participantLeft(let event):
+                await handleParticipantLeft(event)
+            case .dominantSpeakerChanged(let event):
+                await handleDominantSpeakerChanged(event)
+            case .joinResponse(let event):
                 onSocketConnected?()
                 await loadParticipants(from: event)
-            } else if let event = event as? Stream_Video_Sfu_Event_TrackPublished {
+            case .healthCheckResponse(_):
+                break
+            case .trackPublished(let event):
                 await handleTrackPublishedEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_TrackUnpublished {
+            case .trackUnpublished(let event):
                 await handleTrackUnpublishedEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_ConnectionQualityChanged {
-                await handleConnectionQualityChangedEvent(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_AudioLevelChanged {
-                await handleAudioLevelsChanged(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_DominantSpeakerChanged {
-                await handleDominantSpeakerChanged(event)
-            } else if let event = event as? Stream_Video_Sfu_Event_Error {
+            case .error(let event):
                 log.error(event.error.message)
+            case .callGrantsUpdated(_):
+                log.error("TODO: callGrantsUpdated")
+            case .goAway(_):
+                log.error("TODO: goAway")
             }
         }
         return event

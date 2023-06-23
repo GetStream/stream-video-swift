@@ -7,10 +7,7 @@ import Foundation
 /// The type is designed to pre-process some incoming `Event` via middlewares before being published
 class EventNotificationCenter: NotificationCenter {
     private(set) var middlewares: [EventMiddleware] = []
-    
-    // We post events on a queue different from database.writable context
-    // queue to prevent a deadlock happening when @CoreDataLazy (with `context.performAndWait` inside)
-    // model is accessed in event handlers.
+
     var eventPostingQueue = DispatchQueue(label: "io.getstream.event-notification-center")
     
     func add(middlewares: [EventMiddleware]) {
@@ -21,7 +18,7 @@ class EventNotificationCenter: NotificationCenter {
         middlewares.append(middleware)
     }
 
-    func process(_ events: [Event], postNotifications: Bool = true, completion: (() -> Void)? = nil) {
+    func process(_ events: [WrappedEvent], postNotifications: Bool = true, completion: (() -> Void)? = nil) {
         let processingEventsDebugMessage: () -> String = {
             let eventNames = events.map(\.name)
             return "Processing Events: \(eventNames)"
@@ -46,7 +43,7 @@ class EventNotificationCenter: NotificationCenter {
 }
 
 extension EventNotificationCenter {
-    func process(_ event: Event, postNotification: Bool = true, completion: (() -> Void)? = nil) {
+    func process(_ event: WrappedEvent, postNotification: Bool = true, completion: (() -> Void)? = nil) {
         process([event], postNotifications: postNotification, completion: completion)
     }
 }
