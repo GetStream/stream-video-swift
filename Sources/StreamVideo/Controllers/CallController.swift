@@ -26,11 +26,7 @@ class CallController {
     private var reconnectionDate: Date?
     private let environment: CallController.Environment
     private var cachedLocation: String?
-    private var currentSFU: String? {
-        didSet {
-            print("===== \(currentSFU)")
-        }
-    }
+    private var currentSFU: String?
     
     init(
         defaultAPI: DefaultAPI,

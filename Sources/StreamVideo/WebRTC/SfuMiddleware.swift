@@ -11,7 +11,7 @@ class SfuMiddleware: EventMiddleware {
     private let sessionID: String
     private let user: User
     private let state: WebRTCClient.State
-    private let signalService: Stream_Video_Sfu_Signal_SignalServer
+    var signalService: Stream_Video_Sfu_Signal_SignalServer
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onSocketConnected: (() -> Void)?
@@ -212,8 +212,6 @@ class SfuMiddleware: EventMiddleware {
             let updated = participant.withUpdated(audio: true)
             await state.update(callParticipant: updated)
         } else if event.type == .video {
-            let track = await state.tracks[event.sessionID]
-            track?.isEnabled = true
             let updated = participant.withUpdated(video: true)
             await state.update(callParticipant: updated)
         } else if event.type == .screenShare {

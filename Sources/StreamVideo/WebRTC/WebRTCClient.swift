@@ -19,15 +19,10 @@ class WebRTCClient: NSObject {
         var connectionState = ConnectionState.disconnected(reason: nil)
         @Published var callParticipants = [String: CallParticipant]() {
             didSet {
-                print("==== participants: \(callParticipants.map({ key, value in "\(key)-\(value.name)-\(value.trackLookupPrefix)-\(value.track)" }))")
                 continuation?.yield([true])
             }
         }
-        var tracks = [String: RTCVideoTrack]() {
-            didSet {
-                print("==== tracks: \(tracks)")
-            }
-        }
+        var tracks = [String: RTCVideoTrack]()
         var screensharingTracks = [String: RTCVideoTrack]()
         private var continuation: AsyncStream<[Bool]>.Continuation?
         
@@ -365,10 +360,12 @@ class WebRTCClient: NSObject {
             return
         }
         log.debug("Setting track for \(participant.name) to \(isVisible)")
-        let updated = participant.withUpdated(showTrack: isVisible)
         let trackId = participant.trackLookupPrefix ?? participant.id
         let track = await state.tracks[trackId]
         track?.isEnabled = isVisible
+        let updated = participant
+            .withUpdated(showTrack: isVisible)
+            .withUpdated(track: track)
         await state.update(callParticipant: updated)
         await state.add(track: track, id: trackId)
     }
@@ -405,14 +402,16 @@ class WebRTCClient: NSObject {
         signalChannel = migratingWSClient
         if let migratingSignalService {
             signalService = migratingSignalService
+            sfuMiddleware.signalService = migratingSignalService
         }
-        signalChannel?.engine?.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
         cleanupMigrationData()
         Task {
             temp = subscriber
+            temp?.paused = true
             try await setupPeerConnections()
             try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
             onSessionMigrationCompleted?()
+            temp?.close()
             temp = nil
         }
     }
@@ -815,7 +814,7 @@ class WebRTCClient: NSObject {
                 }
             }
             var updated: CallParticipant?
-            if track != nil && participant.track == nil {
+            if track != nil && (participant.track == nil || participant.track?.readyState == .ended) {
                 updated = participant.withUpdated(track: track)
             }
             if screenshareTrack != nil && participant.screenshareTrack == nil {

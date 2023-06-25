@@ -13,12 +13,12 @@ enum PeerConnectionType: String {
 
 class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
-    private let pc: RTCPeerConnection
+    var pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let callCid: String
-    private let type: PeerConnectionType
+    let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
     private let reportStats: Bool
@@ -32,6 +32,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     var onDisconnect: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
+    
+    var paused = false
     
     init(
         sessionId: String,
@@ -179,7 +181,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue) state: \(stream.videoTracks.first?.readyState.rawValue)")
+        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)")
         if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
             screensharingStreams.append(stream)
         }
@@ -210,6 +212,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
+        if paused {
+            return
+        }
         Task {
             let encoder = JSONEncoder()
             let iceCandidate = candidate.toIceCandidate()
