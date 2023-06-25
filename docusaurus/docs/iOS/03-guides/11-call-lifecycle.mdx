@@ -8,7 +8,7 @@ The `Call` object manages everything related to a particular call, such as creat
 
 When a call starts, the iOS SDK communicates with our backend infrastructure, to find the best Selective Forwarding Unit (SFU) to host the call, based on the locations of the participants. It then establishes the connection with that SFU and provides updates on all events related to a call.
 
-You can create a new call via the `StreamVideo`'s method `func call(callType: String, callId: String, members: [Member])`.
+You can create a new call via the `StreamVideo`'s method `func call(callType: String, callId: String)`.
 
 It's a lower-level component than the stateful `CallViewModel`, and it's suitable if you want to create your own presentation logic and state handling.
 
@@ -18,4 +18,4 @@ Every call has a call id and type. You can join a call with the same id as many 
 
 ## Web Socket Connection
 
-The web socket connection with our backend is established by calling the `connect` method in the `StreamVideo` object. If you go into the background, and come back, the SDK tries to re-establish this connection. The web socket connection is persisted in order to listen to events such as incoming calls, that can be presented in-app (if you're not using CallKit).
+The web socket connection with our backend is established when the `StreamVideo` object is being created. If you go into the background, and come back, the SDK tries to re-establish this connection. The web socket connection is persisted in order to listen to events such as incoming calls, that can be presented in-app (if you're not using CallKit).

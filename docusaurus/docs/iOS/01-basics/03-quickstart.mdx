@@ -17,7 +17,7 @@ In this tutorial, we will build a video calling app that shows how you can integ
 
 To get started with the `StreamVideo` SDK, open Xcode and create a new project.
 
-- Create a new Swift project in Xcode 14
+- Create a new Swift project in Xcode
 - Choose iOS from the list of platforms
 - Choose the "App" template
 - Use VideoDemoSwiftUI for the project name
@@ -77,7 +77,6 @@ struct VideoDemoSwiftUIApp: App {
             apiKey: apiKey,
             user: userCredentials.user,
             token: userCredentials.token,
-            videoConfig: VideoConfig(),
             tokenProvider: { result in
                 // Call your networking service to generate a new token here.
                 // When finished, call the result handler with either .success or .failure.
@@ -110,8 +109,7 @@ extension UserCredentials {
             imageURL: URL(string: "https://vignette.wikia.nocookie.net/starwars/images/2/20/LukeTLJ.jpg")!,
             customData: [:]
         ),
-        token: try! UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0"
-        )
+        token: UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdHJlYW0tdmlkZW8tZ29AdjAuMS4wIiwic3ViIjoidXNlci90ZXN0dXNlciIsImlhdCI6MTY2NjY5ODczMSwidXNlcl9pZCI6InRlc3R1c2VyIn0.h4lnaF6OFYaNPjeK8uFkKirR5kHtj1vAKuipq3A5nM0")
     )
 }
 ```
@@ -153,11 +151,6 @@ struct ContentView: View {
         }
         .padding()
         .modifier(CallModifier(viewModel: callViewModel))
-        .onAppear {
-            Task {
-                try await streamVideo.connect()
-            }
-        }
     }
 }
 ```
@@ -166,10 +159,8 @@ Here, you need to create the `CallViewModel`, which deals with the call related 
 
 In the example, we're also setting a `CallModifier` to the view. With this modifier, the calling support is added to your view. The modifier handles everything from reporting incoming / outgoing calls to showing the appropriate UI based on the call state.
 
-Lastly, we are also calling `streamVideo.connect()` in the `.onAppear` modifier. This is necessary, so that the user we've set during initialization of the `StreamVideo` object is connected to the backend.
-
 :::note
-In a production application we would call the `.connect()` function earlier during our login flow. For the sake of this tutorial we're simplifying this here. The way we retrieve the `streamVideo` object here is through the `@Injected` property wrapper (read more on [this page](../../guides/dependency-injection).)
+The way we retrieve the `streamVideo` object here is through the `@Injected` property wrapper (read more on [this page](../../guides/dependency-injection).)
 :::
 
 ### UI Customizations
@@ -264,6 +255,12 @@ Making a video call requires the usage of the camera and the microphone of the d
 
 ![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
-Note that you should replace "Your_app_name" (or also use your custom strings instead).
+:::note
+You should replace "Your_app_name" (or also use your custom strings instead).
+:::
 
-With this, you should be able to test a video call between two devices. Note that you need to specify the participants list in the `startCall` method. Also, the call id should be the same on the different devices that are part of the call.
+With this, you should be able to test a video call between two devices.
+
+:::note
+The call id should be the same on the different devices that are part of the call.
+:::

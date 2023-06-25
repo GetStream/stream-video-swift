@@ -5,12 +5,12 @@ description: Permission Requests
 
 Different call participants can have different capabilities and permissions. Depending on your app's requirements, some users might be able to request additional permissions during a call. More details about permissions [here](../../guides/permissions-and-moderation).
 
-When a user asks for additional capabilities, the hosts of the call receive an event that they can react to (approve or deny the request). You can listen to these events by subscribing to the `permissionRequests` async stream:
+When a user asks for additional capabilities, the hosts of the call receive an event that they can react to (approve or deny the request). You can listen to these events by subscribing to the `subscribe(for:)` async stream:
 
 ```swift
 func subscribeForPermissionsRequests() {
     Task {
-        for await request in call.permissionRequests() {
+        for await request in call.subscribe(for: PermissionRequestEvent.self) {
             self.permissionRequest = request
         }
     }

@@ -8,7 +8,7 @@ description: Install the SDK for video calling
 
 To get started with the `StreamVideo` SDK, open Xcode and create a new project.
 
-- Create a new Swift project in Xcode 14
+- Create a new Swift project in Xcode
 - Choose iOS from the list of platforms
 - Choose the "App" template
 - Use VideoDemoSwiftUI for the project name
@@ -38,6 +38,12 @@ Making a video call requires the usage of the camera and the microphone of the d
 
 ![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
-Note that you should replace "Your_app_name" (or also use your custom strings instead).
+:::note
+You should replace "Your_app_name" (or also use your custom strings instead).
+:::
 
-With this, you should be able to test a video call between two devices. Note that you need to specify the participants list in the `startCall` method. Also, the call id should be the same on the different devices that are part of the call.
+With this, you should be able to test a video call between two devices.
+
+:::note
+The call id should be the same on the different devices that are part of the call.
+:::
