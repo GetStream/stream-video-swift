@@ -13,12 +13,12 @@ enum PeerConnectionType: String {
 
 class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
-    var pc: RTCPeerConnection
+    private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let callCid: String
-    let type: PeerConnectionType
+    private let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
     private let reportStats: Bool
