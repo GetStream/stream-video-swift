@@ -33,19 +33,6 @@ class SfuMiddleware: EventMiddleware {
         self.subscriber = subscriber
         self.publisher = publisher
         participantsThreshold = participantThreshold
-        //TODO: remove this
-        NotificationCenter.default.addObserver(
-            self, selector: #selector(testingGoAway),
-            name: NSNotification.Name("simulateGoAway"),
-            object: nil
-        )
-    }
-    
-    //TODO: remove this
-    @objc private func testingGoAway() {
-        var event = Stream_Video_Sfu_Event_GoAway()
-        event.reason = .rebalance
-        _ = handle(event: event)
     }
     
     func update(subscriber: PeerConnection?) {

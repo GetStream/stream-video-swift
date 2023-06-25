@@ -20,18 +20,12 @@ public struct CallTopView: View {
         HStack {
             Button {
                 withAnimation {
-//                    viewModel.isMinimized = true
-                    NotificationCenter.default.post(name: NSNotification.Name("simulateGoAway"), object: nil)
+                    viewModel.isMinimized = true
                 }
             } label: {
-//                Image(systemName: "chevron.left")
-//                    .foregroundColor(colors.textInverted)
-//                    .padding()
-                Text("Migrate")
+                Image(systemName: "chevron.left")
+                    .foregroundColor(colors.textInverted)
                     .padding()
-                    .foregroundColor(.white)
-                    .background(Color.blue)
-                    .cornerRadius(8)
             }
             .accessibility(identifier: "minimizeCallViewButton")
             

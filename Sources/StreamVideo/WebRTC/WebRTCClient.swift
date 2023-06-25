@@ -239,7 +239,6 @@ class WebRTCClient: NSObject {
                 isMigrating: true
             )
         }
-        NotificationCenter.default.post(name: NSNotification.Name("migrating"), object: nil)
     }
     
     func cleanUp() async {

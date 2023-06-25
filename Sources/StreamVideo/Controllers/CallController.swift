@@ -331,48 +331,48 @@ class CallController {
         source: WebSocketConnectionState.DisconnectionSource,
         isRetry: Bool = false
     ) {
-//        guard let call = call, call.state.reconnectionStatus != .migrating else {
-//            return
-//        }
-//        guard (call.state.reconnectionStatus != .reconnecting || isRetry),
-//                source != .userInitiated else {
-//            return            
-//        }
-//        if reconnectionDate == nil {
-//            reconnectionDate = Date()
-//        }
-//        let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
-//        if diff > sfuReconnectionTime {
-//            log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
-//            handleReconnectionError()
-//            reconnectionDate = nil
-//            return
-//        }
-//        Task {
-//            do {
-//                await webRTCClient?.cleanUp()
-//                log.debug("Waiting to reconnect")
-//                try? await Task.sleep(nanoseconds: 250_000_000)
-//                log.debug("Retrying to connect to the call")
-//                self.call?.update(reconnectionStatus: .reconnecting)
-//                _ = try await joinCall(
-//                    create: false,
-//                    callType: call.callType,
-//                    callId: call.callId,
-//                    callSettings: webRTCClient?.callSettings ?? CallSettings(),
-//                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
-//                    options: nil,
-//                    migratingFrom: nil
-//                )
-//            } catch {
-//                if diff > sfuReconnectionTime {
-//                    self.handleReconnectionError()
-//                } else {
-//                    try? await Task.sleep(nanoseconds: 1_000_000_000)
-//                    self.handleSignalChannelDisconnect(source: source, isRetry: true)
-//                }
-//            }
-//        }
+        guard let call = call, call.state.reconnectionStatus != .migrating else {
+            return
+        }
+        guard (call.state.reconnectionStatus != .reconnecting || isRetry),
+                source != .userInitiated else {
+            return
+        }
+        if reconnectionDate == nil {
+            reconnectionDate = Date()
+        }
+        let diff = Date().timeIntervalSince(reconnectionDate ?? Date())
+        if diff > sfuReconnectionTime {
+            log.debug("Stopping retry mechanism, SFU not available more than 15 seconds")
+            handleReconnectionError()
+            reconnectionDate = nil
+            return
+        }
+        Task {
+            do {
+                await webRTCClient?.cleanUp()
+                log.debug("Waiting to reconnect")
+                try? await Task.sleep(nanoseconds: 250_000_000)
+                log.debug("Retrying to connect to the call")
+                self.call?.update(reconnectionStatus: .reconnecting)
+                _ = try await joinCall(
+                    create: false,
+                    callType: call.callType,
+                    callId: call.callId,
+                    callSettings: webRTCClient?.callSettings ?? CallSettings(),
+                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
+                    options: nil,
+                    migratingFrom: nil
+                )
+            } catch {
+                if diff > sfuReconnectionTime {
+                    self.handleReconnectionError()
+                } else {
+                    try? await Task.sleep(nanoseconds: 1_000_000_000)
+                    self.handleSignalChannelDisconnect(source: source, isRetry: true)
+                }
+            }
+        }
     }
     
     private func handleReconnectionError() {
