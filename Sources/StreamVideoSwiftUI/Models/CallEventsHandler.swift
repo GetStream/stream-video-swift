@@ -49,17 +49,7 @@ public class CallEventsHandler {
                 id: id,
                 caller: caller,
                 type: type,
-                // TODO: use helper to map to members + why do we call this participants?
-                participants: ringEvent.members.map {
-                    let user = $0.user.toUser
-                    let member = Member(
-                        user: user,
-                        role: $0.role ?? $0.user.role,
-                        customData: $0.custom,
-                        updatedAt: $0.updatedAt
-                    )
-                    return member
-                },
+                members: ringEvent.members.map(\.member),
                 timeout: TimeInterval(ringEvent.call.settings.ring.autoCancelTimeoutMs / 1000)
             )
             return .incoming(incomingCall)
@@ -100,5 +90,18 @@ public class CallEventsHandler {
         default:
             return nil
         }
+    }
+}
+
+extension MemberResponse {
+
+    var member: Member {
+        let user = user.toUser
+        return Member(
+            user: user,
+            role: role ?? user.role,
+            customData: custom,
+            updatedAt: updatedAt
+        )
     }
 }

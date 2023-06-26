@@ -16,7 +16,7 @@ public class IncomingViewModel: ObservableObject {
     @Published public var hideIncomingCallScreen = false
     
     var callParticipants: [Member] {
-        callInfo.participants.filter { $0.id != streamVideo.user.id }
+        callInfo.members.filter { $0.id != streamVideo.user.id }
     }
     
     private var ringingTimer: Foundation.Timer?
