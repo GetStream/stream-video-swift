@@ -6,7 +6,7 @@ import Foundation
 
 /// The type that does events batching.
 protocol EventBatcher {
-    typealias Batch = [Event]
+    typealias Batch = [WrappedEvent]
     typealias BatchHandler = (_ batch: Batch, _ completion: @escaping () -> Void) -> Void
     
     /// The current batch of events.
@@ -19,13 +19,13 @@ protocol EventBatcher {
     /// that will happen when `period` has passed.
     ///
     /// - Parameter event: The event to add to the current batch.
-    func append(_ event: Event)
+    func append(_ event: WrappedEvent)
     
     /// Ignores `period` and passes the current batch of events to handler as soon as possible.
     func processImmediately(completion: @escaping () -> Void)
 }
 
-extension Batcher: EventBatcher where Item == Event {}
+extension Batcher: EventBatcher where Item == WrappedEvent {}
 
 final class Batcher<Item> {
     /// The batching period. If the item is added sonner then `period` has passed after the first item they will get into the same batch.

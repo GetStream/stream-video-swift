@@ -22,4 +22,4 @@ public enum CallNotification {
     public static let participantLeft = "StreamVideo.Call.ParticipantLeft"
 }
 
-typealias EventHandling = ((Event) -> ())?
+typealias EventHandling = ((WrappedEvent) -> ())?

@@ -9,7 +9,7 @@ import Combine
 public class CallsController: ObservableObject {
     
     /// Observable list of calls.
-    @Published public var calls = [CallStateResponseFields]()
+    @Published public var calls = [Call]()
     
     actor State {
         var loading = false
@@ -87,13 +87,13 @@ public class CallsController: ObservableObject {
         let request = makeQueryCallsRequest()
         
         do {
-            let response = try await defaultAPI.queryCalls(queryCallsRequest: request)
+            let response = try await streamVideo.queryCalls(request: request)
             if response.next == nil {
                 await state.update(loadedAllCalls: true)
             }
             prev = response.prev
             next = response.next
-            let calls = response.calls
+            let calls = response.calls.map { call(from: $0) }
             if shouldRefresh {
                 self.calls = calls
             } else {
@@ -146,87 +146,32 @@ public class CallsController: ObservableObject {
     }
     
     private func handle(event: VideoEvent) {
-        switch event {
-        case .typeCallBroadcastingStartedEvent(let broadcastingStarted):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == broadcastingStarted.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
+        guard let callEvent = event.rawValue as? WSCallEvent else { return }
+        for (index, call) in calls.enumerated() {
+            if call.cId == callEvent.callCid {
+                call.state.updateState(from: event)
+                calls[index] = call
                 return
             }
-            calls[index].call.egress.broadcasting = true
-        case .typeCallBroadcastingStoppedEvent(let broadcastingStopped):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == broadcastingStopped.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call.egress.broadcasting = false
-        case .typeCallCreatedEvent(let callCreated):
-            let call = CallStateResponseFields(
-                blockedUsers: [],
-                call: callCreated.call,
-                members: [],
-                ownCapabilities: []
-            )
-            calls.insert(call, at: 0)
-        case .typeCallEndedEvent(let callEnded):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == callEnded.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call.endedAt = Date()
-        case .typeCallLiveStartedEvent(let liveStarted):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == liveStarted.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call.backstage = false
-        case .typeCallSessionParticipantJoinedEvent(let event):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == event.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            let participant = CallParticipantResponse(
-                joinedAt: event.createdAt,
-                user: event.user
-            )
-            calls[index].call.session?.participants.append(participant)
-        case .typeCallSessionParticipantLeftEvent(let event):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == event.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call.session?.participants.removeAll(where: { participant in
-                participant.user.id == event.user.id
-            })
-        case .typeCallUpdatedEvent(let callUpdated):
-            let index = calls.firstIndex { callData in
-                callData.call.cid == callUpdated.callCid
-            }
-            guard let index else {
-                log.warning("Received an event for call that's not available")
-                return
-            }
-            calls[index].call = callUpdated.call
-        default:
-            log.debug("Receivend an event \(event)")
         }
+        if case let .typeCallCreatedEvent(callCreated) = event {
+            let call = streamVideo.call(
+                callType: callCreated.call.type,
+                callId: callCreated.call.id
+            )
+            call.state.update(from: callCreated.call)
+            calls.insert(call, at: 0)
+        }
+    }
+    
+    private func call(from callResponse: CallStateResponseFields) -> Call {
+        let call = streamVideo.call(
+            callType: callResponse.call.type,
+            callId: callResponse.call.id
+        )
+        call.state.update(from: callResponse.call)
+        call.state.mergeMembers(callResponse.members)
+        return call
     }
     
     private func reWatchCalls() {

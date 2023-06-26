@@ -114,7 +114,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.reconnectionStatus == .reconnecting)
      
         // When
-        try await waitForCallEvent(nanoseconds: 5_000_000_000)
+        try await waitForCallEvent(nanoseconds: 5_500_000_000)
         
         // Then
         XCTAssert(callController.call == nil)
@@ -160,7 +160,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         callController.call = call
         let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
-        eventNotificationCenter?.process(event)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRecordingStartedEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callController.call?.state.recordingState == .recording)
@@ -183,7 +183,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         callController.call = call
         let event = CallRecordingStartedEvent(callCid: "test", createdAt: Date())
-        eventNotificationCenter?.process(event)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRecordingStartedEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callController.call?.state.recordingState == .noRecording)

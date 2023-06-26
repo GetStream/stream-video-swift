@@ -6,6 +6,12 @@ import Foundation
 
 extension APIError: Error {}
 
+extension Stream_Video_Sfu_Models_Error: Error, CustomStringConvertible {
+    var description: String {
+        "SFU error code: \(code.rawValue) message: \(message) shouldRetry: \(shouldRetry)"
+    }
+}
+
 /// A Client error.
 public class ClientError: Error, CustomStringConvertible {
     public struct Location: Equatable {

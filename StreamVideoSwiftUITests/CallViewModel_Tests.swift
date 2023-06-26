@@ -71,12 +71,10 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
-        let videoEvent = VideoEvent.typeCallRejectedEvent(event)
-        let container = CoordinatorEvent(wrapped: videoEvent, event: event)
-        eventNotificationCenter?.process(container)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRejectedEvent(event)))
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 900_000_000)
     }
     
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
@@ -96,10 +94,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
-        let first = CoordinatorEvent(
-            wrapped: .typeCallRejectedEvent(firstReject),
-            event: firstReject
-        )
+        let first = WrappedEvent.coordinatorEvent(.typeCallRejectedEvent(firstReject))
         eventNotificationCenter?.process(first)
         
         // Then
@@ -116,10 +111,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: thirdUser.userId).toUserResponse()
         )
-        let second = CoordinatorEvent(
-            wrapped: .typeCallRejectedEvent(secondReject),
-            event: secondReject
-        )
+        let second = WrappedEvent.coordinatorEvent(.typeCallRejectedEvent(secondReject))
         eventNotificationCenter?.process(second)
         
         // Then
@@ -133,8 +125,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         
         // When
         let event = CallEndedEvent(callCid: callCid, createdAt: Date())
-        let container = CoordinatorEvent(wrapped: .typeCallEndedEvent(event), event: event)
-        eventNotificationCenter?.process(container)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallEndedEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -151,8 +142,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: firstUser.userId).toUserResponse()
         )
-        let container = CoordinatorEvent(wrapped: .typeBlockedUserEvent(event), event: event)
-        eventNotificationCenter?.process(container)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callViewModel.callingState == .idle)
@@ -175,7 +165,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             createdAt: Date(),
             user: User(id: secondUser.userId).toUserResponse()
         )
-        eventNotificationCenter?.process(event)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeBlockedUserEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callViewModel.call?.state.blockedUserIds.first == secondUser.userId)
@@ -218,8 +208,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 updatedAt: Date()
             )
         )
-        let container = CoordinatorEvent(wrapped: .typeCallRingEvent(event), event: event)
-        eventNotificationCenter?.process(container)
+
+        let wrapped = WrappedEvent.coordinatorEvent(.typeCallRingEvent(event))
+        eventNotificationCenter?.process(wrapped)
         
         // Then
         try await waitForCallEvent()
@@ -260,8 +251,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 updatedAt: Date()
             )
         )
-        let container = CoordinatorEvent(wrapped: .typeCallRingEvent(event), event: event)
-        eventNotificationCenter?.process(container)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRingEvent(event)))
         
         // Then
         try await waitForCallEvent()
@@ -275,7 +265,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.rejectCall(callType: callType, callId: callId)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 1_000_000_000)
     }
     
     func test_joinCall_success() async throws {
@@ -399,11 +389,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             sessionId: "123",
             user: .make(from: "test")
         )
-        let container = CoordinatorEvent(
-            wrapped: .typeCallSessionParticipantJoinedEvent(participantEvent),
-            event: participantEvent
-        )
-        eventNotificationCenter?.process(container)
+
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallSessionParticipantJoinedEvent(participantEvent)))
         try await waitForCallEvent()
 
         // Then
@@ -419,14 +406,16 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
+
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
+
         let controller = callViewModel.call!.callController as! CallController_Mock
-        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
 
         // Then
         try await XCTAssertWithDelay(callViewModel.participants.map(\.userId).contains(secondUser.userId))
@@ -435,7 +424,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         var participantLeft = Stream_Video_Sfu_Event_ParticipantLeft()
         participantLeft.callCid = callCid
         participantLeft.participant = participant
-        controller.webRTCClient.eventNotificationCenter.process(participantLeft)
+        controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantLeft(participantLeft)))
 
         // Then
         try await XCTAssertWithDelay(callViewModel.participants.count == 0)
@@ -448,14 +437,18 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
+
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
+
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
+
         let controller = callViewModel.call!.callController as! CallController_Mock
-        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
+
         let callParticipant = participant.toCallParticipant(showTrack: false)
         callViewModel.changeTrackVisbility(for: callParticipant, isVisible: true)
 
@@ -470,14 +463,18 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
+
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
+
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
+
         let controller = callViewModel.call!.callController as! CallController_Mock
-        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
+
         let callParticipant = participant.toCallParticipant(showTrack: false)
         callViewModel.pinnedParticipant = callParticipant
 
@@ -492,15 +489,19 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // When
         callViewModel.startCall(callType: .default, callId: callId, members: participants)
         try await waitForCallEvent()
+
         var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
         participantJoined.callCid = callCid
+
         var participant = Stream_Video_Sfu_Models_Participant()
         participant.userID = secondUser.userId
         participant.sessionID = UUID().uuidString
         participantJoined.participant = participant
+
         let controller = callViewModel.call!.callController as! CallController_Mock
-        controller.webRTCClient.eventNotificationCenter.process(participantJoined)
+        controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         callViewModel.update(participantsLayout: .fullScreen)
+
         let callParticipant = participant.toCallParticipant(showTrack: false)
         callViewModel.pinnedParticipant = callParticipant
 

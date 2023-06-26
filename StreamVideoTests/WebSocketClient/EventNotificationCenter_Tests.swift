@@ -61,7 +61,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
         let eventLogger = EventLogger(center)
 
         // Simulate incoming event
-        center.process(TestEvent())
+        center.process(.internalEvent(TestEvent()))
 
         // Assert event is published as it is
         AssertAsync.staysTrue(eventLogger.equatableEvents.isEmpty)
@@ -76,7 +76,11 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Simulate incoming event
         let event = TestEvent()
-        center.process(event)
+        center.process(.internalEvent(event))
+
+        let expectation = expectation(description: "wait expectation")
+        expectation.isInverted = true
+        wait(for: [expectation], timeout: 1)
 
         // Assert event is published as it is
         AssertAsync.willBeEqual(eventLogger.events as? [TestEvent], [event])
@@ -94,7 +98,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Feed events that should be posted and catch the completion
         var completionCalled = false
-        center.process(events, postNotifications: true) {
+        center.process(events.map { .internalEvent($0)}, postNotifications: true) {
             completionCalled = true
         }
 
@@ -117,7 +121,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Feed events that should not be posted and catch the completion
         var completionCalled = false
-        center.process(events, postNotifications: false) {
+        center.process(events.map { .internalEvent($0)}, postNotifications: false) {
             completionCalled = true
         }
 
@@ -148,16 +152,27 @@ final class EventNotificationCenter_Tests: XCTestCase {
             object: nil,
             queue: nil
         ) { notification in
-            // Assert notification contains test event
-            XCTAssertEqual(notification.event as? TestEvent, testEvent)
-            // Assert notificaion is posted on correct queue
-            XCTAssertTrue(DispatchQueue.isTestQueue(withId: mockQueueUUID))
+            guard let wrappedEvent = notification.event else { return }
+
+            switch wrappedEvent {
+            case .internalEvent(let event):
+                // Assert notification contains test event
+                XCTAssertEqual(event as? TestEvent, testEvent)
+                // Assert notification is posted on correct queue
+                XCTAssertTrue(DispatchQueue.isTestQueue(withId: mockQueueUUID))
+            default:
+                break
+            }
 
             observerTriggered = true
         }
 
         // Process test event and post when processing is completed
-        center.process([testEvent], postNotifications: true)
+        center.process([.internalEvent(testEvent)], postNotifications: true)
+
+        let expectation = expectation(description: "wait expectation")
+        expectation.isInverted = true
+        wait(for: [expectation], timeout: 1)
 
         // Wait for observer to be called
         AssertAsync.willBeTrue(observerTriggered)
@@ -182,14 +197,20 @@ final class EventNotificationCenter_Tests: XCTestCase {
         // Add event swapping middleware
         center.add(middleware: EventMiddleware_Mock { event in
             // Assert expected event is received
-            XCTAssertEqual(event as? TestEvent, originalEvent)
-
-            // Simulate event swapping
-            return outputEvent
+            if case let .internalEvent(event) = event {
+                XCTAssertEqual(event as? TestEvent, originalEvent)
+                // Swap to outputEvent
+                return .internalEvent(outputEvent)
+            }
+            return event
         })
 
         // Start processing of original event
-        center.process(originalEvent, postNotification: true)
+        center.process(.internalEvent(originalEvent), postNotification: true)
+
+        let expectation = expectation(description: "wait expectation")
+        expectation.isInverted = true
+        wait(for: [expectation], timeout: 1)
 
         // Assert event returned from middleware is posted
         AssertAsync.willBeEqual(

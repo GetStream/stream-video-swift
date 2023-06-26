@@ -200,6 +200,9 @@ class WebRTCClient: NSObject {
         log.debug("Connecting WS channel")
         signalChannel?.connect()
         sfuMiddleware.onSocketConnected = handleOnSocketConnected
+        sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
+            self?.onParticipantCountUpdated?(participantCount)
+        }
     }
     
     func cleanUp() async {
@@ -210,7 +213,6 @@ class WebRTCClient: NSObject {
         subscriber = nil
         signalChannel?.connectionStateDelegate = nil
         signalChannel?.onWSConnectionEstablished = nil
-        signalChannel?.participantCountUpdated = nil
         signalChannel?.disconnect {}
         signalChannel = nil
         localAudioTrack = nil
@@ -556,9 +558,6 @@ class WebRTCClient: NSObject {
             Task {
                 try await self.handleSocketConnected()
             }
-        }
-        webSocketClient.participantCountUpdated = { [weak self] participantCount in
-            self?.onParticipantCountUpdated?(participantCount)
         }
 
         return webSocketClient

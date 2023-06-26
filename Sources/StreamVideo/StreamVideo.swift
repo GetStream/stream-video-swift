@@ -234,27 +234,41 @@ public class StreamVideo: ObservableObject {
         }
     }
     
+    /// Subscribes to all video events.
+    /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent {
-                    continuation.yield(event.wrapped)
+                guard case let .coordinatorEvent(event) = event else {
+                    return
                 }
+                continuation.yield(event)
             }
             self?.eventHandlers.append(eventHandler)
         }
     }
 
+    /// Subscribes to a particular WS event.
+    /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent,
-                    let rawEvent = event.event as? WSEvent {
-                    continuation.yield(rawEvent)
+                guard let coordinatorEvent = event.unwrap() else {
+                    return
+                }
+                if let event = coordinatorEvent.unwrap() as? WSEvent {
+                    continuation.yield(event)
                 }
             }
             self?.eventHandlers.append(eventHandler)
         }
+    }
+    
+    /// Queries calls with the provided request.
+    /// - Parameter request: the query calls request.
+    /// - Returns: response with the queried calls.
+    public func queryCalls(request: QueryCallsRequest) async throws -> QueryCallsResponse {
+        try await coordinatorClient.queryCalls(queryCallsRequest: request)
     }
 
     // MARK: - private
@@ -509,9 +523,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            eventHandlers.forEach { $0?(WSDisconnected()) }
+            eventHandlers.forEach { $0?(.internalEvent(WSDisconnected())) }
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0?(WSConnected()) }
+            eventHandlers.forEach { $0?(.internalEvent(WSConnected())) }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -520,7 +534,7 @@ extension StreamVideo: ConnectionStateDelegate {
 
 extension StreamVideo: WSEventsSubscriber {
     
-    func onEvent(_ event: Event) {
+    func onEvent(_ event: WrappedEvent) {
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }

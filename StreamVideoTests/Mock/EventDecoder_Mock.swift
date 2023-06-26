@@ -8,9 +8,9 @@ import XCTest
 
 final class EventDecoder_Mock: AnyEventDecoder {
     var decode_calledWithData: Data?
-    var decodedEvent: Result<Event, Error>!
+    var decodedEvent: Result<WrappedEvent, Error>!
 
-    func decode(from data: Data) throws -> Event {
+    func decode(from data: Data) throws -> WrappedEvent {
         decode_calledWithData = data
 
         switch decodedEvent {

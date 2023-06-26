@@ -73,7 +73,6 @@ class WebSocketClient {
         
     var onWSConnectionEstablished: (() -> Void)?
     var onConnected: (() -> Void)?
-    var participantCountUpdated: ((UInt32) -> ())?
     
     init(
         sessionConfiguration: URLSessionConfiguration,
@@ -158,9 +157,9 @@ extension WebSocketClient {
         }
         
         var eventBatcherBuilder: (
-            _ handler: @escaping ([Event], @escaping () -> Void) -> Void
+            _ handler: @escaping ([WrappedEvent], @escaping () -> Void) -> Void
         ) -> EventBatcher = {
-            Batcher<Event>(period: 0.0, handler: $0)
+            Batcher<WrappedEvent>(period: 0.0, handler: $0)
         }
     }
 }
@@ -175,32 +174,37 @@ extension WebSocketClient: WebSocketEngineDelegate {
     }
     
     func webSocketDidReceiveMessage(_ data: Data) {
+        var event: WrappedEvent
+
         do {
-            let messageData = data
-            log.debug("Event received")
-            let decoded = try eventDecoder.decode(from: messageData)
-            var event = decoded
-            if let container = event as? CoordinatorEvent {
-                event = container.event
-            }
-            log.debug("Event decoded: \(event)")
-            if let healthCheckEvent = event as? (any HealthCheck) {
-                handle(healthCheckEvent: healthCheckEvent)
-            } else if let errorEvent = event as? ConnectionErrorEvent {
-                let error = ClientError(with: errorEvent.error)
-                connectionState = .disconnecting(source: .serverInitiated(error: error))
-            } else {
-                eventsBatcher.append(decoded)
-            }
-        } catch is ClientError.UnsupportedEventType {
-            log.info("Skipping unsupported event type", subsystems: .webSocket)
+            event = try eventDecoder.decode(from: data)
         } catch {
-            // Check if the message contains an error object from the server
-            if let errorContainer = try? StreamJSONDecoder.default.decode(WebSocketErrorContainer.self, from: data) {
-                let webSocketError = ClientError.WebSocket(with: errorContainer.error)
-                connectionState = .disconnecting(source: .serverInitiated(error: webSocketError))
-            }
+            log.error("decoding websocket payload errored err: \(error)")
+            return
         }
+        
+        switch event {
+        case .coordinatorEvent(let event):
+            log.info("received WS \(event.type) event from coordinator")
+        case .internalEvent(_):
+            break
+        case .sfuEvent(_):
+            break
+        }
+
+        if let error = event.error() {
+            log.error("received an error event from WS err: \(error)")
+            connectionState = .disconnecting(source: .serverInitiated(error: ClientError(with: error)))
+            return
+        }
+
+        // healthcheck events are not passed to batcher
+        if let info = event.healthcheck() {
+            handle(healthcheck: event, info: info)
+            return
+        }
+
+        eventsBatcher.append(event)
     }
     
     func webSocketDidDisconnect(error engineError: WebSocketEngineError?) {
@@ -218,30 +222,18 @@ extension WebSocketClient: WebSocketEngineDelegate {
         }
     }
     
-    private func handle<Event: HealthCheck>(healthCheckEvent: Event) {
-        log.debug("Handling healthcheck event")
-        var healthCheckInfo = HealthCheckInfo()
-        if let healthCheckEvent = healthCheckEvent as? HealthCheckEvent {
-            healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
-        } else if let healthCheckEvent = healthCheckEvent as? Stream_Video_Sfu_Event_HealthCheckResponse {
-            healthCheckInfo = HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
-            participantCountUpdated?(healthCheckEvent.participantCount.total)
-        } else if let wsConnected = healthCheckEvent as? ConnectedEvent {
-            let healthCheck = HealthCheckEvent(
-                connectionId: wsConnected.connectionId,
-                createdAt: wsConnected.createdAt,
-                type: wsConnected.type
-            )
-            healthCheckInfo = HealthCheckInfo(coordinatorHealthCheck: healthCheck)
-        }
+    private func handle(healthcheck: WrappedEvent, info: HealthCheckInfo) {
+        log.debug("Handling healthcheck")
+        
         if connectionState == .authenticating {
-            connectionState = .connected(healthCheckInfo: healthCheckInfo)
+            connectionState = .connected(healthCheckInfo: info)
             onConnected?()
         }
-        eventNotificationCenter.process(healthCheckEvent, postNotification: false) { [weak self] in
+        
+        eventNotificationCenter.process(healthcheck, postNotification: false) { [weak self] in
             self?.engineQueue.async { [weak self] in
                 self?.pingController.pongReceived()
-                self?.connectionState = .connected(healthCheckInfo: healthCheckInfo)
+                self?.connectionState = .connected(healthCheckInfo: info)
             }
         }
     }
@@ -290,8 +282,8 @@ extension Notification {
         self.init(name: .NewEventReceived, object: sender, userInfo: [Self.eventKey: event])
     }
     
-    var event: Event? {
-        userInfo?[Self.eventKey] as? Event
+    var event: WrappedEvent? {
+        userInfo?[Self.eventKey] as? WrappedEvent
     }
 }
 
