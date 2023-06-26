@@ -12,12 +12,12 @@ final class IncomingCallView_Tests: StreamVideoUITestCase {
     
     func test_incomingCallView_snapshot() throws {
         for count in spotlightParticipants {
-            let users = UserFactory.get(count)
+            let members = UserFactory.get(count)
             let callInfo = IncomingCall(
                 id: callCid,
-                caller: users.first!.user,
+                caller: members.first!.user,
                 type: callType,
-                participants: users,
+                members: members,
                 timeout: 15000
             )
             let view = IncomingCallView(

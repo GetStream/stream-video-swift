@@ -26,7 +26,6 @@ extension Event {
         return nil
     }
 
-    // TODO: write a test for this!
     func forCall(cid: String) -> Bool {
         guard let videoEvent = self.unwrap() else {
             return false

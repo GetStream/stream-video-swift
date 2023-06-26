@@ -15,6 +15,6 @@ public struct IncomingCall: Identifiable, Sendable, Equatable {
     public let id: String
     public let caller: User
     public let type: String
-    public let participants: [Member]
+    public let members: [Member]
     public let timeout: TimeInterval
 }

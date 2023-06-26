@@ -330,12 +330,12 @@ final class WebSocketClient_Tests: XCTestCase {
         // Assert event gets batched
         XCTAssertEqual(
             eventsBatcher.mock_append.calls.map(\.asEquatable),
-            [incomingEvent.asEquatable]
+            [WrappedEvent.coordinatorEvent(.typeCustomVideoEvent(incomingEvent)).asEquatable]
         )
 
         // Assert incoming event get processed and posted
         let (events, postNotifications, completion) = try XCTUnwrap(eventNotificationCenter.mock_process.calls.first)
-        XCTAssertEqual(events.map(\.asEquatable), [incomingEvent.asEquatable])
+        XCTAssertEqual(events.map(\.asEquatable), [WrappedEvent.coordinatorEvent(.typeCustomVideoEvent(incomingEvent)).asEquatable])
         XCTAssertTrue(postNotifications)
         XCTAssertNotNil(completion)
     }

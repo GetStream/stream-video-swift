@@ -76,7 +76,11 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Simulate incoming event
         let event = TestEvent()
-        center.process(.internalEvent(TestEvent()))
+        center.process(.internalEvent(event))
+
+        let expectation = expectation(description: "wait expectation")
+        expectation.isInverted = true
+        wait(for: [expectation], timeout: 1)
 
         // Assert event is published as it is
         AssertAsync.willBeEqual(eventLogger.events as? [TestEvent], [event])
@@ -148,16 +152,27 @@ final class EventNotificationCenter_Tests: XCTestCase {
             object: nil,
             queue: nil
         ) { notification in
-            // Assert notification contains test event
-            XCTAssertEqual(notification.event as? TestEvent, testEvent)
-            // Assert notificaion is posted on correct queue
-            XCTAssertTrue(DispatchQueue.isTestQueue(withId: mockQueueUUID))
+            guard let wrappedEvent = notification.event else { return }
+
+            switch wrappedEvent {
+            case .internalEvent(let event):
+                // Assert notification contains test event
+                XCTAssertEqual(event as? TestEvent, testEvent)
+                // Assert notification is posted on correct queue
+                XCTAssertTrue(DispatchQueue.isTestQueue(withId: mockQueueUUID))
+            default:
+                break
+            }
 
             observerTriggered = true
         }
 
         // Process test event and post when processing is completed
         center.process([.internalEvent(testEvent)], postNotifications: true)
+
+        let expectation = expectation(description: "wait expectation")
+        expectation.isInverted = true
+        wait(for: [expectation], timeout: 1)
 
         // Wait for observer to be called
         AssertAsync.willBeTrue(observerTriggered)
@@ -184,12 +199,18 @@ final class EventNotificationCenter_Tests: XCTestCase {
             // Assert expected event is received
             if case let .internalEvent(event) = event {
                 XCTAssertEqual(event as? TestEvent, originalEvent)
+                // Swap to outputEvent
+                return .internalEvent(outputEvent)
             }
             return event
         })
 
         // Start processing of original event
         center.process(.internalEvent(originalEvent), postNotification: true)
+
+        let expectation = expectation(description: "wait expectation")
+        expectation.isInverted = true
+        wait(for: [expectation], timeout: 1)
 
         // Assert event returned from middleware is posted
         AssertAsync.willBeEqual(
