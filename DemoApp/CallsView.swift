@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import StreamVideo
 
 struct CallsView: View {
     
@@ -17,20 +18,20 @@ struct CallsView: View {
                 ForEach(viewModel.calls) { call in
                     HStack {
                         VStack(alignment: .leading) {
-                            Text(call.call.cid)
+                            Text(call.cId)
                                 .bold()
-                            Text("\(call.members.map(\.userId).joined(separator: ","))")
+                            Text("\(call.state.members.map(\.user.id).joined(separator: ","))")
                                 .font(.caption)
                         }
                         Spacer()
                         VStack(alignment: .trailing) {
-                            if !call.call.backstage {
+                            if !call.state.backstage {
                                 Text("Live")
                                     .bold()
                                     .foregroundColor(.green)
                             }
                             if #available(iOS 15, *) {
-                                Text(call.call.createdAt.formatted(date: .abbreviated, time: .shortened))
+                                Text(call.state.createdAt.formatted(date: .abbreviated, time: .shortened))
                                     .font(.caption)
                                     .foregroundColor(.gray)
                             }
@@ -44,5 +45,11 @@ struct CallsView: View {
                 }
             }
         }
+    }
+}
+
+extension Call: Identifiable {
+    public var id: String {
+        cId
     }
 }

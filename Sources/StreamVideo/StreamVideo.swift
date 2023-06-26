@@ -234,6 +234,8 @@ public class StreamVideo: ObservableObject {
         }
     }
     
+    /// Subscribes to all video events.
+    /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
@@ -246,6 +248,8 @@ public class StreamVideo: ObservableObject {
         }
     }
 
+    /// Subscribes to a particular WS event.
+    /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
@@ -258,6 +262,13 @@ public class StreamVideo: ObservableObject {
             }
             self?.eventHandlers.append(eventHandler)
         }
+    }
+    
+    /// Queries calls with the provided request.
+    /// - Parameter request: the query calls request.
+    /// - Returns: response with the queried calls.
+    public func queryCalls(request: QueryCallsRequest) async throws -> QueryCallsResponse {
+        try await coordinatorClient.queryCalls(queryCallsRequest: request)
     }
 
     // MARK: - private
