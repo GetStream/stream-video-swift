@@ -15,6 +15,7 @@ class SfuMiddleware: EventMiddleware {
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onSocketConnected: (() -> Void)?
+    var onParticipantCountUpdated: ((UInt32) -> ())?
     
     init(
         sessionID: String,
@@ -52,7 +53,7 @@ class SfuMiddleware: EventMiddleware {
             case .subscriberOffer(let event):
                 await handleSubscriberEvent(event)
             case .publisherAnswer(_):
-                log.error("TODO: publisher answer")
+                log.warning("Publisher answer event shouldn't be sent")
             case .connectionQualityChanged(let event):
                 await handleConnectionQualityChangedEvent(event)
             case .audioLevelChanged(let event):
@@ -71,9 +72,7 @@ class SfuMiddleware: EventMiddleware {
                 onSocketConnected?()
                 await loadParticipants(from: event)
             case .healthCheckResponse(let event):
-                // TODO: yay! we can update it here but I have no idea about how
-                //                event.participantCount
-                break
+                onParticipantCountUpdated?(event.participantCount.total)
             case .trackPublished(let event):
                 await handleTrackPublishedEvent(event)
             case .trackUnpublished(let event):
@@ -91,6 +90,7 @@ class SfuMiddleware: EventMiddleware {
     
     func cleanUp() {
         onSocketConnected = nil
+        onParticipantCountUpdated = nil
     }
     
     private func handleSubscriberEvent(_ event: Stream_Video_Sfu_Event_SubscriberOffer) async {

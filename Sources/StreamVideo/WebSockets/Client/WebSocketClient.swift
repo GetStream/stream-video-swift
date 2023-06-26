@@ -73,7 +73,6 @@ class WebSocketClient {
         
     var onWSConnectionEstablished: (() -> Void)?
     var onConnected: (() -> Void)?
-    var participantCountUpdated: ((UInt32) -> ())?
     
     init(
         sessionConfiguration: URLSessionConfiguration,
@@ -225,12 +224,6 @@ extension WebSocketClient: WebSocketEngineDelegate {
     
     private func handle(healthcheck: WrappedEvent, info: HealthCheckInfo) {
         log.debug("Handling healthcheck")
-        
-        // TODO: better if we let this event flow and have a subscriber sync it to call.state
-        // probably easy fix if we pass this event to the eventsBatcher
-        if let sfuHealthcheck = info.sfuHealthCheck {
-            participantCountUpdated?(sfuHealthcheck.participantCount.total)
-        }
         
         if connectionState == .authenticating {
             connectionState = .connected(healthCheckInfo: info)
