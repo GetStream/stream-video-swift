@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */; };
+		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		40B7136B2A275F1D00D1FE67 /* DemoAppUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 845C573128DDC57A00D38FCC /* DemoAppUtils.swift */; };
@@ -675,6 +676,7 @@
 /* Begin PBXFileReference section */
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamVideoSwiftUIApp+Sentry.swift"; sourceTree = "<group>"; };
+		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
 		4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTest.swift; sourceTree = "<group>"; };
 		4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
@@ -1252,6 +1254,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		40AB31232A49836800C270E1 /* WebSockets */ = {
+			isa = PBXGroup;
+			children = (
+				40AB31242A49837400C270E1 /* Events */,
+			);
+			path = WebSockets;
+			sourceTree = "<group>";
+		};
+		40AB31242A49837400C270E1 /* Events */ = {
+			isa = PBXGroup;
+			children = (
+				40AB31252A49838000C270E1 /* EventTests.swift */,
+			);
+			path = Events;
+			sourceTree = "<group>";
+		};
 		4351AEAB2A40586B00D32D0D /* IntegrationTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -2180,6 +2198,7 @@
 		84F737F8287C13AD00A363F4 /* StreamVideoTests */ = {
 			isa = PBXGroup;
 			children = (
+				40AB31232A49836800C270E1 /* WebSockets */,
 				4351AEAB2A40586B00D32D0D /* IntegrationTests */,
 				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
 				84DCA2162A398BFD000C3411 /* Call */,
@@ -3113,6 +3132,7 @@
 				8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */,
 				84F58B8F29EEB32700010C4C /* WebSocketPingController_Mock.swift in Sources */,
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
+				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
 				842747FC29EEECBA00E063AD /* AssertTestQueue.swift in Sources */,
 				84DCA2112A389160000C3411 /* AssertDelay.swift in Sources */,
