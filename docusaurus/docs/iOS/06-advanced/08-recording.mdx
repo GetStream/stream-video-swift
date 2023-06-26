@@ -55,9 +55,17 @@ You can listen to the recording events and show visual indications to the users 
 ```swift
 func subscribeToRecordingEvents() {
     Task {
-        for await event in call.recordingEvents() {
-            log.debug("received an event \(event)")
-            /* handle recording event */
+        for await event in call.subscribe() {
+            switch event {
+                case .typeCallRecordingStartedEvent(let recordingStartedEvent):
+                    log.debug("received an event \(recordingStartedEvent)")
+                    /* handle recording event */
+                case .typeCallRecordingStoppedEvent(let recordingStoppedEvent):
+                    log.debug("received an event \(recordingStoppedEvent)")
+                    /* handle recording event */
+                default:
+                    break
+            }
         }
     }
 }

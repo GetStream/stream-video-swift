@@ -7,11 +7,11 @@ The `Call` object provides several options to ring and notify users about a call
 
 ### Ringing
 
-If a call was not created before, you should first create it and pass the ring value to `true`. For this, you can use the `getOrCreate` method from the `Call` object.
+If a call was not created before, you should first create it and pass the ring value to `true`. For this, you can use the `create` method from the `Call` object.
 
 ```swift
-let call = streamVideo.call(callType: "default", callId: callId, members: members)
-let callResponse = try await call.getOrCreate(members: members, ring: true)
+let call = streamVideo.call(callType: "default", callId: callId)
+let callResponse = try await call.create(members: members, ring: true)
 ```
 
 When `ring` is true, a VoIP notification will be sent to the members, provided you have the required setup for CallKit and PushKit. If you don't have a VoIP push setup, a regular push notification will be sent to the members. For more details around push notifications, please check [this page](../push-notifications).
@@ -37,8 +37,8 @@ let callResponse = try await call.ring()
 In some cases, you just want to notify users that you joined a call, instead of ringing. To do this, you should use the `notify` option:
 
 ```swift
-let call = streamVideo.call(callType: "default", callId: callId, members: members)
-let callResponse = try await call.getOrCreate(members: members, notify: true)
+let call = streamVideo.call(callType: "default", callId: callId)
+let callResponse = try await call.create(members: members, notify: true)
 ```
 
 When `notify` is true, a regular push notification will be sent to all the members. This can be useful for livestreams apps or huddles. 

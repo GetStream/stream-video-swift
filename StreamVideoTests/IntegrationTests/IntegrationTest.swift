@@ -31,10 +31,12 @@ class IntegrationTest: XCTestCase {
     public override func setUp() async throws {
         try await super.setUp()
         try await client.connect()
-    }
-    
-    public func fetchToken(for userId: String, expiration: Double = 0) -> UserToken? {
-        return TokenGenerator.shared.generateUserToken(userId: userId, tokenDurationInMinutes: expiration)
+        
+        /**
+         Token generation example
+         
+         let token = TokenGenerator.shared.fetchToken(for: <#T##String#>, expiration: <#T##Double#>)
+         */
     }
 
     public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}

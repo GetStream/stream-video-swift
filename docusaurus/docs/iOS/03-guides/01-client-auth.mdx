@@ -29,7 +29,6 @@ let streamVideo = StreamVideo(
     apiKey: "your_api_key",
     user: user.userInfo,
     token: user.token,
-    videoConfig: VideoConfig(),
     tokenProvider: { result in
         Task {
             let newToken = try await fetchToken(for: user.userInfo)
@@ -39,17 +38,9 @@ let streamVideo = StreamVideo(
 )
 ```
 
-Note the `fetchToken` method. In this method, you will need to provide your own implementation, that will load a new token for the current user. As soon as you provide the token in the `result`, the SDK will be notified about the new token and retry the failed request.
-
-When the object is created, you should connect the user to our backend. This can be done whenever you plan on using the video features.
-
-```swift
-private func connectUser() {
-    Task {
-        try await streamVideo?.connect()
-    }
-}
-```
+:::note
+You will need the `fetchToken` method to provide your own implementation, that will load a new token for the current user. As soon as you provide the token in the `result`, the SDK will be notified about the new token and retry the failed request.
+:::
 
 #### Guest users
 
@@ -67,9 +58,13 @@ Task {
 
 After the client is initialized, you can safely create a `CallViewModel` and join calls, like a regular user.
 
+:::warning
+Guest users do not have permissions to start new calls.
+:::
+
 #### Anonymous users
 
-Anonymous users don't have a profile. They are not able to send audio or video, and they are not able to perform a web socket connection. If you try to call the `connect` method for an anonymous user, a `MissingPermission` error will be thrown.
+Anonymous users don't have a profile. They are not able to send audio or video, and they are not able to perform a web socket connection.
 
 Anonymous users need a call token to join a call. Call tokens are JWT authentication tokens that include additional claims that grant special access to a list of calls. They allow anonymous users to have access to a list of calls.
 
