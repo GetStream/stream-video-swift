@@ -38,20 +38,16 @@ public class CallState: ObservableObject {
         case .typeCallAcceptedEvent(let event):
             update(from: event.call)
         case .typeCallBroadcastingStartedEvent(_):
-            // TODO
-            break
+            self.egress?.broadcasting = true
         case .typeCallBroadcastingStoppedEvent(_):
-            // TODO
-            break
-        case .typeCallCreatedEvent(_):
-            // TODO
-            break
+            self.egress?.broadcasting = false
+        case .typeCallCreatedEvent(let event):
+            update(from: event.call)
+            mergeMembers(event.members)
         case .typeCallEndedEvent(_):
-            // TODO
-            break
-        case .typeCallLiveStartedEvent(_):
-            // TODO
-            break
+            endedAt = Date()
+        case .typeCallLiveStartedEvent(let event):
+            update(from: event.call)
         case .typeCallMemberAddedEvent(let event):
             mergeMembers(event.members)
         case .typeCallMemberRemovedEvent(let event):
@@ -59,14 +55,14 @@ public class CallState: ObservableObject {
             self.members = updated
         case .typeCallMemberUpdatedEvent(let event):
             mergeMembers(event.members)
-        case .typeCallMemberUpdatedPermissionEvent(_):
-            // TODO
-            break
-        case .typeCallNotificationEvent(_):
-            // TODO
-            break
+        case .typeCallMemberUpdatedPermissionEvent(let event):
+            capabilitiesByRole = event.capabilitiesByRole
+            mergeMembers(event.members)
+            update(from: event.call)
+        case .typeCallNotificationEvent(let event):
+            mergeMembers(event.members)
+            update(from: event.call)
         case .typeCallReactionEvent(_):
-            // TODO
             break
         case .typeCallRecordingStartedEvent(_):
             if recordingState != .recording {
@@ -78,21 +74,25 @@ public class CallState: ObservableObject {
             }
         case .typeCallRejectedEvent(let event):
             update(from: event.call)
-        case .typeCallRingEvent(_):
-            // TODO
-            break
-        case .typeCallSessionEndedEvent(_):
-            // TODO
-            break
-        case .typeCallSessionParticipantJoinedEvent(_):
-            // TODO
-            break
-        case .typeCallSessionParticipantLeftEvent(_):
-            // TODO
-            break
-        case .typeCallSessionStartedEvent(_):
-            // TODO
-            break
+        case .typeCallRingEvent(let event):
+            update(from: event.call)
+            mergeMembers(event.members)
+        case .typeCallSessionEndedEvent(let event):
+            update(from: event.call)
+        case .typeCallSessionParticipantJoinedEvent(let event):
+            if session?.participants.map(\.user).contains(event.user) == false {
+                let callParticipant = CallParticipantResponse(
+                    joinedAt: Date(),
+                    user: event.user
+                )
+                session?.participants.append(callParticipant)
+            }
+        case .typeCallSessionParticipantLeftEvent(let event):
+            session?.participants.removeAll(where: { participant in
+                participant.user == event.user
+            })
+        case .typeCallSessionStartedEvent(let event):
+            update(from: event.call)
         case .typeCallUpdatedEvent(let event):
             update(from: event.call)
         case .typeConnectedEvent(_):
@@ -104,7 +104,6 @@ public class CallState: ObservableObject {
         case .typeHealthCheckEvent(_):
             break
         case .typePermissionRequestEvent(_):
-            // TODO
             break
         case .typeUnblockedUserEvent(let event):
             unblockUser(id: event.user.id)
