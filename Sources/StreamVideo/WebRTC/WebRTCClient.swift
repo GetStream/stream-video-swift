@@ -222,6 +222,9 @@ class WebRTCClient: NSObject {
             subscriber?.update(configuration: connectOptions.rtcConfiguration)
             sfuMiddleware.onSocketConnected = handleOnMigrationJoinResponse
         }
+        sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
+            self?.onParticipantCountUpdated?(participantCount)
+        }
     }
     
     func prepareForMigration(url: String, token: String, webSocketURL: String) {
@@ -250,7 +253,6 @@ class WebRTCClient: NSObject {
         subscriber = nil
         signalChannel?.connectionStateDelegate = nil
         signalChannel?.onWSConnectionEstablished = nil
-        signalChannel?.participantCountUpdated = nil
         signalChannel?.disconnect {}
         signalChannel = nil
         localAudioTrack = nil
@@ -660,9 +662,6 @@ class WebRTCClient: NSObject {
                     try await self.handleSocketConnected()
                 }
             }
-        }
-        webSocketClient.participantCountUpdated = { [weak self] participantCount in
-            self?.onParticipantCountUpdated?(participantCount)
         }
 
         return webSocketClient

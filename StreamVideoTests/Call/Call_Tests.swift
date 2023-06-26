@@ -29,7 +29,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
                 
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallAcceptedEvent(event))
         
         // Then
         XCTAssert(call?.cId == callCid)
@@ -56,7 +56,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallRejectedEvent(event))
         
         // Then
         XCTAssert(call?.cId == callCid)
@@ -81,7 +81,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallUpdatedEvent(event))
         
         // Then
         XCTAssert(call?.cId == callCid)
@@ -97,7 +97,7 @@ final class Call_Tests: StreamVideoTestCase {
         let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallRecordingStartedEvent(event))
         
         // Then
         XCTAssert(call?.state.recordingState == .recording)
@@ -109,7 +109,7 @@ final class Call_Tests: StreamVideoTestCase {
         let event = CallRecordingStoppedEvent(callCid: callCid, createdAt: Date())
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallRecordingStoppedEvent(event))
         
         // Then
         XCTAssert(call?.state.recordingState == .noRecording)
@@ -148,7 +148,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call.state.updateState(from: event)
+        call.state.updateState(from: .typeUpdatedCallPermissionsEvent(event))
         
         // Then
         XCTAssert(call.currentUserHasCapability(.sendAudio) == true)
@@ -171,7 +171,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallMemberAddedEvent(event))
         
         // Then
         XCTAssert(call?.state.members.first?.id == userId)
@@ -193,7 +193,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallMemberRemovedEvent(event))
         
         // Then
         XCTAssert(call?.state.members.isEmpty == true)
@@ -217,7 +217,7 @@ final class Call_Tests: StreamVideoTestCase {
         )
         
         // When
-        call?.state.updateState(from: event)
+        call?.state.updateState(from: .typeCallMemberUpdatedEvent(event))
         
         // Then
         XCTAssert(call?.state.members.first?.user.name == "newname")

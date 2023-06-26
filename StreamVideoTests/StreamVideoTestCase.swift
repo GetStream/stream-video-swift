@@ -15,6 +15,7 @@ open class StreamVideoTestCase: XCTestCase {
         streamVideo = StreamVideo.mock(httpClient: httpClient)
     }
     
+    // TODO: replace this with something a bit better
     func waitForCallEvent(nanoseconds: UInt64 = 500_000_000) async throws {
         try await Task.sleep(nanoseconds: nanoseconds)
     }

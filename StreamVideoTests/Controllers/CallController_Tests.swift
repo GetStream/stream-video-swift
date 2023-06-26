@@ -160,7 +160,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         callController.call = call
         let event = CallRecordingStartedEvent(callCid: callCid, createdAt: Date())
-        eventNotificationCenter?.process(event)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRecordingStartedEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callController.call?.state.recordingState == .recording)
@@ -183,7 +183,7 @@ final class CallController_Tests: ControllerTestCase {
         )
         callController.call = call
         let event = CallRecordingStartedEvent(callCid: "test", createdAt: Date())
-        eventNotificationCenter?.process(event)
+        eventNotificationCenter?.process(.coordinatorEvent(.typeCallRecordingStartedEvent(event)))
         
         // Then
         try await XCTAssertWithDelay(callController.call?.state.recordingState == .noRecording)

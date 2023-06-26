@@ -237,9 +237,10 @@ public class StreamVideo: ObservableObject {
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent {
-                    continuation.yield(event.wrapped)
+                guard case let .coordinatorEvent(event) = event else {
+                    return
                 }
+                continuation.yield(event)
             }
             self?.eventHandlers.append(eventHandler)
         }
@@ -248,9 +249,11 @@ public class StreamVideo: ObservableObject {
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
-                if let event = event as? CoordinatorEvent,
-                    let rawEvent = event.event as? WSEvent {
-                    continuation.yield(rawEvent)
+                guard let coordinatorEvent = event.unwrap() else {
+                    return
+                }
+                if let event = coordinatorEvent.unwrap() as? WSEvent {
+                    continuation.yield(event)
                 }
             }
             self?.eventHandlers.append(eventHandler)
@@ -509,9 +512,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            eventHandlers.forEach { $0?(WSDisconnected()) }
+            eventHandlers.forEach { $0?(.internalEvent(WSDisconnected())) }
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0?(WSConnected()) }
+            eventHandlers.forEach { $0?(.internalEvent(WSConnected())) }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -520,7 +523,7 @@ extension StreamVideo: ConnectionStateDelegate {
 
 extension StreamVideo: WSEventsSubscriber {
     
-    func onEvent(_ event: Event) {
+    func onEvent(_ event: WrappedEvent) {
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }

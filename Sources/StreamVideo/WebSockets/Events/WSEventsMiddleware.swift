@@ -7,8 +7,9 @@ import Foundation
 final class WSEventsMiddleware: EventMiddleware {
     
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
-    
-    func handle(event: Event) -> Event? {
+
+    // TODO: check if this is still correctly forwarding events to subscribers
+    func handle(event: WrappedEvent) -> WrappedEvent? {
         var streamVideo: StreamVideo?
         for subscriber in subscribers.allObjects {
             if let subscriber = subscriber as? StreamVideo {
@@ -37,6 +38,6 @@ final class WSEventsMiddleware: EventMiddleware {
 
 protocol WSEventsSubscriber: AnyObject {
     
-    func onEvent(_ event: Event)
+    func onEvent(_ event: WrappedEvent)
     
 }
