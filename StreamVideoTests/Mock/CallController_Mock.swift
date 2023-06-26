@@ -34,6 +34,7 @@ class CallController_Mock: CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
+        migratingFrom: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {

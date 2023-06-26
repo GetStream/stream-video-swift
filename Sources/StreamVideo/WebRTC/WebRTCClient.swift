@@ -125,7 +125,8 @@ class WebRTCClient: NSObject {
     private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
     private var migratingWSClient: WebSocketClient?
     private var migratingToken: String?
-    
+    private var temp: PeerConnection?
+
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
     var onParticipantCountUpdated: ((UInt32) -> ())?
@@ -196,7 +197,7 @@ class WebRTCClient: NSObject {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         connectOptions: ConnectOptions,
-        migrating: Bool
+        migrating: Bool = false
     ) async throws {
         let connectionStatus = await state.connectionState
         if (connectionStatus == .connected || connectionStatus == .connecting) && !migrating {
@@ -393,9 +394,7 @@ class WebRTCClient: NSObject {
             }
         }
     }
-    
-    private var temp: PeerConnection?
-    
+        
     private func handleOnMigrationJoinResponse() {
         signalChannel?.disconnect {}
         signalChannel = migratingWSClient

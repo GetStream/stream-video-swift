@@ -114,7 +114,7 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.reconnectionStatus == .reconnecting)
      
         // When
-        try await waitForCallEvent(nanoseconds: 5_000_000_000)
+        try await waitForCallEvent(nanoseconds: 5_500_000_000)
         
         // Then
         XCTAssert(callController.call == nil)
