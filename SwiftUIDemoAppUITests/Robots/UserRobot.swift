@@ -281,12 +281,9 @@ extension UserRobot {
         CallPage.participantMenu.wait(timeout: timeout).tap()
         let user = 1
         let expectedCount = participantCount + user
-        _ = CallPage.ParticipantMenu.participantCount.waitForValue("\(expectedCount)", timeout: timeout)
-        
-        let attachment = XCTAttachment(screenshot: app.screenshot())
-        attachment.lifetime = .deleteOnSuccess
-        StreamTestCase().add(attachment)
-        
+        CallPage.ParticipantMenu.participantCount
+            .waitForValue("\(expectedCount)", timeout: timeout)
+            .tapFrameCenter() // to take a screenshot
         CallPage.ParticipantMenu.closeButton.waitForHitPoint().tapFrameCenter()
         return self
     }

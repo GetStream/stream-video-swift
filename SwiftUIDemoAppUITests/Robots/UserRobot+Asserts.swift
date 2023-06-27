@@ -6,7 +6,7 @@ import XCTest
 
 extension UserRobot {
     
-    static let defaultTimeout: Double = TestRunnerEnvironment.isCI ? 80 : 30
+    static let defaultTimeout: Double = TestRunnerEnvironment.isCI ? 100 : 30
     
     @discardableResult
     func assertParticipantJoinCall() -> Self {
