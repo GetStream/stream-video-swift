@@ -264,10 +264,42 @@ public class StreamVideo: ObservableObject {
         }
     }
     
+    public func queryCalls(
+        next: String? = nil,
+        watch: Bool = false
+    ) async throws -> [Call] {
+        try await self.queryCalls(filters:nil, sort:nil, next: next, watch: watch)
+    }
+
+    public func queryCalls(
+        filters: [String: RawJSON]?,
+        sort: [SortParamRequest] = [SortParamRequest.descending("created_at")],
+        limit: Int? = 25,
+        watch: Bool = false
+    ) async throws -> [Call] {
+        try await self.queryCalls(filters:filters, sort:sort, limit:limit, next: nil, watch: watch)
+    }
+
+    internal func queryCalls(
+        filters: [String: RawJSON]?,
+        sort: [SortParamRequest]?,
+        limit: Int? = 25,
+        next: String? = nil,
+        watch: Bool = false
+    ) async throws -> [Call] {
+        let response = try await queryCalls(request: QueryCallsRequest(filterConditions: filters, limit: limit, sort: sort))
+        return response.calls.map {
+            let callController = makeCallController(callType: $0.call.type, callId: $0.call.id)
+            let call =  Call(from: $0, coordinatorClient: self.coordinatorClient, callController: callController)
+            eventsMiddleware.add(subscriber: call)
+            return call
+        }
+    }
+
     /// Queries calls with the provided request.
     /// - Parameter request: the query calls request.
     /// - Returns: response with the queried calls.
-    public func queryCalls(request: QueryCallsRequest) async throws -> QueryCallsResponse {
+    internal func queryCalls(request: QueryCallsRequest) async throws -> QueryCallsResponse {
         try await coordinatorClient.queryCalls(queryCallsRequest: request)
     }
 
