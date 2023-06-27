@@ -155,10 +155,11 @@ class CallCRUDTest: IntegrationTest {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create(memberIds: ["thierry"])
         
-        let calls = try await client.queryCalls(filters: ["cid": .string(call.cId)], watch: true)
+        let (calls, next) = try await client.queryCalls(filters: ["cid": .string(call.cId)], watch: true)
         XCTAssertEqual(1, calls.count)
         XCTAssertEqual(call.cId, calls[0].cId)
-        
+        XCTAssertEqual(nil, next)
+
         // changes to a watched call via query call should propagate as usual to the state
         let updateResponse = try await call.update(custom: ["color": "blue"])
         XCTAssertEqual(updateResponse.call.custom["color"], "blue")
@@ -167,13 +168,13 @@ class CallCRUDTest: IntegrationTest {
             return v["color"] == "blue"
         }
         
-        let secondTry = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
+        let (secondTry, _) = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
         XCTAssertEqual(1, secondTry.count)
         XCTAssertEqual(call.cId, calls[0].cId)
         
         try await call.end()
         
-        let thirdTry = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
+        let (thirdTry, _) = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
         XCTAssertEqual(0, thirdTry.count)
         
         // check propagation as well

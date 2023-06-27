@@ -267,7 +267,7 @@ public class StreamVideo: ObservableObject {
     public func queryCalls(
         next: String? = nil,
         watch: Bool = false
-    ) async throws -> [Call] {
+    ) async throws -> (calls: [Call], next: String?) {
         try await self.queryCalls(filters:nil, sort:nil, next: next, watch: watch)
     }
 
@@ -276,7 +276,7 @@ public class StreamVideo: ObservableObject {
         sort: [SortParamRequest] = [SortParamRequest.descending("created_at")],
         limit: Int? = 25,
         watch: Bool = false
-    ) async throws -> [Call] {
+    ) async throws -> (calls: [Call], next: String?) {
         try await self.queryCalls(filters:filters, sort:sort, limit:limit, next: nil, watch: watch)
     }
 
@@ -286,14 +286,14 @@ public class StreamVideo: ObservableObject {
         limit: Int? = 25,
         next: String? = nil,
         watch: Bool = false
-    ) async throws -> [Call] {
+    ) async throws -> (calls: [Call], next: String?) {
         let response = try await queryCalls(request: QueryCallsRequest(filterConditions: filters, limit: limit, sort: sort))
-        return response.calls.map {
+        return (response.calls.map({
             let callController = makeCallController(callType: $0.call.type, callId: $0.call.id)
             let call =  Call(from: $0, coordinatorClient: self.coordinatorClient, callController: callController)
             eventsMiddleware.add(subscriber: call)
             return call
-        }
+        }), response.next)
     }
 
     /// Queries calls with the provided request.
