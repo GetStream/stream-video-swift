@@ -28,7 +28,7 @@ class CallCRUDTest: IntegrationTest {
             return v["color"] == "blue"
         }
     }
-
+    
     func test_get_call_missing_id() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         let apiErr = await XCTAssertThrowsErrorAsync({
@@ -42,7 +42,7 @@ class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(apiErr.code, 16)
         XCTAssertEqual(apiErr.message, "GetCall failed with error: \"Can't find call with id \(call.cId)\"")
     }
-
+    
     func test_get_call_wrong_type() async throws {
         let call = client.call(callType: "bananas", callId: UUID().uuidString)
         let apiErr = await XCTAssertThrowsErrorAsync({
@@ -61,7 +61,7 @@ class CallCRUDTest: IntegrationTest {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create()
         try await call.send(event: SendEventRequest(custom: ["test": .string("asd")]))
-
+        
         let eventSubscriber = call.subscribe()
         await assertNext(eventSubscriber) { ev in
             if case let .typeCustomVideoEvent(data) = ev {
@@ -74,11 +74,11 @@ class CallCRUDTest: IntegrationTest {
     func test_create_call_with_members() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create(memberIds: ["thierry"])
-
+        
         await assertNext(call.state.$members) { v in
             return v.count == 1 && v[0].id == "thierry"
         }
-
+        
         try await call.updateMembers(members: [.init(custom: ["stars" : .number(3)], userId: "thierry")])
         await assertNext(call.state.$members) { v in
             guard let member = v.first else {
@@ -104,14 +104,14 @@ class CallCRUDTest: IntegrationTest {
     func test_paginate_call_with_members() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create(memberIds: ["thierry"])
-
+        
         let call2 = client.call(callType: call.callType, callId: call.callId)
         let _ = try await call2.get(membersLimit: 0)
-
+        
         try await Task.sleep(nanoseconds: 1_000_000)
-
+        
         XCTAssertEqual(0, call2.state.members.count)
-
+        
         let _ = try await call2.get(membersLimit: 1)
         await assertNext(call.state.$members) { v in
             return v.count == 1
@@ -150,5 +150,36 @@ class CallCRUDTest: IntegrationTest {
             return v.count == 2 && v.first?.id == "tommaso"
         }
     }
+    
+    func test_query_channels() async throws {
+        let call = client.call(callType: "default", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry"])
+        
+        let (calls, next) = try await client.queryCalls(filters: ["cid": .string(call.cId)], watch: true)
+        XCTAssertEqual(1, calls.count)
+        XCTAssertEqual(call.cId, calls[0].cId)
+        XCTAssertEqual(nil, next)
 
+        // changes to a watched call via query call should propagate as usual to the state
+        let updateResponse = try await call.update(custom: ["color": "blue"])
+        XCTAssertEqual(updateResponse.call.custom["color"], "blue")
+        
+        await assertNext(calls[0].state.$custom) { v in
+            return v["color"] == "blue"
+        }
+        
+        let (secondTry, _) = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
+        XCTAssertEqual(1, secondTry.count)
+        XCTAssertEqual(call.cId, calls[0].cId)
+        
+        try await call.end()
+        
+        let (thirdTry, _) = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
+        XCTAssertEqual(0, thirdTry.count)
+        
+        // check propagation as well
+        await assertNext(calls[0].state.$endedAt) { v in
+            return v != nil
+        }
+    }
 }

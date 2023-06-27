@@ -35,7 +35,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callId: String,
         coordinatorClient: DefaultAPI,
         callController: CallController,
-        videoOptions: VideoOptions
+        videoOptions: VideoOptions = VideoOptions()
     ) {
         self.callId = callId
         self.callType = callType
@@ -45,6 +45,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callController.call = self
     }
     
+    convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
+        self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
+        state.update(from: response.call)
+    }
+
     /// Joins the current call.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.

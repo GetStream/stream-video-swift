@@ -42,7 +42,6 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typePermissionRequestEvent(PermissionRequestEvent)
     case typeUnblockedUserEvent(UnblockedUserEvent)
     case typeUpdatedCallPermissionsEvent(UpdatedCallPermissionsEvent)
-    
     public var type: String {
         switch self {
         case .typeBlockedUserEvent(let value):
@@ -105,7 +104,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value.type
         }
     }
-    
+
     public var rawValue: Event {
         switch self {
         case .typeBlockedUserEvent(let value):
@@ -168,7 +167,6 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value
         }
     }
-
     public func encode(to encoder: Encoder) throws {
         var container = encoder.singleValueContainer()
         switch self {
