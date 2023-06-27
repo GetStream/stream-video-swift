@@ -59,26 +59,24 @@ public struct CallView<Factory: ViewFactory>: View {
                     }
                 }
                                 
-                TopRightView {
-                    VStack(alignment: .trailing, spacing: padding) {
-                        viewFactory.makeCallTopView(viewModel: viewModel)
-                        
-                        if viewModel.screensharingSession == nil, viewModel.participantsLayout == .grid {
-                            CornerDragableView(
-                                content: contentDragableView(size: reader.size),
-                                proxy: reader
-                            ) {
-                                withAnimation {
-                                    if participants.count == 1 {
-                                        viewModel.localVideoPrimary.toggle()
-                                    }
+                VStack(alignment: .trailing, spacing: padding) {
+                    viewFactory.makeCallTopView(viewModel: viewModel)
+
+                    if viewModel.screensharingSession == nil, viewModel.participantsLayout == .grid {
+                        CornerDragableView(
+                            content: contentDragableView(size: reader.size),
+                            proxy: reader
+                        ) {
+                            withAnimation {
+                                if participants.count == 1 {
+                                    viewModel.localVideoPrimary.toggle()
                                 }
                             }
-                            .accessibility(identifier: "cornerDragableView")
                         }
+                        .accessibility(identifier: "cornerDragableView")
                     }
-                    .padding(.top, 4)
                 }
+                .padding(.top, 4)
                 .opacity(viewModel.hideUIElements ? 0 : 1)
                 
                 if viewModel.participantsShown {

@@ -53,7 +53,6 @@ struct CallParticipantBackground<Background: View>: View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = imageURL {
                 StreamLazyImage(imageURL: imageURL)
-                    .aspectRatio(contentMode: .fill)
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .blur(radius: 8)
                     .clipped()
