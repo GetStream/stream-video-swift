@@ -77,6 +77,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             notify: notify
         )
         state.update(from: response.call)
+        streamVideo.state.activeCall = self
         return response
     }
     
@@ -95,6 +96,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> CallResponse {
         let response = try await coordinatorClient.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
         state.update(from: response.call)
+        if ring {
+            streamVideo.state.ringingCall = self
+        }
         return response.call
     }
     
@@ -150,6 +154,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             getOrCreateCallRequest: request
         )
         state.update(from: response)
+        if ring {
+            streamVideo.state.ringingCall = self
+        }
         return response.call
     }
 
@@ -173,7 +180,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Rejects a call.
     @discardableResult
     public func reject() async throws -> RejectCallResponse {
-        try await coordinatorClient.rejectCall(type: callType, id: callId)
+        let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
+        if streamVideo.state.ringingCall?.cId == self.cId {            
+            streamVideo.state.ringingCall = nil
+        }
+        return response
     }
     
     /// Adds the given user to the list of blocked users for the call.
@@ -303,6 +314,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         postNotification(with: CallNotification.callEnded)
         eventHandlers.removeAll()
         callController.cleanUp()
+        streamVideo.state.ringingCall = nil
+        streamVideo.state.activeCall = nil
     }
     
     //MARK: - Permissions

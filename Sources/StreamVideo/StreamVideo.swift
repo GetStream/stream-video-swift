@@ -12,11 +12,29 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
 public class StreamVideo: ObservableObject {
-
-    @Published public var connectionStatus: ConnectionStatus = .initialized
     
-    public private(set) var user: User
+    public class State: ObservableObject {
+        @Published public internal(set) var connection: ConnectionStatus = .initialized
+        @Published public internal(set) var user: User
+        @Published public internal(set) var activeCall: Call? {
+            didSet {
+                if ringingCall != nil {
+                    ringingCall = nil
+                }
+            }
+        }
+        @Published public internal(set) var ringingCall: Call?
+        
+        init(user: User) {
+            self.user = user
+        }
+    }
+    
+    public var state: State
     public let videoConfig: VideoConfig
+    public var user: User {
+        state.user
+    }
     
     var token: UserToken
 
@@ -96,7 +114,7 @@ public class StreamVideo: ObservableObject {
         environment: Environment
     ) {
         self.apiKey = APIKey(apiKey)
-        self.user = user
+        self.state = State(user: user)
         self.token = token
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
@@ -130,7 +148,7 @@ public class StreamVideo: ObservableObject {
             if user.type == .guest {
                 do {
                     let guestInfo = try await loadGuestUserInfo(for: user, apiKey: apiKey)
-                    self.user = guestInfo.user
+                    self.state.user = guestInfo.user
                     self.token = guestInfo.token
                     self.tokenProvider = guestInfo.tokenProvider
                     try await self.connectUser(isInitial: true)
@@ -539,7 +557,7 @@ extension StreamVideo: ConnectionStateDelegate {
         _ client: WebSocketClient,
         didUpdateConnectionState state: WebSocketConnectionState
     ) {
-        self.connectionStatus = ConnectionStatus(webSocketConnectionState: state)
+        self.state.connection = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
             if let serverError = source.serverError, serverError.isInvalidTokenError
@@ -569,6 +587,19 @@ extension StreamVideo: WSEventsSubscriber {
     func onEvent(_ event: WrappedEvent) {
         for eventHandler in eventHandlers {
             eventHandler?(event)
+        }
+        checkRingEvent(event)
+    }
+    
+    private func checkRingEvent(_ event: WrappedEvent) {
+        if case let .typeCallRingEvent(ringEvent) = event.unwrap() {
+            let call = call(
+                callType: ringEvent.call.type,
+                callId: ringEvent.call.id
+            )
+            call.state.update(from: ringEvent.call)
+            call.state.mergeMembers(ringEvent.members)
+            self.state.ringingCall = call
         }
     }
     

@@ -63,7 +63,7 @@ public class CallsController: ObservableObject {
     // MARK: - private
     
     private func subscribeToConnectionUpdates() {
-        streamVideo.$connectionStatus.sink { [weak self] status in
+        streamVideo.state.$connection.sink { [weak self] status in
             guard let self = self else { return }
             if case .disconnected(_) = status {
                 self.socketDisconnected = true
