@@ -1,3 +1,4 @@
+tap 'chargepoint/xcparse'
 brew 'mint'
 brew 'sonar-scanner'
-brew 'chargepoint/xcparse/xcparse'
+brew 'xcparse'

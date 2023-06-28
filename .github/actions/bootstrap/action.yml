@@ -28,6 +28,11 @@ runs:
         path: ~/Library/Caches/Homebrew
         key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
         restore-keys: ${{ env.IMAGE }}-brew-
+    - name: Cache brew binaries
+      uses: actions/cache@v3
+      id: brew-bin-cache
+      with:
+        path: /opt/homebrew/bin
     - name: Cache SPM
       uses: actions/cache@v2
       id: spm-cache

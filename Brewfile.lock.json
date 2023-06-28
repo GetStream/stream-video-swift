@@ -62,6 +62,15 @@
       "chargepoint/xcparse/xcparse": {
         "version": "2.3.1",
         "bottle": false
+      },
+      "xcparse": {
+        "version": "2.3.1",
+        "bottle": false
+      }
+    },
+    "tap": {
+      "chargepoint/xcparse": {
+        "revision": "ebde7613d1b59ea40cc39cf0bf3110f6db5e18b4"
       }
     }
   },
