@@ -157,19 +157,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         transceiver = pc.addTransceiver(with: track, init: transceiverInit)
     }
     
-    func add(iceCandidate: RTCIceCandidate) {
+    func add(iceCandidate: RTCIceCandidate) async throws {
         guard pc.remoteDescription != nil else {
             log.debug("remote description not set, adding pending ice candidate")
             pendingIceCandidates.append(iceCandidate)
             return
         }
-        pc.add(iceCandidate) { error in
-            if let error = error {
-                log.debug("Error adding ice candidate \(error.localizedDescription)")
-            } else {
-                log.debug("Added ice candidate successfully")
-            }
-        }
+        try await add(candidate: iceCandidate)
     }
     
     func close() {
@@ -290,9 +284,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     @discardableResult
-    private func add(iceCandidate: RTCIceCandidate) async throws -> Bool {
+    private func add(candidate: RTCIceCandidate) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
-            self.pc.add(iceCandidate) { error in
+            self.pc.add(candidate) { error in
                 if let error = error {
                     log.debug("Error adding ice candidate \(error.localizedDescription)")
                     continuation.resume(throwing: error)

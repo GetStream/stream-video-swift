@@ -66,19 +66,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false,
         callSettings: CallSettings = CallSettings()
     ) async throws -> JoinCallResponse {
-        let response = try await callController.joinCall(
-            create: create,
-            callType: callType,
-            callId: callId,
-            callSettings: callSettings,
-            videoOptions: videoOptions,
-            options: options,
-            ring: ring,
-            notify: notify
-        )
-        state.update(from: response.call)
-        streamVideo.state.activeCall = self
-        return response
+        try await executeTask(retryPolicy: .fastAndSimple, task: {
+            let response = try await callController.joinCall(
+                create: create,
+                callType: callType,
+                callId: callId,
+                callSettings: callSettings,
+                videoOptions: videoOptions,
+                options: options,
+                ring: ring,
+                notify: notify
+            )
+            state.update(from: response.call)
+            streamVideo.state.activeCall = self
+            return response
+        })
     }
     
     /// Gets the call on the backend with the given parameters.

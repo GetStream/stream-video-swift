@@ -47,20 +47,22 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
     }
 
     func execute(request: URLRequest) async throws -> (Data, URLResponse) {
-        do {
-            return try await execute(request: request, isRetry: false)
-        } catch {
-            if error.isTokenExpiredError && tokenProvider != nil {
-                log.debug("Refreshing user token")
-                let token = try await refreshToken()
-                if let onTokenUpdate = onTokenUpdate {
-                    onTokenUpdate(token)
+        try await executeTask(retryPolicy: .fastAndSimple) {
+            do {
+                return try await execute(request: request, isRetry: false)
+            } catch {
+                if error.isTokenExpiredError && tokenProvider != nil {
+                    log.debug("Refreshing user token")
+                    let token = try await refreshToken()
+                    if let onTokenUpdate = onTokenUpdate {
+                        onTokenUpdate(token)
+                    }
+                    let updated = update(request: request, with: token.rawValue)
+                    log.debug("Retrying failed request with new token")
+                    return try await execute(request: updated, isRetry: true)
+                } else {
+                    throw error
                 }
-                let updated = update(request: request, with: token.rawValue)
-                log.debug("Retrying failed request with new token")
-                return try await execute(request: updated, isRetry: true)
-            } else {
-                throw error
             }
         }
     }
