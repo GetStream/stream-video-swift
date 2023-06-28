@@ -23,7 +23,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var hasVideo: Bool
     /// Returns whether the participant has audio.
     public var hasAudio: Bool
-    /// Returns whether the participant is screensharing.
+    /// Returns whether the participant is screenSharing.
     public var isScreensharing: Bool
     /// Returns the participant's video track.
     public var track: RTCVideoTrack?

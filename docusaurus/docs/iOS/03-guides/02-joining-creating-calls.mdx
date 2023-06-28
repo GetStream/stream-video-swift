@@ -3,83 +3,105 @@ title: Joining & Creating Calls
 description: An overview of how to create calls and join them
 ---
 
-### Joining calls
+### Creating a call
 
-There are several ways to join a call:
-
-- if you know the call id and type
-- if you receive an incoming call event and decide to join it
-- if you have a link to the call (deep linking support required, more info [here](../../advanced/deeplinking))
-
-#### Join with call id and type
-
-You can join a call via the `Call` object's method `join()`. First, you need to create an instance of the `Call` object, from your main `StreamVideo` object:
+You create a call by specifying a "call type" and a call id.
 
 ```swift
-let call = streamVideo.call(callType: type, callId: callId)
+let call = streamVideo.call(callType: "default", callId: "123")
+let result = try await call.create()
 ```
 
-:::note 
-This creates a local instance of the call and it is not synced with the server (unless it was already created before).
-:::
+The **call type** controls which features are enabled, and sets up permissions.
 
-In order to join the call, you need to call the `join()` method, which also creates the call if it was not already created.
+For the call id there are a few things to note:
+
+- You can reuse the same call multiple times.
+- If you have a unique id for the call we recommend passing that as the id.
+- If you don't have a unique id you can leave it empty and we'll generate one for you.
+
+As an example, if you're building a telemedicine app calls will be connected to an appointment. Using your own appointment id as the **call id** makes it easy to find the call later.
+
+### Joining a call
+
+Joining a call sets up the realtime communication for audio and video.
 
 ```swift
-try await call.join(ring: ring, callSettings: callSettings)
+let call = streamVideo.call(callType: "default", callId: "123")
+let result = try await call.join()
 ```
 
-The `join` method has a few optional parameters:
-- `create` - whether the call should be created if it doesn't exist.
-- `members` - the members of the call.
-- `ring` - whether the call should ring, `false` by default.
-- `notify` - whether the participants should be notified about the call.
-- `callSettings` - optional call settings.
+### Call CRUD
 
-If you want to just create the call on the server (and not join it), you should use the `create` method:
+Basic CRUD operations are available on the call object
 
 ```swift
-let callData = try await call.create(members: members, startsAt: Date(), ring: false)
+// create
+let call = streamVideo.call(callType: "default", callId: "123")
+let result = try await call.create()
+
+// update
+let custom: [String: RawJSON] = ["secret": .string("secret")]
+let updateResult = try await call.update(custom: custom)
+
+// get
+let getResult = try await call.get()
 ```
 
-This method will either get an already existing call with the call id and call type, or create a new one.
+### Call Create Options
 
-All parameters are optional in this method:
-
-- `members` - the list of members in the call.
-- `membersIds` - the list of member ids in the call.
-- `custom` - any custom data you want to pass to the call.
-- `startsAt` - the starting date of the call.
-- `team` - The team the user belongs to.
-- `ring` - A boolean value indicating whether to ring the call.
-- `notify` - A boolean value indicating whether members should be notified about the call.
-
-#### Joining a call via the CallViewModel
-
-If you are using the `CallViewModel`, the call creation and joining methods above are abstracted away via the `startCall` and `joinCall` methods, which take care of creating the call and joining it, while also considering the current state of the call.
-
-If you receive an incoming call event, you can join it via the `acceptCall` method:
+Here's a more complete example that shows how to create a call with members and custom data that starts tomorrow and is limited to our team:
 
 ```swift
-viewModel.acceptCall(callId: "call_id", type: "default")
+let members = ["thierry", "tommaso"]
+let call = streamVideo.call(callType: "default", callId: UUID().uuidString)
+
+let result = try await call.create(
+    memberIds: members, 
+    custom: ["color": .string("red")], 
+    startsAt: Calendar.current.date(byAdding: .day, value: 1, to: Date()),
+    team: "stream",
+    ring: true,
+    notify: false,
+)
 ```
 
-Similarly, you can reject the call via the `rejectCall` method:
+Members are permanently associated with a call. It allows you to:
+
+- Restrict the ability to join a call only to members
+- Send a push notification to members when the call starts
+
+The following options are supported when creating a call:
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `memberIds` | A list of users ids to add as members to this call. | `nil` |
+| `members` | A list of members to add to this call. You can specify the role and custom data on these members. | `nil` |
+| `custom` | Any custom data you want to store. | `nil` |
+| `startsAt` | When the call will start. Used for calls scheduled in the future, livestreams, audio rooms etc. | `nil` |
+| `team` | Restrict the access to this call to a specific team. | `nil` |
+| `ring` | If you want the call to ring for each member. | `false` |
+| `notify` | If you want the call to nofiy each member by sending push notification. | `false` |
+
+### Querying Members
+
+You can query the members of the call. This is helpful if you have thousands of members in a call and want to paginate.
 
 ```swift
-viewModel.rejectCall(callId: "call_id", type: "default")
+let filters = ["user_id": .string("jaewoong")]
+let response = try await call.queryMembers(
+    filters: filters,
+    sort: [SortParamRequest.descending("created_at")],
+    limit: 5
+)
 ```
 
-### Leaving calls
+You can filter the member list on these fields, and sort on the selected fields. Note that you can also query on custom data for the member or the user.
 
-If you want to leave a call, you should call the `leave` call on the `Call` object:
-
-```swift
-call.leave()
-```
-
-If you are using the `CallViewModel`, you should call the `hangUp` method, which also clears the call state.
-
-```swift
-viewModel.hangUp()
-```
+| Option | Description | Sorting Supported |
+| ------ | ----------- | ------- |
+| `user_id` | The user's id. | Yes |
+| `role` | The member's role. | No |
+| `custom` | The custom data on the member. | No |
+| `created_at` | When the member was created. | Yes |
+| `updated_at` | When the member was last updated. | No |

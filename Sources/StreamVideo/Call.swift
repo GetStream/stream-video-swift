@@ -53,7 +53,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Joins the current call.
     /// - Parameters:
     ///  - create: whether the call should be created if it doesn't exist.
-    ///  - members: the members of the call.
+    ///  - options: configuration options for the call.
     ///  - ring: whether the call should ring, `false` by default.
     ///  - notify: whether the participants should be notified about the call.
     ///  - callSettings: optional call settings.
@@ -181,7 +181,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func reject() async throws -> RejectCallResponse {
         let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
-        if streamVideo.state.ringingCall?.cId == self.cId {            
+        if streamVideo.state.ringingCall?.cId == self.cId {
             streamVideo.state.ringingCall = nil
         }
         return response
@@ -308,7 +308,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             self?.eventHandlers.append(eventHandler)
         }
     }
-        
+
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
@@ -332,10 +332,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 && callSettings.audio.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.sendVideo.rawValue
-                && callSettings.video.accessRequestEnabled == false {
+                        && callSettings.video.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.screenshare.rawValue
-                && callSettings.screensharing.accessRequestEnabled == false {
+                        && callSettings.screensharing.accessRequestEnabled == false {
                 return false
             }
         }
@@ -589,7 +589,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             type: callType,
             id: callId,
             updateUserPermissionsRequest: updatePermissionsRequest
-        )        
+        )
     }
     
     private func updateCallMembers(
@@ -609,3 +609,4 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response
     }
 }
+

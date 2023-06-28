@@ -81,7 +81,6 @@ open class CallViewModel: ObservableObject {
             }
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
-            checkForScreensharingSession()
             checkCallSettingsForCurrentUser()
         }
     }
@@ -99,13 +98,13 @@ open class CallViewModel: ObservableObject {
     @Published public var localVideoPrimary = false
     
     /// Optional property about the ongoing screensharing session (if any).
-    @Published public var screensharingSession: ScreensharingSession? {
-        didSet {
-            if screensharingSession?.participant.id != oldValue?.participant.id {
-                lastLayoutChange = Date()
-            }
-        }
-    }
+//    @Published public var screensharingSession: ScreenSharingSession? {
+//        didSet {
+//            if screensharingSession?.participant.id != oldValue?.participant.id {
+//                lastLayoutChange = Date()
+//            }
+//        }
+//    }
     
     /// Whether the UI elements, such as the call controls should be hidden (for example while screensharing).
     @Published public var hideUIElements = false
@@ -169,7 +168,7 @@ open class CallViewModel: ObservableObject {
     public var participants: [CallParticipant] {
         callParticipants
             .filter {
-                if participantsLayout == .grid && screensharingSession == nil {
+                if participantsLayout == .grid && call?.state.screenSharingSession == nil {
                     return $0.value.id != call?.sessionId
                 } else {
                     return true
@@ -575,19 +574,6 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func checkForScreensharingSession() {
-        for (_, participant) in callParticipants {
-            if participant.screenshareTrack != nil {
-                screensharingSession = ScreensharingSession(
-                    track: participant.screenshareTrack,
-                    participant: participant
-                )
-                return
-            }
-        }
-        screensharingSession = nil
-    }
-    
     private func checkCallSettingsForCurrentUser() {
         guard let localParticipant = localParticipant,
               // Skip updates for the initial period while the connection is established.
@@ -630,11 +616,6 @@ public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: String
     public let participants: [MemberRequest]
-}
-
-public struct ScreensharingSession {
-    public let track: RTCVideoTrack?
-    public let participant: CallParticipant
 }
 
 public enum ParticipantsLayout {
