@@ -501,26 +501,24 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - Events
     
     /// Sends a custom event to the call.
-    /// - Parameter event: The `SendEventRequest` object representing the custom event to send.
     /// - Throws: An error if the sending fails.
     @discardableResult
-    public func send(event: SendEventRequest) async throws -> SendEventResponse {
+    public func sendCustomEvent(_ data: [String: RawJSON]) async throws -> SendEventResponse {
         try await coordinatorClient.sendEvent(
             type: callType,
             id: callId,
-            sendEventRequest: event
+            sendEventRequest: SendEventRequest(custom: data)
         )
     }
     
     /// Sends a reaction to the call.
-    /// - Parameter reaction: The `SendReactionRequest` object representing the reaction to send.
     /// - Throws: An error if the sending fails.
     @discardableResult
-    public func send(reaction: SendReactionRequest) async throws -> SendReactionResponse {
+    public func sendReaction(type: String, custom: [String: RawJSON]? = nil, emojiCode: String? = nil) async throws -> SendReactionResponse {
         try await coordinatorClient.sendVideoReaction(
             type: callType,
             id: callId,
-            sendReactionRequest: reaction
+            sendReactionRequest: SendReactionRequest(custom: custom, emojiCode: emojiCode, type: type)
         )
     }
     
