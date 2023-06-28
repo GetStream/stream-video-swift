@@ -42,10 +42,10 @@ chmod +x ./hooks/git-format-staged
 puts "Install bundle dependencies"
 bundle install
 
-if [[ ${XCODE_ACTIONS-default} == default ]]; then
-  puts "Install Mint if needed"
-  brew install mint
+puts "Install brew dependencies"
+brew bundle
 
+if [[ ${XCODE_ACTIONS-default} == default ]]; then
   puts "Bootstrap Mint dependencies"
   mint bootstrap --link
 fi
@@ -53,7 +53,6 @@ fi
 if [[ ${INSTALL_SONAR-default} == true ]]; then
   puts "Install sonar dependencies"
   pip install lizard
-  brew install sonar-scanner
 fi
 
 if [[ ${INSTALL_ALLURE-default} == true ]]; then
@@ -66,10 +65,6 @@ if [[ ${INSTALL_ALLURE-default} == true ]]; then
   DOWNLOAD_URL="https://github.com/eroshenkoam/xcresults/releases/download/${XCRESULTS_VERSION}/xcresults"
   curl -sL "${DOWNLOAD_URL}" -o ./fastlane/xcresults
   chmod +x ./fastlane/xcresults
-fi
-
-if [[ ${INSTALL_XCPARSE-default} == true ]]; then
-  brew install chargepoint/xcparse/xcparse
 fi
 
 if [[ ${INSTALL_VIDEO_BUDDY-default} == true ]]; then

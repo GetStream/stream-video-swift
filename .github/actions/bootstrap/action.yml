@@ -21,5 +21,19 @@ runs:
         path: ~/.mint
         key: ${{ env.IMAGE }}-mint-${{ hashFiles('**/Mintfile') }}
         restore-keys: ${{ env.IMAGE }}-mint-
+    - name: Cache brew
+      uses: actions/cache@v3
+      id: brew-cache
+      with:
+        path: ~/Library/Caches/Homebrew
+        key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
+        restore-keys: ${{ env.IMAGE }}-brew-
+    - name: Cache SPM
+      uses: actions/cache@v2
+      id: spm-cache
+      with:
+        path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages/checkouts
+        key: ${{ env.IMAGE }}-spm-${{ hashFiles('**/Package.resolved') }}
+        restore-keys: ${{ env.IMAGE }}-spm-
     - run: ./Scripts/bootstrap.sh
       shell: bash
