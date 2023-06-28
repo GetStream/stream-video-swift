@@ -39,7 +39,22 @@ class IntegrationTest: XCTestCase {
          */
     }
 
-    public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}
+    // TODO: extract code between these two assertNext methods
+    public func assertNext<Output: Sendable>(_ s: AsyncStream<Output>, _ assertion: @Sendable @escaping (Output) -> Bool) async -> Void {
+        let expectation = XCTestExpectation(description: "NextValue")
+
+        Task {
+            expectation.fulfill()
+            for await v in s {
+                if assertion(v) {
+                    expectation.fulfill()
+                    return
+                }
+            }
+        }
+        
+        await fulfillment(of: [expectation], timeout: 1)
+    }
 
     public func assertNext<Output>(
         _ p: some Publisher<Output, Never>,

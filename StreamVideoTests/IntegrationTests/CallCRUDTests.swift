@@ -60,7 +60,7 @@ class CallCRUDTest: IntegrationTest {
     func test_send_custom_event() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
         try await call.create()
-        try await call.send(event: SendEventRequest(custom: ["test": .string("asd")]))
+        try await call.sendCustomEvent(["test": .string("asd")])
         
         let eventSubscriber = call.subscribe()
         await assertNext(eventSubscriber) { ev in
@@ -68,6 +68,11 @@ class CallCRUDTest: IntegrationTest {
                 return data.custom["test"]?.stringValue == "asd"
             }
             return false
+        }
+        
+        let specificSub = call.subscribe(for: CustomVideoEvent.self)
+        await assertNext(specificSub) { ev in
+            return ev.custom["test"]?.stringValue == "asd"
         }
     }
     
@@ -181,5 +186,28 @@ class CallCRUDTest: IntegrationTest {
         await assertNext(calls[0].state.$endedAt) { v in
             return v != nil
         }
+    }
+    
+    func test_send_reaction() async throws {
+        let call = client.call(callType: "default", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry"])
+        
+        let specificSub = call.subscribe(for: CallReactionEvent.self)
+
+        let _ = try await call.sendReaction(type: "happy")
+        await assertNext(specificSub) { ev in
+            return ev.reaction.type == "happy"
+        }
+
+        let _ = try await call.sendReaction(type: "happyy", emojiCode: ":smile:")
+        await assertNext(specificSub) { ev in
+            return ev.reaction.type == "happyy" && ev.reaction.emojiCode == ":smile:"
+        }
+
+        let _ = try await call.sendReaction(type: "happyyy", custom: ["test": .string("asd")])
+        await assertNext(specificSub) { ev in
+            return ev.reaction.type == "happyyy" && ev.reaction.custom?["test"]?.stringValue == "asd"
+        }
+
     }
 }
