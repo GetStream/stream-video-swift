@@ -62,7 +62,12 @@ class IntegrationTest: XCTestCase {
                 assertionSucceded = true
             }
         }.store(in: &bag)
+        
+        #if compiler(>=5.8)
         await fulfillment(of: [expectation], timeout: 1)
+        #else
+        wait(for: [expectation], timeout: 1)
+        #endif
 
         if assertionSucceded {
             return
