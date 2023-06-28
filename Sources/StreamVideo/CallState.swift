@@ -149,6 +149,12 @@ public class CallState: ObservableObject {
         mergeMembers(response.members)
     }
 
+    internal func update(from response: CallStateResponseFields) {
+        update(from: response.call)
+        mergeMembers(response.members)
+        ownCapabilities = response.ownCapabilities
+    }
+
     internal func update(from response: CallResponse) {
         custom = response.custom
         createdAt = response.createdAt
