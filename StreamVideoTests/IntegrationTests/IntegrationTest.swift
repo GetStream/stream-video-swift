@@ -41,33 +41,26 @@ class IntegrationTest: XCTestCase {
 
     public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}
 
-    public func assertNext<Output>(_ p: some Publisher<Output, Never>, _ assertion: @escaping (Output) -> Bool) async -> Void {
-        let expectation = XCTestExpectation(description: "NextValue")
-        var assertionSucceded = false
+    public func assertNext<Output>(
+        _ p: some Publisher<Output, Never>,
+        _ assertion: @escaping (Output) -> Bool
+    ) async -> Void {
+        let nextValueExpectation = expectation(description: "NextValue")
         var values = [Output]()
-
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-            expectation.fulfill()
-        }
-
         var bag = Set<AnyCancellable>()
-        defer {
-            bag.forEach { $0.cancel() }
-        }
+        defer { bag.forEach { $0.cancel() } }
 
         p.sink {
             values.append($0)
             if assertion($0) {
-                expectation.fulfill()
-                assertionSucceded = true
+                nextValueExpectation.fulfill()
             }
         }.store(in: &bag)
-        await fulfillment(of: [expectation], timeout: 1)
 
-        if assertionSucceded {
-            return
-        }
-
-        XCTFail("unable to fulfill assertion, collected values on the publishers were: \(values)")
+    #if compiler(>=5.8)
+        await fulfillment(of: [nextValueExpectation], timeout: 1)
+    #else
+        wait(for: [nextValueExpectation], timeout: 1)
+    #endif
     }
 }
