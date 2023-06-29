@@ -27,8 +27,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
+    private let badConnectionStates: [RTCIceConnectionState] = [.disconnected, .failed, .closed]
         
-    var onNegotiationNeeded: ((PeerConnection) -> Void)?
+    var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
@@ -52,6 +53,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(internetConnectionAvailabilityDidChange(_:)),
+            name: .internetConnectionAvailabilityDidChange,
+            object: nil
+        )
     }
     
     var audioTrackPublished: Bool {
@@ -62,9 +69,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         publishedTracks.contains(.video)
     }
     
-    func createOffer() async throws -> RTCSessionDescription {
+    func createOffer(constraints: RTCMediaConstraints = .defaultConstraints) async throws -> RTCSessionDescription {
         try await withCheckedThrowingContinuation { continuation in
-            pc.offer(for: .defaultConstraints) { sdp, error in
+            pc.offer(for: constraints) { sdp, error in
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else if let sdp = sdp {
@@ -187,14 +194,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
         log.debug("Negotiation needed for peer connection \(type.rawValue)")
-        onNegotiationNeeded?(self)
+        onNegotiationNeeded?(self, .defaultConstraints)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         log.debug("Peer connection state changed to \(newState)")
-        if newState == .disconnected {
-            log.debug("Peer connection disconnected")
-            onDisconnect?(self)
+        if badConnectionStates.contains(newState) {
+            onNegotiationNeeded?(self, .iceRestartConstraints)
         }
     }
     
@@ -298,9 +304,16 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
     
+    @objc private func internetConnectionAvailabilityDidChange(_ notification: Notification) {
+        if notification.internetConnectionStatus == .unavailable {
+            onDisconnect?(self)
+        }
+    }
+    
     deinit {
         statsTimer?.invalidate()
         statsTimer = nil
+        NotificationCenter.default.removeObserver(self)
     }
 }
 

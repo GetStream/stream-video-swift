@@ -447,19 +447,27 @@ class WebRTCClient: NSObject {
         onParticipantsUpdated?(participants)
     }
     
-    private func handleNegotiationNeeded() -> ((PeerConnection) -> Void) {
-        { [weak self] peerConnection in
+    private func handleNegotiationNeeded() -> ((PeerConnection, RTCMediaConstraints?) -> Void) {
+        { [weak self] peerConnection, constraints in
             guard let self = self else { return }
             Task {
-                try? await self.negotiate(peerConnection: peerConnection)
+                try? await self.negotiate(
+                    peerConnection: peerConnection,
+                    constraints: constraints
+                )
             }
         }
     }
         
-    private func negotiate(peerConnection: PeerConnection?) async throws {
+    private func negotiate(
+        peerConnection: PeerConnection?,
+        constraints: RTCMediaConstraints? = nil
+    ) async throws {
         guard let peerConnection else { return }
         log.debug("Negotiating peer connection")
-        let initialOffer = try await peerConnection.createOffer()
+        let initialOffer = try await peerConnection.createOffer(
+            constraints: constraints ?? .defaultConstraints
+        )
         log.debug("Setting local description for peer connection")
         var updatedSdp = initialOffer.sdp
         if audioSettings.opusDtxEnabled {
@@ -474,10 +482,22 @@ class WebRTCClient: NSObject {
         }
         let offer = RTCSessionDescription(type: initialOffer.type, sdp: updatedSdp)
         try await peerConnection.setLocalDescription(offer)
-        var sdp: String = ""
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
         request.sdp = offer.sdp
         request.sessionID = sessionID
+        request.tracks = loadTracks()
+        let connectURL = signalChannel?.connectURL
+        try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
+            self?.sfuChanged(connectURL) == false
+        }, task: {
+            let response = try await signalService.setPublisher(setPublisherRequest: request)
+            let sdp = response.sdp
+            log.debug("Setting remote description")
+            try await peerConnection.setRemoteDescription(sdp, type: .answer)
+        })
+    }
+    
+    private func loadTracks() -> [Stream_Video_Sfu_Models_TrackInfo] {
         var tracks = [Stream_Video_Sfu_Models_TrackInfo]()
         if callSettings.videoOn {
             var layers = [Stream_Video_Sfu_Models_VideoLayer]()
@@ -504,16 +524,7 @@ class WebRTCClient: NSObject {
             audioTrack.trackType = .audio
             tracks.append(audioTrack)
         }
-        request.tracks = tracks
-        let connectURL = signalChannel?.connectURL
-        try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
-            self?.sfuChanged(connectURL) == false
-        }, task: {
-            let response = try await signalService.setPublisher(setPublisherRequest: request)
-            sdp = response.sdp
-            log.debug("Setting remote description")
-            try await peerConnection.setRemoteDescription(sdp, type: .answer)
-        })
+        return tracks
     }
     
     private func makeAudioTrack() async -> RTCAudioTrack {
