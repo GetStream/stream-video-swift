@@ -105,10 +105,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testSixParticipantsOnTheCall() {
+    func testSwitchingBetweenViewsOnTheCall() {
         linkToScenario(withId: 1768)
         
-        let participants = 6
+        let participants = 4
 
         WHEN("user starts a new call") {
             userRobot
