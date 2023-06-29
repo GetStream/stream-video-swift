@@ -47,6 +47,14 @@ open class CallViewModel: ObservableObject {
                         }
                     }
                 })
+            screenSharingUpdates = call?.state.$screenSharingSession
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] screenSharingSession in
+                    if screenSharingSession?.participant.id != self?.lastScreenSharingParticipant?.id {
+                        self?.lastLayoutChange = Date()
+                    }
+                    self?.lastScreenSharingParticipant = screenSharingSession?.participant
+                })
         }
     }
     
@@ -81,7 +89,6 @@ open class CallViewModel: ObservableObject {
             }
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
-            checkForScreensharingSession()
             checkCallSettingsForCurrentUser()
         }
     }
@@ -97,15 +104,6 @@ open class CallViewModel: ObservableObject {
     
     /// `false` by default. It becomes `true` when the current user's local video is shown as a primary view.
     @Published public var localVideoPrimary = false
-    
-    /// Optional property about the ongoing screensharing session (if any).
-    @Published public var screensharingSession: ScreensharingSession? {
-        didSet {
-            if screensharingSession?.participant.id != oldValue?.participant.id {
-                lastLayoutChange = Date()
-            }
-        }
-    }
     
     /// Whether the UI elements, such as the call controls should be hidden (for example while screensharing).
     @Published public var hideUIElements = false
@@ -147,7 +145,7 @@ open class CallViewModel: ObservableObject {
     /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
         callParticipants.first(where: { (_, value) in
-            value.id == call?.sessionId
+            value.id == call?.state.sessionId
         })
             .map { $1 }
     }
@@ -158,8 +156,10 @@ open class CallViewModel: ObservableObject {
     private var callUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?
     private var recordingUpdates: AnyCancellable?
+    private var screenSharingUpdates: AnyCancellable?
         
     private var ringingTimer: Foundation.Timer?
+    private var lastScreenSharingParticipant: CallParticipant?
     
     private var lastLayoutChange = Date()
     private var enteringCallTask: Task<Void, Never>?
@@ -169,8 +169,8 @@ open class CallViewModel: ObservableObject {
     public var participants: [CallParticipant] {
         callParticipants
             .filter {
-                if participantsLayout == .grid && screensharingSession == nil {
-                    return $0.value.id != call?.sessionId
+                if participantsLayout == .grid && call?.state.screenSharingSession == nil {
+                    return $0.value.id != call?.state.sessionId
                 } else {
                     return true
                 }
@@ -430,6 +430,8 @@ open class CallViewModel: ObservableObject {
         automaticLayoutHandling = true
         reconnectionUpdates?.cancel()
         reconnectionUpdates = nil
+        screenSharingUpdates?.cancel()
+        screenSharingUpdates = nil
         recordingUpdates?.cancel()
         recordingUpdates = nil
         call?.leave()
@@ -575,19 +577,6 @@ open class CallViewModel: ObservableObject {
         }
     }
     
-    private func checkForScreensharingSession() {
-        for (_, participant) in callParticipants {
-            if participant.screenshareTrack != nil {
-                screensharingSession = ScreensharingSession(
-                    track: participant.screenshareTrack,
-                    participant: participant
-                )
-                return
-            }
-        }
-        screensharingSession = nil
-    }
-    
     private func checkCallSettingsForCurrentUser() {
         guard let localParticipant = localParticipant,
               // Skip updates for the initial period while the connection is established.
@@ -630,11 +619,6 @@ public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: String
     public let participants: [MemberRequest]
-}
-
-public struct ScreensharingSession {
-    public let track: RTCVideoTrack?
-    public let participant: CallParticipant
 }
 
 public enum ParticipantsLayout {

@@ -122,7 +122,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the screensharing slot.
     func makeScreenSharingView(
         viewModel: CallViewModel,
-        screensharingSession: ScreensharingSession,
+        screensharingSession: ScreenSharingSession,
         availableSize: CGSize
     ) -> ScreenSharingViewType
     
@@ -258,7 +258,7 @@ extension ViewFactory {
     
     public func makeScreenSharingView(
         viewModel: CallViewModel,
-        screensharingSession: ScreensharingSession,
+        screensharingSession: ScreenSharingSession,
         availableSize: CGSize
     ) -> some View {
         ScreenSharingView(
