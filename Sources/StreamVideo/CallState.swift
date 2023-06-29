@@ -7,7 +7,10 @@ import Foundation
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
-    
+
+    /// The id of the current session.
+    /// When a call is started, a unique session identifier is assigned to the user in the call.
+    @Published public internal(set) var sessionId: String = ""
     @Published public internal(set) var participants = [String: CallParticipant]() { didSet { didUpdate(Array(participants.values)) } }
     @Published public internal(set) var me: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
@@ -194,7 +197,7 @@ public class CallState: ObservableObject {
         var screenSharingSession: ScreenSharingSession?
 
         for participant in participants {
-            if participant.id == streamVideo.user.id {
+            if participant.sessionId == sessionId {
                 me = participant
             } else {
                 remoteParticipants.append(participant)

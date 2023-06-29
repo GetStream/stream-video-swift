@@ -11,10 +11,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     public internal(set) var state = CallState()
     
-    /// The id of the current session.
-    /// When a call is started, a unique session identifier is assigned to the user in the call.
-    public internal(set) var sessionId: String = ""
-    
     /// The call id.
     public let callId: String
     /// The call type.

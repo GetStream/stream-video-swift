@@ -1,8 +1,5 @@
 //
-//  ScreenSharingSession.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 28/6/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
