@@ -75,6 +75,8 @@ public struct CallView<Factory: ViewFactory>: View {
                         }
                         .accessibility(identifier: "cornerDragableView")
                     }
+
+                    Spacer()
                 }
                 .padding(.top, 4)
                 .opacity(viewModel.hideUIElements ? 0 : 1)
