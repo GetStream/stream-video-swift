@@ -13,7 +13,7 @@ final class Retries_Tests: XCTestCase {
     private var dummyError: Error! = ClientError.NetworkError()
     private var dummyState: String! = "dummy"
     
-    func tearDown() throws async {
+    override func tearDown() async throws {
         dummyRequest = nil
         dummyData = nil
         dummyError = nil
