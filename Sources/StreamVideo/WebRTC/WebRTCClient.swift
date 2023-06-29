@@ -289,6 +289,7 @@ class WebRTCClient: NSObject {
         let connectURL = signalChannel?.connectURL
         try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
             self?.sfuChanged(connectURL) == false
+                && self?.callSettings.audioOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             localAudioTrack?.isEnabled = isEnabled
@@ -316,6 +317,7 @@ class WebRTCClient: NSObject {
         let connectURL = signalChannel?.connectURL
         try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
             self?.sfuChanged(connectURL) == false
+                && self?.callSettings.videoOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             localVideoTrack?.isEnabled = isEnabled
