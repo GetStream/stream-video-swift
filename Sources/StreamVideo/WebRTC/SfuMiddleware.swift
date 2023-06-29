@@ -107,7 +107,12 @@ class SfuMiddleware: EventMiddleware {
             sendAnswerRequest.peerType = .subscriber
             sendAnswerRequest.sdp = answer?.sdp ?? ""
             log.debug("Sending answer for offer")
-            _ = try await signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
+            let hostname = signalService.hostname
+            try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
+                self?.hostnameChanged(hostname) == false
+            }) {
+                _ = try await signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
+            }
         } catch {
             log.error("Error handling offer event \(error.localizedDescription)")
         }
@@ -196,10 +201,14 @@ class SfuMiddleware: EventMiddleware {
         )
         if peerType == .subscriber, let subscriber = self.subscriber {
             log.debug("Adding ice candidate for the subscriber")
-            subscriber.add(iceCandidate: iceCandidate)
+            try await executeTask(retryPolicy: .fastAndSimple) {
+                try await subscriber.add(iceCandidate: iceCandidate)
+            }
         } else if peerType == .publisherUnspecified, let publisher = self.publisher {
             log.debug("Adding ice candidate for the publisher")
-            publisher.add(iceCandidate: iceCandidate)
+            try await executeTask(retryPolicy: .fastAndSimple) {
+                try await publisher.add(iceCandidate: iceCandidate)
+            }
         }
     }
     
@@ -289,5 +298,9 @@ class SfuMiddleware: EventMiddleware {
                 await state.update(callParticipant: updated)
             }
         }
+    }
+    
+    private func hostnameChanged(_ hostname: String) -> Bool {
+        signalService.hostname != hostname
     }
 }

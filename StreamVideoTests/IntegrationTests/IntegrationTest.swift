@@ -39,35 +39,46 @@ class IntegrationTest: XCTestCase {
          */
     }
 
-    public func assertNext<Output>(_ s: AsyncStream<Output>, _ assertion: @escaping (Output) -> Bool) async -> Void {}
-
-    public func assertNext<Output>(_ p: some Publisher<Output, Never>, _ assertion: @escaping (Output) -> Bool) async -> Void {
+    // TODO: extract code between these two assertNext methods
+    public func assertNext<Output: Sendable>(_ s: AsyncStream<Output>, _ assertion: @Sendable @escaping (Output) -> Bool) async -> Void {
         let expectation = XCTestExpectation(description: "NextValue")
-        var assertionSucceded = false
-        var values = [Output]()
 
-        DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
+        Task {
             expectation.fulfill()
+            for await v in s {
+                if assertion(v) {
+                    expectation.fulfill()
+                    return
+                }
+            }
         }
+        
+        await fulfillment(of: [expectation], timeout: 1)
+    }
 
+    public func assertNext<Output>(
+        _ p: some Publisher<Output, Never>,
+        _ assertion: @escaping (Output) -> Bool,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async -> Void {
+        let nextValueExpectation = expectation(description: "NextValue")
+        nextValueExpectation.assertForOverFulfill = false
+        var values = [Output]()
         var bag = Set<AnyCancellable>()
-        defer {
-            bag.forEach { $0.cancel() }
-        }
+        defer { bag.forEach { $0.cancel() } }
 
         p.sink {
             values.append($0)
             if assertion($0) {
-                expectation.fulfill()
-                assertionSucceded = true
+                nextValueExpectation.fulfill()
             }
         }.store(in: &bag)
-        await fulfillment(of: [expectation], timeout: 1)
 
-        if assertionSucceded {
-            return
-        }
-
-        XCTFail("unable to fulfill assertion, collected values on the publishers were: \(values)")
+    #if compiler(>=5.8)
+        await fulfillment(of: [nextValueExpectation], timeout: 1)
+    #else
+        wait(for: [nextValueExpectation], timeout: 1)
+    #endif
     }
 }

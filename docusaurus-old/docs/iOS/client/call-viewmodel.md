@@ -107,10 +107,6 @@ You can mute/unmute the audio during a call, using the `toggleMicrophoneEnabled`
 
 The view model also has support for explicitly asking to capture the current user's local video. To do this, you will need to call `startCapturingLocalVideo`.
 
-### Screen Sharing Session
-
-When there is a screen sharing session in progress, it can be accessed via the `screensharingSession` published property in the view model.
-
 ### Other properties
 
 Here are some other useful properties from the view model that you can use to build custom calling experiences:

@@ -7,10 +7,15 @@
 final class HTTPClient_Mock: @unchecked Sendable, HTTPClient, DefaultAPITransport {
             
     var dataResponses = [Data]()
+    var errors = [Error]()
     var requestCounter = 0
     
     func execute(request: URLRequest) async throws -> Data {
         requestCounter += 1
+        if !errors.isEmpty {
+            let error = errors.removeFirst()
+            throw error
+        }
         if dataResponses.isEmpty {
             throw ClientError.Unexpected("Please setup responses")
         }

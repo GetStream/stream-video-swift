@@ -326,8 +326,14 @@ class WebRTCClient: NSObject {
         audio.muted = !isEnabled
         request.muteStates = [audio]
         request.sessionID = sessionID
-        _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
-        localAudioTrack?.isEnabled = isEnabled
+        let connectURL = signalChannel?.connectURL
+        try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
+            self?.sfuChanged(connectURL) == false
+                && self?.callSettings.audioOn == !isEnabled
+        }) {
+            _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
+            localAudioTrack?.isEnabled = isEnabled
+        }
     }
     
     func changeVideoState(isEnabled: Bool) async throws {
@@ -348,8 +354,14 @@ class WebRTCClient: NSObject {
         video.muted = !isEnabled
         request.muteStates = [video]
         request.sessionID = sessionID
-        _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
-        localVideoTrack?.isEnabled = isEnabled
+        let connectURL = signalChannel?.connectURL
+        try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
+            self?.sfuChanged(connectURL) == false
+                && self?.callSettings.videoOn == !isEnabled
+        }) {
+            _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
+            localVideoTrack?.isEnabled = isEnabled
+        }
     }
     
     func changeSoundState(isEnabled: Bool) async throws {
@@ -507,17 +519,20 @@ class WebRTCClient: NSObject {
         await assignTracksToParticipants()
         let state = await self.state.connectionState
         if state == .connected {
-            await updateParticipantsSubscriptions()
+            try? await updateParticipantsSubscriptions()
         }
         let participants = await self.state.callParticipants
         onParticipantsUpdated?(participants)
     }
     
-    private func handleNegotiationNeeded() -> ((PeerConnection) -> Void) {
-        { [weak self] peerConnection in
+    private func handleNegotiationNeeded() -> ((PeerConnection, RTCMediaConstraints?) -> Void) {
+        { [weak self] peerConnection, constraints in
             guard let self = self else { return }
             Task {
-                try? await self.negotiate(peerConnection: peerConnection)
+                try? await self.negotiate(
+                    peerConnection: peerConnection,
+                    constraints: constraints
+                )
             }
         }
     }
@@ -545,15 +560,19 @@ class WebRTCClient: NSObject {
         }
         let offer = RTCSessionDescription(type: initialOffer.type, sdp: updatedSdp)
         try await peerConnection.setLocalDescription(offer)
-        let sdp: String
         var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
         request.sdp = offer.sdp
         request.sessionID = sessionID
         request.tracks = loadTracks()
-        let response = try await signalService.setPublisher(setPublisherRequest: request)
-        sdp = response.sdp
-        log.debug("Setting remote description")
-        try await peerConnection.setRemoteDescription(sdp, type: .answer)
+        let connectURL = signalChannel?.connectURL
+        try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
+            self?.sfuChanged(connectURL) == false
+        }, task: {
+            let response = try await signalService.setPublisher(setPublisherRequest: request)
+            let sdp = response.sdp
+            log.debug("Setting remote description")
+            try await peerConnection.setRemoteDescription(sdp, type: .answer)
+        })
     }
     
     private func loadTracks() -> [Stream_Video_Sfu_Models_TrackInfo] {
@@ -715,16 +734,21 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func updateParticipantsSubscriptions() async {
+    private func updateParticipantsSubscriptions() async throws {
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
         request.sessionID = sessionID
         let tracks = await loadTrackSubscriptionDetails()
         let connectionState = await state.connectionState
         if connectionState == .connected && !tracks.isEmpty {
             request.tracks = tracks
-            _ = try? await signalService.updateSubscriptions(
-                updateSubscriptionsRequest: request
-            )
+            let connectURL = signalChannel?.connectURL
+            try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
+                self?.sfuChanged(connectURL) == false
+            }) {
+                _ = try await signalService.updateSubscriptions(
+                    updateSubscriptionsRequest: request
+                )
+            }
         }
     }
     
@@ -840,6 +864,10 @@ class WebRTCClient: NSObject {
     private func cleanupMigrationData() {
         migratingWSClient = nil
         migratingSignalService = nil
+    }
+    
+    private func sfuChanged(_ connectURL: URL?) -> Bool {
+        signalChannel?.connectURL != connectURL
     }
 }
 

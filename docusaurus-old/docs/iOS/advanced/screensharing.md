@@ -17,7 +17,7 @@ If you want to implement your own UI when there's screen sharing in progress, yo
 ```swift
 public func makeScreenSharingView(
     viewModel: CallViewModel,
-    screensharingSession: ScreensharingSession,
+    screensharingSession: ScreenSharingSession,
     availableSize: CGSize
 ) -> some View {
     CustomScreenSharingView(
@@ -30,5 +30,4 @@ public func makeScreenSharingView(
 
 In this method, the following parameters are provided:
 - `viewModel` - the `CallViewModel` used in the call.
-- `screensharingSession` - The current screen sharing session, that contains information about the track, as well as the participant that is sharing.
-- `availableSize` - the available size to layout the rendering view.
+- `screensharingSession` - The current screen sharing session, that contains information about the track, as well as the participant that is sharing.- `availableSize` - the available size to layout the rendering view.

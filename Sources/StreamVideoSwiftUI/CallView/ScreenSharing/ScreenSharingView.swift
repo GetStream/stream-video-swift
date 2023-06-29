@@ -8,7 +8,7 @@ import SwiftUI
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     @ObservedObject var viewModel: CallViewModel
-    var screenSharing: ScreensharingSession
+    var screenSharing: ScreenSharingSession
     var availableSize: CGSize
     var viewFactory: Factory
     
@@ -18,7 +18,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     
     public init(
         viewModel: CallViewModel,
-        screenSharing: ScreensharingSession,
+        screenSharing: ScreenSharingSession,
         availableSize: CGSize,
         viewFactory: Factory = DefaultViewFactory.shared
     ) {

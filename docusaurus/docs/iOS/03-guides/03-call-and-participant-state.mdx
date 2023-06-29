@@ -3,64 +3,111 @@ title: Call & Participant State
 description: How the state is exposed
 ---
 
-## Call State
+### Video Call State
 
-When you join a call, we expose the following observable `state` from the `Call` object:
-
-- `createdAt` - the creation date of the call.
-- `updatedAt` - the update date of a call.
-- `startsAt` - the starting date of the call.
-- `endedAt` - the end date of the call.
-- `endedBy` - the user who ended the call.
-- `createdBy` - the user who created the call.
-- `backstage` - whether the call is in backstage.
-- `transcribing` - a boolean indicating if transciptions are active or or not for this call.
-- `blockedUserIds` - the blocked user ids.
-- `custom` - any custom data that you passed while creating the call.
-- `members` - the members of the call.
-- `team: ` - the team that this call is owned by.
-- `ownCapabilities` - current user's capabilities (e.g. send audio, video etc).
-- `capabilitiesByRole` - the capabilities that come with a role.
-- `ingress` - contains an address URL that you can use to stream.
-- `egress` - contains URL for playlist of recording.
-- `settings` - current call settings.
-- `session` - the session associated with the call.
-- `participants` - dictionary of the participants in the call.
-- `reconnectionStatus` - whether the call is reconnecting.
-- `recordingState` - the recording state of the call.
-- `participantCount` - number of participants connected to the call.
-
-## Call Participant
-
-When users join a call, they become CallParticipants. The call participants are available from the CallViewModel's `callParticipants` property, as a dictionary, or directly from the call's `state` observable object.
-
-You can use this property to filter participants, based on their properties. Here's a list of the info that is available about the `CallParticipant`:
-
-- `id`: `String` - The unique call id of the participant.
-- `userId`: `String` - The user's id. This is not necessarily unique, since a user can join from multiple devices.
-- `roles`: `[String]` - The user's roles in the call.
-- `name`: `String` - The user's name.
-- `profileImageURL`: `URL?` - The user's profile image URL.
-- `trackLookupPrefix`: `String?` - The id of the track that's connected to the participant.
-- `hasVideo`: `Bool` - Returns whether the participant has video.
-- `hasAudio`: `Bool` - Returns whether the participant has audio.
-- `isScreensharing`: `Bool` - Returns whether the participant is screen sharing.
-- `track`: `RTCVideoTrack?` - Returns the participant's video track.
-- `trackSize`: `CGSize` - Returns the size of the track for the participant.
-- `screenshareTrack`: `RTCVideoTrack?` - Returns the screen sharing track for the participant.
-- `showTrack`: `Bool` - Returns whether the track should be shown.
-- `isSpeaking`: `Bool` - Returns whether the participant is speaking.
-- `isDominantSpeaker`: `Bool` - Returns whether the participant is a dominant speaker.
-- `sessionId`: `String` - Returns the session id of the participant.
-- `connectionQuality`: `ConnectionQuality` - Returns the connection quality of the participant.
-- `joinedAt`: `Date` - Returns the date when the user joined the call.
-- `isPinned`: `Bool` - Returns whether the current user is pinned.
-- `audioLevel`: `Float` - The audio level of the current participant.
-
-These properties can be used to do custom filtering of the participants. For example, if you want to get the first user who is dominant speaker, you can do the following:
+When you join a call, we'll automatically expose stateflow objects in 3 different places:
 
 ```swift
-var speaker: CallParticipant? {
-    participants.first { $0.isDominantSpeaker }
-}
+let clientState = streamVideo.state
+let callState = call.state
+let participants = call.state.participants
 ```
+
+### Call State
+
+Here's an example of how you can access the call state:
+
+```swift
+let call = streamVideo.call(callType: "default", callId: "mycall")
+let joinResult = try await call.join(create: true)
+// state is now available at
+let state = call.state
+```
+
+The following fields are available on the call:
+
+| Attribute | Description|
+| --------- | ---------- |
+| `participants` | The list of call participants. |
+| `me` | Shortcut to your own participant state. |
+| `remoteParticipants` | The list of call participants other than yourself. |
+| `activeSpeakers` | The list of participants who are currently speaking. |
+| `dominantSpeaker` | The dominant speaker. |
+| `members` | The list of call members. |
+| `screenSharingSession` | If someone is screensharing, it will be available here. |
+| `recordingState` | if the call is being recorded or not. |
+| `blockedUserIds` | The user ids who are blocked from this call. |
+| `settings` | The settings for this call. |
+| `ownCapabilities` | Which actions you have permission to do. |
+| `capabilitiesByRole` | What different roles (user, admin, moderator etc.) are allowed to do. |
+| `backstage` | If a call is in backstage mode or not. |
+| `broadcasting` | If a call is broadcasting (to HLS) or not. |
+| `createdAt` | When the call was created. |
+| `updatedAt` | When the call was updated. |
+| `startsAt` | When the call is scheduled to start. |
+| `endedAt` | When the call ended. |
+| `endedBy` | User who ended the call. |
+| `custom` | Custom data on the call. |
+| `team` | Team that the call is restricted to. Default to null. |
+| `createdBy` | Who created the call. |
+| `ingress` | If there is an active ingress session to this call. IE if you're sending RTMP into the call |
+| `transcribing` | a boolean indicating if transciptions are active or or not for this call. |
+| `egress` | contains URL for playlist of recording. |
+| `session` | the session associated with the call. |
+| `reconnectionStatus` | whether the call is reconnecting. |
+| `participantCount` | number of participants connected to the call. |
+
+### Participant State
+
+The `CallParticipant` is the most essential component used to render a participant in a call. It contains all of the information to render a participant, such as audio & video renderers, availabilities of audio & video, the screen sharing session, reactions, and etc. Here's how you iterate over the participants:
+
+```swift
+// all participants
+let cancellable = call.state.$participants.sink { participants in
+    // ..
+}
+
+// you
+let me: CallParticipant? = call.state.me
+```
+
+The following fields are available on the participant:
+
+| Attribute | Description|
+| --------- | ---------- |
+| `id` | The unique call id of the participant. |
+| `userId` | The user's id. This is not necessarily unique, since a user can join from multiple devices. |
+| `roles` | The user's roles in the call. |
+| `name` | The user's name. |
+| `profileImageURL`| The user's profile image url. |
+| `trackLookupPrefix` | The id of the track that's connected to the participant. |
+| `hasVideo` | Returns whether the participant has video. |
+| `hasAudio` | Returns whether the participant has audio. |
+| `isScreensharing` | Returns whether the participant is screenSharing. |
+| `track` | Returns the participant's video track. |
+| `trackSize` | Returns the size of the track for the participant. |
+| `screenshareTrack` | Returns the screensharing track for the participant. |
+| `showTrack` | Returns whether the track should be shown. |
+| `isSpeaking` | Returns whether the participant is speaking. |
+| `isDominantSpeaker` | Returns whether the participant is a dominant speaker. |
+| `sessionId` | Returns whether the participant is speaking. |
+| `connectionQuality` | The participant's connection quality. |
+| `joinedAt` | Returns the date when the user joined the call. |
+| `isPinned` | Returns whether the user is pinned. |
+| `audioLevel` | The audio level for the user. |
+
+### Client State
+
+```swift
+// client state is available on the client object
+let state = streamVideo.state
+```
+
+And contains these fields:
+
+| Attribute | Description|
+| --------- | ---------- |
+| `user` | The user you're currently authenticated as. |
+| `connection` | The connection state. See ConnectionState. |
+| `activeCall` | The call you've currently joined. |
+| `ringingCall` | Contains the call if you're calling someone or someone is calling you. |
