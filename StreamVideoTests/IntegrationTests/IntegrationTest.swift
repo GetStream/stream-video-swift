@@ -58,9 +58,12 @@ class IntegrationTest: XCTestCase {
 
     public func assertNext<Output>(
         _ p: some Publisher<Output, Never>,
-        _ assertion: @escaping (Output) -> Bool
+        _ assertion: @escaping (Output) -> Bool,
+        file: StaticString = #file,
+        line: UInt = #line
     ) async -> Void {
         let nextValueExpectation = expectation(description: "NextValue")
+        nextValueExpectation.assertForOverFulfill = false
         var values = [Output]()
         var bag = Set<AnyCancellable>()
         defer { bag.forEach { $0.cancel() } }

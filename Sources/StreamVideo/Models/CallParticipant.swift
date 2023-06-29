@@ -23,7 +23,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var hasVideo: Bool
     /// Returns whether the participant has audio.
     public var hasAudio: Bool
-    /// Returns whether the participant is screensharing.
+    /// Returns whether the participant is screen sharing.
     public var isScreensharing: Bool
     /// Returns the participant's video track.
     public var track: RTCVideoTrack?
@@ -37,9 +37,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var isSpeaking: Bool
     /// Returns whether the participant is a dominant speaker.
     public var isDominantSpeaker: Bool
-    /// Returns whether the participant is speaking.
-    public var sessionId: String
     /// Returns the session id of the participant.
+    public var sessionId: String
+    /// The participant's connection quality.
     public var connectionQuality: ConnectionQuality
     /// Returns the date when the user joined the call.
     public var joinedAt: Date

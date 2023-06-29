@@ -3,97 +3,85 @@ title: Client & Authentication
 description: How to setup the client and authenticate
 ---
 
-Stream uses JWT (JSON Web Tokens) to authenticate video users, enabling them to login. The same token can be used to login into our chat services (provided that your app ID is enabled for both chat and video).
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
-For security reasons, you cannot generate User Tokens from the Video SDK in the front end and you must request them from your token provider endpoint. If you do not have a token provider endpoint during your development phase, you can manually generate tokens for getting started [here](https://generator.getstream.io). It's important to note that you should not use them in production.
+## Client & Auth
 
-### Token Providers
-
-At a high level, the Token Provider is an endpoint on your server that can perform the following sequence of tasks:
-
-- Receive information about a user from the front end.
-- Validate that user information against your system.
-- Provide a User-ID corresponding to that user to the server client's token creation method.
-- Return that token to the front end.
-
-User Tokens can only be safely generated from a server. This means you will need to implement a Token Provider prior to deploying your application to production. 
-
-### StreamVideo client
-
-The `StreamVideo` client requires a token and a token provider to be initialized. If the provided token has an expiry date (which we strongly recommend), the token provider closure would be invoked when the token expires, giving you a chance to refresh it.
-
-Here is an example initialization of the `StreamVideo` client:
+Before joining a call, it is necessary to set up the video client. Here's a basic example:
 
 ```swift
 let streamVideo = StreamVideo(
-    apiKey: "your_api_key",
-    user: user.userInfo,
-    token: user.token,
-    tokenProvider: { result in
-        Task {
-            let newToken = try await fetchToken(for: user.userInfo)
-            result(.success(newToken))
-        }
-    }
+    apiKey: apiKey,
+    user: user,
+    token: token,
+    tokenProvider: { _ in }
 )
 ```
 
-:::note
-You will need the `fetchToken` method to provide your own implementation, that will load a new token for the current user. As soon as you provide the token in the `result`, the SDK will be notified about the new token and retry the failed request.
-:::
+- The API Key can be found in your dashboard.
+- The user can be either authenticated, anonymous or guest.
+- Note: You can store custom data on the user object, if required.
 
-#### Guest users
+Typically, you'll want to initialize the client in your app's AppDelegate or SceneDelegate or in a dependency injection module.
 
-Another type of users are guest users. Guests can perform web socket connection and join a call (depending on the configured permissions). Also, guests are able to send audio and video to a call.
+### Generating a token
 
-Creating a `StreamVideo` client for a guest user is an async and throwing operation, since we are fetching a guest token for the user to join a call in the background. 
+Tokens need to be generated server side. You can use our server side SDKs to quickly add support for this. Typically you integrate this into the part of your codebase where you login or register users. The tokens provide a way to authenticate a user or give access to a specific set of calls.
 
-Here's an example initialization of the `StreamVideo` client for guest users:
+Here's a valid user and token to help you get started on the client side, before integrating with your backend API.
 
-```swift
-Task {
-    let streamVideo = try await StreamVideo(apiKey: "api_key", user: .guest("martin"))
-}
-```
+<TokenSnippet sampleApp='client-auth-token-generation' displayStyle='credentials'/>
 
-After the client is initialized, you can safely create a `CallViewModel` and join calls, like a regular user.
+### Different types of users
 
-:::warning
-Guest users do not have permissions to start new calls.
-:::
+Authenticated users are users that have an account on your app.
+Guest users are temporary user accounts. You can use it to temporarily give someone a name and image when joining a call.
+Anonymous users are users that are not authenticated. It's common to use this for watching a livestream or similar where you aren't authenticated.
 
-#### Anonymous users
-
-Anonymous users don't have a profile. They are not able to send audio or video, and they are not able to perform a web socket connection.
-
-Anonymous users need a call token to join a call. Call tokens are JWT authentication tokens that include additional claims that grant special access to a list of calls. They allow anonymous users to have access to a list of calls.
-
-Few important things about call tokens:
-- Call tokens must have an expiration time included to avoid security problems.
-- Call tokens can contain up to 100 call ids.
-- Call tokens for anonymous users must be generated with the special `!anon` `user_id` claim.
-- Membership / role can only be invalidated using the existing API around token invalidation (we invalidate all tokens for a user).
-- Generating a call token does not require any API interaction and can be done with any server-side SDK.
-
-The call token should contain `user_id="!anon"`, as well as the list of supported call ids `call_cids=["default:1", "default:2"]`.
-
-In order to create a `StreamVideo` client for an anonymous user, you need to provide the `.anonymous` `User` type:
+This example shows the client setup for a guest user:
 
 ```swift
-let streamVideo = StreamVideo(apiKey: "api_key", user: .anonymous, token: serverSideGeneratedToken) { result in
-    Task {
-        do {
-            let token = try await TokenService.shared.fetchToken(for: user.id)
-            result(.success(token))
-        } catch {
-            result(.failure(error))
-        }
-    }
-}
+let streamVideo = StreamVideo(
+    apiKey: apiKey,
+    user: .guest("guest"),
+    token: token,
+    tokenProvider: { _ in }
+)
 ```
 
-Alternatively, you can skip the `tokenProvider` parameter which is called when a token expires. In that case, the user will have an invalid token and will not be able to be part of the call anymore.
+And here's an example for an anonymous user
 
 ```swift
-let streamVideo = StreamVideo(apiKey: "api_key", user: .anonymous, token: serverSideGeneratedToken)
+let streamVideo = StreamVideo(
+    apiKey: apiKey,
+    user: .anonymous,
+    token: token,
+    tokenProvider: { _ in }
+)
 ```
+
+### Client options
+
+Here's a more complete example of the client options:
+
+```swift
+let streamVideo = StreamVideo(
+    apiKey: apiKey,
+    user: user,
+    token: token,
+    videoConfig: VideoConfig(),
+    pushNotificationsConfig: .default,
+    tokenProvider: { _ in }
+)
+```
+
+The full list of supported options is:
+
+| Option | Description | Default |
+| ------ | ----------- | ------- |
+| `apiKey` | The API key to use. Found in the dashboard | - |
+| `user` | The user object. You can store custom data on the user. | - |
+| `token` | The JWT token to use for authentication. | - |
+| `videoConfig` | A `VideoConfig` instance representing the current video config. | `VideoConfig()` |
+| `pushNotificationsConfig` | Config for push notifications. | `.default` |
+| `tokenProvider` | A function to call if the token is expired or invalid. | - |

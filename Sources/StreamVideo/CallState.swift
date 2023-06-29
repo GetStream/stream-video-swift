@@ -7,28 +7,38 @@ import Foundation
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
-    
+
+    /// The id of the current session.
+    /// When a call is started, a unique session identifier is assigned to the user in the call.
+    @Published public internal(set) var sessionId: String = ""
+    @Published public internal(set) var participants = [String: CallParticipant]() { didSet { didUpdate(Array(participants.values)) } }
+    @Published public internal(set) var me: CallParticipant?
+    @Published public internal(set) var dominantSpeaker: CallParticipant?
+    @Published public internal(set) var remoteParticipants: [CallParticipant] = []
+    @Published public internal(set) var activeSpeakers: [CallParticipant] = []
+    @Published public internal(set) var members: [Member] = []
+    @Published public internal(set) var screenSharingSession: ScreenSharingSession? = nil
+    @Published public internal(set) var recordingState: RecordingState = .noRecording
+    @Published public internal(set) var blockedUserIds: Set<String> = []
+    @Published public internal(set) var settings: CallSettingsResponse?
+    @Published public internal(set) var ownCapabilities: [OwnCapability] = []
+    @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
+    @Published public internal(set) var backstage: Bool = false
+    @Published public internal(set) var broadcasting: Bool = false
     @Published public internal(set) var createdAt: Date = .distantPast
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
-    @Published public internal(set) var createdBy: User?
-    @Published public internal(set) var backstage: Bool = false
-    @Published public internal(set) var transcribing: Bool = false
-    @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var custom: [String: RawJSON] = [:]
-    @Published public internal(set) var members: [Member] = []
     @Published public internal(set) var team: String?
-    @Published public internal(set) var ownCapabilities: [OwnCapability] = []
-    @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
+    @Published public internal(set) var createdBy: User?
     @Published public internal(set) var ingress: CallIngressResponse?
-    @Published public internal(set) var egress: EgressResponse?    
-    @Published public internal(set) var settings: CallSettingsResponse?
+
+    @Published public internal(set) var transcribing: Bool = false
+    @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
     @Published public internal(set) var session: CallSessionResponse?
-    @Published public internal(set) var participants = [String: CallParticipant]()
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
-    @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var participantCount: UInt32 = 0
         
     internal func updateState(from event: VideoEvent) {
@@ -180,5 +190,38 @@ public class CallState: ObservableObject {
         }
         self.ownCapabilities = event.ownCapabilities
     }
-    
+
+    private func didUpdate(_ participants: [CallParticipant]) {
+        var remoteParticipants: [CallParticipant] = []
+        var activeSpeakers: [CallParticipant] = []
+        var screenSharingSession: ScreenSharingSession?
+
+        for participant in participants {
+            if participant.sessionId == sessionId {
+                me = participant
+            } else {
+                remoteParticipants.append(participant)
+            }
+
+            if participant.isSpeaking {
+                activeSpeakers.append(participant)
+            }
+
+            if participant.isDominantSpeaker {
+                dominantSpeaker = participant
+            }
+
+            if let screenshareTrack = participant.screenshareTrack {
+                screenSharingSession = .init(track: screenshareTrack, participant: participant)
+            }
+        }
+
+        self.screenSharingSession = screenSharingSession
+        self.remoteParticipants = remoteParticipants
+        self.activeSpeakers = activeSpeakers
+    }
+
+    private func didUpdate(_ egress: EgressResponse?) {
+        self.broadcasting = egress?.broadcasting ?? false
+    }
 }
