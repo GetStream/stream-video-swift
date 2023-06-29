@@ -7,13 +7,10 @@ runs:
       shell: bash
     - run: echo "$HOME/.mint/bin" >> $GITHUB_PATH
       shell: bash
-    - name: Cache RubyGems
-      uses: actions/cache@v3
-      id: rubygem-cache
+    - uses: ruby/setup-ruby@v1
       with:
-        path: vendor/bundle
-        key: ${{ env.IMAGE }}-gem-${{ hashFiles('**/Gemfile.lock') }}
-        restore-keys: ${{ env.IMAGE }}-gem-
+        ruby-version: 3.1
+        bundler-cache: true
     - name: Cache Mint
       uses: actions/cache@v3
       id: mint-cache
