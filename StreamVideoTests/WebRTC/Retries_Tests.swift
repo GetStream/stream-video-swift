@@ -8,10 +8,18 @@ import XCTest
 
 final class Retries_Tests: XCTestCase {
     
-    let dummyRequest = URLRequest(url: URL(string: "https://test.com")!)
-    let dummyData = Data()
-    let dummyError = ClientError.NetworkError()
-    var dummyState = "dummy"
+    private var dummyRequest: URLRequest! = URLRequest(url: URL(string: "https://test.com")!)
+    private var dummyData: Data! = Data()
+    private var dummyError: Error! = ClientError.NetworkError()
+    private var dummyState: String! = "dummy"
+    
+    func tearDown() throws async {
+        dummyRequest = nil
+        dummyData = nil
+        dummyError = nil
+        dummyState = nil
+        try await super.tearDown()
+    }
     
     func test_executeTask_success() async throws {
         // Given
