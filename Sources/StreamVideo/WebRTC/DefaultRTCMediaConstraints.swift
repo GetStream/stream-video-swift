@@ -11,4 +11,9 @@ extension RTCMediaConstraints {
         mandatoryConstraints: nil,
         optionalConstraints: ["DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue]
     )
+    
+    static let iceRestartConstraints = RTCMediaConstraints(
+        mandatoryConstraints: [kRTCMediaConstraintsIceRestart: kRTCMediaConstraintsValueTrue],
+        optionalConstraints: ["DtlsSrtpKeyAgreement": kRTCMediaConstraintsValueTrue]
+    )
 }
