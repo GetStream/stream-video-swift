@@ -66,7 +66,7 @@ public class MicrophoneChecker: ObservableObject {
             }
             captureAudio()
         } catch {
-            log.error("Failed to set up recording session")
+            log.error("Failed to set up recording session", error: error)
         }
     }
     
@@ -95,7 +95,7 @@ public class MicrophoneChecker: ObservableObject {
                 self.decibels = temp
             }
         } catch {
-            log.error("Failed to start recording process")
+            log.error("Failed to start recording process", error: error)
         }
     }
     
@@ -116,7 +116,7 @@ public class MicrophoneChecker: ObservableObject {
             try FileManager.default.removeItem(at: audioFilename)
             log.debug("Successfully deleted audio filename")
         } catch {
-            log.error("Error deleting audio filename: \(error.localizedDescription)")
+            log.error("Error deleting audio filename: \(error.localizedDescription)", error: error)
         }
     }
 }

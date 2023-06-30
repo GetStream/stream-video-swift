@@ -66,7 +66,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             let data = try message.serializedData()
             send(data: data)
         } catch {
-            log.error("Failed sending SendableEvent, error: \(error)", subsystems: .webSocket)
+            log.error("Failed sending SendableEvent", subsystems: .webSocket, error: error)
         }
     }
     
@@ -75,7 +75,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             let data = try JSONEncoder().encode(jsonMessage)
             send(data: data)
         } catch {
-            log.error("Failed sending JSON message, error: \(error)", subsystems: .webSocket)
+            log.error("Failed sending JSON message", subsystems: .webSocket, error: error)
         }
     }
     
@@ -115,7 +115,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                 self.doRead()
                 
             case let .failure(error):
-                log.error("Failed receiving Web Socket Message with error: \(error)", subsystems: .webSocket)
+                log.error("Failed receiving Web Socket Message", subsystems: .webSocket, error: error)
             }
         }
     }
@@ -137,7 +137,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                     code: closeCode.rawValue,
                     engineError: nil
                 )
-                log.error("WebSocket onClose error: \(error!)", subsystems: .webSocket)
+                log.error("WebSocket onClose", subsystems: .webSocket, error: error)
             }
 
             self?.callbackQueue.async { [weak self] in
@@ -154,7 +154,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
 
             self?.callbackQueue.async { [weak self] in
                 let socketError = WebSocketEngineError(error: error)
-                log.error("WebSocket onClose error: \(socketError)", subsystems: .webSocket)
+                log.error("WebSocket onClose", subsystems: .webSocket, error: error)
                 self?.delegate?.webSocketDidDisconnect(error: socketError)
             }
         }

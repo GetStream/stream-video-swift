@@ -289,7 +289,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             self.pc.add(candidate) { error in
                 if let error = error {
-                    log.debug("Error adding ice candidate \(error.localizedDescription)", subsystems: .webRTC)
+                    log.error("Error adding ice candidate", subsystems: .webRTC, error: error)
                     continuation.resume(throwing: error)
                 } else {
                     log.debug("Added ice candidate successfully", subsystems: .webRTC)

@@ -101,7 +101,7 @@ public class CallsController: ObservableObject {
             }
             await state.update(loading: false)
         } catch {
-            log.error("Error querying calls \(error.localizedDescription)")
+            log.error("Error querying calls", error: error)
             await state.update(loading: false)
             throw error
         }

@@ -156,7 +156,7 @@ public class StreamVideo: ObservableObject {
                     self.tokenProvider = guestInfo.tokenProvider
                     try await self.connectUser(isInitial: true)
                 } catch {
-                    log.error("Error connecting as guest \(error.localizedDescription)")
+                    log.error("Error connecting as guest", error: error)
                 }
             } else {
                 try await self.connectUser(isInitial: true)
@@ -572,7 +572,7 @@ extension StreamVideo: ConnectionStateDelegate {
                         log.debug("user token updated, will reconnect ws")
                         webSocketClient?.connect()
                     } catch {
-                        log.error("Error refreshing token, will disconnect ws connection")
+                        log.error("Error refreshing token, will disconnect ws connection", error: error)
                     }
                 }
             }

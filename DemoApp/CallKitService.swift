@@ -110,7 +110,7 @@ class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private func requestTransaction(_ transaction: CXTransaction) {
         callController.request(transaction) { error in
             if let error = error {
-                log.error("Error while executing the transaction \(error.localizedDescription)")
+                log.error("Error while executing the transaction", error: error)
             } else {
                 log.debug("Transaction completed successfully")
             }

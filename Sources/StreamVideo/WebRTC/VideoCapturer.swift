@@ -34,7 +34,7 @@ class VideoCapturer {
         let devices = RTCCameraVideoCapturer.captureDevices()
         
         guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
-            log.error("No camera video capture devices available")
+            log.warning("No camera video capture devices available")
             return
         }
 
@@ -54,7 +54,7 @@ class VideoCapturer {
         }
 
         guard let selectedFormat = selectedFormat, let fpsRange = selectedFormat.format.fpsRange() else {
-            log.error("Unable to resolve format")
+            log.warning("Unable to resolve format")
             return
         }
 
