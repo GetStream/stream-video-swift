@@ -62,8 +62,8 @@ class IntegrationTest: XCTestCase {
         file: StaticString = #file,
         line: UInt = #line
     ) async -> Void {
-        let nextValueExpectation = expectation(description: "NextValue")
-        nextValueExpectation.assertForOverFulfill = false
+        let expectation = expectation(description: "NextValue")
+        expectation.assertForOverFulfill = false
         var values = [Output]()
         var bag = Set<AnyCancellable>()
         defer { bag.forEach { $0.cancel() } }
@@ -71,14 +71,21 @@ class IntegrationTest: XCTestCase {
         p.sink {
             values.append($0)
             if assertion($0) {
-                nextValueExpectation.fulfill()
+                expectation.fulfill()
             }
         }.store(in: &bag)
 
+        await fulfillment(of: [expectation], timeout: 1)
+    }
+    
+    private func fulfillment(
+        of expectations: [XCTestExpectation],
+        timeout seconds: TimeInterval = .infinity
+    ) async {
     #if compiler(>=5.8)
-        await fulfillment(of: [nextValueExpectation], timeout: 1)
+        await super.fulfillment(of: expectations, timeout: seconds)
     #else
-        wait(for: [nextValueExpectation], timeout: 1)
+        wait(for: expectations, timeout: seconds)
     #endif
     }
 }
