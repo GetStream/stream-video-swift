@@ -94,14 +94,14 @@ public class StreamVideo: ObservableObject {
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
         pushNotificationsConfig: PushNotificationsConfig = .default,
-        tokenProvider: @escaping UserTokenProvider
+        tokenProvider: UserTokenProvider? = nil
     ) {
         self.init(
             apiKey: apiKey,
             user: user,
             token: token,
             videoConfig: videoConfig,
-            tokenProvider: tokenProvider,
+            tokenProvider: tokenProvider ?? { _ in },
             pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
