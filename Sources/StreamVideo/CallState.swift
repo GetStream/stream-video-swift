@@ -159,6 +159,11 @@ public class CallState: ObservableObject {
         mergeMembers(response.members)
     }
 
+    internal func update(from response: JoinCallResponse) {
+        update(from: response.call)
+        mergeMembers(response.members)
+    }
+
     internal func update(from response: CallStateResponseFields) {
         update(from: response.call)
         mergeMembers(response.members)

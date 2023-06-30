@@ -73,7 +73,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 ring: ring,
                 notify: notify
             )
-            state.update(from: response.call)
+            state.update(from: response)
             streamVideo.state.activeCall = self
             return response
         })
