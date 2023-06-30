@@ -358,7 +358,7 @@ class CallController {
     }
     
     private func handleReconnectionError() {
-        log.warning("Error while reconnecting to the call")
+        log.error("Error while reconnecting to the call")
         self.call?.update(reconnectionStatus: .disconnected)
         self.cleanUp()
     }
