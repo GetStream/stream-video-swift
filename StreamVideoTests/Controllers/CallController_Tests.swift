@@ -252,6 +252,7 @@ final class CallController_Tests: ControllerTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: self.callCid,
+            sessionID: nil,
             ownCapabilities: [.sendAudio, .sendVideo],
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
@@ -272,7 +273,7 @@ extension CallController.Environment {
     
     static func mock(with webRTCClient: WebRTCClient) -> Self {
         .init(
-            webRTCBuilder: { _, _, _, _, _, _, _, _, _, _ in
+            webRTCBuilder: { _, _, _, _, _, _, _, _, _, _,_  in
             webRTCClient
         },
             sfuReconnectionTime: 5

@@ -53,12 +53,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(internetConnectionAvailabilityDidChange(_:)),
-            name: .internetConnectionAvailabilityDidChange,
-            object: nil
-        )
     }
     
     var audioTrackPublished: Bool {
@@ -198,9 +192,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        log.debug("Peer connection state changed to \(newState)", subsystems: .webRTC)
-        if badConnectionStates.contains(newState) {
-            onNegotiationNeeded?(self, .iceRestartConstraints)
+        log.debug("Peer connection state changed to \(newState)")
+        if newState == .disconnected {
+            log.debug("Peer connection state changed to \(newState)", subsystems: .webRTC)
+            onDisconnect?(self)
         }
     }
     
@@ -304,16 +299,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         }
     }
     
-    @objc private func internetConnectionAvailabilityDidChange(_ notification: Notification) {
-        if notification.internetConnectionStatus == .unavailable {
-            onDisconnect?(self)
-        }
-    }
-    
     deinit {
         statsTimer?.invalidate()
         statsTimer = nil
-        NotificationCenter.default.removeObserver(self)
     }
 }
 
