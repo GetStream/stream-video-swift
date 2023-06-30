@@ -368,7 +368,7 @@ public class Logger {
     public func error(
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
-        error: Error?,
+        error: Error? = nil,
         functionName: StaticString = #function,
         fileName: StaticString = #file,
         lineNumber: UInt = #line

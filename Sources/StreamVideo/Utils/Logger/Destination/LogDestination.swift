@@ -66,7 +66,6 @@ public protocol LogDestination {
     func isEnabled(level: LogLevel, subsystems: LogSubsystem) -> Bool
     func process(logDetails: LogDetails)
     func applyFormatters(logDetails: LogDetails, message: String) -> String
-    func write(message: String)
 }
 
 public extension LogDestination {
