@@ -18,6 +18,9 @@ public class StreamVideo: ObservableObject {
         @Published public internal(set) var user: User
         @Published public internal(set) var activeCall: Call? {
             didSet {
+                if oldValue != nil && oldValue?.cId != activeCall?.cId {
+                    oldValue?.leave()
+                }
                 if ringingCall != nil {
                     ringingCall = nil
                 }

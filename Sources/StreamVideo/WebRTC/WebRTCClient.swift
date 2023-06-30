@@ -102,7 +102,7 @@ class WebRTCClient: NSObject {
     
     private(set) var signalChannel: WebSocketClient?
     
-    private(set) var sessionID = UUID().uuidString
+    private(set) var sessionID: String
     private let token: String
     private let timeoutInterval: TimeInterval = 15
     
@@ -150,6 +150,7 @@ class WebRTCClient: NSObject {
         webSocketURLString: String,
         token: String,
         callCid: String,
+        sessionID: String?,
         ownCapabilities: [OwnCapability],
         videoConfig: VideoConfig,
         audioSettings: AudioSettings,
@@ -162,6 +163,7 @@ class WebRTCClient: NSObject {
         self.audioSettings = audioSettings
         self.videoConfig = videoConfig
         self.ownCapabilities = ownCapabilities
+        self.sessionID = sessionID ?? UUID().uuidString
         self.environment = environment
         httpClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession()
@@ -209,6 +211,8 @@ class WebRTCClient: NSObject {
         log.debug("Cleaning up WebRTCClient")
         videoCapturer?.stopCameraCapture()
         videoCapturer = nil
+        publisher?.close()
+        subscriber?.close()
         publisher = nil
         subscriber = nil
         signalChannel?.connectionStateDelegate = nil
