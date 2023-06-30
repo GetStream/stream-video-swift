@@ -69,6 +69,7 @@ class CallController {
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         migratingFrom: String? = nil,
+        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
@@ -85,6 +86,7 @@ class CallController {
         self.currentSFU = response.credentials.server.edgeName
         try await connectToEdge(
             response,
+            sessionID: sessionID,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
@@ -240,6 +242,7 @@ class CallController {
     
     private func connectToEdge(
         _ response: JoinCallResponse,
+        sessionID: String?,
         callType: String,
         callId: String,
         callSettings: CallSettings,
@@ -255,6 +258,7 @@ class CallController {
                 response.credentials.server.wsEndpoint,
                 response.credentials.token,
                 callCid(from: callId, callType: callType),
+                sessionID,
                 response.ownCapabilities,
                 videoConfig,
                 response.call.settings.audio,
@@ -350,6 +354,7 @@ class CallController {
         }
         Task {
             do {
+                let sessionId = webRTCClient?.sessionID
                 await webRTCClient?.cleanUp()
                 log.debug("Waiting to reconnect")
                 try? await Task.sleep(nanoseconds: 250_000_000)
@@ -362,7 +367,8 @@ class CallController {
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                     options: nil,
-                    migratingFrom: nil
+                    migratingFrom: nil,
+                    sessionID: sessionId
                 )
             } catch {
                 if diff > sfuReconnectionTime {
@@ -483,6 +489,7 @@ extension CallController {
             _ webSocketURLString: String,
             _ token: String,
             _ callCid: String,
+            _ sessionID: String?,
             _ ownCapabilities: [OwnCapability],
             _ videoConfig: VideoConfig,
             _ audioSettings: AudioSettings,
@@ -495,10 +502,11 @@ extension CallController {
                 webSocketURLString: $3,
                 token: $4,
                 callCid: $5,
-                ownCapabilities: $6,
-                videoConfig: $7,
-                audioSettings: $8,
-                environment: $9
+                sessionID: $6,
+                ownCapabilities: $7,
+                videoConfig: $8,
+                audioSettings: $9,
+                environment: $10
             )
         }
         

@@ -168,7 +168,7 @@ extension WebSocketClient {
 
 extension WebSocketClient: WebSocketEngineDelegate {
     func webSocketDidConnect() {
-        log.debug("Web socket connection established")
+        log.debug("Web socket connection established", subsystems: .webSocket)
         connectionState = .authenticating
         onWSConnectionEstablished?()
     }
@@ -179,13 +179,13 @@ extension WebSocketClient: WebSocketEngineDelegate {
         do {
             event = try eventDecoder.decode(from: data)
         } catch {
-            log.error("decoding websocket payload errored err: \(error)")
+            log.error("decoding websocket payload errored err: \(error)", subsystems: .webSocket)
             return
         }
         
         switch event {
         case .coordinatorEvent(let event):
-            log.info("received WS \(event.type) event from coordinator")
+            log.info("received WS \(event.type) event from coordinator", subsystems: .webSocket)
         case .internalEvent(_):
             break
         case .sfuEvent(_):
@@ -193,7 +193,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         }
 
         if let error = event.error() {
-            log.error("received an error event from WS err: \(error)")
+            log.error("received an error event from WS err: \(error)", subsystems: .webSocket)
             connectionState = .disconnecting(source: .serverInitiated(error: ClientError(with: error)))
             return
         }
@@ -218,12 +218,12 @@ extension WebSocketClient: WebSocketEngineDelegate {
             connectionState = .disconnected(source: source)
         
         case .initialized, .disconnected:
-            log.error("Web socket can not be disconnected when in \(connectionState) state.")
+            log.error("Web socket can not be disconnected when in \(connectionState) state with error \(String(describing: engineError)).", subsystems: .webSocket)
         }
     }
     
     private func handle(healthcheck: WrappedEvent, info: HealthCheckInfo) {
-        log.debug("Handling healthcheck")
+        log.debug("Handling healthcheck", subsystems: .webSocket)
         
         if connectionState == .authenticating {
             connectionState = .connected(healthCheckInfo: info)
@@ -256,7 +256,7 @@ extension WebSocketClient: WebSocketPingControllerDelegate {
     }
     
     func disconnectOnNoPongReceived() {
-        log.debug("disconnecting from \(connectURL)")
+        log.debug("disconnecting from \(connectURL)", subsystems: .webSocket)
         disconnect(source: .noPongReceived) {
             log.debug("Websocket is disconnected because of no pong received", subsystems: .webSocket)
         }

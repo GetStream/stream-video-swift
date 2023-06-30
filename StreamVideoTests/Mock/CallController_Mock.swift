@@ -15,6 +15,7 @@ class CallController_Mock: CallController {
         webSocketURLString: "wss://localhost/ws",
         token: StreamVideo.mockToken.rawValue,
         callCid: "default:test",
+        sessionID: nil,
         ownCapabilities: [.sendAudio, .sendVideo],
         videoConfig: VideoConfig(),
         audioSettings: AudioSettings(
@@ -35,6 +36,7 @@ class CallController_Mock: CallController {
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         migratingFrom: String? = nil,
+        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {

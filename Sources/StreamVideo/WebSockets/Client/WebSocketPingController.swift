@@ -72,7 +72,7 @@ class WebSocketPingController {
         schedulePingTimerIfNeeded()
         
         if connectionState.isConnected {
-            log.info("Resume WebSocket Ping timer")
+            log.info("Resume WebSocket Ping timer", subsystems: .httpRequests)
             pingTimerControl?.resume()
         } else {
             pingTimerControl?.suspend()
@@ -84,7 +84,7 @@ class WebSocketPingController {
     private func sendPing() {
         schedulePongTimeoutTimer()
 
-        log.info("WebSocket Ping")
+        log.info("WebSocket Ping", subsystems: .webSocket)
         if webSocketClientType == .coordinator {
             delegate?.sendPing()
         } else {
@@ -96,7 +96,7 @@ class WebSocketPingController {
     }
     
     func pongReceived() {
-        log.info("WebSocket Pong")
+        log.info("WebSocket Pong", subsystems: .webSocket)
         cancelPongTimeoutTimer()
     }
     
@@ -113,7 +113,7 @@ class WebSocketPingController {
         cancelPongTimeoutTimer()
         // Start pong timeout timer.
         pongTimeoutTimer = timerType.schedule(timeInterval: Self.pongTimeoutTimeInterval, queue: timerQueue) { [weak self] in
-            log.info("WebSocket Pong timeout. Reconnect")
+            log.info("WebSocket Pong timeout. Reconnect", subsystems: .webSocket)
             self?.delegate?.disconnectOnNoPongReceived()
         }
     }
