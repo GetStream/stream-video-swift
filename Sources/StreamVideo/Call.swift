@@ -9,7 +9,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     @Injected(\.streamVideo) var streamVideo
 
-    public internal(set) var state = CallState()
+    @MainActor public internal(set) var state = CallState()
     
     /// The call id.
     public let callId: String
@@ -43,7 +43,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
         self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
-        state.update(from: response)
+        executeOnMain {
+            self.state.update(from: response)
+        }
     }
 
     /// Joins the current call.
@@ -73,7 +75,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 ring: ring,
                 notify: notify
             )
-            state.update(from: response)
+            await state.update(from: response)
             streamVideo.state.activeCall = self
             return response
         })
@@ -93,7 +95,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false
     ) async throws -> CallResponse {
         let response = try await coordinatorClient.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
-        state.update(from: response)
+        await state.update(from: response)
         if ring {
             streamVideo.state.ringingCall = self
         }
@@ -105,7 +107,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func ring() async throws -> CallResponse {
         let response = try await get(ring: true)
-        state.update(from: response)
+        await state.update(from: response)
         return response
     }
     
@@ -114,7 +116,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func notify() async throws -> CallResponse {
         let response = try await get(notify: true)
-        state.update(from: response)
+        await state.update(from: response)
         return response
     }
 
@@ -151,7 +153,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             getOrCreateCallRequest: request
         )
-        state.update(from: response)
+        await state.update(from: response)
         if ring {
             streamVideo.state.ringingCall = self
         }
@@ -165,7 +167,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> UpdateCallResponse {
         let request = UpdateCallRequest(custom: custom, startsAt: startsAt)
         let response = try await coordinatorClient.updateCall(type: callType, id: callId, updateCallRequest: request)
-        state.update(from: response)
+        await state.update(from: response)
         return response
     }
 
@@ -321,7 +323,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Checks if the current user can request permissions.
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
-    public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
+    @MainActor public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
         guard let callSettings = state.settings else {
             return false
         }
@@ -346,7 +348,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     @discardableResult
     public func request(permissions: [Permission]) async throws -> RequestPermissionResponse {
-        guard currentUserCanRequestPermissions(permissions) else {
+        guard await currentUserCanRequestPermissions(permissions) else {
             throw ClientError.MissingPermissions()
         }
         let request = RequestPermissionRequest(
@@ -363,7 +365,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
-    public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
+    @MainActor public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
         return state.ownCapabilities.contains(capability)
     }
     
@@ -430,7 +432,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func blockUser(with userId: String) async throws -> BlockUserResponse {
         let response = try await coordinatorClient.blockUser(type: callType, id: callId, blockUserRequest: BlockUserRequest(userId: userId))
-        state.blockUser(id: userId)
+        await state.blockUser(id: userId)
         return response
     }
     
@@ -441,7 +443,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func unblockUser(with userId: String) async throws -> UnblockUserResponse {
         let response = try await coordinatorClient.unblockUser(type: callType, id: callId, unblockUserRequest: UnblockUserRequest(userId: userId))
-        state.unblockUser(id: userId)
+        await state.unblockUser(id: userId)
         return response
     }
     
@@ -527,7 +529,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> QueryMembersResponse {
         let request = QueryMembersRequest(filterConditions: filters, id: callId, limit: limit, next: next, sort: sort, type: callType)
         let response = try await coordinatorClient.queryMembers(queryMembersRequest: request)
-        state.mergeMembers(response.members)
+        await state.mergeMembers(response.members)
         return response
     }
 
@@ -546,13 +548,17 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        if reconnectionStatus != self.state.reconnectionStatus {
-            self.state.reconnectionStatus = reconnectionStatus
+        executeOnMain {
+            if reconnectionStatus != self.state.reconnectionStatus {
+                self.state.reconnectionStatus = reconnectionStatus
+            }
         }
     }
     
     internal func update(recordingState: RecordingState) {
-        self.state.recordingState = recordingState
+        executeOnMain {
+            self.state.recordingState = recordingState
+        }
     }
     
     internal func onEvent(_ event: WrappedEvent) {
@@ -562,8 +568,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        state.updateState(from: videoEvent)
-        callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
+        executeOnMain {
+            self.state.updateState(from: videoEvent)
+            self.callController.updateOwnCapabilities(ownCapabilities: self.state.ownCapabilities)
+        }
+        
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }
@@ -575,7 +584,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         granted: [Permission],
         revoked: [Permission]
     ) async throws -> UpdateUserPermissionsResponse {
-        if !currentUserHasCapability(.updateCallPermissions) {
+        if await !currentUserHasCapability(.updateCallPermissions) {
             throw ClientError.MissingPermissions()
         }
         let updatePermissionsRequest = UpdateUserPermissionsRequest(
@@ -603,7 +612,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             updateCallMembersRequest: request
         )
-        state.mergeMembers(response.members)
+        await state.mergeMembers(response.members)
         return response
     }
 }

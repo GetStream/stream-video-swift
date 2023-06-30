@@ -265,10 +265,12 @@ class CallController {
             connectOptions: connectOptions
         )
         let sessionId = webRTCClient?.sessionID ?? ""
-        call?.state.sessionId = sessionId
-        call?.update(recordingState: response.call.recording ? .recording : .noRecording)
-        call?.state.ownCapabilities = response.ownCapabilities
-        call?.state.update(from: response)
+        executeOnMain {
+            self.call?.state.sessionId = sessionId
+            self.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
+            self.call?.state.ownCapabilities = response.ownCapabilities
+            self.call?.state.update(from: response)
+        }
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
@@ -298,7 +300,9 @@ class CallController {
         switch state {
         case .disconnected(let source):
             log.debug("Signal channel disconnected")
-            handleSignalChannelDisconnect(source: source)
+            executeOnMain {
+                self.handleSignalChannelDisconnect(source: source)
+            }
         case .connected(healthCheckInfo: _):
             log.debug("Signal channel connected")
             if reconnectionDate != nil {
@@ -310,14 +314,14 @@ class CallController {
         }
     }
     
-    private func handleSignalChannelDisconnect(
+    @MainActor private func handleSignalChannelDisconnect(
         source: WebSocketConnectionState.DisconnectionSource,
         isRetry: Bool = false
     ) {
         guard let call = call,
               (call.state.reconnectionStatus != .reconnecting || isRetry),
                 source != .userInitiated else {
-            return            
+            return
         }
         if reconnectionDate == nil {
             reconnectionDate = Date()

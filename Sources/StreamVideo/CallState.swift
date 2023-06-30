@@ -4,6 +4,7 @@
 
 import Foundation
 
+@MainActor
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
