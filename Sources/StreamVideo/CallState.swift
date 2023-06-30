@@ -164,10 +164,30 @@ public class CallState: ObservableObject {
         mergeMembers(response.members)
     }
 
+    internal func update(from response: GetCallResponse) {
+        update(from: response.call)
+        mergeMembers(response.members)
+    }
+
     internal func update(from response: CallStateResponseFields) {
         update(from: response.call)
         mergeMembers(response.members)
         ownCapabilities = response.ownCapabilities
+    }
+
+    internal func update(from response: UpdateCallResponse) {
+        update(from: response.call)
+        mergeMembers(response.members)
+    }
+
+    internal func update(from event: CallCreatedEvent) {
+        update(from: event.call)
+        mergeMembers(event.members)
+    }
+
+    internal func update(from event: CallRingEvent) {
+        update(from: event.call)
+        mergeMembers(event.members)
     }
 
     internal func update(from response: CallResponse) {

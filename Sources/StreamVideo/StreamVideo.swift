@@ -600,8 +600,7 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            call.state.update(from: ringEvent.call)
-            call.state.mergeMembers(ringEvent.members)
+            call.state.update(from: ringEvent)
             self.state.ringingCall = call
         }
     }
