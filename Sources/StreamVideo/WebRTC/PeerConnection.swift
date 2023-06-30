@@ -160,7 +160,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func add(iceCandidate: RTCIceCandidate) async throws {
         guard pc.remoteDescription != nil else {
-            log.debug("remote description not set, adding pending ice candidate")
+            log.debug("remote description not set, adding pending ice candidate", subsystems: .webRTC)
             pendingIceCandidates.append(iceCandidate)
             return
         }
@@ -174,7 +174,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)")
+        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)", subsystems: .webRTC)
         if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
             screensharingStreams.append(stream)
         }
@@ -182,29 +182,29 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove stream: RTCMediaStream) {
-        log.debug("Stream removed from peer connection \(type.rawValue)")
+        log.debug("Stream removed from peer connection \(type.rawValue)", subsystems: .webRTC)
         onStreamRemoved?(stream)
     }
     
     func peerConnectionShouldNegotiate(_ peerConnection: RTCPeerConnection) {
-        log.debug("Negotiation needed for peer connection \(type.rawValue)")
+        log.debug("Negotiation needed for peer connection \(type.rawValue)", subsystems: .webRTC)
         onNegotiationNeeded?(self, .defaultConstraints)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
         log.debug("Peer connection state changed to \(newState)")
         if newState == .disconnected {
-            log.debug("Peer connection disconnected")
+            log.debug("Peer connection state changed to \(newState)", subsystems: .webRTC)
             onDisconnect?(self)
         }
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceGatheringState) {
-        log.debug("Ice gathering state changed to \(newState)")
+        log.debug("Ice gathering state changed to \(newState)", subsystems: .webRTC)
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
-        log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)")
+        log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)", subsystems: .webRTC)
         Task {
             let encoder = JSONEncoder()
             let iceCandidate = candidate.toIceCandidate()
@@ -221,7 +221,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didRemove candidates: [RTCIceCandidate]) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didOpen dataChannel: RTCDataChannel) {
-        log.debug("Data channel opened for \(type.rawValue)")
+        log.debug("Data channel opened for \(type.rawValue)", subsystems: .webRTC)
     }
     
     func findScreensharingTrack(for trackLookupPrefix: String?) -> RTCVideoTrack? {
@@ -250,7 +250,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private func reportCurrentStats() {
         pc.statistics(completionHandler: { _ in
-            log.debug("Stats still not reported")
+            log.debug("Stats still not reported", subsystems: .webRTC)
             /*
              Task {
                  let stats = report.statistics
@@ -289,10 +289,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             self.pc.add(candidate) { error in
                 if let error = error {
-                    log.debug("Error adding ice candidate \(error.localizedDescription)")
+                    log.debug("Error adding ice candidate \(error.localizedDescription)", subsystems: .webRTC)
                     continuation.resume(throwing: error)
                 } else {
-                    log.debug("Added ice candidate successfully")
+                    log.debug("Added ice candidate successfully", subsystems: .webRTC)
                     continuation.resume(returning: true)
                 }
             }

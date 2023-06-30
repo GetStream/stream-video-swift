@@ -52,13 +52,13 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
                 return try await execute(request: request, isRetry: false)
             } catch {
                 if error.isTokenExpiredError && tokenProvider != nil {
-                    log.debug("Refreshing user token")
+                    log.debug("Refreshing user token", subsystems: .httpRequests)
                     let token = try await refreshToken()
                     if let onTokenUpdate = onTokenUpdate {
                         onTokenUpdate(token)
                     }
                     let updated = update(request: request, with: token.rawValue)
-                    log.debug("Retrying failed request with new token")
+                    log.debug("Retrying failed request with new token", subsystems: .httpRequests)
                     return try await execute(request: updated, isRetry: true)
                 } else {
                     throw error
@@ -118,6 +118,17 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
         var clone = request
         clone.headers["Content-Type"] = "application/json"
         clone.headers["X-Stream-Client"] = "stream-video-swift"
-        return try await execute(request: clone.urlRequest())
+        do {
+            return try await execute(request: clone.urlRequest())
+        } catch {
+            // Log error and rethrow          
+            log.error(
+                "URLSessionTransport: \(String(describing: request.url.absoluteString))\n"
+                    + "Headers:\n\(String(describing: request.headers))\n"
+                    + "Query items:\n\(request.queryParams)\n\n"
+                    + "Error: \(error)",
+                subsystems: .httpRequests)
+            throw error
+        }
     }
 }
