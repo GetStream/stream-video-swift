@@ -7,6 +7,26 @@ The `StreamVideo` SDK allows you to query calls and watch them. This allows you 
 
 You can query calls based on built-in fields as well as any custom field you add to the calls. Multiple filters can be combined using AND, OR logical operators, each filter can use its comparison (equality, inequality, greater than, greater or equal, etc.). 
 
+### Client
+
+You can query calls by using the client directly. By using the `queryCalls(filters:sort:limit:watch:)` method we will fetch the first page. The result will be an array of calls and a cursor to the next page (if one is available). Finally, we can use the next page cursor to fetch the next page.
+
+```swift
+let filters: [String: RawJSON] = ["ended_at": .nil]
+let sort = [SortParamRequest.descending("created_at")]
+let limit = 10
+
+// Fetch the first page of calls 
+let (firstPageCalls, secondPageCursor) = try await client.queryCalls(
+    filters: filters, 
+    sort: sort, 
+    limit: limit
+)
+
+// Use the cursor we received from the previous call to fetch the second page
+let (secondPageCalls, _) = try await client.queryCalls(next: secondPageCursor)
+```
+
 ### CallsController
 
 In order to query calls, you need to create an instance of the `CallsController`, via the `StreamVideo` object's method `makeCallsController`:
