@@ -39,13 +39,13 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
             return data
         } catch {
             if error is ClientError.InvalidToken && tokenProvider != nil {
-                log.debug("Refreshing user token")
+                log.debug("Refreshing user token", subsystems: .httpRequests)
                 let token = try await refreshToken()
                 if let onTokenUpdate = onTokenUpdate {
                     onTokenUpdate(token)
                 }
                 let updated = update(request: request, with: token.rawValue)
-                log.debug("Retrying failed request with new token")
+                log.debug("Retrying failed request with new token", subsystems: .httpRequests)
                 return try await execute(request: updated, isRetry: true)
             } else {
                 throw error
@@ -82,7 +82,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    log.debug("Error executing request \(error.localizedDescription)")
+                    log.debug("Error executing request \(error.localizedDescription)", subsystems: .httpRequests)
                     continuation.resume(throwing: error)
                     return
                 }
@@ -90,24 +90,24 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                     if (response.statusCode == 401 || response.statusCode == 403) && !isRetry {
                         let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
                         if let code = errorResponse?["code"] as? Int, ClosedRange.tokenInvalidErrorCodes ~= code {
-                            log.debug("Access token expired")
+                            log.debug("Access token expired", subsystems: .httpRequests)
                             continuation.resume(throwing: ClientError.InvalidToken())
                         } else {
                             let requestURLString = request.url?.absoluteString ?? ""
-                            log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))")
+                            log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))", subsystems: .httpRequests)
                             continuation.resume(throwing: ClientError.NetworkError(response.description))
                         }
                         return
                     } else if response.statusCode >= 400 {
                         let requestURLString = request.url?.absoluteString ?? ""
                         let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
-                        log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))")
+                        log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))", subsystems: .httpRequests)
                         continuation.resume(throwing: ClientError.NetworkError(response.description))
                         return
                     }
                 }
                 guard let data = data else {
-                    log.debug("Received empty response")
+                    log.debug("Received empty response", subsystems: .httpRequests)
                     continuation.resume(throwing: ClientError.NetworkError())
                     return
                 }

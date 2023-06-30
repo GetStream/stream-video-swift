@@ -11,7 +11,7 @@ public struct APIKey: Equatable {
     /// - Warning: The `apiKeyString` must be a non-empty value, otherwise an assertion failure is raised.
     ///
     public init(_ apiKeyString: String) {
-        log.assert(apiKeyString.isEmpty == false, "APIKey can't be initialize with an empty string.")
+        log.assert(apiKeyString.isEmpty == false, "APIKey can't be initialize with an empty string.", subsystems: .webSocket)
         self.apiKeyString = apiKeyString
     }
 }

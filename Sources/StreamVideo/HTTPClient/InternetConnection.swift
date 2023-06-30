@@ -31,7 +31,7 @@ class InternetConnection {
         didSet {
             guard oldValue != status else { return }
             
-            log.info("Internet Connection: \(status)")
+            log.info("Internet Connection: \(status)", subsystems: .httpRequests)
             
             postNotification(.internetConnectionStatusDidChange, with: status)
             
@@ -188,7 +188,7 @@ extension InternetConnection {
         }
         
         private func updateStatus(with path: NWPath) {
-            log.info("Internet Connection info: \(path.debugDescription)")
+            log.info("Internet Connection info: \(path.debugDescription)", subsystems: .httpRequests)
             delegate?.internetConnectionStatusDidChange(status: status(from: path))
         }
         
