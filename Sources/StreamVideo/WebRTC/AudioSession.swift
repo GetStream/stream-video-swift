@@ -28,7 +28,7 @@ actor AudioSession {
             }
             try audioSession.overrideOutputAudioPort(callSettings.speakerOn ? .speaker : .none)
         } catch {
-            log.error("Error occured while configuring audio session \(error)")
+            log.error("Error occured while configuring audio session", error: error)
         }
     }
     

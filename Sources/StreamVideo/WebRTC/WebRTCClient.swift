@@ -365,7 +365,7 @@ class WebRTCClient: NSObject {
             do {
                 try await self.setupPeerConnections()
             } catch {
-                log.error("Error setting up peer connections", subsystems: .webRTC)
+                log.error("Error setting up peer connections", subsystems: .webRTC, error: error)
                 await self.state.update(connectionState: .disconnected())
             }
         }

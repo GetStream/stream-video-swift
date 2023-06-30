@@ -179,7 +179,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         do {
             event = try eventDecoder.decode(from: data)
         } catch {
-            log.error("decoding websocket payload errored err: \(error)", subsystems: .webSocket)
+            log.error("decoding websocket payload", subsystems: .webSocket, error: error)
             return
         }
         
@@ -193,7 +193,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         }
 
         if let error = event.error() {
-            log.error("received an error event from WS err: \(error)", subsystems: .webSocket)
+            log.error("received an error event", subsystems: .webSocket, error: error)
             connectionState = .disconnecting(source: .serverInitiated(error: ClientError(with: error)))
             return
         }
@@ -218,7 +218,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
             connectionState = .disconnected(source: source)
         
         case .initialized, .disconnected:
-            log.error("Web socket can not be disconnected when in \(connectionState) state with error \(String(describing: engineError)).", subsystems: .webSocket)
+            log.error("Web socket can not be disconnected when in \(connectionState) state", subsystems: .webSocket, error: engineError)
         }
     }
     
