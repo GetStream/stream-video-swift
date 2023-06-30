@@ -24,7 +24,9 @@ runs:
       with:
         path: |
           ~/Library/Caches/Homebrew
-          /opt/homebrew/bin
+          /opt/homebrew/Cellar/xcparse
+          /opt/homebrew/Cellar/sonar-scanner
+          /opt/homebrew/Cellar/mint
         key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
         restore-keys: ${{ env.IMAGE }}-brew-
     - name: Cache SPM
