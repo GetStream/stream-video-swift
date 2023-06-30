@@ -22,7 +22,9 @@ runs:
       uses: actions/cache@v3
       id: brew-cache
       with:
-        path: ~/Library/Caches/Homebrew
+        path: |
+          ~/Library/Caches/Homebrew
+          /opt/homebrew/bin
         key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
         restore-keys: ${{ env.IMAGE }}-brew-
     - name: Cache SPM
