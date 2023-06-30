@@ -123,5 +123,32 @@ final class Retries_Tests: XCTestCase {
         XCTAssert(result == dummyData)
         XCTAssert(httpClient.requestCounter == 5)
     }
+    
+    func test_executeTask_clientError() async throws {
+        // Given
+        let httpClient = HTTPClient_Mock()
+        let apiError = APIError(
+            statusCode: 400,
+            code: 40,
+            details: [],
+            duration: "1.0",
+            message: "Bad request",
+            moreInfo: ""
+        )
+        httpClient.errors = [apiError, dummyError, dummyError, dummyError]
+        httpClient.dataResponses = [dummyData]
+        let condition = { self.dummyState == "dummy" }
+        
+        // When
+        do {
+            _ = try await executeTask(retryPolicy: .fastCheckValue(condition), task: {
+                try await httpClient.execute(request: dummyRequest)
+            })
+            XCTFail("Task should fail")
+        } catch {
+            // Then
+            XCTAssert(httpClient.requestCounter == 1)
+        }
+    }
 
 }
