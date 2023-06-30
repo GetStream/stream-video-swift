@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import StreamVideo
 import Sentry
 
 extension StreamVideoSwiftUIApp {
@@ -19,6 +20,16 @@ extension StreamVideoSwiftUIApp {
             options.tracesSampleRate = 1.0
             options.enableAppHangTracking = true
         }
+        
+        LogConfig.destinationTypes = [ConsoleLogDestination.self, SentryLogDestination.self]
+
     #endif
+    }
+}
+
+/// Basic destination for outputting messages to console.
+public class SentryLogDestination: BaseLogDestination {
+    override open func write(message: String) {
+        SentrySDK.capture(message: message)
     }
 }
