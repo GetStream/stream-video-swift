@@ -268,7 +268,7 @@ class CallController {
         call?.state.sessionId = sessionId
         call?.update(recordingState: response.call.recording ? .recording : .noRecording)
         call?.state.ownCapabilities = response.ownCapabilities
-        call?.state.update(from: response.call)
+        call?.state.update(from: response)
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {

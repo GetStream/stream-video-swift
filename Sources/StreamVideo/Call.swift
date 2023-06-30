@@ -43,7 +43,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
         self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
-        state.update(from: response.call)
+        state.update(from: response)
     }
 
     /// Joins the current call.
@@ -73,7 +73,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 ring: ring,
                 notify: notify
             )
-            state.update(from: response.call)
+            state.update(from: response)
             streamVideo.state.activeCall = self
             return response
         })
@@ -93,7 +93,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false
     ) async throws -> CallResponse {
         let response = try await coordinatorClient.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
-        state.update(from: response.call)
+        state.update(from: response)
         if ring {
             streamVideo.state.ringingCall = self
         }
@@ -165,7 +165,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> UpdateCallResponse {
         let request = UpdateCallRequest(custom: custom, startsAt: startsAt)
         let response = try await coordinatorClient.updateCall(type: callType, id: callId, updateCallRequest: request)
-        state.update(from: response.call)
+        state.update(from: response)
         return response
     }
 
