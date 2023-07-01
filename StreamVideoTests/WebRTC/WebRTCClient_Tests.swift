@@ -428,6 +428,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
             callCid: callCid,
+            sessionID: nil,
             ownCapabilities: ownCapabilities,
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(

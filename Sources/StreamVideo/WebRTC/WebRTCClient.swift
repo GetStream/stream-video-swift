@@ -102,7 +102,7 @@ class WebRTCClient: NSObject {
     
     private(set) var signalChannel: WebSocketClient?
     
-    private(set) var sessionID = UUID().uuidString
+    private(set) var sessionID: String
     private let token: String
     private let timeoutInterval: TimeInterval = 15
     
@@ -150,6 +150,7 @@ class WebRTCClient: NSObject {
         webSocketURLString: String,
         token: String,
         callCid: String,
+        sessionID: String?,
         ownCapabilities: [OwnCapability],
         videoConfig: VideoConfig,
         audioSettings: AudioSettings,
@@ -162,6 +163,7 @@ class WebRTCClient: NSObject {
         self.audioSettings = audioSettings
         self.videoConfig = videoConfig
         self.ownCapabilities = ownCapabilities
+        self.sessionID = sessionID ?? UUID().uuidString
         self.environment = environment
         httpClient = URLSessionClient(
             urlSession: StreamVideo.Environment.makeURLSession()
@@ -187,17 +189,17 @@ class WebRTCClient: NSObject {
     ) async throws {
         let connectionStatus = await state.connectionState
         if connectionStatus == .connected || connectionStatus == .connecting {
-            log.debug("Skipping connection, already connected or connecting")
+            log.debug("Skipping connection, already connected or connecting", subsystems: .webRTC)
             return
         }
         self.videoOptions = videoOptions
         self.connectOptions = connectOptions
         self.callSettings = callSettings
-        log.debug("Connecting to SFU")
+        log.debug("Connecting to SFU", subsystems: .webRTC)
         await state.update(connectionState: .connecting)
-        log.debug("Setting user media")
+        log.debug("Setting user media", subsystems: .webRTC)
         await setupUserMedia(callSettings: callSettings)
-        log.debug("Connecting WS channel")
+        log.debug("Connecting WS channel", subsystems: .webRTC)
         signalChannel?.connect()
         sfuMiddleware.onSocketConnected = handleOnSocketConnected
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
@@ -206,9 +208,11 @@ class WebRTCClient: NSObject {
     }
     
     func cleanUp() async {
-        log.debug("Cleaning up WebRTCClient")
+        log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
         videoCapturer?.stopCameraCapture()
         videoCapturer = nil
+        publisher?.close()
+        subscriber?.close()
         publisher = nil
         subscriber = nil
         signalChannel?.connectionStateDelegate = nil
@@ -227,7 +231,7 @@ class WebRTCClient: NSObject {
     
     func startCapturingLocalVideo(cameraPosition: AVCaptureDevice.Position) {
         setCameraPosition(cameraPosition) {
-            log.debug("Started capturing local video")
+            log.debug("Started capturing local video", subsystems: .webRTC)
         }
     }
     
@@ -256,14 +260,14 @@ class WebRTCClient: NSObject {
         if hasCapability(.sendAudio),
             let audioTrack = localAudioTrack, callSettings.audioOn,
             publisher?.audioTrackPublished == false {
-            log.debug("publishing audio track")
+            log.debug("publishing audio track", subsystems: .webRTC)
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"], trackType: .audio)
         }
         if hasCapability(.sendVideo),
             callSettings.videoOn,
             let videoTrack = localVideoTrack,           
             publisher?.videoTrackPublished == false {
-            log.debug("publishing video track")
+            log.debug("publishing video track", subsystems: .webRTC)
             publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"], trackType: .video)
         }
     }
@@ -333,7 +337,7 @@ class WebRTCClient: NSObject {
               participant.showTrack != isVisible else {
             return
         }
-        log.debug("Setting track for \(participant.name) to \(isVisible)")
+        log.debug("Setting track for \(participant.name) to \(isVisible)", subsystems: .webRTC)
         let updated = participant.withUpdated(showTrack: isVisible)
         let trackId = participant.trackLookupPrefix ?? participant.id
         let track = await state.tracks[trackId]
@@ -361,7 +365,7 @@ class WebRTCClient: NSObject {
             do {
                 try await self.setupPeerConnections()
             } catch {
-                log.error("Error setting up peer connections")
+                log.error("Error setting up peer connections", subsystems: .webRTC, error: error)
                 await self.state.update(connectionState: .disconnected())
             }
         }
@@ -371,7 +375,7 @@ class WebRTCClient: NSObject {
         guard let connectOptions = connectOptions else {
             throw ClientError.Unexpected("Connect options not setup")
         }
-        log.debug("Creating subscriber peer connection")
+        log.debug("Creating subscriber peer connection", subsystems: .webRTC)
         let configuration = connectOptions.rtcConfiguration
         subscriber = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
@@ -385,7 +389,7 @@ class WebRTCClient: NSObject {
         subscriber?.onStreamAdded = handleStreamAdded
         subscriber?.onStreamRemoved = handleStreamRemoved
         
-        log.debug("Updating connection status to connected")
+        log.debug("Updating connection status to connected", subsystems: .webRTC)
         await state.update(connectionState: .connected)
         signalChannel?.engine?.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
         if callSettings.shouldPublish {
@@ -466,14 +470,14 @@ class WebRTCClient: NSObject {
         constraints: RTCMediaConstraints? = nil
     ) async throws {
         guard let peerConnection else { return }
-        log.debug("Negotiating peer connection")
+        log.debug("Negotiating peer connection", subsystems: .webRTC)
         let initialOffer = try await peerConnection.createOffer(
             constraints: constraints ?? .defaultConstraints
         )
-        log.debug("Setting local description for peer connection")
+        log.debug("Setting local description for peer connection", subsystems: .webRTC)
         var updatedSdp = initialOffer.sdp
         if audioSettings.opusDtxEnabled {
-            log.debug("Setting Opus DTX for the audio")
+            log.debug("Setting Opus DTX for the audio", subsystems: .webRTC)
             updatedSdp = updatedSdp.replacingOccurrences(
                 of: "useinbandfec=1",
                 with: "useinbandfec=1;usedtx=1"
@@ -494,7 +498,7 @@ class WebRTCClient: NSObject {
         }, task: {
             let response = try await signalService.setPublisher(setPublisherRequest: request)
             let sdp = response.sdp
-            log.debug("Setting remote description")
+            log.debug("Setting remote description", subsystems: .webRTC)
             try await peerConnection.setRemoteDescription(sdp, type: .answer)
         })
     }
@@ -549,7 +553,7 @@ class WebRTCClient: NSObject {
     }
     
     private func makeJoinRequest(subscriberSdp: String) -> Stream_Video_Sfu_Event_JoinRequest {
-        log.debug("Executing join request")
+        log.debug("Executing join request", subsystems: .webRTC)
         var joinRequest = Stream_Video_Sfu_Event_JoinRequest()
         joinRequest.token = token
         joinRequest.sessionID = sessionID
@@ -641,7 +645,7 @@ class WebRTCClient: NSObject {
         for (_, value) in callParticipants {
             if value.id != sessionID {
                 if value.hasVideo {
-                    log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)")
+                    log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)", subsystems: .webRTC)
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
                     dimension.height = UInt32(value.trackSize.height)
                     dimension.width = UInt32(value.trackSize.width)
@@ -744,7 +748,7 @@ class WebRTCClient: NSObject {
     private func addOnParticipantsChangeHandler() {
         Task {
             for await _ in await state.callParticipantsUpdates() {
-                log.debug("received participant event")
+                log.debug("received participant event", subsystems: .webRTC)
                 await self.handleParticipantsUpdated()
             }
         }

@@ -47,6 +47,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var isPinned: Bool
     /// The audio level for the user.
     public var audioLevel: Float
+    /// List of the last 10 audio levels.
+    public var audioLevels: [Float]
     
     public init(
         id: String,
@@ -68,7 +70,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         connectionQuality: ConnectionQuality,
         joinedAt: Date,
         isPinned: Bool,
-        audioLevel: Float
+        audioLevel: Float,
+        audioLevels: [Float]
     ) {
         self.id = id
         self.userId = userId
@@ -90,6 +93,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         self.joinedAt = joinedAt
         self.isPinned = isPinned
         self.audioLevel = audioLevel
+        self.audioLevels = audioLevels
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -118,7 +122,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
     
@@ -143,7 +148,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
     
@@ -168,7 +174,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
     
@@ -193,7 +200,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
 
@@ -218,7 +226,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
     
@@ -243,7 +252,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
 
@@ -268,7 +278,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
 
@@ -276,6 +287,12 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         isSpeaking: Bool,
         audioLevel: Float
     ) -> CallParticipant {
+        var levels = audioLevels
+        levels.append(audioLevel)
+        let limit = 10
+        if levels.count > limit {
+            levels = Array(levels.dropFirst(levels.count - limit))
+        }
         return CallParticipant(
             id: id,
             userId: userId,
@@ -296,7 +313,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: levels
         )
     }
     
@@ -321,7 +339,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
     
@@ -346,7 +365,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: isPinned,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
     
@@ -371,7 +391,8 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             isPinned: pinState,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: audioLevels
         )
     }
 }
@@ -396,7 +417,8 @@ extension Stream_Video_Sfu_Models_Participant {
             connectionQuality: connectionQuality.mapped,
             joinedAt: joinedAt.date,
             isPinned: false,
-            audioLevel: audioLevel
+            audioLevel: audioLevel,
+            audioLevels: [audioLevel]
         )
     }
 }

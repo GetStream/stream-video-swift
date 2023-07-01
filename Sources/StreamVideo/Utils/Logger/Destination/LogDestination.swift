@@ -29,6 +29,7 @@ public struct LogDetails {
     public let functionName: StaticString
     public let fileName: StaticString
     public let lineNumber: UInt
+    public let error: Error?
 }
 
 public protocol LogDestination {
@@ -65,7 +66,6 @@ public protocol LogDestination {
     func isEnabled(level: LogLevel, subsystems: LogSubsystem) -> Bool
     func process(logDetails: LogDetails)
     func applyFormatters(logDetails: LogDetails, message: String) -> String
-    func write(message: String)
 }
 
 public extension LogDestination {

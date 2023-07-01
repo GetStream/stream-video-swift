@@ -101,7 +101,7 @@ public class CallsController: ObservableObject {
             }
             await state.update(loading: false)
         } catch {
-            log.error("Error querying calls \(error.localizedDescription)")
+            log.error("Error querying calls", error: error)
             await state.update(loading: false)
             throw error
         }
@@ -159,7 +159,7 @@ public class CallsController: ObservableObject {
                 callType: callCreated.call.type,
                 callId: callCreated.call.id
             )
-            call.state.update(from: callCreated.call)
+            call.state.update(from: callCreated)
             calls.insert(call, at: 0)
         }
     }
@@ -169,8 +169,7 @@ public class CallsController: ObservableObject {
             callType: callResponse.call.type,
             callId: callResponse.call.id
         )
-        call.state.update(from: callResponse.call)
-        call.state.mergeMembers(callResponse.members)
+        call.state.update(from: callResponse)
         return call
     }
     

@@ -55,7 +55,7 @@ class InviteParticipantsViewModel: ObservableObject {
                     selectedUsers = []
                 }
             } catch {
-                log.error(error.localizedDescription)
+                log.error(error.localizedDescription, error: error)
             }
         }
     }

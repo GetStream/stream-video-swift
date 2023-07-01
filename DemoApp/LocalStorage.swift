@@ -68,7 +68,7 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler, PushTokenHandler
                 let token = UserToken(rawValue: tokenValue)
                 return UserCredentials(userInfo: loadedUser, token: token)
             } catch {
-                log.error("Error while decoding user: \(String(describing: error))")
+                log.error("Error while decoding user", error: error)
             }
         }
         return nil

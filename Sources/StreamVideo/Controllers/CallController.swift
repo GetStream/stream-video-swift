@@ -65,6 +65,7 @@ class CallController {
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
+        sessionID: String? = nil,
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> JoinCallResponse {
@@ -80,6 +81,7 @@ class CallController {
         
         try await connectToEdge(
             response,
+            sessionID: sessionID,
             callType: callType,
             callId: callId,
             callSettings: callSettings,
@@ -234,6 +236,7 @@ class CallController {
     
     private func connectToEdge(
         _ response: JoinCallResponse,
+        sessionID: String?,
         callType: String,
         callId: String,
         callSettings: CallSettings,
@@ -247,6 +250,7 @@ class CallController {
             response.credentials.server.wsEndpoint,
             response.credentials.token,
             callCid(from: callId, callType: callType),
+            sessionID,
             response.ownCapabilities,
             videoConfig,
             response.call.settings.audio,
@@ -264,7 +268,7 @@ class CallController {
         call?.state.sessionId = sessionId
         call?.update(recordingState: response.call.recording ? .recording : .noRecording)
         call?.state.ownCapabilities = response.ownCapabilities
-        call?.state.update(from: response.call)
+        call?.state.update(from: response)
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
@@ -327,6 +331,7 @@ class CallController {
         }
         Task {
             do {
+                let sessionId = webRTCClient?.sessionID
                 await webRTCClient?.cleanUp()
                 log.debug("Waiting to reconnect")
                 try? await Task.sleep(nanoseconds: 250_000_000)
@@ -338,7 +343,8 @@ class CallController {
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
                     videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
-                    options: nil
+                    options: nil,
+                    sessionID: sessionId
                 )
             } catch {
                 if diff > sfuReconnectionTime {
@@ -441,6 +447,7 @@ extension CallController {
             _ webSocketURLString: String,
             _ token: String,
             _ callCid: String,
+            _ sessionID: String?,
             _ ownCapabilities: [OwnCapability],
             _ videoConfig: VideoConfig,
             _ audioSettings: AudioSettings,
@@ -453,10 +460,11 @@ extension CallController {
                 webSocketURLString: $3,
                 token: $4,
                 callCid: $5,
-                ownCapabilities: $6,
-                videoConfig: $7,
-                audioSettings: $8,
-                environment: $9
+                sessionID: $6,
+                ownCapabilities: $7,
+                videoConfig: $8,
+                audioSettings: $9,
+                environment: $10
             )
         }
         

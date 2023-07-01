@@ -31,13 +31,13 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    log.debug("Error executing request \(error.localizedDescription)")
+                    log.error("Error executing request", subsystems: .httpRequests, error: error)
                     continuation.resume(throwing: error)
                     return
                 }
                 if let response = response as? HTTPURLResponse {
                     if response.statusCode == 403, !isRetry {
-                        log.debug("Access token expired")
+                        log.debug("Access token expired", subsystems: .httpRequests)
                         continuation.resume(throwing: ClientError.InvalidToken())
                         return
                     } else if response.statusCode >= 400 {
@@ -46,7 +46,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                     }
                 }
                 guard let data = data else {
-                    log.debug("Received empty response")
+                    log.debug("Received empty response", subsystems: .httpRequests)
                     continuation.resume(throwing: ClientError.NetworkError())
                     return
                 }

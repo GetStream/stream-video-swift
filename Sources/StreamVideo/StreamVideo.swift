@@ -18,6 +18,9 @@ public class StreamVideo: ObservableObject {
         @Published public internal(set) var user: User
         @Published public internal(set) var activeCall: Call? {
             didSet {
+                if oldValue != nil && oldValue?.cId != activeCall?.cId {
+                    oldValue?.leave()
+                }
                 if ringingCall != nil {
                     ringingCall = nil
                 }
@@ -91,14 +94,14 @@ public class StreamVideo: ObservableObject {
         token: UserToken,
         videoConfig: VideoConfig = VideoConfig(),
         pushNotificationsConfig: PushNotificationsConfig = .default,
-        tokenProvider: @escaping UserTokenProvider
+        tokenProvider: UserTokenProvider? = nil
     ) {
         self.init(
             apiKey: apiKey,
             user: user,
             token: token,
             videoConfig: videoConfig,
-            tokenProvider: tokenProvider,
+            tokenProvider: tokenProvider ?? { _ in },
             pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
@@ -153,7 +156,7 @@ public class StreamVideo: ObservableObject {
                     self.tokenProvider = guestInfo.tokenProvider
                     try await self.connectUser(isInitial: true)
                 } catch {
-                    log.error("Error connecting as guest \(error.localizedDescription)")
+                    log.error("Error connecting as guest", error: error)
                 }
             } else {
                 try await self.connectUser(isInitial: true)
@@ -569,7 +572,7 @@ extension StreamVideo: ConnectionStateDelegate {
                         log.debug("user token updated, will reconnect ws")
                         webSocketClient?.connect()
                     } catch {
-                        log.error("Error refreshing token, will disconnect ws connection")
+                        log.error("Error refreshing token, will disconnect ws connection", error: error)
                     }
                 }
             }
@@ -597,8 +600,7 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            call.state.update(from: ringEvent.call)
-            call.state.mergeMembers(ringEvent.members)
+            call.state.update(from: ringEvent)
             self.state.ringingCall = call
         }
     }

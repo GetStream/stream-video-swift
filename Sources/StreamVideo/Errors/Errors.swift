@@ -121,6 +121,14 @@ extension Error {
         }
         return false
     }
+    
+    var hasClientErrors: Bool {
+        if let apiError = self as? APIError,
+            ClosedRange.clientErrorCodes ~= apiError.statusCode {
+            return false
+        }
+        return true
+    }
 }
 
 extension ClosedRange where Bound == Int {

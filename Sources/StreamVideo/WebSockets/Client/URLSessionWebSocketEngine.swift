@@ -44,7 +44,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             "Making Websocket upgrade request: \(String(describing: request.url?.absoluteString))\n"
                 + "Headers:\n\(String(describing: request.allHTTPHeaderFields))\n"
                 + "Query items:\n\(request.queryItems.prettyPrinted)",
-            subsystems: .httpRequests
+            subsystems: .webSocket
         )
 
         task = session?.webSocketTask(with: request)
@@ -66,7 +66,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             let data = try message.serializedData()
             send(data: data)
         } catch {
-            log.error("error occurred")
+            log.error("Failed sending SendableEvent", subsystems: .webSocket, error: error)
         }
     }
     
@@ -75,7 +75,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             let data = try JSONEncoder().encode(jsonMessage)
             send(data: data)
         } catch {
-            log.error("error occurred")
+            log.error("Failed sending JSON message", subsystems: .webSocket, error: error)
         }
     }
     
@@ -87,7 +87,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         let message: URLSessionWebSocketTask.Message = .data(data)
         task?.send(message) { [weak self] error in
             if error == nil {
-                log.debug("Event message sent")
+                log.debug("Event message sent", subsystems: .webSocket)
                 self?.doRead()
             }
         }
@@ -95,7 +95,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
     
     private func doRead() {
         task?.receive { [weak self] result in
-            log.debug("received new event \(result)")
+            log.debug("received new event \(result)", subsystems: .webSocket)
             guard let self = self else {
                 return
             }
@@ -115,7 +115,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                 self.doRead()
                 
             case let .failure(error):
-                log.error("Failed receiving Web Socket Message with error: \(error)", subsystems: .webSocket)
+                log.error("Failed receiving Web Socket Message", subsystems: .webSocket, error: error)
             }
         }
     }
@@ -137,6 +137,7 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
                     code: closeCode.rawValue,
                     engineError: nil
                 )
+                log.error("WebSocket onClose", subsystems: .webSocket, error: error)
             }
 
             self?.callbackQueue.async { [weak self] in
@@ -152,7 +153,9 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
             guard let error = error else { return }
 
             self?.callbackQueue.async { [weak self] in
-                self?.delegate?.webSocketDidDisconnect(error: WebSocketEngineError(error: error))
+                let socketError = WebSocketEngineError(error: error)
+                log.error("WebSocket onClose", subsystems: .webSocket, error: error)
+                self?.delegate?.webSocketDidDisconnect(error: socketError)
             }
         }
 
