@@ -17,6 +17,7 @@
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
+		435F01B32A501148009CD0BD /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F01B22A501148009CD0BD /* Extensions.swift */; };
 		8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
@@ -684,6 +685,7 @@
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
 		4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTest.swift; sourceTree = "<group>"; };
 		4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
+		435F01B22A501148009CD0BD /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		8202215E2A24BB7100F7BAED /* LaunchArgument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchArgument.swift; sourceTree = "<group>"; };
 		822257872A42F8F600CFFD96 /* Credentials.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Credentials.xcconfig; sourceTree = "<group>"; };
 		822257892A42F93600CFFD96 /* TokenGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenGenerator.swift; sourceTree = "<group>"; };
@@ -1924,6 +1926,7 @@
 		84B57D3A2981645900E4E709 /* OpenApi */ = {
 			isa = PBXGroup;
 			children = (
+				435F01B22A501148009CD0BD /* Extensions.swift */,
 				84A8B79E29927830003AA570 /* generated */,
 				84DCA2202A39E380000C3411 /* URLSessionTransport.swift */,
 				84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */,
@@ -3083,6 +3086,7 @@
 				84530C6C2A3C4E0700F2678E /* CallState.swift in Sources */,
 				84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */,
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
+				435F01B32A501148009CD0BD /* Extensions.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
 				84DC38AD29ADFCFD00946713 /* HealthCheckEvent.swift in Sources */,
 				842B8E1C2A2DFED900863A87 /* AcceptCallResponse.swift in Sources */,
