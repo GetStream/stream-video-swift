@@ -4,6 +4,18 @@
 
 import Foundation
 
+public struct PermissionRequest: Identifiable {
+    public let id: UUID = .init()
+    public let permission: String
+    public let user: User
+    public let requestedAt: Date
+    let onReject: (PermissionRequest) -> Void
+    
+    public func reject() -> Void {
+        onReject(self)
+    }
+}
+
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
@@ -25,7 +37,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
-    @Published public internal(set) var createdAt: Date = .distantPast
+    @Published public internal(set) var createdAt: Date = .distantPast { didSet { if !isInitialized { isInitialized = true }} }
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var endedAt: Date?
@@ -34,13 +46,14 @@ public class CallState: ObservableObject {
     @Published public internal(set) var team: String?
     @Published public internal(set) var createdBy: User?
     @Published public internal(set) var ingress: CallIngressResponse?
-
+    @Published public internal(set) var permissionRequests: [PermissionRequest] = []
     @Published public internal(set) var transcribing: Bool = false
     @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
     @Published public internal(set) var session: CallSessionResponse?
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var participantCount: UInt32 = 0
-        
+    @Published public internal(set) var isInitialized: Bool = false
+
     internal func updateState(from event: VideoEvent) {
         switch event {
         case .typeBlockedUserEvent(let event):
@@ -113,15 +126,33 @@ public class CallState: ObservableObject {
             break
         case .typeHealthCheckEvent(_):
             break
-        case .typePermissionRequestEvent(_):
-            break
+        case .typePermissionRequestEvent(let event):
+            addPermissionRequest(user: event.user.toUser, permissions: event.permissions, requestedAt: event.createdAt)
         case .typeUnblockedUserEvent(let event):
             unblockUser(id: event.user.id)
         case .typeUpdatedCallPermissionsEvent(let event):
             updateOwnCapabilities(event)
         }
     }
-    
+
+    internal func addPermissionRequest(user: User, permissions: [String], requestedAt: Date) {
+        let requests = permissions.map {
+            PermissionRequest(
+                permission: $0,
+                user: user,
+                requestedAt: requestedAt,
+                onReject: self.removePermissionRequest
+            )
+        }
+        permissionRequests.append(contentsOf: requests)
+    }
+
+    internal func removePermissionRequest(request: PermissionRequest) {
+        permissionRequests = permissionRequests.filter {
+            $0.id != request.id
+        }
+    }
+
     internal func blockUser(id: String) {
         if !blockedUserIds.contains(id) {
             blockedUserIds.insert(id)
@@ -157,16 +188,19 @@ public class CallState: ObservableObject {
     internal func update(from response: GetOrCreateCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
+        ownCapabilities = response.ownCapabilities
     }
 
     internal func update(from response: JoinCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
+        ownCapabilities = response.ownCapabilities
     }
 
     internal func update(from response: GetCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
+        ownCapabilities = response.ownCapabilities
     }
 
     internal func update(from response: CallStateResponseFields) {
@@ -178,6 +212,7 @@ public class CallState: ObservableObject {
     internal func update(from response: UpdateCallResponse) {
         update(from: response.call)
         mergeMembers(response.members)
+        ownCapabilities = response.ownCapabilities
     }
 
     internal func update(from event: CallCreatedEvent) {

@@ -1,26 +1,22 @@
 ---
-title: Audio Room Tutorial
-description: How to build an audio room using Stream's video SDKs
+title: How to Build an iOS Audio Room with Swift
+description: How to build an audio room using Swift Stream's video SDKs
 ---
 
 import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
-## Credentials
-
-For this tutorial we will use the information below to create and join an AudioRoom
-
-<TokenSnippet sampleApp='audio-rooms'/>
-
-## Audio Room Tutorial
-
 This tutorial will teach you how to build an audio room experience like Twitter Spaces or Clubhouse.
+The end result will look like the image on the right and support the following features:
 
-- Backstage mode. You can start the call with your co-hosts and chat a bit before going live
-- Calls run on Stream's global edge network for optimal latency and scalability
-- There is no cap to how many listeners you can have in a room
-- Listeners can raise their hand, and be invited to speak by the host
-- Audio tracks are send multiple times for optimal reliability
-- Time to get started
+* Backstage mode. You can start the call with your co-hosts and chat a bit before going live
+* Calls run on Stream's global edge network for optimal latency and scalability
+* There is no cap to how many listeners you can have in a room
+* Listeners can raise their hand, and be invited to speak by the host
+* Audio tracks are send multiple times for optimal reliability
+
+## TODO INSERT SCREENSHOT IMAGE OF THE APP
+
+Time to get started building an audio-room for your app.
 
 ### Step 1 - Create a new project in Xcode
 | Create a new Project in Xcode | Select iOS as the platform and then select app as the type. | Name your project "AudioRooms" and select SwiftUI as your UI setup. |
@@ -28,51 +24,67 @@ This tutorial will teach you how to build an audio room experience like Twitter 
 |![step_1](../assets/audio-rooms-create-project-step-1.png)|![step_2](../assets/audio-rooms-create-project-step-2.png)|![step_3](../assets/audio-rooms-create-project-step-3.png)|
 
 
-### Step 2 - Install the SDK & Setup the client
+### Step 2 - Install the SDK & Setup permissions
+
 #### Add the SwiftUI SDK as dependency to your Xcode Project.
 
 | Open Project's settings | Add the package's URL (https://github.com/GetStream/stream-video-swift) in the search bar | Add the following SDK to your target |
 |---|---|---|
 |![step_1](../assets/audio-rooms-add-dependency-step-1.png)|![step_2](../assets/audio-rooms-add-dependency-step-2.png)|![step_3](../assets/audio-rooms-add-dependency-step-3.png)|
 
-```swift
+### Permissions
+
+Making a video call requires the usage of the camera and the microphone of the device. Therefore, you need to request permissions to use them in your app. In order to do this, you will need to add the following keys and values in your `Info.plist` file.
+
+- `Privacy - Camera Usage Description` - "AudioRooms requires camera access in order to capture and transmit video"
+- `Privacy - Microphone Usage Description` - "AudioRooms requires microphone access in order to capture and transmit audio"
+
+![Screenshot shows permissions in the .plist file](../assets/permissions.png)
+
+### Step 3 - Create & Join a call
+
+Open up `AudioRooms/AudioRoomsApp.swift` and replace it with this code:
+
+```swift title="AudioRooms/AudioRoomsApp.swift"
 import SwiftUI
 import StreamVideo
 
 @main
 struct AudioRoomsApp: App {
-    @State var call: Call?
-    @State private var participants: [CallParticipant] = []
-    @State private var isCallLive: Bool = false
+    @State var call: Call
+    @ObservedObject var state: CallState
+    @State private var callCreated: Bool = false
 
-    private let currentUser: User
-    private var streamVideo: StreamVideo?
-
+    private var client: StreamVideo
     private let apiKey: String = "" // The API key can be found in the Credentials section
     private let userId: String = "" // The User Id can be found in the Credentials section
     private let token: String = "" // The Token can be found in the Credentials section
     private let callId: String = "" // The CallId can be found in the Credentials section
 
     init() {
-        // create a user.
-        self.currentUser = User(
+        let user = User(
             id: userId,
-            name: "Tutorial", // name is used in the UI
-            role: "admin" // user roles are important for an audio room
+            name: "Tutorial" // name is used in the UI
         )
 
-        // initialize StreamVideo
-        self.streamVideo = StreamVideo(
+        // Initialize Stream Video client
+        self.client = StreamVideo(
             apiKey: apiKey,
-            user: currentUser,
+            user: user,
             token: .init(stringLiteral: token)
         )
+
+        // Initialize the call object
+        let call = client.call(callType: "audio_room", callId: callId)
+
+        self.call = call
+        self.state = call.state
     }
 
     var body: some Scene {
         WindowGroup {
             Group {
-                if let call = call {
+                if callCreated {
                     Text("Call \(call.callId) has \(call.state.participantCount) participants")
                         .font(.system(size: 30))
                         .foregroundColor(.blue)
@@ -81,10 +93,21 @@ struct AudioRoomsApp: App {
                 }
             }.task {
                 Task {
-                    guard call == nil else { return }
-                    try await streamVideo?.connect()
-                    call = streamVideo?.call(callType: .audioRoom, callId: "123") // The callId can be found in the Credentials section
-                    try await call?.join()
+                    guard !callCreated else { return }
+                    try await call.join(
+                        create: true,
+                        options: .init(
+                            members: [
+                                .init(userId: "tommaso"),
+                                .init(userId: "thierry"),
+                            ],
+                            custom: [
+                                "title": .string("SwiftUI heads"),
+                                "description": .string("talking about SwiftUI")
+                            ]
+                        )
+                    )
+                    callCreated = true
                 }
             }
         }
@@ -92,10 +115,63 @@ struct AudioRoomsApp: App {
 }
 ```
 
-By default calls of type "audio_room" start with backstage mode enabled. Admins and moderators can join the call. Regular users can only join the call when you go live. This gives an opportunity to setup the audio/video etc before inviting people in.
+Let's review the example above and go over the details.
 
+**User** setup. First we create a user object.
+You typically sync your users via a server side integration from your own backend.
+Alternatively, you can also use guest or anonymous users.
 
-### Step 3 - Adding audio room UI elements
+```swift
+let user = User(
+    id: userId,
+    name: "Tutorial" // name is used in the UI
+)
+```
+
+**Client init**. Next we initialize the client by passing the API Key, user and user token.
+
+```swift
+self.client = StreamVideo(
+    apiKey: apiKey,
+    user: user,
+    token: .init(stringLiteral: token)
+)
+```
+
+**Create and join call** After the user and client are created, we create a call like this:
+
+```swift
+self.call = client.call(callType: "audio_room", callId: callId)
+
+try await call.join(
+    create: true,
+    options: .init(
+        members: [
+            .init(userId: "tommaso"),
+            .init(userId: "thierry"),
+        ],
+        custom: [
+            "title": .string("SwiftUI heads"),
+            "description": .string("talking about SwiftUI")
+        ]
+    )
+)
+```
+
+* This joins and creates a call with the type: "audio_room" and the specified callId
+* The users with id jack and sophia are added
+* And we set the `title` and `description` custom field on the call object
+
+To actually run this sample we need a valid user token. The user token is typically generated by your server side API.
+When a user logs in to your app you return the user token that gives them access to the call.
+To make this tutorial easier to follow we'll generate a user token for you:
+
+Please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
+
+<TokenSnippet sampleApp='audio-rooms' />
+
+### Step 4 - Adding audio room UI elements
+
 In this next step we'll add:
 
 - Room title, room description
@@ -103,15 +179,10 @@ In this next step we'll add:
 - An indicator for who's speaking
 
 Let's create a component for the active speaker and the list of participants.
+
 ```swift
 struct ParticipantView: View {
-
     var participant: CallParticipant
-
-    init(participant: CallParticipant) {
-        self.participant = participant
-    }
-
     var body: some View {
         HStack {
             Text("\(participant.name) - \(participant.roles.joined(separator: ","))")
@@ -127,69 +198,208 @@ struct ParticipantView: View {
 }
 ```
 
-Next we'll create 
+And then update the App to render participants and a button to toggle live mode on/off.
 ```swift
-   Group {
-      if let call = call {
-         VStack {
-            VStack {
-                  Text("\(call.state.callData?.customData["title"]?.stringValue ?? "")")
-                     .font(.title)
-                     .frame(maxWidth: .infinity, alignment: .leading)
-                     .lineLimit(1)
-                     .padding([.bottom], 8)
+    Group {
+       if callCreated {
+          VStack {
+             VStack {
+                   Text("\(call.state.custom["title"]?.stringValue ?? "")")
+                      .font(.title)
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                      .lineLimit(1)
+                      .padding([.bottom], 8)
 
-                  Text("\(call.state.callData?.customData["description"]?.stringValue ?? "")")
-                     .font(.body)
-                     .frame(maxWidth: .infinity, alignment: .leading)
-                     .lineLimit(1)
-                     .padding([.bottom], 4)
+                   Text("\(call.state.custom["description"]?.stringValue ?? "")")
+                      .font(.body)
+                      .frame(maxWidth: .infinity, alignment: .leading)
+                      .lineLimit(1)
+                      .padding([.bottom], 4)
 
-                  Text("CallID: \(call.callId), \(participants.count) participants")
-                     .font(.caption)
-                     .frame(maxWidth: .infinity, alignment: .leading)
-            }
-            .padding([.leading, .trailing])
-
-            List(participants) { participant in
-                  ParticipantView(participant: participant)
-            }
-
-            if !isCallLive {
+                 Text("CallID: \(call.callId) \(state.participants.count) participants")
+                      .font(.caption)
+                      .frame(maxWidth: .infinity, alignment: .leading)
+             }
+             .padding([.leading, .trailing])
+              List {
+                  ForEach(Array(state.participants.keys), id: \.self) {
+                      ParticipantView(participant: state.participants[$0]!)
+                  }
+              }
+              if call.state.backstage {
+                   Button {
+                      Task {
+                         try await call.goLive()
+                      }
+                   } label: {
+                      Text("Go Live")
+                         .frame(maxWidth: .infinity)
+                   }
+                   .padding([.leading, .trailing])
+                   .buttonStyle(.borderedProminent)
+              } else {
                   Button {
                      Task {
-                        try await call.goLive()
+                        try await call.stopLive()
                      }
                   } label: {
-                     Text("Go Live")
+                     Text("Stop live")
                         .frame(maxWidth: .infinity)
                   }
                   .padding([.leading, .trailing])
                   .buttonStyle(.borderedProminent)
+              }
+          }
+       } else {
+          Text("loading...")
+       }
+    }
+```
+
+The app file should now look like this:
+
+```swift title="AudioRooms/AudioRoomsApp.swift"
+import SwiftUI
+import StreamVideo
+
+
+@main
+struct AudioRoomsApp: App {
+    @State var call: Call
+    @ObservedObject var state: CallState
+    @State private var callCreated: Bool = false
+
+    private var client: StreamVideo
+    private let apiKey: String = "hd8szvscpxvd" // The API key can be found in the Credentials section
+    private let userId: String = "Kit_Fisto" // The User Id can be found in the Credentials section
+    private let token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiS2l0X0Zpc3RvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9LaXRfRmlzdG8iLCJpYXQiOjE2ODgxMTIyNTYsImV4cCI6MTY4ODcxNzA2MX0.S7iukA9r81BekOEwqniiKZAg4IOBvjiCnwuMe9DYkvU" // The Token can be found in the Credentials section
+    private let callId: String = "QpZcx7wt3aFL" // The CallId can be found in the Credentials section
+
+    init() {
+        let user = User(
+            id: userId,
+            name: "Tutorial" // name is used in the UI
+        )
+
+        // Initialize Stream Video client
+        self.client = StreamVideo(
+            apiKey: apiKey,
+            user: user,
+            token: .init(stringLiteral: token)
+        )
+
+        // Initialize the call object
+        let call = client.call(callType: "audio_room", callId: callId)
+
+        self.call = call
+        self.state = call.state
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            Group {
+               if callCreated {
+                  VStack {
+                     VStack {
+                           Text("\(call.state.custom["title"]?.stringValue ?? "")")
+                              .font(.title)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                              .lineLimit(1)
+                              .padding([.bottom], 8)
+                           Text("\(call.state.custom["description"]?.stringValue ?? "")")
+                              .font(.body)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                              .lineLimit(1)
+                              .padding([.bottom], 4)
+
+                         Text("CallID: \(call.callId) \(state.participants.count) participants")
+                              .font(.caption)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                     }
+                     .padding([.leading, .trailing])
+
+                      List {
+                          ForEach(Array(state.participants.keys), id: \.self) {
+                              ParticipantView(participant: state.participants[$0]!)
+                          }
+                      }
+                      if call.state.backstage {
+                           Button {
+                              Task {
+                                 try await call.goLive()
+                              }
+                           } label: {
+                              Text("Go Live")
+                                 .frame(maxWidth: .infinity)
+                           }
+                           .padding([.leading, .trailing])
+                           .buttonStyle(.borderedProminent)
+                      } else {
+                          Button {
+                             Task {
+                                try await call.stopLive()
+                             }
+                          } label: {
+                             Text("Stop live")
+                                .frame(maxWidth: .infinity)
+                          }
+                          .padding([.leading, .trailing])
+                          .buttonStyle(.borderedProminent)
+                      }
+                  }
+               } else {
+                  Text("loading...")
+               }
+            }.task {
+                Task {
+                    guard !callCreated else { return }
+                    try await call.join(
+                        create: true,
+                        options: .init(
+                            members: [
+                                .init(userId: "tommaso"),
+                                .init(userId: "thierry"),
+                            ],
+                            custom: [
+                                "title": .string("SwiftUI heads"),
+                                "description": .string("talking about SwiftUI")
+                            ]
+                        )
+                    )
+                    callCreated = true
+                }
             }
-         }
-         .onReceive(call.state.$participants) {
-            self.participants = Array($0.values).sorted(by: { $0.name < $1.name })
-         }
-         .onReceive(call.state.$callData) { callData in
-            isCallLive = callData.map { !$0.backstage } ?? false
-         }
-      } else {
-         Text("loading...")
-      }
-   }
+        }
+    }
+}
+
+struct ParticipantView: View {
+    var participant: CallParticipant
+    var body: some View {
+        HStack {
+            Text("\(participant.name) - \(participant.roles.joined(separator: ","))")
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+
+            if participant.isSpeaking {
+                Circle()
+                    .fill(Color.blue)
+                    .frame(width: 15, height: 15)
+            }
+        }
+    }
+}
 ```
 
 ### Step 4 - Go live and join from the browser
 
-Run the sample app now and you'll see 1 participant. Click the go live button to allow participants to join.
+Run the sample app now and you will see one participant. Click the go live button to allow participants to join.
 
 To make this a little more interactive let's join the call from your browser. Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call. On your iOS emulator you'll see the text update to 2 participants.
 
 Note how the web interface won't allow you to share your audio/video. The reason for this is that by default the audio_room call type only allows moderators or admins to speak. Regular participants can request permission. And if different defaults make sense for your app you can edit the call type in the dashboard or create your own.
 
-
 ### Step 5 - Requesting permission to speak
+
 Requesting permission to speak is easy.
 ```swift
 let response = try await call.request(permissions: [.sendAudio])

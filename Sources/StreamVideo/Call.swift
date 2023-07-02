@@ -346,13 +346,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     @discardableResult
     public func request(permissions: [Permission]) async throws -> RequestPermissionResponse {
-        guard currentUserCanRequestPermissions(permissions) else {
+        if state.isInitialized && !currentUserCanRequestPermissions(permissions) {
             throw ClientError.MissingPermissions()
         }
         let request = RequestPermissionRequest(
             permissions: permissions.map(\.rawValue)
         )
-        
         return try await coordinatorClient.requestPermission(
             type: callType,
             id: callId,
@@ -364,6 +363,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
     public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
+        if !state.isInitialized {
+            log.warning("currentUserHasCapability called before the call was initialized using .get .create or .join")
+        }
         return state.ownCapabilities.contains(capability)
     }
     
@@ -379,11 +381,22 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> UpdateUserPermissionsResponse {
         try await updatePermissions(
             for: userId,
-            granted: permissions,
+            granted: permissions.map(\.rawValue),
             revoked: []
         )
     }
     
+    @discardableResult
+    public func grant(request: PermissionRequest) async throws -> UpdateUserPermissionsResponse {
+        let response = try await updatePermissions(
+            for: request.user.id,
+            granted: [request.permission],
+            revoked: []
+        )
+        state.removePermissionRequest(request: request)
+        return response
+    }
+
     /// Revokes permissions for a user in a call.
     /// - Parameters:
     ///   - permissions: The list of permissions to revoke.
@@ -397,7 +410,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await updatePermissions(
             for: userId,
             granted: [],
-            revoked: permissions
+            revoked: permissions.map(\.rawValue)
         )
     }
     
@@ -572,15 +585,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - private
     private func updatePermissions(
         for userId: String,
-        granted: [Permission],
-        revoked: [Permission]
+        granted: [String],
+        revoked: [String]
     ) async throws -> UpdateUserPermissionsResponse {
-        if !currentUserHasCapability(.updateCallPermissions) {
+        if state.isInitialized && !currentUserHasCapability(.updateCallPermissions) {
             throw ClientError.MissingPermissions()
         }
         let updatePermissionsRequest = UpdateUserPermissionsRequest(
-            grantPermissions: granted.map(\.rawValue),
-            revokePermissions: revoked.map(\.rawValue),
+            grantPermissions: granted,
+            revokePermissions: revoked,
             userId: userId
         )
         return try await coordinatorClient.updateUserPermissions(
