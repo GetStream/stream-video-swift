@@ -270,10 +270,10 @@ struct AudioRoomsApp: App {
     @State private var callCreated: Bool = false
 
     private var client: StreamVideo
-    private let apiKey: String = "hd8szvscpxvd" // The API key can be found in the Credentials section
-    private let userId: String = "Kit_Fisto" // The User Id can be found in the Credentials section
-    private let token: String = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiS2l0X0Zpc3RvIiwiaXNzIjoicHJvbnRvIiwic3ViIjoidXNlci9LaXRfRmlzdG8iLCJpYXQiOjE2ODgxMTIyNTYsImV4cCI6MTY4ODcxNzA2MX0.S7iukA9r81BekOEwqniiKZAg4IOBvjiCnwuMe9DYkvU" // The Token can be found in the Credentials section
-    private let callId: String = "QpZcx7wt3aFL" // The CallId can be found in the Credentials section
+    private let apiKey: String = "" // The API key can be found in the Credentials section
+    private let userId: String = "" // The User Id can be found in the Credentials section
+    private let token: String = "" // The Token can be found in the Credentials section
+    private let callId: String = "" // The CallId can be found in the Credentials section
 
     init() {
         let user = User(
@@ -401,6 +401,7 @@ Note how the web interface won't allow you to share your audio/video. The reason
 ### Step 5 - Requesting permission to speak
 
 Requesting permission to speak is easy.
+
 ```swift
 let response = try await call.request(permissions: [.sendAudio])
 
@@ -410,6 +411,167 @@ for await request in call.subscribe(for: PermissionRequestEvent.self) {
       call.grant(permissions: [.sendAudio], for: request.user.id)
 }
 ```
+
+Here's how we can show requests from users to speak and deny or reject their request.
+
+```swift
+import SwiftUI
+import StreamVideo
+
+
+@main
+struct AudioRoomsApp: App {
+    @State var call: Call
+    @ObservedObject var state: CallState
+    @State private var callCreated: Bool = false
+
+    private var client: StreamVideo
+    private let apiKey: String = "" // The API key can be found in the Credentials section
+    private let userId: String = "" // The User Id can be found in the Credentials section
+    private let token: String = "" // The Token can be found in the Credentials section
+    private let callId: String = "" // The CallId can be found in the Credentials section
+
+    init() {
+        let user = User(
+            id: userId,
+            name: "Tutorial" // name is used in the UI
+        )
+
+        // Initialize Stream Video client
+        self.client = StreamVideo(
+            apiKey: apiKey,
+            user: user,
+            token: .init(stringLiteral: token)
+        )
+
+        // Initialize the call object
+        let call = client.call(callType: "audio_room", callId: callId)
+
+        self.call = call
+        self.state = call.state
+    }
+
+    var body: some Scene {
+        WindowGroup {
+            Group {
+               if callCreated {
+                  VStack {
+                     VStack {
+                         List {
+                             ForEach(state.permissionRequests) {
+                                 PermissionRequestView(request: $0, call: call)
+                             }
+                         }
+                     }
+                     VStack {
+                           Text("\(call.state.custom["title"]?.stringValue ?? "")")
+                              .font(.title)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                              .lineLimit(1)
+                              .padding([.bottom], 8)
+                           Text("\(call.state.custom["description"]?.stringValue ?? "")")
+                              .font(.body)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                              .lineLimit(1)
+                              .padding([.bottom], 4)
+
+                         Text("CallID: \(call.callId) \(state.participants.count) participants")
+                              .font(.caption)
+                              .frame(maxWidth: .infinity, alignment: .leading)
+                     }
+                     .padding([.leading, .trailing])
+                      List {
+                          ForEach(Array(state.participants.keys), id: \.self) {
+                              ParticipantView(participant: state.participants[$0]!)
+                          }
+                      }
+                      if call.state.backstage {
+                           Button {
+                              Task {
+                                 try await call.goLive()
+                              }
+                           } label: {
+                              Text("Go Live")
+                                 .frame(maxWidth: .infinity)
+                           }
+                           .padding([.leading, .trailing])
+                           .buttonStyle(.borderedProminent)
+                      } else {
+                          Button {
+                             Task {
+                                try await call.stopLive()
+                             }
+                          } label: {
+                             Text("Stop live")
+                                .frame(maxWidth: .infinity)
+                          }
+                          .padding([.leading, .trailing])
+                          .buttonStyle(.borderedProminent)
+                      }
+                  }
+               } else {
+                  Text("loading...")
+               }
+            }.task {
+                Task {
+                    guard !callCreated else { return }
+                    try await call.join(
+                        create: true,
+                        options: .init(
+                            members: [
+                                .init(userId: "tommaso"),
+                                .init(userId: "thierry"),
+                            ],
+                            custom: [
+                                "title": .string("SwiftUI heads"),
+                                "description": .string("talking about SwiftUI")
+                            ]
+                        )
+                    )
+                    callCreated = true
+                }
+            }
+        }
+    }
+}
+
+struct ParticipantView: View {
+    var participant: CallParticipant
+    var body: some View {
+        HStack {
+            Text("\(participant.name) - \(participant.roles.joined(separator: ","))")
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+
+            if participant.isSpeaking {
+                Circle()
+                    .fill(Color.blue)
+                    .frame(width: 15, height: 15)
+            }
+        }
+    }
+}
+
+struct PermissionRequestView: View {
+    var request: PermissionRequest
+    var call: Call
+    var body: some View {
+        HStack(alignment: .top) {
+            Text("\(request.user.name) requested to \(request.permission)").frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading).font(.system(size: 11))
+            Button {
+               Task {
+                   try await call.grant(request: request)
+               }
+            } label: {
+                Label("", systemImage: "hand.thumbsup.circle")
+            }
+            Button(action: request.reject) {
+                Label("", systemImage: "hand.thumbsdown.circle.fill")
+            }
+        }
+    }
+}
+```
+
 
 ## Other built-in features
 There are a few more exciting features that you can use to build audio rooms
