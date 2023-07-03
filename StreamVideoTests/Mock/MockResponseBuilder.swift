@@ -6,10 +6,10 @@
 
 class MockResponseBuilder {
     
-    func makeJoinCallResponse(cid: String) -> JoinCallResponse {
+    func makeJoinCallResponse(cid: String, recording: Bool = false) -> JoinCallResponse {
         JoinCallResponse(
             blockedUsers: [],
-            call: makeCallResponse(cid: cid),
+            call: makeCallResponse(cid: cid, recording: recording),
             created: true,
             credentials: Credentials(
                 iceServers: [],
@@ -29,7 +29,8 @@ class MockResponseBuilder {
     func makeCallResponse(
         cid: String,
         acceptedBy: [String: Date] = [:],
-        rejectedBy: [String: Date] = [:]
+        rejectedBy: [String: Date] = [:],
+        recording: Bool = false
     ) -> CallResponse {
         let userResponse = makeUserResponse()
         let callIngressResponse = CallIngressResponse(
@@ -56,7 +57,7 @@ class MockResponseBuilder {
             ),
             id: "123",
             ingress: callIngressResponse,
-            recording: false,
+            recording: recording,
             session: session,
             settings: makeCallSettingsResponse(),
             transcribing: false,
