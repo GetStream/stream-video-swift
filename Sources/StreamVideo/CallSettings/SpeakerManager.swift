@@ -5,45 +5,59 @@
 import Foundation
 
 /// Handles the speaker state during a call.
-public class SpeakerManager: ObservableObject {
-    
-    actor State {
-        var updatingState: Bool?
-        func setUpdatingState(_ state: Bool?) {
-            self.updatingState = state
-        }
-    }
-    
+public class SpeakerManager: ObservableObject, CallSettingsManager {
+        
     internal let callController: CallController
     @Published public internal(set) var callSettings: CallSettings
-    private let state = State()
+    internal let state = CallSettingsState()
     
     init(callController: CallController, settings: CallSettings) {
         self.callController = callController
         self.callSettings = settings
     }
     
-    /// Enables the speaker.
-    public func enable() async throws {
+    public func enableSpeakerPhone() async throws {
+        try await updateSpeakerState(true)
+    }
+    
+    public func disableSpeakerPhone() async throws {
+        try await updateSpeakerState(false)
+    }
+    
+    /// Enables the sound on the device.
+    public func enableAudioOutput() async throws {
         try await updateAudioOutputState(true)
     }
     
-    /// Disables the speaker.
-    public func disable() async throws {
+    /// Disables the sound on the device.
+    public func disableAudioOutput() async throws {
         try await updateAudioOutputState(false)
     }
     
     // MARK: - private
     
+    private func updateSpeakerState(_ state: Bool) async throws {
+        try await updateState(
+            newState: state,
+            current: callSettings.speakerOn,
+            action: { [unowned self] state in
+                try await callController.changeSpeakerState(isEnabled: state)
+            },
+            onUpdate: { [unowned self] state in
+                updateCallSettings(speakerOn: state)
+            }
+        )
+    }
+    
     private func updateAudioOutputState(_ state: Bool) async throws {
-        let updatingState = await self.state.updatingState
-        if state == callSettings.audioOutputOn || updatingState == state {
-            return
-        }
-        await self.state.setUpdatingState(state)
-        try await callController.changeSoundState(isEnabled: state)
-        updateCallSettings(audioOutpuOn: state)
-        await self.state.setUpdatingState(nil)
+        try await updateState(
+            newState: state,
+            current: callSettings.audioOutputOn,
+            action: { [unowned self] state in
+            try await callController.changeSoundState(isEnabled: state)
+        }, onUpdate: { [unowned self] state in
+            updateCallSettings(audioOutpuOn: state)
+        })
     }
 
     private func updateCallSettings(audioOutpuOn: Bool) {
@@ -52,6 +66,16 @@ public class SpeakerManager: ObservableObject {
             videoOn: callSettings.videoOn,
             speakerOn: callSettings.speakerOn,
             audioOutputOn: audioOutpuOn,
+            cameraPosition: callSettings.cameraPosition
+        )
+    }
+    
+    private func updateCallSettings(speakerOn: Bool) {
+        callSettings = CallSettings(
+            audioOn: callSettings.audioOn,
+            videoOn: callSettings.videoOn,
+            speakerOn: speakerOn,
+            audioOutputOn: callSettings.audioOutputOn,
             cameraPosition: callSettings.cameraPosition
         )
     }

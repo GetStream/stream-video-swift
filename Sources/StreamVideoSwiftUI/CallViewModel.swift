@@ -236,9 +236,9 @@ open class CallViewModel: ObservableObject {
         Task {
             do {
                 if callSettings.audioOutputOn {
-                    try await call.speaker.disable()
+                    try await call.speaker.disableAudioOutput()
                 } else {
-                    try await call.speaker.enable()
+                    try await call.speaker.enableAudioOutput()
                 }
             } catch {
                 log.error("Error toggling audio output", error: error)

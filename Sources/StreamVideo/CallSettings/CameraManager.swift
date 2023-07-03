@@ -10,14 +10,7 @@ public enum CameraStatus: String {
 }
 
 /// Handles the camera state during a call.
-public class CameraManager: ObservableObject {
-    
-    actor State {
-        var updatingState: Bool?
-        func setUpdatingState(_ state: Bool?) {
-            self.updatingState = state
-        }
-    }
+public class CameraManager: ObservableObject, CallSettingsManager {
     
     internal let callController: CallController
     @Published public internal(set) var callSettings: CallSettings {
@@ -28,7 +21,7 @@ public class CameraManager: ObservableObject {
     }
     @Published public internal(set) var status: CameraStatus
     @Published public internal(set) var direction: CameraPosition
-    private let state = State()
+    let state = CallSettingsState()
     
     init(callController: CallController, settings: CallSettings) {
         self.callController = callController
@@ -66,14 +59,16 @@ public class CameraManager: ObservableObject {
     // MARK: - private
     
     private func updateVideoState(_ state: Bool) async throws {
-        let updatingState = await self.state.updatingState
-        if state == callSettings.videoOn || updatingState == state {
-            return
-        }
-        await self.state.setUpdatingState(state)
-        try await callController.changeVideoState(isEnabled: state)
-        updateCallSettings(videoOn: state)
-        await self.state.setUpdatingState(nil)
+        try await updateState(
+            newState: state,
+            current: callSettings.videoOn,
+            action: { [unowned self] state in
+                try await callController.changeVideoState(isEnabled: state)
+            },
+            onUpdate: { [unowned self] state in
+                updateCallSettings(videoOn: state)
+            }
+        )
     }
     
     private func updateCallSettings(videoOn: Bool) {

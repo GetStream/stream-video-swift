@@ -3,11 +3,10 @@
 //
 
 import Foundation
-import Combine
+@preconcurrency import Combine
 import XCTest
 @testable import StreamVideo
 
-@MainActor
 class CallCRUDTest: IntegrationTest {
     func test_call_create_and_update() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
@@ -116,7 +115,8 @@ class CallCRUDTest: IntegrationTest {
 
         try await Task.sleep(nanoseconds: 1_500_000_000)
 
-        XCTAssertEqual(0, call2.state.members.count)
+        let count = await call2.state.members.count
+        XCTAssertEqual(0, count)
         
         let _ = try await call2.get(membersLimit: 1)
         await assertNext(call.state.$members) { v in

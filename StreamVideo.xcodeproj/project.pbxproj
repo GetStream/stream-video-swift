@@ -402,6 +402,7 @@
 		84C619C629432E890051C513 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84C619C529432E890051C513 /* NukeUI */; };
 		84CBBE0B29228BA900D0DA61 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
 		84CC05892A530C3F00EE9815 /* SpeakerManager_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CC05882A530C3F00EE9815 /* SpeakerManager_Tests.swift */; };
+		84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84CC058A2A531B0B00EE9815 /* CallSettingsManager.swift */; };
 		84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D114D929F092E700BCCB0C /* CallController_Tests.swift */; };
 		84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37029DC856C001D2118 /* CallMemberRemovedEvent.swift */; };
 		84D2E37729DC856D001D2118 /* CallMemberUpdatedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37129DC856C001D2118 /* CallMemberUpdatedEvent.swift */; };
@@ -1022,6 +1023,7 @@
 		84C4003D29E3F446007B69C2 /* WSClientEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = WSClientEvent.swift; sourceTree = "<group>"; };
 		84C4003E29E3F446007B69C2 /* ConnectedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectedEvent.swift; sourceTree = "<group>"; };
 		84CC05882A530C3F00EE9815 /* SpeakerManager_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerManager_Tests.swift; sourceTree = "<group>"; };
+		84CC058A2A531B0B00EE9815 /* CallSettingsManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallSettingsManager.swift; sourceTree = "<group>"; };
 		84D114D929F092E700BCCB0C /* CallController_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallController_Tests.swift; sourceTree = "<group>"; };
 		84D2E37029DC856C001D2118 /* CallMemberRemovedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberRemovedEvent.swift; sourceTree = "<group>"; };
 		84D2E37129DC856C001D2118 /* CallMemberUpdatedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberUpdatedEvent.swift; sourceTree = "<group>"; };
@@ -1768,6 +1770,7 @@
 				846D16212A52B8D00036CE4C /* MicrophoneManager.swift */,
 				846D16232A52C3D50036CE4C /* CameraManager.swift */,
 				846D16252A52CE8C0036CE4C /* SpeakerManager.swift */,
+				84CC058A2A531B0B00EE9815 /* CallSettingsManager.swift */,
 			);
 			path = CallSettings;
 			sourceTree = "<group>";
@@ -3038,6 +3041,7 @@
 				84DC38C829ADFCFD00946713 /* Device.swift in Sources */,
 				84DC38D729ADFCFD00946713 /* RecordSettings.swift in Sources */,
 				8412903629DDD1ED00C70A6D /* UpdateCallMembersRequest.swift in Sources */,
+				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,

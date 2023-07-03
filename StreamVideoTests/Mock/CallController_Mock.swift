@@ -57,6 +57,8 @@ class CallController_Mock: CallController {
     
     override func changeSoundState(isEnabled: Bool) async throws { /* no op */ }
     
+    override func changeSpeakerState(isEnabled: Bool) async throws { /* no op */ }
+    
 }
 
 extension CallController_Mock {

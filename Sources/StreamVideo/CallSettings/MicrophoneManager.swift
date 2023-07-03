@@ -10,14 +10,7 @@ public enum MicrophoneStatus: String {
 }
 
 /// Handles the microphone state during a call.
-public class MicrophoneManager: ObservableObject {
-    
-    actor State {
-        var updatingState: Bool?
-        func setUpdatingState(_ state: Bool?) {
-            self.updatingState = state
-        }
-    }
+public class MicrophoneManager: ObservableObject, CallSettingsManager {
     
     internal let callController: CallController
     @Published public internal(set) var callSettings: CallSettings {
@@ -27,7 +20,7 @@ public class MicrophoneManager: ObservableObject {
     }
     /// The status of the microphone.
     @Published public internal(set) var status: MicrophoneStatus
-    private let state = State()
+    let state = CallSettingsState()
 
     init(callController: CallController, settings: CallSettings) {
         self.callController = callController
@@ -53,14 +46,16 @@ public class MicrophoneManager: ObservableObject {
     // MARK: - private
     
     private func updateAudioState(_ state: Bool) async throws {
-        let updatingState = await self.state.updatingState
-        if state == callSettings.audioOn || updatingState == state {
-            return
-        }
-        await self.state.setUpdatingState(state)
-        try await callController.changeAudioState(isEnabled: state)
-        updateCallSettings(audioOn: state)
-        await self.state.setUpdatingState(nil)
+        try await updateState(
+            newState: state,
+            current: callSettings.audioOn,
+            action: { [unowned self] state in
+                try await callController.changeAudioState(isEnabled: state)
+            },
+            onUpdate: { [unowned self] state in
+                updateCallSettings(audioOn: state)
+            }
+        )
     }
     
     private func updateCallSettings(audioOn: Bool) {
