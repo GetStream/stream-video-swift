@@ -265,11 +265,11 @@ class CallController {
             connectOptions: connectOptions
         )
         let sessionId = webRTCClient?.sessionID ?? ""
-        executeOnMain {
-            self.call?.state.sessionId = sessionId
-            self.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
-            self.call?.state.ownCapabilities = response.ownCapabilities
-            self.call?.state.update(from: response)
+        executeOnMain { [weak self] in
+            self?.call?.state.sessionId = sessionId
+            self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
+            self?.call?.state.ownCapabilities = response.ownCapabilities
+            self?.call?.state.update(from: response)
         }
     }
     
@@ -300,8 +300,8 @@ class CallController {
         switch state {
         case .disconnected(let source):
             log.debug("Signal channel disconnected")
-            executeOnMain {
-                self.handleSignalChannelDisconnect(source: source)
+            executeOnMain { [weak self] in
+                self?.handleSignalChannelDisconnect(source: source)
             }
         case .connected(healthCheckInfo: _):
             log.debug("Signal channel connected")

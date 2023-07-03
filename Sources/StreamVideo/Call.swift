@@ -43,8 +43,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
         self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
-        executeOnMain {
-            self.state.update(from: response)
+        executeOnMain { [weak self] in
+            self?.state.update(from: response)
         }
     }
 
@@ -548,7 +548,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        executeOnMain {
+        executeOnMain { [weak self] in
+            guard let self else { return }
             if reconnectionStatus != self.state.reconnectionStatus {
                 self.state.reconnectionStatus = reconnectionStatus
             }
@@ -556,8 +557,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     internal func update(recordingState: RecordingState) {
-        executeOnMain {
-            self.state.recordingState = recordingState
+        executeOnMain { [weak self] in
+            self?.state.recordingState = recordingState
         }
     }
     
@@ -568,7 +569,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        executeOnMain {
+        executeOnMain { [weak self] in
+            guard let self else { return }
             self.state.updateState(from: videoEvent)
             self.callController.updateOwnCapabilities(ownCapabilities: self.state.ownCapabilities)
         }
