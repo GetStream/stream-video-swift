@@ -89,8 +89,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_XCPARSE: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 25
@@ -114,8 +112,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_XCPARSE: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 25
@@ -165,7 +161,6 @@ jobs:
       if: env.LAUNCH_ID != ''
       env:
         INSTALL_ALLURE: true
-        INSTALL_XCPARSE: true
         INSTALL_VIDEO_BUDDY: true
     - name: Run UI Tests (Debug)
       if: env.LAUNCH_ID != ''
