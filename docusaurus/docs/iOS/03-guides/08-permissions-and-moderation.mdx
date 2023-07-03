@@ -21,12 +21,15 @@ let hasPermission = call.currentUserHasCapability(.sendAudio)
 let response = try await call.request(permissions: [.sendAudio])
 ```
 
-The host can proceed to grant you permission:
+Permission requests are exposed from `call.state` on the `permissionRequests` published variable.
 
 ```swift
- for await request in call.subscribe(for: PermissionRequestEvent.self) {
-    call.grant(permissions: request.permissions for: request.user.id)
-    // or ignore to reject.
+if let request = call.state.permissionRequests.first {
+    // reject it
+    request.reject()
+
+    // grant it
+    try await call.grant(request: request)
 }
 ```
 
@@ -36,7 +39,7 @@ You can also grant permissions directly using call.grantPermissions() method lik
 call.grant(permissions: [.sendAudio] for: "thrierry")
 ```
 
-You can request the following 3 permissions: send-audio, send-video, and screenshare.
+You can request the following 3 permissions: `send-audio`, `send-video`, and `screenshare`.
 
 ### Revoking permissions
 
@@ -51,18 +54,21 @@ let response = try await call.revoke(permissions: [.sendAudio], for: "tommaso")
 
 ```swift
 // block a user
-let response = try await call.blockUser(with: "tommaso")
+try await call.blockUser(with: "tommaso")
+
+// unblock a user
+try await call.unblockUser(with: "tommaso")
 
 // remove a member from a call
-let response = try await call.removeMembers(["tommaso"])
+try await call.removeMembers(ids: ["tommaso"])
 ```
 
 Alternatively you can also mute users.
 
 ```swift
-// mutes all users other than yourself
-let response = try await call.muteAllUsers(with: MuteUsersRequest(muteAllUsers: true))
+// mutes all users (audio and video are true by default) other than yourself
+try await call.muteAllUsers()
 
 // mute user with id "tommaso" specifically
-let response = try await call.muteAllUsers(with: MuteUsersRequest(userIds: ["tommaso"]))
+try await call.mute(userId: "tommaso")
 ```

@@ -257,4 +257,20 @@ class CallCRUDTest: IntegrationTest {
         XCTAssertTrue(tommasoCall.currentUserHasCapability(.sendAudio))
         XCTAssertFalse(tommasoCall.currentUserHasCapability(.sendVideo))
     }
+    
+    func test_mute_user_by_id() async throws {
+        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry", "tommaso"])
+
+        // there is no muted event from coordinator atm
+        try await call.mute(userId: "tommaso")
+    }
+    
+    func test_mute_user_by_all() async throws {
+        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry", "tommaso"])
+
+        try await call.muteAllUsers()
+        // there is no muted event from coordinator atm
+    }
 }

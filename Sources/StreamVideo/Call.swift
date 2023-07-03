@@ -419,21 +419,37 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
-    /// Mute users in a call.
-    /// - Parameters:
-    ///   - request: The mute request.
-    /// - Throws: error if muting the users fails.
     @discardableResult
-    public func muteUsers(
-        with request: MuteUsersRequest
+    public func mute(
+        userId: String,
+        audio: Bool = true,
+        video: Bool = true
     ) async throws -> MuteUsersResponse {
         try await coordinatorClient.muteUsers(
             type: callType,
             id: callId,
-            muteUsersRequest: request
+            muteUsersRequest: MuteUsersRequest(
+                audio: audio,
+                userIds: [userId],
+                video: video
+            )
         )
     }
-    
+
+    @discardableResult
+    public func muteAllUsers(audio: Bool = true, video: Bool = true) async throws -> MuteUsersResponse {
+        try await coordinatorClient.muteUsers(
+            type: callType,
+            id: callId,
+            muteUsersRequest: MuteUsersRequest(
+                audio: audio,
+                muteAllUsers: true,
+                video: video
+            )
+        )
+    }
+
+
     /// Ends a call.
     /// - Throws: error if ending the call fails.
     @discardableResult
