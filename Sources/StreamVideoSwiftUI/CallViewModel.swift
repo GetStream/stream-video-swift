@@ -55,6 +55,11 @@ open class CallViewModel: ObservableObject {
                     }
                     self?.lastScreenSharingParticipant = screenSharingSession?.participant
                 })
+            callSettingsUpdates = call?.microphone.$callSettings
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] settings in
+                    self?.callSettings = settings
+                })
         }
     }
     
@@ -97,7 +102,7 @@ open class CallViewModel: ObservableObject {
     @Published public var participantEvent: ParticipantEvent?
     
     /// Provides information about the current call settings, such as the camera position and whether there's an audio and video turned on.
-    @Published public var callSettings = CallSettings()
+    @Published public internal(set) var callSettings = CallSettings()
     
     /// Whether the call is in minimized mode.
     @Published public var isMinimized = false
@@ -157,6 +162,7 @@ open class CallViewModel: ObservableObject {
     private var reconnectionUpdates: AnyCancellable?
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
+    private var callSettingsUpdates: AnyCancellable?
         
     private var ringingTimer: Foundation.Timer?
     private var lastScreenSharingParticipant: CallParticipant?
@@ -193,14 +199,7 @@ open class CallViewModel: ObservableObject {
         guard let call = call else { return }
         Task {
             do {
-                let isEnabled = !callSettings.videoOn
-                try await call.changeVideoState(isEnabled: isEnabled)
-                callSettings = CallSettings(
-                    audioOn: callSettings.audioOn,
-                    videoOn: isEnabled,
-                    speakerOn: callSettings.speakerOn,
-                    audioOutputOn: callSettings.audioOutputOn
-                )
+                try await call.camera.toggle()
             } catch {
                 log.error("Error toggling camera", error: error)
             }
@@ -212,14 +211,7 @@ open class CallViewModel: ObservableObject {
         guard let call = call else { return }
         Task {
             do {
-                let isEnabled = !callSettings.audioOn
-                try await call.changeAudioState(isEnabled: isEnabled)
-                callSettings = CallSettings(
-                    audioOn: isEnabled,
-                    videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn,
-                    audioOutputOn: callSettings.audioOutputOn
-                )
+                try await call.microphone.toggle()
             } catch {
                 log.error("Error toggling microphone", error: error)
             }
@@ -229,11 +221,11 @@ open class CallViewModel: ObservableObject {
     /// Toggles the camera position (front vs back).
     public func toggleCameraPosition() {
         guard let call = call, callSettings.videoOn else { return }
-        let next = callSettings.cameraPosition.next()
-        call.changeCameraMode(position: next) { [weak self] in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.callSettings = self.callSettings.withUpdatedCameraPosition(next)
+        Task {
+            do {
+                try await call.camera.flip()
+            } catch {
+                log.error("Error toggling camera position", error: error)
             }
         }
     }
@@ -243,14 +235,11 @@ open class CallViewModel: ObservableObject {
         guard let call = call else { return }
         Task {
             do {
-                let isEnabled = !callSettings.audioOutputOn
-                try await call.changeSoundState(isEnabled: isEnabled)
-                callSettings = CallSettings(
-                    audioOn: callSettings.audioOutputOn,
-                    videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn,
-                    audioOutputOn: isEnabled
-                )
+                if callSettings.audioOutputOn {
+                    try await call.speaker.disable()
+                } else {
+                    try await call.speaker.enable()
+                }
             } catch {
                 log.error("Error toggling audio output", error: error)
             }

@@ -21,6 +21,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callCid(from: callId, callType: callType)
     }
     
+    /// Provides access to the microphone.
+    public let microphone: MicrophoneManager
+    /// Provides access to the camera.
+    public let camera: CameraManager
+    /// Provides access to the speaker.
+    public let speaker: SpeakerManager
+    
     internal let callController: CallController
     private let videoOptions: VideoOptions
     private var eventHandlers = [EventHandling]()
@@ -38,11 +45,33 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.coordinatorClient = coordinatorClient
         self.callController = callController
         self.videoOptions = videoOptions
+        let initialSettings = CallSettings()
+        self.microphone = MicrophoneManager(
+            callController: callController,
+            settings: initialSettings
+        )
+        self.camera = CameraManager(
+            callController: callController,
+            settings: initialSettings
+        )
+        self.speaker = SpeakerManager(
+            callController: callController,
+            settings: initialSettings
+        )
         self.callController.call = self
     }
     
-    convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
-        self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
+    convenience internal init(
+        from response: CallStateResponseFields,
+        coordinatorClient: DefaultAPI,
+        callController: CallController
+    ) {
+        self.init(
+            callType: response.call.type,
+            callId: response.call.id,
+            coordinatorClient: coordinatorClient,
+            callController: callController
+        )
         executeOnMain { [weak self] in
             self?.state.update(from: response)
         }
@@ -65,6 +94,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callSettings: CallSettings = CallSettings()
     ) async throws -> JoinCallResponse {
         try await executeTask(retryPolicy: .fastAndSimple, task: {
+            update(callSettings: callSettings)
             let response = try await callController.joinCall(
                 create: create,
                 callType: callType,
@@ -199,32 +229,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func unblock(user: User) async throws -> UnblockUserResponse{
         return try await unblockUser(with: user.id)
-    }
-    
-    /// Changes the audio state for the current user.
-    /// - Parameter isEnabled: whether audio should be enabled.
-    public func changeAudioState(isEnabled: Bool) async throws {
-        try await callController.changeAudioState(isEnabled: isEnabled)
-    }
-    
-    /// Changes the video state for the current user.
-    /// - Parameter isEnabled: whether video should be enabled.
-    public func changeVideoState(isEnabled: Bool) async throws {
-        try await callController.changeVideoState(isEnabled: isEnabled)
-    }
-    
-    /// Changes the availability of sound during the call.
-    /// - Parameter isEnabled: whether the sound should be enabled.
-    public func changeSoundState(isEnabled: Bool) async throws {
-        try await callController.changeSoundState(isEnabled: isEnabled)
-    }
-    
-    /// Changes the camera position (front/back) for the current user.
-    /// - Parameters:
-    ///  - position: the new camera position.
-    ///  - completion: called when the camera position is changed.
-    public func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
-        callController.changeCameraMode(position: position, completion: completion)
     }
     
     /// Changes the track visibility for a participant (not visible if they go off-screen).
@@ -616,6 +620,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.mergeMembers(response.members)
         return response
+    }
+    
+    private func update(callSettings: CallSettings) {
+        microphone.callSettings = callSettings
+        speaker.callSettings = callSettings
+        camera.callSettings = callSettings
     }
 }
 

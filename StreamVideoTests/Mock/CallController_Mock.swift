@@ -55,4 +55,24 @@ class CallController_Mock: CallController {
         completion()
     }
     
+    override func changeSoundState(isEnabled: Bool) async throws { /* no op */ }
+    
+}
+
+extension CallController_Mock {
+    static func make() -> CallController_Mock {
+        CallController_Mock(
+            defaultAPI: DefaultAPI(
+                basePath: "test.com",
+                transport: HTTPClient_Mock(),
+                middlewares: []
+            ),
+            user: StreamVideo.mockUser,
+            callId: "123",
+            callType: "default",
+            apiKey: "key1",
+            videoConfig: VideoConfig(),
+            cachedLocation: nil
+        )
+    }
 }
