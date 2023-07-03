@@ -14,7 +14,7 @@ The end result will look like the image on the right and support the following f
 * Listeners can raise their hand, and be invited to speak by the host
 * Audio tracks are send multiple times for optimal reliability
 
-![Preview of the final result](../assets/audioroom_tutorial/notfound.png)
+![Preview of the final result](../assets/audioroom_tutorial/finish.png)
 
 Time to get started building an audio-room for your app.
 
@@ -65,7 +65,8 @@ struct AudioRoomsApp: App {
     init() {
         let user = User(
             id: userId,
-            name: "Tutorial" // name is used in the UI
+            name: "Martin", // name and imageURL are used in the UI
+            imageURL: .init(string: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/a3911/martin-mitrevski.webp")
         )
 
         // Initialize Stream Video client
@@ -84,7 +85,7 @@ struct AudioRoomsApp: App {
 
     var body: some Scene {
         WindowGroup {
-            Group {
+            VStack {
                 if callCreated {
                     Text("Audio Room \(call.callId) has \(call.state.participantCount) participants")
                         .font(.system(size: 30))
@@ -245,7 +246,7 @@ That's it for the basics, here's how the app Scene should look like now:
 ```swift
 var body: some Scene {
     WindowGroup {
-        Group {
+        VStack {
             if callCreated {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
@@ -255,8 +256,8 @@ var body: some Scene {
                 ParticipantsView(
                     participants: call.state.participants.values.map {$0}
                 )
-                ControlsView(call: call, state: state)
                 Spacer()
+                ControlsView(call: call, state: state)
             } else {
                 Text("loading...")
             }
@@ -293,7 +294,7 @@ To make this a little more interactive let's join the audio room from the browse
 
 <TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
 
-#### Room Backstage & Live mode control
+#### Backstage & Live mode control
 
 As you probably noticed by opening the same room from the browser, audio rooms by default are not live. Regular users can only join an audio room when it is in live mode. Let's expand the ControlView and add a button that controls the backstage or the room.
 
@@ -311,13 +312,13 @@ struct MicButtonView: View {
 }
 ```
 
-```swift title=MicButtonView
+```swift title=LiveButtonView
 struct LiveButtonView: View {
-    @State var call: Call
+    var call: Call
     @ObservedObject var state: CallState
 
     var body: some View {
-        if call.state.backstage {
+        if state.backstage {
             Button {
                 Task {
                     try await call.goLive()
@@ -325,7 +326,7 @@ struct LiveButtonView: View {
             } label: {
                 Text("Go Live")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.borderedProminent).tint(.green)
         } else {
             Button {
                 Task {
@@ -334,7 +335,7 @@ struct LiveButtonView: View {
             } label: {
                 Text("Stop live")
             }
-            .buttonStyle(.borderedProminent)
+            .buttonStyle(.borderedProminent).tint(.red)
         }
     }
 }
@@ -342,7 +343,7 @@ struct LiveButtonView: View {
 
 ```swift title=ControlsView
 struct ControlsView: View {
-    @State var call: Call
+    var call: Call
     @ObservedObject var state: CallState
 
     var body: some View {
@@ -366,15 +367,25 @@ As a next step, let's render the actual list of participants and show an indicat
 struct ParticipantView: View {
     var participant: CallParticipant
     var body: some View {
-        HStack {
-            Text("\(participant.name) - \(participant.roles.joined(separator: ","))")
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
-
-            if participant.isSpeaking {
+        VStack{
+            ZStack {
                 Circle()
-                    .fill(Color.blue)
-                    .frame(width: 15, height: 15)
+                    .fill(participant.isSpeaking ? .green : .white)
+                    .frame(width: 68, height: 68)
+                AsyncImage(
+                    url: participant.profileImageURL,
+                    content: { image in
+                        image.resizable()
+                            .aspectRatio(contentMode: .fit)
+                            .frame(maxWidth: 64, maxHeight: 64)
+                            .clipShape(Circle())
+                    },
+                    placeholder: {
+                        Image(systemName: "person.crop.circle").font(.system(size: 60))
+                    }
+                )
             }
+            Text("\(participant.name)")
         }
     }
 }
@@ -385,8 +396,10 @@ struct ParticipantsView: View {
     var participants: [CallParticipant]
 
     var body: some View {
-        List(participants) {
-            ParticipantView(participant: $0)
+        LazyVGrid(columns: [GridItem(.adaptive(minimum: 100))], spacing: 20) {
+            ForEach(participants) {
+                ParticipantView(participant: $0)
+            }
         }
     }
 }
@@ -417,17 +430,18 @@ let response = try await call.request(permissions: [.sendAudio])
 Permission requests are exposed from `call.state` on the `permissionRequests` published variable.
 
 ```swift
-call.state.permissionRequests.value.forEach { request in
-    // reject the request
+if let request = call.state.permissionRequests.first {
+    // reject it
     request.reject()
-    // grant the request
+
+    // grant it
     try await call.grant(request: request)
 }
 ```
 
 Let's add another view that shows the last incoming request as well as the buttons to grant / reject it
 
-```swift
+```swift title=PermissionRequestsView
 struct PermissionRequestsView: View {
     var call: Call
     @ObservedObject var state: CallState
@@ -441,10 +455,10 @@ struct PermissionRequestsView: View {
                        try await call.grant(request: request)
                    }
                 } label: {
-                    Label("", systemImage: "hand.thumbsup.circle")
+                    Label("", systemImage: "hand.thumbsup.circle").tint(.green)
                 }
                 Button(action: request.reject) {
-                    Label("", systemImage: "hand.thumbsdown.circle.fill")
+                    Label("", systemImage: "hand.thumbsdown.circle.fill").tint(.red)
                 }
             }
         }
@@ -457,7 +471,7 @@ And here is the updated Scene code that includes it:
 ```swift
 var body: some Scene {
     WindowGroup {
-        Group {
+        VStack {
             if callCreated {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
@@ -467,9 +481,9 @@ var body: some Scene {
                 ParticipantsView(
                     participants: call.state.participants.values.map {$0}
                 )
+                Spacer()
                 PermissionRequestsView(call: call, state: state)
                 ControlsView(call: call, state: state)
-                Spacer()
             } else {
                 Text("loading...")
             }
@@ -507,18 +521,22 @@ TODO: add this
 ## Other built-in features
 There are a few more exciting features that you can use to build audio rooms
 
-**Query Calls** You can query calls to easily show upcoming calls, calls that recently finished etc. **Reactions & Custom events** Reactions and custom events are supported. **Recording & Broadcasting** You can record your calls Chat Stream's chat SDKs are fully featured and you can integrate them in the call **Moderation** Moderation capabilities are built-in to the product **Transcriptions** Transcriptions aren't available yet, but they are due to launch soon
+- **Query Calls:** You can query calls to easily show upcoming calls, calls that recently finished as well as call previews.
+- **Reactions & Custom events:** Reactions and custom events are supported.
+- **Recording & Broadcasting:** You can record your calls Chat Stream's chat SDKs are fully featured, and you can integrate them in the call.
+- **Moderation:** Moderation capabilities are built-in to the product
+- **Transcriptions:** Transcriptions aren't available yet, but they are due to launch soon
 
 ## Recap
 It was fun to see just how quickly you can build an audio-room for your app. Please do let us know if you ran into any issues. Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
 
 To recap what we've learned:
 
-- You setup a call: (call = streamVideo?.call(callType: .audioRoom, callId: "123"))
-- The call type "audio_room" controls which features are enabled and how permissions are setup
-- The audio_room by default enables "backstage" mode, and only allows admins to join before the call goes live
-- When you join a call, realtime communication is setup for audio & video calling: (call.join())
-- State objects in call.state and call.state.participants make it easy to build your own UI
+- You set up a call with call = client.call(callType: "audio_room", callId: "123")
+- The call type "audio_room" controls which features are enabled and how permissions are set up
+- The audio_room by default enables "backstage" mode, and only allows admins and the creator of the call to join before the call goes live
+- When you join a call, realtime communication is set up for audio & video calling: call.join()
+- State objects in `call.state` and `call.state.participants` make it easy to build your own UI
 - Calls run on Stream's global edge network of video servers. Being closer to your users improves the latency and reliability of calls. For audio rooms we use Opus RED and Opus DTX for optimal audio quality.
 
 The SDKs enable you to build audio rooms, video calling and livestreaming in days.
