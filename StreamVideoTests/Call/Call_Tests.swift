@@ -5,6 +5,7 @@
 @testable import StreamVideo
 import XCTest
 
+@MainActor
 final class Call_Tests: StreamVideoTestCase {
     
     let callType = "default"

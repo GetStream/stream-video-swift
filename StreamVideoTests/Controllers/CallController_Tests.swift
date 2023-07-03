@@ -6,6 +6,7 @@
 import XCTest
 import SwiftProtobuf
 
+@MainActor
 final class CallController_Tests: ControllerTestCase {
 
     private var webRTCClient: WebRTCClient!
@@ -147,7 +148,7 @@ final class CallController_Tests: ControllerTestCase {
     func test_callController_updateRecordingState() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
-        let callController = makeCallController()
+        let callController = makeCallController(recording: true)
         let call = streamVideo?.call(callType: callType, callId: callId)
         
         // When
@@ -212,9 +213,12 @@ final class CallController_Tests: ControllerTestCase {
     
     // MARK: - private
     
-    private func makeCallController(shouldReconnect: Bool = false) -> CallController {
+    private func makeCallController(
+        shouldReconnect: Bool = false,
+        recording: Bool = false
+    ) -> CallController {
         let httpClient = HTTPClient_Mock()
-        let joinCallResponse = MockResponseBuilder().makeJoinCallResponse(cid: callCid)
+        let joinCallResponse = MockResponseBuilder().makeJoinCallResponse(cid: callCid, recording: recording)
         let data = try! JSONEncoder.default.encode(joinCallResponse)
         var responses = [data]
         if shouldReconnect {

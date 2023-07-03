@@ -600,11 +600,12 @@ extension StreamVideo: WSEventsSubscriber {
                 callType: ringEvent.call.type,
                 callId: ringEvent.call.id
             )
-            call.state.update(from: ringEvent)
+            executeOnMain {
+                call.state.update(from: ringEvent)
+            }
             self.state.ringingCall = call
         }
     }
-    
 }
 
 /// Returns the current value for the `StreamVideo` instance.

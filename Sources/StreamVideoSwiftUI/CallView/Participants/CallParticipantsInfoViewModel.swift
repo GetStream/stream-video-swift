@@ -5,6 +5,7 @@
 import StreamVideo
 import SwiftUI
 
+@MainActor
 class CallParticipantsInfoViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo

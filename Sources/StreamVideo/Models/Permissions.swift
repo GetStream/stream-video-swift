@@ -4,7 +4,7 @@
 
 import Foundation
 
-public struct Permission: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
+public struct Permission: Sendable, RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
     public let rawValue: String
 
     public init(rawValue: String) {

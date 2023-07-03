@@ -23,3 +23,9 @@ public enum CallNotification {
 }
 
 typealias EventHandling = ((WrappedEvent) -> ())?
+
+func executeOnMain(_ task: @escaping @MainActor () -> ()) {
+    Task {
+        await task()
+    }
+}

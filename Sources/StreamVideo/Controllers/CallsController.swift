@@ -149,8 +149,10 @@ public class CallsController: ObservableObject {
         guard let callEvent = event.rawValue as? WSCallEvent else { return }
         for (index, call) in calls.enumerated() {
             if call.cId == callEvent.callCid {
-                call.state.updateState(from: event)
-                calls[index] = call
+                executeOnMain { [weak self] in
+                    call.state.updateState(from: event)
+                    self?.calls[index] = call
+                }
                 return
             }
         }
@@ -159,8 +161,10 @@ public class CallsController: ObservableObject {
                 callType: callCreated.call.type,
                 callId: callCreated.call.id
             )
-            call.state.update(from: callCreated)
-            calls.insert(call, at: 0)
+            executeOnMain { [weak self] in
+                call.state.update(from: callCreated)
+                self?.calls.insert(call, at: 0)
+            }
         }
     }
     
@@ -169,7 +173,9 @@ public class CallsController: ObservableObject {
             callType: callResponse.call.type,
             callId: callResponse.call.id
         )
-        call.state.update(from: callResponse)
+        executeOnMain {
+            call.state.update(from: callResponse)
+        }
         return call
     }
     
