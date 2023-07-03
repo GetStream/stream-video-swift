@@ -16,6 +16,7 @@ public struct PermissionRequest: Identifiable {
     }
 }
 
+@MainActor
 public class CallState: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo

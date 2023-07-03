@@ -7,6 +7,7 @@ import Combine
 import XCTest
 @testable import StreamVideo
 
+@MainActor
 class CallCRUDTest: IntegrationTest {
     func test_call_create_and_update() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
