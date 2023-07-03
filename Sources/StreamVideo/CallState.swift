@@ -118,20 +118,24 @@ public class CallState: ObservableObject {
             update(from: event.call)
         case .typeCallUpdatedEvent(let event):
             update(from: event.call)
-        case .typeConnectedEvent(_):
-            break
-        case .typeConnectionErrorEvent(_):
-            break
-        case .typeCustomVideoEvent(_):
-            break
-        case .typeHealthCheckEvent(_):
-            break
         case .typePermissionRequestEvent(let event):
             addPermissionRequest(user: event.user.toUser, permissions: event.permissions, requestedAt: event.createdAt)
         case .typeUnblockedUserEvent(let event):
             unblockUser(id: event.user.id)
         case .typeUpdatedCallPermissionsEvent(let event):
             updateOwnCapabilities(event)
+        case .typeConnectedEvent(_):
+            // note: connection events are not relevant for call state sync'ing
+            break
+        case .typeConnectionErrorEvent(_):
+            // note: connection events are not relevant for call state sync'ing
+            break
+        case .typeCustomVideoEvent(_):
+            // note: custom events are exposed via event subscriptions
+            break
+        case .typeHealthCheckEvent(_):
+            // note: health checks are not relevant for call state sync'ing
+            break
         }
     }
 
