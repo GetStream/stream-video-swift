@@ -14,25 +14,26 @@ The end result will look like the image on the right and support the following f
 * Listeners can raise their hand, and be invited to speak by the host
 * Audio tracks are send multiple times for optimal reliability
 
-## TODO INSERT SCREENSHOT IMAGE OF THE APP
+![Preview of the final result](../assets/audioroom_tutorial/notfound.png)
 
 Time to get started building an audio-room for your app.
 
-### Step 1 - Create a new project in Xcode
-| Create a new Project in Xcode | Select iOS as the platform and then select app as the type. | Name your project "AudioRooms" and select SwiftUI as your UI setup. |
-|---|---|---|
-|![step_1](../assets/audio-rooms-create-project-step-1.png)|![step_2](../assets/audio-rooms-create-project-step-2.png)|![step_3](../assets/audio-rooms-create-project-step-3.png)|
+### Step 1 - Create a new SwiftUI Application in Xcode
 
+1. Make sure you have Xcode installed and that you are running 14.3 or later
+2. Open Xcode and select "Create a new Project"
+3. Select "iOS" as the platform and "App" as the type of Application
+4. Name your project "AudioRooms" and select "SwiftUI" as the interface
 
 ### Step 2 - Install the SDK & Setup permissions
 
-#### Add the SwiftUI SDK as dependency to your Xcode Project.
+Next you need to add our SDK dependencies to your project using Swift Package Manager from Xcode.
 
-| Open Project's settings | Add the package's URL (https://github.com/GetStream/stream-video-swift) in the search bar | Add the following SDK to your target |
-|---|---|---|
-|![step_1](../assets/audio-rooms-add-dependency-step-1.png)|![step_2](../assets/audio-rooms-add-dependency-step-2.png)|![step_3](../assets/audio-rooms-add-dependency-step-3.png)|
+1. Click on "Add packages..." from the File menu
+2. Add https://github.com/GetStream/stream-video-swift in the search bar
+3. Select "StreamVideo" and "StreamVideoSwiftUI" and then click Add Package
 
-### Permissions
+#### App Permissions
 
 Making a video call requires the usage of the camera and the microphone of the device. Therefore, you need to request permissions to use them in your app. In order to do this, you will need to add the following keys and values in your `Info.plist` file.
 
@@ -85,7 +86,7 @@ struct AudioRoomsApp: App {
         WindowGroup {
             Group {
                 if callCreated {
-                    Text("Call \(call.callId) has \(call.state.participantCount) participants")
+                    Text("Audio Room \(call.callId) has \(call.state.participantCount) participants")
                         .font(.system(size: 30))
                         .foregroundColor(.blue)
                 } else {
@@ -103,7 +104,7 @@ struct AudioRoomsApp: App {
                             ],
                             custom: [
                                 "title": .string("SwiftUI heads"),
-                                "description": .string("talking about SwiftUI")
+                                "description": .string("Talking about SwiftUI")
                             ]
                         )
                     )
@@ -152,7 +153,7 @@ try await call.join(
         ],
         custom: [
             "title": .string("SwiftUI heads"),
-            "description": .string("talking about SwiftUI")
+            "description": .string("Talking about SwiftUI")
         ]
     )
 )
@@ -170,209 +171,198 @@ Please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WIT
 
 <TokenSnippet sampleApp='audio-rooms' />
 
+With valid credentials in place, we can join the call. When you run the app you'll see the following:
+
+![Preview of the app after step 3](../assets/audioroom_tutorial/basic.png)
+
 ### Step 4 - Adding audio room UI elements
 
 In this next step we'll add:
 
-- Room title, room description
-- A list of participants
-- An indicator for who's speaking
+- Room title and description
+- Controls to toggle live mode on/off
+- A list of participants with their speaking status
 
-Let's create a component for the active speaker and the list of participants.
+#### Room Title & Description
 
-```swift
-struct ParticipantView: View {
-    var participant: CallParticipant
+Let's create the components we need to render this and add them to the main app view
+
+```swift title=DescriptionView
+struct DescriptionView: View {
+    var title: String?
+    var description: String?
+    var participants: [CallParticipant]
+
     var body: some View {
-        HStack {
-            Text("\(participant.name) - \(participant.roles.joined(separator: ","))")
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+        VStack {
+            VStack {
+                Text("\(title ?? "")")
+                  .font(.title)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .lineLimit(1)
+                  .padding([.bottom], 8)
 
-            if participant.isSpeaking {
-                Circle()
-                    .fill(Color.blue)
-                    .frame(width: 15, height: 15)
-            }
+                Text("\(description ?? "")")
+                  .font(.body)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+                  .lineLimit(1)
+                  .padding([.bottom], 4)
+
+                Text("\(participants.count) participants")
+                  .font(.caption)
+                  .frame(maxWidth: .infinity, alignment: .leading)
+            }.padding([.leading, .trailing])
         }
     }
 }
 ```
 
-And then update the App to render participants and a button to toggle live mode on/off.
-```swift
-    Group {
-       if callCreated {
-          VStack {
-             VStack {
-                   Text("\(call.state.custom["title"]?.stringValue ?? "")")
-                      .font(.title)
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                      .lineLimit(1)
-                      .padding([.bottom], 8)
+```swift title=ParticipantsView
+struct ParticipantsView: View {
+    var participants: [CallParticipant]
 
-                   Text("\(call.state.custom["description"]?.stringValue ?? "")")
-                      .font(.body)
-                      .frame(maxWidth: .infinity, alignment: .leading)
-                      .lineLimit(1)
-                      .padding([.bottom], 4)
-
-                 Text("CallID: \(call.callId) \(state.participants.count) participants")
-                      .font(.caption)
-                      .frame(maxWidth: .infinity, alignment: .leading)
-             }
-             .padding([.leading, .trailing])
-              List {
-                  ForEach(Array(state.participants.keys), id: \.self) {
-                      ParticipantView(participant: state.participants[$0]!)
-                  }
-              }
-              if call.state.backstage {
-                   Button {
-                      Task {
-                         try await call.goLive()
-                      }
-                   } label: {
-                      Text("Go Live")
-                         .frame(maxWidth: .infinity)
-                   }
-                   .padding([.leading, .trailing])
-                   .buttonStyle(.borderedProminent)
-              } else {
-                  Button {
-                     Task {
-                        try await call.stopLive()
-                     }
-                  } label: {
-                     Text("Stop live")
-                        .frame(maxWidth: .infinity)
-                  }
-                  .padding([.leading, .trailing])
-                  .buttonStyle(.borderedProminent)
-              }
-          }
-       } else {
-          Text("loading...")
-       }
+    var body: some View {
+        Spacer()
+        Text("Participants: TODO").font(.body)
+        Spacer()
     }
+}
 ```
 
-The app file should now look like this:
-
-```swift title="AudioRooms/AudioRoomsApp.swift"
-import SwiftUI
-import StreamVideo
-
-
-@main
-struct AudioRoomsApp: App {
+```swift title=ControlsView
+struct ControlsView: View {
     @State var call: Call
     @ObservedObject var state: CallState
-    @State private var callCreated: Bool = false
 
-    private var client: StreamVideo
-    private let apiKey: String = "" // The API key can be found in the Credentials section
-    private let userId: String = "" // The User Id can be found in the Credentials section
-    private let token: String = "" // The Token can be found in the Credentials section
-    private let callId: String = "" // The CallId can be found in the Credentials section
-
-    init() {
-        let user = User(
-            id: userId,
-            name: "Tutorial" // name is used in the UI
-        )
-
-        // Initialize Stream Video client
-        self.client = StreamVideo(
-            apiKey: apiKey,
-            user: user,
-            token: .init(stringLiteral: token)
-        )
-
-        // Initialize the call object
-        let call = client.call(callType: "audio_room", callId: callId)
-
-        self.call = call
-        self.state = call.state
+    var body: some View {
+        Text("Controls: TODO").font(.body)
     }
+}
+```
 
-    var body: some Scene {
-        WindowGroup {
-            Group {
-               if callCreated {
-                  VStack {
-                     VStack {
-                           Text("\(call.state.custom["title"]?.stringValue ?? "")")
-                              .font(.title)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                              .lineLimit(1)
-                              .padding([.bottom], 8)
-                           Text("\(call.state.custom["description"]?.stringValue ?? "")")
-                              .font(.body)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                              .lineLimit(1)
-                              .padding([.bottom], 4)
+That's it for the basics, here's how the app Scene should look like now:
 
-                         Text("CallID: \(call.callId) \(state.participants.count) participants")
-                              .font(.caption)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                     }
-                     .padding([.leading, .trailing])
-
-                      List {
-                          ForEach(Array(state.participants.keys), id: \.self) {
-                              ParticipantView(participant: state.participants[$0]!)
-                          }
-                      }
-                      if call.state.backstage {
-                           Button {
-                              Task {
-                                 try await call.goLive()
-                              }
-                           } label: {
-                              Text("Go Live")
-                                 .frame(maxWidth: .infinity)
-                           }
-                           .padding([.leading, .trailing])
-                           .buttonStyle(.borderedProminent)
-                      } else {
-                          Button {
-                             Task {
-                                try await call.stopLive()
-                             }
-                          } label: {
-                             Text("Stop live")
-                                .frame(maxWidth: .infinity)
-                          }
-                          .padding([.leading, .trailing])
-                          .buttonStyle(.borderedProminent)
-                      }
-                  }
-               } else {
-                  Text("loading...")
-               }
-            }.task {
-                Task {
-                    guard !callCreated else { return }
-                    try await call.join(
-                        create: true,
-                        options: .init(
-                            members: [
-                                .init(userId: "tommaso"),
-                                .init(userId: "thierry"),
-                            ],
-                            custom: [
-                                "title": .string("SwiftUI heads"),
-                                "description": .string("talking about SwiftUI")
-                            ]
-                        )
+```swift
+var body: some Scene {
+    WindowGroup {
+        Group {
+            if callCreated {
+                DescriptionView(
+                    title: call.state.custom["title"]?.stringValue,
+                    description: call.state.custom["description"]?.stringValue,
+                    participants: call.state.participants.values.map {$0}
+                )
+                ParticipantsView(
+                    participants: call.state.participants.values.map {$0}
+                )
+                ControlsView(call: call, state: state)
+                Spacer()
+            } else {
+                Text("loading...")
+            }
+        }.task {
+            Task {
+                guard !callCreated else { return }
+                try await call.join(
+                    create: true,
+                    options: .init(
+                        members: [
+                            .init(userId: "tommaso"),
+                            .init(userId: "thierry"),
+                        ],
+                        custom: [
+                            "title": .string("SwiftUI heads"),
+                            "description": .string("talking about SwiftUI")
+                        ]
                     )
-                    callCreated = true
-                }
+                )
+                callCreated = true
             }
         }
     }
 }
+```
 
+If you run the app now, it should look like this:
+
+![Preview of the app after step 4](../assets/audioroom_tutorial/description.png)
+
+The approach is the same for all components. We take the states of the call by observing `call.state` published vars, such as `call.state.participants` and use it to power our UI.
+
+To make this a little more interactive let's join the audio room from the browser.
+
+<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
+
+#### Room Backstage & Live mode control
+
+As you probably noticed by opening the same room from the browser, audio rooms by default are not live. Regular users can only join an audio room when it is in live mode. Let's expand the ControlView and add a button that controls the backstage or the room.
+
+```swift title=MicButtonView
+struct MicButtonView: View {
+    var body: some View {
+        Button {
+           Task {
+               print("handle mic tap")
+           }
+        } label: {
+            Label("", systemImage: "mic.circle").font(.title)
+        }
+    }
+}
+```
+
+```swift title=MicButtonView
+struct LiveButtonView: View {
+    @State var call: Call
+    @ObservedObject var state: CallState
+
+    var body: some View {
+        if call.state.backstage {
+            Button {
+                Task {
+                    try await call.goLive()
+                }
+            } label: {
+                Text("Go Live")
+            }
+            .buttonStyle(.borderedProminent)
+        } else {
+            Button {
+                Task {
+                    try await call.stopLive()
+                }
+            } label: {
+                Text("Stop live")
+            }
+            .buttonStyle(.borderedProminent)
+        }
+    }
+}
+```
+
+```swift title=ControlsView
+struct ControlsView: View {
+    @State var call: Call
+    @ObservedObject var state: CallState
+
+    var body: some View {
+        HStack {
+            MicButtonView()
+            LiveButtonView(call: call, state: state)
+        }
+    }
+}
+```
+
+Now the app exposes a fake mic control button (more on that later) and a button that allows to toggle live mode on/off. If you try the web demo of the audio room you should be able to join as a regular user.
+
+![Preview of the app with live button](../assets/audioroom_tutorial/live.png)
+
+#### List Participants
+
+As a next step, let's render the actual list of participants and show an indicator when they are speaking. To do this we are going to create a `ParticipantView` and render it from the `ParticipantsView`
+
+```swift title=ParticipantView
 struct ParticipantView: View {
     var participant: CallParticipant
     var body: some View {
@@ -389,189 +379,130 @@ struct ParticipantView: View {
     }
 }
 ```
+
+```swift title=ParticipantsView
+struct ParticipantsView: View {
+    var participants: [CallParticipant]
+
+    var body: some View {
+        List(participants) {
+            ParticipantView(participant: $0)
+        }
+    }
+}
+```
+
+With these changes things get more interesting, the app is now showing a list of all participants connected to the call and displays a small circle next to the ones that are speaking.
+
+![Preview of the app with participants list](../assets/audioroom_tutorial/participants.png)
 
 ### Step 4 - Go live and join from the browser
 
-Run the sample app now and you will see one participant. Click the go live button to allow participants to join.
-
-To make this a little more interactive let's join the call from your browser. Visit https://getstream.io/video/demos/?id=123&skip-intro=1 and join the call. On your iOS emulator you'll see the text update to 2 participants.
+If you now join the call from the browser you will see that the participant list updates as you open/close the browser tab.
 
 Note how the web interface won't allow you to share your audio/video. The reason for this is that by default the audio_room call type only allows moderators or admins to speak. Regular participants can request permission. And if different defaults make sense for your app you can edit the call type in the dashboard or create your own.
 
 ### Step 5 - Requesting permission to speak
 
-Requesting permission to speak is easy.
+Requesting permission to speak is easy. Let's first have a quick look at how the SDK call object exposes this:
+
+#### Requesting permission to speak
 
 ```swift
 let response = try await call.request(permissions: [.sendAudio])
+```
 
-// and next the admin will call
-val requests = call.state.permissionRequests.value
-for await request in call.subscribe(for: PermissionRequestEvent.self) {
-      call.grant(permissions: [.sendAudio], for: request.user.id)
+#### Handling permission requests
+
+Permission requests are exposed from `call.state` on the `permissionRequests` published variable.
+
+```swift
+call.state.permissionRequests.value.forEach { request in
+    // reject the request
+    request.reject()
+    // grant the request
+    try await call.grant(request: request)
 }
 ```
 
-Here's how we can show requests from users to speak and deny or reject their request.
+Let's add another view that shows the last incoming request as well as the buttons to grant / reject it
 
 ```swift
-import SwiftUI
-import StreamVideo
-
-
-@main
-struct AudioRoomsApp: App {
-    @State var call: Call
+struct PermissionRequestsView: View {
+    var call: Call
     @ObservedObject var state: CallState
-    @State private var callCreated: Bool = false
 
-    private var client: StreamVideo
-    private let apiKey: String = "" // The API key can be found in the Credentials section
-    private let userId: String = "" // The User Id can be found in the Credentials section
-    private let token: String = "" // The Token can be found in the Credentials section
-    private let callId: String = "" // The CallId can be found in the Credentials section
-
-    init() {
-        let user = User(
-            id: userId,
-            name: "Tutorial" // name is used in the UI
-        )
-
-        // Initialize Stream Video client
-        self.client = StreamVideo(
-            apiKey: apiKey,
-            user: user,
-            token: .init(stringLiteral: token)
-        )
-
-        // Initialize the call object
-        let call = client.call(callType: "audio_room", callId: callId)
-
-        self.call = call
-        self.state = call.state
-    }
-
-    var body: some Scene {
-        WindowGroup {
-            Group {
-               if callCreated {
-                  VStack {
-                     VStack {
-                         List {
-                             ForEach(state.permissionRequests) {
-                                 PermissionRequestView(request: $0, call: call)
-                             }
-                         }
-                     }
-                     VStack {
-                           Text("\(call.state.custom["title"]?.stringValue ?? "")")
-                              .font(.title)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                              .lineLimit(1)
-                              .padding([.bottom], 8)
-                           Text("\(call.state.custom["description"]?.stringValue ?? "")")
-                              .font(.body)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                              .lineLimit(1)
-                              .padding([.bottom], 4)
-
-                         Text("CallID: \(call.callId) \(state.participants.count) participants")
-                              .font(.caption)
-                              .frame(maxWidth: .infinity, alignment: .leading)
-                     }
-                     .padding([.leading, .trailing])
-                      List {
-                          ForEach(Array(state.participants.keys), id: \.self) {
-                              ParticipantView(participant: state.participants[$0]!)
-                          }
-                      }
-                      if call.state.backstage {
-                           Button {
-                              Task {
-                                 try await call.goLive()
-                              }
-                           } label: {
-                              Text("Go Live")
-                                 .frame(maxWidth: .infinity)
-                           }
-                           .padding([.leading, .trailing])
-                           .buttonStyle(.borderedProminent)
-                      } else {
-                          Button {
-                             Task {
-                                try await call.stopLive()
-                             }
-                          } label: {
-                             Text("Stop live")
-                                .frame(maxWidth: .infinity)
-                          }
-                          .padding([.leading, .trailing])
-                          .buttonStyle(.borderedProminent)
-                      }
-                  }
-               } else {
-                  Text("loading...")
-               }
-            }.task {
-                Task {
-                    guard !callCreated else { return }
-                    try await call.join(
-                        create: true,
-                        options: .init(
-                            members: [
-                                .init(userId: "tommaso"),
-                                .init(userId: "thierry"),
-                            ],
-                            custom: [
-                                "title": .string("SwiftUI heads"),
-                                "description": .string("talking about SwiftUI")
-                            ]
-                        )
-                    )
-                    callCreated = true
+    var body: some View {
+        if let request = state.permissionRequests.first {
+            HStack {
+                Text("\(request.user.name) requested to \(request.permission)")
+                Button {
+                   Task {
+                       try await call.grant(request: request)
+                   }
+                } label: {
+                    Label("", systemImage: "hand.thumbsup.circle")
+                }
+                Button(action: request.reject) {
+                    Label("", systemImage: "hand.thumbsdown.circle.fill")
                 }
             }
         }
     }
 }
+```
 
-struct ParticipantView: View {
-    var participant: CallParticipant
-    var body: some View {
-        HStack {
-            Text("\(participant.name) - \(participant.roles.joined(separator: ","))")
-                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+And here is the updated Scene code that includes it:
 
-            if participant.isSpeaking {
-                Circle()
-                    .fill(Color.blue)
-                    .frame(width: 15, height: 15)
+```swift
+var body: some Scene {
+    WindowGroup {
+        Group {
+            if callCreated {
+                DescriptionView(
+                    title: call.state.custom["title"]?.stringValue,
+                    description: call.state.custom["description"]?.stringValue,
+                    participants: call.state.participants.values.map {$0}
+                )
+                ParticipantsView(
+                    participants: call.state.participants.values.map {$0}
+                )
+                PermissionRequestsView(call: call, state: state)
+                ControlsView(call: call, state: state)
+                Spacer()
+            } else {
+                Text("loading...")
             }
-        }
-    }
-}
-
-struct PermissionRequestView: View {
-    var request: PermissionRequest
-    var call: Call
-    var body: some View {
-        HStack(alignment: .top) {
-            Text("\(request.user.name) requested to \(request.permission)").frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading).font(.system(size: 11))
-            Button {
-               Task {
-                   try await call.grant(request: request)
-               }
-            } label: {
-                Label("", systemImage: "hand.thumbsup.circle")
-            }
-            Button(action: request.reject) {
-                Label("", systemImage: "hand.thumbsdown.circle.fill")
+        }.task {
+            Task {
+                guard !callCreated else { return }
+                try await call.join(
+                    create: true,
+                    options: .init(
+                        members: [
+                            .init(userId: "tommaso"),
+                            .init(userId: "thierry"),
+                        ],
+                        custom: [
+                            "title": .string("SwiftUI heads"),
+                            "description": .string("Talking about SwiftUI")
+                        ]
+                    )
+                )
+                callCreated = true
             }
         }
     }
 }
 ```
 
+Now when a user requests access to speak the app will look like this:
+
+![Permission requests](../assets/audioroom_tutorial/permissions.png)
+
+### Step 6 - Add microphone control
+
+TODO: add this
 
 ## Other built-in features
 There are a few more exciting features that you can use to build audio rooms
