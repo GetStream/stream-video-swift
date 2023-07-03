@@ -39,8 +39,8 @@ public struct MicrophoneCheckView: View {
                 AudioVolumeIndicator(
                     audioLevels: decibels,
                     maxHeight: maxHeight,
-                    minValue: -120,
-                    maxValue: 0
+                    minValue: 0,
+                    maxValue: 1
                 )
             } else {
                 images.micTurnOff
@@ -97,19 +97,8 @@ public struct AudioVolumeIndicator: View {
         return levels
     }
     
-    private func height(for decibel: Float) -> CGFloat {
-        let value = abs(decibel)
-        let divider = (maxValue - minValue) / 2
-        if divider == 0 {
-            return 0
-        }
-        let ratio = value / divider
-        var height: CGFloat
-        if decibel > 0 {
-            height = CGFloat(ratio * maxHeight)
-        } else {
-            height = CGFloat(maxHeight - ratio * maxHeight)
-        }
+    private func height(for value: Float) -> CGFloat {
+        let height: CGFloat = value > 0 ? CGFloat(value * maxHeight) : 0
         return max(height, 0.5)
     }
 }

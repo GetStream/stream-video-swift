@@ -10,9 +10,7 @@ import StreamVideo
 public class MicrophoneChecker: ObservableObject {
     
     /// Returns the last three decibel values.
-    @Published public var decibels: [Float]
-    
-    private static let minimalDecibelValue: Float = -120
+    @Published public var audioLevels: [Float]
     
     private var timer: Timer?
     
@@ -22,20 +20,22 @@ public class MicrophoneChecker: ObservableObject {
     
     private let audioFilename: URL = {
         let documentPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let audioFilename = documentPath.appendingPathComponent("recording.m4a")
+        let audioFilename = documentPath.appendingPathComponent("recording.aac")
         return audioFilename
     }()
-    
+
+    private lazy var audioNormaliser: AudioValuePercentageNormaliser = .init()
+
     public init(valueLimit: Int = 3) {
         self.valueLimit = valueLimit
-        self.decibels = [Float](repeating: 0.0, count: valueLimit)
+        self.audioLevels = [Float](repeating: 0.0, count: valueLimit)
         setUpAudioCapture()
     }
     
     /// Checks if there are decibel values available.
     public var hasDecibelValues: Bool {
-        for decibel in decibels {
-            if decibel > Self.minimalDecibelValue {
+        for decibel in audioLevels {
+            if decibel > audioNormaliser.valueRange.lowerBound {
                 return true
             }
         }
@@ -87,12 +87,13 @@ public class MicrophoneChecker: ObservableObject {
                 guard let self = self else { return }
                 audioRecorder.updateMeters()
                 let decibel = audioRecorder.averagePower(forChannel: 0)
-                var temp = self.decibels
-                temp.append(decibel)
+                let normalisedAudioLevel = self.audioNormaliser.normalise(decibel)
+                var temp = self.audioLevels
+                temp.append(normalisedAudioLevel)
                 if temp.count > self.valueLimit {
                     temp = Array(temp.dropFirst())
                 }
-                self.decibels = temp
+                self.audioLevels = temp
             }
         } catch {
             log.error("Failed to start recording process", error: error)
@@ -108,7 +109,7 @@ public class MicrophoneChecker: ObservableObject {
         self.audioRecorder?.stop()
         self.audioRecorder = nil
     }
-    
+
     deinit {
         stopTimer()
         stopAudioRecorder()

@@ -168,7 +168,7 @@ struct CameraCheckView: View {
                 Spacer()
                 HStack {
                     MicrophoneCheckView(
-                        decibels: microphoneChecker.decibels,
+                        decibels: microphoneChecker.audioLevels,
                         microphoneOn: callSettings.audioOn,
                         hasDecibelValues: microphoneChecker.hasDecibelValues
                     )
