@@ -77,11 +77,11 @@
   "system": {
     "macos": {
       "ventura": {
-        "HOMEBREW_VERSION": "4.0.26-29-g9a482de",
+        "HOMEBREW_VERSION": "4.0.26-35-g9e257fc",
         "HOMEBREW_PREFIX": "/opt/homebrew",
         "Homebrew/homebrew-core": "api",
         "CLT": "",
-        "Xcode": "14.3",
+        "Xcode": "14.3.1",
         "macOS": "13.2"
       }
     }

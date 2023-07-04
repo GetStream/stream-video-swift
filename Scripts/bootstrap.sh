@@ -42,7 +42,7 @@ puts "Install bundle dependencies"
 bundle install
 
 puts "Install brew dependencies"
-brew bundle
+brew bundle -d
 
 if [[ ${XCODE_ACTIONS-default} == default ]]; then
   puts "Bootstrap Mint dependencies"
