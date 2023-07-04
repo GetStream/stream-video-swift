@@ -518,6 +518,77 @@ Now when a user requests access to speak the app will look like this:
 
 TODO: add this
 
+### Step 7 - Group participants
+
+It is common for audio rooms and similar interactive audio/video experiences to show users in separate groups. Let's see how we can update this application to render participants in two separate sections: speakers and listeners.
+
+Building custom layouts is very simple, all we need to do is to apply some filtering to the `call.participants` observable.
+
+```swift
+// a list of participants, by default this is list is ordered by the ID of the user
+call.state.participants.values.map {$0}
+
+// Speakers: participants that have an audio track (ie. are allowed to speak and have a mic configured)
+call.state.participants.values.filter {$0.hasAudio}
+
+// Listeners: participants that do not have an audio track
+call.state.participants.values.filter {!$0.hasAudio}
+```
+
+We already have a view to display participants so all we need to do is to create another one, here's how the scene body looks
+
+```swift
+var body: some Scene {
+    WindowGroup {
+        VStack {
+            if callCreated {
+                DescriptionView(
+                    title: call.state.custom["title"]?.stringValue,
+                    description: call.state.custom["description"]?.stringValue,
+                    participants: call.state.participants.values.map {$0}
+                )
+                Text("Speakers")
+                Divider()
+                ParticipantsView(
+                    participants: call.state.participants.values.filter {$0.hasAudio}
+                )
+                Text("Listeners")
+                Divider()
+                ParticipantsView(
+                    participants: call.state.participants.values.filter {!$0.hasAudio}
+                )
+                Spacer()
+                PermissionRequestsView(call: call, state: state)
+                ControlsView(call: call, state: state)
+            } else {
+                Text("loading...")
+            }
+        }.task {
+            Task {
+                guard !callCreated else { return }
+                try await call.join(
+                    create: true,
+                    options: .init(
+                        members: [
+                            .init(userId: "tommaso"),
+                            .init(userId: "thierry"),
+                        ],
+                        custom: [
+                            "title": .string("SwiftUI heads"),
+                            "description": .string("Talking about SwiftUI")
+                        ]
+                    )
+                )
+                try await call.sendReaction(type: "raise-hand", custom: ["mycustomfield": "hello"], emojiCode: ":smile:")
+                callCreated = true
+            }
+        }
+    }
+}
+```
+
+![SplitUI](../assets/audioroom_tutorial/split.png)
+
 ## Other built-in features
 There are a few more exciting features that you can use to build audio rooms
 
