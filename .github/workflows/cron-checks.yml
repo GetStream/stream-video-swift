@@ -46,7 +46,6 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_ALLURE: true
-        INSTALL_XCPARSE: true
         INSTALL_VIDEO_BUDDY: true
     - name: Setup iOS ${{ matrix.ios }} Runtime
       if: ${{ matrix.ios != 'latest' }}

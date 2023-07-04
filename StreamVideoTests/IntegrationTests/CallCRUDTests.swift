@@ -163,7 +163,7 @@ class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(1, calls.count)
         XCTAssertEqual(call.cId, calls[0].cId)
         XCTAssertEqual(nil, next)
-
+        
         // changes to a watched call via query call should propagate as usual to the state
         let updateResponse = try await call.update(custom: ["color": "blue"])
         XCTAssertEqual(updateResponse.call.custom["color"], "blue")
@@ -192,21 +192,87 @@ class CallCRUDTest: IntegrationTest {
         try await call.create(memberIds: ["thierry"])
         
         let specificSub = call.subscribe(for: CallReactionEvent.self)
-
+        
         let _ = try await call.sendReaction(type: "happy")
         await assertNext(specificSub) { ev in
             return ev.reaction.type == "happy"
         }
-
+        
         let _ = try await call.sendReaction(type: "happyy", emojiCode: ":smile:")
         await assertNext(specificSub) { ev in
             return ev.reaction.type == "happyy" && ev.reaction.emojiCode == ":smile:"
         }
-
+        
         let _ = try await call.sendReaction(type: "happyyy", custom: ["test": .string("asd")])
         await assertNext(specificSub) { ev in
             return ev.reaction.type == "happyyy" && ev.reaction.custom?["test"]?.stringValue == "asd"
         }
+    }
+    
+    func test_request_permission_discard() async throws {
+        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry"])
 
+        let tommasoClient = getUserClient(id: "tommaso")
+        try await tommasoClient.connect()
+        let tommasoCall = tommasoClient.call(callType: "audio_room", callId: call.callId)
+
+        let _ = try await tommasoCall.get()
+        var hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
+        XCTAssertFalse(hasAudioCapability)
+        var hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
+        XCTAssertFalse(hasVideoCapability)
+
+        try await tommasoCall.request(permissions: [.sendVideo, .sendAudio])
+
+        await assertNext(call.state.$permissionRequests) { value in
+            return value.count == 2 && value.first?.permission == "send-video"
+        }
+        if let p = await call.state.permissionRequests.first {
+            p.reject()
+        }
+        
+        // Test: send-audio request is the only one listed
+        await assertNext(call.state.$permissionRequests) { value in
+            return value.first?.permission == "send-audio"
+        }
+        // Test: tommaso does not have send-audio capabilities
+        await assertNext(tommasoCall.state.$ownCapabilities) { value in
+            return !value.contains(where: {$0.rawValue == "send-audio"})
+        }
+
+        // Then: accept the send-audio request
+        if let p = await call.state.permissionRequests.first {
+            try await call.grant(request: p)
+        }
+        // Test: permission requests list is now empty
+        await assertNext(call.state.$permissionRequests) { value in
+            return value.count == 0
+        }
+        // Test: tommaso has send-audio capability now
+        await assertNext(tommasoCall.state.$ownCapabilities) { value in
+            return value.contains(where: {$0.rawValue == "send-audio"})
+        }
+        
+        hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
+        XCTAssertTrue(hasAudioCapability)
+        hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
+        XCTAssertFalse(hasVideoCapability)
+    }
+    
+    func test_mute_user_by_id() async throws {
+        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry", "tommaso"])
+
+        // there is no muted event from coordinator atm
+        try await call.mute(userId: "tommaso")
+    }
+    
+    func test_mute_user_by_all() async throws {
+        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
+        try await call.create(memberIds: ["thierry", "tommaso"])
+
+        try await call.muteAllUsers()
+        // there is no muted event from coordinator atm
     }
 }
