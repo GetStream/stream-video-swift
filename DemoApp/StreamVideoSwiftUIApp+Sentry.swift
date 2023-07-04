@@ -19,6 +19,8 @@ extension StreamVideoSwiftUIApp {
             options.debug = true
             options.tracesSampleRate = 1.0
             options.enableAppHangTracking = true
+            options.failedRequestStatusCodes = [HttpStatusCodeRange(min: 400, max: 400), HttpStatusCodeRange(min: 404, max: 599)]
+            
         }
         
         LogConfig.destinationTypes = [ConsoleLogDestination.self, SentryLogDestination.self]
@@ -27,8 +29,11 @@ extension StreamVideoSwiftUIApp {
     }
 }
 
-/// Basic destination for outputting messages to console.
 public class SentryLogDestination: LogDestination {
+    public func write(message: String) {
+        //TODO remove me once this function is gone from the protocol
+    }
+    
     open var identifier: String
     open var level: LogLevel
     open var subsystems: LogSubsystem
@@ -103,6 +108,12 @@ public class SentryLogDestination: LogDestination {
     /// Process the log details before outputting the log.
     /// - Parameter logDetails: Log details to be processed.
     open func process(logDetails: LogDetails) {
+        
+        guard logDetails.level == .error || logDetails.level == .warning else {
+            // Sentry does only gets warnings and errors.
+            return
+        }
+        
         let scope = Scope()
         
         if showLevel {

@@ -55,6 +55,14 @@ open class CallViewModel: ObservableObject {
                     }
                     self?.lastScreenSharingParticipant = screenSharingSession?.participant
                 })
+            callSettingsUpdates = call?.state.$callSettings
+                .receive(on: RunLoop.main)
+                .sink(receiveValue: { [weak self] settings in
+                    self?.callSettings = settings
+                })
+            if let callSettings = call?.state.callSettings {
+                self.callSettings = callSettings
+            }
         }
     }
     
@@ -97,7 +105,11 @@ open class CallViewModel: ObservableObject {
     @Published public var participantEvent: ParticipantEvent?
     
     /// Provides information about the current call settings, such as the camera position and whether there's an audio and video turned on.
-    @Published public var callSettings = CallSettings()
+    @Published public internal(set) var callSettings: CallSettings {
+        didSet {
+            localCallSettingsChange = true
+        }
+    }
     
     /// Whether the call is in minimized mode.
     @Published public var isMinimized = false
@@ -157,6 +169,7 @@ open class CallViewModel: ObservableObject {
     private var reconnectionUpdates: AnyCancellable?
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
+    private var callSettingsUpdates: AnyCancellable?
         
     private var ringingTimer: Foundation.Timer?
     private var lastScreenSharingParticipant: CallParticipant?
@@ -165,6 +178,7 @@ open class CallViewModel: ObservableObject {
     private var enteringCallTask: Task<Void, Never>?
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
+    private var localCallSettingsChange = false
     
     public var participants: [CallParticipant] {
         callParticipants
@@ -182,25 +196,25 @@ open class CallViewModel: ObservableObject {
     private var automaticLayoutHandling = true
     
     public init(
-        participantsLayout: ParticipantsLayout = .grid
+        participantsLayout: ParticipantsLayout = .grid,
+        callSettings: CallSettings? = nil
     ) {
         self.participantsLayout = participantsLayout
+        self.callSettings = callSettings ?? CallSettings()
+        self.localCallSettingsChange = callSettings != nil
         self.subscribeToCallEvents()
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
     public func toggleCameraEnabled() {
-        guard let call = call else { return }
+        guard let call = call else {
+            self.callSettings = callSettings.withUpdatedVideoState(!callSettings.videoOn)
+            return
+        }
         Task {
             do {
-                let isEnabled = !callSettings.videoOn
-                try await call.changeVideoState(isEnabled: isEnabled)
-                callSettings = CallSettings(
-                    audioOn: callSettings.audioOn,
-                    videoOn: isEnabled,
-                    speakerOn: callSettings.speakerOn,
-                    audioOutputOn: callSettings.audioOutputOn
-                )
+                try await call.camera.toggle()
+                localCallSettingsChange = true
             } catch {
                 log.error("Error toggling camera", error: error)
             }
@@ -209,17 +223,14 @@ open class CallViewModel: ObservableObject {
     
     /// Toggles the state of the microphone (muted vs unmuted).
     public func toggleMicrophoneEnabled() {
-        guard let call = call else { return }
+        guard let call = call else {
+            self.callSettings = callSettings.withUpdatedAudioState(!callSettings.audioOn)
+            return
+        }
         Task {
             do {
-                let isEnabled = !callSettings.audioOn
-                try await call.changeAudioState(isEnabled: isEnabled)
-                callSettings = CallSettings(
-                    audioOn: isEnabled,
-                    videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn,
-                    audioOutputOn: callSettings.audioOutputOn
-                )
+                try await call.microphone.toggle()
+                localCallSettingsChange = true
             } catch {
                 log.error("Error toggling microphone", error: error)
             }
@@ -228,31 +239,52 @@ open class CallViewModel: ObservableObject {
     
     /// Toggles the camera position (front vs back).
     public func toggleCameraPosition() {
-        guard let call = call, callSettings.videoOn else { return }
-        let next = callSettings.cameraPosition.next()
-        call.changeCameraMode(position: next) { [weak self] in
-            guard let self = self else { return }
-            DispatchQueue.main.async {
-                self.callSettings = self.callSettings.withUpdatedCameraPosition(next)
+        guard let call = call, callSettings.videoOn else {
+            self.callSettings = callSettings.withUpdatedCameraPosition(callSettings.cameraPosition.next())
+            return
+        }
+        Task {
+            do {
+                try await call.camera.flip()
+                localCallSettingsChange = true
+            } catch {
+                log.error("Error toggling camera position", error: error)
             }
         }
     }
     
     /// Enables or disables the audio output.
     public func toggleAudioOutput() {
-        guard let call = call else { return }
+        guard let call = call else {
+            self.callSettings = callSettings.withUpdatedAudioOutputState(!callSettings.audioOutputOn)
+            return
+        }
         Task {
             do {
-                let isEnabled = !callSettings.audioOutputOn
-                try await call.changeSoundState(isEnabled: isEnabled)
-                callSettings = CallSettings(
-                    audioOn: callSettings.audioOutputOn,
-                    videoOn: callSettings.videoOn,
-                    speakerOn: callSettings.speakerOn,
-                    audioOutputOn: isEnabled
-                )
+                if callSettings.audioOutputOn {
+                    try await call.speaker.disableAudioOutput()
+                } else {
+                    try await call.speaker.enableAudioOutput()
+                }
+                localCallSettingsChange = true
             } catch {
                 log.error("Error toggling audio output", error: error)
+            }
+        }
+    }
+    
+    /// Enables or disables the speaker.
+    public func toggleSpeaker() {
+        guard let call = call else {
+            self.callSettings = callSettings.withUpdatedSpeakerState(!callSettings.speakerOn)
+            return
+        }
+        Task {
+            do {
+                try await call.speaker.toggleSpeakerPhone()
+                localCallSettingsChange = true
+            } catch {
+                log.error("Error toggling speaker", error: error)
             }
         }
     }
@@ -304,6 +336,13 @@ open class CallViewModel: ObservableObject {
     public func enterLobby(callType: String, callId: String, members: [MemberRequest]) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         callingState = .lobby(lobbyInfo)
+        if !localCallSettingsChange {
+            Task {
+                let call =  streamVideo.call(callType: callType, callId: callId)
+                let info = try await call.get()
+                self.callSettings = info.settings.toCallSettings
+            }
+        }
     }
     
     /// Accepts the call with the provided call id and type.
@@ -458,7 +497,13 @@ open class CallViewModel: ObservableObject {
                 log.debug("Starting call")
                 let call = call ?? streamVideo.call(callType: callType, callId: callId)
                 let options = CreateCallOptions(members: members)
-                try await call.join(create: true, options: options, ring: ring, callSettings: callSettings)
+                let settings = localCallSettingsChange ? callSettings : nil
+                try await call.join(
+                    create: true,
+                    options: options,
+                    ring: ring,
+                    callSettings: settings
+                )
                 save(call: call)
                 enteringCallTask = nil
             } catch {

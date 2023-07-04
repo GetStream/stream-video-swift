@@ -281,7 +281,10 @@ class WebRTCClient: NSObject {
     
     func setupUserMedia(callSettings: CallSettings) async {
         if hasCapability(.sendAudio), localAudioTrack == nil {
-            await audioSession.configure(callSettings: callSettings)
+            await audioSession.configure(
+                audioOn: callSettings.audioOn,
+                speakerOn: callSettings.speakerOn
+            )
             
             // Audio
             let audioTrack = await makeAudioTrack()
@@ -370,6 +373,10 @@ class WebRTCClient: NSObject {
     
     func changeSoundState(isEnabled: Bool) async throws {
         await audioSession.setAudioSessionEnabled(isEnabled)
+    }
+    
+    func changeSpeakerState(isEnabled: Bool) async throws {
+        await audioSession.configure(audioOn: callSettings.audioOn, speakerOn: isEnabled)
     }
     
     func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {

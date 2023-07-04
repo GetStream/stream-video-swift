@@ -9,7 +9,8 @@ actor AudioSession {
     
     func configure(
         _ configuration: RTCAudioSessionConfiguration = .default,
-        callSettings: CallSettings
+        audioOn: Bool,
+        speakerOn: Bool
     ) {
         let audioSession: RTCAudioSession = RTCAudioSession.sharedInstance()
         audioSession.lockForConfiguration()
@@ -20,13 +21,14 @@ actor AudioSession {
 
         do {
             log.debug("Configuring audio session")
-            try audioSession.setConfiguration(configuration, active: callSettings.audioOn)
-            if callSettings.speakerOn {
+            if speakerOn {
                 configuration.categoryOptions.insert(.defaultToSpeaker)
+                configuration.mode = AVAudioSession.Mode.videoChat.rawValue
             } else {
                 configuration.categoryOptions.remove(.defaultToSpeaker)
+                configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
             }
-            try audioSession.overrideOutputAudioPort(callSettings.speakerOn ? .speaker : .none)
+            try audioSession.setConfiguration(configuration, active: audioOn)
         } catch {
             log.error("Error occured while configuring audio session", error: error)
         }

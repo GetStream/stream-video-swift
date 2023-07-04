@@ -203,3 +203,32 @@ public struct AudioOutputIconView: View {
     }
     
 }
+
+public struct SpeakerIconView: View {
+    
+    @Injected(\.images) var images
+    
+    @ObservedObject var viewModel: CallViewModel
+    let size: CGFloat
+    
+    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+        self.viewModel = viewModel
+        self.size = size
+    }
+    
+    public var body: some View {
+        Button(
+            action: {
+                viewModel.toggleSpeaker()
+            },
+            label: {
+                CallIconView(
+                    icon: (viewModel.callSettings.speakerOn ? images.speakerOn : images.speakerOff),
+                    size: size,
+                    iconStyle: (viewModel.callSettings.speakerOn ? .primary : .transparent)
+                )
+            }
+        )
+    }
+    
+}
