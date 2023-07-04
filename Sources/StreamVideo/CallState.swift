@@ -24,7 +24,8 @@ public class CallState: ObservableObject {
     /// The id of the current session.
     /// When a call is started, a unique session identifier is assigned to the user in the call.
     @Published public internal(set) var sessionId: String = ""
-    @Published public internal(set) var participants = [String: CallParticipant]() { didSet { didUpdate(Array(participants.values)) } }
+    @Published public internal(set) var participants = [CallParticipant]()
+    @Published public internal(set) var participantsMap = [String: CallParticipant]() { didSet { didUpdate(Array(participantsMap.values)) } }
     @Published public internal(set) var me: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
@@ -268,6 +269,7 @@ public class CallState: ObservableObject {
     }
 
     private func didUpdate(_ participants: [CallParticipant]) {
+        self.participants = participants.sorted(by: { $0.id < $1.id })
         var remoteParticipants: [CallParticipant] = []
         var activeSpeakers: [CallParticipant] = []
         var screenSharingSession: ScreenSharingSession?

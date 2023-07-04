@@ -17,7 +17,7 @@ open class CallViewModel: ObservableObject {
     @Published public private(set) var call: Call? {
         didSet {
             lastLayoutChange = Date()
-            participantUpdates = call?.state.$participants
+            participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] participants in
                     self?.callParticipants = participants
