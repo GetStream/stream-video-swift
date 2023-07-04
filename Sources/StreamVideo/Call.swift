@@ -58,8 +58,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         self.speaker = SpeakerManager(
             callController: callController,
-            initialStatus: .enabled,
-            audioOutputStatus: .enabled
+            initialSpeakerStatus: .enabled,
+            initialAudioOutputStatus: .enabled
         )
         self.callController.call = self
         self.subscribeToLocalCallSettingsChanges()
@@ -676,7 +676,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         speaker.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
-                let newState = self.state.callSettings.withUpdatedSpeakerState(status.toBool)
+                let newState = self.state.callSettings.withUpdatedSpeakerState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
         }
@@ -685,7 +685,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
-                let newState = self.state.callSettings.withUpdatedAudioOutputState(status.toBool)
+                let newState = self.state.callSettings.withUpdatedAudioOutputState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
         }
@@ -694,7 +694,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         camera.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
-                let newState = self.state.callSettings.withUpdatedVideoState(status.toBool)
+                let newState = self.state.callSettings.withUpdatedVideoState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
         }
@@ -712,7 +712,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         microphone.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
-                let newState = self.state.callSettings.withUpdatedAudioState(status.toBool)
+                let newState = self.state.callSettings.withUpdatedAudioState(status.boolValue)
                 self.state.update(callSettings: newState)
             }
         }

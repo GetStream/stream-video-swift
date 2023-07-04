@@ -30,7 +30,8 @@ public class CameraManager: ObservableObject, CallSettingsManager {
     /// Flips the camera (front to back and vice versa).
     public func flip() async throws {
         let next = direction.next()
-        await withCheckedContinuation { [unowned self] continuation in
+        await withCheckedContinuation { [weak self] continuation in
+            guard let self else { return }
             callController.changeCameraMode(position: next) {
                 self.direction = next
                 continuation.resume()
@@ -52,8 +53,8 @@ public class CameraManager: ObservableObject, CallSettingsManager {
     
     private func updateVideoStatus(_ status: CallSettingsStatus) async throws {
         try await updateState(
-            newState: status.toBool,
-            current: self.status.toBool,
+            newState: status.boolValue,
+            current: self.status.boolValue,
             action: { [unowned self] state in
                 try await callController.changeVideoState(isEnabled: state)
             },

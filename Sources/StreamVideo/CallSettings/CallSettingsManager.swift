@@ -49,7 +49,7 @@ public enum CallSettingsStatus: String {
         self == .enabled ? .disabled : .enabled
     }
     
-    var toBool: Bool {
+    var boolValue: Bool {
         self == .enabled ? true : false
     }
 }

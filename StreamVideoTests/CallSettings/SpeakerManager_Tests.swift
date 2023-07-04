@@ -11,8 +11,8 @@ final class SpeakerManager_Tests: XCTestCase {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            initialStatus: .enabled,
-            audioOutputStatus: .enabled
+            initialSpeakerStatus: .enabled,
+            initialAudioOutputStatus: .enabled
         )
         
         // When
@@ -26,8 +26,8 @@ final class SpeakerManager_Tests: XCTestCase {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            initialStatus: .disabled,
-            audioOutputStatus: .enabled
+            initialSpeakerStatus: .disabled,
+            initialAudioOutputStatus: .enabled
         )
         
         // When
@@ -41,8 +41,8 @@ final class SpeakerManager_Tests: XCTestCase {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            initialStatus: .enabled,
-            audioOutputStatus: .enabled
+            initialSpeakerStatus: .enabled,
+            initialAudioOutputStatus: .enabled
         )
         
         // When
@@ -56,8 +56,8 @@ final class SpeakerManager_Tests: XCTestCase {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            initialStatus: .enabled,
-            audioOutputStatus: .disabled
+            initialSpeakerStatus: .enabled,
+            initialAudioOutputStatus: .disabled
         )
         
         // When

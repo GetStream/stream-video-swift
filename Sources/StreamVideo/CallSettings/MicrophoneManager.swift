@@ -36,8 +36,8 @@ public class MicrophoneManager: ObservableObject, CallSettingsManager {
     
     private func updateAudioStatus(_ status: CallSettingsStatus) async throws {
         try await updateState(
-            newState: status.toBool,
-            current: self.status.toBool,
+            newState: status.boolValue,
+            current: self.status.boolValue,
             action: { [unowned self] state in
                 try await callController.changeAudioState(isEnabled: state)
             },
