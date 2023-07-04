@@ -21,7 +21,6 @@ actor AudioSession {
 
         do {
             log.debug("Configuring audio session")
-            try audioSession.setConfiguration(configuration, active: audioOn)
             if speakerOn {
                 configuration.categoryOptions.insert(.defaultToSpeaker)
                 configuration.mode = AVAudioSession.Mode.videoChat.rawValue
@@ -29,6 +28,7 @@ actor AudioSession {
                 configuration.categoryOptions.remove(.defaultToSpeaker)
                 configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
             }
+            try audioSession.setConfiguration(configuration, active: audioOn)
         } catch {
             log.error("Error occured while configuring audio session", error: error)
         }

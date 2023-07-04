@@ -22,14 +22,17 @@ public class SpeakerManager: ObservableObject, CallSettingsManager {
         self.audioOutputStatus = audioOutputStatus
     }
     
+    /// Toggles the speaker during a call.
     public func toggleSpeakerPhone() async throws {
         try await updateSpeakerStatus(status.next)
     }
     
+    /// Enables the speaker during a call.
     public func enableSpeakerPhone() async throws {
         try await updateSpeakerStatus(.enabled)
     }
     
+    /// Disables the speaker during a call.
     public func disableSpeakerPhone() async throws {
         try await updateSpeakerStatus(.disabled)
     }
