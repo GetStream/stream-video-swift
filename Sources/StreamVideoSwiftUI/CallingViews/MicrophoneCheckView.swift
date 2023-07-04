@@ -10,20 +10,20 @@ public struct MicrophoneCheckView: View {
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
-    var decibels: [Float]
+    var audioLevels: [Float]
     var microphoneOn: Bool
-    var hasDecibelValues: Bool
+    var isSilent: Bool
     var maxHeight: Float = 14
     
     public init(
-        decibels: [Float],
+        audioLevels: [Float],
         microphoneOn: Bool,
-        hasDecibelValues: Bool,
+        isSilent: Bool,
         maxHeight: Float = 14
     ) {
-        self.decibels = decibels
+        self.audioLevels = audioLevels
         self.microphoneOn = microphoneOn
-        self.hasDecibelValues = hasDecibelValues
+        self.isSilent = isSilent
         self.maxHeight = maxHeight
     }
     
@@ -35,9 +35,9 @@ public struct MicrophoneCheckView: View {
                 .bold()
                 .padding(.trailing, 8)
             
-            if microphoneOn && hasDecibelValues {
+            if microphoneOn && !isSilent {
                 AudioVolumeIndicator(
-                    audioLevels: decibels,
+                    audioLevels: audioLevels,
                     maxHeight: maxHeight,
                     minValue: 0,
                     maxValue: 1

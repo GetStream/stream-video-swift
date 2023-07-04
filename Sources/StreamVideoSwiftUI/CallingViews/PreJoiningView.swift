@@ -86,7 +86,7 @@ struct LobbyContentView: View {
                         availableSize: reader.size
                     )
                     
-                    if !microphoneChecker.hasDecibelValues {
+                    if microphoneChecker.isSilent {
                         Text(L10n.WaitingRoom.Mic.notWorking)
                             .font(.caption)
                             .foregroundColor(colors.text)
@@ -168,9 +168,9 @@ struct CameraCheckView: View {
                 Spacer()
                 HStack {
                     MicrophoneCheckView(
-                        decibels: microphoneChecker.audioLevels,
+                        audioLevels: microphoneChecker.audioLevels,
                         microphoneOn: callSettings.audioOn,
-                        hasDecibelValues: microphoneChecker.hasDecibelValues
+                        isSilent: microphoneChecker.isSilent
                     )
                     .accessibility(identifier: "microphoneCheckView")
                     Spacer()
