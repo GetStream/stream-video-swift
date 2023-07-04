@@ -3,28 +3,60 @@ title: Camera & Microphone
 description: Docs on the media manager
 ---
 
-The StreamVideo iOS SDK supports toggling between the front and back camera of the iOS device while in a call. 
-
-There are two ways to change the camera, depending on whether you use the `CallViewModel` or the `Call` object directly.
-
-:::note
-By default the microphone and camera settings are based on the call settings.
-:::
-
-#### Toggle the camera with the `Call` object
-
-If you have your own presentation layer and want to directly handle the camera state, you can use the `Call` object directly to update the state. In order to do this, you should use the `changeCameraMode(position: CameraPosition, completion: @escaping () -> ())` method:
+The SDK does its best to make working with the camera and microphone easy.
+We expose the following objects on the call:
 
 ```swift
-call.changeCameraMode(position: .back) {
-	print("changed camera position")
-}
+let call = streamVideo.call(callType: "default", callId: "123")
+let camera = call.camera
+let microphone = call.microphone
+let speaker = call.speaker
 ```
 
-#### Toggle the camera with the `CallViewModel`
+### Camera Manager
 
-You can toggle the camera position by calling the method `toggleCameraPosition`. The method takes into consideration the current camera state (front or back), and it updates it to the new one.
+The following methods are available on the camera manager:
 
 ```swift
-viewModel.toggleCameraPosition()
+try await call.camera.enable() // enable the camera
+try await call.camera.disable() // disable the camera
+try await call.camera.flip() // switch between front and back camera
+```
+
+The camera manager also exposes these observables:
+
+```swift
+call.camera.direction // front/back
+call.camera.status // enabled/ disabled.
+```
+
+### Microphone Manager
+
+The microphone manager supports changing the mic state:
+
+```swift
+try await call.microphone.enable() // enable the microphone
+try await call.microphone.disable() // disable the microphone
+```
+
+You can get the microphone status like this:
+
+```swift
+call.microphone.status // enabled/ disabled.
+```
+
+### Speaker Manager
+
+The speaker allows you to enable/disable the speaker phone.
+
+```swift
+try await call.speaker.enableSpeakerPhone()
+try await call.speaker.disableSpeakerPhone()
+```
+
+Additionally, you can enable/disable the audio output on the device. 
+
+```swift
+try await call.speaker.enableAudioOutput()
+try await call.speaker.disableAudioOutput()
 ```

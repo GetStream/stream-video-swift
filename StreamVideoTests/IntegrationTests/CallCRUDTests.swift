@@ -3,11 +3,10 @@
 //
 
 import Foundation
-import Combine
+@preconcurrency import Combine
 import XCTest
 @testable import StreamVideo
 
-@MainActor
 class CallCRUDTest: IntegrationTest {
     func test_call_create_and_update() async throws {
         let call = client.call(callType: "default", callId: UUID().uuidString)
@@ -113,10 +112,11 @@ class CallCRUDTest: IntegrationTest {
         
         let call2 = client.call(callType: call.callType, callId: call.callId)
         let _ = try await call2.get(membersLimit: 0)
+
+        try await Task.sleep(nanoseconds: 2_500_000_000)
         
-        try await Task.sleep(nanoseconds: 1_500_000_000)
-        
-        XCTAssertEqual(0, call2.state.members.count)
+        let count = await call2.state.members.count
+        XCTAssertEqual(0, count)
         
         let _ = try await call2.get(membersLimit: 1)
         await assertNext(call.state.$members) { v in
@@ -220,15 +220,17 @@ class CallCRUDTest: IntegrationTest {
         let tommasoCall = tommasoClient.call(callType: "audio_room", callId: call.callId)
 
         let _ = try await tommasoCall.get()
-        XCTAssertFalse(tommasoCall.currentUserHasCapability(.sendAudio))
-        XCTAssertFalse(tommasoCall.currentUserHasCapability(.sendVideo))
+        var hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
+        XCTAssertFalse(hasAudioCapability)
+        var hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
+        XCTAssertFalse(hasVideoCapability)
 
         try await tommasoCall.request(permissions: [.sendVideo, .sendAudio])
 
         await assertNext(call.state.$permissionRequests) { value in
             return value.count == 2 && value.first?.permission == "send-video"
         }
-        if let p = call.state.permissionRequests.first {
+        if let p = await call.state.permissionRequests.first {
             p.reject()
         }
         
@@ -242,7 +244,7 @@ class CallCRUDTest: IntegrationTest {
         }
 
         // Then: accept the send-audio request
-        if let p = call.state.permissionRequests.first {
+        if let p = await call.state.permissionRequests.first {
             try await call.grant(request: p)
         }
         // Test: permission requests list is now empty
@@ -254,8 +256,10 @@ class CallCRUDTest: IntegrationTest {
             return value.contains(where: {$0.rawValue == "send-audio"})
         }
         
-        XCTAssertTrue(tommasoCall.currentUserHasCapability(.sendAudio))
-        XCTAssertFalse(tommasoCall.currentUserHasCapability(.sendVideo))
+        hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
+        XCTAssertTrue(hasAudioCapability)
+        hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
+        XCTAssertFalse(hasVideoCapability)
     }
     
     func test_mute_user_by_id() async throws {

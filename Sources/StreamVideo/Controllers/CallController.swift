@@ -62,7 +62,7 @@ class CallController {
         create: Bool = true,
         callType: String,
         callId: String,
-        callSettings: CallSettings,
+        callSettings: CallSettings?,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         sessionID: String? = nil,
@@ -79,12 +79,14 @@ class CallController {
             notify: notify
         )
         
+        let settings = callSettings ?? response.call.settings.toCallSettings
+        
         try await connectToEdge(
             response,
             sessionID: sessionID,
             callType: callType,
             callId: callId,
-            callSettings: callSettings,
+            callSettings: settings,
             videoOptions: videoOptions,
             ring: ring
         )
@@ -193,6 +195,13 @@ class CallController {
     ///  - completion: called when the camera position is changed.
     func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
         webRTCClient?.changeCameraMode(position: position, completion: completion)
+    }
+    
+    /// Changes the speaker state.
+    /// - Parameter isEnabled: whether the speaker should be enabled.
+    func changeSpeakerState(isEnabled: Bool) async throws {
+        let webRTCClient = try currentWebRTCClient()
+        try await webRTCClient.changeSpeakerState(isEnabled: isEnabled)
     }
     
     /// Changes the track visibility for a participant (not visible if they go off-screen).

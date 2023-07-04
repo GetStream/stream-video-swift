@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
 public class Call: @unchecked Sendable, WSEventsSubscriber {
@@ -21,11 +22,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callCid(from: callId, callType: callType)
     }
     
+    /// Provides access to the microphone.
+    public let microphone: MicrophoneManager
+    /// Provides access to the camera.
+    public let camera: CameraManager
+    /// Provides access to the speaker.
+    public let speaker: SpeakerManager
+    
     internal let callController: CallController
     private let videoOptions: VideoOptions
     private var eventHandlers = [EventHandling]()
     private let coordinatorClient: DefaultAPI
-
+    private var cancellables = Set<AnyCancellable>()
+    
     internal init(
         callType: String,
         callId: String,
@@ -38,11 +47,35 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.coordinatorClient = coordinatorClient
         self.callController = callController
         self.videoOptions = videoOptions
+        self.microphone = MicrophoneManager(
+            callController: callController,
+            initialStatus: .enabled
+        )
+        self.camera = CameraManager(
+            callController: callController,
+            initialStatus: .enabled,
+            initialDirection: .front
+        )
+        self.speaker = SpeakerManager(
+            callController: callController,
+            initialSpeakerStatus: .enabled,
+            initialAudioOutputStatus: .enabled
+        )
         self.callController.call = self
+        self.subscribeToLocalCallSettingsChanges()
     }
     
-    convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
-        self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
+    convenience internal init(
+        from response: CallStateResponseFields,
+        coordinatorClient: DefaultAPI,
+        callController: CallController
+    ) {
+        self.init(
+            callType: response.call.type,
+            callId: response.call.id,
+            coordinatorClient: coordinatorClient,
+            callController: callController
+        )
         executeOnMain { [weak self] in
             self?.state.update(from: response)
         }
@@ -62,7 +95,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         options: CreateCallOptions? = nil,
         ring: Bool = false,
         notify: Bool = false,
-        callSettings: CallSettings = CallSettings()
+        callSettings: CallSettings? = nil
     ) async throws -> JoinCallResponse {
         try await executeTask(retryPolicy: .fastAndSimple, task: {
             let response = try await callController.joinCall(
@@ -75,7 +108,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 ring: ring,
                 notify: notify
             )
+            if let callSettings {
+                await state.update(callSettings: callSettings)
+            }
             await state.update(from: response)
+            let updated = await state.callSettings
+            updateCallSettingsManagers(with: updated)
             streamVideo.state.activeCall = self
             return response
         })
@@ -94,7 +132,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         ring: Bool = false,
         notify: Bool = false
     ) async throws -> CallResponse {
-        let response = try await coordinatorClient.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
+        let response = try await coordinatorClient.getCall(
+            type: callType,
+            id: callId,
+            membersLimit: membersLimit,
+            ring: ring,
+            notify: notify
+        )
         await state.update(from: response)
         if ring {
             streamVideo.state.ringingCall = self
@@ -201,32 +245,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return try await unblockUser(with: user.id)
     }
     
-    /// Changes the audio state for the current user.
-    /// - Parameter isEnabled: whether audio should be enabled.
-    public func changeAudioState(isEnabled: Bool) async throws {
-        try await callController.changeAudioState(isEnabled: isEnabled)
-    }
-    
-    /// Changes the video state for the current user.
-    /// - Parameter isEnabled: whether video should be enabled.
-    public func changeVideoState(isEnabled: Bool) async throws {
-        try await callController.changeVideoState(isEnabled: isEnabled)
-    }
-    
-    /// Changes the availability of sound during the call.
-    /// - Parameter isEnabled: whether the sound should be enabled.
-    public func changeSoundState(isEnabled: Bool) async throws {
-        try await callController.changeSoundState(isEnabled: isEnabled)
-    }
-    
-    /// Changes the camera position (front/back) for the current user.
-    /// - Parameters:
-    ///  - position: the new camera position.
-    ///  - completion: called when the camera position is changed.
-    public func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
-        callController.changeCameraMode(position: position, completion: completion)
-    }
-    
     /// Changes the track visibility for a participant (not visible if they go off-screen).
     /// - Parameters:
     ///  - participant: the participant whose track visibility would be changed.
@@ -312,6 +330,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Leave the current call.
     public func leave() {
         postNotification(with: CallNotification.callEnded)
+        for cancellable in cancellables {
+            cancellable.cancel()
+        }
+        cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
         streamVideo.state.ringingCall = nil
@@ -648,6 +670,61 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         await state.mergeMembers(response.members)
         return response
+    }
+    
+    private func subscribeToLocalCallSettingsChanges() {
+        speaker.$status.dropFirst().sink { [weak self] status in
+            guard let self else { return }
+            executeOnMain {
+                let newState = self.state.callSettings.withUpdatedSpeakerState(status.boolValue)
+                self.state.update(callSettings: newState)
+            }
+        }
+        .store(in: &cancellables)
+        
+        speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
+            guard let self else { return }
+            executeOnMain {
+                let newState = self.state.callSettings.withUpdatedAudioOutputState(status.boolValue)
+                self.state.update(callSettings: newState)
+            }
+        }
+        .store(in: &cancellables)
+        
+        camera.$status.dropFirst().sink { [weak self] status in
+            guard let self else { return }
+            executeOnMain {
+                let newState = self.state.callSettings.withUpdatedVideoState(status.boolValue)
+                self.state.update(callSettings: newState)
+            }
+        }
+        .store(in: &cancellables)
+        
+        camera.$direction.dropFirst().sink { [weak self] position in
+            guard let self else { return }
+            executeOnMain {
+                let newState = self.state.callSettings.withUpdatedCameraPosition(position)
+                self.state.update(callSettings: newState)
+            }
+        }
+        .store(in: &cancellables)
+        
+        microphone.$status.dropFirst().sink { [weak self] status in
+            guard let self else { return }
+            executeOnMain {
+                let newState = self.state.callSettings.withUpdatedAudioState(status.boolValue)
+                self.state.update(callSettings: newState)
+            }
+        }
+        .store(in: &cancellables)
+    }
+    
+    private func updateCallSettingsManagers(with callSettings: CallSettings) {
+        microphone.status = callSettings.audioOn ? .enabled : .disabled
+        camera.status = callSettings.videoOn ? .enabled : .disabled
+        camera.direction = callSettings.cameraPosition
+        speaker.status = callSettings.speakerOn ? .enabled : .disabled
+        speaker.audioOutputStatus = callSettings.audioOutputOn ? .enabled : .disabled
     }
 }
 
