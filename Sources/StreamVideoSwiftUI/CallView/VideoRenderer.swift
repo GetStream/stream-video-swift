@@ -16,6 +16,8 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     private var viewFactory: Factory
     private var participant: CallParticipant
     private var idSuffix: String
+
+    @ObservedObject private var microphoneChecker: MicrophoneChecker
     
     public init(
         viewFactory: Factory,
@@ -29,6 +31,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
         self.idSuffix = idSuffix
         self.callSettings = callSettings
         self.onLocalVideoUpdate = onLocalVideoUpdate
+        self.microphoneChecker = .init()
     }
             
     public var body: some View {
@@ -47,6 +50,23 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
                 axis: (x: 0, y: 1, z: 0)
             )
         }
+        .overlay(
+            VStack {
+                Spacer()
+                HStack {
+                    MicrophoneCheckView(
+                        audioLevels: microphoneChecker.audioLevels,
+                        microphoneOn: callSettings.audioOn,
+                        isSilent: microphoneChecker.isSilent
+                    )
+                    .accessibility(identifier: "microphoneCheckView")
+                    Spacer()
+                }
+                .padding()
+                .onAppear { microphoneChecker.startListening() }
+                .onDisappear { microphoneChecker.stopListening() }
+            }
+        )
     }
     
     private var shouldRotate: Bool {
