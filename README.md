@@ -14,7 +14,7 @@
   <img alt="StreamVideoSwiftUI" src="https://img.shields.io/endpoint?url=https://stream-sdks-size-badges.onrender.com/ios/stream-video-swiftui&cacheSeconds=86400"/>
 </p>
 
-<img src="docusaurus/docs/iOS/assets/readmeHeader.png" alt="Stream Video for iOS Header image" style="box-shadow: 0 3px 10px rgb(0 0 0 / 0.2); border-radius: 1rem" />
+![Stream Video for iOS Header image](https://github.com/GetStream/stream-video-swift/assets/12433593/e4a44ae5-a8eb-4ac7-8910-28187aa011f6)
 
 This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repository includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
 
