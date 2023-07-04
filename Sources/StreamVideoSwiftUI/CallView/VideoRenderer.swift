@@ -52,6 +52,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     private var shouldRotate: Bool {
         callSettings.cameraPosition == .front && callSettings.videoOn
     }
+    
 }
 
 public struct VideoRendererView: UIViewRepresentable {
