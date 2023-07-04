@@ -41,6 +41,9 @@ public class CallState: ObservableObject {
     @Published public internal(set) var session: CallSessionResponse?
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var participantCount: UInt32 = 0
+    @Published public internal(set) var callSettings = CallSettings()
+    
+    private var localCallSettingsUpdate = false
         
     internal func updateState(from event: VideoEvent) {
         switch event {
@@ -206,6 +209,14 @@ public class CallState: ObservableObject {
         session = response.session
         settings = response.settings
         egress = response.egress
+        if !localCallSettingsUpdate {
+            callSettings = response.settings.toCallSettings
+        }
+    }
+    
+    internal func update(callSettings: CallSettings) {
+        self.callSettings = callSettings
+        localCallSettingsUpdate = true
     }
     
     private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {

@@ -24,10 +24,11 @@ actor AudioSession {
             try audioSession.setConfiguration(configuration, active: audioOn)
             if speakerOn {
                 configuration.categoryOptions.insert(.defaultToSpeaker)
+                configuration.mode = AVAudioSession.Mode.videoChat.rawValue
             } else {
                 configuration.categoryOptions.remove(.defaultToSpeaker)
+                configuration.mode = AVAudioSession.Mode.voiceChat.rawValue
             }
-            try audioSession.overrideOutputAudioPort(speakerOn ? .speaker : .none)
         } catch {
             log.error("Error occured while configuring audio session", error: error)
         }

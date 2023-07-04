@@ -38,16 +38,6 @@ public final class CallSettings: ObservableObject, Sendable {
     public var shouldPublish: Bool {
         audioOn || videoOn
     }
-    
-    public func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
-        CallSettings(
-            audioOn: audioOn,
-            videoOn: videoOn,
-            speakerOn: speakerOn,
-            audioOutputOn: audioOutputOn,
-            cameraPosition: cameraPosition
-        )
-    }
 }
 
 /// The camera position.
@@ -57,5 +47,71 @@ public enum CameraPosition: Sendable {
     
     public func next() -> CameraPosition {
         self == .front ? .back : .front
+    }
+}
+
+extension CallSettingsResponse {
+    
+    public var toCallSettings: CallSettings {
+        CallSettings(
+            audioOn: audio.micDefaultOn,
+            videoOn: video.cameraDefaultOn,
+            speakerOn: audio.speakerDefaultOn,
+            audioOutputOn: true, //TODO: wait until exposed
+            cameraPosition: video.cameraFacing == .back ? .back : .front
+        )
+    }
+    
+}
+
+public extension CallSettings {
+    func withUpdatedCameraPosition(_ cameraPosition: CameraPosition) -> CallSettings {
+        CallSettings(
+            audioOn: audioOn,
+            videoOn: videoOn,
+            speakerOn: speakerOn,
+            audioOutputOn: audioOutputOn,
+            cameraPosition: cameraPosition
+        )
+    }
+    
+    func withUpdatedAudioState(_ audioOn: Bool) -> CallSettings {
+        CallSettings(
+            audioOn: audioOn,
+            videoOn: videoOn,
+            speakerOn: speakerOn,
+            audioOutputOn: audioOutputOn,
+            cameraPosition: cameraPosition
+        )
+    }
+    
+    func withUpdatedVideoState(_ videoOn: Bool) -> CallSettings {
+        CallSettings(
+            audioOn: audioOn,
+            videoOn: videoOn,
+            speakerOn: speakerOn,
+            audioOutputOn: audioOutputOn,
+            cameraPosition: cameraPosition
+        )
+    }
+    
+    func withUpdatedSpeakerState(_ speakerOn: Bool) -> CallSettings {
+        CallSettings(
+            audioOn: audioOn,
+            videoOn: videoOn,
+            speakerOn: speakerOn,
+            audioOutputOn: audioOutputOn,
+            cameraPosition: cameraPosition
+        )
+    }
+    
+    func withUpdatedAudioOutputState(_ audioOutputOn: Bool) -> CallSettings {
+        CallSettings(
+            audioOn: audioOn,
+            videoOn: videoOn,
+            speakerOn: speakerOn,
+            audioOutputOn: audioOutputOn,
+            cameraPosition: cameraPosition
+        )
     }
 }

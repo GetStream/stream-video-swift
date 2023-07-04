@@ -113,8 +113,6 @@ class CallCRUDTest: IntegrationTest {
         let call2 = client.call(callType: call.callType, callId: call.callId)
         let _ = try await call2.get(membersLimit: 0)
 
-        try await Task.sleep(nanoseconds: 1_500_000_000)
-
         let count = await call2.state.members.count
         XCTAssertEqual(0, count)
         

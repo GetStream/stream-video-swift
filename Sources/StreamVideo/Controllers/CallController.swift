@@ -62,7 +62,7 @@ class CallController {
         create: Bool = true,
         callType: String,
         callId: String,
-        callSettings: CallSettings,
+        callSettings: CallSettings?,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         sessionID: String? = nil,
@@ -79,12 +79,14 @@ class CallController {
             notify: notify
         )
         
+        let settings = callSettings ?? response.call.settings.toCallSettings
+        
         try await connectToEdge(
             response,
             sessionID: sessionID,
             callType: callType,
             callId: callId,
-            callSettings: callSettings,
+            callSettings: settings,
             videoOptions: videoOptions,
             ring: ring
         )

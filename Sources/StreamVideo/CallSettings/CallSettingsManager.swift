@@ -40,3 +40,16 @@ actor CallSettingsState {
         self.updatingState = state
     }
 }
+
+public enum CallSettingsStatus: String {
+    case enabled
+    case disabled
+    
+    var next: Self {
+        self == .enabled ? .disabled : .enabled
+    }
+    
+    var toBool: Bool {
+        self == .enabled ? true : false
+    }
+}

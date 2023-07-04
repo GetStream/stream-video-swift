@@ -32,7 +32,7 @@ class CallController_Mock: CallController {
         create: Bool = true,
         callType: String,
         callId: String,
-        callSettings: CallSettings,
+        callSettings: CallSettings?,
         videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         sessionID: String? = nil,

@@ -11,7 +11,7 @@ final class MicrophoneManager_Tests: XCTestCase {
         // Given
         let microphoneManager = MicrophoneManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled
         )
         
         // When
@@ -19,14 +19,13 @@ final class MicrophoneManager_Tests: XCTestCase {
         
         // Then
         XCTAssert(microphoneManager.status == .disabled)
-        XCTAssert(microphoneManager.callSettings.audioOn == false)
     }
     
     func test_microphoneManager_enable() async throws {
         // Given
         let microphoneManager = MicrophoneManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings(audioOn: false)
+            initialStatus: .disabled
         )
         
         // When
@@ -34,14 +33,13 @@ final class MicrophoneManager_Tests: XCTestCase {
         
         // Then
         XCTAssert(microphoneManager.status == .enabled)
-        XCTAssert(microphoneManager.callSettings.audioOn == true)
     }
     
     func test_microphoneManager_disable() async throws {
         // Given
         let microphoneManager = MicrophoneManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled
         )
         
         // When
@@ -49,14 +47,13 @@ final class MicrophoneManager_Tests: XCTestCase {
         
         // Then
         XCTAssert(microphoneManager.status == .disabled)
-        XCTAssert(microphoneManager.callSettings.audioOn == false)
     }
     
     func test_microphoneManager_sameState() async throws {
         // Given
         let microphoneManager = MicrophoneManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled
         )
         
         // When
@@ -64,7 +61,6 @@ final class MicrophoneManager_Tests: XCTestCase {
         
         // Then
         XCTAssert(microphoneManager.status == .enabled)
-        XCTAssert(microphoneManager.callSettings.audioOn == true)
     }
     
 }

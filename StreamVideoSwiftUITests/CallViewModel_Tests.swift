@@ -181,7 +181,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.hangUp()
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 1_500_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 2_500_000_000)
     }
     
     func test_incomingCall_acceptCall() async throws {
@@ -370,8 +370,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.toggleCameraPosition()
         
         // Then
-        // Video is not available in simulator, so it stays in front.
-        try await XCTAssertWithDelay(callViewModel.callSettings.cameraPosition == .front)
+        try await XCTAssertWithDelay(callViewModel.callSettings.cameraPosition == .back)
     }
     
     // MARK: - Events

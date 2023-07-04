@@ -4,67 +4,46 @@
 
 import Foundation
 
-public enum MicrophoneStatus: String {
-    case enabled
-    case disabled
-}
-
 /// Handles the microphone state during a call.
 public class MicrophoneManager: ObservableObject, CallSettingsManager {
     
     internal let callController: CallController
-    @Published public internal(set) var callSettings: CallSettings {
-        didSet {
-            self.status = callSettings.audioOn ? .enabled : .disabled
-        }
-    }
     /// The status of the microphone.
-    @Published public internal(set) var status: MicrophoneStatus
+    @Published public internal(set) var status: CallSettingsStatus
     let state = CallSettingsState()
 
-    init(callController: CallController, settings: CallSettings) {
+    init(callController: CallController, initialStatus: CallSettingsStatus) {
         self.callController = callController
-        self.callSettings = settings
-        self.status = settings.audioOn ? .enabled : .disabled
+        self.status = initialStatus
     }
 
     /// Toggles the microphone state.
     public func toggle() async throws {
-        try await updateAudioState(!callSettings.audioOn)
+        try await updateAudioStatus(status.next)
     }
 
     /// Enables the microphone.
     public func enable() async throws {
-        try await updateAudioState(true)
+        try await updateAudioStatus(.enabled)
     }
 
     /// Disables the microphone.
     public func disable() async throws {
-        try await updateAudioState(false)
+        try await updateAudioStatus(.disabled)
     }
     
     // MARK: - private
     
-    private func updateAudioState(_ state: Bool) async throws {
+    private func updateAudioStatus(_ status: CallSettingsStatus) async throws {
         try await updateState(
-            newState: state,
-            current: callSettings.audioOn,
+            newState: status.toBool,
+            current: self.status.toBool,
             action: { [unowned self] state in
                 try await callController.changeAudioState(isEnabled: state)
             },
-            onUpdate: { [unowned self] state in
-                updateCallSettings(audioOn: state)
+            onUpdate: { value in
+                self.status = status
             }
-        )
-    }
-    
-    private func updateCallSettings(audioOn: Bool) {
-        callSettings = CallSettings(
-            audioOn: audioOn,
-            videoOn: callSettings.videoOn,
-            speakerOn: callSettings.speakerOn,
-            audioOutputOn: callSettings.audioOutputOn,
-            cameraPosition: callSettings.cameraPosition
         )
     }
 }

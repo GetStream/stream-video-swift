@@ -11,7 +11,8 @@ final class CameraManager_Tests: XCTestCase {
         // Given
         let cameraManager = CameraManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled,
+            initialDirection: .front
         )
         
         // When
@@ -19,14 +20,14 @@ final class CameraManager_Tests: XCTestCase {
         
         // Then
         XCTAssert(cameraManager.status == .disabled)
-        XCTAssert(cameraManager.callSettings.videoOn == false)
     }
     
     func test_cameraManager_disable() async throws {
         // Given
         let cameraManager = CameraManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled,
+            initialDirection: .front
         )
         
         // When
@@ -34,14 +35,14 @@ final class CameraManager_Tests: XCTestCase {
         
         // Then
         XCTAssert(cameraManager.status == .disabled)
-        XCTAssert(cameraManager.callSettings.videoOn == false)
     }
     
     func test_cameraManager_flipToBack() async throws {
         // Given
         let cameraManager = CameraManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled,
+            initialDirection: .front
         )
         
         // When
@@ -55,8 +56,8 @@ final class CameraManager_Tests: XCTestCase {
         // Given
         let cameraManager = CameraManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings(cameraPosition: .back)
-        )
+            initialStatus: .enabled,
+            initialDirection: .back        )
         
         // When
         try await cameraManager.flip()

@@ -11,56 +11,60 @@ final class SpeakerManager_Tests: XCTestCase {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled,
+            audioOutputStatus: .enabled
         )
         
         // When
         try await speakerManager.disableSpeakerPhone()
         
         // Then
-        XCTAssert(speakerManager.callSettings.speakerOn == false)
+        XCTAssert(speakerManager.status == .disabled)
     }
     
     func test_speaker_enable() async throws {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings(speakerOn: false)
+            initialStatus: .disabled,
+            audioOutputStatus: .enabled
         )
         
         // When
         try await speakerManager.enableSpeakerPhone()
         
         // Then
-        XCTAssert(speakerManager.callSettings.speakerOn == true)
+        XCTAssert(speakerManager.status == .enabled)
     }
     
     func test_speaker_disableSound() async throws {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings()
+            initialStatus: .enabled,
+            audioOutputStatus: .enabled
         )
         
         // When
         try await speakerManager.disableAudioOutput()
         
         // Then
-        XCTAssert(speakerManager.callSettings.audioOutputOn == false)
+        XCTAssert(speakerManager.audioOutputStatus == .disabled)
     }
     
     func test_speaker_enableSound() async throws {
         // Given
         let speakerManager = SpeakerManager(
             callController: CallController_Mock.make(),
-            settings: CallSettings(audioOutputOn: false)
+            initialStatus: .enabled,
+            audioOutputStatus: .disabled
         )
         
         // When
         try await speakerManager.enableAudioOutput()
         
         // Then
-        XCTAssert(speakerManager.callSettings.audioOutputOn == true)
+        XCTAssert(speakerManager.audioOutputStatus == .enabled)
     }
 
 
