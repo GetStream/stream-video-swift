@@ -16,7 +16,7 @@ public struct CallView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
-    @ObservedObject private var microphoneChecker: MicrophoneChecker
+    private var microphoneChecker: MicrophoneChecker
     
     public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
@@ -148,6 +148,7 @@ public struct CallView<Factory: ViewFactory>: View {
             }
             .opacity(viewModel.localParticipant != nil ? 1 : 0)
             .modifier(viewFactory.makeLocalParticipantViewModifier(
+                localParticipant: localParticipant,
                 microphoneChecker: microphoneChecker,
                 callSettings: $viewModel.callSettings
             ))

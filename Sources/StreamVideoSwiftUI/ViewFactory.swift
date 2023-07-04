@@ -148,6 +148,7 @@ public protocol ViewFactory: AnyObject {
 
     associatedtype LocalParticipantViewModifierType = ViewModifier
     func makeLocalParticipantViewModifier(
+        localParticipant: CallParticipant,
         microphoneChecker: MicrophoneChecker,
         callSettings: Binding<CallSettings>
     ) -> LocalParticipantViewModifierType
@@ -318,16 +319,19 @@ extension ViewFactory {
     }
 
     public func makeLocalParticipantViewModifier(
+        localParticipant: CallParticipant,
         microphoneChecker: MicrophoneChecker,
         callSettings: Binding<CallSettings>
     ) -> some ViewModifier {
         if #available(iOS 14.0, *) {
             return LocalParticipantViewModifier(
+                localParticipant: localParticipant,
                 microphoneChecker: microphoneChecker,
                 callSettings: callSettings
             )
         } else {
             return LocalParticipantViewModifier_iOS13(
+                localParticipant: localParticipant,
                 microphoneChecker: microphoneChecker,
                 callSettings: callSettings
             )
