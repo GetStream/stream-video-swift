@@ -16,10 +16,12 @@ public struct CallView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
+    @ObservedObject private var microphoneChecker: MicrophoneChecker
     
     public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
+        self.microphoneChecker = .init()
     }
     
     public var body: some View {
@@ -145,6 +147,10 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
             }
             .opacity(viewModel.localParticipant != nil ? 1 : 0)
+            .modifier(viewFactory.makeLocalParticipantViewModifier(
+                microphoneChecker: microphoneChecker,
+                callSettings: $viewModel.callSettings
+            ))
         } else {
             EmptyView()
         }
@@ -155,7 +161,7 @@ public struct CallView<Factory: ViewFactory>: View {
             viewModel: viewModel,
             availableSize: size,
             onViewRendering: handleViewRendering(_:participant:),
-            onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)
+            onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
         )
     }
     
