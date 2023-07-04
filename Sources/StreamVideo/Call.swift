@@ -9,7 +9,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     @Injected(\.streamVideo) var streamVideo
 
-    public internal(set) var state = CallState()
+    @MainActor public internal(set) var state = CallState()
     
     /// The call id.
     public let callId: String
@@ -43,7 +43,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     convenience internal init(from response: CallStateResponseFields, coordinatorClient: DefaultAPI, callController: CallController) {
         self.init(callType: response.call.type, callId: response.call.id, coordinatorClient: coordinatorClient, callController: callController)
-        state.update(from: response.call)
+        executeOnMain { [weak self] in
+            self?.state.update(from: response)
+        }
     }
 
     /// Joins the current call.
@@ -73,7 +75,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 ring: ring,
                 notify: notify
             )
-            state.update(from: response.call)
+            await state.update(from: response)
             streamVideo.state.activeCall = self
             return response
         })
@@ -93,7 +95,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         notify: Bool = false
     ) async throws -> CallResponse {
         let response = try await coordinatorClient.getCall(type: callType, id: callId, membersLimit: membersLimit, ring: ring, notify: notify)
-        state.update(from: response.call)
+        await state.update(from: response)
         if ring {
             streamVideo.state.ringingCall = self
         }
@@ -105,7 +107,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func ring() async throws -> CallResponse {
         let response = try await get(ring: true)
-        state.update(from: response)
+        await state.update(from: response)
         return response
     }
     
@@ -114,7 +116,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func notify() async throws -> CallResponse {
         let response = try await get(notify: true)
-        state.update(from: response)
+        await state.update(from: response)
         return response
     }
 
@@ -151,7 +153,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             getOrCreateCallRequest: request
         )
-        state.update(from: response)
+        await state.update(from: response)
         if ring {
             streamVideo.state.ringingCall = self
         }
@@ -165,7 +167,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> UpdateCallResponse {
         let request = UpdateCallRequest(custom: custom, startsAt: startsAt)
         let response = try await coordinatorClient.updateCall(type: callType, id: callId, updateCallRequest: request)
-        state.update(from: response.call)
+        await state.update(from: response)
         return response
     }
 
@@ -321,7 +323,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Checks if the current user can request permissions.
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
-    public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
+    @MainActor public func currentUserCanRequestPermissions(_ permissions: [Permission]) -> Bool {
         guard let callSettings = state.settings else {
             return false
         }
@@ -346,13 +348,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     @discardableResult
     public func request(permissions: [Permission]) async throws -> RequestPermissionResponse {
-        guard currentUserCanRequestPermissions(permissions) else {
+        if await !currentUserCanRequestPermissions(permissions) {
             throw ClientError.MissingPermissions()
         }
         let request = RequestPermissionRequest(
             permissions: permissions.map(\.rawValue)
         )
-        
         return try await coordinatorClient.requestPermission(
             type: callType,
             id: callId,
@@ -363,7 +364,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
-    public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
+    @MainActor public func currentUserHasCapability(_ capability: OwnCapability) -> Bool {
+        if !state.isInitialized {
+            log.warning("currentUserHasCapability called before the call was initialized using .get .create or .join")
+        }
         return state.ownCapabilities.contains(capability)
     }
     
@@ -379,11 +383,25 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> UpdateUserPermissionsResponse {
         try await updatePermissions(
             for: userId,
-            granted: permissions,
+            granted: permissions.map(\.rawValue),
             revoked: []
         )
     }
     
+    @discardableResult
+    public func grant(request: PermissionRequest) async throws -> UpdateUserPermissionsResponse {
+        let response = try await updatePermissions(
+            for: request.user.id,
+            granted: [request.permission],
+            revoked: []
+        )
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self.state.removePermissionRequest(request: request)
+        }
+        return response
+    }
+
     /// Revokes permissions for a user in a call.
     /// - Parameters:
     ///   - permissions: The list of permissions to revoke.
@@ -397,25 +415,41 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await updatePermissions(
             for: userId,
             granted: [],
-            revoked: permissions
+            revoked: permissions.map(\.rawValue)
         )
     }
     
-    /// Mute users in a call.
-    /// - Parameters:
-    ///   - request: The mute request.
-    /// - Throws: error if muting the users fails.
     @discardableResult
-    public func muteUsers(
-        with request: MuteUsersRequest
+    public func mute(
+        userId: String,
+        audio: Bool = true,
+        video: Bool = true
     ) async throws -> MuteUsersResponse {
         try await coordinatorClient.muteUsers(
             type: callType,
             id: callId,
-            muteUsersRequest: request
+            muteUsersRequest: MuteUsersRequest(
+                audio: audio,
+                userIds: [userId],
+                video: video
+            )
         )
     }
-    
+
+    @discardableResult
+    public func muteAllUsers(audio: Bool = true, video: Bool = true) async throws -> MuteUsersResponse {
+        try await coordinatorClient.muteUsers(
+            type: callType,
+            id: callId,
+            muteUsersRequest: MuteUsersRequest(
+                audio: audio,
+                muteAllUsers: true,
+                video: video
+            )
+        )
+    }
+
+
     /// Ends a call.
     /// - Throws: error if ending the call fails.
     @discardableResult
@@ -430,7 +464,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func blockUser(with userId: String) async throws -> BlockUserResponse {
         let response = try await coordinatorClient.blockUser(type: callType, id: callId, blockUserRequest: BlockUserRequest(userId: userId))
-        state.blockUser(id: userId)
+        await state.blockUser(id: userId)
         return response
     }
     
@@ -441,7 +475,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func unblockUser(with userId: String) async throws -> UnblockUserResponse {
         let response = try await coordinatorClient.unblockUser(type: callType, id: callId, unblockUserRequest: UnblockUserRequest(userId: userId))
-        state.unblockUser(id: userId)
+        await state.unblockUser(id: userId)
         return response
     }
     
@@ -527,7 +561,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ) async throws -> QueryMembersResponse {
         let request = QueryMembersRequest(filterConditions: filters, id: callId, limit: limit, next: next, sort: sort, type: callType)
         let response = try await coordinatorClient.queryMembers(queryMembersRequest: request)
-        state.mergeMembers(response.members)
+        await state.mergeMembers(response.members)
         return response
     }
 
@@ -546,13 +580,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
-        if reconnectionStatus != self.state.reconnectionStatus {
-            self.state.reconnectionStatus = reconnectionStatus
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            if reconnectionStatus != self.state.reconnectionStatus {
+                self.state.reconnectionStatus = reconnectionStatus
+            }
         }
     }
     
     internal func update(recordingState: RecordingState) {
-        self.state.recordingState = recordingState
+        executeOnMain { [weak self] in
+            self?.state.recordingState = recordingState
+        }
     }
     
     internal func onEvent(_ event: WrappedEvent) {
@@ -562,8 +601,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         guard videoEvent.forCall(cid: cId) else {
             return
         }
-        state.updateState(from: videoEvent)
-        callController.updateOwnCapabilities(ownCapabilities: state.ownCapabilities)
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self.state.updateState(from: videoEvent)
+            self.callController.updateOwnCapabilities(ownCapabilities: self.state.ownCapabilities)
+        }
+        
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }
@@ -572,15 +615,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     //MARK: - private
     private func updatePermissions(
         for userId: String,
-        granted: [Permission],
-        revoked: [Permission]
+        granted: [String],
+        revoked: [String]
     ) async throws -> UpdateUserPermissionsResponse {
-        if !currentUserHasCapability(.updateCallPermissions) {
+        if await !currentUserHasCapability(.updateCallPermissions) {
             throw ClientError.MissingPermissions()
         }
         let updatePermissionsRequest = UpdateUserPermissionsRequest(
-            grantPermissions: granted.map(\.rawValue),
-            revokePermissions: revoked.map(\.rawValue),
+            grantPermissions: granted,
+            revokePermissions: revoked,
             userId: userId
         )
         return try await coordinatorClient.updateUserPermissions(
@@ -603,7 +646,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             id: callId,
             updateCallMembersRequest: request
         )
-        state.mergeMembers(response.members)
+        await state.mergeMembers(response.members)
         return response
     }
 }

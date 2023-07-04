@@ -5,6 +5,7 @@
 import StreamVideo
 import SwiftUI
 
+@MainActor
 class CallParticipantsInfoViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
@@ -86,25 +87,11 @@ class CallParticipantsInfoViewModel: ObservableObject {
     }
     
     private func muteAudio(for userId: String) {
-        let muteRequest = MuteUsersRequest(
-            audio: true,
-            muteAllUsers: false,
-            screenshare: false,
-            userIds: [userId],
-            video: false
-        )
-        execute(muteRequest: muteRequest)
+        executeMute(userId: userId, audio: true, video: false)
     }
     
     private func muteVideo(for userId: String) {
-        let muteRequest = MuteUsersRequest(
-            audio: false,
-            muteAllUsers: false,
-            screenshare: false,
-            userIds: [userId],
-            video: true
-        )
-        execute(muteRequest: muteRequest)
+        executeMute(userId: userId, audio: false, video: true)
     }
     
     private func block(userId: String) {
@@ -121,10 +108,10 @@ class CallParticipantsInfoViewModel: ObservableObject {
         }
     }
     
-    private func execute(muteRequest: MuteUsersRequest) {
+    private func executeMute(userId: String,audio: Bool = true,video: Bool = true){
         guard let call else { return }
         Task {
-            try await call.muteUsers(with: muteRequest)
+            try await call.mute(userId:userId, audio:audio, video:video)
         }
     }
 }

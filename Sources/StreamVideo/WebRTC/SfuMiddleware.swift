@@ -79,9 +79,9 @@ class SfuMiddleware: EventMiddleware {
             case .trackUnpublished(let event):
                 await handleTrackUnpublishedEvent(event)
             case .error(let event):
-                log.error(event.error.message)
+                log.error(event.error.message, error: event.error)
             case .callGrantsUpdated(_):
-                log.error("TODO: callGrantsUpdated")
+                log.warning("TODO: callGrantsUpdated")
             case .goAway(let event):
                 log.info("Received go away event with reason: \(event.reason.rawValue)")
                 onSessionMigrationEvent?()
@@ -114,7 +114,7 @@ class SfuMiddleware: EventMiddleware {
                 _ = try await signalService.sendAnswer(sendAnswerRequest: sendAnswerRequest)
             }
         } catch {
-            log.error("Error handling offer event \(error.localizedDescription)")
+            log.error("Error handling offer event", error: error)
         }
     }
     

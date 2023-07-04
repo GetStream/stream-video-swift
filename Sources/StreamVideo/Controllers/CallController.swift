@@ -270,7 +270,9 @@ class CallController {
                 self?.call?.update(reconnectionStatus: .connected)
             }
         } else {
-            call?.state.reconnectionStatus = .migrating
+            executeOnMain { [weak self] in
+                self?.call?.state.reconnectionStatus = .migrating
+            }
             webRTCClient?.prepareForMigration(
                 url: response.credentials.server.url,
                 token: response.credentials.token,
@@ -286,10 +288,12 @@ class CallController {
             migrating: migrating
         )
         let sessionId = webRTCClient?.sessionID ?? ""
-        call?.state.sessionId = sessionId
-        call?.update(recordingState: response.call.recording ? .recording : .noRecording)
-        call?.state.ownCapabilities = response.ownCapabilities
-        call?.state.update(from: response.call)
+        executeOnMain { [weak self] in
+            self?.call?.state.sessionId = sessionId
+            self?.call?.update(recordingState: response.call.recording ? .recording : .noRecording)
+            self?.call?.state.ownCapabilities = response.ownCapabilities
+            self?.call?.state.update(from: response)
+        }
     }
     
     private func currentWebRTCClient() throws -> WebRTCClient {
@@ -319,7 +323,9 @@ class CallController {
         switch state {
         case .disconnected(let source):
             log.debug("Signal channel disconnected")
-            handleSignalChannelDisconnect(source: source)
+            executeOnMain { [weak self] in
+                self?.handleSignalChannelDisconnect(source: source)
+            }
         case .connected(healthCheckInfo: _):
             log.debug("Signal channel connected")
             if reconnectionDate != nil {
@@ -331,7 +337,7 @@ class CallController {
         }
     }
     
-    private func handleSignalChannelDisconnect(
+    @MainActor private func handleSignalChannelDisconnect(
         source: WebSocketConnectionState.DisconnectionSource,
         isRetry: Bool = false
     ) {

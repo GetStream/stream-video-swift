@@ -15,6 +15,13 @@ extension MemberResponse: @unchecked Sendable {}
 extension UpdateCallMembersResponse: @unchecked Sendable {}
 extension CallSettingsRequest: @unchecked Sendable {}
 extension JoinCallResponse: @unchecked Sendable {}
+extension GetOrCreateCallResponse: @unchecked Sendable {}
+extension GetCallResponse: @unchecked Sendable {}
+extension UpdateCallResponse: @unchecked Sendable {}
+extension BlockUserResponse: @unchecked Sendable {}
+extension UnblockUserResponse: @unchecked Sendable {}
+extension MuteUsersResponse: @unchecked Sendable {}
+extension MuteUsersRequest: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 

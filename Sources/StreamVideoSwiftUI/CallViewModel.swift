@@ -202,7 +202,7 @@ open class CallViewModel: ObservableObject {
                     audioOutputOn: callSettings.audioOutputOn
                 )
             } catch {
-                log.error("Error toggling camera")
+                log.error("Error toggling camera", error: error)
             }
         }
     }
@@ -221,7 +221,7 @@ open class CallViewModel: ObservableObject {
                     audioOutputOn: callSettings.audioOutputOn
                 )
             } catch {
-                log.error("Error toggling microphone")
+                log.error("Error toggling microphone", error: error)
             }
         }
     }
@@ -252,7 +252,7 @@ open class CallViewModel: ObservableObject {
                     audioOutputOn: isEnabled
                 )
             } catch {
-                log.error("Error toggling audio output")
+                log.error("Error toggling audio output", error: error)
             }
         }
     }
@@ -462,7 +462,7 @@ open class CallViewModel: ObservableObject {
                 save(call: call)
                 enteringCallTask = nil
             } catch {
-                log.error("Error starting a call \(error.localizedDescription)")
+                log.error("Error starting a call", error: error)
                 self.error = error
                 callingState = .idle
                 enteringCallTask = nil

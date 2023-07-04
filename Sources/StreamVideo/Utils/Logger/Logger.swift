@@ -230,7 +230,8 @@ public class Logger {
         fileName: StaticString = #filePath,
         lineNumber: UInt = #line,
         message: @autoclosure () -> Any,
-        subsystems: LogSubsystem = .other
+        subsystems: LogSubsystem = .other,
+        error: Error?
     ) {
         log(
             level,
@@ -238,7 +239,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: message(),
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: error
         )
     }
     
@@ -257,7 +259,8 @@ public class Logger {
         fileName: StaticString = #file,
         lineNumber: UInt = #line,
         message: @autoclosure () -> Any,
-        subsystems: LogSubsystem = .other
+        subsystems: LogSubsystem = .other,
+        error: Error?
     ) {
         let enabledDestinations = destinations.filter { $0.isEnabled(level: level, subsystems: subsystems) }
         guard !enabledDestinations.isEmpty else { return }
@@ -270,7 +273,8 @@ public class Logger {
             threadName: threadName,
             functionName: functionName,
             fileName: fileName,
-            lineNumber: lineNumber
+            lineNumber: lineNumber,
+            error: error
         )
         for destination in enabledDestinations {
             loggerQueue.async {
@@ -299,7 +303,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: message(),
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: nil
         )
     }
     
@@ -323,7 +328,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: message(),
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: nil
         )
     }
     
@@ -347,7 +353,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: message(),
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: nil
         )
     }
     
@@ -361,6 +368,7 @@ public class Logger {
     public func error(
         _ message: @autoclosure () -> Any,
         subsystems: LogSubsystem = .other,
+        error: Error? = nil,
         functionName: StaticString = #function,
         fileName: StaticString = #file,
         lineNumber: UInt = #line
@@ -371,7 +379,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: message(),
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: error
         )
     }
     
@@ -399,7 +408,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: "Assert failed: \(message())",
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: nil
         )
     }
     
@@ -424,7 +434,8 @@ public class Logger {
             fileName: fileName,
             lineNumber: lineNumber,
             message: "Assert failed: \(message())",
-            subsystems: subsystems
+            subsystems: subsystems,
+            error: nil
         )
     }
 }

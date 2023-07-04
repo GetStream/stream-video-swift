@@ -82,7 +82,7 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
         try await withCheckedThrowingContinuation { continuation in
             let task = urlSession.dataTask(with: request) { data, response, error in
                 if let error = error {
-                    log.debug("Error executing request \(error.localizedDescription)", subsystems: .httpRequests)
+                    log.error("Error executing request", subsystems: .httpRequests, error: error)
                     continuation.resume(throwing: error)
                     return
                 }

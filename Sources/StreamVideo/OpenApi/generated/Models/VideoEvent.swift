@@ -104,7 +104,6 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value.type
         }
     }
-
     public var rawValue: Event {
         switch self {
         case .typeBlockedUserEvent(let value):
