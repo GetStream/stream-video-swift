@@ -1,8 +1,5 @@
 //
-//  StreamVideoUIKit.h
-//  StreamVideoUIKit
-//
-//  Created by Martin Mitrevski on 11.7.22.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 #import <Foundation/Foundation.h>

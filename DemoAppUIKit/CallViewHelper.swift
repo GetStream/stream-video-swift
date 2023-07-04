@@ -1,8 +1,5 @@
 //
-//  CallViewHelper.swift
-//  DemoAppUIKit
-//
-//  Created by Martin Mitrevski on 12.12.22.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import UIKit

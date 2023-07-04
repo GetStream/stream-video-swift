@@ -19,7 +19,7 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
                 microphoneOn: true,
                 hasDecibelValues: true
             )
-            AssertSnapshot(view, size: sizeThatFits, suffix: "with_\(count)_decibels")
+            AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits, suffix: "with_\(count)_decibels")
         }
     }
     
@@ -29,7 +29,7 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
             microphoneOn: true,
             hasDecibelValues: false
         )
-        AssertSnapshot(view, size: sizeThatFits)
+        AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits)
     }
     
     func test_microphoneCheckView_micOff_snapshot() throws {
@@ -38,6 +38,6 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
             microphoneOn: false,
             hasDecibelValues: true
         )
-        AssertSnapshot(view, size: sizeThatFits)
+        AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits)
     }
 }
