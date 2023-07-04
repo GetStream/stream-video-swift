@@ -1,8 +1,5 @@
 //
-//  CallsView.swift
-//  DemoApp
-//
-//  Created by Martin Mitrevski on 13.4.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI

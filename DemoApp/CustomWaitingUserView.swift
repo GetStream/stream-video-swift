@@ -1,8 +1,5 @@
 //
-//  CustomWaitingUserView.swift
-//  DemoApp
-//
-//  Created by Martin Mitrevski on 28.5.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI

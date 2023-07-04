@@ -1,8 +1,5 @@
 //
-//  TokenService.swift
-//  DemoApp
-//
-//  Created by Martin Mitrevski on 2.3.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
