@@ -251,10 +251,10 @@ var body: some Scene {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
                     description: call.state.custom["description"]?.stringValue,
-                    participants: call.state.participants.map {$0}
+                    participants: call.state.participants
                 )
                 ParticipantsView(
-                    participants: call.state.participants.map {$0}
+                    participants: call.state.participants
                 )
                 Spacer()
                 ControlsView(call: call, state: state)
@@ -476,10 +476,10 @@ var body: some Scene {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
                     description: call.state.custom["description"]?.stringValue,
-                    participants: call.state.participants.map {$0}
+                    participants: call.state.participants
                 )
                 ParticipantsView(
-                    participants: call.state.participants.map {$0}
+                    participants: call.state.participants
                 )
                 Spacer()
                 PermissionRequestsView(call: call, state: state)
@@ -494,8 +494,8 @@ var body: some Scene {
                     create: true,
                     options: .init(
                         members: [
-                            .init(userId: "tommaso"),
-                            .init(userId: "thierry"),
+                            .init(userId: "john_smith"),
+                            .init(userId: "jane_doe"),
                         ],
                         custom: [
                             "title": .string("SwiftUI heads"),
@@ -576,7 +576,7 @@ Building custom layouts is very simple, all we need to do is to apply some filte
 
 ```swift
 // a list of participants, by default this is list is ordered by the ID of the user
-call.state.participants.map { $0 }
+call.state.participants
 
 // Speakers: participants that have an audio track (ie. are allowed to speak and have a mic configured)
 call.state.participants.filter { $0.hasAudio }
@@ -595,7 +595,7 @@ var body: some Scene {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
                     description: call.state.custom["description"]?.stringValue,
-                    participants: call.state.participants.map {$0}
+                    participants: call.state.participants
                 )
                 Text("Speakers")
                 Divider()
@@ -620,8 +620,8 @@ var body: some Scene {
                     create: true,
                     options: .init(
                         members: [
-                            .init(userId: "tommaso"),
-                            .init(userId: "thierry"),
+                            .init(userId: "john_smith"),
+                            .init(userId: "jane_doe"),
                         ],
                         custom: [
                             "title": .string("SwiftUI heads"),
