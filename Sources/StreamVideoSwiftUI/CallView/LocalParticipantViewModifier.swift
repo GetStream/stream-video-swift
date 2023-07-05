@@ -15,11 +15,10 @@ public struct LocalParticipantViewModifier: ViewModifier {
 
     init(
         localParticipant: CallParticipant,
-        microphoneChecker: MicrophoneChecker,
         callSettings: Binding<CallSettings>
     ) {
         self.localParticipant = localParticipant
-        _microphoneChecker = .init(wrappedValue: microphoneChecker)
+        _microphoneChecker = .init(wrappedValue: .init())
         self._callSettings = callSettings
     }
 
@@ -47,11 +46,10 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
     init(
         localParticipant: CallParticipant,
-        microphoneChecker: MicrophoneChecker,
         callSettings: Binding<CallSettings>
     ) {
         self.localParticipant = localParticipant
-        _microphoneChecker = .init(wrappedValue: microphoneChecker)
+        _microphoneChecker = .init(wrappedValue: .init())
         self._callSettings = callSettings
     }
 
