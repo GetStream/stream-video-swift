@@ -131,9 +131,6 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleParticipantLeft(_ event: Stream_Video_Sfu_Event_ParticipantLeft) async {
-        if event.participant.sessionID == sessionID {
-            return
-        }
         guard event.participant.userID != recordingUserId else {
             log.debug("Recording user has left the call")
             return

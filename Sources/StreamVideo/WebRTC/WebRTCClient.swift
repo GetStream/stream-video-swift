@@ -221,7 +221,6 @@ class WebRTCClient: NSObject {
             log.debug("Performing session migration", subsystems: .webRTC)
             migratingWSClient?.connect()
             publisher?.update(configuration: connectOptions.rtcConfiguration)
-            subscriber?.update(configuration: connectOptions.rtcConfiguration)
             sfuMiddleware.onSocketConnected = handleOnMigrationJoinResponse
         }
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
@@ -261,7 +260,6 @@ class WebRTCClient: NSObject {
         signalChannel = nil
         localAudioTrack = nil
         localVideoTrack = nil
-        sessionID = UUID().uuidString
         await state.cleanUp()
         sfuMiddleware.cleanUp()
         onParticipantsUpdated = nil
@@ -432,20 +430,23 @@ class WebRTCClient: NSObject {
             temp = subscriber
             temp?.paused = true
             try await setupPeerConnections()
-            try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
-            onSessionMigrationCompleted?()
-            temp?.close()
-            temp = nil
+            if publisher?.shouldRestartIce == true {
+                try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
+            }
+            subscriber?.onConnected = { [weak self] _ in
+                guard let self else { return }
+                self.onSessionMigrationCompleted?()
+                self.temp?.close()
+                self.temp = nil
+                self.subscriber?.onConnected = nil
+            }
         }
     }
     
     private func sendMigrationJoinRequest() async {
         do {
-            guard let publisher else {
-                throw ClientError.Unexpected("Peer connection doesn't exist")
-            }
-            let offer = try await publisher.createOffer()
-            await sendJoinRequest(with: offer.sdp, migrating: true)
+            let sdp = try await tempOfferSdp()
+            await sendJoinRequest(with: sdp, migrating: true)
         } catch {
             log.error("Error migrating the session")
             cleanupMigrationData()
@@ -698,8 +699,13 @@ class WebRTCClient: NSObject {
     }
     
     private func handleSocketConnected() async throws {
+        let sdp = try await tempOfferSdp()
+        await sendJoinRequest(with: sdp)
+    }
+    
+    private func tempOfferSdp() async throws -> String {
         guard let connectOptions = connectOptions else {
-            return
+            throw ClientError.Unexpected()
         }
         
         let tempPeerConnection = try await peerConnectionFactory.makePeerConnection(
@@ -707,7 +713,7 @@ class WebRTCClient: NSObject {
             callCid: callCid,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
-            signalService: signalService,
+            signalService: migratingSignalService ?? signalService,
             videoOptions: videoOptions,
             reportsStats: false
         )
@@ -731,7 +737,7 @@ class WebRTCClient: NSObject {
         let offer = try await tempPeerConnection.createOffer()
         tempPeerConnection.transceiver?.stopInternal()
         tempPeerConnection.close()
-        await sendJoinRequest(with: offer.sdp)
+        return offer.sdp
     }
     
     private func sendJoinRequest(with sdp: String, migrating: Bool = false) async {

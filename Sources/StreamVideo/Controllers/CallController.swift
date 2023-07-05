@@ -341,7 +341,13 @@ class CallController {
             if reconnectionDate != nil {
                 reconnectionDate = nil
             }
-            call?.update(reconnectionStatus: .connected)
+            executeOnMain { [weak self] in
+                guard let self else { return }
+                let status = self.call?.state.reconnectionStatus
+                if status != .migrating {
+                    self.call?.update(reconnectionStatus: .connected)
+                }
+            }
         default:
             log.debug("Signal connection state changed to \(state)")
         }
@@ -405,12 +411,18 @@ class CallController {
     
     private func handleSessionMigrationEvent() {
         Task {
+            let state = await call?.state.reconnectionStatus
+            if state == .migrating {
+                log.debug("Migration already in progress")
+                return
+            }
             try await joinCall(
                 callType: callType,
                 callId: callId,
-                callSettings: webRTCClient?.callSettings ?? CallSettings(),
+                callSettings: call?.state.callSettings ?? CallSettings(),
                 videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                 migratingFrom: currentSFU,
+                sessionID: webRTCClient?.sessionID,
                 ring: false,
                 notify: false
             )

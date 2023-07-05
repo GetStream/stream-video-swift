@@ -31,6 +31,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
+    var onConnected: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
     
@@ -63,6 +64,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     var videoTrackPublished: Bool {
         publishedTracks.contains(.video)
+    }
+    
+    var shouldRestartIce: Bool {
+        !publishedTracks.isEmpty
     }
     
     func createOffer(constraints: RTCMediaConstraints = .defaultConstraints) async throws -> RTCSessionDescription {
@@ -198,6 +203,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         if newState == .disconnected {
             log.debug("Peer connection state changed to \(newState)", subsystems: .webRTC)
             onDisconnect?(self)
+        } else if newState == .connected {
+            onConnected?(self)
         }
     }
     
