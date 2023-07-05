@@ -27,10 +27,7 @@ extension StreamVideoSwiftUIApp {
 }
 
 public class SentryLogDestination: LogDestination {
-    public func write(message: String) {
-        //TODO remove me once this function is gone from the protocol
-    }
-    
+  
     open var identifier: String
     open var level: LogLevel
     open var subsystems: LogSubsystem
