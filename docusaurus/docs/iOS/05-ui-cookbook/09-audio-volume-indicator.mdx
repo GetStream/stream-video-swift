@@ -3,10 +3,7 @@ title: Audio Volume Indicator
 description: Audio Volume Indicator
 ---
 
-The audio indicator gives you a visual feedback when a user is speaking. To understand who's speaking we provide the following attributes from the `CallParticipant`:
-- `isDominantSpeaker` - whether the participant is the dominant speaker on the call.
-- `isSpeaking` - whether the participant is speaking.
-- `audioLevel` - the current audio level of the user.
+The audio indicator gives you a visual feedback when a user is speaking. To understand who's speaking we provide `call.state.dominantSpeaker` and `call.state.activeSpeakers`. On the participant you can observe `participant.isSpeaking`, `participant.isDominantSpeaker`, `participant.audioLevel` and `participant.audioLevels`.
 
 ### Audio Volume Indicator
 
@@ -35,7 +32,7 @@ The component expects the following parameters:
 
 If you want to build a custom pre-joining (lobby) view, that's displayed to users before they join the call, you might want to show an indicator of the audio levels of the current user.
 
-In order to do this, you can use the `MicrophoneChecker` and the `MicrophoneCheckView` from the `StreamVideo` SwiftUI SDK. The `MicrophoneChecker` is an observable class that provides updates for the last decibel values of the current user. The `MicrophoneCheckView` presents them in a reusable view component.
+In order to do this, you can use the `MicrophoneChecker` and the `MicrophoneCheckView` from the `StreamVideo` SwiftUI SDK. The `MicrophoneChecker` is an observable class that provides updates for the last audioLevels of the current user. The `MicrophoneCheckView` presents them in a reusable view component.
 
 Both components are used in our `LobbyView`, that you can also directly use in your apps.
 
@@ -45,14 +42,14 @@ Here's an example usage. First, you instantiate the `MicrophoneChecker` class, e
 @StateObject var microphoneChecker = MicrophoneChecker()
 ```
 
-Optionally, you can provide a `valueLimit` in the initalizer of the `MicrophoneChecker`. By default, this value is 3, which means it returns the last three decibel values. You can pass a bigger number if you want to show more values to the user.
+Optionally, you can provide a `valueLimit` in the initalizer of the `MicrophoneChecker`. By default, this value is 3, which means it returns the last three audioLevels. You can pass a bigger number if you want to show more values to the user.
 
-Then, in the `MicrophoneCheckView`, you pass the decibels array, as well as whether the `microphoneChecker` has any decibel values. If this value is `false`, the UI shows warning to the user that they might have an issue with their microphone.
+Then, in the `MicrophoneCheckView`, you pass the audioLevels array, as well as the `microphoneChecker.isSilent` value. If this value is `true`, the UI shows warning to the user that they might have an issue with their microphone.
 
 ```swift
 MicrophoneCheckView(
-	decibels: microphoneChecker.decibels,
+	audioLevels: microphoneChecker.audioLevels,
 	microphoneOn: callViewModel.callSettings.audioOn,
-    hasDecibelValues: microphoneChecker.hasDecibelValues                    
+    isSilent: microphoneChecker.isSilent                    
 )
 ```
