@@ -251,10 +251,10 @@ var body: some Scene {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
                     description: call.state.custom["description"]?.stringValue,
-                    participants: call.state.participants.values.map {$0}
+                    participants: call.state.participants.map {$0}
                 )
                 ParticipantsView(
-                    participants: call.state.participants.values.map {$0}
+                    participants: call.state.participants.map {$0}
                 )
                 Spacer()
                 ControlsView(call: call, state: state)
@@ -476,10 +476,10 @@ var body: some Scene {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
                     description: call.state.custom["description"]?.stringValue,
-                    participants: call.state.participants.values.map {$0}
+                    participants: call.state.participants.map {$0}
                 )
                 ParticipantsView(
-                    participants: call.state.participants.values.map {$0}
+                    participants: call.state.participants.map {$0}
                 )
                 Spacer()
                 PermissionRequestsView(call: call, state: state)
@@ -516,7 +516,57 @@ Now when a user requests access to speak the app will look like this:
 
 ### Step 6 - Add microphone control
 
-TODO: add this
+You can read & manage the microphone status from the `call.microphone` published variable. 
+
+```swift
+/// Read the microphone's status
+let isEnabled = call.microphone.status == .enabled
+
+/// Toggle between enabled/disabled microphone status.
+try await call.microphone.toggle()
+
+/// Enable the microphone.
+try await call.microphone.enable()
+
+/// Disable the microphone.
+try await call.microphone.disable()
+```
+
+Let's update the `MicButtonView` with microphone handling.
+
+```swift title=MicButtonView
+struct MicButtonView: View {
+    @ObservedObject var microphone: MicrophoneManager
+
+    var body: some View {
+        Button {
+           Task {
+               try await microphone.toggle()
+           }
+        } label: {
+            Image(systemName: microphone.status == .enabled ? "mic.circle" : "mic.slash.circle")
+                .foregroundColor(microphone.status == .enabled ? .red : .primary)
+                .font(.title)
+        }
+    }
+}
+```
+
+We can now pass the `microphone` ObservedObject from the `ControlsView`
+
+```swift title=ControlsView
+struct ControlsView: View {
+    var call: Call
+    @ObservedObject var state: CallState
+
+    var body: some View {
+        HStack {
+            MicButtonView(microphone: call.microphone)
+            LiveButtonView(call: call, state: state)
+        }
+    }
+}
+```
 
 ### Step 7 - Group participants
 
@@ -526,13 +576,13 @@ Building custom layouts is very simple, all we need to do is to apply some filte
 
 ```swift
 // a list of participants, by default this is list is ordered by the ID of the user
-call.state.participants.values.map {$0}
+call.state.participants.map { $0 }
 
 // Speakers: participants that have an audio track (ie. are allowed to speak and have a mic configured)
-call.state.participants.values.filter {$0.hasAudio}
+call.state.participants.filter { $0.hasAudio }
 
 // Listeners: participants that do not have an audio track
-call.state.participants.values.filter {!$0.hasAudio}
+call.state.participants.filter { !$0.hasAudio }
 ```
 
 We already have a view to display participants so all we need to do is to create another one, here's how the scene body looks
@@ -545,17 +595,17 @@ var body: some Scene {
                 DescriptionView(
                     title: call.state.custom["title"]?.stringValue,
                     description: call.state.custom["description"]?.stringValue,
-                    participants: call.state.participants.values.map {$0}
+                    participants: call.state.participants.map {$0}
                 )
                 Text("Speakers")
                 Divider()
                 ParticipantsView(
-                    participants: call.state.participants.values.filter {$0.hasAudio}
+                    participants: call.state.participants.filter {$0.hasAudio}
                 )
                 Text("Listeners")
                 Divider()
                 ParticipantsView(
-                    participants: call.state.participants.values.filter {!$0.hasAudio}
+                    participants: call.state.participants.filter {!$0.hasAudio}
                 )
                 Spacer()
                 PermissionRequestsView(call: call, state: state)
