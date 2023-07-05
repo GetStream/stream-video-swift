@@ -409,13 +409,13 @@ With these changes things get more interesting, the app is now showing a list of
 
 ![Preview of the app with participants list](../assets/audioroom_tutorial/participants.png)
 
-### Step 4 - Go live and join from the browser
+### Step 5 - Go live and join from the browser
 
 If you now join the call from the browser you will see that the participant list updates as you open/close the browser tab.
 
 Note how the web interface won't allow you to share your audio/video. The reason for this is that by default the audio_room call type only allows moderators or admins to speak. Regular participants can request permission. And if different defaults make sense for your app you can edit the call type in the dashboard or create your own.
 
-### Step 5 - Requesting permission to speak
+### Step 6 - Requesting permission to speak
 
 Requesting permission to speak is easy. Let's first have a quick look at how the SDK call object exposes this:
 
@@ -514,7 +514,7 @@ Now when a user requests access to speak the app will look like this:
 
 ![Permission requests](../assets/audioroom_tutorial/permissions.png)
 
-### Step 6 - Add microphone control
+### Step 7 - Add microphone control
 
 You can read & manage the microphone status from the `call.microphone` published variable. 
 
@@ -568,7 +568,7 @@ struct ControlsView: View {
 }
 ```
 
-### Step 7 - Group participants
+### Step 8 - Group participants
 
 It is common for audio rooms and similar interactive audio/video experiences to show users in separate groups. Let's see how we can update this application to render participants in two separate sections: speakers and listeners.
 
