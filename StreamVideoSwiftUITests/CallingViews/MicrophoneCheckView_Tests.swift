@@ -10,33 +10,33 @@ import XCTest
 @MainActor
 final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
     
-    let decibels = [Float](repeating: 0.0, count: 10)
+    let audioLevels = [Float](repeating: 0.0, count: 10)
     
-    func test_microphoneCheckView_withDecibels_snapshot() throws {
+    func test_microphoneCheckView_withAudioLevels_snapshot() throws {
         for count in 0...5 {
             let view = MicrophoneCheckView(
-                decibels: [Float](repeating: 0.0, count: count),
+                audioLevels: [Float](repeating: 0.0, count: count),
                 microphoneOn: true,
-                hasDecibelValues: true
+                isSilent: false
             )
-            AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits, suffix: "with_\(count)_decibels")
+            AssertSnapshot(view, size: sizeThatFits, suffix: "with_\(count)_audioLevels")
         }
     }
     
-    func test_microphoneCheckView_withoutDecibels_snapshot() throws {
+    func test_microphoneCheckView_withoutAudioLevels_snapshot() throws {
         let view = MicrophoneCheckView(
-            decibels: decibels,
+            audioLevels: audioLevels,
             microphoneOn: true,
-            hasDecibelValues: false
+            isSilent: true
         )
         AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits)
     }
     
     func test_microphoneCheckView_micOff_snapshot() throws {
         let view = MicrophoneCheckView(
-            decibels: decibels,
+            audioLevels: audioLevels,
             microphoneOn: false,
-            hasDecibelValues: true
+            isSilent: false
         )
         AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits)
     }
