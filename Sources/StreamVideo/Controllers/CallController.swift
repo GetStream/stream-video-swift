@@ -286,7 +286,8 @@ class CallController {
             webRTCClient?.prepareForMigration(
                 url: response.credentials.server.url,
                 token: response.credentials.token,
-                webSocketURL: response.credentials.server.wsEndpoint
+                webSocketURL: response.credentials.server.wsEndpoint,
+                fromSfuName: response.credentials.server.edgeName
             )
         }
         

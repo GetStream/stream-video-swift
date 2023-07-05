@@ -125,6 +125,7 @@ class WebRTCClient: NSObject {
     private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
     private var migratingWSClient: WebSocketClient?
     private var migratingToken: String?
+    private var fromSfuName: String?
     private var temp: PeerConnection?
 
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
@@ -228,7 +229,13 @@ class WebRTCClient: NSObject {
         }
     }
     
-    func prepareForMigration(url: String, token: String, webSocketURL: String) {
+    func prepareForMigration(
+        url: String,
+        token: String,
+        webSocketURL: String,
+        fromSfuName: String
+    ) {
+        self.fromSfuName = fromSfuName
         migratingToken = token
         let signalServer = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,
@@ -419,7 +426,10 @@ class WebRTCClient: NSObject {
     }
         
     private func handleOnMigrationJoinResponse() {
+        signalChannel?.connectionStateDelegate = nil
+        signalChannel?.onWSConnectionEstablished = nil
         signalChannel?.disconnect {}
+        signalChannel = nil
         signalChannel = migratingWSClient
         if let migratingSignalService {
             signalService = migratingSignalService
@@ -647,7 +657,7 @@ class WebRTCClient: NSObject {
         if migrating {
             joinRequest.token = migratingToken ?? token
             var migration = Stream_Video_Sfu_Event_Migration()
-            migration.fromSfuID = signalService.hostname
+            migration.fromSfuID = fromSfuName ?? signalService.hostname
             migration.announcedTracks = loadTracks()
             migration.subscriptions = await loadTrackSubscriptionDetails()
         } else {
