@@ -145,6 +145,12 @@ public protocol ViewFactory: AnyObject {
     ///  - viewModel: The view model used for the call.
     /// - Returns: view shown in the reconnection slot.
     func makeReconnectionView(viewModel: CallViewModel) -> ReconnectionViewType
+
+    associatedtype LocalParticipantViewModifierType = ViewModifier
+    func makeLocalParticipantViewModifier(
+        localParticipant: CallParticipant,
+        callSettings: Binding<CallSettings>
+    ) -> LocalParticipantViewModifierType
 }
 
 extension ViewFactory {
@@ -309,6 +315,23 @@ extension ViewFactory {
     
     public func makeReconnectionView(viewModel: CallViewModel) -> some View {
         ReconnectionView(viewModel: viewModel, viewFactory: self)
+    }
+
+    public func makeLocalParticipantViewModifier(
+        localParticipant: CallParticipant,
+        callSettings: Binding<CallSettings>
+    ) -> some ViewModifier {
+        if #available(iOS 14.0, *) {
+            return LocalParticipantViewModifier(
+                localParticipant: localParticipant,
+                callSettings: callSettings
+            )
+        } else {
+            return LocalParticipantViewModifier_iOS13(
+                localParticipant: localParticipant,
+                callSettings: callSettings
+            )
+        }
     }
 }
 

@@ -449,7 +449,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
 
         let callParticipant = participant.toCallParticipant(showTrack: false)
-        callViewModel.changeTrackVisbility(for: callParticipant, isVisible: true)
+        callViewModel.changeTrackVisibility(for: callParticipant, isVisible: true)
 
         // Then
         try await XCTAssertWithDelay(callViewModel.participants.first?.showTrack == true)

@@ -74,10 +74,10 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                             .cornerRadius(8)
                             .accessibility(identifier: "screenSharingParticipantView")
                             .onAppear {
-                                viewModel.changeTrackVisbility(for: participant, isVisible: true)
+                                viewModel.changeTrackVisibility(for: participant, isVisible: true)
                             }
                             .onDisappear {
-                                viewModel.changeTrackVisbility(for: participant, isVisible: false)
+                                viewModel.changeTrackVisibility(for: participant, isVisible: false)
                             }
                         }
                     }

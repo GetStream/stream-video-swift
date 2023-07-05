@@ -379,7 +379,7 @@ open class CallViewModel: ObservableObject {
     /// - Parameters:
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
-    public func changeTrackVisbility(for participant: CallParticipant, isVisible: Bool) {
+    public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
         if !isVisible {
             if participantsLayout == .fullScreen || participantsLayout == .spotlight {
                 if participant.id == participants.first?.id {

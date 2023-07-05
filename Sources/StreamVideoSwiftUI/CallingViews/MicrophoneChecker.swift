@@ -20,7 +20,7 @@ public class MicrophoneChecker: ObservableObject {
     
     private let audioFilename: URL = {
         let documentPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
-        let audioFilename = documentPath.appendingPathComponent("recording.aac")
+        let audioFilename = documentPath.appendingPathComponent("recording.wav")
         return audioFilename
     }()
 
@@ -71,8 +71,12 @@ public class MicrophoneChecker: ObservableObject {
     }
     
     private func captureAudio() {
+        // `kAudioFormatLinearPCM` is being used to be able to support multiple
+        // instances of AVAudioRecorders. (useful when using MicrophoneChecker
+        // during a Call).
+        // https://stackoverflow.com/a/8575101
         let settings = [
-            AVFormatIDKey: Int(kAudioFormatMPEG4AAC),
+            AVFormatIDKey: Int(kAudioFormatLinearPCM),
             AVSampleRateKey: 12000,
             AVNumberOfChannelsKey: 1,
             AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
