@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '14.3'
+xcode_version = ENV['XCODE_VERSION'] || '14.3.1'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
@@ -112,39 +112,28 @@ end
 
 desc 'Runs SwiftUI tests in Debug config'
 lane :test_swiftui do |options|
-  next unless is_check_required(sources: sources_matrix[:swiftui])
-
-  remove_snapshots if options[:record]
-
-  update_testplan_on_ci(path: 'StreamVideoSwiftUITests/StreamVideoSwiftUI.xctestplan')
-
-  scan(
-    project: xcode_project,
-    scheme: 'StreamVideoSwiftUI',
-    testplan: 'StreamVideoSwiftUI',
-    clean: true,
-    result_bundle: true,
-    devices: options[:device],
-    build_for_testing: options[:build_for_testing]
-  )
+  test_ui(scheme: 'StreamVideoSwiftUI', source: :swiftui, device: options[:device], record: options[:record])
 end
 
 desc 'Runs UIKit tests in Debug config'
 lane :test_uikit do |options|
-  next unless is_check_required(sources: sources_matrix[:uikit])
+  test_ui(scheme: 'StreamVideoUIKit', source: :uikit, device: options[:device], record: options[:record])
+end
 
-  remove_snapshots if options[:record]
+private_lane :test_ui do |options|
+  next unless is_check_required(sources: sources_matrix[options[:source]])
 
-  update_testplan_on_ci(path: 'StreamVideoUIKitTests/StreamVideoUIKit.xctestplan')
+  remove_snapshots(scheme: options[:scheme]) if options[:record]
+
+  update_testplan_on_ci(path: "#{options[:scheme]}Tests/#{options[:scheme]}.xctestplan")
 
   scan(
     project: xcode_project,
-    scheme: 'StreamVideoUIKit',
-    testplan: 'StreamVideoUIKit',
+    scheme: options[:scheme],
+    testplan: options[:scheme],
     clean: true,
     result_bundle: true,
-    devices: options[:device],
-    build_for_testing: options[:build_for_testing]
+    devices: options[:device]
   )
 end
 

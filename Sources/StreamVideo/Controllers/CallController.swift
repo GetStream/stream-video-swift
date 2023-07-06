@@ -317,7 +317,7 @@ class CallController {
     private func handleParticipantsUpdated() {
         webRTCClient?.onParticipantsUpdated = { [weak self] participants in
             DispatchQueue.main.async {
-                self?.call?.state.participants = participants
+                self?.call?.state.participantsMap = participants
             }
         }
     }

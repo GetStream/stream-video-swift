@@ -21,7 +21,7 @@ struct CustomCallView<Factory: ViewFactory>: View {
             .onReceive(viewModel.$callSettings) { callSettings in
                 updateMicrophoneChecker()
             }
-            .onReceive(microphoneChecker.$decibels, perform: { values in
+            .onReceive(microphoneChecker.$audioLevels, perform: { values in
                 guard !viewModel.callSettings.audioOn else { return }
                 for value in values {
                     if (value > -50 && value < 0) && !mutedIndicatorShown {

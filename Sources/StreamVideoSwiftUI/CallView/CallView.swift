@@ -145,6 +145,10 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
             }
             .opacity(viewModel.localParticipant != nil ? 1 : 0)
+            .modifier(viewFactory.makeLocalParticipantViewModifier(
+                localParticipant: localParticipant,
+                callSettings: $viewModel.callSettings
+            ))
         } else {
             EmptyView()
         }
@@ -155,7 +159,7 @@ public struct CallView<Factory: ViewFactory>: View {
             viewModel: viewModel,
             availableSize: size,
             onViewRendering: handleViewRendering(_:participant:),
-            onChangeTrackVisibility: viewModel.changeTrackVisbility(for:isVisible:)
+            onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
         )
     }
     

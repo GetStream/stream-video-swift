@@ -22,7 +22,7 @@ jobs:
         include:
           - ios: latest
             device: "iPhone 14 Pro Max"
-            xcode: 14.3
+            xcode: 14.3.1
             os: macos-13
           - ios: 15.4
             device: "iPhone 11"
@@ -95,7 +95,7 @@ jobs:
     strategy:
       matrix:
         include:
-          - xcode: 14.3
+          - xcode: 14.3.1
             os: macos-13
           - xcode: 14.2
             os: macos-12

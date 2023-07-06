@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */; };
+		401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */; };
+		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
@@ -685,6 +688,9 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser.swift; sourceTree = "<group>"; };
+		401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser_Tests.swift; sourceTree = "<group>"; };
+		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "StreamVideoSwiftUIApp+Sentry.swift"; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
@@ -1276,6 +1282,14 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		401480332A5423C70029166A /* Utils */ = {
+			isa = PBXGroup;
+			children = (
+				401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */,
+			);
+			path = Utils;
+			sourceTree = "<group>";
+		};
 		40AB31232A49836800C270E1 /* WebSockets */ = {
 			isa = PBXGroup;
 			children = (
@@ -1613,6 +1627,7 @@
 				846FBE8728AAD81E00147F6E /* Participants */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
 				84231E4628B2506B007985EF /* VideoRenderer.swift */,
+				401480352A5447C50029166A /* LocalParticipantViewModifier.swift */,
 				8457CF9028BB835F00E8CF50 /* CallView.swift */,
 				846E4AFE29D236EA003733AB /* CallTopView.swift */,
 				84EA5D3B28BFB890004D3531 /* CallParticipantImageView.swift */,
@@ -2172,6 +2187,7 @@
 				846E4B0429D2D3D3003733AB /* ModifiedContent.swift */,
 				8479F83329C09EF1009ECE37 /* UserAvatar.swift */,
 				827D893D2A16369300838B1A /* LazyImageExtensions.swift */,
+				4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2294,6 +2310,7 @@
 		84F73814287C141000A363F4 /* StreamVideoSwiftUITests */ = {
 			isa = PBXGroup;
 			children = (
+				401480332A5423C70029166A /* Utils */,
 				84932244290831B70013C029 /* StreamVideoSwiftUI.xctestplan */,
 				8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */,
 				84DCA20A2A382FE0000C3411 /* CallViewModel_Tests.swift */,
@@ -3236,6 +3253,7 @@
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
+				401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */,
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
 				8435EB9029CDAADA00E02651 /* ParticipantsGridLayout.swift in Sources */,
 				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
@@ -3265,6 +3283,7 @@
 				8434C527289AA2F00001490A /* Images.swift in Sources */,
 				827D893E2A16369300838B1A /* LazyImageExtensions.swift in Sources */,
 				8435EB9229CDAD0D00E02651 /* ParticipantsFullScreenLayout.swift in Sources */,
+				401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */,
 				84DC382F29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift in Sources */,
 				846FBE9128AAF52600147F6E /* SelectedParticipantView.swift in Sources */,
 				848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */,
@@ -3331,6 +3350,7 @@
 				82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */,
 				8251E6302A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				8251E62C2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
+				401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */,
 				8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */,
 				84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */,
 				82E3BA362A0BABA2001AB93E /* HTTPClient_Mock.swift in Sources */,

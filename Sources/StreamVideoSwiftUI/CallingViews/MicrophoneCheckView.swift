@@ -10,20 +10,20 @@ public struct MicrophoneCheckView: View {
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
-    var decibels: [Float]
+    var audioLevels: [Float]
     var microphoneOn: Bool
-    var hasDecibelValues: Bool
+    var isSilent: Bool
     var maxHeight: Float = 14
     
     public init(
-        decibels: [Float],
+        audioLevels: [Float],
         microphoneOn: Bool,
-        hasDecibelValues: Bool,
+        isSilent: Bool,
         maxHeight: Float = 14
     ) {
-        self.decibels = decibels
+        self.audioLevels = audioLevels
         self.microphoneOn = microphoneOn
-        self.hasDecibelValues = hasDecibelValues
+        self.isSilent = isSilent
         self.maxHeight = maxHeight
     }
     
@@ -35,12 +35,12 @@ public struct MicrophoneCheckView: View {
                 .bold()
                 .padding(.trailing, 8)
             
-            if microphoneOn && hasDecibelValues {
+            if microphoneOn && !isSilent {
                 AudioVolumeIndicator(
-                    audioLevels: decibels,
+                    audioLevels: audioLevels,
                     maxHeight: maxHeight,
-                    minValue: -120,
-                    maxValue: 0
+                    minValue: 0,
+                    maxValue: 1
                 )
             } else {
                 images.micTurnOff
@@ -97,19 +97,8 @@ public struct AudioVolumeIndicator: View {
         return levels
     }
     
-    private func height(for decibel: Float) -> CGFloat {
-        let value = abs(decibel)
-        let divider = (maxValue - minValue) / 2
-        if divider == 0 {
-            return 0
-        }
-        let ratio = value / divider
-        var height: CGFloat
-        if decibel > 0 {
-            height = CGFloat(ratio * maxHeight)
-        } else {
-            height = CGFloat(maxHeight - ratio * maxHeight)
-        }
+    private func height(for value: Float) -> CGFloat {
+        let height: CGFloat = value > 0 ? CGFloat(value * maxHeight) : 0
         return max(height, 0.5)
     }
 }
