@@ -179,7 +179,12 @@ extension WebSocketClient: WebSocketEngineDelegate {
         do {
             event = try eventDecoder.decode(from: data)
         } catch {
-            log.error("decoding websocket payload", subsystems: .webSocket, error: error)
+            do {
+                let apiError = try JSONDecoder.default.decode(APIErrorContainer.self, from: data).error
+                log.error("web socket error \(apiError.message)", subsystems: .webSocket, error: apiError)
+            } catch let decodingError {
+                log.error("decoding websocket payload", subsystems: .webSocket, error: decodingError)
+            }
             return
         }
         

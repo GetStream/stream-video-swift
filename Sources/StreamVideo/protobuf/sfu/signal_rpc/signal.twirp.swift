@@ -61,7 +61,11 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
                 return try await execute(request: request, path: path, retries: retries + 1)
             } else {
                 httpConfig.retryStrategy.resetConsecutiveFailures()
-                throw NSError(domain: "stream", code: response.error.code.rawValue)
+                throw NSError(
+                    domain: "stream",
+                    code: response.error.code.rawValue,
+                    userInfo: ["message": response.error.message]
+                )
             }
         }
         httpConfig.retryStrategy.resetConsecutiveFailures()

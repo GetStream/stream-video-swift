@@ -138,3 +138,7 @@ extension ClosedRange where Bound == Int {
     /// The range of HTTP request status codes for client errors.
     static let clientErrorCodes: Self = 400...499
 }
+
+struct APIErrorContainer: Codable {
+    let error: APIError
+}
