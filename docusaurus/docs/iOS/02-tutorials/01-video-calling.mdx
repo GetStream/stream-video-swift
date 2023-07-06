@@ -196,7 +196,7 @@ struct ParticipantsView: View {
         GeometryReader { proxy in
             if !participants.isEmpty {
                 ScrollView {
-                    VStack {
+                    LazyVStack {
                         if participants.count == 1, let participant = participants.first {
                             VideoRendererView(id: participant.id, size: proxy.size) { videoRenderer in
                                 videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
