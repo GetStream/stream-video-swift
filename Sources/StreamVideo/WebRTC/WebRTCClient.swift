@@ -126,7 +126,7 @@ class WebRTCClient: NSObject {
     private var migratingWSClient: WebSocketClient?
     private var migratingToken: String?
     private var fromSfuName: String?
-    private var temp: PeerConnection?
+    private var tempSubscriber: PeerConnection?
 
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
@@ -437,8 +437,8 @@ class WebRTCClient: NSObject {
         }
         cleanupMigrationData()
         Task {
-            temp = subscriber
-            temp?.paused = true
+            tempSubscriber = subscriber
+            tempSubscriber?.paused = true
             try await setupPeerConnections()
             if publisher?.shouldRestartIce == true {
                 try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
@@ -446,8 +446,8 @@ class WebRTCClient: NSObject {
             subscriber?.onConnected = { [weak self] _ in
                 guard let self else { return }
                 self.onSessionMigrationCompleted?()
-                self.temp?.close()
-                self.temp = nil
+                self.tempSubscriber?.close()
+                self.tempSubscriber = nil
                 self.subscriber?.onConnected = nil
             }
         }
