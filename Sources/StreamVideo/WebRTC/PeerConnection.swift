@@ -15,7 +15,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-    private let signalService: Stream_Video_Sfu_Signal_SignalServer
+    var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let callCid: String
     private let type: PeerConnectionType
@@ -31,8 +31,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
+    var onConnected: ((PeerConnection) -> Void)?
     var onStreamAdded: ((RTCMediaStream) -> Void)?
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
+    
+    var paused = false
     
     init(
         sessionId: String,
@@ -61,6 +64,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     var videoTrackPublished: Bool {
         publishedTracks.contains(.video)
+    }
+    
+    var shouldRestartIce: Bool {
+        !publishedTracks.isEmpty
     }
     
     func createOffer(constraints: RTCMediaConstraints = .defaultConstraints) async throws -> RTCSessionDescription {
@@ -174,7 +181,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue)", subsystems: .webRTC)
+        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue), sfu = \(signalService.hostname)", subsystems: .webRTC)
         if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
             screensharingStreams.append(stream)
         }
@@ -196,6 +203,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         if newState == .disconnected {
             log.debug("Peer connection state changed to \(newState)", subsystems: .webRTC)
             onDisconnect?(self)
+        } else if newState == .connected {
+            onConnected?(self)
         }
     }
     
@@ -205,6 +214,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didGenerate candidate: RTCIceCandidate) {
         log.debug("Generated ice candidate \(candidate.sdp) for \(type.rawValue)", subsystems: .webRTC)
+        if paused {
+            return
+        }
         Task {
             let encoder = JSONEncoder()
             let iceCandidate = candidate.toIceCandidate()
@@ -232,6 +244,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             }
         }
         return nil
+    }
+    
+    func update(configuration: RTCConfiguration?) {
+        guard let configuration else { return }
+        self.pc.setConfiguration(configuration)
     }
     
     // MARK: - private

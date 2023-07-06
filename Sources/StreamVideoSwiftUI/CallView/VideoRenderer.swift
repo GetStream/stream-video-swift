@@ -99,7 +99,9 @@ public class VideoRenderer: RTCMTLVideoView {
     
     public func add(track: RTCVideoTrack) {
         queue.sync {
-            guard track.trackId != self.track?.trackId else { return }
+            if track.trackId == self.track?.trackId && track.readyState == .live {
+                return
+            }
             self.track?.remove(self)
             self.track = nil
             log.debug("Adding track to the view")

@@ -11,11 +11,12 @@ class SfuMiddleware: EventMiddleware {
     private let sessionID: String
     private let user: User
     private let state: WebRTCClient.State
-    private let signalService: Stream_Video_Sfu_Signal_SignalServer
+    var signalService: Stream_Video_Sfu_Signal_SignalServer
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onSocketConnected: (() -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> ())?
+    var onSessionMigrationEvent: (() -> Void)?
     
     init(
         sessionID: String,
@@ -81,8 +82,9 @@ class SfuMiddleware: EventMiddleware {
                 log.error(event.error.message, error: event.error)
             case .callGrantsUpdated(_):
                 log.warning("TODO: callGrantsUpdated")
-            case .goAway(_):
-                log.warning("TODO: goAway")
+            case .goAway(let event):
+                log.info("Received go away event with reason: \(event.reason.rawValue)")
+                onSessionMigrationEvent?()
             }
         }
         return event
