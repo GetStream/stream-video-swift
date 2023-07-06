@@ -660,6 +660,7 @@ class WebRTCClient: NSObject {
             migration.fromSfuID = fromSfuName ?? signalService.hostname
             migration.announcedTracks = loadTracks()
             migration.subscriptions = await loadTrackSubscriptionDetails()
+            joinRequest.migration = migration
         } else {
             joinRequest.token = token
         }
@@ -865,7 +866,8 @@ class WebRTCClient: NSObject {
             if track != nil && (participant.track == nil || participant.track?.readyState == .ended) {
                 updated = participant.withUpdated(track: track)
             }
-            if screenshareTrack != nil && participant.screenshareTrack == nil {
+            if screenshareTrack != nil
+                && (participant.screenshareTrack == nil || participant.screenshareTrack?.readyState == .ended) {
                 let base = updated ?? participant
                 updated = base.withUpdated(screensharingTrack: screenshareTrack)
             }

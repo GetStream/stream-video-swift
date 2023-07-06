@@ -217,6 +217,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   case publishTracksMismatch // = 101
   case publishTrackOutOfOrder // = 102
   case publishTrackVideoLayerNotFound // = 103
+  case liveEnded // = 104
   case participantNotFound // = 200
   case participantMigratingOut // = 201
   case participantMigrationFailed // = 202
@@ -240,6 +241,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case 101: self = .publishTracksMismatch
     case 102: self = .publishTrackOutOfOrder
     case 103: self = .publishTrackVideoLayerNotFound
+    case 104: self = .liveEnded
     case 200: self = .participantNotFound
     case 201: self = .participantMigratingOut
     case 202: self = .participantMigrationFailed
@@ -261,6 +263,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case .publishTracksMismatch: return 101
     case .publishTrackOutOfOrder: return 102
     case .publishTrackVideoLayerNotFound: return 103
+    case .liveEnded: return 104
     case .participantNotFound: return 200
     case .participantMigratingOut: return 201
     case .participantMigrationFailed: return 202
@@ -287,6 +290,7 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     .publishTracksMismatch,
     .publishTrackOutOfOrder,
     .publishTrackVideoLayerNotFound,
+    .liveEnded,
     .participantNotFound,
     .participantMigratingOut,
     .participantMigrationFailed,
@@ -979,6 +983,7 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     101: .same(proto: "ERROR_CODE_PUBLISH_TRACKS_MISMATCH"),
     102: .same(proto: "ERROR_CODE_PUBLISH_TRACK_OUT_OF_ORDER"),
     103: .same(proto: "ERROR_CODE_PUBLISH_TRACK_VIDEO_LAYER_NOT_FOUND"),
+    104: .same(proto: "ERROR_CODE_LIVE_ENDED"),
     200: .same(proto: "ERROR_CODE_PARTICIPANT_NOT_FOUND"),
     201: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATING_OUT"),
     202: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATION_FAILED"),
