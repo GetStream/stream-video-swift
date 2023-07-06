@@ -162,37 +162,14 @@ In this next step we're going to render your local & remote participant video.
 
 Let's update the body of our VideoCallApp View with following code.
 
-```swift 
+```swift title=VideoCall/VideoCallApp.swift
 var body: some Scene {
     WindowGroup {
         VStack {
             if callCreated {
-                GeometryReader { proxy in
-                    ZStack {
-                        if let participant = call.state.remoteParticipants.first {
-                            VideoRendererView(id: participant.id, size: proxy.size) { videoRenderer in
-                                videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
-                            }
-                            .ignoresSafeArea()
-                        } else {
-                            Color.black
-                        }
-
-                        if let me = call.state.me {
-                            VStack {
-                                HStack {
-                                    Spacer()
-
-                                    VideoRendererView(id: me.id, size: proxy.size) { videoRenderer in
-                                        videoRenderer.handleViewRendering(for: me, onTrackSizeUpdate: { _, _ in })
-                                    }
-                                    .frame(width: 120, height: 120)
-                                }
-                                Spacer()
-                            }
-                            .padding()
-                        }
-                    }
+                ZStack {
+                    ParticipantsView(participants: call.state.remoteParticipants)
+                    FloatingParticipantView(participant: call.state.me)
                 }
             } else {
                 Text("loading...")
@@ -203,6 +180,68 @@ var body: some Scene {
                 try await call.join(create: true)
                 callCreated = true
             }
+        }
+    }
+}
+```
+
+We will now create
+
+```swift title=VideoCall/ParticipantsView.swift
+struct ParticipantsView: View {
+
+    var participants: [CallParticipant]
+
+    var body: some View {
+        GeometryReader { proxy in
+            if !participants.isEmpty {
+                ScrollView {
+                    VStack {
+                        if participants.count == 1, let participant = participants.first {
+                            VideoRendererView(id: participant.id, size: proxy.size) { videoRenderer in
+                                videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
+                            }
+                            .frame(width: proxy.size.width, height: proxy.size.height)
+                        } else {
+                            ForEach(participants) { participant in
+                                VideoRendererView(id: participant.id, size: proxy.size) { videoRenderer in
+                                    videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
+                                }
+                                .frame(width: proxy.size.width, height: proxy.size.height / 2)
+                            }
+                        }
+                    }
+                }
+            } else {
+                Color.black
+            }
+        }
+        .edgesIgnoringSafeArea(.all)
+    }
+}
+```
+
+```swift title=VideoCall/FloatingParticipantView.swift
+struct FloatingParticipantView: View {
+
+    var participant: CallParticipant?
+    var size: CGSize = .init(width: 120, height: 120)
+
+    var body: some View {
+        if let participant = participant {
+            VStack {
+                HStack {
+                    Spacer()
+
+                    VideoRendererView(id: participant.id, size: size) { videoRenderer in
+                        videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
+                    }
+                    .frame(width: size.width, height: size.height)
+                    .clipShape(RoundedRectangle(cornerRadius: 8))
+                }
+                Spacer()
+            }
+            .padding()
         }
     }
 }
@@ -229,6 +268,18 @@ VideoRendererView(
 ```
 
 It only displays the video and doesn't add any other UI elements. The video is lazily loaded, and only requested from the video infrastructure if you're actually displaying it. So if you have a video call with 200 participants, and you show only 10 of them, you'll only receive video for 10 participants. This is how software like Zoom and Google Meet make large calls work.
+
+`FloatingParticipantVideo` renders a display of your own video.
+
+```swift
+FloatingParticipantView(participant: call.state.me)
+```
+
+`ParticipantsView` renders a scrollview of all remoteParticipants.
+
+```swift
+ParticipantsView(participants: call.state.remoteParticipants)
+```
 
 ### Step 6 - A Full Video Calling UI
 
