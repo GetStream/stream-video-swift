@@ -42,7 +42,7 @@ public class StreamVideo: ObservableObject {
     var token: UserToken
 
     private var tokenProvider: UserTokenProvider
-    private static let endpointConfig: EndpointConfig = .localhostConfig
+    private static let endpointConfig: EndpointConfig = .production
     private let coordinatorClient: DefaultAPI
     private let apiTransport: DefaultAPITransport
     
