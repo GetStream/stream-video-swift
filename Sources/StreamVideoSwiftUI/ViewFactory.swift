@@ -146,7 +146,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: view shown in the reconnection slot.
     func makeReconnectionView(viewModel: CallViewModel) -> ReconnectionViewType
 
-    associatedtype LocalParticipantViewModifierType = ViewModifier
+    associatedtype LocalParticipantViewModifierType: ViewModifier
     func makeLocalParticipantViewModifier(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>
