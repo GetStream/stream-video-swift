@@ -242,7 +242,7 @@ The above example showed how to use the call state object and compose to build a
 - Labels for the participant names
 - Call header and controls
 
-Stream ships with several Compose components to make this easy. You can customize the components with theming, arguments and swapping parts of them. This is convenient if you want to quickly build a production ready calling experience for you app. (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
+Stream ships with several SwiftUI components to make this easy. You can customize the components with theming, arguments and swapping parts of them. This is convenient if you want to quickly build a production ready calling experience for you app. (and if you need more flexibility, many customers use the above low level approach to build a UI from scratch)
 
 To render a full calling UI, we'll leverage the [CallContainer](../../ui-components/call/call-container) component. This includes sensible defaults for a call header, video grid, call controls, picture-in-picture, and everything that you need to build a video call screen.
 
@@ -327,7 +327,7 @@ You can see an example of how to swap out the call controls for your own in the 
 
 Please do let us know if you ran into any issues while building an video calling app with Kotlin. Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
 
-To recap what we've learned about android video calling:
+To recap what we've learned about iOS video calling:
 
 - You setup a call: (let call = streamVideo.call(callType: "default", callId: "123")).
 - The call type ("default" in the above case) controls which features are enabled and how permissions are setup.
