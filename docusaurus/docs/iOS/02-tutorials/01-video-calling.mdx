@@ -31,10 +31,10 @@ Next you need to add our SDK dependencies to your project using Swift Package Ma
 
 Making a video call requires the usage of the camera and the microphone of the device. Therefore, you need to request permissions to use them in your app. In order to do this, you will need to add the following keys and values in your `Info.plist` file.
 
-- `Privacy - Camera Usage Description` - "AudioRooms requires camera access in order to capture and transmit video"
-- `Privacy - Microphone Usage Description` - "AudioRooms requires microphone access in order to capture and transmit audio"
+- `Privacy - Camera Usage Description` - "VideoCall requires camera access in order to capture and transmit video"
+- `Privacy - Microphone Usage Description` - "VideoCall requires microphone access in order to capture and transmit audio"
 
-![Screenshot shows permissions in the .plist file](../assets/permissions.png)
+![Screenshot shows permissions in the .plist file](../assets/video_tutorial/permissions.png)
 
 ### Step 3 - Create & Join a call
 
@@ -132,7 +132,7 @@ self.client = StreamVideo(
 **Create and join call** After the user and client are created, we create a call like this:
 
 ```swift
-self.call = client.call(callType: "audio_room", callId: callId)
+self.call = client.call(callType: "default", callId: callId)
 
 try await call.join(create: true)
 ```
@@ -158,56 +158,54 @@ On your iOS device, you'll see the text update to 2 participants. Let's keep the
 
 ### Step 5 - Rendering Video
 
-In this next step we're going to:
-
-- Render your local & remote participant video.
+In this next step we're going to render your local & remote participant video.
 
 Let's update the body of our VideoCallApp View with following code.
 
 ```swift 
 var body: some Scene {
-        WindowGroup {
-            VStack {
-                if callCreated {
-                    GeometryReader { proxy in
-                        ZStack {
-                            if let participant = call.state.remoteParticipants.first {
-                                VideoRendererView(id: participant.id, size: proxy.size) { videoRenderer in
-                                    videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
-                                }
-                                .ignoresSafeArea()
-                            } else {
-                                Color.black
+    WindowGroup {
+        VStack {
+            if callCreated {
+                GeometryReader { proxy in
+                    ZStack {
+                        if let participant = call.state.remoteParticipants.first {
+                            VideoRendererView(id: participant.id, size: proxy.size) { videoRenderer in
+                                videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
                             }
+                            .ignoresSafeArea()
+                        } else {
+                            Color.black
+                        }
 
-                            if let me = call.state.me {
-                                VStack {
-                                    HStack {
-                                        Spacer()
-
-                                        VideoRendererView(id: me.id, size: proxy.size) { videoRenderer in
-                                            videoRenderer.handleViewRendering(for: me, onTrackSizeUpdate: { _, _ in })
-                                        }
-                                        .frame(width: 120, height: 120)
-                                    }
+                        if let me = call.state.me {
+                            VStack {
+                                HStack {
                                     Spacer()
+
+                                    VideoRendererView(id: me.id, size: proxy.size) { videoRenderer in
+                                        videoRenderer.handleViewRendering(for: me, onTrackSizeUpdate: { _, _ in })
+                                    }
+                                    .frame(width: 120, height: 120)
                                 }
-                                .padding()
+                                Spacer()
                             }
+                            .padding()
                         }
                     }
-                } else {
-                    Text("loading...")
                 }
-            }.onAppear {
-                Task {
-                    guard callCreated == false else { return }
-                    try await call.join(create: true)
-                    callCreated = true
-                }
+            } else {
+                Text("loading...")
+            }
+        }.onAppear {
+            Task {
+                guard callCreated == false else { return }
+                try await call.join(create: true)
+                callCreated = true
             }
         }
     }
+}
 ```
 
 Now when you run the app, you'll see your local video in a floating video element and the video from your browser. The end result should look somewhat like this:
