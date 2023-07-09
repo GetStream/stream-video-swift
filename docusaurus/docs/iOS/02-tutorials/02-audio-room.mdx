@@ -35,9 +35,8 @@ Next you need to add our SDK dependencies to your project using Swift Package Ma
 
 #### App Permissions
 
-Making a video call requires the usage of the camera and the microphone of the device. Therefore, you need to request permissions to use them in your app. In order to do this, you will need to add the following keys and values in your `Info.plist` file.
+Joining an audio room requires microphone access, you need to request permissions to use them in your app. In order to do this, you will need to add the following key to the `Info.plist` file.
 
-- `Privacy - Camera Usage Description` - "AudioRooms requires camera access in order to capture and transmit video"
 - `Privacy - Microphone Usage Description` - "AudioRooms requires microphone access in order to capture and transmit audio"
 
 ![Screenshot shows permissions in the .plist file](../assets/permissions.png)
