@@ -3,20 +3,12 @@ title: Installation
 description: Install the SDK for video calling
 ---
 
+The Swift SDK can be installed using Swift Package Manager, if you are starting a new project we always recommend using the latest release.
+Releases and changes are published on the [Github releases page](https://github.com/GetStream/stream-video-swift/releases).
 
-### Creating a project
+### Add the SDK to your project
 
-To get started with the `StreamVideo` SDK, open Xcode and create a new project.
-
-- Create a new Swift project in Xcode
-- Choose iOS from the list of platforms
-- Choose the "App" template
-- Use VideoDemoSwiftUI for the project name
-- Select "SwiftUI" in the Interface option
-
-![Screenshot shows how to create a project in Xcode](../assets/new_project.png)
-
-We are going to use the Swift Package Manager to fetch the SDK.
+To add `StreamVideo` SDK, open Xcode and follow these steps:
 
 - In Xcode, go to File -> "Add Packages..."
 - Paste the URL https://github.com/GetStream/stream-video-swift.git
@@ -38,12 +30,6 @@ Making a video call requires the usage of the camera and the microphone of the d
 
 ![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
-:::note
-You should replace "Your_app_name" (or also use your custom strings instead).
-:::
+### Push notifications
 
-With this, you should be able to test a video call between two devices.
-
-:::note
-The call id should be the same on the different devices that are part of the call.
-:::
+Stream video support both Remote Notifications and VoIP notifications. See the [Push Notification](../../advanced/push-notifications) section for more details.
