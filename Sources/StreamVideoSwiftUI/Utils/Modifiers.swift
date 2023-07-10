@@ -61,6 +61,7 @@ extension View {
 struct ShadowViewModifier: ViewModifier {
     
     var cornerRadius: CGFloat = 16
+    var borderColor: Color = Color.gray
 
     func body(content: Content) -> some View {
         content
@@ -70,7 +71,7 @@ struct ShadowViewModifier: ViewModifier {
             .overlay(
                 RoundedRectangle(cornerRadius: cornerRadius)
                     .stroke(
-                        Color.gray,
+                        borderColor,
                         lineWidth: 0.5
                     )
             )

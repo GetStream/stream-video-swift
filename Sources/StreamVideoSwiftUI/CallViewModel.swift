@@ -77,12 +77,20 @@ open class CallViewModel: ObservableObject {
     public var error: Error? {
         didSet {
             errorAlertShown = error != nil
+            if let error {
+                toast = Toast(style: .error, message: error.localizedDescription)
+            } else {
+                toast = nil
+            }
         }
     }
+        
+    /// Controls the display of toast messages.
+    @Published public var toast: Toast?
     
     /// If the `error` property has a value, it's true. You can use it to control the visibility of an alert presented to the user.
     @Published public var errorAlertShown = false
-       
+    
     /// Whether the list of participants is shown during the call.
     @Published public var participantsShown = false
         

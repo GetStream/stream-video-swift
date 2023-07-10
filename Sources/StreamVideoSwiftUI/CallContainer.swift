@@ -58,9 +58,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .alert(isPresented: $viewModel.errorAlertShown, content: {
-            return Alert.defaultErrorAlert
-        })
+        .toastView(toast: $viewModel.toast)
         .overlay(overlayView)
         .onReceive(viewModel.$callingState) { _ in
             if viewModel.callingState == .idle || viewModel.callingState == .inCall {
