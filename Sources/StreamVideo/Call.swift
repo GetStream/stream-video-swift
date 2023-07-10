@@ -370,6 +370,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: A `ClientError.MissingPermissions` if the current user can't request the permissions.
     @discardableResult
     public func request(permissions: [Permission]) async throws -> RequestPermissionResponse {
+        if await state.isInitialized == false {
+            let response = try await get()
+            await state.update(from: response)
+        }
         if await !currentUserCanRequestPermissions(permissions) {
             throw ClientError.MissingPermissions()
         }
