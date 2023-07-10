@@ -6,6 +6,7 @@ import NukeUI
 import StreamVideo
 import SwiftUI
 import WebRTC
+import MetalKit
 
 public struct LocalVideoView<Factory: ViewFactory>: View {
     
@@ -102,6 +103,8 @@ public class VideoRenderer: RTCMTLVideoView {
             if track.trackId == self.track?.trackId && track.readyState == .live {
                 return
             }
+            let view = subviews.compactMap { $0 as? MTKView }.first
+            view?.preferredFramesPerSecond = 60
             self.track?.remove(self)
             self.track = nil
             log.debug("Adding track to the view")
