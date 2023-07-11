@@ -101,7 +101,7 @@ lane :test do |options|
 
   update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
 
-  xcargs = is_ci ? "STREAM_VIDEO_SECRET=#{ENV.fetch(['STREAM_VIDEO_SECRET'], nil)}" : ''
+  xcargs = is_ci ? "STREAM_VIDEO_SECRET=#{ENV.fetch('STREAM_VIDEO_SECRET', nil)}" : ''
   scan(
     project: xcode_project,
     scheme: 'StreamVideo',
