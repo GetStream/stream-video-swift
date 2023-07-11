@@ -111,6 +111,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PR_NUM: ${{ github.event.number }}
         XCODE_VERSION: ${{ matrix.xcode }}
+        STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     - uses: 8398a7/action-slack@v3
       with:
         status: ${{ job.status }}

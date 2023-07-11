@@ -30,8 +30,9 @@ class TokenGenerator {
     static let shared = TokenGenerator()
     
     func fetchToken(for userId: String, expiration tokenDurationInMinutes: Double = 0) -> UserToken? {
-        let secret = ProcessInfo.processInfo.environment["STREAM_DEMO_APP_SECRET"]
+        let secret = ProcessInfo.processInfo.environment["STREAM_VIDEO_SECRET"]
         guard let secret = secret else { return nil }
+        
         let privateKey = SymmetricKey(data: secret.data(using: .utf8)!)
         
         guard let headerJSONData = try? JSONEncoder().encode(Header()) else { return nil }

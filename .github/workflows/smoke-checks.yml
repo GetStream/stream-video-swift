@@ -62,6 +62,8 @@ jobs:
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 30
+      env:
+        STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     - name: Get branch name
       id: get_branch_name
       run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT

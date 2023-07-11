@@ -12,8 +12,8 @@
     "codeCoverage" : false,
     "environmentVariableEntries" : [
       {
-        "key" : "STREAM_DEMO_APP_SECRET",
-        "value" : "$(STREAM_DEMO_APP_SECRET)"
+        "key" : "STREAM_VIDEO_SECRET",
+        "value" : "$(STREAM_VIDEO_SECRET)"
       }
     ],
     "targetForVariableExpansion" : {
