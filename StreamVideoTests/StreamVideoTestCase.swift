@@ -8,7 +8,7 @@ import XCTest
 open class StreamVideoTestCase: XCTestCase {
 
     public var streamVideo: StreamVideo?
-    public var httpClient: HTTPClient = HTTPClient_Mock()
+    var httpClient = HTTPClient_Mock()
 
     open override func setUp() {
         super.setUp()

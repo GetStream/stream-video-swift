@@ -67,6 +67,26 @@ class MockResponseBuilder {
         return callResponse
     }
     
+    func makeQueryCallsResponse() -> QueryCallsResponse {
+        let first = CallStateResponseFields(
+            blockedUsers: [],
+            call: makeCallResponse(cid: "default:123"),
+            members: [],
+            ownCapabilities: [.sendAudio, .sendVideo]
+        )
+        let second = CallStateResponseFields(
+            blockedUsers: [],
+            call: makeCallResponse(cid: "default:test"),
+            members: [],
+            ownCapabilities: [.sendAudio, .sendVideo]
+        )
+        let response = QueryCallsResponse(
+            calls: [first, second],
+            duration: "1.0"
+        )
+        return response
+    }
+    
     func makeMemberResponse(id: String = "test") -> MemberResponse {
         MemberResponse(
             createdAt: Date(),

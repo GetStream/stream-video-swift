@@ -40,5 +40,48 @@ final class CallSettings_Tests: XCTestCase {
         // Then
         XCTAssert(callSettings.cameraPosition == .back)
     }
+    
+    func test_callSettings_updatedAudioState() {
+        // Given
+        var callSettings = CallSettings(audioOn: false)
+        
+        // When
+        callSettings = callSettings.withUpdatedAudioState(true)
+        
+        // Then
+        XCTAssert(callSettings.audioOn == true)
+    }
+    
+    func test_callSettings_updatedVideoState() {
+        // Given
+        var callSettings = CallSettings(videoOn: true)
+        
+        // When
+        callSettings = callSettings.withUpdatedVideoState(false)
+        
+        // Then
+        XCTAssert(callSettings.videoOn == false)
+    }
 
+    func test_callSettings_updatedSpeakerState() {
+        // Given
+        var callSettings = CallSettings(speakerOn: true)
+        
+        // When
+        callSettings = callSettings.withUpdatedSpeakerState(false)
+        
+        // Then
+        XCTAssert(callSettings.speakerOn == false)
+    }
+    
+    func test_callSettings_updatedAudioOutputState() {
+        // Given
+        var callSettings = CallSettings(audioOutputOn: true)
+        
+        // When
+        callSettings = callSettings.withUpdatedAudioOutputState(false)
+        
+        // Then
+        XCTAssert(callSettings.audioOutputOn == false)
+    }
 }

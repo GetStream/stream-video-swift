@@ -153,6 +153,8 @@
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
+		841FF5032A5D6FEC00809BBB /* CallsController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5022A5D6FEC00809BBB /* CallsController_Tests.swift */; };
+		841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
 		8423B7562950BB0B00012F8D /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8423B7552950BB0B00012F8D /* Sentry */; };
@@ -788,6 +790,8 @@
 		8415D3E2290BC882006E53CB /* Sounds.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sounds.swift; sourceTree = "<group>"; };
 		841947972886D9CD0007B36E /* BundleExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BundleExtensions.swift; sourceTree = "<group>"; };
 		841F2C7D29429DAD00D8D655 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.0.sdk/usr/lib/swift/libswift_Concurrency.tbd; sourceTree = DEVELOPER_DIR; };
+		841FF5022A5D6FEC00809BBB /* CallsController_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsController_Tests.swift; sourceTree = "<group>"; };
+		841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturerUtils_Tests.swift; sourceTree = "<group>"; };
 		84201792288AB699004964B3 /* AddUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUserView.swift; sourceTree = "<group>"; };
 		84231E4628B2506B007985EF /* VideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer.swift; sourceTree = "<group>"; };
 		842747E429EECD0100E063AD /* ClientError_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientError_Tests.swift; sourceTree = "<group>"; };
@@ -921,7 +925,6 @@
 		846FBE8C28AAEBBC00147F6E /* SearchBar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchBar.swift; sourceTree = "<group>"; };
 		846FBE8E28AAEC5D00147F6E /* KeyboardReadable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeyboardReadable.swift; sourceTree = "<group>"; };
 		846FBE9028AAF52600147F6E /* SelectedParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectedParticipantView.swift; sourceTree = "<group>"; };
-		8472604A2A0AF81800713E30 /* CallData.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallData.swift; sourceTree = "<group>"; };
 		8472604C2A0BB1FA00713E30 /* DemoApp-Debug.entitlements */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.entitlements; path = "DemoApp-Debug.entitlements"; sourceTree = "<group>"; };
 		8478A0EB29F2604A0001F860 /* ControllerTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControllerTestCase.swift; sourceTree = "<group>"; };
 		8478EB12288A054B00525538 /* VideoConfig.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoConfig.swift; sourceTree = "<group>"; };
@@ -1742,7 +1745,6 @@
 				84D6493F29E94C14002CA428 /* CallsQuery.swift */,
 				842D3B5D29F6D36E0051698A /* DeviceData.swift */,
 				84E5C51B2A013C440003A27A /* PushNotificationsConfig.swift */,
-				8472604A2A0AF81800713E30 /* CallData.swift */,
 				844ECF4E2A33458A0023263C /* Member.swift */,
 				84DCA20D2A3885FE000C3411 /* Permissions.swift */,
 				84DCA2132A38A428000C3411 /* CoordinatorModels.swift */,
@@ -1997,6 +1999,7 @@
 			isa = PBXGroup;
 			children = (
 				84D114D929F092E700BCCB0C /* CallController_Tests.swift */,
+				841FF5022A5D6FEC00809BBB /* CallsController_Tests.swift */,
 				8478A0EB29F2604A0001F860 /* ControllerTestCase.swift */,
 			);
 			path = Controllers;
@@ -2008,6 +2011,7 @@
 				84D6494629E9F2D0002CA428 /* WebRTCClient_Tests.swift */,
 				8414081229F28B5600FF2D7C /* RTCConfiguration_Tests.swift */,
 				8446AF902A4D84F4002AB07B /* Retries_Tests.swift */,
+				841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -3187,6 +3191,7 @@
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
+				841FF5032A5D6FEC00809BBB /* CallsController_Tests.swift in Sources */,
 				4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */,
 				84F58B8729EEABF700010C4C /* EventBatcher_Mock.swift in Sources */,
 				84F58B8129EE9C4900010C4C /* WebSocketPingController_Delegate.swift in Sources */,
@@ -3195,6 +3200,7 @@
 				842747F129EED88800E063AD /* InternetConnection_Tests.swift in Sources */,
 				84F58B9329EEB53E00010C4C /* EventMiddleware_Mock.swift in Sources */,
 				842747EC29EED59000E063AD /* JSONDecoder_Tests.swift in Sources */,
+				841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */,
 				8490032F29D6D00C00AD9BB4 /* CallController_Mock.swift in Sources */,
 				842747F829EEEB8200E063AD /* EventNotificationCenter_Tests.swift in Sources */,
 				842747E529EECD0100E063AD /* ClientError_Tests.swift in Sources */,

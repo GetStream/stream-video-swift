@@ -23,9 +23,7 @@ public class CallsController: ObservableObject {
             self.loadedAllCalls = loadedAllCalls
         }
     }
-    
-    private let defaultAPI: DefaultAPI
-    
+        
     private var next: String?
     private var prev: String?
         
@@ -38,8 +36,7 @@ public class CallsController: ObservableObject {
     private var socketDisconnected = false
     private var cancellables = Set<AnyCancellable>()
         
-    init(streamVideo: StreamVideo, defaultAPI: DefaultAPI, callsQuery: CallsQuery) {
-        self.defaultAPI = defaultAPI
+    init(streamVideo: StreamVideo, callsQuery: CallsQuery) {
         self.callsQuery = callsQuery
         self.streamVideo = streamVideo
         self.subscribeToWatchEvents()

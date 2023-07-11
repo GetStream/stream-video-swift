@@ -197,7 +197,6 @@ public class StreamVideo: ObservableObject {
     public func makeCallsController(callsQuery: CallsQuery) -> CallsController {
         let controller = CallsController(
             streamVideo: self,
-            defaultAPI: coordinatorClient,
             callsQuery: callsQuery
         )
         return controller
