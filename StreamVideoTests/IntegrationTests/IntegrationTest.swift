@@ -8,40 +8,43 @@ import XCTest
 @testable import StreamVideo
 
 class IntegrationTest: XCTestCase {
-    // TODO: get credentials from build params and from Github actions when running in CI mode
+    
+    static let testApiKey = "hd8szvscpxvd"
+    
     public var client: StreamVideo = {
+        let userId = "thierry"
+        let token = TokenGenerator.shared.fetchToken(for: userId, expiration: 10)!
         return StreamVideo(
-            apiKey: "hd8szvscpxvd",
-            user: User(id: "thierry"),
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidGhpZXJyeSJ9._4aZL6BR0VGKfZsKYdscsBm8yKVgG-2LatYeHRJUq0g",
+            apiKey: testApiKey,
+            user: User(id: userId),
+            token: token,
             tokenProvider: { _ in }
         )
     }()
 
-    // TODO: wire this up with utils
     public func getUserClient(id: String) -> StreamVideo {
+        let token = TokenGenerator.shared.fetchToken(for: id, expiration: 10)!
         return StreamVideo(
-            apiKey: "hd8szvscpxvd",
+            apiKey: Self.testApiKey,
             user: User(id: id),
-            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoidG9tbWFzbyJ9.9BvijGcp9ga7AHsqd3pz9PIVSqq4moCVFSDwRnNx3qI",
+            token: token,
             tokenProvider: { _ in }
         )
     }
 
     public override func setUp() async throws {
+    #if compiler(<5.8)
+        throw XCTSkip("API tests are flaky on Xcode <14.3 due to async expectation handler in XCTest")
+    #else
         try await super.setUp()
         try await client.connect()
-        
-        /**
-         Token generation example
-         
-         let token = TokenGenerator.shared.fetchToken(for: <#T##String#>, expiration: <#T##Double#>)
-         */
+    #endif
     }
 
     // TODO: extract code between these two assertNext methods
     public func assertNext<Output: Sendable>(_ s: AsyncStream<Output>, _ assertion: @Sendable @escaping (Output) -> Bool) async -> Void {
-        let expectation = XCTestExpectation(description: "NextValue")
+        let expectation = expectation(description: "NextValue")
+        expectation.assertForOverFulfill = false
 
         Task {
             expectation.fulfill()
@@ -64,6 +67,7 @@ class IntegrationTest: XCTestCase {
     ) async -> Void {
         let expectation = expectation(description: "NextValue")
         expectation.assertForOverFulfill = false
+        
         var values = [Output]()
         var bag = Set<AnyCancellable>()
         defer { bag.forEach { $0.cancel() } }
@@ -85,7 +89,7 @@ class IntegrationTest: XCTestCase {
     #if compiler(>=5.8)
         await super.fulfillment(of: expectations, timeout: seconds)
     #else
-        wait(for: expectations, timeout: seconds)
+        await waitForExpectations(timeout: seconds)
     #endif
     }
 }

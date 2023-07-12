@@ -25,9 +25,9 @@
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221622A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
+		8206D8502A5DB9300099F5EC /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784EE29FA8123006DD4F7 /* WebRTC */; };
 		820784F129FA8156006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784F029FA8156006DD4F7 /* WebRTC */; };
-		822257912A431F2E00CFFD96 /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 822257872A42F8F600CFFD96 /* Credentials.xcconfig */; };
 		822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		82392D542993C9E100941435 /* StreamTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D532993C9E100941435 /* StreamTestCase.swift */; };
 		82392D5F2993CCB300941435 /* ParticipantRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D5E2993CCB300941435 /* ParticipantRobot.swift */; };
@@ -702,7 +702,7 @@
 		4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
 		435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "OwnCapability+Identifiable.swift"; sourceTree = "<group>"; };
 		8202215E2A24BB7100F7BAED /* LaunchArgument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchArgument.swift; sourceTree = "<group>"; };
-		822257872A42F8F600CFFD96 /* Credentials.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Credentials.xcconfig; sourceTree = "<group>"; };
+		8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Credentials.xcconfig; sourceTree = "<group>"; };
 		822257892A42F93600CFFD96 /* TokenGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenGenerator.swift; sourceTree = "<group>"; };
 		8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAppUIKit.entitlements; sourceTree = "<group>"; };
 		8228CD8C29128CA000F32136 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1314,6 +1314,7 @@
 			children = (
 				4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */,
 				4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */,
+				8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */,
 			);
 			path = IntegrationTests;
 			sourceTree = "<group>";
@@ -1422,7 +1423,6 @@
 		82CE900229FC3A7B00770EF6 /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				822257872A42F8F600CFFD96 /* Credentials.xcconfig */,
 				82E2F9062A0559E50012C037 /* coffee.png */,
 				82E2F90A2A0559E50012C037 /* fire.png */,
 				82E2F9072A0559E50012C037 /* forest.png */,
@@ -2517,9 +2517,9 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 84F737FF287C13AD00A363F4 /* Build configuration list for PBXNativeTarget "StreamVideoTests" */;
 			buildPhases = (
+				827297E42A4585EA00774306 /* ShellScript */,
 				84F737F0287C13AD00A363F4 /* Sources */,
 				84F737F1287C13AD00A363F4 /* Frameworks */,
-				827297E42A4585EA00774306 /* ShellScript */,
 				84F737F2287C13AD00A363F4 /* Resources */,
 			);
 			buildRules = (
@@ -2753,7 +2753,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				822257912A431F2E00CFFD96 /* Credentials.xcconfig in Resources */,
+				8206D8502A5DB9300099F5EC /* Credentials.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2816,6 +2816,7 @@
 /* Begin PBXShellScriptBuildPhase section */
 		827297E42A4585EA00774306 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
 			files = (
 			);
@@ -2829,7 +2830,8 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Resources/Credentials.xcconfig\n";
+			shellScript = "touch StreamVideoTests/IntegrationTests/Credentials.xcconfig\n";
+			showEnvVarsInLog = 0;
 		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3987,6 +3989,7 @@
 		};
 		84F73800287C13AD00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;

@@ -101,12 +101,16 @@ lane :test do |options|
 
   update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
 
+  # Make sure xcconfig exists even though it won't be used
+  sh('touch ../StreamVideoTests/IntegrationTests/Credentials.xcconfig')
+
   scan(
     project: xcode_project,
     scheme: 'StreamVideo',
     testplan: 'StreamVideo',
     clean: true,
-    devices: options[:device]
+    devices: options[:device],
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{ENV.fetch('STREAM_VIDEO_SECRET', nil)}" : ''
   )
 end
 

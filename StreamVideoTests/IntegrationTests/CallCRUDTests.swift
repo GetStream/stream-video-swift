@@ -3,8 +3,8 @@
 //
 
 import Foundation
-@preconcurrency import Combine
 import XCTest
+@preconcurrency import Combine
 @testable import StreamVideo
 
 class CallCRUDTest: IntegrationTest {
