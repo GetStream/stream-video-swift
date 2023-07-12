@@ -11,6 +11,24 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     private let callCid = "default:123"
     private let sessionId = "123"
     private let userId = "martin"
+    private let callParticipant = CallParticipant(
+        id: "123",
+        userId: "123",
+        roles: [],
+        name: "Test",
+        profileImageURL: nil,
+        trackLookupPrefix: nil,
+        hasVideo: false,
+        hasAudio: true,
+        isScreenSharing: false,
+        showTrack: false,
+        isDominantSpeaker: false,
+        sessionId: "123",
+        connectionQuality: .excellent,
+        joinedAt: Date(),
+        isPinned: false,
+        audioLevel: 0, audioLevels: []
+    )
     
     let mockResponseBuilder = MockResponseBuilder()
     
@@ -38,15 +56,28 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         XCTAssertEqual(webRTCClient.signalChannel?.connectURL.absoluteString, "wss://test.com/ws")
     }
 
-    func test_webRTCClient_connectionFlow(ownCapabilities: [OwnCapability] = [.sendAudio, .sendVideo]) async throws {
+    func test_webRTCClient_connectionFlow(
+        ownCapabilities: [OwnCapability] = [.sendAudio, .sendVideo],
+        migrating: Bool = false
+    ) async throws {
         // Given
         webRTCClient = makeWebRTCClient(ownCapabilities: ownCapabilities)
+        if migrating {
+            webRTCClient.signalChannel?.connect()
+            webRTCClient.prepareForMigration(
+                url: "https://test.com",
+                token: "123",
+                webSocketURL: "ws://test/com",
+                fromSfuName: "sfu-1"
+            )
+        }
         
         // When
         try await webRTCClient.connect(
             callSettings: CallSettings(),
             videoOptions: VideoOptions(),
-            connectOptions: ConnectOptions(iceServers: [])
+            connectOptions: ConnectOptions(iceServers: []),
+            migrating: migrating
         )
         
         // Then
@@ -71,6 +102,10 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Then
         state = await webRTCClient.state.connectionState
         XCTAssert(state == .connected)
+    }
+    
+    func test_webRTCClient_migration() async throws {
+        try await test_webRTCClient_connectionFlow(migrating: true)
     }
     
     func test_webRTCClient_defaultCallCapabilities() async throws {
@@ -413,13 +448,135 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         XCTAssert(newParticipant?.isScreensharing == false)
     }
     
+    func test_webRTCClient_changeAudioState() async throws {
+        // Given
+        let httpClient = HTTPClient_Mock()
+        let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        let data = try response.serializedData()
+        httpClient.dataResponses = [data]
+        webRTCClient = makeWebRTCClient(httpClient: httpClient)
+        
+        // When
+        try await webRTCClient.connect(
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            connectOptions: ConnectOptions(iceServers: [])
+        )
+        try await webRTCClient.changeAudioState(isEnabled: false)
+        
+        // Then
+        XCTAssert(webRTCClient.callSettings.audioOn == false)
+    }
+    
+    func test_webRTCClient_changeVideoState() async throws {
+        // Given
+        let httpClient = HTTPClient_Mock()
+        let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        let data = try response.serializedData()
+        httpClient.dataResponses = [data]
+        webRTCClient = makeWebRTCClient(httpClient: httpClient)
+        
+        // When
+        try await webRTCClient.connect(
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            connectOptions: ConnectOptions(iceServers: [])
+        )
+        try await webRTCClient.changeVideoState(isEnabled: false)
+        
+        // Then
+        XCTAssert(webRTCClient.callSettings.videoOn == false)
+    }
+    
+    func test_webRTCClient_changeSoundState() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        
+        // When
+        try await webRTCClient.changeSoundState(isEnabled: false)
+        
+        // Then
+        XCTAssert(webRTCClient.callSettings.audioOutputOn == false)
+    }
+    
+    func test_webRTCClient_changeSpeakerState() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        
+        // When
+        try await webRTCClient.changeSpeakerState(isEnabled: false)
+        
+        // Then
+        XCTAssert(webRTCClient.callSettings.speakerOn == false)
+    }
+    
+    func test_webRTCClient_changeTrackVisibility() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        let participants = ["123": callParticipant]
+        await webRTCClient.state.update(callParticipants: participants)
+        
+        // When
+        await webRTCClient.changeTrackVisibility(for: callParticipant, isVisible: true)
+        
+        // Then
+        let updated = await webRTCClient.state.callParticipants[callParticipant.sessionId]
+        XCTAssert(updated?.showTrack == true)
+    }
+    
+    func test_webRTCClient_changeTrackVisibilityNonExisting() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+
+        // When
+        await webRTCClient.changeTrackVisibility(for: callParticipant, isVisible: true)
+        
+        // Then
+        let updated = await webRTCClient.state.callParticipants[callParticipant.sessionId]
+        XCTAssertNil(updated)
+    }
+    
+    func test_webRTCClient_updateTrackSize() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        let participants = ["123": callParticipant]
+        await webRTCClient.state.update(callParticipants: participants)
+        let trackSize = CGSize(width: 100, height: 100)
+        
+        // When
+        await webRTCClient.updateTrackSize(trackSize, for: callParticipant)
+        
+        // Then
+        let updated = await webRTCClient.state.callParticipants[callParticipant.sessionId]
+        XCTAssert(updated?.trackSize == trackSize)
+    }
+    
+    func test_webRTCClient_updateTrackSizeNonExisting() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        let trackSize = CGSize(width: 100, height: 100)
+        
+        // When
+        await webRTCClient.updateTrackSize(trackSize, for: callParticipant)
+        
+        // Then
+        let updated = await webRTCClient.state.callParticipants[callParticipant.sessionId]
+        XCTAssertNil(updated)
+    }
+    
     // MARK: - private
     
-    func makeWebRTCClient(ownCapabilities: [OwnCapability] = []) -> WebRTCClient {
+    func makeWebRTCClient(
+        ownCapabilities: [OwnCapability] = [],
+        httpClient: HTTPClient? = nil
+    ) -> WebRTCClient {
         let time = VirtualTime()
         VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
         environment.timerType = VirtualTimeTimer.self
+        environment.httpClientBuilder = {
+            httpClient ?? HTTPClient_Mock()
+        }
 
         let webRTCClient = WebRTCClient(
             user: StreamVideo.mockUser,

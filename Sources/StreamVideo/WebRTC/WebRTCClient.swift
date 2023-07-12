@@ -179,9 +179,7 @@ class WebRTCClient: NSObject {
         self.sessionID = sessionID ?? UUID().uuidString
         self.environment = environment
         self.apiKey = apiKey
-        httpClient = URLSessionClient(
-            urlSession: StreamVideo.Environment.makeURLSession()
-        )
+        httpClient = environment.httpClientBuilder()
         
         signalService = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,
@@ -344,6 +342,7 @@ class WebRTCClient: NSObject {
                 && self?.callSettings.audioOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
+            callSettings = callSettings.withUpdatedAudioState(isEnabled)
             localAudioTrack?.isEnabled = isEnabled
         }
     }
@@ -372,16 +371,19 @@ class WebRTCClient: NSObject {
                 && self?.callSettings.videoOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
+            callSettings = callSettings.withUpdatedVideoState(isEnabled)
             localVideoTrack?.isEnabled = isEnabled
         }
     }
     
     func changeSoundState(isEnabled: Bool) async throws {
         await audioSession.setAudioSessionEnabled(isEnabled)
+        callSettings = callSettings.withUpdatedAudioOutputState(isEnabled)
     }
     
     func changeSpeakerState(isEnabled: Bool) async throws {
         await audioSession.configure(audioOn: callSettings.audioOn, speakerOn: isEnabled)
+        callSettings = callSettings.withUpdatedSpeakerState(isEnabled)
     }
     
     func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {

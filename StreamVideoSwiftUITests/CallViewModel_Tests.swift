@@ -189,7 +189,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let callViewModel = CallViewModel()
         let acceptResponse = AcceptCallResponse(duration: "1.0")
         let data = try JSONEncoder.default.encode(acceptResponse)
-        (httpClient as? HTTPClient_Mock)?.dataResponses = [data]
+        httpClient.dataResponses = [data]
         
         // When
         try await waitForCallEvent()

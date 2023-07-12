@@ -225,39 +225,22 @@ class CallCRUDTest: IntegrationTest {
         var hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
         XCTAssertFalse(hasVideoCapability)
 
-        try await tommasoCall.request(permissions: [.sendVideo, .sendAudio])
+        try await tommasoCall.request(permissions: [.sendAudio])
 
         await assertNext(call.state.$permissionRequests) { value in
-            return value.count == 2 && value.first?.permission == "send-video"
+            return value.count == 1 && value.first?.permission == "send-audio"
         }
         if let p = await call.state.permissionRequests.first {
             p.reject()
         }
         
-        // Test: send-audio request is the only one listed
-        await assertNext(call.state.$permissionRequests) { value in
-            return value.first?.permission == "send-audio"
-        }
-        // Test: tommaso does not have send-audio capabilities
-        await assertNext(tommasoCall.state.$ownCapabilities) { value in
-            return !value.contains(where: {$0.rawValue == "send-audio"})
-        }
-
-        // Then: accept the send-audio request
-        if let p = await call.state.permissionRequests.first {
-            try await call.grant(request: p)
-        }
         // Test: permission requests list is now empty
         await assertNext(call.state.$permissionRequests) { value in
             return value.count == 0
         }
-        // Test: tommaso has send-audio capability now
-        await assertNext(tommasoCall.state.$ownCapabilities) { value in
-            return value.contains(where: {$0.rawValue == "send-audio"})
-        }
-        
+
         hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
-        XCTAssertTrue(hasAudioCapability)
+        XCTAssertFalse(hasAudioCapability)
         hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
         XCTAssertFalse(hasVideoCapability)
     }

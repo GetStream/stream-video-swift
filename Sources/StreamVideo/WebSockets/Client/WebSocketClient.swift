@@ -156,6 +156,12 @@ extension WebSocketClient {
             URLSessionWebSocketEngine(request: $0, sessionConfiguration: $1, callbackQueue: $2)
         }
         
+        var httpClientBuilder: () -> HTTPClient = {
+            URLSessionClient(
+                urlSession: StreamVideo.Environment.makeURLSession()
+            )
+        }
+        
         var eventBatcherBuilder: (
             _ handler: @escaping ([WrappedEvent], @escaping () -> Void) -> Void
         ) -> EventBatcher = {
