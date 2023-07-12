@@ -162,6 +162,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.2 milestone
 
 - [ ] Test coverage
+- [ ] Lobby updates
 - [ ] Stability
 - [ ] Test with many participants
 - [ ] CPU usage improvements
@@ -171,12 +172,12 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Audio filters
+- [ ] Improved chat integration
 - [ ] Picture-in-picture sample
 - [ ] Screensharing from mobile
 
 ### 0.4 milestone
 
 - [ ] Analytics integration
-- [ ] Improved chat integration
 - [ ] Tap to focus
 - [ ] Picture of the video stream at highest resolution
