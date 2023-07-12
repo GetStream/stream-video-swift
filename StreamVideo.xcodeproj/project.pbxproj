@@ -253,6 +253,9 @@
 		8456E6D5287EC343004E180E /* PrefixLogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */; };
 		8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6CF287EC343004E180E /* LogFormatter.swift */; };
 		8456E6DB287EC530004E180E /* StreamRuntimeCheck.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */; };
+		8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457BF7B2A5BF9E0000AE567 /* ToastView.swift */; };
+		8457BF7E2A5BFA04000AE567 /* Toast.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457BF7D2A5BFA04000AE567 /* Toast.swift */; };
+		8457BF802A5C18A7000AE567 /* ToastView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457BF7F2A5C18A7000AE567 /* ToastView_Tests.swift */; };
 		8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8457CF9028BB835F00E8CF50 /* CallView.swift */; };
 		8458872328A3A9E2002A81BF /* CallingParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */; };
 		8458872728A3F34D002A81BF /* HelperViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8458872628A3F34D002A81BF /* HelperViews.swift */; };
@@ -890,6 +893,9 @@
 		8456E6CE287EC343004E180E /* PrefixLogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PrefixLogFormatter.swift; sourceTree = "<group>"; };
 		8456E6CF287EC343004E180E /* LogFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = LogFormatter.swift; sourceTree = "<group>"; };
 		8456E6DA287EC530004E180E /* StreamRuntimeCheck.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRuntimeCheck.swift; sourceTree = "<group>"; };
+		8457BF7B2A5BF9E0000AE567 /* ToastView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView.swift; sourceTree = "<group>"; };
+		8457BF7D2A5BFA04000AE567 /* Toast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Toast.swift; sourceTree = "<group>"; };
+		8457BF7F2A5C18A7000AE567 /* ToastView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToastView_Tests.swift; sourceTree = "<group>"; };
 		8457CF9028BB835F00E8CF50 /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
 		8458872228A3A9E2002A81BF /* CallingParticipantsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallingParticipantsView.swift; sourceTree = "<group>"; };
 		8458872628A3F34D002A81BF /* HelperViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HelperViews.swift; sourceTree = "<group>"; };
@@ -1289,6 +1295,7 @@
 			isa = PBXGroup;
 			children = (
 				401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */,
+				8457BF7F2A5C18A7000AE567 /* ToastView_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -1459,6 +1466,7 @@
 				840626992A37A5E2004B8748 /* CallEvents.swift */,
 				840626702A37A431004B8748 /* IncomingCall.swift */,
 				8406269B2A37A653004B8748 /* CallEventsHandler.swift */,
+				8457BF7D2A5BFA04000AE567 /* Toast.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -2192,6 +2200,7 @@
 				8479F83329C09EF1009ECE37 /* UserAvatar.swift */,
 				827D893D2A16369300838B1A /* LazyImageExtensions.swift */,
 				4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */,
+				8457BF7B2A5BF9E0000AE567 /* ToastView.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2314,10 +2323,10 @@
 		84F73814287C141000A363F4 /* StreamVideoSwiftUITests */ = {
 			isa = PBXGroup;
 			children = (
-				401480332A5423C70029166A /* Utils */,
 				84932244290831B70013C029 /* StreamVideoSwiftUI.xctestplan */,
 				8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */,
 				84DCA20A2A382FE0000C3411 /* CallViewModel_Tests.swift */,
+				401480332A5423C70029166A /* Utils */,
 				829F7BFF29FAC5B1003EBACE /* CallView */,
 				82FF40BC2A17C6F500B4D95E /* CallingViews */,
 			);
@@ -3278,6 +3287,7 @@
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
+				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
 				844299412942394C0037232A /* VideoView_iOS13.swift in Sources */,
 				846E4AFF29D236EA003733AB /* CallTopView.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
@@ -3290,6 +3300,7 @@
 				8434C52B289AA3150001490A /* Appearance.swift in Sources */,
 				8434C527289AA2F00001490A /* Images.swift in Sources */,
 				827D893E2A16369300838B1A /* LazyImageExtensions.swift in Sources */,
+				8457BF7E2A5BFA04000AE567 /* Toast.swift in Sources */,
 				8435EB9229CDAD0D00E02651 /* ParticipantsFullScreenLayout.swift in Sources */,
 				401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */,
 				84DC382F29A8BB8D00946713 /* CallParticipantsInfoViewModel.swift in Sources */,
@@ -3370,6 +3381,7 @@
 				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
 				82FF40C42A17C74D00B4D95E /* IncomingCallView_Tests.swift in Sources */,
 				829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */,
+				8457BF802A5C18A7000AE567 /* ToastView_Tests.swift in Sources */,
 				82FF40C82A17C75C00B4D95E /* LobbyView_Tests.swift in Sources */,
 				82FF40CC2A17C76B00B4D95E /* OutgoingCallView_Tests.swift in Sources */,
 				82E3BA4E2A0BAE4D001AB93E /* VirtualTimer.swift in Sources */,
