@@ -20,7 +20,7 @@ jobs:
       - name: push
         uses: GetStream/push-stream-chat-docusaurus-action@main
         with:
-          target-branch: 'staging'
+          target-branch: 'production'
           destination-repository-name: 'stream-video-docusaurus'
         env:
           DOCUSAURUS_GH_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}
