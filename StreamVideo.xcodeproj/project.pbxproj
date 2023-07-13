@@ -25,6 +25,7 @@
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221622A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
+		8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */; };
 		820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784EE29FA8123006DD4F7 /* WebRTC */; };
 		820784F129FA8156006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784F029FA8156006DD4F7 /* WebRTC */; };
 		822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
@@ -708,6 +709,7 @@
 		435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "OwnCapability+Identifiable.swift"; sourceTree = "<group>"; };
 		8202215E2A24BB7100F7BAED /* LaunchArgument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchArgument.swift; sourceTree = "<group>"; };
 		8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Credentials.xcconfig; sourceTree = "<group>"; };
+		8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SystemEnvironment+Version.swift"; sourceTree = "<group>"; };
 		822257892A42F93600CFFD96 /* TokenGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenGenerator.swift; sourceTree = "<group>"; };
 		8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAppUIKit.entitlements; sourceTree = "<group>"; };
 		8228CD8C29128CA000F32136 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
@@ -1329,6 +1331,14 @@
 				8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */,
 			);
 			path = IntegrationTests;
+			sourceTree = "<group>";
+		};
+		8206D8512A5FF30E0099F5EC /* Generated */ = {
+			isa = PBXGroup;
+			children = (
+				8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */,
+			);
+			path = Generated;
 			sourceTree = "<group>";
 		};
 		82392D522993C9E100941435 /* SwiftUIDemoAppUITests */ = {
@@ -2272,6 +2282,7 @@
 				8456E6D8287EC436004E180E /* Errors */,
 				84B57D3A2981645900E4E709 /* OpenApi */,
 				84ED240B286C9500002A3186 /* protobuf */,
+				8206D8512A5FF30E0099F5EC /* Generated */,
 				82B82F2229114001001B5FD7 /* Info.plist */,
 			);
 			path = StreamVideo;
@@ -3168,6 +3179,7 @@
 				435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
 				84DC38AD29ADFCFD00946713 /* HealthCheckEvent.swift in Sources */,
+				8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */,
 				842B8E1C2A2DFED900863A87 /* AcceptCallResponse.swift in Sources */,
 				842B8E262A2DFED900863A87 /* CallParticipantResponse.swift in Sources */,
 				8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */,

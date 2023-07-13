@@ -29,12 +29,22 @@ end
 
 desc "Release a new version"
 lane :release do |options|
+  previous_version_number = last_git_tag
+  swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
+  extra_changes = lambda do |release_version|
+    # Set the framework version in SystemEnvironment+Version.swift
+    new_content = File.read(swift_environment_path).gsub!(previous_version_number, release_version)
+    File.open(swift_environment_path, 'w') { |f| f.puts(new_content) }
+  end
+
   pod_lint
   version_number = release_ios_sdk(
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
-    github_repo: github_repo
+    github_repo: github_repo,
+    extra_changes: extra_changes,
+    create_pull_request: false
   )
   publish_release(version: version_number)
 end
