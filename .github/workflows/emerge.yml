@@ -5,10 +5,19 @@ on:
     branches:
       - main
       - develop
+    paths-ignore:
+      - 'docusaurus/**'
+      - 'README.md'
+      - 'CHANGELOG.md'
+
   pull_request:
     branches:
       - main
       - develop
+    paths-ignore:
+      - 'docusaurus/**'
+      - 'README.md'
+      - 'CHANGELOG.md'
 
   workflow_dispatch:
 
