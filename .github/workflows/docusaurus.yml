@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - 'docusaurus/**'
+      - '.github/workflows/docusaurus.yml'
 
 jobs:
   push_docusaurus:
