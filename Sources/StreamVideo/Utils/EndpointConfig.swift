@@ -37,7 +37,7 @@ extension EndpointConfig {
         [
             "api_key": apiKey,
             "stream-auth-type": "jwt",
-            "X-Stream-Client": "stream-video-swift"
+            "X-Stream-Client": SystemEnvironment.xStreamClientHeader
         ]
     }
 }

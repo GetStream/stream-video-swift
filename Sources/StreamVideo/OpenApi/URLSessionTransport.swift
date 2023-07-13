@@ -117,7 +117,7 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
     func execute(request: Request) async throws -> (Data, URLResponse) {
         var clone = request
         clone.headers["Content-Type"] = "application/json"
-        clone.headers["X-Stream-Client"] = "stream-video-swift"
+        clone.headers["X-Stream-Client"] = SystemEnvironment.xStreamClientHeader
         do {
             return try await execute(request: clone.urlRequest())
         } catch {
