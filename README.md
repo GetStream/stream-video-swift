@@ -161,23 +161,36 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.2 milestone
 
+- [x] Toast views
 - [ ] Test coverage
-- [ ] Lobby updates
+- [ ] Lobby updates (show participants and events)
 - [ ] Stability
 - [ ] Test with many participants
 - [ ] CPU usage improvements
-- [ ] Call Analytics
+- [ ] Support settings.audio.default_device
+- [ ] Report SDK version number on all API calls
+- [ ] Fix AppClips
+- [ ] Add chat to the AppStore app (and app clip if possible)
+- [ ] Improve logging / Sentry integration
 
 ### 0.3 milestone
 
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Audio filters
 - [ ] Improved chat integration
-- [ ] Picture-in-picture sample
+- [ ] Picture-in-picture sample (if we get an entitlement)
 - [ ] Screensharing from mobile
+- [ ] Buttons to simulate ice-restart and SFU switching
+- [ ] Button to switch speakerphone/earpiece
+- [ ] Call Analytics / Stats
 
 ### 0.4 milestone
 
+- [ ] Complete reconnection flows
 - [ ] Analytics integration
+- [ ] Pagination on query members
+- [x] Pagination on query channels
 - [ ] Tap to focus
 - [ ] Picture of the video stream at highest resolution
+- [ ] Address testing feedback
+- [ ] Improve livestream tutorial (depends on RTMP support)
