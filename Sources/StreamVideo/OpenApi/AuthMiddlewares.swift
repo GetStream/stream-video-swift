@@ -54,7 +54,7 @@ struct DefaultParams: DefaultAPIClientMiddleware {
     ) async throws -> (Data, URLResponse) {
         var modifiedRequest = request
         modifiedRequest.queryParams.append(.init(name: "api_key", value: apiKey))
-        modifiedRequest.headers["X-Stream-Client"] = "stream-video-swift"
+        modifiedRequest.headers["X-Stream-Client"] = SystemEnvironment.xStreamClientHeader
         modifiedRequest.headers["x-client-request-id"] = UUID().uuidString
         return try await next(modifiedRequest)
     }
