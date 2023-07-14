@@ -201,9 +201,10 @@ struct JoinCallView: View {
     var onJoinCallTap: () -> ()
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text("\(L10n.WaitingRoom.description)")
+        VStack(alignment: .leading, spacing: 16) {
+            Text(waitingRoomDescription)
                 .font(.headline)
+                .multilineTextAlignment(.leading)
                 .accessibility(identifier: "otherParticipantsCount")
                 .streamAccessibility(value: "\(otherParticipantsCount)")
             
@@ -231,6 +232,10 @@ struct JoinCallView: View {
         .padding()
         .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
+    }
+    
+    private var waitingRoomDescription: String {
+        return "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
     }
     
     private var otherParticipantsCount: Int {
@@ -312,25 +317,21 @@ struct ParticipantsInCallView: View {
     private let viewSize: CGFloat = 64
     
     var body: some View {
-        VStack(spacing: 4) {
-            Text("\(L10n.WaitingRoom.numberOfParticipants) (\(callParticipants.count)):")
-                .font(.headline)
-            
-            ScrollView(.horizontal) {
-                LazyHStack {
-                    ForEach(participantsInCall) { participant in
-                        VStack {
-                            UserAvatar(
-                                imageURL: participant.user.imageURL,
-                                size: 40
-                            )
-                            Text(participant.user.name)
-                                .font(.caption)
-                        }
-                        .frame(width: viewSize, height: viewSize)
+        ScrollView(.horizontal) {
+            LazyHStack {
+                ForEach(participantsInCall) { participant in
+                    VStack {
+                        UserAvatar(
+                            imageURL: participant.user.imageURL,
+                            size: 40
+                        )
+                        Text(participant.user.name)
+                            .font(.caption)
                     }
+                    .frame(width: viewSize, height: viewSize)
                 }
             }
         }
+        .frame(height: viewSize)
     }
 }

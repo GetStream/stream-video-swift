@@ -29,8 +29,6 @@
 "waiting-room.subtitle" = "Setup your audio and video";
 "waiting-room.join" = "Join Call";
 "waiting-room.description" = "You are about to join a call.";
-"waiting-room.number-of-participants" = "Already in the call";
-"waiting-room.no-users-in-call" = "Currently there are no other participants in the call.";
 "waiting-room.connection-issues" = "It seems you are having issues with your internet connection.";
 "waiting-room.mic.not-working" = "Your microphone doesn't seem to be working. Make sure you have all permissions accepted.";
 
