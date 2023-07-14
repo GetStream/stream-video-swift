@@ -19,6 +19,7 @@ public struct LobbyView: View {
     var onCloseLobby: () -> ()
         
     public init(
+        viewModel: LobbyViewModel? = nil,
         callId: String,
         callType: String,
         callSettings: Binding<CallSettings>,
@@ -31,7 +32,7 @@ public struct LobbyView: View {
         self.onCloseLobby = onCloseLobby
         _callSettings = callSettings
         _viewModel = StateObject(
-            wrappedValue: LobbyViewModel(
+            wrappedValue: viewModel ?? LobbyViewModel(
                 callType: callType,
                 callId: callId
             )
