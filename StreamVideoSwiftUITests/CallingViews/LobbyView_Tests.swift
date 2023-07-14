@@ -12,11 +12,9 @@ final class LobbyView_Tests: StreamVideoUITestCase {
     
     func test_lobbyView_snapshot() throws {
         for count in 1...2 {
-            let users = UserFactory.get(count)
             let view = LobbyView(
                 callId: callId,
                 callType: callType,
-                callParticipants: users,
                 callSettings: .constant(CallSettings()),
                 onJoinCallTap: {},
                 onCloseLobby: {}

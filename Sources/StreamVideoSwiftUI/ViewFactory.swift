@@ -295,7 +295,6 @@ extension ViewFactory {
             return LobbyView(
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
-                callParticipants: lobbyInfo.participants.map(\.toMember),
                 callSettings: callSettings,
                 onJoinCallTap: handleJoinCall,
                 onCloseLobby: handleCloseLobby
@@ -305,7 +304,6 @@ extension ViewFactory {
                 callViewModel: viewModel,
                 callId: lobbyInfo.callId,
                 callType: lobbyInfo.callType,
-                callParticipants: lobbyInfo.participants.map(\.toMember),
                 callSettings: callSettings,
                 onJoinCallTap: handleJoinCall,
                 onCloseLobby: handleCloseLobby
