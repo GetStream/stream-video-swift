@@ -18,10 +18,12 @@ jobs:
         uses: actions/setup-node@v3.1.0
         with:
           node-version: 18
-      - name: push
+      - name: Push iOS docs
         uses: GetStream/push-stream-chat-docusaurus-action@main
         with:
           target-branch: 'main'
+          cli-target-branch: 'production'
           destination-repository-name: 'stream-video-docusaurus'
+          source-directory: 'docusaurus'
         env:
           DOCUSAURUS_GH_TOKEN: ${{ secrets.DOCUSAURUS_GH_TOKEN }}
