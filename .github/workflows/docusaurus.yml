@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+      - docs-hotfix-prod-deploy # FIXME
     paths:
       - 'docusaurus/**'
       - '.github/workflows/docusaurus.yml'
