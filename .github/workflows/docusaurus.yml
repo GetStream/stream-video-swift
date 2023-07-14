@@ -1,16 +1,7 @@
 name: Docusaurus
 
 on:
-  pull_request:
-    branches:
-      - '**'
-    paths:
-      - 'docusaurus/**'
-      - '.github/workflows/docusaurus.yml'
-
   push:
-    branches:
-      - main
     paths:
       - 'docusaurus/**'
       - '.github/workflows/docusaurus.yml'
