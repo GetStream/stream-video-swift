@@ -9,30 +9,34 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LobbyView: View {
     
-    @StateObject var viewModel = LobbyViewModel()
+    @StateObject var viewModel: LobbyViewModel
     @StateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
     var callType: String
-    var callParticipants: [Member]
     @Binding var callSettings: CallSettings
     var onJoinCallTap: () -> ()
     var onCloseLobby: () -> ()
         
     public init(
+        viewModel: LobbyViewModel? = nil,
         callId: String,
         callType: String,
-        callParticipants: [Member],
         callSettings: Binding<CallSettings>,
         onJoinCallTap: @escaping () -> (),
         onCloseLobby: @escaping () -> ()
     ) {
         self.callId = callId
         self.callType = callType
-        self.callParticipants = callParticipants
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
         _callSettings = callSettings
+        _viewModel = StateObject(
+            wrappedValue: viewModel ?? LobbyViewModel(
+                callType: callType,
+                callId: callId
+            )
+        )
     }
     
     public var body: some View {
@@ -41,7 +45,6 @@ public struct LobbyView: View {
             microphoneChecker: microphoneChecker,
             callId: callId,
             callType: callType,
-            callParticipants: callParticipants,
             callSettings: $callSettings,
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
@@ -60,7 +63,6 @@ struct LobbyContentView: View {
     
     var callId: String
     var callType: String
-    var callParticipants: [Member]
     @Binding var callSettings: CallSettings
     var onJoinCallTap: () -> ()
     var onCloseLobby: () -> ()
@@ -97,7 +99,7 @@ struct LobbyContentView: View {
                     JoinCallView(
                         callId: callId,
                         callType: callType,
-                        callParticipants: callParticipants,
+                        callParticipants: viewModel.participants,
                         onJoinCallTap: onJoinCallTap
                     )
                 }
@@ -142,7 +144,7 @@ struct CameraCheckView: View {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: availableSize.width - 32, height: availableSize.height / 2)
+                    .frame(width: availableSize.width - 32, height: cameraSize)
                     .cornerRadius(16)
                     .accessibility(identifier: "cameraCheckView")
                     .streamAccessibility(value: "1")
@@ -150,7 +152,7 @@ struct CameraCheckView: View {
                 ZStack {
                     Rectangle()
                         .fill(colors.lobbySecondaryBackground)
-                        .frame(width: availableSize.width - 32, height: availableSize.height / 2)
+                        .frame(width: availableSize.width - 32, height: cameraSize)
                         .cornerRadius(16)
 
                     if #available(iOS 14.0, *) {
@@ -160,7 +162,7 @@ struct CameraCheckView: View {
                     }
                 }
                 .opacity(callSettings.videoOn ? 0 : 1)
-                .frame(width: availableSize.width - 32, height: availableSize.height / 2)
+                .frame(width: availableSize.width - 32, height: cameraSize)
             }
         }
         .overlay(
@@ -179,6 +181,15 @@ struct CameraCheckView: View {
             }
         )
     }
+    
+    private var cameraSize: CGFloat {
+        if viewModel.participants.count > 0 {
+            return availableSize.height / 2 - 64
+        } else {
+            return availableSize.height / 2
+        }
+    }
+    
 }
 
 struct JoinCallView: View {
@@ -187,15 +198,25 @@ struct JoinCallView: View {
     
     var callId: String
     var callType: String
-    var callParticipants: [Member]
+    var callParticipants: [User]
     var onJoinCallTap: () -> ()
     
     var body: some View {
-        VStack(spacing: 16) {
-            Text("\(L10n.WaitingRoom.description)")
+        VStack(alignment: .leading, spacing: 16) {
+            Text(waitingRoomDescription)
                 .font(.headline)
+                .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibility(identifier: "otherParticipantsCount")
                 .streamAccessibility(value: "\(otherParticipantsCount)")
+            
+            if #available(iOS 14, *) {
+                if callParticipants.count > 0 {
+                    ParticipantsInCallView(
+                        callParticipants: callParticipants
+                    )
+                }
+            }
             
             Button {
                 onJoinCallTap()
@@ -213,6 +234,10 @@ struct JoinCallView: View {
         .padding()
         .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
+    }
+    
+    private var waitingRoomDescription: String {
+        return "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
     }
     
     private var otherParticipantsCount: Int {
@@ -268,5 +293,47 @@ struct CallSettingsView: View {
             }
         }
         .padding()
+    }
+}
+
+@available(iOS 14.0, *)
+struct ParticipantsInCallView: View {
+    
+    struct ParticipantInCall: Identifiable {
+        let id: String
+        let user: User
+    }
+    
+    var callParticipants: [User]
+    
+    var participantsInCall: [ParticipantInCall] {
+        var result = [ParticipantInCall]()
+        for (index, participant) in callParticipants.enumerated() {
+            let id = "\(index)-\(participant.id)"
+            let participant = ParticipantInCall(id: id, user: participant)
+            result.append(participant)
+        }
+        return result
+    }
+    
+    private let viewSize: CGFloat = 64
+    
+    var body: some View {
+        ScrollView(.horizontal) {
+            LazyHStack {
+                ForEach(participantsInCall) { participant in
+                    VStack {
+                        UserAvatar(
+                            imageURL: participant.user.imageURL,
+                            size: 40
+                        )
+                        Text(participant.user.name)
+                            .font(.caption)
+                    }
+                    .frame(width: viewSize, height: viewSize)
+                }
+            }
+        }
+        .frame(height: viewSize)
     }
 }

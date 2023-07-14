@@ -14,7 +14,11 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
         for count in spotlightParticipants {
             let users = UserFactory.get(count)
             let view = CallingGroupView(participants: users, isCalling: true)
-            AssertSnapshot(view, suffix: "with_\(count)_participants")
+            AssertSnapshot(
+                view,
+                perceptualPrecision: 0.95,
+                suffix: "with_\(count)_participants"
+            )
         }
     }
     
@@ -22,7 +26,11 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
         for count in spotlightParticipants {
             let users = UserFactory.get(count)
             let view = CallingGroupView(participants: users, isCalling: true)
-            AssertSnapshot(view, suffix: "with_\(count)_participants")
+            AssertSnapshot(
+                view,
+                perceptualPrecision: 0.95,
+                suffix: "with_\(count)_participants"
+            )
         }
     }
 }

@@ -84,8 +84,10 @@ internal enum L10n {
     internal static var description: String { L10n.tr("Localizable", "waiting-room.description") }
     /// Join Call
     internal static var join: String { L10n.tr("Localizable", "waiting-room.join") }
-    /// more people are in the call.
-    internal static var numberOfParticipants: String { L10n.tr("Localizable", "waiting-room.number-of-participants") }
+    /// Plural format key: "%#@participants@"
+    internal static func numberOfParticipants(_ p1: Int) -> String {
+      return L10n.tr("Localizable", "waiting-room.number-of-participants", p1)
+    }
     /// Setup your audio and video
     internal static var subtitle: String { L10n.tr("Localizable", "waiting-room.subtitle") }
     /// Before Joining

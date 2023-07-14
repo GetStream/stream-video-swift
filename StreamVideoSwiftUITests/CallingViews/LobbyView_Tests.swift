@@ -11,12 +11,14 @@ import XCTest
 final class LobbyView_Tests: StreamVideoUITestCase {
     
     func test_lobbyView_snapshot() throws {
-        for count in 1...2 {
-            let users = UserFactory.get(count)
+        for count in 0...2 {
+            let viewModel = LobbyViewModel(callType: callId, callId: callType)
+            let users = UserFactory.get(count).map { $0.user }
+            viewModel.participants = users
             let view = LobbyView(
+                viewModel: viewModel,
                 callId: callId,
                 callType: callType,
-                callParticipants: users,
                 callSettings: .constant(CallSettings()),
                 onJoinCallTap: {},
                 onCloseLobby: {}

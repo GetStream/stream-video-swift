@@ -31,6 +31,7 @@ func AssertSnapshot(
     isEmbeddedInNavigationController: Bool = false,
     variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     screenSize: CGSize = defaultScreenSize,
+    perceptualPrecision: Float = 0.97,
     suffix: String? = nil,
     record: Bool = false,
     line: UInt = #line,
@@ -46,7 +47,7 @@ func AssertSnapshot(
     variantsToTest.forEach { variant in
         assertSnapshot(
             matching: viewController,
-            as: .image(perceptualPrecision: 0.97, size: screenSize, traits: variant.traits),
+            as: .image(perceptualPrecision: perceptualPrecision, size: screenSize, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
@@ -72,6 +73,7 @@ func AssertSnapshot(
     _ view: UIView,
     variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     size: CGSize? = nil,
+    perceptualPrecision: Float = 0.97,
     suffix: String? = nil,
     record: Bool = false,
     line: UInt = #line,
@@ -86,8 +88,8 @@ func AssertSnapshot(
         assertSnapshot(
             matching: view,
             as: size != nil ?
-                .image(perceptualPrecision: 0.97, size: size!, traits: variant.traits)
-                : .image(perceptualPrecision: 0.97, traits: variant.traits),
+                .image(perceptualPrecision: perceptualPrecision, size: size!, traits: variant.traits)
+                : .image(perceptualPrecision: perceptualPrecision, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
@@ -105,6 +107,7 @@ func AssertSnapshot<View: UIViewControllerRepresentable>(
     isEmbeddedInNavigationController: Bool = false,
     variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     screenSize: CGSize = defaultScreenSize,
+    perceptualPrecision: Float = 0.97,
     suffix: String? = nil,
     record: Bool = false,
     line: UInt = #line,
@@ -117,6 +120,7 @@ func AssertSnapshot<View: UIViewControllerRepresentable>(
         isEmbeddedInNavigationController: isEmbeddedInNavigationController,
         variants: variants,
         screenSize: screenSize,
+        perceptualPrecision: perceptualPrecision,
         suffix: suffix,
         record: overrideRecording ?? record,
         line: line,
@@ -143,6 +147,7 @@ func AssertSnapshot<View: SwiftUI.View>(
     variants: [SnapshotVariant] = [.defaultLight, .defaultDark],
     device: ViewImageConfig = .iPhoneX,
     size: CGSize? = nil,
+    perceptualPrecision: Float = 0.97,
     suffix: String? = nil,
     record: Bool = false,
     line: UInt = #line,
@@ -157,8 +162,8 @@ func AssertSnapshot<View: SwiftUI.View>(
         assertSnapshot(
             matching: view,
             as: size != nil ?
-                .image(perceptualPrecision: 0.97, layout: .sizeThatFits)
-                : .image(perceptualPrecision: 0.97, layout: .device(config: device), traits: variant.traits),
+                .image(perceptualPrecision: perceptualPrecision, layout: .sizeThatFits)
+                : .image(perceptualPrecision: perceptualPrecision, layout: .device(config: device), traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,

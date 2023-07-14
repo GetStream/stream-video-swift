@@ -20,5 +20,23 @@
 			<string>%d participants</string>
 		</dict>
 	</dict>
+	<key>waiting-room.number-of-participants</key>
+	<dict>
+		<key>NSStringLocalizedFormatKey</key>
+		<string>%#@participants@</string>
+		<key>participants</key>
+		<dict>
+			<key>NSStringFormatSpecTypeKey</key>
+			<string>NSStringPluralRuleType</string>
+			<key>NSStringFormatValueTypeKey</key>
+			<string>d</string>
+			<key>zero</key>
+			<string>Currently there are no other participants in the call.</string>
+			<key>one</key>
+			<string>There is %d more person in the call.</string>
+			<key>other</key>
+			<string>There are %d more people in the call.</string>
+		</dict>
+	</dict>
 </dict>
 </plist>

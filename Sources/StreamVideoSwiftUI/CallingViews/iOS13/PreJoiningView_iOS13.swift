@@ -10,12 +10,11 @@ import SwiftUI
 struct LobbyView_iOS13: View {
     
     @ObservedObject var callViewModel: CallViewModel
-    @BackportStateObject var viewModel = LobbyViewModel()
+    @BackportStateObject var viewModel: LobbyViewModel
     @BackportStateObject var microphoneChecker = MicrophoneChecker()
     
     var callId: String
     var callType: String
-    var callParticipants: [Member]
     @Binding var callSettings: CallSettings
     var onJoinCallTap: () -> ()
     var onCloseLobby: () -> ()
@@ -24,16 +23,20 @@ struct LobbyView_iOS13: View {
         callViewModel: CallViewModel,
         callId: String,
         callType: String,
-        callParticipants: [Member],
         callSettings: Binding<CallSettings>,
         onJoinCallTap: @escaping () -> (),
         onCloseLobby: @escaping () -> ()
     ) {
         _callViewModel = ObservedObject(wrappedValue: callViewModel)
+        _viewModel = BackportStateObject(
+            wrappedValue: LobbyViewModel(
+                callType: callType,
+                callId: callId
+            )
+        )
         _callSettings = callSettings
         self.callId = callId
         self.callType = callType
-        self.callParticipants = callParticipants
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
     }
@@ -44,7 +47,6 @@ struct LobbyView_iOS13: View {
             microphoneChecker: microphoneChecker,
             callId: callId,
             callType: callType,
-            callParticipants: callParticipants,
             callSettings: $callSettings,
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
