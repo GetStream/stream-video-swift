@@ -1,4 +1,4 @@
-name: Check Docusaurus docs with Vale linter
+name: Vale
 
 on:
   pull_request:
@@ -8,7 +8,7 @@ on:
 
 jobs:
   vale:
-    name: Vale doc linter
+    name: Check Docusaurus docs
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
