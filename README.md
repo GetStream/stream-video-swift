@@ -163,12 +163,12 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [x] Toast views
 - [ ] Test coverage
-- [ ] Lobby updates (show participants and events)
+- [x] Lobby updates (show participants and events)
 - [ ] Stability
 - [ ] Test with many participants
 - [ ] CPU usage improvements
 - [ ] Support settings.audio.default_device
-- [ ] Report SDK version number on all API calls
+- [x] Report SDK version number on all API calls
 - [ ] Fix AppClips
 - [ ] Add chat to the AppStore app (and app clip if possible)
 - [ ] Improve logging / Sentry integration

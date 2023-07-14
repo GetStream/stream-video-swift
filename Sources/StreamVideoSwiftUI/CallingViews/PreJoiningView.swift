@@ -205,6 +205,7 @@ struct JoinCallView: View {
             Text(waitingRoomDescription)
                 .font(.headline)
                 .multilineTextAlignment(.leading)
+                .fixedSize(horizontal: false, vertical: true)
                 .accessibility(identifier: "otherParticipantsCount")
                 .streamAccessibility(value: "\(otherParticipantsCount)")
             

@@ -35,7 +35,7 @@
 			<key>one</key>
 			<string>There is %d more person in the call.</string>
 			<key>other</key>
-			<string>There are %d more people are in the call.</string>
+			<string>There are %d more people in the call.</string>
 		</dict>
 	</dict>
 </dict>
