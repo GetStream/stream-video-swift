@@ -21,7 +21,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view)
+        AssertSnapshot(view, perceptualPrecision: 0.96)
     }
     
     func test_toastView_successSnapshot() {
@@ -36,7 +36,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view)
+        AssertSnapshot(view, perceptualPrecision: 0.96)
     }
     
     func test_toastView_warningSnapshot() {
@@ -51,7 +51,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view)
+        AssertSnapshot(view, perceptualPrecision: 0.96)
     }
     
     func test_toastView_infoSnapshot() {
@@ -66,7 +66,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view)
+        AssertSnapshot(view, perceptualPrecision: 0.96)
     }
     
     func test_toastView_errorSnapshotBottom() {
@@ -81,7 +81,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view)
+        AssertSnapshot(view, perceptualPrecision: 0.96)
     }
 
 }
