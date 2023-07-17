@@ -87,6 +87,52 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call?.state.reconnectionStatus == .connected)
     }
     
+    func test_callController_migrationSuccess() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        let callController = makeCallController(shouldReconnect: true)
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            options: nil
+        )
+        callController.call = call
+        webRTCClient.signalChannel?.connect()
+        try await waitForCallEvent()
+        let signalChannel = webRTCClient.signalChannel!
+        let engine = signalChannel.engine as! WebSocketEngine_Mock
+        engine.simulateConnectionSuccess()
+        try await waitForCallEvent()
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.goAway(Stream_Video_Sfu_Event_GoAway())))
+        try await waitForCallEvent()
+        
+        // Then
+        XCTAssert(callController.call?.state.reconnectionStatus == .migrating)
+     
+        // When
+        try await waitForCallEvent()
+        engine.simulateConnectionSuccess()
+        try await waitForCallEvent()
+        webRTCClient?.webSocketClient(
+            signalChannel,
+            didUpdateConnectionState: .connected(
+                healthCheckInfo: HealthCheckInfo(
+                    sfuHealthCheck: Stream_Video_Sfu_Event_HealthCheckResponse()
+                )
+            )
+        )
+        webRTCClient?.onSessionMigrationCompleted?()
+        try await waitForCallEvent()
+        
+        // Then
+        XCTAssert(callController.call?.state.reconnectionStatus == .connected)
+    }
+    
     func test_callController_reconnectionFailure() async throws {
         // Given
         webRTCClient = makeWebRTCClient()
@@ -211,6 +257,99 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(callController.call == nil)
     }
     
+    func test_callController_changeAudioState() async throws {
+        // Given
+        webRTCClient = try makeWebRTCClientWithMuteStatesResponse()
+        let callController = makeCallController()
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            options: nil
+        )
+        callController.call = call
+        try await callController.changeAudioState(isEnabled: false)
+        
+        // Then
+        XCTAssert(webRTCClient.callSettings.audioOn == false)
+    }
+    
+    func test_callController_changeVideoState() async throws {
+        // Given
+        webRTCClient = try makeWebRTCClientWithMuteStatesResponse()
+        let callController = makeCallController()
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            options: nil
+        )
+        callController.call = call
+        try await callController.changeVideoState(isEnabled: false)
+        
+        // Then
+        XCTAssert(webRTCClient.callSettings.videoOn == false)
+    }
+    
+    func test_callController_changeTrackVisibility() async throws {
+        // Given
+        let sessionId = "test"
+        webRTCClient = makeWebRTCClient()
+        let participant = MockResponseBuilder().makeCallParticipant(id: sessionId)
+        await webRTCClient.state.update(callParticipants: [sessionId: participant])
+        let callController = makeCallController()
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            options: nil
+        )
+        callController.call = call
+        await callController.changeTrackVisibility(for: participant, isVisible: true)
+        
+        // Then
+        let updated = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssert(updated?.showTrack == true)
+    }
+    
+    func test_callController_updateTrackSize() async throws {
+        // Given
+        let sessionId = "test"
+        let size = CGSize(width: 100, height: 100)
+        webRTCClient = makeWebRTCClient()
+        let participant = MockResponseBuilder().makeCallParticipant(id: sessionId)
+        await webRTCClient.state.update(callParticipants: [sessionId: participant])
+        let callController = makeCallController()
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            options: nil
+        )
+        callController.call = call
+        await callController.updateTrackSize(size, for: participant)
+        
+        // Then
+        let updated = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssert(updated?.trackSize == size)
+    }
+    
     // MARK: - private
     
     private func makeCallController(
@@ -243,11 +382,23 @@ final class CallController_Tests: ControllerTestCase {
         return callController
     }
     
-    private func makeWebRTCClient() -> WebRTCClient {
+    private func makeWebRTCClientWithMuteStatesResponse() throws -> WebRTCClient {
+        let response = try Stream_Video_Sfu_Signal_UpdateMuteStatesResponse().serializedData()
+        let httpClient = HTTPClient_Mock()
+        httpClient.dataResponses = [response]
+        return makeWebRTCClient(httpClient: httpClient)
+    }
+    
+    private func makeWebRTCClient(httpClient: HTTPClient_Mock? = nil) -> WebRTCClient {
         let time = VirtualTime()
         VirtualTimeTimer.time = time
         var environment = WebSocketClient.Environment.mock
         environment.timerType = VirtualTimeTimer.self
+        if let httpClient {
+            environment.httpClientBuilder = {
+                httpClient
+            }
+        }
         
         let webRTCClient = WebRTCClient(
             user: StreamVideo.mockUser,

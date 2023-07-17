@@ -6,6 +6,8 @@
 import XCTest
 
 final class Sorting_Tests: XCTestCase {
+    
+    private let mockResponseBuilder = MockResponseBuilder()
 
     func testSortByScreensharingAndUserId() {
         // Given
@@ -120,30 +122,16 @@ final class Sorting_Tests: XCTestCase {
         isSpeaking: Bool = false,
         isDominantSpeaker: Bool = false
     ) -> CallParticipant {
-        let participant = CallParticipant(
+        mockResponseBuilder.makeCallParticipant(
             id: id,
-            userId: id,
-            roles: roles,
             name: name,
-            profileImageURL: nil,
-            trackLookupPrefix: nil,
+            roles: roles,
             hasVideo: hasVideo,
             hasAudio: hasAudio,
             isScreenSharing: isScreenSharing,
-            showTrack: true,
-            track: nil,
-            trackSize: .zero,
-            screenshareTrack: nil,
             isSpeaking: isSpeaking,
-            isDominantSpeaker: isDominantSpeaker,
-            sessionId: id,
-            connectionQuality: .unknown,
-            joinedAt: Date(),
-            isPinned: false,
-            audioLevel: 0,
-            audioLevels: []
+            isDominantSpeaker: isDominantSpeaker
         )
-        return participant
     }
     
 }
