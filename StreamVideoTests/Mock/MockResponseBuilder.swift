@@ -111,6 +111,7 @@ class MockResponseBuilder {
     func makeCallSettingsResponse() -> CallSettingsResponse {
         let audioSettings = AudioSettings(
             accessRequestEnabled: true,
+            defaultDevice: .speaker,
             micDefaultOn: true,
             opusDtxEnabled: true,
             redundantCodingEnabled: true,

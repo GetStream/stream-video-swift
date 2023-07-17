@@ -20,6 +20,7 @@ class CallController_Mock: CallController {
         videoConfig: VideoConfig(),
         audioSettings: AudioSettings(
             accessRequestEnabled: true,
+            defaultDevice: .speaker,
             micDefaultOn: true,
             opusDtxEnabled: true,
             redundantCodingEnabled: true,
