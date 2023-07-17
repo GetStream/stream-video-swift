@@ -167,7 +167,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Stability
 - [ ] Test with many participants
 - [ ] CPU usage improvements
-- [ ] Support settings.audio.default_device
+- [x] Support settings.audio.default_device
 - [x] Report SDK version number on all API calls
 - [ ] Fix AppClips
 - [ ] Add chat to the AppStore app (and app clip if possible)

@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - SDK version info sent in all requests
 - Call participants shown in the lobby view
+- Support for setting default audio device
 
 # [0.1.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.1.0)
 _July 07, 2023_

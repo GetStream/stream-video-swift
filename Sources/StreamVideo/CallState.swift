@@ -111,7 +111,9 @@ public class CallState: ObservableObject {
             if session?.participants.map(\.user).contains(event.user) == false {
                 let callParticipant = CallParticipantResponse(
                     joinedAt: Date(),
-                    user: event.user
+                    role: event.user.role,
+                    user: event.user,
+                    userSessionId: event.userSessionId
                 )
                 session?.participants.append(callParticipant)
             }
