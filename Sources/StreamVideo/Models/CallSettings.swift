@@ -56,7 +56,7 @@ extension CallSettingsResponse {
         CallSettings(
             audioOn: audio.micDefaultOn,
             videoOn: video.cameraDefaultOn,
-            speakerOn: true, //TODO: true until exposed
+            speakerOn: video.cameraDefaultOn ? true : audio.defaultDevice == .speaker,
             audioOutputOn: audio.speakerDefaultOn,
             cameraPosition: video.cameraFacing == .back ? .back : .front
         )

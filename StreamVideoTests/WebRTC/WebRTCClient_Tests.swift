@@ -590,6 +590,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
+                defaultDevice: .speaker,
                 micDefaultOn: true,
                 opusDtxEnabled: true,
                 redundantCodingEnabled: true,

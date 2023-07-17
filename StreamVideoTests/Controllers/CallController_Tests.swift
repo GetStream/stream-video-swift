@@ -261,6 +261,7 @@ final class CallController_Tests: ControllerTestCase {
             videoConfig: VideoConfig(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
+                defaultDevice: .speaker,
                 micDefaultOn: true,
                 opusDtxEnabled: true,
                 redundantCodingEnabled: true,

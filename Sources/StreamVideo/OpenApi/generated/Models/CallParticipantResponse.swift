@@ -10,16 +10,22 @@ import Foundation
 
 public struct CallParticipantResponse: Codable, JSONEncodable, Hashable {
     public var joinedAt: Date
+    public var role: String
     public var user: UserResponse
+    public var userSessionId: String
 
-    public init(joinedAt: Date, user: UserResponse) {
+    public init(joinedAt: Date, role: String, user: UserResponse, userSessionId: String) {
         self.joinedAt = joinedAt
+        self.role = role
         self.user = user
+        self.userSessionId = userSessionId
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case joinedAt = "joined_at"
+        case role
         case user
+        case userSessionId = "user_session_id"
     }
 
     // Encodable protocol methods
@@ -27,7 +33,9 @@ public struct CallParticipantResponse: Codable, JSONEncodable, Hashable {
     public func encode(to encoder: Encoder) throws {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(joinedAt, forKey: .joinedAt)
+        try container.encode(role, forKey: .role)
         try container.encode(user, forKey: .user)
+        try container.encode(userSessionId, forKey: .userSessionId)
     }
 }
 

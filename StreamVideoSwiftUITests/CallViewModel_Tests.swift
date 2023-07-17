@@ -386,7 +386,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
             callCid: callCid,
             createdAt: Date(),
             sessionId: "123",
-            user: .make(from: "test")
+            user: .make(from: "test"),
+            userSessionId: "123"
         )
 
         eventNotificationCenter?.process(.coordinatorEvent(.typeCallSessionParticipantJoinedEvent(participantEvent)))

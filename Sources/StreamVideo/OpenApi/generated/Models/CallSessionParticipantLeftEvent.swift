@@ -16,13 +16,16 @@ public struct CallSessionParticipantLeftEvent: @unchecked Sendable, Event, Codab
     /** The type of event: \"call.session_participant_left\" in this case */
     public var type: String = "call.session_participant_left"
     public var user: UserResponse
+    /** The user session ID of the user that left the call session */
+    public var userSessionId: String
 
-    public init(callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_participant_left", user: UserResponse) {
+    public init(callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_participant_left", user: UserResponse, userSessionId: String) {
         self.callCid = callCid
         self.createdAt = createdAt
         self.sessionId = sessionId
         self.type = type
         self.user = user
+        self.userSessionId = userSessionId
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -31,6 +34,7 @@ public struct CallSessionParticipantLeftEvent: @unchecked Sendable, Event, Codab
         case sessionId = "session_id"
         case type
         case user
+        case userSessionId = "user_session_id"
     }
 
     // Encodable protocol methods
@@ -42,6 +46,7 @@ public struct CallSessionParticipantLeftEvent: @unchecked Sendable, Event, Codab
         try container.encode(sessionId, forKey: .sessionId)
         try container.encode(type, forKey: .type)
         try container.encode(user, forKey: .user)
+        try container.encode(userSessionId, forKey: .userSessionId)
     }
 }
 
