@@ -108,18 +108,12 @@ public class CallState: ObservableObject {
         case .typeCallSessionEndedEvent(let event):
             update(from: event.call)
         case .typeCallSessionParticipantJoinedEvent(let event):
-            if session?.participants.map(\.user).contains(event.user) == false {
-                let callParticipant = CallParticipantResponse(
-                    joinedAt: Date(),
-                    role: event.user.role,
-                    user: event.user,
-                    userSessionId: event.userSessionId
-                )
-                session?.participants.append(callParticipant)
+            if session?.participants.contains(event.participant) == false {
+                session?.participants.append(event.participant)
             }
         case .typeCallSessionParticipantLeftEvent(let event):
             session?.participants.removeAll(where: { participant in
-                participant.user == event.user
+                participant == event.participant
             })
         case .typeCallSessionStartedEvent(let event):
             update(from: event.call)

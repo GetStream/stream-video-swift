@@ -83,7 +83,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     private func subscribeForCallJoinUpdates() {
         joinEventsTask = Task {
             for await event in call.subscribe(for: CallSessionParticipantJoinedEvent.self) {
-                let user = event.user.toUser
+                let user = event.participant.user.toUser
                 withAnimation {
                     participants.append(user)
                 }
@@ -94,7 +94,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     private func subscribeForCallLeaveUpdates() {
         leaveEventsTask = Task {
             for await event in call.subscribe(for: CallSessionParticipantLeftEvent.self) {
-                let user = event.user.toUser
+                let user = event.participant.user.toUser
                 var indexToRemove: Int?
                 for (index, participant) in participants.enumerated() {
                     if participant.id == user.id {
