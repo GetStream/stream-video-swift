@@ -11,30 +11,26 @@ import Foundation
 public struct CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSCallEvent {
     public var callCid: String
     public var createdAt: Date
+    public var participant: CallParticipantResponse
     /** Call session ID */
     public var sessionId: String
     /** The type of event: \"call.session_participant_joined\" in this case */
     public var type: String = "call.session_participant_joined"
-    public var user: UserResponse
-    /** The user session ID of the user that joined the call session */
-    public var userSessionId: String
 
-    public init(callCid: String, createdAt: Date, sessionId: String, type: String = "call.session_participant_joined", user: UserResponse, userSessionId: String) {
+    public init(callCid: String, createdAt: Date, participant: CallParticipantResponse, sessionId: String, type: String = "call.session_participant_joined") {
         self.callCid = callCid
         self.createdAt = createdAt
+        self.participant = participant
         self.sessionId = sessionId
         self.type = type
-        self.user = user
-        self.userSessionId = userSessionId
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case callCid = "call_cid"
         case createdAt = "created_at"
+        case participant
         case sessionId = "session_id"
         case type
-        case user
-        case userSessionId = "user_session_id"
     }
 
     // Encodable protocol methods
@@ -43,10 +39,9 @@ public struct CallSessionParticipantJoinedEvent: @unchecked Sendable, Event, Cod
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(callCid, forKey: .callCid)
         try container.encode(createdAt, forKey: .createdAt)
+        try container.encode(participant, forKey: .participant)
         try container.encode(sessionId, forKey: .sessionId)
         try container.encode(type, forKey: .type)
-        try container.encode(user, forKey: .user)
-        try container.encode(userSessionId, forKey: .userSessionId)
     }
 }
 

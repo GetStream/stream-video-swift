@@ -177,9 +177,13 @@ final class CallEventsHandler_Tests: XCTestCase {
         let rawEvent = CallSessionParticipantJoinedEvent(
             callCid: callCid,
             createdAt: Date(),
-            sessionId: "123",
-            user: mockResponseBuilder.makeUserResponse(),
-            userSessionId: "123"
+            participant: CallParticipantResponse(
+                joinedAt: Date(),
+                role: "user",
+                user: mockResponseBuilder.makeUserResponse(),
+                userSessionId: "123"
+            ),
+            sessionId: "123"
         )
         let event: VideoEvent = .typeCallSessionParticipantJoinedEvent(rawEvent)
         
@@ -197,9 +201,13 @@ final class CallEventsHandler_Tests: XCTestCase {
         let rawEvent = CallSessionParticipantLeftEvent(
             callCid: callCid,
             createdAt: Date(),
-            sessionId: "123",
-            user: mockResponseBuilder.makeUserResponse(),
-            userSessionId: "123"
+            participant: CallParticipantResponse(
+                joinedAt: Date(),
+                role: "user",
+                user: mockResponseBuilder.makeUserResponse(),
+                userSessionId: "123"
+            ),
+            sessionId: "123"
         )
         let event: VideoEvent = .typeCallSessionParticipantLeftEvent(rawEvent)
         

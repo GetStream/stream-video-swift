@@ -75,17 +75,17 @@ public class CallEventsHandler {
         switch event {
         case .typeCallSessionParticipantJoinedEvent(let event):
             return ParticipantEvent(
-                id: event.user.id,
+                id: event.participant.user.id,
                 action: .join,
-                user: event.user.name ?? event.user.id,
-                imageURL: URL(string: event.user.image ?? "")
+                user: event.participant.user.name ?? event.participant.user.id,
+                imageURL: URL(string: event.participant.user.image ?? "")
             )
         case .typeCallSessionParticipantLeftEvent(let event):
             return ParticipantEvent(
-                id: event.user.id,
+                id: event.participant.user.id,
                 action: .leave,
-                user: event.user.name ?? event.user.id,
-                imageURL: URL(string: event.user.image ?? "")
+                user: event.participant.user.name ?? event.participant.user.id,
+                imageURL: URL(string: event.participant.user.image ?? "")
             )
         default:
             return nil

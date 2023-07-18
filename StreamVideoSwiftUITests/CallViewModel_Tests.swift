@@ -385,9 +385,13 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let participantEvent = CallSessionParticipantJoinedEvent(
             callCid: callCid,
             createdAt: Date(),
-            sessionId: "123",
-            user: .make(from: "test"),
-            userSessionId: "123"
+            participant: CallParticipantResponse(
+                joinedAt: Date(),
+                role: "user",
+                user: mockResponseBuilder.makeUserResponse(),
+                userSessionId: "123"
+            ),
+            sessionId: "123"
         )
 
         eventNotificationCenter?.process(.coordinatorEvent(.typeCallSessionParticipantJoinedEvent(participantEvent)))
