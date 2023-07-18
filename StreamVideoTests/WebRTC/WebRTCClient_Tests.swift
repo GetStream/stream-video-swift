@@ -564,6 +564,70 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         XCTAssertNil(updated)
     }
     
+    func test_webRTCClient_iceTrickleSubscriber() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        try await test_webRTCClient_connectionFlow()
+        let trickleEvent = try makeIceTrickleEvent(peerType: .subscriber)
+        
+        // When
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.iceTrickle(trickleEvent)))
+        try await waitForCallEvent()
+
+        
+        // Then
+        XCTAssert(webRTCClient.subscriber?.pendingIceCandidates.count == 1)
+    }
+    
+    func test_webRTCClient_iceTricklePublisher() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        try await test_webRTCClient_connectionFlow()
+        let trickleEvent = try makeIceTrickleEvent(peerType: .publisherUnspecified)
+        
+        // When
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.iceTrickle(trickleEvent)))
+        try await waitForCallEvent()
+
+        
+        // Then
+        XCTAssert(webRTCClient.publisher?.pendingIceCandidates.count == 1)
+    }
+    
+    func test_webRTCClient_changePublishQuality() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        try await test_webRTCClient_connectionFlow()
+        var event = Stream_Video_Sfu_Event_ChangePublishQuality()
+        var videoSender = Stream_Video_Sfu_Event_VideoSender()
+        var layer = Stream_Video_Sfu_Event_VideoLayerSetting()
+        layer.active = true
+        layer.name = "test"
+        videoSender.layers = [layer]
+        event.videoSenders = [videoSender]
+        let videoOptions = VideoOptions()
+        var encodingParams = [RTCRtpEncodingParameters]()
+        for codec in videoOptions.supportedCodecs {
+            let encodingParam = RTCRtpEncodingParameters()
+            encodingParam.rid = codec.quality
+            encodingParam.maxBitrateBps = (codec.maxBitrate) as NSNumber
+            if let scaleDownFactor = codec.scaleDownFactor {
+                encodingParam.scaleResolutionDownBy = (scaleDownFactor) as NSNumber
+            }
+            encodingParams.append(encodingParam)
+        }
+        
+        // When
+        let videoTrack = await makeVideoTrack()
+        webRTCClient.publisher?.addTransceiver(videoTrack, streamIds: ["some-id"], trackType: .video)
+        try await waitForCallEvent()
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.changePublishQuality(event)))
+        try await waitForCallEvent()
+
+        // Then
+        XCTAssert(webRTCClient.publisher?.transceiver?.sender.parameters.encodings.map(\.rid) == encodingParams.map(\.rid))
+    }
+    
     // MARK: - private
     
     func makeWebRTCClient(
@@ -599,6 +663,17 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             environment: environment
         )
         return webRTCClient
+    }
+    
+    private func makeIceTrickleEvent(
+        peerType: Stream_Video_Sfu_Models_PeerType
+    ) throws -> Stream_Video_Sfu_Models_ICETrickle {
+        let iceCandidate = try JSONSerialization.data(withJSONObject: ["candidate": "test-sdp"])
+        let iceCandidateString = String(data: iceCandidate, encoding: .utf8)!
+        var trickleEvent = Stream_Video_Sfu_Models_ICETrickle()
+        trickleEvent.iceCandidate = iceCandidateString
+        trickleEvent.peerType = peerType
+        return trickleEvent
     }
     
     private func makeVideoTrack() async -> RTCVideoTrack {

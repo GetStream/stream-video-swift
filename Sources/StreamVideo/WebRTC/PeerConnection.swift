@@ -24,7 +24,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let reportStats: Bool
     private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
-    private var pendingIceCandidates = [RTCIceCandidate]()
+    internal var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
     private let badConnectionStates: [RTCIceConnectionState] = [.disconnected, .failed, .closed]
