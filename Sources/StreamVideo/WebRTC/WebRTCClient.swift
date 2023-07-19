@@ -108,7 +108,9 @@ class WebRTCClient: NSObject {
     
     private(set) var localVideoTrack: RTCVideoTrack?
     private(set) var localAudioTrack: RTCAudioTrack?
+    private(set) var localScreenshareTrack: RTCVideoTrack?
     private var videoCapturer: VideoCapturer?
+    private var screenshareCapturer: ScreenshareCapturer?
     private let user: User
     private let callCid: String
     private let audioSession = AudioSession()
@@ -263,7 +265,9 @@ class WebRTCClient: NSObject {
         signalChannel?.onWSConnectionEstablished = nil
         signalChannel?.disconnect {}
         signalChannel = nil
+        localAudioTrack?.isEnabled = false
         localAudioTrack = nil
+        localVideoTrack?.isEnabled = false
         localVideoTrack = nil
         await state.cleanUp()
         sfuMiddleware.cleanUp()
@@ -412,6 +416,28 @@ class WebRTCClient: NSObject {
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         videoCapturer?.setVideoFilter(videoFilter)
+    }
+    
+    func startScreensharing() async throws {
+        if hasCapability(.screenshare) {
+            if localScreenshareTrack == nil {
+                // Screenshare
+                let screenshareTrack = await makeVideoTrack(screenshare: true)
+                localScreenshareTrack = screenshareTrack
+                publisher?.addTransceiver(
+                    screenshareTrack,
+                    streamIds: ["\(sessionID)-screenshare"],
+                    trackType: .screenshare
+                )
+                await state.add(screensharingTrack: screenshareTrack, id: sessionID)
+                await assignTracksToParticipants()
+                try await negotiate(peerConnection: publisher)
+            } else if localScreenshareTrack?.isEnabled == false {
+                localScreenshareTrack?.isEnabled = true
+            }
+        } else {
+            throw ClientError.MissingPermissions()
+        }
     }
     
     // MARK: - private
@@ -626,6 +652,25 @@ class WebRTCClient: NSObject {
             audioTrack.trackType = .audio
             tracks.append(audioTrack)
         }
+        if let localScreenshareTrack {
+            var layers = [Stream_Video_Sfu_Models_VideoLayer]()
+            for codec in videoOptions.supportedCodecs {
+                var layer = Stream_Video_Sfu_Models_VideoLayer()
+                layer.bitrate = UInt32(codec.maxBitrate)
+                layer.rid = codec.quality
+                var dimension = Stream_Video_Sfu_Models_VideoDimension()
+                dimension.height = UInt32(codec.dimensions.height)
+                dimension.width = UInt32(codec.dimensions.width)
+                layer.videoDimension = dimension
+                layer.fps = 30
+                layers.append(layer)
+            }
+            var screenshareTrack = Stream_Video_Sfu_Models_TrackInfo()
+            screenshareTrack.trackID = localScreenshareTrack.trackId
+            screenshareTrack.trackType = .screenShare
+            screenshareTrack.layers = layers
+            tracks.append(screenshareTrack)
+        }
         return tracks
     }
     
@@ -638,12 +683,21 @@ class WebRTCClient: NSObject {
     
     private func makeVideoTrack(screenshare: Bool = false) async -> RTCVideoTrack {
         let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshare)
-        videoCapturer = VideoCapturer(
-            videoSource: videoSource,
-            videoOptions: videoOptions,
-            videoFilters: videoConfig.videoFilters
-        )
-        startCapturingLocalVideo(cameraPosition: callSettings.cameraPosition == .front ? .front : .back)
+        if screenshare {
+            screenshareCapturer = ScreenshareCapturer(
+                videoSource: videoSource,
+                videoOptions: videoOptions,
+                videoFilters: videoConfig.videoFilters
+            )
+            screenshareCapturer?.startCapture()
+        } else {
+            videoCapturer = VideoCapturer(
+                videoSource: videoSource,
+                videoOptions: videoOptions,
+                videoFilters: videoConfig.videoFilters
+            )
+            startCapturingLocalVideo(cameraPosition: callSettings.cameraPosition == .front ? .front : .back)
+        }
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }
@@ -854,9 +908,13 @@ class WebRTCClient: NSObject {
                 screenshareTrack = await state.screensharingTracks[participant.id]
             }
             if participant.isScreensharing && screenshareTrack == nil {
-                screenshareTrack = subscriber?.findScreensharingTrack(
-                    for: participant.trackLookupPrefix
-                )
+                if participant.sessionId == sessionID {
+                    screenshareTrack = localScreenshareTrack
+                } else {
+                    screenshareTrack = subscriber?.findScreensharingTrack(
+                        for: participant.trackLookupPrefix
+                    )
+                }
                 if screenshareTrack != nil {
                     await state.add(
                         screensharingTrack: screenshareTrack,

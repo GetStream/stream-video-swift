@@ -31,7 +31,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             localVideoView
                                 .edgesIgnoringSafeArea(.top)
                                 .accessibility(identifier: "localVideoView")
-                        } else if let screenSharingSession = viewModel.call?.state.screenSharingSession {
+                        } else if let screenSharingSession = viewModel.call?.state.screenSharingSession, screenSharingSession.participant.userId != streamVideo.user.id {
                             viewFactory.makeScreenSharingView(
                                 viewModel: viewModel,
                                 screensharingSession: screenSharingSession,

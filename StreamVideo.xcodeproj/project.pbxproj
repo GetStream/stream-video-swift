@@ -309,6 +309,7 @@
 		847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B62A260CF0000714CE /* CustomCallView.swift */; };
 		847BE09C29DADE0100B55D21 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09B29DADE0100B55D21 /* Call.swift */; };
 		847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847D001F29C8AB1E00DD0A50 /* RecordingView.swift */; };
+		8487D8AD2A67F4EC00536ED4 /* ScreenshareCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */; };
 		848A73C02926314F0089AA6E /* MinimizedCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73BF2926314F0089AA6E /* MinimizedCallView.swift */; };
 		848A73C229269E7D0089AA6E /* CornerDragableView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848A73C129269E7D0089AA6E /* CornerDragableView.swift */; };
 		848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
@@ -953,6 +954,7 @@
 		847B47B62A260CF0000714CE /* CustomCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCallView.swift; sourceTree = "<group>"; };
 		847BE09B29DADE0100B55D21 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
 		847D001F29C8AB1E00DD0A50 /* RecordingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView.swift; sourceTree = "<group>"; };
+		8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshareCapturer.swift; sourceTree = "<group>"; };
 		848A73BF2926314F0089AA6E /* MinimizedCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimizedCallView.swift; sourceTree = "<group>"; };
 		848A73C129269E7D0089AA6E /* CornerDragableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerDragableView.swift; sourceTree = "<group>"; };
 		8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sorting_Tests.swift; sourceTree = "<group>"; };
@@ -2389,6 +2391,8 @@
 				84FC2C1D28ACF2AE00181490 /* WebRTCClient.swift */,
 				84FC2C2128ACF2E000181490 /* PeerConnection.swift */,
 				843697CC28C647B600839D99 /* VideoCapturer.swift */,
+				8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */,
+				84B0091A2A4C521000CF1FA7 /* Retries.swift */,
 				84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */,
 				84FC2C2728AD350100181490 /* WebRTCEvents.swift */,
 				84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */,
@@ -2398,7 +2402,6 @@
 				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
 				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
 				84F0867A29632DA30099907A /* VideoFilters.swift */,
-				84B0091A2A4C521000CF1FA7 /* Retries.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -3175,6 +3178,7 @@
 				842B8E1D2A2DFED900863A87 /* EgressHLSResponse.swift in Sources */,
 				84D2E37629DC856D001D2118 /* CallMemberRemovedEvent.swift in Sources */,
 				84F73859287C1A3400A363F4 /* StreamVideo.swift in Sources */,
+				8487D8AD2A67F4EC00536ED4 /* ScreenshareCapturer.swift in Sources */,
 				842B8E282A2DFED900863A87 /* StopBroadcastingResponse.swift in Sources */,
 				84530C6C2A3C4E0700F2678E /* CallState.swift in Sources */,
 				84DC38C729ADFCFD00946713 /* UpdateCallResponse.swift in Sources */,

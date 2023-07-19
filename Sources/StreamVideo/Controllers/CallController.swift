@@ -151,6 +151,11 @@ class CallController {
         webRTCClient?.setVideoFilter(videoFilter)
     }
     
+    func startScreensharing() async throws {
+        let webRTCClient = try currentWebRTCClient()
+        try await webRTCClient.startScreensharing()
+    }
+    
     /// Updates the track size for the provided participant.
     /// - Parameters:
     ///  - trackSize: the size of the track.

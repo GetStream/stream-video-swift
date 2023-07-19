@@ -422,6 +422,12 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    public func startScreensharing() {
+        Task {
+            try await call?.startScreensharing()
+        }
+    }
+    
     /// Hangs up from the active call.
     public func hangUp() {
         if callingState == .outgoing {

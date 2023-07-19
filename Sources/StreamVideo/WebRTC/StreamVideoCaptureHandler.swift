@@ -14,10 +14,12 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var selectedFilter: VideoFilter?
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
+    private let handleRotation: Bool
     
-    init(source: RTCVideoSource, filters: [VideoFilter]) {
+    init(source: RTCVideoSource, filters: [VideoFilter], handleRotation: Bool = true) {
         self.source = source
         self.filters = filters
+        self.handleRotation = handleRotation
         context = CIContext(options: [CIContextOption.useSoftwareRenderer: false])
         colorSpace = CGColorSpaceCreateDeviceRGB()
         super.init()
@@ -39,7 +41,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             let outputImage = await filter(image: inputImage)
             CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
             self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
-            let updatedFrame = adjustRotation(capturer, for: buffer, frame: frame)
+            let updatedFrame = handleRotation ? adjustRotation(capturer, for: buffer, frame: frame) : frame
             self.source.capturer(capturer, didCapture: updatedFrame)
         }
     }

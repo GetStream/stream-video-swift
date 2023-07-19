@@ -24,6 +24,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let reportStats: Bool
     private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
+    private(set) var transceiverScreenshare: RTCRtpTransceiver?
     internal var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
@@ -162,7 +163,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         
         transceiverInit.sendEncodings = encodingParams
         publishedTracks.append(trackType)
-        transceiver = pc.addTransceiver(with: track, init: transceiverInit)
+        if trackType == .screenshare {
+            transceiverScreenshare = pc.addTransceiver(with: track, init: transceiverInit)
+        } else {
+            transceiver = pc.addTransceiver(with: track, init: transceiverInit)
+        }
     }
     
     func add(iceCandidate: RTCIceCandidate) async throws {
