@@ -123,6 +123,7 @@ struct LobbyContentView: View {
         }
         .onDisappear {
             viewModel.stopCamera()
+            viewModel.cleanUp()
         }
     }
 }

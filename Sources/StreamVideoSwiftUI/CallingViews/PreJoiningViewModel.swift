@@ -69,6 +69,13 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         }
     }
     
+    public func cleanUp() {
+        joinEventsTask?.cancel()
+        joinEventsTask = nil
+        leaveEventsTask?.cancel()
+        leaveEventsTask = nil
+    }
+    
     // MARK: - private
     
     private func loadCurrentMembers() {
@@ -109,13 +116,6 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
                 }
             }
         }
-    }
-    
-    deinit {
-        joinEventsTask?.cancel()
-        joinEventsTask = nil
-        leaveEventsTask?.cancel()
-        leaveEventsTask = nil
     }
 }
 
