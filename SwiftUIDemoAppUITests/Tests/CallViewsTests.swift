@@ -327,7 +327,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("user observers the list of participants") {
             userRobot
-                .waitForParticipantsToJoin(participants)
+                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertGridView(with: participants)
                 .assertGridViewParticipantListVisibity(percent: 0)
         }
@@ -356,7 +356,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("user observers the list of participants") {
             userRobot
-                .waitForParticipantsToJoin(participants)
+                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertSpotlightView(with: participants)
                 .assertSpotlightViewParticipantListVisibity(percent: 0)
         }

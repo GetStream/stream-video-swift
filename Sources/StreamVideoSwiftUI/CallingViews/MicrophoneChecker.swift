@@ -115,6 +115,7 @@ public class MicrophoneChecker: ObservableObject {
     private func stopAudioRecorder() {
         self.audioRecorder?.stop()
         self.audioRecorder = nil
+        try? AVAudioSession.sharedInstance().setActive(false)
     }
 
     deinit {
