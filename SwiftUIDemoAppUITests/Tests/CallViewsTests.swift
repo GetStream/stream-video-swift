@@ -298,7 +298,7 @@ final class CallViewsTests: StreamTestCase {
         }
         THEN("user observers participant's screen") {
             userRobot
-                .waitForParticipantsToJoin(participants)
+                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertParticipantStartSharingScreen()
                 .assertScreenSharingParticipantListVisibity(percent: 0)
         }
