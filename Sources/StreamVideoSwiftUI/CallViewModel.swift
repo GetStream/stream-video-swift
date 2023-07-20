@@ -191,7 +191,9 @@ open class CallViewModel: ObservableObject {
     public var participants: [CallParticipant] {
         callParticipants
             .filter {
-                if participantsLayout == .grid && call?.state.screenSharingSession == nil {
+                if participantsLayout == .grid &&
+                    (call?.state.screenSharingSession == nil
+                     || call?.state.isCurrentUserScreensharing == true) {
                     return $0.value.id != call?.state.sessionId
                 } else {
                     return true
