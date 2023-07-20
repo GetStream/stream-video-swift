@@ -8,7 +8,7 @@ import WebRTC
 import ReplayKit
 #endif
 
-class ScreenshareCapturer {
+class ScreenshareCapturer: VideoCapturing {
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
@@ -30,46 +30,21 @@ class ScreenshareCapturer {
         #endif
     }
     
-    func startCapture() {
+    func startCapture(device: AVCaptureDevice?, completion: @escaping () -> ()) {
         let devices = RTCCameraVideoCapturer.captureDevices()
         
         guard let device = devices.first else {
             log.warning("No camera video capture devices available")
             return
         }
-
-        let formats = RTCCameraVideoCapturer.supportedFormats(for: device)
-        let sortedFormats = formats.map {
-            (format: $0, dimensions: CMVideoFormatDescriptionGetDimensions($0.formatDescription))
-        }
-        .sorted { $0.dimensions.area < $1.dimensions.area }
-
-        var selectedFormat = sortedFormats.first
-
-        if let preferredFormat = videoOptions.preferredFormat,
-           let foundFormat = sortedFormats.first(where: { $0.format == preferredFormat }) {
-            selectedFormat = foundFormat
-        } else {
-            selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= videoOptions.preferredDimensions.area })
-        }
-
-        guard let selectedFormat = selectedFormat, let fpsRange = selectedFormat.format.fpsRange() else {
-            log.warning("Unable to resolve format")
-            return
-        }
-
-        var selectedFps = videoOptions.preferredFps
-
-        if !fpsRange.contains(selectedFps) {
-            log.warning("requested fps: \(videoOptions.preferredFps) not available: \(fpsRange) and will be clamped")
-            selectedFps = selectedFps.clamped(to: fpsRange)
-        }
+        
+        let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
 
         if RPScreenRecorder.shared().isRecording {
             return
         }
         
-        RPScreenRecorder.shared().startCapture { sampleBuffer, type, error in
+        RPScreenRecorder.shared().startCapture(handler: { sampleBuffer, type, error in
             if type == .video {
                 guard CMSampleBufferGetNumSamples(sampleBuffer) == 1,
                       CMSampleBufferIsValid(sampleBuffer),
@@ -92,17 +67,22 @@ class ScreenshareCapturer {
                 )
 
                 self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
-                self.videoSource.adaptOutputFormat(
-                    toWidth: selectedFormat.dimensions.width,
-                    height: selectedFormat.dimensions.height,
-                    fps: Int32(selectedFps)
-                )
+                if let dimensions = outputFormat.dimensions {
+                    self.videoSource.adaptOutputFormat(
+                        toWidth: dimensions.width,
+                        height: dimensions.height,
+                        fps: Int32(outputFormat.fps)
+                    )
+                }
             }
+        }) { _ in
+            completion()
         }
     }
     
-    func stopCameraCapture() {
+    func stopCapture() {
         (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+        RPScreenRecorder.shared().stopCapture()
     }
 
 }

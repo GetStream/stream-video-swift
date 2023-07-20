@@ -109,8 +109,8 @@ class WebRTCClient: NSObject {
     private(set) var localVideoTrack: RTCVideoTrack?
     private(set) var localAudioTrack: RTCAudioTrack?
     private(set) var localScreenshareTrack: RTCVideoTrack?
-    private var videoCapturer: VideoCapturer?
-    private var screenshareCapturer: ScreenshareCapturer?
+    private var videoCapturer: CameraVideoCapturing?
+    private var screenshareCapturer: VideoCapturing?
     private let user: User
     private let callCid: String
     private let audioSession = AudioSession()
@@ -255,8 +255,10 @@ class WebRTCClient: NSObject {
     
     func cleanUp() async {
         log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
-        videoCapturer?.stopCameraCapture()
+        videoCapturer?.stopCapture()
         videoCapturer = nil
+        screenshareCapturer?.stopCapture()
+        screenshareCapturer = nil
         publisher?.close()
         subscriber?.close()
         publisher = nil
@@ -274,12 +276,6 @@ class WebRTCClient: NSObject {
         onParticipantsUpdated = nil
         onSignalConnectionStateChange = nil
         onParticipantCountUpdated = nil
-    }
-    
-    func startCapturingLocalVideo(cameraPosition: AVCaptureDevice.Position) {
-        setCameraPosition(cameraPosition) {
-            log.debug("Started capturing local video", subsystems: .webRTC)
-        }
     }
     
     func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
@@ -689,14 +685,20 @@ class WebRTCClient: NSObject {
                 videoOptions: videoOptions,
                 videoFilters: videoConfig.videoFilters
             )
-            screenshareCapturer?.startCapture()
+            screenshareCapturer?.startCapture(device: nil, completion: {
+                log.debug("Started screensharing", subsystems: .webRTC)
+            })
         } else {
             videoCapturer = VideoCapturer(
                 videoSource: videoSource,
                 videoOptions: videoOptions,
                 videoFilters: videoConfig.videoFilters
             )
-            startCapturingLocalVideo(cameraPosition: callSettings.cameraPosition == .front ? .front : .back)
+            let position: AVCaptureDevice.Position = callSettings.cameraPosition == .front ? .front : .back
+            let device = videoCapturer?.capturingDevice(for: position)
+            videoCapturer?.startCapture(device: device, completion: {
+                log.debug("Started capturing local video", subsystems: .webRTC)
+            })
         }
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack

@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-class VideoCapturer {
+class VideoCapturer: CameraVideoCapturing {
     
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
@@ -29,66 +29,50 @@ class VideoCapturer {
     }
     
     func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()) {
-        guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer else { return }
-        
-        let devices = RTCCameraVideoCapturer.captureDevices()
-        
-        guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
-            log.warning("No camera video capture devices available")
-            return
-        }
-
-        let formats = RTCCameraVideoCapturer.supportedFormats(for: device)
-        let sortedFormats = formats.map {
-            (format: $0, dimensions: CMVideoFormatDescriptionGetDimensions($0.formatDescription))
-        }
-        .sorted { $0.dimensions.area < $1.dimensions.area }
-
-        var selectedFormat = sortedFormats.first
-
-        if let preferredFormat = videoOptions.preferredFormat,
-           let foundFormat = sortedFormats.first(where: { $0.format == preferredFormat }) {
-            selectedFormat = foundFormat
-        } else {
-            selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= videoOptions.preferredDimensions.area })
-        }
-
-        guard let selectedFormat = selectedFormat, let fpsRange = selectedFormat.format.fpsRange() else {
-            log.warning("Unable to resolve format")
-            return
-        }
-
-        var selectedFps = videoOptions.preferredFps
-
-        if !fpsRange.contains(selectedFps) {
-            log.warning("requested fps: \(videoOptions.preferredFps) not available: \(fpsRange) and will be clamped")
-            selectedFps = selectedFps.clamped(to: fpsRange)
-        }
-        
-        if selectedFormat.dimensions.area != videoOptions.preferredDimensions.area {
-            log.debug("Adapting video source output format")
-            videoSource.adaptOutputFormat(
-                toWidth: selectedFormat.dimensions.width,
-                height: selectedFormat.dimensions.height,
-                fps: Int32(selectedFps)
-            )
-        }
-        
-        videoCapturer.startCapture(
-            with: device,
-            format: selectedFormat.format,
-            fps: selectedFps
-        ) { [weak self] _ in
-            self?.videoCaptureHandler?.currentCameraPosition = cameraPosition
-            completion()
-        }
+        guard let device = capturingDevice(for: cameraPosition) else { return }
+        startCapture(device: device, completion: completion)
     }
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         videoCaptureHandler?.selectedFilter = videoFilter
     }
     
-    func stopCameraCapture() {
+    func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {
+        let devices = RTCCameraVideoCapturer.captureDevices()
+        
+        guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
+            log.warning("No camera video capture devices available")
+            return nil
+        }
+        
+        return device
+    }
+    
+    func startCapture(device: AVCaptureDevice?, completion: @escaping () -> ()) {
+        guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else { return }
+        let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
+        guard let selectedFormat = outputFormat.format, let dimensions = outputFormat.dimensions else { return }
+        
+        if dimensions.area != videoOptions.preferredDimensions.area {
+            log.debug("Adapting video source output format")
+            videoSource.adaptOutputFormat(
+                toWidth: dimensions.width,
+                height: dimensions.height,
+                fps: Int32(outputFormat.fps)
+            )
+        }
+        
+        videoCapturer.startCapture(
+            with: device,
+            format: selectedFormat,
+            fps: outputFormat.fps
+        ) { [weak self] _ in
+            self?.videoCaptureHandler?.currentCameraPosition = device.position
+            completion()
+        }
+    }
+    
+    func stopCapture() {
         (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
     }
 }
