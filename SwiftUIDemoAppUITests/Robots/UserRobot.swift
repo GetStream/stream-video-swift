@@ -284,7 +284,16 @@ extension UserRobot {
         CallPage.ParticipantMenu.participantCount
             .waitForValue("\(expectedCount)", timeout: timeout)
             .tapFrameCenter() // to take a screenshot
-        CallPage.ParticipantMenu.closeButton.waitForHitPoint().tapFrameCenter()
+        safelyCloseParticipantsMenu()
         return self
+    }
+    
+    private func safelyCloseParticipantsMenu() {
+        var retries = 0
+        let closeButton = CallPage.ParticipantMenu.closeButton
+        while closeButton.exists && retries < 3 {
+            CallPage.ParticipantMenu.closeButton.waitForHitPoint().tapFrameCenter()
+            retries += 1
+        }
     }
 }
