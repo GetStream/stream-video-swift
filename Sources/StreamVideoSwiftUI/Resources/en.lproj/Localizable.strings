@@ -24,6 +24,8 @@
 "call.current.layout-view" = "View";
 "call.current.pin-user" = "Pin user";
 "call.current.unpin-user" = "Unpin user";
+"call.current.sharing" = "You are sharing your screen";
+"call.current.stop-sharing" = "Stop sharing";
 
 "waiting-room.title" = "Before Joining";
 "waiting-room.subtitle" = "Setup your audio and video";

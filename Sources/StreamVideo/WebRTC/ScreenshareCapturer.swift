@@ -43,6 +43,8 @@ class ScreenshareCapturer: VideoCapturing {
             return
         }
         
+        RPScreenRecorder.shared().isMicrophoneEnabled = false
+        
         return try await withCheckedThrowingContinuation { continuation in
             RPScreenRecorder.shared().startCapture(handler: { [weak self] sampleBuffer, type, error in
                 guard let self else { return }

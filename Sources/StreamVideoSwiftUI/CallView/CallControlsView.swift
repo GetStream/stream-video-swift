@@ -133,7 +133,7 @@ public struct ToggleCameraIconView: View {
     public var body: some View {
         Button(
             action: {
-                viewModel.startScreensharing()
+                viewModel.toggleCameraPosition()
             },
             label: {
                 CallIconView(

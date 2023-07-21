@@ -36,6 +36,10 @@ internal enum L10n {
       internal static var reconnecting: String { L10n.tr("Localizable", "call.current.reconnecting") }
       /// Recording
       internal static var recording: String { L10n.tr("Localizable", "call.current.recording") }
+      /// You are sharing your screen
+      internal static var sharing: String { L10n.tr("Localizable", "call.current.sharing") }
+      /// Stop sharing
+      internal static var stopSharing: String { L10n.tr("Localizable", "call.current.stop-sharing") }
       /// Unpin user
       internal static var unpinUser: String { L10n.tr("Localizable", "call.current.unpin-user") }
     }

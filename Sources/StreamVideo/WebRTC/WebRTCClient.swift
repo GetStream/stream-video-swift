@@ -443,6 +443,8 @@ class WebRTCClient: NSObject {
                 try await changeScreensharingState(isEnabled: true)
             } else if localScreenshareTrack?.isEnabled == false {
                 localScreenshareTrack?.isEnabled = true
+                await state.add(screensharingTrack: localScreenshareTrack, id: sessionID)
+                await assignTracksToParticipants()
                 try await changeScreensharingState(isEnabled: true)
             }
         } else {
@@ -453,11 +455,7 @@ class WebRTCClient: NSObject {
     func stopScreensharing() async throws {
         await state.removeScreensharingTrack(id: sessionID)
         localScreenshareTrack?.isEnabled = false
-        localScreenshareTrack = nil
-        try await screenshareCapturer?.stopCapture()
-        screenshareCapturer = nil
         await assignTracksToParticipants()
-        publisher?.stopScreensharing()
         try await changeScreensharingState(isEnabled: false)
     }
     
@@ -675,7 +673,7 @@ class WebRTCClient: NSObject {
             audioTrack.trackType = .audio
             tracks.append(audioTrack)
         }
-        if let localScreenshareTrack {
+        if let localScreenshareTrack, localScreenshareTrack.isEnabled {
             var layers = [Stream_Video_Sfu_Models_VideoLayer]()
             for codec in videoOptions.supportedCodecs {
                 var layer = Stream_Video_Sfu_Models_VideoLayer()

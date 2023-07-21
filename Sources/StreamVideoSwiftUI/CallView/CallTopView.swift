@@ -53,5 +53,30 @@ public struct CallTopView: View {
                 .accessibility(identifier: "participantMenu")
             }
         }
+        .overlay(
+            viewModel.call?.state.isCurrentUserScreensharing == true ?
+            SharingIndicator(viewModel: viewModel)
+            : nil
+        )
     }
+}
+
+struct SharingIndicator: View {
+    
+    @ObservedObject var viewModel: CallViewModel
+    
+    var body: some View {
+        HStack {
+            Text(L10n.Call.Current.sharing)
+            Divider()
+            Button {
+                viewModel.stopScreensharing()
+            } label: {
+                Text(L10n.Call.Current.stopSharing)
+            }
+        }
+        .padding()
+        .modifier(ShadowViewModifier())
+    }
+    
 }
