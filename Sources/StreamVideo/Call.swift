@@ -305,6 +305,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await callController.startScreensharing()
     }
     
+    public func stopScreensharing() async throws {
+        try await callController.stopScreensharing()
+    }
+    
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in

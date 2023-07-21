@@ -6,8 +6,8 @@ import Foundation
 import WebRTC
 
 protocol VideoCapturing {
-    func startCapture(device: AVCaptureDevice?, completion: @escaping () -> ())
-    func stopCapture()
+    func startCapture(device: AVCaptureDevice?) async throws
+    func stopCapture() async throws
 }
 
 extension VideoCapturing {
@@ -47,9 +47,7 @@ extension VideoCapturing {
 }
 
 protocol CameraVideoCapturing: VideoCapturing {    
-    func setCameraPosition(
-        _ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()
-    )
+    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws
     func setVideoFilter(_ videoFilter: VideoFilter?)
     func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice?
 }

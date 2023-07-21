@@ -28,9 +28,11 @@ class VideoCapturer: CameraVideoCapturing {
         #endif
     }
     
-    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()) {
-        guard let device = capturingDevice(for: cameraPosition) else { return }
-        startCapture(device: device, completion: completion)
+    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
+        guard let device = capturingDevice(for: cameraPosition) else {
+            throw ClientError.Unexpected()
+        }
+        try await startCapture(device: device)
     }
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
@@ -48,32 +50,52 @@ class VideoCapturer: CameraVideoCapturing {
         return device
     }
     
-    func startCapture(device: AVCaptureDevice?, completion: @escaping () -> ()) {
-        guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else { return }
-        let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
-        guard let selectedFormat = outputFormat.format, let dimensions = outputFormat.dimensions else { return }
-        
-        if dimensions.area != videoOptions.preferredDimensions.area {
-            log.debug("Adapting video source output format")
-            videoSource.adaptOutputFormat(
-                toWidth: dimensions.width,
-                height: dimensions.height,
-                fps: Int32(outputFormat.fps)
-            )
-        }
-        
-        videoCapturer.startCapture(
-            with: device,
-            format: selectedFormat,
-            fps: outputFormat.fps
-        ) { [weak self] _ in
-            self?.videoCaptureHandler?.currentCameraPosition = device.position
-            completion()
+    func startCapture(device: AVCaptureDevice?) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {
+                continuation.resume(throwing: ClientError.Unexpected())
+                return
+            }
+            let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
+            guard let selectedFormat = outputFormat.format, let dimensions = outputFormat.dimensions else {
+                continuation.resume(throwing: ClientError.Unexpected())
+                return
+            }
+            
+            if dimensions.area != videoOptions.preferredDimensions.area {
+                log.debug("Adapting video source output format")
+                videoSource.adaptOutputFormat(
+                    toWidth: dimensions.width,
+                    height: dimensions.height,
+                    fps: Int32(outputFormat.fps)
+                )
+            }
+            
+            videoCapturer.startCapture(
+                with: device,
+                format: selectedFormat,
+                fps: outputFormat.fps
+            ) { [weak self] error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    self?.videoCaptureHandler?.currentCameraPosition = device.position
+                    continuation.resume(returning: ())
+                }
+            }
         }
     }
     
-    func stopCapture() {
-        (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+    func stopCapture() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            if let capturer = videoCapturer as? RTCCameraVideoCapturer {
+                capturer.stopCapture {
+                    continuation.resume(returning: ())
+                }
+            } else {
+                continuation.resume(returning: ())
+            }
+        }
     }
 }
 

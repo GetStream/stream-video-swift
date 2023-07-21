@@ -425,8 +425,13 @@ open class CallViewModel: ObservableObject {
     }
     
     public func startScreensharing() {
+        //TODO: separate methods
         Task {
-            try await call?.startScreensharing()
+            if call?.state.isCurrentUserScreensharing == true {
+                try await call?.stopScreensharing()
+            } else {
+                try await call?.startScreensharing()
+            }
         }
     }
     

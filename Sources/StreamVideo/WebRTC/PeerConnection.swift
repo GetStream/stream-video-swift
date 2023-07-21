@@ -179,6 +179,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         try await add(candidate: iceCandidate)
     }
     
+    func stopScreensharing() {
+        transceiverScreenshare?.stopInternal()
+        transceiverScreenshare = nil
+    }
+    
     func close() {
         pc.close()
     }

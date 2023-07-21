@@ -255,9 +255,9 @@ class WebRTCClient: NSObject {
     
     func cleanUp() async {
         log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
-        videoCapturer?.stopCapture()
+        try? await videoCapturer?.stopCapture()
         videoCapturer = nil
-        screenshareCapturer?.stopCapture()
+        try? await screenshareCapturer?.stopCapture()
         screenshareCapturer = nil
         publisher?.close()
         subscriber?.close()
@@ -278,8 +278,8 @@ class WebRTCClient: NSObject {
         onParticipantCountUpdated = nil
     }
     
-    func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
-        setCameraPosition(position == .front ? .front : .back, completion: completion)
+    func changeCameraMode(position: CameraPosition) async throws {
+        try await setCameraPosition(position == .front ? .front : .back)
     }
     
     func setupUserMedia(callSettings: CallSettings) async {
@@ -344,6 +344,19 @@ class WebRTCClient: NSObject {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             callSettings = callSettings.withUpdatedAudioState(isEnabled)
             localAudioTrack?.isEnabled = isEnabled
+        }
+    }
+    
+    func changeScreensharingState(isEnabled: Bool) async throws {
+        var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
+        var screenshare = Stream_Video_Sfu_Signal_TrackMuteState()
+        screenshare.trackType = .screenShare
+        screenshare.muted = !isEnabled
+        request.muteStates = [screenshare]
+        request.sessionID = sessionID
+        try await executeTask(retryPolicy: .fastAndSimple) {
+            _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
+            localScreenshareTrack?.isEnabled = isEnabled
         }
     }
     
@@ -427,13 +440,25 @@ class WebRTCClient: NSObject {
                 )
                 await state.add(screensharingTrack: screenshareTrack, id: sessionID)
                 await assignTracksToParticipants()
-                try await negotiate(peerConnection: publisher)
+                try await changeScreensharingState(isEnabled: true)
             } else if localScreenshareTrack?.isEnabled == false {
                 localScreenshareTrack?.isEnabled = true
+                try await changeScreensharingState(isEnabled: true)
             }
         } else {
             throw ClientError.MissingPermissions()
         }
+    }
+    
+    func stopScreensharing() async throws {
+        await state.removeScreensharingTrack(id: sessionID)
+        localScreenshareTrack?.isEnabled = false
+        localScreenshareTrack = nil
+        try await screenshareCapturer?.stopCapture()
+        screenshareCapturer = nil
+        await assignTracksToParticipants()
+        publisher?.stopScreensharing()
+        try await changeScreensharingState(isEnabled: false)
     }
     
     // MARK: - private
@@ -556,9 +581,11 @@ class WebRTCClient: NSObject {
         }
     }
     
-    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()) {
-        guard let capturer = videoCapturer else { return }
-        capturer.setCameraPosition(cameraPosition, completion: completion)
+    private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
+        guard let capturer = videoCapturer else {
+            throw ClientError.Unexpected()
+        }
+        try await capturer.setCameraPosition(cameraPosition)
     }
     
     private func handleParticipantsUpdated() async {
@@ -685,9 +712,7 @@ class WebRTCClient: NSObject {
                 videoOptions: videoOptions,
                 videoFilters: videoConfig.videoFilters
             )
-            screenshareCapturer?.startCapture(device: nil, completion: {
-                log.debug("Started screensharing", subsystems: .webRTC)
-            })
+            try? await screenshareCapturer?.startCapture(device: nil)
         } else {
             videoCapturer = VideoCapturer(
                 videoSource: videoSource,
@@ -696,9 +721,7 @@ class WebRTCClient: NSObject {
             )
             let position: AVCaptureDevice.Position = callSettings.cameraPosition == .front ? .front : .back
             let device = videoCapturer?.capturingDevice(for: position)
-            videoCapturer?.startCapture(device: device, completion: {
-                log.debug("Started capturing local video", subsystems: .webRTC)
-            })
+            try? await videoCapturer?.startCapture(device: device)
         }
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
