@@ -37,8 +37,6 @@ class ScreenshareCapturer: VideoCapturing {
             throw ClientError.Unexpected()
         }
         
-        let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
-
         if RPScreenRecorder.shared().isRecording {
             return
         }
@@ -48,36 +46,7 @@ class ScreenshareCapturer: VideoCapturing {
         return try await withCheckedThrowingContinuation { continuation in
             RPScreenRecorder.shared().startCapture(handler: { [weak self] sampleBuffer, type, error in
                 guard let self else { return }
-                if type == .video {
-                    guard CMSampleBufferGetNumSamples(sampleBuffer) == 1,
-                          CMSampleBufferIsValid(sampleBuffer),
-                          CMSampleBufferDataIsReady(sampleBuffer) else {
-                        return
-                    }
-
-                    guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
-                        return
-                    }
-
-                    let timeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
-                    let timeStampNs = Int64(CMTimeGetSeconds(timeStamp) * Double(NSEC_PER_SEC))
-                    
-                    let rtcBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
-                    let rtcFrame = RTCVideoFrame(
-                        buffer: rtcBuffer,
-                        rotation: ._0,
-                        timeStampNs: timeStampNs
-                    )
-
-                    self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
-                    if let dimensions = outputFormat.dimensions {
-                        self.videoSource.adaptOutputFormat(
-                            toWidth: dimensions.width,
-                            height: dimensions.height,
-                            fps: Int32(outputFormat.fps)
-                        )
-                    }
-                }
+                self.handle(sampleBuffer: sampleBuffer, type: type, for: device)
             }) { error in
                 if let error {
                     continuation.resume(throwing: error)
@@ -91,6 +60,41 @@ class ScreenshareCapturer: VideoCapturing {
     func stopCapture() async throws {
         try await stopScreensharing()
         await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+    }
+    
+    func handle(sampleBuffer: CMSampleBuffer, type: RPSampleBufferType, for device: AVCaptureDevice) {
+        let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
+
+        if type == .video {
+            guard CMSampleBufferGetNumSamples(sampleBuffer) == 1,
+                  CMSampleBufferIsValid(sampleBuffer),
+                  CMSampleBufferDataIsReady(sampleBuffer) else {
+                return
+            }
+
+            guard let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer) else {
+                return
+            }
+
+            let timeStamp = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
+            let timeStampNs = Int64(CMTimeGetSeconds(timeStamp) * Double(NSEC_PER_SEC))
+            
+            let rtcBuffer = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
+            let rtcFrame = RTCVideoFrame(
+                buffer: rtcBuffer,
+                rotation: ._0,
+                timeStampNs: timeStampNs
+            )
+
+            self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
+            if let dimensions = outputFormat.dimensions {
+                self.videoSource.adaptOutputFormat(
+                    toWidth: dimensions.width,
+                    height: dimensions.height,
+                    fps: Int32(outputFormat.fps)
+                )
+            }
+        }
     }
     
     private func stopScreensharing() async throws {

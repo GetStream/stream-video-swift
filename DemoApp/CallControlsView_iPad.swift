@@ -5,6 +5,7 @@
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+import ReplayKit
 
 struct CallControlsView_iPad: View {
     
@@ -64,11 +65,14 @@ public struct ScreenshareIconView: View {
     
     public var body: some View {
         Button {
-            if viewModel.call?.state.isCurrentUserScreensharing == true {
-                viewModel.stopScreensharing()
-            } else {
-                viewModel.startScreensharing()
-            }
+            viewModel.showScreensharePicker = true
+            viewModel.startScreensharing()
+//            if viewModel.call?.state.isCurrentUserScreensharing == true {
+//                viewModel.stopScreensharing()
+//            } else {
+//                viewModel.startScreensharing()
+//            }
+            
         } label: {
             CallIconView(
                 icon: Image(systemName: "square.and.arrow.up.circle.fill"),

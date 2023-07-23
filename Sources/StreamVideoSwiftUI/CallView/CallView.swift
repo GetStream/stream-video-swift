@@ -92,6 +92,13 @@ public struct CallView<Factory: ViewFactory>: View {
                     .accessibility(identifier: "trailingTopView")
                 }
             }
+            .overlay(
+                viewModel.showScreensharePicker ?
+                //TODO:
+                BroadcastPickerView(preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing")
+                    .frame(height: 200)
+                : nil
+            )
         }
         .background(Color(colors.callBackground))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -174,4 +181,22 @@ public struct CallView<Factory: ViewFactory>: View {
             viewModel.updateTrackSize(size, for: participant)
         }
     }
+}
+
+//TODO: move from here
+import ReplayKit
+
+struct BroadcastPickerView: UIViewRepresentable {
+    
+    let preferredExtension: String
+    
+    func makeUIView(context: Context) -> some UIView {
+        let view = RPSystemBroadcastPickerView(frame: .init(x: 0, y: 0, width: 200, height: 200))
+        view.preferredExtension = preferredExtension
+        view.showsMicrophoneButton = false
+        return view
+    }
+    
+    func updateUIView(_ uiView: UIViewType, context: Context) {}
+    
 }

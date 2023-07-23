@@ -97,6 +97,8 @@ open class CallViewModel: ObservableObject {
     /// List of the outgoing call members.
     @Published public var outgoingCallMembers = [MemberRequest]()
     
+    @Published public var showScreensharePicker = false
+    
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {

@@ -705,7 +705,13 @@ class WebRTCClient: NSObject {
     private func makeVideoTrack(screenshare: Bool = false) async -> RTCVideoTrack {
         let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshare)
         if screenshare {
-            screenshareCapturer = ScreenshareCapturer(
+//            screenshareCapturer = ScreenshareCapturer(
+//                videoSource: videoSource,
+//                videoOptions: videoOptions,
+//                videoFilters: videoConfig.videoFilters
+//            )
+//            try? await screenshareCapturer?.startCapture(device: nil)
+            screenshareCapturer = BroadcastScreenCapturer(
                 videoSource: videoSource,
                 videoOptions: videoOptions,
                 videoFilters: videoConfig.videoFilters
