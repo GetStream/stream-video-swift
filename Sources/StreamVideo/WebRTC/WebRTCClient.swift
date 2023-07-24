@@ -264,7 +264,6 @@ class WebRTCClient: NSObject {
         try? await videoCapturer?.stopCapture()
         videoCapturer = nil
         try? await screenshareCapturer?.stopCapture()
-        screenshareCapturer = nil
         publisher?.close()
         subscriber?.close()
         publisher = nil
@@ -433,11 +432,11 @@ class WebRTCClient: NSObject {
         videoCapturer?.setVideoFilter(videoFilter)
     }
     
-    func startScreensharing() async throws {
+    func startScreensharing(type: ScreensharingType) async throws {
         if hasCapability(.screenshare) {
             if localScreenshareTrack == nil {
                 // Screenshare
-                let screenshareTrack = await makeVideoTrack(screenshare: true)
+                let screenshareTrack = await makeVideoTrack(screenshareType: type)
                 localScreenshareTrack = screenshareTrack
                 publisher?.addTransceiver(
                     screenshareTrack,
@@ -708,20 +707,22 @@ class WebRTCClient: NSObject {
         return audioTrack
     }
     
-    private func makeVideoTrack(screenshare: Bool = false) async -> RTCVideoTrack {
-        let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshare)
-        if screenshare {
-//            screenshareCapturer = ScreenshareCapturer(
-//                videoSource: videoSource,
-//                videoOptions: videoOptions,
-//                videoFilters: videoConfig.videoFilters
-//            )
-//            try? await screenshareCapturer?.startCapture(device: nil)
-            screenshareCapturer = BroadcastScreenCapturer(
-                videoSource: videoSource,
-                videoOptions: videoOptions,
-                videoFilters: videoConfig.videoFilters
-            )
+    private func makeVideoTrack(screenshareType: ScreensharingType? = nil) async -> RTCVideoTrack {
+        let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshareType != nil)
+        if let screenshareType {
+            if screenshareType == .inApp {
+                screenshareCapturer = ScreenshareCapturer(
+                    videoSource: videoSource,
+                    videoOptions: videoOptions,
+                    videoFilters: videoConfig.videoFilters
+                )
+            } else if screenshareType == .broadcast {
+                screenshareCapturer = BroadcastScreenCapturer(
+                    videoSource: videoSource,
+                    videoOptions: videoOptions,
+                    videoFilters: videoConfig.videoFilters
+                )
+            }
             try? await screenshareCapturer?.startCapture(device: nil)
         } else {
             videoCapturer = VideoCapturer(

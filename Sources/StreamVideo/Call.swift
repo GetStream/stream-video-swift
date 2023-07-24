@@ -301,8 +301,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
     
-    public func startScreensharing() async throws {
-        try await callController.startScreensharing()
+    public func startScreensharing(type: ScreensharingType) async throws {
+        try await callController.startScreensharing(type: type)
     }
     
     public func stopScreensharing() async throws {

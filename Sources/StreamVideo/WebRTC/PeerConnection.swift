@@ -164,6 +164,9 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         transceiverInit.sendEncodings = encodingParams
         publishedTracks.append(trackType)
         if trackType == .screenshare {
+            if transceiverScreenshare != nil {
+                transceiverScreenshare?.stopInternal()
+            }
             transceiverScreenshare = pc.addTransceiver(with: track, init: transceiverInit)
         } else {
             transceiver = pc.addTransceiver(with: track, init: transceiverInit)

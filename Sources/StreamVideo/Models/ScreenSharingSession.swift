@@ -9,3 +9,8 @@ public struct ScreenSharingSession {
     public let track: RTCVideoTrack?
     public let participant: CallParticipant
 }
+
+public enum ScreensharingType: Sendable {
+    case inApp
+    case broadcast
+}

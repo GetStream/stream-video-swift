@@ -150,9 +150,9 @@ class CallController {
         webRTCClient?.setVideoFilter(videoFilter)
     }
     
-    func startScreensharing() async throws {
+    func startScreensharing(type: ScreensharingType) async throws {
         let webRTCClient = try currentWebRTCClient()
-        try await webRTCClient.startScreensharing()
+        try await webRTCClient.startScreensharing(type: type)
     }
     
     func stopScreensharing() async throws {

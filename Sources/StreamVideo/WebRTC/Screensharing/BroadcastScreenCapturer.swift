@@ -96,6 +96,7 @@ class BroadcastScreenCapturer: VideoCapturing {
 
         self.frameReader?.stopCapture()
         self.frameReader = nil
+        await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
     }
     
     func toEncodeSafeDimensions(width: Int32, height: Int32) -> (width: Int32, height: Int32) {
