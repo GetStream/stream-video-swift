@@ -5,6 +5,7 @@
 import AVFoundation
 import Foundation
 import StreamVideo
+import Combine
 
 /// Checks the audio capabilities of the device.
 public class MicrophoneChecker: ObservableObject {
@@ -15,9 +16,13 @@ public class MicrophoneChecker: ObservableObject {
     private var timer: Timer?
     
     private let valueLimit: Int
-    
+    private let audioSession: AudioSessionProtocol
+    private let notificationCenter: NotificationCenter
+
     private var audioRecorder: AVAudioRecorder?
-    
+
+    private var callEndedCancellable: AnyCancellable?
+
     private let audioFilename: URL = {
         let documentPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
         let audioFilename = documentPath.appendingPathComponent("recording.wav")
@@ -26,12 +31,30 @@ public class MicrophoneChecker: ObservableObject {
 
     private lazy var audioNormaliser: AudioValuePercentageNormaliser = .init()
 
-    public init(valueLimit: Int = 3) {
+    public convenience init(
+        valueLimit: Int = 3
+    ) {
+        self.init(
+            valueLimit: valueLimit,
+            audioSession: AVAudioSession.sharedInstance(),
+            notificationCenter: .default
+        )
+    }
+
+    init(
+        valueLimit: Int,
+        audioSession: AudioSessionProtocol,
+        notificationCenter: NotificationCenter = .default
+    ) {
         self.valueLimit = valueLimit
+        self.audioSession = audioSession
+        self.notificationCenter = notificationCenter
         self.audioLevels = [Float](repeating: 0.0, count: valueLimit)
         setUpAudioCapture()
+
+        subscribeToCallEnded()
     }
-    
+
     /// Checks if there are audible values available.
     public var isSilent: Bool {
         for audioLevel in audioLevels {
@@ -54,14 +77,18 @@ public class MicrophoneChecker: ObservableObject {
     }
     
     //MARK: - private
-    
+
+    private func subscribeToCallEnded() {
+        callEndedCancellable = notificationCenter
+            .publisher(for: Notification.Name(CallNotification.callEnded))
+            .sink { [audioSession] _ in try? audioSession.setActive(false, options: []) }
+    }
+
     private func setUpAudioCapture() {
-        let recordingSession = AVAudioSession.sharedInstance()
-                
         do {
-            try recordingSession.setCategory(.playAndRecord)
-            try recordingSession.setActive(true)
-            recordingSession.requestRecordPermission { result in
+            try audioSession.setCategory(.playAndRecord)
+            try audioSession.setActive(true, options: [])
+            audioSession.requestRecordPermission { result in
                 guard result else { return }
             }
             captureAudio()
@@ -115,7 +142,6 @@ public class MicrophoneChecker: ObservableObject {
     private func stopAudioRecorder() {
         self.audioRecorder?.stop()
         self.audioRecorder = nil
-        try? AVAudioSession.sharedInstance().setActive(false)
     }
 
     deinit {
@@ -129,3 +155,18 @@ public class MicrophoneChecker: ObservableObject {
         }
     }
 }
+
+/// A simple protocol that abstracts the usage of AVAudioSession.
+protocol AudioSessionProtocol {
+
+    func setCategory(_ category: AVAudioSession.Category) throws
+
+    func setActive(
+        _ active: Bool,
+        options: AVAudioSession.SetActiveOptions
+    ) throws
+
+    func requestRecordPermission(_ response: @escaping (Bool) -> Void)
+}
+
+extension AVAudioSession: AudioSessionProtocol {}
