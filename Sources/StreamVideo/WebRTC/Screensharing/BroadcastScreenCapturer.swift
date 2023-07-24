@@ -11,7 +11,8 @@ import ReplayKit
 class BroadcastScreenCapturer: VideoCapturing {
     
     var frameReader: SocketConnectionFrameReader?
-    
+    var adaptedOutputFormat = false
+
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
@@ -46,8 +47,15 @@ class BroadcastScreenCapturer: VideoCapturing {
         }
 
         let bounds = await UIScreen.main.bounds
-        let width = bounds.size.width
-        let height = bounds.size.height
+        let width = Int32(bounds.size.width)
+        let height = Int32(bounds.size.height)
+        
+        var targetDimensions = aspectFit(
+            width: width,
+            height: height,
+            size: Swift.max(videoOptions.preferredDimensions.width, videoOptions.preferredDimensions.height)
+        )
+        targetDimensions = toEncodeSafeDimensions(width: targetDimensions.width, height: targetDimensions.height)
 
         let frameReader = SocketConnectionFrameReader()
         guard let socketConnection = BroadcastServerSocketConnection(filePath: filePath, streamDelegate: frameReader)
@@ -67,16 +75,19 @@ class BroadcastScreenCapturer: VideoCapturing {
             )
 
             self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
-            self.videoSource.adaptOutputFormat(
-                toWidth: Int32(width),
-                height: Int32(height),
-                fps: Int32(30)
-            )
+            if !adaptedOutputFormat {
+                adaptedOutputFormat = true
+                self.videoSource.adaptOutputFormat(
+                    toWidth: targetDimensions.width,
+                    height: targetDimensions.height,
+                    fps: 15
+                )
+            }
         }
         frameReader.startCapture(with: socketConnection)
         self.frameReader = frameReader
     }
-    
+        
     func stopCapture() async throws {
         guard self.frameReader != nil else {
             // already stopped
@@ -85,6 +96,22 @@ class BroadcastScreenCapturer: VideoCapturing {
 
         self.frameReader?.stopCapture()
         self.frameReader = nil
+    }
+    
+    func toEncodeSafeDimensions(width: Int32, height: Int32) -> (width: Int32, height: Int32) {
+        (
+            width: Swift.max(16, width.roundUp(toMultipleOf: 2)),
+            height: Swift.max(16, height.roundUp(toMultipleOf: 2))
+        )
+    }
+    
+    func aspectFit(width: Int32, height: Int32, size: Int32) -> (width: Int32, height: Int32) {
+        let c = width >= height
+        let r = c ? Double(height) / Double(width) : Double(width) / Double(height)
+        return (
+            width: c ? size : Int32(r * Double(size)),
+            height: c ? Int32(r * Double(size)) : size
+        )
     }
     
     private func lookUpAppGroupIdentifier() -> String? {
@@ -99,5 +126,16 @@ class BroadcastScreenCapturer: VideoCapturing {
 
         let filePath = sharedContainer.appendingPathComponent("rtc_SSFD").path
         return filePath
+    }
+}
+
+extension FixedWidthInteger {
+
+    func roundUp(toMultipleOf powerOfTwo: Self) -> Self {
+        // Check that powerOfTwo really is.
+        precondition(powerOfTwo > 0 && powerOfTwo & (powerOfTwo &- 1) == 0)
+        // Round up and return. This may overflow and trap, but only if the rounded
+        // result would have overflowed anyway.
+        return (self + (powerOfTwo &- 1)) & (0 &- powerOfTwo)
     }
 }

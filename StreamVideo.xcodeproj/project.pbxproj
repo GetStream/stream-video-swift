@@ -412,7 +412,6 @@
 		84BAD7802A6C002800733156 /* DarwinNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77F2A6C002800733156 /* DarwinNotificationCenter.swift */; };
 		84BAD7822A6C013100733156 /* BroadcastScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */; };
 		84BAD7842A6C01AF00733156 /* SocketConnectionFrameReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7832A6C01AF00733156 /* SocketConnectionFrameReader.swift */; };
-		84BAD7862A6C4EDD00733156 /* BroadcastHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7852A6C4EDD00733156 /* BroadcastHandler.swift */; };
 		84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
@@ -1088,7 +1087,6 @@
 		84BAD77F2A6C002800733156 /* DarwinNotificationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DarwinNotificationCenter.swift; sourceTree = "<group>"; };
 		84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastScreenCapturer.swift; sourceTree = "<group>"; };
 		84BAD7832A6C01AF00733156 /* SocketConnectionFrameReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketConnectionFrameReader.swift; sourceTree = "<group>"; };
-		84BAD7852A6C4EDD00733156 /* BroadcastHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastHandler.swift; sourceTree = "<group>"; };
 		84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping_Tests.swift; sourceTree = "<group>"; };
 		84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnectionFactory.swift; sourceTree = "<group>"; };
 		84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DefaultRTCMediaConstraints.swift; sourceTree = "<group>"; };
@@ -2103,7 +2101,6 @@
 				84BAD77F2A6C002800733156 /* DarwinNotificationCenter.swift */,
 				84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */,
 				84BAD7832A6C01AF00733156 /* SocketConnectionFrameReader.swift */,
-				84BAD7852A6C4EDD00733156 /* BroadcastHandler.swift */,
 			);
 			path = Screensharing;
 			sourceTree = "<group>";
@@ -3171,7 +3168,6 @@
 				84BAD7842A6C01AF00733156 /* SocketConnectionFrameReader.swift in Sources */,
 				846E4AF529CDEA66003733AB /* ConnectUserDetailsRequest.swift in Sources */,
 				846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */,
-				84BAD7862A6C4EDD00733156 /* BroadcastHandler.swift in Sources */,
 				842B8E302A2DFED900863A87 /* EgressResponse.swift in Sources */,
 				84DC38C229ADFCFD00946713 /* HLSSettings.swift in Sources */,
 				84DC38B229ADFCFD00946713 /* UnblockUserResponse.swift in Sources */,

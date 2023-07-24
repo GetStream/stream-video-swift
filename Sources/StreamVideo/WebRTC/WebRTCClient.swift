@@ -24,6 +24,7 @@ class WebRTCClient: NSObject {
         }
         var tracks = [String: RTCVideoTrack]()
         var screensharingTracks = [String: RTCVideoTrack]()
+        var pausedTrackIds = [String]()
         private var continuation: AsyncStream<[Bool]>.Continuation?
         
         func update(connectionState: ConnectionState) {
@@ -71,6 +72,10 @@ class WebRTCClient: NSObject {
                 self.continuation = continuation
             }
             return updates
+        }
+        
+        func update(pausedTrackIds: [String]) {
+            self.pausedTrackIds = pausedTrackIds
         }
         
         func cleanUp() {
@@ -194,6 +199,7 @@ class WebRTCClient: NSObject {
             signalChannel = makeWebSocketClient(url: url, apiKey: .init(apiKey))
         }
         addOnParticipantsChangeHandler()
+        subscribeToAppLifecycleChanges()
     }
     
     func connect(
@@ -987,6 +993,48 @@ class WebRTCClient: NSObject {
     private func sfuChanged(_ connectURL: URL?) -> Bool {
         signalChannel?.connectURL != connectURL
     }
+    
+    @objc private func pauseTracks() {
+        Task {
+            var pausedTrackIds = [String]()
+            let tracks = await state.tracks
+            for (id, track) in tracks {
+                track.isEnabled = false
+                pausedTrackIds.append(id)
+            }
+            await state.update(pausedTrackIds: pausedTrackIds)
+        }
+
+    }
+    
+    @objc private func unpauseTracks() {
+        Task {
+            let tracks = await state.tracks
+            let pausedTrackIds = await state.pausedTrackIds
+            for (id, track) in tracks {
+                if pausedTrackIds.contains(id) {
+                    track.isEnabled = true
+                }
+            }
+            await state.update(pausedTrackIds: [])
+        }
+    }
+    
+    private func subscribeToAppLifecycleChanges() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(pauseTracks),
+            name: UIScene.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(unpauseTracks),
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+    
 }
 
 extension WebRTCClient: ConnectionStateDelegate {

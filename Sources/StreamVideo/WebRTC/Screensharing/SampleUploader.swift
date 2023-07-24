@@ -37,10 +37,6 @@ class SampleUploader {
         isReady = false
 
         dataToSend = prepare(sample: buffer)
-//        guard let pixelBuffer = CMSampleBufferGetImageBuffer(buffer) else {
-//            return false
-//        }
-//        dataToSend = serializePixelBuffer(buffer: pixelBuffer)
         byteIndex = 0
 
         serialQueue.async { [weak self] in
@@ -137,7 +133,7 @@ private extension SampleUploader {
             return nil
         }
 
-        let options: [CIImageRepresentationOption: Float] = [kCGImageDestinationLossyCompressionQuality as CIImageRepresentationOption: 1.0]
+        let options: [CIImageRepresentationOption: Float] = [kCGImageDestinationLossyCompressionQuality as CIImageRepresentationOption: 0.6]
 
         return SampleUploader.imageContext.jpegRepresentation(of: image, colorSpace: colorSpace, options: options)
     }

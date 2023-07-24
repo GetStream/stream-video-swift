@@ -82,7 +82,6 @@ private class Message {
             return false
         }
 
-//        imageBuffer = deserializePixelBuffer(data: messageData as Data)
         copyImageData(messageData as Data, to: imageBuffer)
 
         return true
