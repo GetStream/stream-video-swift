@@ -8,7 +8,7 @@ import ReplayKit
 
 class BroadcastScreenCapturer: VideoCapturing {
     
-    var frameReader: SocketConnectionFrameReader?
+    var bufferReader: BroadcastBufferReader?
     var adaptedOutputFormat = false
     
     private var videoCapturer: RTCVideoCapturer
@@ -33,7 +33,7 @@ class BroadcastScreenCapturer: VideoCapturing {
     }
     
     func startCapture(device: AVCaptureDevice?) async throws {
-        guard self.frameReader == nil else {
+        guard self.bufferReader == nil else {
             // already started
             return
         }
@@ -55,12 +55,16 @@ class BroadcastScreenCapturer: VideoCapturing {
         )
         targetDimensions = toEncodeSafeDimensions(width: targetDimensions.width, height: targetDimensions.height)
         
-        let frameReader = SocketConnectionFrameReader()
-        guard let socketConnection = BroadcastServerSocketConnection(filePath: filePath, streamDelegate: frameReader)
-        else {
+        let bufferReader = BroadcastBufferReader()
+        
+        guard let socketConnection = BroadcastBufferReaderConnection(
+            filePath: filePath,
+            streamDelegate: bufferReader
+        ) else {
             return
         }
-        frameReader.didCapture = { [weak self] pixelBuffer, rotation in
+        
+        bufferReader.didCapture = { [weak self] pixelBuffer, rotation in
             guard let self else { return }
             let systemTime = ProcessInfo.processInfo.systemUptime
             let timeStampNs = Int64(systemTime * Double(NSEC_PER_SEC))
@@ -82,18 +86,18 @@ class BroadcastScreenCapturer: VideoCapturing {
                 )
             }
         }
-        frameReader.startCapture(with: socketConnection)
-        self.frameReader = frameReader
+        bufferReader.startCapturing(with: socketConnection)
+        self.bufferReader = bufferReader
     }
     
     func stopCapture() async throws {
-        guard self.frameReader != nil else {
+        guard self.bufferReader != nil else {
             // already stopped
             return
         }
         
-        self.frameReader?.stopCapture()
-        self.frameReader = nil
+        self.bufferReader?.stopCapturing()
+        self.bufferReader = nil
         await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
     }
     

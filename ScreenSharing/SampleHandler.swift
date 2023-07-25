@@ -8,4 +8,4 @@
 import ReplayKit
 import StreamVideo
 
-class SampleHandler: StreamBroadcastSampleHandler {}
+class SampleHandler: BroadcastSampleHandler {}

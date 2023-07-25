@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-class BroadcastUploadSocketConnection: NSObject {
+class BroadcastBufferUploadConnection: NSObject {
     var didOpen: (() -> Void)?
     var didClose: ((Error?) -> Void)?
     var streamHasSpaceAvailable: (() -> Void)?
@@ -17,7 +17,7 @@ class BroadcastUploadSocketConnection: NSObject {
     private var inputStream: InputStream?
     private var outputStream: OutputStream?
     
-    private var networkQueue: DispatchQueue?
+    private var streamQueue: DispatchQueue?
     private var shouldKeepRunning = false
     
     init?(filePath path: String) {
@@ -30,15 +30,9 @@ class BroadcastUploadSocketConnection: NSObject {
     }
     
     func open() -> Bool {
-        guard FileManager.default.fileExists(atPath: filePath) else {
-            return false
-        }
-        
-        guard setupAddress() == true else {
-            return false
-        }
-        
-        guard connectSocket() == true else {
+        guard FileManager.default.fileExists(atPath: filePath),
+                setupAddress(),
+                connectSocket() else {
             return false
         }
         
@@ -66,9 +60,95 @@ class BroadcastUploadSocketConnection: NSObject {
     func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
         return outputStream?.write(buffer, maxLength: length) ?? 0
     }
+    
+    //MARK: - private
+    
+    private func setupAddress() -> Bool {
+        var addr = sockaddr_un()
+        addr.sun_family = sa_family_t(AF_UNIX)
+        guard filePath.count < MemoryLayout.size(ofValue: addr.sun_path) else {
+            return false
+        }
+        
+        _ = withUnsafeMutablePointer(to: &addr.sun_path.0) { ptr in
+            filePath.withCString {
+                strncpy(ptr, $0, filePath.count)
+            }
+        }
+        
+        address = addr
+        return true
+    }
+    
+    private func connectSocket() -> Bool {
+        guard var addr = address else {
+            return false
+        }
+        
+        let status = withUnsafePointer(to: &addr) { ptr in
+            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
+                Darwin.connect(socketHandle, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
+            }
+        }
+        
+        return status == noErr
+    }
+    
+    private func setupStreams() {
+        var readStream: Unmanaged<CFReadStream>?
+        var writeStream: Unmanaged<CFWriteStream>?
+        
+        CFStreamCreatePairWithSocket(kCFAllocatorDefault, socketHandle, &readStream, &writeStream)
+        
+        inputStream = readStream?.takeRetainedValue()
+        inputStream?.delegate = self
+        inputStream?.setProperty(
+            kCFBooleanTrue,
+            forKey: Stream.PropertyKey(kCFStreamPropertyShouldCloseNativeSocket as String)
+        )
+        
+        outputStream = writeStream?.takeRetainedValue()
+        outputStream?.delegate = self
+        outputStream?.setProperty(
+            kCFBooleanTrue,
+            forKey: Stream.PropertyKey(kCFStreamPropertyShouldCloseNativeSocket as String)
+        )
+        
+        scheduleStreams()
+    }
+    
+    private func scheduleStreams() {
+        shouldKeepRunning = true
+        
+        streamQueue = DispatchQueue.global(qos: .userInitiated)
+        streamQueue?.async { [weak self] in
+            self?.inputStream?.schedule(in: .current, forMode: .common)
+            self?.outputStream?.schedule(in: .current, forMode: .common)
+            RunLoop.current.run()
+            
+            var isRunning = false
+            
+            repeat {
+                isRunning = self?.shouldKeepRunning ?? false && RunLoop.current.run(mode: .default, before: .distantFuture)
+            } while (isRunning)
+        }
+    }
+    
+    private func unscheduleStreams() {
+        streamQueue?.sync { [weak self] in
+            self?.inputStream?.remove(from: .current, forMode: .common)
+            self?.outputStream?.remove(from: .current, forMode: .common)
+        }
+        
+        shouldKeepRunning = false
+    }
+    
+    private func notifyDidClose(error: Error?) {
+        didClose?(error)
+    }
 }
 
-extension BroadcastUploadSocketConnection: StreamDelegate {
+extension BroadcastBufferUploadConnection: StreamDelegate {
     
     func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         switch eventCode {
@@ -92,94 +172,8 @@ extension BroadcastUploadSocketConnection: StreamDelegate {
         case .errorOccurred:
             close()
             notifyDidClose(error: aStream.streamError)
-            
         default:
             break
         }
-    }
-}
-
-private extension BroadcastUploadSocketConnection {
-    
-    func setupAddress() -> Bool {
-        var addr = sockaddr_un()
-        addr.sun_family = sa_family_t(AF_UNIX)
-        guard filePath.count < MemoryLayout.size(ofValue: addr.sun_path) else {
-            return false
-        }
-        
-        _ = withUnsafeMutablePointer(to: &addr.sun_path.0) { ptr in
-            filePath.withCString {
-                strncpy(ptr, $0, filePath.count)
-            }
-        }
-        
-        address = addr
-        return true
-    }
-    
-    func connectSocket() -> Bool {
-        guard var addr = address else {
-            return false
-        }
-        
-        let status = withUnsafePointer(to: &addr) { ptr in
-            ptr.withMemoryRebound(to: sockaddr.self, capacity: 1) {
-                Darwin.connect(socketHandle, $0, socklen_t(MemoryLayout<sockaddr_un>.size))
-            }
-        }
-        
-        guard status == noErr else {
-            return false
-        }
-        
-        return true
-    }
-    
-    func setupStreams() {
-        var readStream: Unmanaged<CFReadStream>?
-        var writeStream: Unmanaged<CFWriteStream>?
-        
-        CFStreamCreatePairWithSocket(kCFAllocatorDefault, socketHandle, &readStream, &writeStream)
-        
-        inputStream = readStream?.takeRetainedValue()
-        inputStream?.delegate = self
-        inputStream?.setProperty(kCFBooleanTrue, forKey: Stream.PropertyKey(kCFStreamPropertyShouldCloseNativeSocket as String))
-        
-        outputStream = writeStream?.takeRetainedValue()
-        outputStream?.delegate = self
-        outputStream?.setProperty(kCFBooleanTrue, forKey: Stream.PropertyKey(kCFStreamPropertyShouldCloseNativeSocket as String))
-        
-        scheduleStreams()
-    }
-    
-    func scheduleStreams() {
-        shouldKeepRunning = true
-        
-        networkQueue = DispatchQueue.global(qos: .userInitiated)
-        networkQueue?.async { [weak self] in
-            self?.inputStream?.schedule(in: .current, forMode: .common)
-            self?.outputStream?.schedule(in: .current, forMode: .common)
-            RunLoop.current.run()
-            
-            var isRunning = false
-            
-            repeat {
-                isRunning = self?.shouldKeepRunning ?? false && RunLoop.current.run(mode: .default, before: .distantFuture)
-            } while (isRunning)
-        }
-    }
-    
-    func unscheduleStreams() {
-        networkQueue?.sync { [weak self] in
-            self?.inputStream?.remove(from: .current, forMode: .common)
-            self?.outputStream?.remove(from: .current, forMode: .common)
-        }
-        
-        shouldKeepRunning = false
-    }
-    
-    func notifyDidClose(error: Error?) {
-        didClose?(error)
     }
 }

@@ -5,7 +5,7 @@
 import Foundation
 import Darwin
 
-class BroadcastServerSocketConnection: NSObject {
+class BroadcastBufferReaderConnection: NSObject {
     private let streamDelegate: StreamDelegate
     
     private let filePath: String
@@ -16,7 +16,7 @@ class BroadcastServerSocketConnection: NSObject {
     private var outputStream: OutputStream?
     
     private var listeningSource: DispatchSourceRead?
-    private var networkQueue: DispatchQueue?
+    private var streamQueue: DispatchQueue?
     private var shouldKeepRunning = false
     
     init?(filePath path: String, streamDelegate: StreamDelegate) {
@@ -30,19 +30,11 @@ class BroadcastServerSocketConnection: NSObject {
     }
     
     func open() -> Bool {
-        
-        guard setupAddress() == true else {
-            return false
-        }
-        
-        guard bindSocket() == true else {
-            return false
-        }
-        
-        guard FileManager.default.fileExists(atPath: filePath) else {
-            return false
-        }
-        guard Darwin.listen(socketHandle, 10) >= 0 else {
+        guard setupAddress(),
+              bindSocket(),
+              FileManager.default.fileExists(atPath: filePath),
+              Darwin.listen(socketHandle, 10) >= 0
+        else {
             return false
         }
         
@@ -144,8 +136,8 @@ class BroadcastServerSocketConnection: NSObject {
     private func scheduleStreams() {
         shouldKeepRunning = true
         
-        networkQueue = DispatchQueue.global(qos: .userInitiated)
-        networkQueue?.async { [weak self] in
+        streamQueue = DispatchQueue.global(qos: .userInitiated)
+        streamQueue?.async { [weak self] in
             self?.inputStream?.schedule(in: .current, forMode: .default)
             self?.outputStream?.schedule(in: .current, forMode: .default)
             
@@ -158,7 +150,7 @@ class BroadcastServerSocketConnection: NSObject {
     }
     
     private func unscheduleStreams() {
-        networkQueue?.sync { [weak self] in
+        streamQueue?.sync { [weak self] in
             self?.inputStream?.remove(from: .current, forMode: .common)
             self?.outputStream?.remove(from: .current, forMode: .common)
         }

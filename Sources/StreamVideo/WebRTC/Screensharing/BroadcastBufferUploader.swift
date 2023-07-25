@@ -6,18 +6,18 @@ import Foundation
 import WebRTC
 import ReplayKit
 
-actor SampleUploader {
+actor BroadcastBufferUploader {
     
     private static var imageContext = CIContext(options: nil)
     
     private var isReady = false
-    private var connection: BroadcastUploadSocketConnection
+    private var connection: BroadcastBufferUploadConnection
     
     private var dataToSend: Data?
     private var byteIndex = 0
     private let compressionQuality: Float = 0.6
         
-    init(connection: BroadcastUploadSocketConnection) {
+    init(connection: BroadcastBufferUploadConnection) {
         self.connection = connection
         Task {
             await setupConnection()
@@ -136,7 +136,7 @@ actor SampleUploader {
             kCGImageDestinationLossyCompressionQuality as CIImageRepresentationOption: compressionQuality
         ]
         
-        return SampleUploader.imageContext.jpegRepresentation(of: image, colorSpace: colorSpace, options: options)
+        return BroadcastBufferUploader.imageContext.jpegRepresentation(of: image, colorSpace: colorSpace, options: options)
     }
     
     private func makeHttpResponse(

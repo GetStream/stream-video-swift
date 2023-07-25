@@ -124,11 +124,11 @@ private class Message {
     }
 }
 
-class SocketConnectionFrameReader: NSObject {
+class BroadcastBufferReader: NSObject {
     private var readLength = 0
     
-    private var _connection: BroadcastServerSocketConnection?
-    private var connection: BroadcastServerSocketConnection? {
+    private var _connection: BroadcastBufferReaderConnection?
+    private var connection: BroadcastBufferReaderConnection? {
         get { _connection }
         set {
             if _connection != newValue {
@@ -143,16 +143,16 @@ class SocketConnectionFrameReader: NSObject {
     
     override init() {}
     
-    func startCapture(with connection: BroadcastServerSocketConnection) {
+    func startCapturing(with connection: BroadcastBufferReaderConnection) {
         self.connection = connection
         message = nil
         
         if !connection.open() {
-            stopCapture()
+            stopCapturing()
         }
     }
     
-    func stopCapture() {
+    func stopCapturing() {
         connection?.close()
         connection = nil
     }
@@ -160,9 +160,7 @@ class SocketConnectionFrameReader: NSObject {
     // MARK: private
     
     func readBytes(from stream: InputStream) {
-        if !(stream.hasBytesAvailable) {
-            return
-        }
+        guard stream.hasBytesAvailable else { return }
         
         if message == nil {
             message = Message()
@@ -178,13 +176,11 @@ class SocketConnectionFrameReader: NSObject {
             }
         }
         
-        guard let msg = message
-        else {
-            return
-        }
+        guard let msg = message else { return }
         
         var buffer = [UInt8](repeating: 0, count: readLength)
         let numberOfBytesRead = stream.read(&buffer, maxLength: readLength)
+        
         if numberOfBytesRead < 0 {
             return
         }
@@ -220,7 +216,7 @@ class SocketConnectionFrameReader: NSObject {
     
 }
 
-extension SocketConnectionFrameReader: StreamDelegate {
+extension BroadcastBufferReader: StreamDelegate {
     func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         switch eventCode {
         case .openCompleted:
@@ -228,7 +224,7 @@ extension SocketConnectionFrameReader: StreamDelegate {
         case .hasBytesAvailable:
             readBytes(from: aStream as! InputStream)
         case .endEncountered:
-            stopCapture()
+            stopCapturing()
             log.debug("stopping capture")
         case .errorOccurred:
             log.debug("server stream error encountered: \(aStream.streamError?.localizedDescription ?? "")")

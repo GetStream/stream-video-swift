@@ -4,13 +4,12 @@
 
 @preconcurrency import ReplayKit
 
-open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
+open class BroadcastSampleHandler: RPBroadcastSampleHandler {
     
-    private var clientConnection: BroadcastUploadSocketConnection?
-    private var uploader: SampleUploader?
-    private let notificationCenter: CFNotificationCenter
-    
-    public var socketFilePath: String {
+    private var clientConnection: BroadcastBufferUploadConnection?
+    private var uploader: BroadcastBufferUploader?
+    private let notificationCenter: CFNotificationCenter    
+    private var socketFilePath: String {
         guard let appGroupIdentifier = infoPlistValue(for: BroadcastConstants.broadcastAppGroupIdentifier),
               let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
         else {
@@ -19,37 +18,31 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
         
         return sharedContainer.appendingPathComponent(
             BroadcastConstants.broadcastSharePath
-        ).path
+        )
+        .path
     }
     
     public override init() {
         notificationCenter = CFNotificationCenterGetDarwinNotifyCenter()
         super.init()
         
-        if let connection = BroadcastUploadSocketConnection(filePath: self.socketFilePath) {
+        if let connection = BroadcastBufferUploadConnection(filePath: self.socketFilePath) {
             self.clientConnection = connection
             self.setupConnection()
-            
-            self.uploader = SampleUploader(connection: connection)
+            self.uploader = BroadcastBufferUploader(connection: connection)
         }
     }
     
     override public func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
-        // User has requested to start the broadcast. Setup info from the UI extension can be supplied but optional.d
         postNotification(BroadcastConstants.broadcastStartedNotification)
         self.openConnection()
     }
     
-    override public func broadcastPaused() {
-        // User has requested to pause the broadcast. Samples will stop being delivered.
-    }
+    override public func broadcastPaused() {}
     
-    override public func broadcastResumed() {
-        // User has requested to resume the broadcast. Samples delivery will resume.
-    }
+    override public func broadcastResumed() {}
     
     override public func broadcastFinished() {
-        // User has requested to finish the broadcast.
         postNotification(BroadcastConstants.broadcastStoppedNotification)
         clientConnection?.close()
     }
@@ -65,16 +58,19 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
         }
     }
     
+    //MARK: - private
+    
     private func setupConnection() {
         clientConnection?.didClose = { [weak self] error in
-            
             if let error = error {
                 self?.finishBroadcastWithError(error)
             } else {
-                // the displayed failure message is more user friendly when using NSError instead of Error
-                let LKScreenSharingStopped = 10001
-                let customError = NSError(domain: RPRecordingErrorDomain, code: LKScreenSharingStopped, userInfo: [NSLocalizedDescriptionKey: "Screen sharing stopped"])
-                self?.finishBroadcastWithError(customError)
+                let screenshareError = NSError(
+                    domain: RPRecordingErrorDomain,
+                    code: 1001,
+                    userInfo: [NSLocalizedDescriptionKey: "Screen sharing stopped"]
+                )
+                self?.finishBroadcastWithError(screenshareError)
             }
         }
     }
@@ -82,7 +78,11 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
     private func openConnection() {
         let queue = DispatchQueue(label: "broadcast.connectTimer")
         let timer = DispatchSource.makeTimerSource(queue: queue)
-        timer.schedule(deadline: .now(), repeating: .milliseconds(100), leeway: .milliseconds(500))
+        timer.schedule(
+            deadline: .now(),
+            repeating: .milliseconds(100),
+            leeway: .milliseconds(500)
+        )
         timer.setEventHandler { [weak self] in
             guard self?.clientConnection?.open() == true else {
                 return
