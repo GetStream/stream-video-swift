@@ -12,7 +12,7 @@ class BroadcastScreenCapturer: VideoCapturing {
     
     var frameReader: SocketConnectionFrameReader?
     var adaptedOutputFormat = false
-
+    
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
@@ -25,13 +25,13 @@ class BroadcastScreenCapturer: VideoCapturing {
     ) {
         self.videoOptions = videoOptions
         self.videoSource = videoSource
-        #if targetEnvironment(simulator)
+#if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
-        #else
+#else
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters, handleRotation: false)
         videoCaptureHandler = handler
         videoCapturer = RTCCameraVideoCapturer(delegate: handler)
-        #endif
+#endif
     }
     
     func startCapture(device: AVCaptureDevice?) async throws {
@@ -39,13 +39,13 @@ class BroadcastScreenCapturer: VideoCapturing {
             // already started
             return
         }
-
+        
         guard let identifier = self.lookUpAppGroupIdentifier(),
               let filePath = self.filePathForIdentifier(identifier)
         else {
             return
         }
-
+        
         let bounds = await UIScreen.main.bounds
         let width = Int32(bounds.size.width)
         let height = Int32(bounds.size.height)
@@ -56,7 +56,7 @@ class BroadcastScreenCapturer: VideoCapturing {
             size: Swift.max(videoOptions.preferredDimensions.width, videoOptions.preferredDimensions.height)
         )
         targetDimensions = toEncodeSafeDimensions(width: targetDimensions.width, height: targetDimensions.height)
-
+        
         let frameReader = SocketConnectionFrameReader()
         guard let socketConnection = BroadcastServerSocketConnection(filePath: filePath, streamDelegate: frameReader)
         else {
@@ -73,7 +73,7 @@ class BroadcastScreenCapturer: VideoCapturing {
                 rotation: rotation,
                 timeStampNs: timeStampNs
             )
-
+            
             self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
             if !adaptedOutputFormat {
                 adaptedOutputFormat = true
@@ -87,13 +87,13 @@ class BroadcastScreenCapturer: VideoCapturing {
         frameReader.startCapture(with: socketConnection)
         self.frameReader = frameReader
     }
-        
+    
     func stopCapture() async throws {
         guard self.frameReader != nil else {
             // already stopped
             return
         }
-
+        
         self.frameReader?.stopCapture()
         self.frameReader = nil
         await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
@@ -118,20 +118,20 @@ class BroadcastScreenCapturer: VideoCapturing {
     private func lookUpAppGroupIdentifier() -> String? {
         return Bundle.main.infoDictionary?["RTCAppGroupIdentifier"] as? String
     }
-
+    
     private func filePathForIdentifier(_ identifier: String) -> String? {
         guard let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
         else {
             return nil
         }
-
+        
         let filePath = sharedContainer.appendingPathComponent("rtc_SSFD").path
         return filePath
     }
 }
 
 extension FixedWidthInteger {
-
+    
     func roundUp(toMultipleOf powerOfTwo: Self) -> Self {
         // Check that powerOfTwo really is.
         precondition(powerOfTwo > 0 && powerOfTwo & (powerOfTwo &- 1) == 0)
