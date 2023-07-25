@@ -8,29 +8,57 @@ import XCTest
 @testable import StreamVideo
 
 class CallCRUDTest: IntegrationTest {
-    func test_call_create_and_update() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
+    
+    let user1 = "thierry"
+    let user2 = "tommaso"
+    let defaultCallType = "default"
+    let apiErrorCode = 16
+    let randomCallId = UUID().uuidString
+    let userIdKey = MemberRequest.CodingKeys.userId.rawValue
+    
+    func test_callCreateAndUpdate() async throws {
+        let colorKey = "color"
+        let red: RawJSON = "red"
+        let blue: RawJSON = "blue"
         
-        let response = try await call.create(custom: ["color": "red"])
-        XCTAssertEqual(response.custom["color"], "red")
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        
+        let response = try await call.create(custom: [colorKey: red])
+        XCTAssertEqual(response.custom[colorKey], red)
         
         await assertNext(call.state.$custom) { v in
-            guard let newColor = v["color"]?.stringValue else {
+            guard let newColor = v[colorKey]?.stringValue else {
                 return false
             }
-            return newColor == "red"
+            return newColor == red.stringValue
         }
         
-        let updateResponse = try await call.update(custom: ["color": "blue"])
-        XCTAssertEqual(updateResponse.call.custom["color"], "blue")
+        let updateResponse = try await call.update(custom: [colorKey: blue])
+        XCTAssertEqual(updateResponse.call.custom[colorKey], blue)
         
         await assertNext(call.state.$custom) { v in
-            return v["color"] == "blue"
+            return v[colorKey] == blue
         }
     }
     
-    func test_get_call_missing_id() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
+    func test_getCallMissingId() async throws {
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        let apiErr = await XCTAssertThrowsErrorAsync({
+            let _ = try await call.get()
+        })
+        guard let apiErr = apiErr as? APIError else {
+            XCTAssert((apiErr as Any) is APIError)
+            return
+        }
+        XCTAssertEqual(apiErr.code, apiErrorCode)
+        
+        let expectedErrMessage = "GetCall failed with error: \"Can't find call with id \(call.cId)\""
+        XCTAssertEqual(apiErr.message, expectedErrMessage)
+    }
+    
+    func test_getCallWrongType() async throws {
+        let wrongCallType = "bananas"
+        let call = client.call(callType: wrongCallType, callId: randomCallId)
         let apiErr = await XCTAssertThrowsErrorAsync({
             let _ = try await call.get()
             return
@@ -39,148 +67,143 @@ class CallCRUDTest: IntegrationTest {
             XCTAssert((apiErr as Any) is APIError)
             return
         }
-        XCTAssertEqual(apiErr.code, 16)
-        XCTAssertEqual(apiErr.message, "GetCall failed with error: \"Can't find call with id \(call.cId)\"")
+        XCTAssertEqual(apiErr.code, apiErrorCode)
+        
+        
+        let expectedErrMessage = "\(wrongCallType): call type does not exist"
+        XCTAssertTrue(apiErr.message.localizedStandardContains(expectedErrMessage))
     }
     
-    func test_get_call_wrong_type() async throws {
-        let call = client.call(callType: "bananas", callId: UUID().uuidString)
-        let apiErr = await XCTAssertThrowsErrorAsync({
-            let _ = try await call.get()
-            return
-        })
-        guard let apiErr = apiErr as? APIError else {
-            XCTAssert((apiErr as Any) is APIError)
-            return
-        }
-        XCTAssertEqual(apiErr.code, 16)
-        XCTAssertTrue(apiErr.message.localizedStandardContains("call type does not exist"))
-    }
-    
-    func test_send_custom_event() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
+    func test_sendCustomEvent() async throws {
+        let customEventKey = "test"
+        let customEventValue = "asd"
+        
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
         try await call.create()
-        try await call.sendCustomEvent(["test": .string("asd")])
         
-        let eventSubscriber = call.subscribe()
-        await assertNext(eventSubscriber) { ev in
-            if case let .typeCustomVideoEvent(data) = ev {
-                return data.custom["test"]?.stringValue == "asd"
-            }
-            return false
-        }
+        let subscription = call.subscribe(for: CustomVideoEvent.self)
+        try await call.sendCustomEvent([customEventKey: .string(customEventValue)])
         
-        let specificSub = call.subscribe(for: CustomVideoEvent.self)
-        await assertNext(specificSub) { ev in
-            return ev.custom["test"]?.stringValue == "asd"
+        await assertNext(subscription) { ev in
+            return ev.custom[customEventKey]?.stringValue == customEventValue
         }
     }
     
-    func test_create_call_with_members() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry"])
+    func test_createCallWithMembers() async throws {
+        let roleKey = "role"
+        let roleValue = "CEO"
+        let membersGroup = "stars"
+        let membersCount: Double = 3
+        
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1])
         
         await assertNext(call.state.$members) { v in
-            return v.count == 1 && v[0].id == "thierry"
+            return v.count == 1 && v[0].id == self.user1
         }
         
-        try await call.updateMembers(members: [.init(custom: ["stars" : .number(3)], userId: "thierry")])
+        try await call.updateMembers(members: [.init(custom: [membersGroup : .number(membersCount)], userId: user1)])
         await assertNext(call.state.$members) { v in
             guard let member = v.first else {
                 return false
             }
-            return member.id == "thierry" && member.customData["stars"]?.numberValue == 3
+            return member.id == self.user1 && member.customData[membersGroup]?.numberValue == membersCount
         }
         
-        try await call.removeMembers(ids: ["thierry"])
+        try await call.removeMembers(ids: [user1])
         await assertNext(call.state.$members) { v in
             return v.count == 0
         }
         
-        try await call.addMembers(members: [.init(custom: ["role" : .string("CEO")], userId: "thierry")])
+        try await call.addMembers(members: [.init(custom: [roleKey : .string(roleValue)], userId: user1)])
         await assertNext(call.state.$members) { v in
             guard let member = v.first else {
                 return false
             }
-            return member.id == "thierry" && member.customData["role"]?.stringValue == "CEO"
+            return member.id == self.user1 && member.customData[roleKey]?.stringValue == roleValue
         }
     }
     
-    func test_paginate_call_with_members() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry"])
+    func test_paginateCallWithMembers() async throws {
+        let call1 = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call1.create(memberIds: [user1])
         
-        let call2 = client.call(callType: call.callType, callId: call.callId)
-        let _ = try await call2.get(membersLimit: 0)
-
-        try await Task.sleep(nanoseconds: 2_500_000_000)
-        
-        let count = await call2.state.members.count
-        XCTAssertEqual(0, count)
-        
+        let call2 = client.call(callType: call1.callType, callId: call1.callId)
         let _ = try await call2.get(membersLimit: 1)
-        await assertNext(call.state.$members) { v in
+        await assertNext(call1.state.$members) { v in
             return v.count == 1
         }
         
         var membersResponse = try await call2.queryMembers()
         XCTAssertEqual(1, membersResponse.members.count)
         
-        membersResponse = try await call2.queryMembers(filters: ["user_id": .string("thierry")])
+        membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user1)])
         XCTAssertEqual(1, membersResponse.members.count)
         
-        membersResponse = try await call2.queryMembers(filters: ["user_id": .string("tommaso")])
+        membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user2)])
         XCTAssertEqual(0, membersResponse.members.count)
         
-        let tommasoClient = getUserClient(id: "tommaso")
-        try await tommasoClient.connect()
+        let secondUserClient = getUserClient(id: user2)
+        try await secondUserClient.connect()
         
         // add to call2 so we can test that the other call object is updated via WS events
-        try await call2.addMembers(ids: ["tommaso"])
-        await assertNext(call.state.$members) { v in
+        try await call2.addMembers(ids: [user2])
+        await assertNext(call1.state.$members) { v in
             return v.count == 2
         }
         
-        membersResponse = try await call2.queryMembers(filters: ["user_id": .string("tommaso")])
+        membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user2)])
         XCTAssertEqual(1, membersResponse.members.count)
         
         membersResponse = try await call2.queryMembers(limit:1)
         XCTAssertEqual(1, membersResponse.members.count)
-        XCTAssertEqual("tommaso", membersResponse.members.first?.userId)
+        XCTAssertEqual(user2, membersResponse.members.first?.userId)
         
         membersResponse = try await call2.queryMembers(next: membersResponse.next)
         XCTAssertEqual(1, membersResponse.members.count)
-        XCTAssertEqual("thierry", membersResponse.members.first?.userId)
+        XCTAssertEqual(user1, membersResponse.members.first?.userId)
         
         await assertNext(call2.state.$members) { v in
-            return v.count == 2 && v.first?.id == "tommaso"
+            return v.count == 2 && v.first?.id == self.user2
         }
     }
     
-    func test_query_channels() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry"])
+    func test_queryChannels() async throws {
+        let colorKey = "color"
+        let blue: RawJSON = "blue"
         
-        let (calls, next) = try await client.queryCalls(filters: ["cid": .string(call.cId)], watch: true)
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1])
+        
+        let (calls, next) = try await client.queryCalls(
+            filters: [CallSortField.cid.rawValue: .string(call.cId)],
+            watch: true
+        )
         XCTAssertEqual(1, calls.count)
         XCTAssertEqual(call.cId, calls[0].cId)
         XCTAssertEqual(nil, next)
         
         // changes to a watched call via query call should propagate as usual to the state
-        let updateResponse = try await call.update(custom: ["color": "blue"])
-        XCTAssertEqual(updateResponse.call.custom["color"], "blue")
+        let updateResponse = try await call.update(custom: [colorKey: blue])
+        XCTAssertEqual(updateResponse.call.custom[colorKey], blue)
         
         await assertNext(calls[0].state.$custom) { v in
-            return v["color"] == "blue"
+            return v[colorKey] == blue
         }
         
-        let (secondTry, _) = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
+        let (secondTry, _) = try await client.queryCalls(
+            filters: [CallSortField.endedAt.rawValue: .nil,
+                      CallSortField.cid.rawValue: .string(call.cId)]
+        )
         XCTAssertEqual(1, secondTry.count)
         XCTAssertEqual(call.cId, calls[0].cId)
         
         try await call.end()
         
-        let (thirdTry, _) = try await client.queryCalls(filters: ["ended_at": .nil, "cid": .string(call.cId)])
+        let (thirdTry, _) = try await client.queryCalls(
+            filters: [CallSortField.endedAt.rawValue: .nil,
+                      CallSortField.cid.rawValue: .string(call.cId)]
+        )
         XCTAssertEqual(0, thirdTry.count)
         
         // check propagation as well
@@ -189,75 +212,315 @@ class CallCRUDTest: IntegrationTest {
         }
     }
     
-    func test_send_reaction() async throws {
-        let call = client.call(callType: "default", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry"])
+    func test_sendReaction() async throws {
+        let reactionType1 = "happy"
+        let reactionType2 = "happyy"
+        let reactionType3 = "happyyy"
+        let emojiCode = ":smile:"
+        let customReactionKey = "test"
+        let customReactionValue = "asd"
+        
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1])
         
         let specificSub = call.subscribe(for: CallReactionEvent.self)
         
-        let _ = try await call.sendReaction(type: "happy")
+        let _ = try await call.sendReaction(type: reactionType1)
         await assertNext(specificSub) { ev in
-            return ev.reaction.type == "happy"
+            return ev.reaction.type == reactionType1
         }
         
-        let _ = try await call.sendReaction(type: "happyy", emojiCode: ":smile:")
+        let _ = try await call.sendReaction(type: reactionType2, emojiCode: emojiCode)
         await assertNext(specificSub) { ev in
-            return ev.reaction.type == "happyy" && ev.reaction.emojiCode == ":smile:"
+            return ev.reaction.type == reactionType2 && ev.reaction.emojiCode == emojiCode
         }
         
-        let _ = try await call.sendReaction(type: "happyyy", custom: ["test": .string("asd")])
+        let _ = try await call.sendReaction(
+            type: reactionType3,
+            custom: [customReactionKey: .string(customReactionValue)]
+        )
         await assertNext(specificSub) { ev in
-            return ev.reaction.type == "happyyy" && ev.reaction.custom?["test"]?.stringValue == "asd"
+            return ev.reaction.type == reactionType3 && ev.reaction.custom?[customReactionKey]?.stringValue == customReactionValue
         }
     }
     
-    func test_request_permission_discard() async throws {
-        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry"])
+    func test_requestPermissionDiscard() async throws {
+        let firstUserCall = client.call(
+            callType: String.audioRoom,
+            callId: randomCallId
+        )
+        try await firstUserCall.create(memberIds: [user1])
 
-        let tommasoClient = getUserClient(id: "tommaso")
-        try await tommasoClient.connect()
-        let tommasoCall = tommasoClient.call(callType: "audio_room", callId: call.callId)
+        let secondUserClient = getUserClient(id: user2)
+        try await secondUserClient.connect()
+        let secondUserCall = secondUserClient.call(
+            callType: String.audioRoom,
+            callId: firstUserCall.callId
+        )
 
-        let _ = try await tommasoCall.get()
-        var hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
+        let _ = try await secondUserCall.get()
+        var hasAudioCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
         XCTAssertFalse(hasAudioCapability)
-        var hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
+        var hasVideoCapability = await secondUserCall.currentUserHasCapability(.sendVideo)
         XCTAssertFalse(hasVideoCapability)
 
-        try await tommasoCall.request(permissions: [.sendAudio])
+        try await secondUserCall.request(permissions: [.sendAudio])
 
-        await assertNext(call.state.$permissionRequests) { value in
-            return value.count == 1 && value.first?.permission == "send-audio"
+        await assertNext(firstUserCall.state.$permissionRequests) { value in
+            return value.count == 1 && value.first?.permission == Permission.sendAudio.rawValue
         }
-        if let p = await call.state.permissionRequests.first {
+        if let p = await firstUserCall.state.permissionRequests.first {
             p.reject()
         }
         
         // Test: permission requests list is now empty
-        await assertNext(call.state.$permissionRequests) { value in
+        await assertNext(firstUserCall.state.$permissionRequests) { value in
             return value.count == 0
         }
 
-        hasAudioCapability = await tommasoCall.currentUserHasCapability(.sendAudio)
+        hasAudioCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
         XCTAssertFalse(hasAudioCapability)
-        hasVideoCapability = await tommasoCall.currentUserHasCapability(.sendVideo)
+        hasVideoCapability = await secondUserCall.currentUserHasCapability(.sendVideo)
         XCTAssertFalse(hasVideoCapability)
     }
     
-    func test_mute_user_by_id() async throws {
-        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry", "tommaso"])
+    func test_muteUserById() async throws {
+        let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
+        try await firstUserCall.create(memberIds: [user1, user2])
+        try await firstUserCall.goLive()
+        
+        let secondUserClient = getUserClient(id: user2)
+        let secondUserCall = secondUserClient.call(
+            callType: String.audioRoom,
+            callId: firstUserCall.callId
+        )
+        
+        try await firstUserCall.join()
+        try await customWait()
+            
+        try await firstUserCall.microphone.enable()
+        try await customWait()
+        
+        try await secondUserCall.join()
+        try await customWait()
+        
+        try await firstUserCall.grant(permissions: [.sendAudio], for: user2)
+        try await customWait()
+            
+        try await secondUserCall.microphone.enable()
+        try await customWait()
+        
+        var participants = await firstUserCall.state.participants
+        XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should have audio enabled")
+        XCTAssertEqual(participants.last?.hasAudio, true, "Participant should have audio enabled")
 
-        // there is no muted event from coordinator atm
-        try await call.mute(userId: "tommaso")
+        for userId in [user1, user2] {
+            try await firstUserCall.mute(userId: userId)
+            try await customWait()
+        }
+        
+        participants = await firstUserCall.state.participants
+        XCTAssertEqual(participants.first?.hasAudio, false, "Call creator should be muted")
+        XCTAssertEqual(participants.last?.hasAudio, false, "All participants should be muted")
     }
     
-    func test_mute_user_by_all() async throws {
-        let call = client.call(callType: "audio_room", callId: UUID().uuidString)
-        try await call.create(memberIds: ["thierry", "tommaso"])
+    func test_muteAllUsers() async throws {
+        let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
+        try await firstUserCall.create(memberIds: [user1, user2])
+        try await firstUserCall.goLive()
+        
+        let secondUserClient = getUserClient(id: user2)
+        let secondUserCall = secondUserClient.call(
+            callType: String.audioRoom,
+            callId: firstUserCall.callId
+        )
+        
+        try await firstUserCall.join()
+        try await customWait()
+            
+        try await firstUserCall.microphone.enable()
+        try await customWait()
+        
+        try await secondUserCall.join()
+        try await customWait()
+        
+        try await firstUserCall.grant(permissions: [.sendAudio], for: user2)
+        try await customWait()
+            
+        try await secondUserCall.microphone.enable()
+        try await customWait()
+        
+        var participants = await firstUserCall.state.participants
+        XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should have audio enabled")
+        XCTAssertEqual(participants.last?.hasAudio, true, "Participant should have audio enabled")
 
-        try await call.muteAllUsers()
-        // there is no muted event from coordinator atm
+        try await firstUserCall.muteAllUsers()
+        try await customWait(nanoseconds: 10_000_000_000)
+        
+        participants = await firstUserCall.state.participants
+        XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should not be muted")
+        XCTAssertEqual(participants.last?.hasAudio, false, "All participants should be muted")
+    }
+    
+    func test_blockAndUnblockUser() async throws {
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1, user2])
+        try await call.blockUser(with: user2)
+        
+        var membersResponse = try await call.queryMembers()
+        XCTAssertEqual(2, membersResponse.members.count)
+        
+        var blockedUsers = try await call.get().blockedUserIds
+        XCTAssertEqual(blockedUsers, [user2])
+        
+        try await call.unblockUser(with: user2)
+        
+        membersResponse = try await call.queryMembers()
+        XCTAssertEqual(2, membersResponse.members.count)
+        
+        blockedUsers = try await call.get().blockedUserIds
+        XCTAssertEqual(blockedUsers, [])
+    }
+    
+    func test_createCallWithMembersAndMemberIds() async throws {
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        
+        var membersRequest = [MemberRequest]()
+        membersRequest.append(.init(userId: user2))
+        
+        try await call.create(members: membersRequest, memberIds: [user1])
+        let membersResponse = try await call.queryMembers()
+        
+        XCTAssertEqual(2, membersResponse.members.count)
+    }
+    
+    func test_grantPermissions() async throws {
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1])
+        
+        let expectedPermissions: [Permission] = [.sendAudio, .sendVideo, .screenshare]
+        try await call.revoke(permissions: expectedPermissions, for: user1)
+        try await customWait()
+        
+        for permission in expectedPermissions {
+            let capability = try XCTUnwrap(OwnCapability(rawValue: permission.rawValue))
+            let userHasRequiredCapability = await call.currentUserHasCapability(capability)
+            XCTAssertFalse(userHasRequiredCapability, "\(permission.rawValue) should not be granted")
+        }
+        
+        try await call.grant(permissions: expectedPermissions, for: user1)
+        try await customWait()
+        
+        for permission in expectedPermissions {
+            let capability = try XCTUnwrap(OwnCapability(rawValue: permission.rawValue))
+            let userHasRequiredCapability = await call.currentUserHasCapability(capability)
+            XCTAssertTrue(userHasRequiredCapability, "\(permission.rawValue) permission should be granted")
+        }
+    }
+    
+    func test_grantPermissionsByRequest() async throws {
+        let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
+        try await firstUserCall.create(memberIds: [user1, user2])
+        
+        let secondUserClient = getUserClient(id: user2)
+        let secondUserCall = secondUserClient.call(
+            callType: firstUserCall.callType,
+            callId: firstUserCall.callId
+        )
+        
+        refreshStreamVideoProviderKey()
+        
+        try await firstUserCall.revoke(permissions: [.sendAudio], for: secondUserClient.user.id)
+        try await customWait()
+                
+        var userHasUnexpectedCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
+        XCTAssertFalse(userHasUnexpectedCapability)
+        
+        try await secondUserCall.request(permissions: [.sendAudio])
+        try await customWait()
+        
+        userHasUnexpectedCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
+        XCTAssertFalse(userHasUnexpectedCapability)
+        
+        await assertNext(firstUserCall.state.$permissionRequests) { value in
+            return value.count == 1 && value.first?.permission == Permission.sendAudio.rawValue
+        }
+        if let p = await firstUserCall.state.permissionRequests.first {
+            try await firstUserCall.grant(request: p)
+        }
+        
+        let userHasExpectedCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
+        XCTAssertFalse(userHasExpectedCapability)
+    }
+    
+    func test_acceptCall() async throws {
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1])
+        try await call.ring()
+        try await customWait()
+        
+        var session = try await call.get().session
+        XCTAssertEqual(session?.acceptedBy.isEmpty, true, "Call should not be accepted yet")
+        
+        try await call.accept()
+        try await customWait()
+        
+        session = try await call.get().session
+        XCTAssertNotNil(session?.acceptedBy[client.user.id], "Call should be accepted by \(user1)")
+    }
+    
+    func test_notifyUser() async throws {
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1, user2])
+        
+        let subscription = call.subscribe(for: CallNotificationEvent.self)
+        
+        try await call.notify()
+        try await customWait()
+        
+        await assertNext(subscription) { [user2] ev in
+            return ev.members.first?.userId == user2
+        }
+    }
+    
+    func test_setAndDeleteDevices() async throws {
+        let deviceId = UUID().uuidString
+        let voipDeviceId = UUID().uuidString
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1, user2])
+        
+        try await call.streamVideo.setDevice(id: deviceId)
+        try await call.streamVideo.setVoipDevice(id: voipDeviceId)
+        try await customWait()
+        var listDevices = try await call.streamVideo.listDevices()
+        XCTAssertTrue(listDevices.contains(where: { $0.id == deviceId }), "Device should be added")
+        XCTAssertTrue(listDevices.contains(where: { $0.id == voipDeviceId }), "Voip device should be added")
+        
+        try await call.streamVideo.deleteDevice(id: deviceId)
+        try await call.streamVideo.deleteDevice(id: voipDeviceId)
+        try await customWait()
+        listDevices = try await call.streamVideo.listDevices()
+        XCTAssertFalse(listDevices.contains(where: { $0.id == deviceId }), "Device should be removed")
+        XCTAssertFalse(listDevices.contains(where: { $0.id == voipDeviceId }), "Voip device should be removed")
+    }
+    
+    func test_setAndDeleteVoipDevices() async throws {
+        let deviceId = UUID().uuidString
+        let call = client.call(callType: defaultCallType, callId: randomCallId)
+        try await call.create(memberIds: [user1, user2])
+        
+        try await call.streamVideo.setVoipDevice(id: deviceId)
+        try await customWait()
+        var listDevices = try await call.streamVideo.listDevices()
+        XCTAssertTrue(listDevices.contains(where: { $0.id == deviceId }))
+        
+        try await call.streamVideo.deleteDevice(id: deviceId)
+        try await customWait()
+        listDevices = try await call.streamVideo.listDevices()
+        XCTAssertFalse(listDevices.contains(where: { $0.id == deviceId }))
+    }
+    
+    func customWait(nanoseconds duration: UInt64 = 3_000_000_000) async throws {
+        try await Task.sleep(nanoseconds: duration)
     }
 }
