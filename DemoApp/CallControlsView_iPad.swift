@@ -28,7 +28,6 @@ struct CallControlsView_iPad: View {
                 VideoIconView(viewModel: viewModel).asAnyView,
                 MicrophoneIconView(viewModel: viewModel).asAnyView,
                 ToggleCameraIconView(viewModel: viewModel).asAnyView,
-                ScreenshareIconView(viewModel: viewModel).asAnyView,
                 BroadcastIconView(viewModel: viewModel).asAnyView,
                 HangUpIconView(viewModel: viewModel).asAnyView
             ]

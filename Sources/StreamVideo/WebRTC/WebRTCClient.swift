@@ -134,6 +134,7 @@ class WebRTCClient: NSObject {
     private var migratingToken: String?
     private var fromSfuName: String?
     private var tempSubscriber: PeerConnection?
+    private var currentScreenhsareType: ScreensharingType?
 
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
@@ -262,7 +263,6 @@ class WebRTCClient: NSObject {
     func cleanUp() async {
         log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
         try? await videoCapturer?.stopCapture()
-        videoCapturer = nil
         try? await screenshareCapturer?.stopCapture()
         publisher?.close()
         subscriber?.close()
@@ -434,13 +434,13 @@ class WebRTCClient: NSObject {
     
     func startScreensharing(type: ScreensharingType) async throws {
         if hasCapability(.screenshare) {
-            if localScreenshareTrack == nil {
+            if localScreenshareTrack == nil || type != currentScreenhsareType {
                 // Screenshare
                 let screenshareTrack = await makeVideoTrack(screenshareType: type)
                 localScreenshareTrack = screenshareTrack
                 publisher?.addTransceiver(
                     screenshareTrack,
-                    streamIds: ["\(sessionID)-screenshare"],
+                    streamIds: ["\(sessionID)-screenshare-\(type)"],
                     trackType: .screenshare
                 )
                 await state.add(screensharingTrack: screenshareTrack, id: sessionID)
@@ -455,6 +455,8 @@ class WebRTCClient: NSObject {
         } else {
             throw ClientError.MissingPermissions()
         }
+        self.currentScreenhsareType = type
+        try await screenshareCapturer?.startCapture(device: nil)
     }
     
     func stopScreensharing() async throws {
@@ -462,6 +464,7 @@ class WebRTCClient: NSObject {
         localScreenshareTrack?.isEnabled = false
         await assignTracksToParticipants()
         try await changeScreensharingState(isEnabled: false)
+        try? await screenshareCapturer?.stopCapture()
     }
     
     // MARK: - private
@@ -723,7 +726,6 @@ class WebRTCClient: NSObject {
                     videoFilters: videoConfig.videoFilters
                 )
             }
-            try? await screenshareCapturer?.startCapture(device: nil)
         } else {
             videoCapturer = VideoCapturer(
                 videoSource: videoSource,

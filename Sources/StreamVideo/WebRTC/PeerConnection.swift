@@ -166,6 +166,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         if trackType == .screenshare {
             if transceiverScreenshare != nil {
                 transceiverScreenshare?.stopInternal()
+                for screensharingStream in screensharingStreams {
+                    pc.remove(screensharingStream)
+                }
+                screensharingStreams = []
             }
             transceiverScreenshare = pc.addTransceiver(with: track, init: transceiverInit)
         } else {
@@ -180,11 +184,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             return
         }
         try await add(candidate: iceCandidate)
-    }
-    
-    func stopScreensharing() {
-        transceiverScreenshare?.stopInternal()
-        transceiverScreenshare = nil
     }
     
     func close() {

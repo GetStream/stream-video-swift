@@ -297,7 +297,7 @@ public class CallState: ObservableObject {
                 dominantSpeaker = participant
             }
 
-            if let screenshareTrack = participant.screenshareTrack {
+            if let screenshareTrack = participant.screenshareTrack, participant.isScreensharing {
                 screenSharingSession = .init(track: screenshareTrack, participant: participant)
             }
         }

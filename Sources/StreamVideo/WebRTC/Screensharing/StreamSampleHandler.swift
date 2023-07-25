@@ -67,7 +67,6 @@ open class LKSampleHandler: RPBroadcastSampleHandler {
         clientConnection?.didClose = { [weak self] error in
 
             if let error = error {
-                print("======= \(error)")
                 self?.finishBroadcastWithError(error)
             } else {
                 // the displayed failure message is more user friendly when using NSError instead of Error
