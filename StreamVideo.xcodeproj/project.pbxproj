@@ -128,6 +128,9 @@
 		840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C42A6FED2900917B30 /* IntExtensions.swift */; };
 		840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C62A6FF20B00917B30 /* BroadcastObserver.swift */; };
 		840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C82A6FF9A200917B30 /* BroadcastConstants.swift */; };
+		840042CB2A701C2000917B30 /* BroadcastUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042CA2A701C2000917B30 /* BroadcastUtils.swift */; };
+		840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */; };
+		840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042CE2A70212D00917B30 /* ScreensharingControls.swift */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -814,6 +817,9 @@
 		840042C42A6FED2900917B30 /* IntExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtensions.swift; sourceTree = "<group>"; };
 		840042C62A6FF20B00917B30 /* BroadcastObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver.swift; sourceTree = "<group>"; };
 		840042C82A6FF9A200917B30 /* BroadcastConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastConstants.swift; sourceTree = "<group>"; };
+		840042CA2A701C2000917B30 /* BroadcastUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastUtils.swift; sourceTree = "<group>"; };
+		840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastPickerView.swift; sourceTree = "<group>"; };
+		840042CE2A70212D00917B30 /* ScreensharingControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreensharingControls.swift; sourceTree = "<group>"; };
 		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
 		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		8403C0AE2897D9940092BD43 /* VoipPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipPushService.swift; sourceTree = "<group>"; };
@@ -1774,6 +1780,8 @@
 			children = (
 				84429931293FA4850037232A /* ScreenSharingView.swift */,
 				844299342940A16F0037232A /* ZoomableScrollView.swift */,
+				840042CC2A7020FD00917B30 /* BroadcastPickerView.swift */,
+				840042CE2A70212D00917B30 /* ScreensharingControls.swift */,
 			);
 			path = ScreenSharing;
 			sourceTree = "<group>";
@@ -2081,6 +2089,7 @@
 				846A06CD29E056C40084C264 /* StringExtensions.swift */,
 				84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */,
 				840042C42A6FED2900917B30 /* IntExtensions.swift */,
+				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -3233,6 +3242,7 @@
 				840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */,
 				84DCA21C2A39D950000C3411 /* DefaultAPI.swift in Sources */,
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
+				840042CB2A701C2000917B30 /* BroadcastUtils.swift in Sources */,
 				844ECF4F2A33458A0023263C /* Member.swift in Sources */,
 				84DC38AC29ADFCFD00946713 /* CallAcceptedEvent.swift in Sources */,
 				84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */,
@@ -3456,6 +3466,7 @@
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,
 				84F3B0E528917C620088751D /* Modifiers.swift in Sources */,
 				843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */,
+				840042CF2A70212D00917B30 /* ScreensharingControls.swift in Sources */,
 				8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */,
 				8415D3E3290BC882006E53CB /* Sounds.swift in Sources */,
 				84DCA2092A382B16000C3411 /* CallModels.swift in Sources */,
@@ -3511,6 +3522,7 @@
 				84E7CD3728D64609009F3542 /* CallingIndicator.swift in Sources */,
 				846FBE8B28AAD84A00147F6E /* InviteParticipantsViewModel.swift in Sources */,
 				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
+				840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */,
 				84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -4042,6 +4054,10 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.1;
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-no_application_extension",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.ScreenSharing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4072,6 +4088,10 @@
 					"@executable_path/../../Frameworks",
 				);
 				MARKETING_VERSION = 1.0.1;
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-no_application_extension",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.ScreenSharing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;

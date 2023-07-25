@@ -14,12 +14,11 @@ private class Message {
     }()
     
     var imageBuffer: CVImageBuffer?
-    var didComplete: ((_ success: Bool, _ message: Message) -> Void)?
+    var onComplete: ((_ success: Bool, _ message: Message) -> Void)?
     var imageOrientation: CGImagePropertyOrientation = .up
     private var framedMessage: CFHTTPMessage?
     
-    init() {
-    }
+    init() {}
     
     func appendBytes(buffer: [UInt8], length: Int) -> Int {
         if framedMessage == nil {
@@ -50,8 +49,7 @@ private class Message {
         let missingBytesCount = contentLength - bodyLength
         if missingBytesCount == 0 {
             let success = unwrapMessage(framedMessage)
-            self.didComplete?(success, self)
-            
+            self.onComplete?(success, self)
             self.framedMessage = nil
         }
         
@@ -139,7 +137,7 @@ class BroadcastBufferReader: NSObject {
     }
     
     private var message: Message?
-    var didCapture: ((CVPixelBuffer, RTCVideoRotation) -> Void)?
+    var onCapture: ((CVPixelBuffer, RTCVideoRotation) -> Void)?
     
     override init() {}
     
@@ -167,7 +165,7 @@ class BroadcastBufferReader: NSObject {
             readLength = BroadcastConstants.bufferMaxLength
             
             weak var weakSelf = self
-            message?.didComplete = { success, message in
+            message?.onComplete = { success, message in
                 if success {
                     weakSelf?.didCaptureVideoFrame(message.imageBuffer, with: message.imageOrientation)
                 }
@@ -211,7 +209,7 @@ class BroadcastBufferReader: NSObject {
             rotation = ._0
         }
         
-        didCapture?(pixelBuffer, rotation)
+        onCapture?(pixelBuffer, rotation)
     }
     
 }

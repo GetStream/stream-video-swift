@@ -6,9 +6,9 @@ import Foundation
 import WebRTC
 
 class BroadcastBufferUploadConnection: NSObject {
-    var didOpen: (() -> Void)?
-    var didClose: ((Error?) -> Void)?
-    var streamHasSpaceAvailable: (() -> Void)?
+    var onOpen: (() -> Void)?
+    var onClose: ((Error?) -> Void)?
+    var hasSpaceAvailable: (() -> Void)?
     
     private let filePath: String
     private var socketHandle: Int32 = -1
@@ -37,16 +37,28 @@ class BroadcastBufferUploadConnection: NSObject {
         }
         
         setupStreams()
-        
-        inputStream?.open()
-        outputStream?.open()
+        openStreams()
         
         return true
     }
     
     func close() {
         unscheduleStreams()
-        
+        closeStreams()
+    }
+    
+    func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
+        return outputStream?.write(buffer, maxLength: length) ?? 0
+    }
+    
+    //MARK: - private
+    
+    private func openStreams() {
+        inputStream?.open()
+        outputStream?.open()
+    }
+    
+    private func closeStreams() {
         inputStream?.delegate = nil
         outputStream?.delegate = nil
         
@@ -56,12 +68,6 @@ class BroadcastBufferUploadConnection: NSObject {
         inputStream = nil
         outputStream = nil
     }
-    
-    func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
-        return outputStream?.write(buffer, maxLength: length) ?? 0
-    }
-    
-    //MARK: - private
     
     private func setupAddress() -> Bool {
         var addr = sockaddr_un()
@@ -129,7 +135,8 @@ class BroadcastBufferUploadConnection: NSObject {
             var isRunning = false
             
             repeat {
-                isRunning = self?.shouldKeepRunning ?? false && RunLoop.current.run(mode: .default, before: .distantFuture)
+                isRunning = self?.shouldKeepRunning ?? false
+                    && RunLoop.current.run(mode: .default, before: .distantFuture)
             } while (isRunning)
         }
     }
@@ -142,10 +149,6 @@ class BroadcastBufferUploadConnection: NSObject {
         
         shouldKeepRunning = false
     }
-    
-    private func notifyDidClose(error: Error?) {
-        didClose?(error)
-    }
 }
 
 extension BroadcastBufferUploadConnection: StreamDelegate {
@@ -154,7 +157,7 @@ extension BroadcastBufferUploadConnection: StreamDelegate {
         switch eventCode {
         case .openCompleted:
             if aStream == outputStream {
-                didOpen?()
+                onOpen?()
             }
         case .hasBytesAvailable:
             if aStream == inputStream {
@@ -162,16 +165,16 @@ extension BroadcastBufferUploadConnection: StreamDelegate {
                 let numberOfBytesRead = inputStream?.read(&buffer, maxLength: 1)
                 if numberOfBytesRead == 0 && aStream.streamStatus == .atEnd {
                     close()
-                    notifyDidClose(error: nil)
+                    onClose?(nil)
                 }
             }
         case .hasSpaceAvailable:
             if aStream == outputStream {
-                streamHasSpaceAvailable?()
+                hasSpaceAvailable?()
             }
         case .errorOccurred:
             close()
-            notifyDidClose(error: aStream.streamError)
+            onClose?(aStream.streamError)
         default:
             break
         }

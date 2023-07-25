@@ -34,7 +34,6 @@ class BroadcastScreenCapturer: VideoCapturing {
     
     func startCapture(device: AVCaptureDevice?) async throws {
         guard self.bufferReader == nil else {
-            // already started
             return
         }
         
@@ -48,12 +47,14 @@ class BroadcastScreenCapturer: VideoCapturing {
         let width = Int32(bounds.size.width)
         let height = Int32(bounds.size.height)
         
-        var targetDimensions = aspectFit(
+        let targetDimensions = BroadcastUtils.adjust(
             width: width,
             height: height,
-            size: Swift.max(videoOptions.preferredDimensions.width, videoOptions.preferredDimensions.height)
+            size: max(
+                videoOptions.preferredDimensions.width,
+                videoOptions.preferredDimensions.height
+            )
         )
-        targetDimensions = toEncodeSafeDimensions(width: targetDimensions.width, height: targetDimensions.height)
         
         let bufferReader = BroadcastBufferReader()
         
@@ -64,7 +65,7 @@ class BroadcastScreenCapturer: VideoCapturing {
             return
         }
         
-        bufferReader.didCapture = { [weak self] pixelBuffer, rotation in
+        bufferReader.onCapture = { [weak self] pixelBuffer, rotation in
             guard let self else { return }
             let systemTime = ProcessInfo.processInfo.systemUptime
             let timeStampNs = Int64(systemTime * Double(NSEC_PER_SEC))
@@ -101,31 +102,17 @@ class BroadcastScreenCapturer: VideoCapturing {
         await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
     }
     
-    func toEncodeSafeDimensions(width: Int32, height: Int32) -> (width: Int32, height: Int32) {
-        (
-            width: Swift.max(16, width.roundUp(toMultipleOf: 2)),
-            height: Swift.max(16, height.roundUp(toMultipleOf: 2))
-        )
-    }
-    
-    func aspectFit(width: Int32, height: Int32, size: Int32) -> (width: Int32, height: Int32) {
-        let c = width >= height
-        let r = c ? Double(height) / Double(width) : Double(width) / Double(height)
-        return (
-            width: c ? size : Int32(r * Double(size)),
-            height: c ? Int32(r * Double(size)) : size
-        )
-    }
-    
     private func filePathForIdentifier(_ identifier: String) -> String? {
-        guard let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
-        else {
+        guard let sharedContainer = FileManager.default.containerURL(
+            forSecurityApplicationGroupIdentifier: identifier
+        ) else {
             return nil
         }
         
         let filePath = sharedContainer.appendingPathComponent(
             BroadcastConstants.broadcastSharePath
         ).path
+        
         return filePath
     }
 }

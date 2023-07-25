@@ -48,9 +48,7 @@ class BroadcastBufferReaderConnection: NSObject {
             }
             
             self.setupStreams(clientSocket: clientSocket)
-            
-            self.inputStream?.open()
-            self.outputStream?.open()
+            self.openStreams()
         }
         
         self.listeningSource = listeningSource
@@ -60,7 +58,23 @@ class BroadcastBufferReaderConnection: NSObject {
     
     func close() {
         unscheduleStreams()
-        
+        closeStreams()
+        listeningSource?.cancel()
+        Darwin.close(socketHandle)
+    }
+    
+    func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
+        outputStream?.write(buffer, maxLength: length) ?? 0
+    }
+    
+    //MARK: - private
+    
+    private func openStreams() {
+        inputStream?.open()
+        outputStream?.open()
+    }
+    
+    private func closeStreams() {
         inputStream?.delegate = nil
         outputStream?.delegate = nil
         
@@ -69,13 +83,6 @@ class BroadcastBufferReaderConnection: NSObject {
         
         inputStream = nil
         outputStream = nil
-        
-        listeningSource?.cancel()
-        Darwin.close(socketHandle)
-    }
-    
-    func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
-        outputStream?.write(buffer, maxLength: length) ?? 0
     }
     
     private func setupAddress() -> Bool {
@@ -144,7 +151,8 @@ class BroadcastBufferReaderConnection: NSObject {
             var isRunning = false
             
             repeat {
-                isRunning = self?.shouldKeepRunning ?? false && RunLoop.current.run(mode: .default, before: .distantFuture)
+                isRunning = self?.shouldKeepRunning ?? false
+                && RunLoop.current.run(mode: .default, before: .distantFuture)
             } while (isRunning)
         }
     }

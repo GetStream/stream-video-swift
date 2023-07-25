@@ -61,7 +61,7 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
     //MARK: - private
     
     private func setupConnection() {
-        clientConnection?.didClose = { [weak self] error in
+        clientConnection?.onClose = { [weak self] error in
             if let error = error {
                 self?.finishBroadcastWithError(error)
             } else {

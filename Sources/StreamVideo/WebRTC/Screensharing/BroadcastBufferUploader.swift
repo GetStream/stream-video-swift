@@ -43,13 +43,13 @@ actor BroadcastBufferUploader {
     }
     
     func setupConnection() {
-        connection.didOpen = { [weak self] in
+        connection.onOpen = { [weak self] in
             guard let self else { return }
             Task {
                 await self.update(isReady: true)
             }
         }
-        connection.streamHasSpaceAvailable = { [weak self] in
+        connection.hasSpaceAvailable = { [weak self] in
             guard let self else { return }
             Task {
                 let success = await self.sendDataChunk()
