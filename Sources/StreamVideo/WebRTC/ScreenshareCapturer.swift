@@ -4,9 +4,7 @@
 
 import Foundation
 import WebRTC
-#if canImport(ReplayKit)
 import ReplayKit
-#endif
 
 class ScreenshareCapturer: VideoCapturing {
     private var videoCapturer: RTCVideoCapturer

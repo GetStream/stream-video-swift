@@ -125,6 +125,7 @@
 		82FF40C82A17C75C00B4D95E /* LobbyView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40C72A17C75C00B4D95E /* LobbyView_Tests.swift */; };
 		82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40C92A17C76400B4D95E /* MicrophoneCheckView_Tests.swift */; };
 		82FF40CC2A17C76B00B4D95E /* OutgoingCallView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40CB2A17C76A00B4D95E /* OutgoingCallView_Tests.swift */; };
+		840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C42A6FED2900917B30 /* IntExtensions.swift */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -809,6 +810,7 @@
 		82FF40C72A17C75C00B4D95E /* LobbyView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyView_Tests.swift; sourceTree = "<group>"; };
 		82FF40C92A17C76400B4D95E /* MicrophoneCheckView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCheckView_Tests.swift; sourceTree = "<group>"; };
 		82FF40CB2A17C76A00B4D95E /* OutgoingCallView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView_Tests.swift; sourceTree = "<group>"; };
+		840042C42A6FED2900917B30 /* IntExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtensions.swift; sourceTree = "<group>"; };
 		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
 		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		8403C0AE2897D9940092BD43 /* VoipPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipPushService.swift; sourceTree = "<group>"; };
@@ -2076,6 +2078,7 @@
 				846E4B0029D2D372003733AB /* Sorting.swift */,
 				846A06CD29E056C40084C264 /* StringExtensions.swift */,
 				84A4DDBC2A3B35030097F3E9 /* LocationFetcher.swift */,
+				840042C42A6FED2900917B30 /* IntExtensions.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -3287,6 +3290,7 @@
 				842B8E172A2DFED900863A87 /* EgressRTMPResponse.swift in Sources */,
 				84A7E1A82883E46200526C98 /* Timers.swift in Sources */,
 				84DC38B129ADFCFD00946713 /* AudioSettings.swift in Sources */,
+				840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
 				84BAD77A2A6BFEF900733156 /* SampleUploader.swift in Sources */,

@@ -6,8 +6,12 @@ import Foundation
 import WebRTC
 import ReplayKit
 
-private enum Constants {
+internal enum BroadcastConstants {
     static let bufferMaxLength = 10240
+    static let contentLength = "Content-Length"
+    static let bufferWidth = "Buffer-Width"
+    static let bufferHeight = "Buffer-Height"
+    static let bufferOrientation = "Buffer-Orientation"
 }
 
 actor SampleUploader {
@@ -68,7 +72,7 @@ actor SampleUploader {
         }
         
         var bytesLeft = dataToSend.count - byteIndex
-        var length = bytesLeft > Constants.bufferMaxLength ? Constants.bufferMaxLength : bytesLeft
+        var length = bytesLeft > BroadcastConstants.bufferMaxLength ? BroadcastConstants.bufferMaxLength : bytesLeft
         
         length = dataToSend[byteIndex..<(byteIndex + length)].withUnsafeBytes {
             guard let ptr = $0.bindMemory(to: UInt8.self).baseAddress else {
@@ -150,12 +154,28 @@ actor SampleUploader {
         orientation: UInt
     ) -> CFHTTPMessage {
         let httpResponse = CFHTTPMessageCreateResponse(nil, 200, nil, kCFHTTPVersion1_1).takeRetainedValue()
-        CFHTTPMessageSetHeaderFieldValue(httpResponse, "Content-Length" as CFString, String(messageData.count) as CFString)
-        CFHTTPMessageSetHeaderFieldValue(httpResponse, "Buffer-Width" as CFString, String(width) as CFString)
-        CFHTTPMessageSetHeaderFieldValue(httpResponse, "Buffer-Height" as CFString, String(height) as CFString)
-        CFHTTPMessageSetHeaderFieldValue(httpResponse, "Buffer-Orientation" as CFString, String(orientation) as CFString)
-        
+        CFHTTPMessageSetHeaderFieldValue(
+            httpResponse,
+            BroadcastConstants.contentLength as CFString,
+            String(messageData.count) as CFString
+        )
+        CFHTTPMessageSetHeaderFieldValue(
+            httpResponse,
+            BroadcastConstants.bufferWidth as CFString,
+            String(width) as CFString
+        )
+        CFHTTPMessageSetHeaderFieldValue(
+            httpResponse,
+            BroadcastConstants.bufferHeight as CFString,
+            String(height) as CFString
+        )
+        CFHTTPMessageSetHeaderFieldValue(
+            httpResponse,
+            BroadcastConstants.bufferOrientation as CFString,
+            String(orientation) as CFString
+        )
         CFHTTPMessageSetBody(httpResponse, messageData as CFData)
+        
         return httpResponse
     }
 }

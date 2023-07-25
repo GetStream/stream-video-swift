@@ -4,9 +4,7 @@
 
 import Foundation
 import WebRTC
-#if canImport(ReplayKit)
 import ReplayKit
-#endif
 
 class BroadcastScreenCapturer: VideoCapturing {
     
@@ -127,16 +125,5 @@ class BroadcastScreenCapturer: VideoCapturing {
         
         let filePath = sharedContainer.appendingPathComponent("rtc_SSFD").path
         return filePath
-    }
-}
-
-extension FixedWidthInteger {
-    
-    func roundUp(toMultipleOf powerOfTwo: Self) -> Self {
-        // Check that powerOfTwo really is.
-        precondition(powerOfTwo > 0 && powerOfTwo & (powerOfTwo &- 1) == 0)
-        // Round up and return. This may overflow and trap, but only if the rounded
-        // result would have overflowed anyway.
-        return (self + (powerOfTwo &- 1)) & (0 &- powerOfTwo)
     }
 }

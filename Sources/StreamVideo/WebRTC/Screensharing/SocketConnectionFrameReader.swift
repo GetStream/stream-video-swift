@@ -8,7 +8,6 @@ import CoreImage
 import WebRTC
 
 private class Message {
-    // Initializing a CIContext object is costly, so we use a singleton instead
     static let imageContextVar: CIContext? = {
         var imageContext = CIContext(options: nil)
         return imageContext
@@ -36,7 +35,10 @@ private class Message {
             return -1
         }
         
-        guard let contentLengthStr = CFHTTPMessageCopyHeaderFieldValue(framedMessage, "Content-Length" as CFString)?.takeRetainedValue(),
+        guard let contentLengthStr = CFHTTPMessageCopyHeaderFieldValue(
+            framedMessage,
+            BroadcastConstants.contentLength as CFString
+        )?.takeRetainedValue(),
               let body = CFHTTPMessageCopyBody(framedMessage)?.takeRetainedValue()
         else {
             return -1
@@ -61,20 +63,39 @@ private class Message {
     }
     
     private func unwrapMessage(_ framedMessage: CFHTTPMessage) -> Bool {
-        guard let widthStr = CFHTTPMessageCopyHeaderFieldValue(framedMessage, "Buffer-Width" as CFString)?.takeRetainedValue(),
-              let heightStr = CFHTTPMessageCopyHeaderFieldValue(framedMessage, "Buffer-Height" as CFString)?.takeRetainedValue(),
-              let imageOrientationStr = CFHTTPMessageCopyHeaderFieldValue(framedMessage, "Buffer-Orientation" as CFString)?.takeRetainedValue(),
-              let messageData = CFHTTPMessageCopyBody(framedMessage)?.takeRetainedValue()
+        guard
+            let widthStr = CFHTTPMessageCopyHeaderFieldValue(
+                framedMessage,
+                BroadcastConstants.bufferWidth as CFString
+            )?.takeRetainedValue(),
+            let heightStr = CFHTTPMessageCopyHeaderFieldValue(
+                framedMessage,
+                BroadcastConstants.bufferHeight as CFString
+            )?.takeRetainedValue(),
+            let imageOrientationStr = CFHTTPMessageCopyHeaderFieldValue(
+                framedMessage,
+                BroadcastConstants.bufferOrientation as CFString
+            )?.takeRetainedValue(),
+            let messageData = CFHTTPMessageCopyBody(framedMessage)?.takeRetainedValue()
         else {
             return false
         }
         
         let width = Int(CFStringGetIntValue(widthStr))
         let height = Int(CFStringGetIntValue(heightStr))
-        self.imageOrientation = CGImagePropertyOrientation(rawValue: UInt32(CFStringGetIntValue(imageOrientationStr))) ?? .up
+        self.imageOrientation = CGImagePropertyOrientation(
+            rawValue: UInt32(CFStringGetIntValue(imageOrientationStr))
+        ) ?? .up
         
-        // Copy the pixel buffer
-        let status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_32BGRA, nil, &imageBuffer)
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            width,
+            height,
+            kCVPixelFormatType_32BGRA,
+            nil,
+            &imageBuffer
+        )
+        
         if status != kCVReturnSuccess {
             return false
         }
@@ -104,7 +125,6 @@ private class Message {
 }
 
 class SocketConnectionFrameReader: NSObject {
-    private static let kMaxReadLength = 10 * 1024
     private var readLength = 0
     
     private var _connection: BroadcastServerSocketConnection?
@@ -121,8 +141,7 @@ class SocketConnectionFrameReader: NSObject {
     private var message: Message?
     var didCapture: ((CVPixelBuffer, RTCVideoRotation) -> Void)?
     
-    override init() {
-    }
+    override init() {}
     
     func startCapture(with connection: BroadcastServerSocketConnection) {
         self.connection = connection
@@ -138,7 +157,8 @@ class SocketConnectionFrameReader: NSObject {
         connection = nil
     }
     
-    // MARK: Private Methods
+    // MARK: private
+    
     func readBytes(from stream: InputStream) {
         if !(stream.hasBytesAvailable) {
             return
@@ -146,7 +166,7 @@ class SocketConnectionFrameReader: NSObject {
         
         if message == nil {
             message = Message()
-            readLength = SocketConnectionFrameReader.kMaxReadLength
+            readLength = BroadcastConstants.bufferMaxLength
             
             weak var weakSelf = self
             message?.didComplete = { success, message in
@@ -170,8 +190,8 @@ class SocketConnectionFrameReader: NSObject {
         }
         
         readLength = msg.appendBytes(buffer: buffer, length: numberOfBytesRead)
-        if readLength == -1 || readLength > SocketConnectionFrameReader.kMaxReadLength {
-            readLength = SocketConnectionFrameReader.kMaxReadLength
+        if readLength == -1 || readLength > BroadcastConstants.bufferMaxLength {
+            readLength = BroadcastConstants.bufferMaxLength
         }
     }
     
@@ -204,13 +224,14 @@ extension SocketConnectionFrameReader: StreamDelegate {
     func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
         switch eventCode {
         case .openCompleted:
-            print("server stream open completed")
+            log.debug("server stream open completed")
         case .hasBytesAvailable:
             readBytes(from: aStream as! InputStream)
         case .endEncountered:
             stopCapture()
+            log.debug("stopping capture")
         case .errorOccurred:
-            print("server stream error encountered: \(aStream.streamError?.localizedDescription ?? "")")
+            log.debug("server stream error encountered: \(aStream.streamError?.localizedDescription ?? "")")
         default:
             break
         }
