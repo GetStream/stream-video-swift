@@ -38,7 +38,7 @@ class BroadcastScreenCapturer: VideoCapturing {
             return
         }
         
-        guard let identifier = self.lookUpAppGroupIdentifier(),
+        guard let identifier = infoPlistValue(for: BroadcastConstants.broadcastAppGroupIdentifier),
               let filePath = self.filePathForIdentifier(identifier)
         else {
             return
@@ -113,17 +113,15 @@ class BroadcastScreenCapturer: VideoCapturing {
         )
     }
     
-    private func lookUpAppGroupIdentifier() -> String? {
-        return Bundle.main.infoDictionary?["RTCAppGroupIdentifier"] as? String
-    }
-    
     private func filePathForIdentifier(_ identifier: String) -> String? {
         guard let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: identifier)
         else {
             return nil
         }
         
-        let filePath = sharedContainer.appendingPathComponent("rtc_SSFD").path
+        let filePath = sharedContainer.appendingPathComponent(
+            BroadcastConstants.broadcastSharePath
+        ).path
         return filePath
     }
 }

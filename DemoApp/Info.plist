@@ -56,7 +56,7 @@
 	<string>Atlantis would use Bonjour Service to discover Proxyman app from your local network.</string>
 	<key>NSMicrophoneUsageDescription</key>
 	<string>DemoApp requires microphone access in order to capture and transmit audio</string>
-	<key>RTCAppGroupIdentifier</key>
+	<key>BroadcastAppGroupIdentifier</key>
 	<string>group.io.getstream.iOS.VideoDemoApp</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>

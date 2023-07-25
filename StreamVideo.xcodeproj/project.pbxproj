@@ -126,6 +126,8 @@
 		82FF40CA2A17C76400B4D95E /* MicrophoneCheckView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40C92A17C76400B4D95E /* MicrophoneCheckView_Tests.swift */; };
 		82FF40CC2A17C76B00B4D95E /* OutgoingCallView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40CB2A17C76A00B4D95E /* OutgoingCallView_Tests.swift */; };
 		840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C42A6FED2900917B30 /* IntExtensions.swift */; };
+		840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C62A6FF20B00917B30 /* BroadcastObserver.swift */; };
+		840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840042C82A6FF9A200917B30 /* BroadcastConstants.swift */; };
 		8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoipPushService.swift */; };
 		840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840425B528D0A96F0084C637 /* VideoParticipantsView.swift */; };
@@ -410,7 +412,6 @@
 		84BAD77A2A6BFEF900733156 /* SampleUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7792A6BFEF900733156 /* SampleUploader.swift */; };
 		84BAD77C2A6BFF4300733156 /* BroadcastServerSocketConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77B2A6BFF4300733156 /* BroadcastServerSocketConnection.swift */; };
 		84BAD77E2A6BFFB200733156 /* StreamSampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77D2A6BFFB200733156 /* StreamSampleHandler.swift */; };
-		84BAD7802A6C002800733156 /* DarwinNotificationCenter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77F2A6C002800733156 /* DarwinNotificationCenter.swift */; };
 		84BAD7822A6C013100733156 /* BroadcastScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */; };
 		84BAD7842A6C01AF00733156 /* SocketConnectionFrameReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7832A6C01AF00733156 /* SocketConnectionFrameReader.swift */; };
 		84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */; };
@@ -811,6 +812,8 @@
 		82FF40C92A17C76400B4D95E /* MicrophoneCheckView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneCheckView_Tests.swift; sourceTree = "<group>"; };
 		82FF40CB2A17C76A00B4D95E /* OutgoingCallView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OutgoingCallView_Tests.swift; sourceTree = "<group>"; };
 		840042C42A6FED2900917B30 /* IntExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntExtensions.swift; sourceTree = "<group>"; };
+		840042C62A6FF20B00917B30 /* BroadcastObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastObserver.swift; sourceTree = "<group>"; };
+		840042C82A6FF9A200917B30 /* BroadcastConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastConstants.swift; sourceTree = "<group>"; };
 		8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */ = {isa = PBXFileReference; lastKnownFileType = "sourcecode.text-based-dylib-definition"; name = libswift_Concurrency.tbd; path = usr/lib/swift/libswift_Concurrency.tbd; sourceTree = SDKROOT; };
 		8403C0AC2897CF4D0092BD43 /* CallKitService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitService.swift; sourceTree = "<group>"; };
 		8403C0AE2897D9940092BD43 /* VoipPushService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VoipPushService.swift; sourceTree = "<group>"; };
@@ -1086,7 +1089,6 @@
 		84BAD7792A6BFEF900733156 /* SampleUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleUploader.swift; sourceTree = "<group>"; };
 		84BAD77B2A6BFF4300733156 /* BroadcastServerSocketConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastServerSocketConnection.swift; sourceTree = "<group>"; };
 		84BAD77D2A6BFFB200733156 /* StreamSampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamSampleHandler.swift; sourceTree = "<group>"; };
-		84BAD77F2A6C002800733156 /* DarwinNotificationCenter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DarwinNotificationCenter.swift; sourceTree = "<group>"; };
 		84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastScreenCapturer.swift; sourceTree = "<group>"; };
 		84BAD7832A6C01AF00733156 /* SocketConnectionFrameReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SocketConnectionFrameReader.swift; sourceTree = "<group>"; };
 		84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Mapping_Tests.swift; sourceTree = "<group>"; };
@@ -2097,13 +2099,15 @@
 		84BAD7762A6BFE7200733156 /* Screensharing */ = {
 			isa = PBXGroup;
 			children = (
+				8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */,
+				840042C62A6FF20B00917B30 /* BroadcastObserver.swift */,
+				84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */,
 				84BAD7772A6BFE8A00733156 /* BroadcastUploadSocketConnection.swift */,
 				84BAD7792A6BFEF900733156 /* SampleUploader.swift */,
 				84BAD77B2A6BFF4300733156 /* BroadcastServerSocketConnection.swift */,
 				84BAD77D2A6BFFB200733156 /* StreamSampleHandler.swift */,
-				84BAD77F2A6C002800733156 /* DarwinNotificationCenter.swift */,
-				84BAD7812A6C013100733156 /* BroadcastScreenCapturer.swift */,
 				84BAD7832A6C01AF00733156 /* SocketConnectionFrameReader.swift */,
+				840042C82A6FF9A200917B30 /* BroadcastConstants.swift */,
 			);
 			path = Screensharing;
 			sourceTree = "<group>";
@@ -2487,7 +2491,6 @@
 				84FC2C2128ACF2E000181490 /* PeerConnection.swift */,
 				8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */,
 				843697CC28C647B600839D99 /* VideoCapturer.swift */,
-				8487D8AC2A67F4EC00536ED4 /* ScreenshareCapturer.swift */,
 				84B0091A2A4C521000CF1FA7 /* Retries.swift */,
 				84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */,
 				84FC2C2728AD350100181490 /* WebRTCEvents.swift */,
@@ -3154,6 +3157,7 @@
 				846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */,
 				84DCA20E2A3885FE000C3411 /* Permissions.swift in Sources */,
 				84BAD77E2A6BFFB200733156 /* StreamSampleHandler.swift in Sources */,
+				840042C92A6FF9A200917B30 /* BroadcastConstants.swift in Sources */,
 				84F73854287C1A2D00A363F4 /* InjectedValuesExtensions.swift in Sources */,
 				84DC38D829ADFCFD00946713 /* JoinCallRequest.swift in Sources */,
 				84AF64D2287C78E70012A503 /* User.swift in Sources */,
@@ -3226,6 +3230,7 @@
 				8458872E28A4EC1F002A81BF /* CallSettings.swift in Sources */,
 				84DC389829ADFCFD00946713 /* VideoSettingsRequest.swift in Sources */,
 				846E4AE429CDE0B0003733AB /* OwnCapability.swift in Sources */,
+				840042C72A6FF20B00917B30 /* BroadcastObserver.swift in Sources */,
 				84DCA21C2A39D950000C3411 /* DefaultAPI.swift in Sources */,
 				8469593429BB5CE200134EA0 /* HTTPConfig.swift in Sources */,
 				844ECF4F2A33458A0023263C /* Member.swift in Sources */,
@@ -3333,7 +3338,6 @@
 				8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */,
 				842B8E1C2A2DFED900863A87 /* AcceptCallResponse.swift in Sources */,
 				842B8E262A2DFED900863A87 /* CallParticipantResponse.swift in Sources */,
-				84BAD7802A6C002800733156 /* DarwinNotificationCenter.swift in Sources */,
 				8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */,
 				84DC38AA29ADFCFD00946713 /* CallRecordingStoppedEvent.swift in Sources */,
 				84DC38CE29ADFCFD00946713 /* BlockUserRequest.swift in Sources */,

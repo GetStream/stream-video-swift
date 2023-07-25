@@ -120,66 +120,6 @@ public struct BroadcastIconView: View {
     }
 }
 
-enum BroadcastState {
-    case notStarted
-    case started
-    case finished
-}
-
-private let broadcastStartedNotification = "iOS_BroadcastStarted"
-private let broadcastStoppedNotification = "iOS_BroadcastStopped"
-
-class BroadcastObserver: ObservableObject {
-    
-    @Published var broadcastState: BroadcastState = .notStarted
-    
-    lazy var broadcastStarted: CFNotificationCallback = { center, observer, name, object, userInfo in
-        postNotification(with: broadcastStartedNotification)
-    }
-    
-    lazy var broadcastStopped: CFNotificationCallback = { center, observer, name, object, userInfo in
-        postNotification(with: broadcastStoppedNotification)
-    }
-    
-    func observe() {
-        observe(notification: broadcastStartedNotification, function: broadcastStarted)
-        observe(notification: broadcastStoppedNotification, function: broadcastStopped)
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleBroadcastStarted),
-            name: NSNotification.Name(broadcastStartedNotification),
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleBroadcastStopped),
-            name: NSNotification.Name(broadcastStoppedNotification),
-            object: nil
-        )
-    }
-    
-    private func observe(notification: String, function: CFNotificationCallback) {
-        let cfstr = notification as CFString
-        let notificationCenter = CFNotificationCenterGetDarwinNotifyCenter()
-        CFNotificationCenterAddObserver(
-            notificationCenter,
-            nil,
-            function,
-            cfstr,
-            nil,
-            .deliverImmediately
-        )
-    }
-
-    @objc func handleBroadcastStarted() {
-        self.broadcastState = .started
-    }
-    
-    @objc func handleBroadcastStopped() {
-        self.broadcastState = .finished
-    }
-}
-
 struct EqualSpacingHStack: View {
     
     var views: () -> [AnyView]

@@ -8,22 +8,22 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
     
     private var clientConnection: BroadcastUploadSocketConnection?
     private var uploader: SampleUploader?
-    
-    public var appGroupIdentifier: String? {
-        return Bundle.main.infoDictionary?["RTCAppGroupIdentifier"] as? String
-    }
+    private let notificationCenter: CFNotificationCenter
     
     public var socketFilePath: String {
-        guard let appGroupIdentifier = appGroupIdentifier,
+        guard let appGroupIdentifier = infoPlistValue(for: BroadcastConstants.broadcastAppGroupIdentifier),
               let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
         else {
             return ""
         }
         
-        return sharedContainer.appendingPathComponent("rtc_SSFD").path
+        return sharedContainer.appendingPathComponent(
+            BroadcastConstants.broadcastSharePath
+        ).path
     }
     
     public override init() {
+        notificationCenter = CFNotificationCenterGetDarwinNotifyCenter()
         super.init()
         
         if let connection = BroadcastUploadSocketConnection(filePath: self.socketFilePath) {
@@ -36,7 +36,7 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
     
     override public func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         // User has requested to start the broadcast. Setup info from the UI extension can be supplied but optional.d
-        DarwinNotificationCenter.shared.postNotification(.broadcastStarted)
+        postNotification(BroadcastConstants.broadcastStartedNotification)
         self.openConnection()
     }
     
@@ -50,7 +50,7 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
     
     override public func broadcastFinished() {
         // User has requested to finish the broadcast.
-        DarwinNotificationCenter.shared.postNotification(.broadcastStopped)
+        postNotification(BroadcastConstants.broadcastStoppedNotification)
         clientConnection?.close()
     }
     
@@ -92,5 +92,15 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
         }
         
         timer.resume()
+    }
+    
+    private func postNotification(_ name: String) {
+        CFNotificationCenterPostNotification(
+            notificationCenter,
+            CFNotificationName(rawValue: name as CFString),
+            nil,
+            nil,
+            true
+        )
     }
 }

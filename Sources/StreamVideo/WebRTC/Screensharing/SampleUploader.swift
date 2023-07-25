@@ -6,14 +6,6 @@ import Foundation
 import WebRTC
 import ReplayKit
 
-internal enum BroadcastConstants {
-    static let bufferMaxLength = 10240
-    static let contentLength = "Content-Length"
-    static let bufferWidth = "Buffer-Width"
-    static let bufferHeight = "Buffer-Height"
-    static let bufferOrientation = "Buffer-Orientation"
-}
-
 actor SampleUploader {
     
     private static var imageContext = CIContext(options: nil)
