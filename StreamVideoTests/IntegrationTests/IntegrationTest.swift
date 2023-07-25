@@ -31,6 +31,10 @@ class IntegrationTest: XCTestCase {
             tokenProvider: { _ in }
         )
     }
+    
+    public func refreshStreamVideoProviderKey() {
+        StreamVideoProviderKey.currentValue = client
+    }
 
     public override func setUp() async throws {
     #if compiler(<5.8)
@@ -42,12 +46,15 @@ class IntegrationTest: XCTestCase {
     }
 
     // TODO: extract code between these two assertNext methods
-    public func assertNext<Output: Sendable>(_ s: AsyncStream<Output>, _ assertion: @Sendable @escaping (Output) -> Bool) async -> Void {
+    public func assertNext<Output: Sendable>(
+        _ s: AsyncStream<Output>,
+        timeout seconds: TimeInterval = 1,
+        _ assertion: @Sendable @escaping (Output) -> Bool
+    ) async -> Void {
         let expectation = expectation(description: "NextValue")
         expectation.assertForOverFulfill = false
 
         Task {
-            expectation.fulfill()
             for await v in s {
                 if assertion(v) {
                     expectation.fulfill()
@@ -56,11 +63,12 @@ class IntegrationTest: XCTestCase {
             }
         }
         
-        await fulfillment(of: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: seconds)
     }
 
     public func assertNext<Output>(
         _ p: some Publisher<Output, Never>,
+        timeout seconds: TimeInterval = 1,
         _ assertion: @escaping (Output) -> Bool,
         file: StaticString = #file,
         line: UInt = #line
@@ -79,7 +87,7 @@ class IntegrationTest: XCTestCase {
             }
         }.store(in: &bag)
 
-        await fulfillment(of: [expectation], timeout: 1)
+        await fulfillment(of: [expectation], timeout: seconds)
     }
     
     private func fulfillment(

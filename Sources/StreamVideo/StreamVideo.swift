@@ -170,7 +170,7 @@ public class StreamVideo: ObservableObject {
     }
     
     /// Creates a call with the provided call id, type and members.
-    /// This doesn't method create the call on the backend, for that you need to call `join` or `getOrCreateCall`.
+    /// This method doesn't create the call on the backend, for that you need to call `join` or `getOrCreateCall`.
     /// - Parameters:
     ///  - callType: the type of the call.
     ///  - callId: the id of the all.
