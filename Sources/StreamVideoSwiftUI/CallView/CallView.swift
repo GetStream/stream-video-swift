@@ -45,20 +45,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     viewFactory.makeCallControlsView(viewModel: viewModel)
                         .opacity(viewModel.hideUIElements ? 0 : 1)
                 }
-                
-                VStack {
-                    Spacer()
-                    if let event = viewModel.participantEvent {
-                        Text("\(event.user) \(event.action.display) the call.")
-                            .padding(8)
-                            .background(Color(UIColor.systemBackground))
-                            .foregroundColor(colors.text)
-                            .modifier(ShadowViewModifier())
-                            .padding()
-                            .accessibility(identifier: "participantEventLabel")
-                    }
-                }
-                                
+
                 VStack(alignment: .trailing, spacing: padding) {
                     viewFactory.makeCallTopView(viewModel: viewModel)
 
@@ -80,7 +67,21 @@ public struct CallView<Factory: ViewFactory>: View {
                 }
                 .padding(.top, 4)
                 .opacity(viewModel.hideUIElements ? 0 : 1)
-                
+
+                VStack {
+                    if let event = viewModel.participantEvent {
+                        Text("\(event.user) \(event.action.display) the call.")
+                            .padding(8)
+                            .background(Color(UIColor.systemBackground))
+                            .foregroundColor(colors.text)
+                            .modifier(ShadowViewModifier())
+                            .padding()
+                            .accessibility(identifier: "participantEventLabel")
+                    }
+
+                    Spacer()
+                }
+
                 if viewModel.participantsShown {
                     viewFactory.makeParticipantsListView(
                         viewModel: viewModel,
