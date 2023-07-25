@@ -2,7 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-import ReplayKit
+@preconcurrency import ReplayKit
 
 open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
     
@@ -57,7 +57,9 @@ open class StreamBroadcastSampleHandler: RPBroadcastSampleHandler {
     override public func processSampleBuffer(_ sampleBuffer: CMSampleBuffer, with sampleBufferType: RPSampleBufferType) {
         switch sampleBufferType {
         case RPSampleBufferType.video:
-            uploader?.send(sample: sampleBuffer)
+            Task {
+                await uploader?.send(sample: sampleBuffer)
+            }
         default:
             break
         }

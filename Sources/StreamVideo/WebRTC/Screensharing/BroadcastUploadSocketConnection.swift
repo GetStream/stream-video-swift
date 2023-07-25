@@ -180,8 +180,6 @@ private extension BroadcastUploadSocketConnection {
     }
     
     func notifyDidClose(error: Error?) {
-        if didClose != nil {
-            didClose?(error)
-        }
+        didClose?(error)
     }
 }
