@@ -29,7 +29,24 @@ class TokenGenerator {
     
     static let shared = TokenGenerator()
     
-    func fetchToken(for userId: String, expiration tokenDurationInMinutes: Double = 0) -> UserToken? {
+    var retries = 0
+    
+    func fetchToken(for userId: String, expiration tokenDurationInSeconds: Int = 0) -> UserToken? {
+        #if STREAM_E2E_TESTS
+        if ProcessInfo.processInfo.arguments.contains("INVALIDATE_JWT") {
+            if retries == 0 {
+                retries += 1
+                let expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
+                    ".eyJ1c2VyX2lkIjoibWFydGluIiwiZXhwIjoxNjkxMDc0MDgyfQ.u8JJBJSMa8yU93iRRid9FNblGb2yR6JJODZKq7PbihM"
+                return UserToken(rawValue: expiredToken)
+            }
+        }
+        
+        if ProcessInfo.processInfo.arguments.contains("BREAK_JWT") {
+            return UserToken(rawValue: "")
+        }
+        #endif
+        
         let secret = ProcessInfo.processInfo.environment["STREAM_VIDEO_SECRET"]
         guard let secret = secret else { return nil }
         
@@ -38,7 +55,7 @@ class TokenGenerator {
         guard let headerJSONData = try? JSONEncoder().encode(Header()) else { return nil }
         let headerBase64String = headerJSONData.urlSafeBase64EncodedString()
         
-        let timeInterval = TimeInterval(tokenDurationInMinutes * 60)
+        let timeInterval = TimeInterval(tokenDurationInSeconds)
         let expirationDate = Date().addingTimeInterval(timeInterval)
         let expiration = Int(expirationDate.timeIntervalSince1970)
         

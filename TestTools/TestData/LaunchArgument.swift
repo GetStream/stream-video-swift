@@ -5,10 +5,15 @@
 import Foundation
 import XCTest
 
+public enum EnvironmentVariable: String {
+    case jwtExpiration = "JWT_EXPIRATION"
+    case streamVideoSecret = "STREAM_VIDEO_SECRET"
+}
+
 public enum LaunchArgument: String {
-    case streamTests = "STREAM_TESTS"
-    case streamE2ETests = "STREAM_E2E_TESTS"
-    case streamSnapshotTests = "STREAM_SNAPSHOT_TESTS"
+    case mockJwt = "MOCK_JWT"
+    case invalidateJwt = "INVALIDATE_JWT"
+    case breakJwt = "BREAK_JWT"
 }
 
 public extension ProcessInfo {
@@ -20,5 +25,11 @@ public extension ProcessInfo {
 public extension XCUIApplication {
     func setLaunchArguments(_ args: LaunchArgument...) {
         launchArguments.append(contentsOf: args.map { $0.rawValue })
+    }
+    
+    func setEnvironmentVariables(_ envVars: [EnvironmentVariable: String]) {
+        envVars.forEach { envVar in
+            launchEnvironment[envVar.key.rawValue] = envVar.value
+        }
     }
 }

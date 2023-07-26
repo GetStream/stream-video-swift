@@ -5,14 +5,15 @@
 import XCTest
 
 let app = XCUIApplication()
+var userRobot = UserRobot()
 
 class StreamTestCase: XCTestCase {
     
     let deviceRobot = DeviceRobot(app)
-    var userRobot = UserRobot()
     var participantRobot = ParticipantRobot()
     var sinatra = Sinatra()
-    var recordVideo = true
+    var recordVideo = false
+    var launchApp = true
     let callId = randomCallId
     let allViews: [UserRobot.View] = [.grid, .fullscreen, .spotlight]
 
@@ -24,7 +25,9 @@ class StreamTestCase: XCTestCase {
         alertHandler()
         ipadSetup()
         startVideo()
-        app.launch()
+        if launchApp {
+            app.launch()
+        }
     }
 
     override func tearDownWithError() throws {
@@ -49,7 +52,8 @@ extension StreamTestCase {
 extension StreamTestCase {
     
     private func setLaunchArguments() {
-        app.setLaunchArguments(.streamE2ETests)
+        let secret = ProcessInfo.processInfo.environment[EnvironmentVariable.streamVideoSecret.rawValue] ?? ""
+        app.setEnvironmentVariables([.streamVideoSecret: secret])
     }
 
     private func attachElementTree() {
