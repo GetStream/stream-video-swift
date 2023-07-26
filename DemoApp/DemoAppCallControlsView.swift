@@ -7,7 +7,7 @@ import StreamVideoSwiftUI
 import SwiftUI
 import ReplayKit
 
-struct CallControlsView_iPad: View {
+struct DemoAppCallControlsView: View {
     
     @Injected(\.streamVideo) var streamVideo
         

@@ -326,7 +326,7 @@
 		848A805C290A808C00F3079B /* StreamVideoSwiftUI.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		848A805D290A808E00F3079B /* StreamVideoUIKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; };
 		848A805E290A808E00F3079B /* StreamVideoUIKit.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73828287C146D00A363F4 /* StreamVideoUIKit.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
-		848C469D2A6A9A3D00E5AC09 /* CallControlsView_iPad.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848C469C2A6A9A3D00E5AC09 /* CallControlsView_iPad.swift */; };
+		848C469D2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848C469C2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift */; };
 		848C46A42A6ABF7E00E5AC09 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848C46A32A6ABF7E00E5AC09 /* ReplayKit.framework */; };
 		848C46A72A6ABF7E00E5AC09 /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848C46A62A6ABF7E00E5AC09 /* SampleHandler.swift */; };
 		848C46AB2A6ABF7E00E5AC09 /* ScreenSharing.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -1011,7 +1011,7 @@
 		8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturing.swift; sourceTree = "<group>"; };
 		848A73BF2926314F0089AA6E /* MinimizedCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MinimizedCallView.swift; sourceTree = "<group>"; };
 		848A73C129269E7D0089AA6E /* CornerDragableView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerDragableView.swift; sourceTree = "<group>"; };
-		848C469C2A6A9A3D00E5AC09 /* CallControlsView_iPad.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView_iPad.swift; sourceTree = "<group>"; };
+		848C469C2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAppCallControlsView.swift; sourceTree = "<group>"; };
 		848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = ScreenSharing.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		848C46A32A6ABF7E00E5AC09 /* ReplayKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ReplayKit.framework; path = System/Library/Frameworks/ReplayKit.framework; sourceTree = SDKROOT; };
 		848C46A62A6ABF7E00E5AC09 /* SampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
@@ -1709,7 +1709,7 @@
 				847B47B02A23EE44000714CE /* CustomWaitingUserView.swift */,
 				847B47B22A23F8C6000714CE /* ShareButtonView.swift */,
 				847B47AE2A233AE2000714CE /* DemoAppViewFactory.swift */,
-				848C469C2A6A9A3D00E5AC09 /* CallControlsView_iPad.swift */,
+				848C469C2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift */,
 				847B47B42A249E7E000714CE /* Examples.swift */,
 				847B47B62A260CF0000714CE /* CustomCallView.swift */,
 				84D6493B29E7F5D2002CA428 /* CallsView.swift */,
@@ -3067,7 +3067,7 @@
 			files = (
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
 				847B47B32A23F8C6000714CE /* ShareButtonView.swift in Sources */,
-				848C469D2A6A9A3D00E5AC09 /* CallControlsView_iPad.swift in Sources */,
+				848C469D2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */,
 				403BE1012A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift in Sources */,

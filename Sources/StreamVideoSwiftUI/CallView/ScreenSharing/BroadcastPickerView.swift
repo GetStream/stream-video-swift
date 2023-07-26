@@ -5,18 +5,23 @@
 import SwiftUI
 import ReplayKit
 
-struct BroadcastPickerView: UIViewRepresentable {
+public struct BroadcastPickerView: UIViewRepresentable {
     
     let preferredExtension: String
-    var size: CGFloat = 30
+    var size: CGFloat
     
-    func makeUIView(context: Context) -> some UIView {
+    public init(preferredExtension: String, size: CGFloat = 30) {
+        self.preferredExtension = preferredExtension
+        self.size = size
+    }
+    
+    public func makeUIView(context: Context) -> some UIView {
         let view = RPSystemBroadcastPickerView(frame: .init(x: 0, y: 0, width: size, height: size))
         view.preferredExtension = preferredExtension
         view.showsMicrophoneButton = false
         return view
     }
     
-    func updateUIView(_ uiView: UIViewType, context: Context) {}
+    public func updateUIView(_ uiView: UIViewType, context: Context) {}
     
 }

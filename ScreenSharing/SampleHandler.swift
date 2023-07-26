@@ -1,8 +1,5 @@
 //
-//  SampleHandler.swift
-//  ScreenSharing
-//
-//  Created by Martin Mitrevski on 21.7.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import ReplayKit

@@ -16,11 +16,10 @@ class DemoAppViewFactory: ViewFactory {
     
     @ViewBuilder
     func makeCallControlsView(viewModel: CallViewModel) -> some View {
-//        if UIDevice.current.userInterfaceIdiom == .pad {
-//            CallControlsView_iPad(viewModel: viewModel)
-//        } else {
-//            DefaultViewFactory.shared.makeCallView(viewModel: viewModel)
-//        }
-        CallControlsView_iPad(viewModel: viewModel)
+#if targetEnvironment(simulator)
+        DefaultViewFactory.shared.makeCallView(viewModel: viewModel)
+#else
+        DemoAppCallControlsView(viewModel: viewModel)
+#endif
     }
 }
