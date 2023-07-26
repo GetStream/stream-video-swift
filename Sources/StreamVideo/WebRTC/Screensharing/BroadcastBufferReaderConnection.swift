@@ -5,7 +5,7 @@
 import Foundation
 import Darwin
 
-class BroadcastBufferReaderConnection: NSObject {
+final class BroadcastBufferReaderConnection: NSObject {
     private let streamDelegate: StreamDelegate
     
     private let filePath: String

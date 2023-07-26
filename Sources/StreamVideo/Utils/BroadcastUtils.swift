@@ -4,7 +4,7 @@
 
 import Foundation
 
-class BroadcastUtils {
+enum BroadcastUtils {
     
     static func adjust(width: Int32, height: Int32, size: Int32) -> (width: Int32, height: Int32) {
         let dimensions = aspectFit(width: width, height: height, size: size)

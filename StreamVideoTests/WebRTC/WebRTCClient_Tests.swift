@@ -629,14 +629,14 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     }
     
     func test_webRTCClient_screensharingBroadcast() async throws {
-        try await test_webRTCClient_screensharing(type: .broadcast)
+        try await assert_webRTCClient_screensharing(type: .broadcast)
     }
     
     func test_webRTCClient_screensharingInApp() async throws {
-        try await test_webRTCClient_screensharing(type: .inApp)
+        try await assert_webRTCClient_screensharing(type: .inApp)
     }
     
-    func test_webRTCClient_screensharing(type: ScreensharingType) async throws {
+    func assert_webRTCClient_screensharing(type: ScreensharingType) async throws {
         // Given
         let httpClient = HTTPClient_Mock()
         let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()

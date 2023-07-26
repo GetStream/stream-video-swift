@@ -15,7 +15,7 @@ actor BroadcastBufferUploader {
     
     private var dataToSend: Data?
     private var byteIndex = 0
-    private let compressionQuality: Float = 0.6
+    private let compressionQuality: Float = 0.7
         
     init(connection: BroadcastBufferUploadConnection) {
         self.connection = connection

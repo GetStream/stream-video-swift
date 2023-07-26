@@ -122,16 +122,13 @@ private class Message {
     }
 }
 
-class BroadcastBufferReader: NSObject {
+final class BroadcastBufferReader: NSObject {
     private var readLength = 0
     
-    private var _connection: BroadcastBufferReaderConnection?
     private var connection: BroadcastBufferReaderConnection? {
-        get { _connection }
-        set {
-            if _connection != newValue {
-                _connection?.close()
-                _connection = newValue
+        didSet {
+            if connection != oldValue {
+                oldValue?.close()
             }
         }
     }

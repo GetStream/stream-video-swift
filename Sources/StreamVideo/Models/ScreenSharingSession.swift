@@ -11,6 +11,8 @@ public struct ScreenSharingSession {
 }
 
 public enum ScreensharingType: Sendable {
+    /// Screensharing only the app window.
     case inApp
+    /// Screensharing even when the app is in background.
     case broadcast
 }
