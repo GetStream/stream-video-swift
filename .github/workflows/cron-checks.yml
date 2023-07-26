@@ -67,16 +67,16 @@ jobs:
     - name: Allure TestOps Launch Removal
       if: cancelled()
       run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
-    # - uses: 8398a7/action-slack@v3
-    #   with:
-    #     status: ${{ job.status }}
-    #     text: "You shall not pass!"
-    #     job_name: "${{ github.workflow }}: ${{ github.job }}"
-    #     fields: message,commit,author,action,workflow,job,took
-    #   env:
-    #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-    #     MATRIX_CONTEXT: ${{ toJson(matrix) }}
-    #   if: failure() && github.event_name == 'schedule'
+    - uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "You shall not pass!"
+        job_name: "${{ github.workflow }}: ${{ github.job }}"
+        fields: message,commit,author,action,workflow,job,took
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      if: failure() && github.event_name == 'schedule'
     - name: Parse xcresult
       if: failure()
       run: xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
