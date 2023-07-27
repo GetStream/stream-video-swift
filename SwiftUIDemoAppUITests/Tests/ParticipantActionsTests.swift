@@ -18,9 +18,15 @@ final class ParticipantActionsTests: StreamTestCase {
         AND("participant joins the call and turns on mic") {
             participantRobot.joinCall(callId, options: [.withMicrophone])
         }
+        AND("participant event labels appears and disappears") {
+            userRobot
+                .waitForAppearanceOfParticipantEventLabel()
+                .waitForDisappearanceOfParticipantEventLabel()
+        }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .setView(mode: view)
             }
             THEN("user observes that participant's microphone is enabled") {
                 userRobot.assertParticipantMicrophoneIsEnabled()
@@ -40,9 +46,15 @@ final class ParticipantActionsTests: StreamTestCase {
         AND("participant joins the call and turns off mic") {
             participantRobot.joinCall(callId, options: [.withCamera])
         }
+        AND("participant event labels appears and disappears") {
+            userRobot
+                .waitForAppearanceOfParticipantEventLabel()
+                .waitForDisappearanceOfParticipantEventLabel()
+        }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .setView(mode: view)
             }
             THEN("user observes that participant's microphone is disabled") {
                 userRobot.assertParticipantMicrophoneIsDisabled()
@@ -62,9 +74,15 @@ final class ParticipantActionsTests: StreamTestCase {
         AND("participant joins the call and turns camera on") {
             participantRobot.joinCall(callId, options: [.withCamera, .withMicrophone])
         }
+        AND("participant event labels appears and disappears") {
+            userRobot
+                .waitForAppearanceOfParticipantEventLabel()
+                .waitForDisappearanceOfParticipantEventLabel()
+        }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .setView(mode: view)
             }
             THEN("user observes that participant's camera is enabled") {
                 userRobot.assertParticipantCameraIsEnabled()
@@ -84,9 +102,15 @@ final class ParticipantActionsTests: StreamTestCase {
         AND("participant joins the call and turns camera off") {
             participantRobot.joinCall(callId, options: [.withMicrophone])
         }
+        AND("participant event labels appears and disappears") {
+            userRobot
+                .waitForAppearanceOfParticipantEventLabel()
+                .waitForDisappearanceOfParticipantEventLabel()
+        }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .setView(mode: view)
             }
             THEN("user observes that participant's camera is disabled") {
                 userRobot.assertParticipantCameraIsDisabled()
@@ -106,9 +130,15 @@ final class ParticipantActionsTests: StreamTestCase {
         AND("participant joins the call") {
             participantRobot.joinCall(callId, options: [.withCamera])
         }
+        AND("participant event labels appears and disappears") {
+            userRobot
+                .waitForAppearanceOfParticipantEventLabel()
+                .waitForDisappearanceOfParticipantEventLabel()
+        }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .setView(mode: view)
             }
             THEN("user observers participant's connection indicator icon") {
                 userRobot.assertConnectionQualityIndicator()
@@ -129,9 +159,15 @@ final class ParticipantActionsTests: StreamTestCase {
                 .setCallRecordingDuration(35)
                 .joinCall(callId, actions: [.recordCall])
         }
+        AND("participant event labels appears and disappears") {
+            userRobot
+                .waitForAppearanceOfParticipantEventLabel()
+                .waitForDisappearanceOfParticipantEventLabel()
+        }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .setView(mode: view)
             }
             THEN("user observes that participant started recording the screen") {
                 userRobot.assertParticipantStartRecordingCall()
@@ -139,7 +175,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
+                userRobot
+                    .waitForAppearanceOfParticipantEventLabel()
+                    .waitForDisappearanceOfParticipantEventLabel()
+                    .setView(mode: view)
             }
             THEN("user observes that participant stopped recording the screen") {
                 userRobot.assertParticipantStopRecordingCall()
