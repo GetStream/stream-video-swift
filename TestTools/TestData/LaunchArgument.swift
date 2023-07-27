@@ -7,6 +7,8 @@ import XCTest
 
 public enum LaunchArgument: String {
     case streamTests = "STREAM_TESTS"
+    case streamE2ETests = "STREAM_E2E_TESTS"
+    case streamSnapshotTests = "STREAM_SNAPSHOT_TESTS"
 }
 
 public extension ProcessInfo {

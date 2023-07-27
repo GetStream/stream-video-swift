@@ -49,7 +49,7 @@ extension StreamTestCase {
 extension StreamTestCase {
     
     private func setLaunchArguments() {
-        app.setLaunchArguments(.streamTests)
+        app.setLaunchArguments(.streamE2ETests)
     }
 
     private func attachElementTree() {

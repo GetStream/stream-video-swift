@@ -77,6 +77,9 @@ public struct CallView<Factory: ViewFactory>: View {
                             .modifier(ShadowViewModifier())
                             .padding()
                             .accessibility(identifier: "participantEventLabel")
+                        #if STREAM_E2E_TESTS
+                            .allowsHitTesting(false)
+                        #endif
                     }
 
                     Spacer()

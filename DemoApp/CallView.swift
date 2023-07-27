@@ -64,7 +64,7 @@ struct CallHomeView: View {
     @ObservedObject var viewModel: CallViewModel
     
     var body: some View {
-        if ProcessInfo.processInfo.arguments.contains("STREAM_TESTS") {
+        if ProcessInfo.processInfo.arguments.contains("STREAM_E2E_TESTS") {
             HomeView(viewModel: viewModel)
         } else {
             StreamCallingView(viewModel: viewModel)
