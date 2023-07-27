@@ -169,7 +169,7 @@ var body: some Scene {
             if callCreated {
                 ZStack {
                     ParticipantsView(participants: call.state.remoteParticipants, onChangeTrackVisibility: changeTrackVisibility(_:isVisible:))
-                    FloatingParticipantView(participant: call.state.me, onChangeTrackVisibility: changeTrackVisibility(_:isVisible:))
+                    FloatingParticipantView(participant: call.state.me)
                 }
             } else {
                 Text("loading...")
@@ -249,7 +249,6 @@ struct FloatingParticipantView: View {
 
     var participant: CallParticipant?
     var size: CGSize = .init(width: 120, height: 120)
-    var onChangeTrackVisibility: (CallParticipant?, Bool) -> Void
 
     var body: some View {
         if let participant = participant {
@@ -260,8 +259,6 @@ struct FloatingParticipantView: View {
                     VideoRendererView(id: participant.id, size: size) { videoRenderer in
                         videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
                     }
-                    .onAppear { onChangeTrackVisibility(participant, true) }
-                    .onDisappear{ onChangeTrackVisibility(participant, false) }
                     .frame(width: size.width, height: size.height)
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                 }
@@ -280,7 +277,7 @@ Now when you run the app, you'll see your local video in a floating video elemen
 
 Let's review the changes we made.
 
-We added the `changeTrackVisibility` in our app and we propagate its call to the other subviews we create. When this method is being called we are asking the Call object to make the participant's track visible or not visible. This is important when the view goes off-screen (e.g. when the user backgrounds the app) to reduce energy and data consumption.
+We added the `changeTrackVisibility` in our app and we propagate its call to the other subviews we create. When this method is being called we are asking the Call object to make the participant's track visible or not visible. This is important when the view goes off-screen (e.g. while scrolling through participants during a call) to reduce energy and data consumption.
 
 ```swift
 VideoCallParticipantView(
@@ -300,7 +297,7 @@ It only displays the video and doesn't add any other UI elements. The video is l
 
 
 ```swift
-FloatingParticipantView(participant: call.state.me, onChangeTrackVisibility: changeTrackVisibility(_:isVisible:))
+FloatingParticipantView(participant: call.state.me)
 ```
 
 `FloatingParticipantVideo` renders a display of your own video. It uses `VideoRendererView` which is the componet used by `VideoCallParticipantView` to simply display the video without adding any other UI elements.
