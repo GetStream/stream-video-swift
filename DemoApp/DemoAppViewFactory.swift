@@ -17,7 +17,7 @@ class DemoAppViewFactory: ViewFactory {
     @ViewBuilder
     func makeCallControlsView(viewModel: CallViewModel) -> some View {
 #if targetEnvironment(simulator)
-        DefaultViewFactory.shared.makeCallView(viewModel: viewModel)
+        DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
 #else
         DemoAppCallControlsView(viewModel: viewModel)
 #endif

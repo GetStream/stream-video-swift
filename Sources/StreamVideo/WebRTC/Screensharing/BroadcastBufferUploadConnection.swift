@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-class BroadcastBufferUploadConnection: NSObject {
+class BroadcastBufferUploadConnection: BroadcastBufferConnection {
     var onOpen: (() -> Void)?
     var onClose: ((Error?) -> Void)?
     var hasSpaceAvailable: (() -> Void)?
@@ -13,13 +13,7 @@ class BroadcastBufferUploadConnection: NSObject {
     private let filePath: String
     private var socketHandle: Int32 = -1
     private var address: sockaddr_un?
-    
-    private var inputStream: InputStream?
-    private var outputStream: OutputStream?
-    
-    private var streamQueue: DispatchQueue?
-    private var shouldKeepRunning = false
-    
+        
     init?(filePath path: String) {
         filePath = path
         socketHandle = Darwin.socket(AF_UNIX, SOCK_STREAM, 0)
@@ -36,38 +30,17 @@ class BroadcastBufferUploadConnection: NSObject {
             return false
         }
         
-        setupStreams()
+        setupStreams(
+            clientSocket: socketHandle,
+            delegate: self,
+            handleOutput: true
+        )
         openStreams()
         
         return true
     }
     
-    func close() {
-        unscheduleStreams()
-        closeStreams()
-    }
-    
-    func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
-        return outputStream?.write(buffer, maxLength: length) ?? 0
-    }
-    
     //MARK: - private
-    
-    private func openStreams() {
-        inputStream?.open()
-        outputStream?.open()
-    }
-    
-    private func closeStreams() {
-        inputStream?.delegate = nil
-        outputStream?.delegate = nil
-        
-        inputStream?.close()
-        outputStream?.close()
-        
-        inputStream = nil
-        outputStream = nil
-    }
     
     private func setupAddress() -> Bool {
         var addr = sockaddr_un()
@@ -98,56 +71,6 @@ class BroadcastBufferUploadConnection: NSObject {
         }
         
         return status == noErr
-    }
-    
-    private func setupStreams() {
-        var readStream: Unmanaged<CFReadStream>?
-        var writeStream: Unmanaged<CFWriteStream>?
-        
-        CFStreamCreatePairWithSocket(kCFAllocatorDefault, socketHandle, &readStream, &writeStream)
-        
-        inputStream = readStream?.takeRetainedValue()
-        inputStream?.delegate = self
-        inputStream?.setProperty(
-            kCFBooleanTrue,
-            forKey: Stream.PropertyKey(kCFStreamPropertyShouldCloseNativeSocket as String)
-        )
-        
-        outputStream = writeStream?.takeRetainedValue()
-        outputStream?.delegate = self
-        outputStream?.setProperty(
-            kCFBooleanTrue,
-            forKey: Stream.PropertyKey(kCFStreamPropertyShouldCloseNativeSocket as String)
-        )
-        
-        scheduleStreams()
-    }
-    
-    private func scheduleStreams() {
-        shouldKeepRunning = true
-        
-        streamQueue = DispatchQueue.global(qos: .userInitiated)
-        streamQueue?.async { [weak self] in
-            self?.inputStream?.schedule(in: .current, forMode: .common)
-            self?.outputStream?.schedule(in: .current, forMode: .common)
-            RunLoop.current.run()
-            
-            var isRunning = false
-            
-            repeat {
-                isRunning = self?.shouldKeepRunning ?? false
-                    && RunLoop.current.run(mode: .default, before: .distantFuture)
-            } while (isRunning)
-        }
-    }
-    
-    private func unscheduleStreams() {
-        streamQueue?.sync { [weak self] in
-            self?.inputStream?.remove(from: .current, forMode: .common)
-            self?.outputStream?.remove(from: .current, forMode: .common)
-        }
-        
-        shouldKeepRunning = false
     }
 }
 

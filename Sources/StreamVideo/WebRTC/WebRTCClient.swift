@@ -657,21 +657,9 @@ class WebRTCClient: NSObject {
     private func loadTracks() -> [Stream_Video_Sfu_Models_TrackInfo] {
         var tracks = [Stream_Video_Sfu_Models_TrackInfo]()
         if callSettings.videoOn {
-            var layers = [Stream_Video_Sfu_Models_VideoLayer]()
-            for codec in videoOptions.supportedCodecs {
-                var layer = Stream_Video_Sfu_Models_VideoLayer()
-                layer.bitrate = UInt32(codec.maxBitrate)
-                layer.rid = codec.quality
-                var dimension = Stream_Video_Sfu_Models_VideoDimension()
-                dimension.height = UInt32(codec.dimensions.height)
-                dimension.width = UInt32(codec.dimensions.width)
-                layer.videoDimension = dimension
-                layer.fps = 30
-                layers.append(layer)
-            }
             var videoTrack = Stream_Video_Sfu_Models_TrackInfo()
             videoTrack.trackID = localVideoTrack?.trackId ?? ""
-            videoTrack.layers = layers
+            videoTrack.layers = loadLayers()
             videoTrack.trackType = .video
             tracks.append(videoTrack)
         }
@@ -682,25 +670,30 @@ class WebRTCClient: NSObject {
             tracks.append(audioTrack)
         }
         if let localScreenshareTrack, localScreenshareTrack.isEnabled {
-            var layers = [Stream_Video_Sfu_Models_VideoLayer]()
-            for codec in videoOptions.supportedCodecs {
-                var layer = Stream_Video_Sfu_Models_VideoLayer()
-                layer.bitrate = UInt32(codec.maxBitrate)
-                layer.rid = codec.quality
-                var dimension = Stream_Video_Sfu_Models_VideoDimension()
-                dimension.height = UInt32(codec.dimensions.height)
-                dimension.width = UInt32(codec.dimensions.width)
-                layer.videoDimension = dimension
-                layer.fps = 30
-                layers.append(layer)
-            }
             var screenshareTrack = Stream_Video_Sfu_Models_TrackInfo()
             screenshareTrack.trackID = localScreenshareTrack.trackId
             screenshareTrack.trackType = .screenShare
-            screenshareTrack.layers = layers
+            screenshareTrack.layers = loadLayers(fps: 15)
             tracks.append(screenshareTrack)
         }
         return tracks
+    }
+    
+    private func loadLayers(fps: UInt32 = 30) -> [Stream_Video_Sfu_Models_VideoLayer] {
+        var layers = [Stream_Video_Sfu_Models_VideoLayer]()
+        for codec in videoOptions.supportedCodecs {
+            var layer = Stream_Video_Sfu_Models_VideoLayer()
+            layer.bitrate = UInt32(codec.maxBitrate)
+            layer.rid = codec.quality
+            var dimension = Stream_Video_Sfu_Models_VideoDimension()
+            dimension.height = UInt32(codec.dimensions.height)
+            dimension.width = UInt32(codec.dimensions.width)
+            layer.videoDimension = dimension
+            layer.fps = fps
+            layers.append(layer)
+        }
+        
+        return layers
     }
     
     private func makeAudioTrack() async -> RTCAudioTrack {

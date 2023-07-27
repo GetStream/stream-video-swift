@@ -94,9 +94,8 @@ actor BroadcastBufferUploader {
         
         CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
         
-        let scaleFactor = 1.0
-        let width = CVPixelBufferGetWidth(imageBuffer)/Int(scaleFactor)
-        let height = CVPixelBufferGetHeight(imageBuffer)/Int(scaleFactor)
+        let width = CVPixelBufferGetWidth(imageBuffer)
+        let height = CVPixelBufferGetHeight(imageBuffer)
         
         let orientation = CMGetAttachment(
             buffer,
@@ -104,8 +103,7 @@ actor BroadcastBufferUploader {
             attachmentModeOut: nil
         )?.uintValue ?? 0
         
-        let scaleTransform = CGAffineTransform(scaleX: CGFloat(1.0/scaleFactor), y: CGFloat(1.0/scaleFactor))
-        let bufferData = self.jpegData(from: imageBuffer, scale: scaleTransform)
+        let bufferData = self.jpegData(from: imageBuffer)
         
         CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
         
@@ -125,8 +123,8 @@ actor BroadcastBufferUploader {
         return serializedMessage
     }
     
-    func jpegData(from buffer: CVPixelBuffer, scale scaleTransform: CGAffineTransform) -> Data? {
-        let image = CIImage(cvPixelBuffer: buffer).transformed(by: scaleTransform)
+    func jpegData(from buffer: CVPixelBuffer) -> Data? {
+        let image = CIImage(cvPixelBuffer: buffer)
         
         guard let colorSpace = image.colorSpace else {
             return nil
