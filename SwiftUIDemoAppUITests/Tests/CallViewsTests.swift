@@ -35,11 +35,8 @@ final class CallViewsTests: StreamTestCase {
                 .setUserCount(participants)
                 .joinCall(callId, options: [.withCamera])
         }
-        AND("participant event label disappears & user enables grid view") {
-            userRobot
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel()
-                .setView(mode: .grid)
+        AND("user enables grid view") {
+            userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
@@ -82,10 +79,7 @@ final class CallViewsTests: StreamTestCase {
                 .joinCall(callId, options: [.withCamera])
         }
         AND("user enables grid view") {
-            userRobot
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel()
-                .setView(mode: .grid)
+            userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
@@ -130,10 +124,7 @@ final class CallViewsTests: StreamTestCase {
                 .joinCall(callId, options: [.withCamera])
         }
         AND("user enables grid view") {
-            userRobot
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel()
-                .setView(mode: .grid)
+            userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
@@ -173,10 +164,7 @@ final class CallViewsTests: StreamTestCase {
                 .joinCall(callId)
         }
         WHEN("user enables grid view") {
-            userRobot
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel()
-                .setView(mode: .grid)
+            userRobot.setView(mode: .grid)
         }
         AND("user minimizes video view") {
             userRobot
@@ -250,10 +238,7 @@ final class CallViewsTests: StreamTestCase {
                 .joinCall(callId)
         }
         WHEN("user enables grid view") {
-            userRobot
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel()
-                .setView(mode: .grid)
+            userRobot.setView(mode: .grid)
         }
         
         let initialCoordinates = CallPage.cornerDragableView.centralCoordinates

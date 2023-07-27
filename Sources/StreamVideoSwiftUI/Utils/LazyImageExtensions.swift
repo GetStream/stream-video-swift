@@ -37,7 +37,7 @@ struct StreamLazyImage: View {
     }
     
     public var body: some View {
-        #if STREAM_TESTS
+        #if STREAM_SNAPSHOT_TESTS
         if let imageURL = imageURL,
            imageURL.isFileURL,
            let image = UIImage(contentsOfFile: imageURL.path)  {
