@@ -323,10 +323,7 @@ final class CallViewsTests: StreamTestCase {
                 .joinCall(callId)
         }
         WHEN("user enables grid view") {
-            userRobot
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel(UserRobot.defaultTimeout * 1.5)
-                .setView(mode: .grid)
+            userRobot.setView(mode: .grid)
         }
         THEN("user observers the list of participants") {
             userRobot
@@ -357,8 +354,6 @@ final class CallViewsTests: StreamTestCase {
         WHEN("user enables spotlight view") {
             userRobot
                 .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
-                .waitForAppearanceOfParticipantEventLabel()
-                .waitForDisappearanceOfParticipantEventLabel(UserRobot.defaultTimeout * 1.5)
                 .setView(mode: .spotlight)
         }
         THEN("user observers the list of participants") {

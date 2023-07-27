@@ -139,10 +139,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
-                userRobot
-                    .waitForAppearanceOfParticipantEventLabel()
-                    .waitForDisappearanceOfParticipantEventLabel()
-                    .setView(mode: view)
+                userRobot.setView(mode: view)
             }
             THEN("user observes that participant stopped recording the screen") {
                 userRobot.assertParticipantStopRecordingCall()
