@@ -113,18 +113,12 @@ extension CMVideoDimensions {
 extension AVCaptureDevice.Format {
 
     // computes a ClosedRange of supported FPSs for this format
-    func fpsRange() -> ClosedRange<Int>? {
+    func fpsRange() -> ClosedRange<Int> {
         videoSupportedFrameRateRanges
             .map { $0.toRange() }
-            .reduce(into: nil as ClosedRange<Int>?) { result, current in
-                guard let previous = result else {
-                    result = current
-                    return
-                }
-
-                // merge previous element
-                result = merge(range: previous, with: current)
-            }
+            .reduce(into: 0...0) { result, current in
+            result = merge(range: result, with: current)
+        }
     }
 }
 

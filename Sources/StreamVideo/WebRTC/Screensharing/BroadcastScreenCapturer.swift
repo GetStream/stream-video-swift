@@ -43,19 +43,6 @@ class BroadcastScreenCapturer: VideoCapturing {
             return
         }
         
-        let bounds = await UIScreen.main.bounds
-        let width = Int32(bounds.size.width)
-        let height = Int32(bounds.size.height)
-        
-        let targetDimensions = BroadcastUtils.adjust(
-            width: width,
-            height: height,
-            size: max(
-                videoOptions.preferredDimensions.width,
-                videoOptions.preferredDimensions.height
-            )
-        )
-        
         let bufferReader = BroadcastBufferReader()
         
         guard let socketConnection = BroadcastBufferReaderConnection(
@@ -77,12 +64,26 @@ class BroadcastScreenCapturer: VideoCapturing {
                 timeStampNs: timeStampNs
             )
             
+            var bufferDimensions = (
+                width: Int32(CVPixelBufferGetWidth(pixelBuffer)),
+                height: Int32(CVPixelBufferGetHeight(pixelBuffer))
+            )
+            
+            bufferDimensions = BroadcastUtils.adjust(
+                width: bufferDimensions.width,
+                height: bufferDimensions.height,
+                size: max(
+                    videoOptions.preferredDimensions.width,
+                    videoOptions.preferredDimensions.height
+                )
+            )
+            
             self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
             if !adaptedOutputFormat {
                 adaptedOutputFormat = true
                 self.videoSource.adaptOutputFormat(
-                    toWidth: targetDimensions.width,
-                    height: targetDimensions.height,
+                    toWidth: bufferDimensions.width,
+                    height: bufferDimensions.height,
                     fps: 15
                 )
             }

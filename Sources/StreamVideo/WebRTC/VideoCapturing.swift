@@ -27,15 +27,21 @@ extension VideoCapturing {
            let foundFormat = sortedFormats.first(where: { $0.format == preferredFormat }) {
             selectedFormat = foundFormat
         } else {
-            selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= videoOptions.preferredDimensions.area })
+            selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= videoOptions.preferredDimensions.area && $0.format.fpsRange().contains(videoOptions.preferredFps)                
+            })
+            
+            if selectedFormat == nil {
+                selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= videoOptions.preferredDimensions.area })
+            }
         }
 
-        guard let selectedFormat = selectedFormat, let fpsRange = selectedFormat.format.fpsRange() else {
+        guard let selectedFormat = selectedFormat else {
             log.warning("Unable to resolve format")
             return (format: nil, dimensions: nil, fps: 0)
         }
 
         var selectedFps = videoOptions.preferredFps
+        let fpsRange = selectedFormat.format.fpsRange()
 
         if !fpsRange.contains(selectedFps) {
             log.warning("requested fps: \(videoOptions.preferredFps) not available: \(fpsRange) and will be clamped")
