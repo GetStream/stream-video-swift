@@ -355,7 +355,7 @@ class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(participants.last?.hasAudio, true, "Participant should have audio enabled")
 
         try await firstUserCall.muteAllUsers()
-        try await customWait(nanoseconds: 18_000_000_000)
+        try await customWait(nanoseconds: 15_000_000_000)
         
         participants = await firstUserCall.state.participants
         XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should not be muted")

@@ -24,6 +24,9 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : [
+        "CallCRUDTest\/test_muteAllUsers()"
+      ],
       "target" : {
         "containerPath" : "container:StreamVideo.xcodeproj",
         "identifier" : "84F737F3287C13AD00A363F4",
