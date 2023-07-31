@@ -11,6 +11,7 @@ public struct CallTopView: View {
     @Injected(\.images) var images
     
     @ObservedObject var viewModel: CallViewModel
+    @State var sharingPopupDismissed = false
     
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
@@ -55,27 +56,45 @@ public struct CallTopView: View {
         }
         .overlay(
             viewModel.call?.state.isCurrentUserScreensharing == true ?
-            SharingIndicator(viewModel: viewModel)
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
+            .opacity(sharingPopupDismissed ? 0 : 1)
             : nil
         )
     }
+    
 }
 
 struct SharingIndicator: View {
     
     @ObservedObject var viewModel: CallViewModel
+    @Binding var sharingPopupDismissed: Bool
     
     var body: some View {
         HStack {
             Text(L10n.Call.Current.sharing)
+                .font(.headline)
             Divider()
             Button {
                 viewModel.stopScreensharing()
             } label: {
                 Text(L10n.Call.Current.stopSharing)
+                    .font(.headline)
             }
+            Button {
+                sharingPopupDismissed = true
+            } label: {
+                Image(systemName: "xmark")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 14)
+            }
+            .padding(.leading, 4)
+
         }
-        .padding()
+        .padding(.all, 8)
         .modifier(ShadowViewModifier())
     }
     
