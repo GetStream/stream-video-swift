@@ -79,6 +79,7 @@ public struct CallView<Factory: ViewFactory>: View {
                             .accessibility(identifier: "participantEventLabel")
                         #if STREAM_E2E_TESTS
                             .allowsHitTesting(false)
+                            .offset(y: 50)
                         #endif
                     }
 
