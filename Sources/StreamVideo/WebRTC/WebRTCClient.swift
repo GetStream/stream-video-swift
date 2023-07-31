@@ -659,7 +659,7 @@ class WebRTCClient: NSObject {
         if callSettings.videoOn {
             var videoTrack = Stream_Video_Sfu_Models_TrackInfo()
             videoTrack.trackID = localVideoTrack?.trackId ?? ""
-            videoTrack.layers = loadLayers()
+            videoTrack.layers = loadLayers(supportedCodecs: videoOptions.supportedCodecs)
             videoTrack.trackType = .video
             tracks.append(videoTrack)
         }
@@ -673,15 +673,18 @@ class WebRTCClient: NSObject {
             var screenshareTrack = Stream_Video_Sfu_Models_TrackInfo()
             screenshareTrack.trackID = localScreenshareTrack.trackId
             screenshareTrack.trackType = .screenShare
-            screenshareTrack.layers = loadLayers(fps: 15)
+            screenshareTrack.layers = loadLayers(fps: 15, supportedCodecs: [.screenshare])
             tracks.append(screenshareTrack)
         }
         return tracks
     }
     
-    private func loadLayers(fps: UInt32 = 30) -> [Stream_Video_Sfu_Models_VideoLayer] {
+    private func loadLayers(
+        fps: UInt32 = 30,
+        supportedCodecs: [VideoCodec]
+    ) -> [Stream_Video_Sfu_Models_VideoLayer] {
         var layers = [Stream_Video_Sfu_Models_VideoLayer]()
-        for codec in videoOptions.supportedCodecs {
+        for codec in supportedCodecs {
             var layer = Stream_Video_Sfu_Models_VideoLayer()
             layer.bitrate = UInt32(codec.maxBitrate)
             layer.rid = codec.quality

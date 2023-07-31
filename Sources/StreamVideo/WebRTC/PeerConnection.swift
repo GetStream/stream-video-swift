@@ -148,20 +148,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         let transceiverInit = RTCRtpTransceiverInit()
         transceiverInit.direction = direction
         transceiverInit.streamIds = streamIds
-        
-        var encodingParams = [RTCRtpEncodingParameters]()
-        
-        for codec in videoOptions.supportedCodecs {
-            let encodingParam = RTCRtpEncodingParameters()
-            encodingParam.rid = codec.quality
-            encodingParam.maxBitrateBps = (codec.maxBitrate) as NSNumber
-            if let scaleDownFactor = codec.scaleDownFactor {
-                encodingParam.scaleResolutionDownBy = (scaleDownFactor) as NSNumber
-            }
-            encodingParams.append(encodingParam)
-        }
-        
-        transceiverInit.sendEncodings = encodingParams
+        transceiverInit.sendEncodings = encodingParams(for: trackType)
         publishedTracks.append(trackType)
         if trackType == .screenshare {
             if transceiverScreenshare != nil {
@@ -264,6 +251,27 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     // MARK: - private
+    
+    private func encodingParams(for trackType: TrackType) -> [RTCRtpEncodingParameters] {
+        var codecs = videoOptions.supportedCodecs
+        var encodingParams = [RTCRtpEncodingParameters]()
+        if trackType == .screenshare {
+            codecs = [.screenshare]
+        }
+        for codec in codecs {
+            let encodingParam = RTCRtpEncodingParameters()
+            encodingParam.rid = codec.quality
+            encodingParam.maxBitrateBps = (codec.maxBitrate) as NSNumber
+            if let scaleDownFactor = codec.scaleDownFactor {
+                encodingParam.scaleResolutionDownBy = (scaleDownFactor) as NSNumber
+            }
+            if trackType == .screenshare {
+                encodingParam.isActive = true
+            }
+            encodingParams.append(encodingParam)
+        }
+        return encodingParams
+    }
     
     private func setupStatsTimer() {
         if reportStats {

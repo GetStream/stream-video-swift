@@ -65,4 +65,10 @@ extension VideoCodec {
         maxBitrate: 300_000,
         scaleDownFactor: CMVideoDimensions.full.area / CMVideoDimensions.quarter.area
     )
+    
+    static let screenshare = VideoCodec(
+        dimensions: .full,
+        quality: "q",
+        maxBitrate: 1_000_000
+    )
 }
