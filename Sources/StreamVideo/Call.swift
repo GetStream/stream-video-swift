@@ -301,14 +301,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callController.setVideoFilter(videoFilter)
     }
     
+    /// Starts screensharing from the device.
+    /// - Parameter type: The screensharing type (in-app or broadcasting).
     public func startScreensharing(type: ScreensharingType) async throws {
         try await callController.startScreensharing(type: type)
     }
     
+    /// Stops screensharing from the current device.
     public func stopScreensharing() async throws {
         try await callController.stopScreensharing()
     }
     
+    /// Subscribes to video events.
+    /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
@@ -321,6 +326,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
 
+    /// Subscribes to a particular web socket event.
+    /// - Parameter event: the type of the event you are subscribing to.
+    /// - Returns: `AsyncStream` of web socket events from the provided type.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         return AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
