@@ -76,8 +76,16 @@ public struct BroadcastIconView: View {
                 broadcastObserver.broadcastState = .notStarted
             }
         })
+        .disabled(isDisabled)
         .onAppear {
             broadcastObserver.observe()
         }
+    }
+    
+    private var isDisabled: Bool {
+        guard viewModel.call?.state.screenSharingSession != nil else {
+            return false
+        }
+        return viewModel.call?.state.isCurrentUserScreensharing == false
     }
 }
