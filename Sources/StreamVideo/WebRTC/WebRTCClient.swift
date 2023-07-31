@@ -434,6 +434,9 @@ class WebRTCClient: NSObject {
     
     func startScreensharing(type: ScreensharingType) async throws {
         if hasCapability(.screenshare) {
+            if publisher == nil, let configuration = connectOptions?.rtcConfiguration {
+                try await publishLocalTracks(configuration: configuration)
+            }
             if localScreenshareTrack == nil || type != currentScreenhsareType {
                 // Screenshare
                 let screenshareTrack = await makeVideoTrack(screenshareType: type)
@@ -445,13 +448,12 @@ class WebRTCClient: NSObject {
                 )
                 await state.add(screensharingTrack: screenshareTrack, id: sessionID)
                 await assignTracksToParticipants()
-                try await changeScreensharingState(isEnabled: true)
             } else if localScreenshareTrack?.isEnabled == false {
                 localScreenshareTrack?.isEnabled = true
                 await state.add(screensharingTrack: localScreenshareTrack, id: sessionID)
                 await assignTracksToParticipants()
-                try await changeScreensharingState(isEnabled: true)
             }
+            try await changeScreensharingState(isEnabled: true)
         } else {
             throw ClientError.MissingPermissions()
         }
