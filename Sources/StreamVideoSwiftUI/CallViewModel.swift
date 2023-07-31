@@ -159,6 +159,17 @@ open class CallViewModel: ObservableObject {
             } else if pinnedParticipant == nil && participantsLayout == .spotlight {
                 participantsLayout = .grid
             }
+            
+            //TODO: remove
+            if let pinnedParticipant {
+                Task {
+                    try await call?.pinForEveryone(userId: pinnedParticipant.userId, sessionId: pinnedParticipant.sessionId)
+                }
+            } else if let oldValue {
+                Task {
+                    try await call?.unpinForEveryone(userId: oldValue.userId, sessionId: oldValue.sessionId)
+                }
+            }
         }
     }
     

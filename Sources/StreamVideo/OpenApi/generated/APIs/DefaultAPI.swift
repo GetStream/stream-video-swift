@@ -1291,6 +1291,82 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      - returns: RequestBuilder<UpdateUserPermissionsResponse> 
      */
 
+
+    /**
+     Pin
+     
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter pinRequest: (body)  
+     - returns: PinResponse
+     */
+
+    open func videoPin(type: String, id: String, pinRequest: PinRequest) async throws -> PinResponse {
+        var localVariablePath = "/call/{type}/{id}/pin"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "POST",
+            request: pinRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(PinResponse.self, from: $0)
+        }
+    }
+    /**
+     Pin
+     - POST /call/{type}/{id}/pin
+     - Pins a track for all users in the call.  Required permissions: - PinCallTrack 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter pinRequest: (body)  
+     - returns: RequestBuilder<PinResponse> 
+     */
+
+
+    /**
+     Unpin
+     
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter unpinRequest: (body)  
+     - returns: UnpinResponse
+     */
+
+    open func videoUnpin(type: String, id: String, unpinRequest: UnpinRequest) async throws -> UnpinResponse {
+        var localVariablePath = "/call/{type}/{id}/unpin"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "POST",
+            request: unpinRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(UnpinResponse.self, from: $0)
+        }
+    }
+    /**
+     Unpin
+     - POST /call/{type}/{id}/unpin
+     - Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter unpinRequest: (body)  
+     - returns: RequestBuilder<UnpinResponse> 
+     */
+
 }
 
 protocol DefaultAPIEndpoints {
@@ -1390,6 +1466,12 @@ protocol DefaultAPIEndpoints {
 
 
         func updateUserPermissions(type: String, id: String, updateUserPermissionsRequest: UpdateUserPermissionsRequest) async throws -> UpdateUserPermissionsResponse
+
+
+        func videoPin(type: String, id: String, pinRequest: PinRequest) async throws -> PinResponse
+
+
+        func videoUnpin(type: String, id: String, unpinRequest: UnpinRequest) async throws -> UnpinResponse
 
 
 }

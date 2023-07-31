@@ -85,6 +85,10 @@ class SfuMiddleware: EventMiddleware {
             case .goAway(let event):
                 log.info("Received go away event with reason: \(event.reason.rawValue)")
                 onSessionMigrationEvent?()
+            case .iceRestart(_):
+                log.info("Received ice restart message")
+            case .pinsUpdated(let event):
+                log.info("=== Received pins updated \(event.pins.map(\.sessionID))")
             }
         }
         return event

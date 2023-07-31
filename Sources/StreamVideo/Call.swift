@@ -619,6 +619,32 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await queryMembers(filters: nil, limit: nil, next: next, sort: nil)
     }
     
+    // MARK: - Pinning
+    
+    public func pinForEveryone(
+        userId: String,
+        sessionId: String
+    ) async throws -> PinResponse {
+        let pinRequest = PinRequest(sessionId: sessionId, userId: userId)
+        return try await coordinatorClient.videoPin(
+            type: callType,
+            id: callId,
+            pinRequest: pinRequest
+        )
+    }
+    
+    public func unpinForEveryone(
+        userId: String,
+        sessionId: String
+    ) async throws -> UnpinResponse {
+        let unpinRequest = UnpinRequest(sessionId: sessionId, userId: userId)
+        return try await coordinatorClient.videoUnpin(
+            type: callType,
+            id: callId,
+            unpinRequest: unpinRequest
+        )
+    }
+    
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
