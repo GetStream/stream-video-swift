@@ -126,6 +126,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
             VStack {
                 Spacer()
                 viewFactory.makeCallControlsView(viewModel: viewModel)
+                    .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }
         }
     }
