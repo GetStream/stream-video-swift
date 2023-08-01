@@ -640,8 +640,10 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Given
         let httpClient = HTTPClient_Mock()
         let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
-        let data = try response.serializedData()
-        httpClient.dataResponses = [data, data, data]
+        for _ in 0..<10 {
+            let data = try response.serializedData()
+            httpClient.dataResponses.append(data)
+        }
         webRTCClient = makeWebRTCClient(
             ownCapabilities: [.screenshare],
             httpClient: httpClient
