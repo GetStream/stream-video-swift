@@ -35,8 +35,8 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                 ParticipantsFullScreenLayout(
                     viewFactory: viewFactory,
                     participant: first,
+                    call: viewModel.call,
                     size: availableSize,
-                    pinnedParticipant: $viewModel.pinnedParticipant,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
@@ -44,17 +44,17 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                 ParticipantsSpotlightLayout(
                     viewFactory: viewFactory,
                     participant: first,
+                    call: viewModel.call,
                     participants: Array(viewModel.participants.dropFirst()),
                     size: availableSize,
-                    pinnedParticipant: $viewModel.pinnedParticipant,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
                 ParticipantsGridLayout(
                     viewFactory: viewFactory,
+                    call: viewModel.call,
                     participants: viewModel.participants,
-                    pinnedParticipant: $viewModel.pinnedParticipant,
                     availableSize: availableSize,
                     orientation: orientation,
                     onViewRendering: onViewRendering,
@@ -73,23 +73,20 @@ public struct VideoCallParticipantModifier: ViewModifier {
     @State var popoverShown = false
     
     var participant: CallParticipant
-    @Binding var pinnedParticipant: CallParticipant?
-    var participantCount: Int
+    var call: Call?
     var availableSize: CGSize
     var ratio: CGFloat
     var showAllInfo: Bool
     
     public init(
         participant: CallParticipant,
-        pinnedParticipant: Binding<CallParticipant?>,
-        participantCount: Int,
+        call: Call?,
         availableSize: CGSize,
         ratio: CGFloat,
         showAllInfo: Bool
     ) {
         self.participant = participant
-        _pinnedParticipant = pinnedParticipant
-        self.participantCount = participantCount
+        self.call = call
         self.availableSize = availableSize
         self.ratio = ratio
         self.showAllInfo = showAllInfo
@@ -104,7 +101,7 @@ public struct VideoCallParticipantModifier: ViewModifier {
                         HStack {
                             ParticipantInfoView(
                                 participant: participant,
-                                isPinned: participant.id == pinnedParticipant?.id
+                                isPinned: participant.isPinned
                             )
                             
                             if showAllInfo {
@@ -125,14 +122,22 @@ public struct VideoCallParticipantModifier: ViewModifier {
                     
                     if popoverShown {
                         Button {
-                            if participant.id == pinnedParticipant?.id {
-                                self.pinnedParticipant = nil
+                            if participant.isPinned {
+                                Task {
+                                    try await call?.unpin(
+                                        sessionId: participant.sessionId
+                                    )
+                                }
                             } else {
-                                self.pinnedParticipant = participant
+                                Task {
+                                    try await call?.pin(
+                                        sessionId: participant.sessionId
+                                    )
+                                }
                             }
                             popoverShown = false
                         } label: {
-                            Text(participant.id == pinnedParticipant?.id ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
+                            Text(participant.isPinned ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
                                 .padding(.horizontal)
                                 .foregroundColor(.primary)
                         }
@@ -150,6 +155,12 @@ public struct VideoCallParticipantModifier: ViewModifier {
                 }
             }
     }
+    
+    @MainActor
+    private var participantCount: Int {
+        call?.state.participants.count ?? 0
+    }
+    
 }
 
 public struct VideoCallParticipantView: View {

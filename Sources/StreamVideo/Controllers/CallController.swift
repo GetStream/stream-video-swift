@@ -160,6 +160,17 @@ class CallController {
         try await webRTCClient.stopScreensharing()
     }
     
+    func changePinState(
+        isEnabled: Bool,
+        sessionId: String
+    ) async throws {
+        let webRTCClient = try currentWebRTCClient()
+        try await webRTCClient.changePinState(
+            isEnabled: isEnabled,
+            sessionId: sessionId
+        )
+    }
+    
     /// Updates the track size for the provided participant.
     /// - Parameters:
     ///  - trackSize: the size of the track.

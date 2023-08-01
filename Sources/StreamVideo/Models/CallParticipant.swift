@@ -43,12 +43,11 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var connectionQuality: ConnectionQuality
     /// Returns the date when the user joined the call.
     public var joinedAt: Date
-    /// Returns whether the user is pinned.
-    public var isPinned: Bool
     /// The audio level for the user.
     public var audioLevel: Float
     /// List of the last 10 audio levels.
     public var audioLevels: [Float]
+    public var pins: [PinInfo]
     
     public init(
         id: String,
@@ -69,9 +68,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         sessionId: String,
         connectionQuality: ConnectionQuality,
         joinedAt: Date,
-        isPinned: Bool,
         audioLevel: Float,
-        audioLevels: [Float]
+        audioLevels: [Float],
+        pins: [PinInfo]
     ) {
         self.id = id
         self.userId = userId
@@ -91,9 +90,14 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         self.connectionQuality = connectionQuality
         isScreensharing = isScreenSharing
         self.joinedAt = joinedAt
-        self.isPinned = isPinned
         self.audioLevel = audioLevel
         self.audioLevels = audioLevels
+        self.pins = pins
+    }
+    
+    //TODO: temp
+    public var isPinned: Bool {
+        !pins.isEmpty
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -121,9 +125,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
@@ -147,9 +151,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
@@ -173,9 +177,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
@@ -199,9 +203,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
 
@@ -225,9 +229,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
@@ -251,9 +255,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
 
@@ -277,9 +281,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
 
@@ -312,9 +316,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: levels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
@@ -338,9 +342,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
@@ -364,13 +368,13 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: isPinned,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
     
-    public func withUpdated(pinState: Bool) -> CallParticipant {
+    public func withUpdated(pins: [PinInfo]) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -390,9 +394,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             sessionId: sessionId,
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
-            isPinned: pinState,
             audioLevel: audioLevel,
-            audioLevels: audioLevels
+            audioLevels: audioLevels,
+            pins: pins
         )
     }
 }
@@ -416,9 +420,15 @@ extension Stream_Video_Sfu_Models_Participant {
             sessionId: sessionID,
             connectionQuality: connectionQuality.mapped,
             joinedAt: joinedAt.date,
-            isPinned: false,
             audioLevel: audioLevel,
-            audioLevels: [audioLevel]
+            audioLevels: [audioLevel],
+            pins: []
         )
     }
+}
+
+public struct PinInfo: Sendable, Equatable {
+    public let isRemotePin: Bool
+    public let pinnedAt: Date
+    public let trackType: TrackType
 }

@@ -621,10 +621,31 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     // MARK: - Pinning
     
+    public func pin(
+        sessionId: String
+    ) async throws {
+        try await callController.changePinState(
+            isEnabled: true,
+            sessionId: sessionId
+        )
+    }
+    
+    public func unpin(
+        sessionId: String
+    ) async throws {
+        try await callController.changePinState(
+            isEnabled: false,
+            sessionId: sessionId
+        )
+    }
+    
     public func pinForEveryone(
         userId: String,
         sessionId: String
     ) async throws -> PinResponse {
+        if await !currentUserHasCapability(.pinForEveryone) {
+            throw ClientError.MissingPermissions()
+        }
         let pinRequest = PinRequest(sessionId: sessionId, userId: userId)
         return try await coordinatorClient.videoPin(
             type: callType,
@@ -637,6 +658,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         userId: String,
         sessionId: String
     ) async throws -> UnpinResponse {
+        if await !currentUserHasCapability(.pinForEveryone) {
+            throw ClientError.MissingPermissions()
+        }
         let unpinRequest = UnpinRequest(sessionId: sessionId, userId: userId)
         return try await coordinatorClient.videoUnpin(
             type: callType,

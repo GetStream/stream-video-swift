@@ -472,6 +472,30 @@ class WebRTCClient: NSObject {
         try? await screenshareCapturer?.stopCapture()
     }
     
+    func changePinState(
+        isEnabled: Bool,
+        sessionId: String
+    ) async throws {
+        guard let participant = await state.callParticipants[sessionId] else {
+            throw ClientError.Unexpected()
+        }
+        var pins = participant.pins
+        if isEnabled {
+            let pin = PinInfo(
+                isRemotePin: false,
+                pinnedAt: Date(),
+                trackType: .video
+            )
+            pins.append(pin)
+        } else {
+            pins.removeAll { pin in
+                !pin.isRemotePin
+            }
+        }
+        let updated = participant.withUpdated(pins: pins)
+        await state.update(callParticipant: updated)
+    }
+    
     // MARK: - private
     
     private func handleOnSocketConnected() {

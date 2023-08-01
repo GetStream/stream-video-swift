@@ -14,16 +14,16 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     var participant: CallParticipant
     var participants: [CallParticipant]
     var size: CGSize
-    @Binding var pinnedParticipant: CallParticipant?
+    var call: Call?
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
         viewFactory: Factory,
         participant: CallParticipant,
+        call: Call?,
         participants: [CallParticipant],
         size: CGSize,
-        pinnedParticipant: Binding<CallParticipant?>,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
@@ -31,7 +31,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.participant = participant
         self.participants = participants
         self.size = size
-        _pinnedParticipant = pinnedParticipant
+        self.call = call
         self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
@@ -51,8 +51,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
-                    participantCount: 1,
-                    pinnedParticipant: $pinnedParticipant,
+                    call: call,
                     availableSize: availableSize,
                     ratio: ratio,
                     showAllInfo: true

@@ -342,19 +342,19 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
 }
 
-struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
-    let rawValue: String
+public struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral, Sendable {
+    public let rawValue: String
 
-    init(rawValue: String) {
+    public init(rawValue: String) {
         self.rawValue = rawValue
     }
 
-    init(stringLiteral value: String) {
+    public init(stringLiteral value: String) {
         self.init(rawValue: value)
     }
 }
 
-extension TrackType {
+public extension TrackType {
     static let audio: Self = "audio"
     static let video: Self = "video"
     static let screenshare: Self = "screenshare"
