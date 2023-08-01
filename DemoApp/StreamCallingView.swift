@@ -72,6 +72,9 @@ struct StreamCallingView: View {
                     )
                 Button {
                     resignFirstResponder()
+                    if viewModel.callingState == .inCall {
+                        viewModel.hangUp()
+                    }
                     viewModel.enterLobby(callType: .default, callId: text, members: [])
                 } label: {
                     CallButtonView(title: "Join Call", maxWidth: 120)

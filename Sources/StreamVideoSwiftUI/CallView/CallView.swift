@@ -31,7 +31,8 @@ public struct CallView<Factory: ViewFactory>: View {
                             localVideoView
                                 .edgesIgnoringSafeArea(.top)
                                 .accessibility(identifier: "localVideoView")
-                        } else if let screenSharingSession = viewModel.call?.state.screenSharingSession {
+                        } else if let screenSharingSession = viewModel.call?.state.screenSharingSession,
+                                    viewModel.call?.state.isCurrentUserScreensharing == false {
                             viewFactory.makeScreenSharingView(
                                 viewModel: viewModel,
                                 screensharingSession: screenSharingSession,
@@ -49,7 +50,8 @@ public struct CallView<Factory: ViewFactory>: View {
                 VStack(alignment: .trailing, spacing: padding) {
                     viewFactory.makeCallTopView(viewModel: viewModel)
 
-                    if viewModel.call?.state.screenSharingSession == nil, viewModel.participantsLayout == .grid {
+                    if (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true),
+                        viewModel.participantsLayout == .grid {
                         CornerDragableView(
                             content: contentDragableView(size: reader.size),
                             proxy: reader

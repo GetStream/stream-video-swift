@@ -628,6 +628,60 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         XCTAssert(webRTCClient.publisher?.transceiver?.sender.parameters.encodings.map(\.rid) == encodingParams.map(\.rid))
     }
     
+    func test_webRTCClient_screensharingBroadcast() async throws {
+        try await assert_webRTCClient_screensharing(type: .broadcast)
+    }
+    
+    func test_webRTCClient_screensharingInApp() async throws {
+        try await assert_webRTCClient_screensharing(type: .inApp)
+    }
+    
+    func assert_webRTCClient_screensharing(type: ScreensharingType) async throws {
+        // Given
+        let httpClient = HTTPClient_Mock()
+        let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
+        for _ in 0..<10 {
+            let data = try response.serializedData()
+            httpClient.dataResponses.append(data)
+        }
+        webRTCClient = makeWebRTCClient(
+            ownCapabilities: [.screenshare],
+            httpClient: httpClient
+        )
+        let sessionId = "123"
+        let participants = [sessionId: callParticipant]
+        await webRTCClient.state.update(callParticipants: participants)
+        
+        // When
+        try await webRTCClient.connect(
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            connectOptions: ConnectOptions(iceServers: [])
+        )
+        try? await webRTCClient.startScreensharing(type: type)
+        var event = Stream_Video_Sfu_Event_TrackPublished()
+        event.sessionID = sessionId
+        event.type = .screenShare
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackPublished(event)))
+        try await waitForCallEvent()
+        
+        // Then
+        var current = await webRTCClient.state.callParticipants
+        XCTAssert(current.values.first?.isScreensharing == true)
+        
+        // When
+        try await webRTCClient.stopScreensharing()
+        var unpublished = Stream_Video_Sfu_Event_TrackUnpublished()
+        unpublished.sessionID = sessionId
+        unpublished.type = .screenShare
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.trackUnpublished(unpublished)))
+        try await waitForCallEvent()
+        
+        // Then
+        current = await webRTCClient.state.callParticipants
+        XCTAssert(current.values.first?.isScreensharing == false)
+    }
+    
     // MARK: - private
     
     func makeWebRTCClient(

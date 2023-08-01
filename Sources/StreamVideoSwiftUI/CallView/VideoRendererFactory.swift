@@ -29,6 +29,12 @@ class VideoRendererFactory {
             name: UIApplication.didReceiveMemoryWarningNotification,
             object: nil
         )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(clearViews),
+            name: UIScene.didEnterBackgroundNotification,
+            object: nil
+        )
     }
     
     func view(for id: String, size: CGSize) -> VideoRenderer {

@@ -44,9 +44,9 @@ public struct CallIconView: View {
 }
 
 public struct CallIconStyle {
-    let backgroundColor: Color
-    let foregroundColor: Color
-    let opacity: CGFloat
+    public let backgroundColor: Color
+    public let foregroundColor: Color
+    public let opacity: CGFloat
 }
 
 extension CallIconStyle {

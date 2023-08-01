@@ -125,9 +125,8 @@ class CallController {
     /// Changes the camera position (front/back) for the current user.
     /// - Parameters:
     ///  - position: the new camera position.
-    ///  - completion: called when the camera position is changed.
-    func changeCameraMode(position: CameraPosition, completion: @escaping () -> ()) {
-        webRTCClient?.changeCameraMode(position: position, completion: completion)
+    func changeCameraMode(position: CameraPosition) async throws {
+        try await webRTCClient?.changeCameraMode(position: position)
     }
     
     /// Changes the speaker state.
@@ -149,6 +148,16 @@ class CallController {
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         webRTCClient?.setVideoFilter(videoFilter)
+    }
+    
+    func startScreensharing(type: ScreensharingType) async throws {
+        let webRTCClient = try currentWebRTCClient()
+        try await webRTCClient.startScreensharing(type: type)
+    }
+    
+    func stopScreensharing() async throws {
+        let webRTCClient = try currentWebRTCClient()
+        try await webRTCClient.stopScreensharing()
     }
     
     /// Updates the track size for the provided participant.

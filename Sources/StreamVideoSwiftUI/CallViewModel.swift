@@ -96,7 +96,7 @@ open class CallViewModel: ObservableObject {
         
     /// List of the outgoing call members.
     @Published public var outgoingCallMembers = [MemberRequest]()
-    
+        
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
@@ -191,7 +191,9 @@ open class CallViewModel: ObservableObject {
     public var participants: [CallParticipant] {
         callParticipants
             .filter {
-                if participantsLayout == .grid && call?.state.screenSharingSession == nil {
+                if participantsLayout == .grid &&
+                    (call?.state.screenSharingSession == nil
+                     || call?.state.isCurrentUserScreensharing == true) {
                     return $0.value.id != call?.state.sessionId
                 } else {
                     return true
@@ -419,6 +421,18 @@ open class CallViewModel: ObservableObject {
         Task {
             log.debug("Updating track size for participant \(participant.name) to \(trackSize)")
             await call?.updateTrackSize(trackSize, for: participant)
+        }
+    }
+    
+    public func startScreensharing(type: ScreensharingType) {
+        Task {
+            try await call?.startScreensharing(type: type)
+        }
+    }
+    
+    public func stopScreensharing() {
+        Task {
+            try await call?.stopScreensharing()
         }
     }
     

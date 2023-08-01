@@ -166,7 +166,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [x] Lobby updates (show participants and events)
 - [x] Support settings.audio.default_device
 - [x] Report SDK version number on all API calls
-- [ ] Fix AppClips
+- [x] Fix AppClips
 
 ### 0.3 milestone
 
@@ -179,7 +179,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Improved chat integration
 - [ ] Picture-in-picture sample (if we get an entitlement)
-- [ ] Screensharing from mobile
+- [x] Screensharing from mobile
 - [ ] Buttons to simulate ice-restart and SFU switching
 - [ ] Button to switch speakerphone/earpiece
 

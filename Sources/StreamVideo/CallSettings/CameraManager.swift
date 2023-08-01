@@ -30,13 +30,8 @@ public class CameraManager: ObservableObject, CallSettingsManager {
     /// Flips the camera (front to back and vice versa).
     public func flip() async throws {
         let next = direction.next()
-        await withCheckedContinuation { [weak self] continuation in
-            guard let self else { return }
-            callController.changeCameraMode(position: next) {
-                self.direction = next
-                continuation.resume()
-            }
-        }
+        try await callController.changeCameraMode(position: next)
+        self.direction = next
     }
 
     /// Enables the camera.

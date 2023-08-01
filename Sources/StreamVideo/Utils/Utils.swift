@@ -29,3 +29,7 @@ func executeOnMain(_ task: @escaping @MainActor () -> ()) {
         await task()
     }
 }
+
+func infoPlistValue(for key: String) -> String? {
+    return Bundle.main.infoDictionary?[key] as? String
+}

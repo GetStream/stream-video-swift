@@ -25,13 +25,22 @@ public class CallState: ObservableObject {
     /// When a call is started, a unique session identifier is assigned to the user in the call.
     @Published public internal(set) var sessionId: String = ""
     @Published public internal(set) var participants = [CallParticipant]()
-    @Published public internal(set) var participantsMap = [String: CallParticipant]() { didSet { didUpdate(Array(participantsMap.values)) } }
+    @Published public internal(set) var participantsMap = [String: CallParticipant]() {
+        didSet { didUpdate(Array(participantsMap.values)) }
+    }
     @Published public internal(set) var me: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
     @Published public internal(set) var activeSpeakers: [CallParticipant] = []
     @Published public internal(set) var members: [Member] = []
-    @Published public internal(set) var screenSharingSession: ScreenSharingSession? = nil
+    @Published public internal(set) var screenSharingSession: ScreenSharingSession? = nil {
+        didSet {
+            let isCurrentUserSharing = screenSharingSession?.participant.id == sessionId
+            if isCurrentUserSharing != isCurrentUserScreensharing {
+                isCurrentUserScreensharing = isCurrentUserSharing
+            }
+        }
+    }
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
@@ -39,7 +48,9 @@ public class CallState: ObservableObject {
     @Published public internal(set) var capabilitiesByRole: [String: [String]] = [:]
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
-    @Published public internal(set) var createdAt: Date = .distantPast { didSet { if !isInitialized { isInitialized = true }} }
+    @Published public internal(set) var createdAt: Date = .distantPast {
+        didSet { if !isInitialized { isInitialized = true }}
+    }
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var endedAt: Date?
@@ -56,6 +67,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
+    @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     
     private var localCallSettingsUpdate = false
         
@@ -285,7 +297,7 @@ public class CallState: ObservableObject {
                 dominantSpeaker = participant
             }
 
-            if let screenshareTrack = participant.screenshareTrack {
+            if let screenshareTrack = participant.screenshareTrack, participant.isScreensharing {
                 screenSharingSession = .init(track: screenshareTrack, participant: participant)
             }
         }

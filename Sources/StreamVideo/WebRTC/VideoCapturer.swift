@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-class VideoCapturer {
+class VideoCapturer: CameraVideoCapturing {
     
     private var videoCapturer: RTCVideoCapturer
     private var videoOptions: VideoOptions
@@ -28,68 +28,74 @@ class VideoCapturer {
         #endif
     }
     
-    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position, completion: @escaping () -> ()) {
-        guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer else { return }
-        
-        let devices = RTCCameraVideoCapturer.captureDevices()
-        
-        guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
-            log.warning("No camera video capture devices available")
-            return
+    func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
+        guard let device = capturingDevice(for: cameraPosition) else {
+            throw ClientError.Unexpected()
         }
-
-        let formats = RTCCameraVideoCapturer.supportedFormats(for: device)
-        let sortedFormats = formats.map {
-            (format: $0, dimensions: CMVideoFormatDescriptionGetDimensions($0.formatDescription))
-        }
-        .sorted { $0.dimensions.area < $1.dimensions.area }
-
-        var selectedFormat = sortedFormats.first
-
-        if let preferredFormat = videoOptions.preferredFormat,
-           let foundFormat = sortedFormats.first(where: { $0.format == preferredFormat }) {
-            selectedFormat = foundFormat
-        } else {
-            selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= videoOptions.preferredDimensions.area })
-        }
-
-        guard let selectedFormat = selectedFormat, let fpsRange = selectedFormat.format.fpsRange() else {
-            log.warning("Unable to resolve format")
-            return
-        }
-
-        var selectedFps = videoOptions.preferredFps
-
-        if !fpsRange.contains(selectedFps) {
-            log.warning("requested fps: \(videoOptions.preferredFps) not available: \(fpsRange) and will be clamped")
-            selectedFps = selectedFps.clamped(to: fpsRange)
-        }
-        
-        if selectedFormat.dimensions.area != videoOptions.preferredDimensions.area {
-            log.debug("Adapting video source output format")
-            videoSource.adaptOutputFormat(
-                toWidth: selectedFormat.dimensions.width,
-                height: selectedFormat.dimensions.height,
-                fps: Int32(selectedFps)
-            )
-        }
-        
-        videoCapturer.startCapture(
-            with: device,
-            format: selectedFormat.format,
-            fps: selectedFps
-        ) { [weak self] _ in
-            self?.videoCaptureHandler?.currentCameraPosition = cameraPosition
-            completion()
-        }
+        try await startCapture(device: device)
     }
     
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         videoCaptureHandler?.selectedFilter = videoFilter
     }
     
-    func stopCameraCapture() {
-        (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+    func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {
+        let devices = RTCCameraVideoCapturer.captureDevices()
+        
+        guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
+            log.warning("No camera video capture devices available")
+            return nil
+        }
+        
+        return device
+    }
+    
+    func startCapture(device: AVCaptureDevice?) async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {
+                continuation.resume(throwing: ClientError.Unexpected())
+                return
+            }
+            let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
+            guard let selectedFormat = outputFormat.format, let dimensions = outputFormat.dimensions else {
+                continuation.resume(throwing: ClientError.Unexpected())
+                return
+            }
+            
+            if dimensions.area != videoOptions.preferredDimensions.area {
+                log.debug("Adapting video source output format")
+                videoSource.adaptOutputFormat(
+                    toWidth: dimensions.width,
+                    height: dimensions.height,
+                    fps: Int32(outputFormat.fps)
+                )
+            }
+            
+            videoCapturer.startCapture(
+                with: device,
+                format: selectedFormat,
+                fps: outputFormat.fps
+            ) { [weak self] error in
+                if let error {
+                    continuation.resume(throwing: error)
+                } else {
+                    self?.videoCaptureHandler?.currentCameraPosition = device.position
+                    continuation.resume(returning: ())
+                }
+            }
+        }
+    }
+    
+    func stopCapture() async throws {
+        return try await withCheckedThrowingContinuation { continuation in
+            if let capturer = videoCapturer as? RTCCameraVideoCapturer {
+                capturer.stopCapture {
+                    continuation.resume(returning: ())
+                }
+            } else {
+                continuation.resume(returning: ())
+            }
+        }
     }
 }
 
@@ -107,18 +113,12 @@ extension CMVideoDimensions {
 extension AVCaptureDevice.Format {
 
     // computes a ClosedRange of supported FPSs for this format
-    func fpsRange() -> ClosedRange<Int>? {
+    func fpsRange() -> ClosedRange<Int> {
         videoSupportedFrameRateRanges
             .map { $0.toRange() }
-            .reduce(into: nil as ClosedRange<Int>?) { result, current in
-                guard let previous = result else {
-                    result = current
-                    return
-                }
-
-                // merge previous element
-                result = merge(range: previous, with: current)
-            }
+            .reduce(into: 0...0) { result, current in
+            result = merge(range: result, with: current)
+        }
     }
 }
 

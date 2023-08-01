@@ -11,6 +11,7 @@ public struct CallTopView: View {
     @Injected(\.images) var images
     
     @ObservedObject var viewModel: CallViewModel
+    @State var sharingPopupDismissed = false
     
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
@@ -39,7 +40,7 @@ public struct CallTopView: View {
             
             if #available(iOS 14, *) {
                 LayoutMenuView(viewModel: viewModel)
-                    .opacity(viewModel.call?.state.screenSharingSession != nil ? 0 : 1)
+                    .opacity(hideLayoutMenu ? 0 : 1)
                     .accessibility(identifier: "viewMenu")
                 
                 Button {
@@ -53,5 +54,53 @@ public struct CallTopView: View {
                 .accessibility(identifier: "participantMenu")
             }
         }
+        .overlay(
+            viewModel.call?.state.isCurrentUserScreensharing == true ?
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
+            .opacity(sharingPopupDismissed ? 0 : 1)
+            : nil
+        )
     }
+    
+    private var hideLayoutMenu: Bool {
+        viewModel.call?.state.screenSharingSession != nil
+            && viewModel.call?.state.isCurrentUserScreensharing == false
+    }
+    
+}
+
+struct SharingIndicator: View {
+    
+    @ObservedObject var viewModel: CallViewModel
+    @Binding var sharingPopupDismissed: Bool
+    
+    var body: some View {
+        HStack {
+            Text(L10n.Call.Current.sharing)
+                .font(.headline)
+            Divider()
+            Button {
+                viewModel.stopScreensharing()
+            } label: {
+                Text(L10n.Call.Current.stopSharing)
+                    .font(.headline)
+            }
+            Button {
+                sharingPopupDismissed = true
+            } label: {
+                Image(systemName: "xmark")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(height: 14)
+            }
+            .padding(.leading, 4)
+
+        }
+        .padding(.all, 8)
+        .modifier(ShadowViewModifier())
+    }
+    
 }

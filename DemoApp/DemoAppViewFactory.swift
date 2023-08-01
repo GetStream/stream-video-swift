@@ -13,4 +13,13 @@ class DemoAppViewFactory: ViewFactory {
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         CustomWaitingLocalUserView(viewModel: viewModel, viewFactory: self)
     }
+    
+    @ViewBuilder
+    func makeCallControlsView(viewModel: CallViewModel) -> some View {
+#if targetEnvironment(simulator)
+        DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
+#else
+        DemoAppCallControlsView(viewModel: viewModel)
+#endif
+    }
 }
