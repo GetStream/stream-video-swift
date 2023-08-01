@@ -121,25 +121,48 @@ public struct VideoCallParticipantModifier: ViewModifier {
                     }
                     
                     if popoverShown {
-                        Button {
-                            if participant.isPinned {
-                                Task {
-                                    try await call?.unpin(
-                                        sessionId: participant.sessionId
-                                    )
-                                }
-                            } else {
-                                Task {
-                                    try await call?.pin(
-                                        sessionId: participant.sessionId
-                                    )
+                        VStack(spacing: 16) {
+                            PopoverButton(
+                                title: pinTitle,
+                                popoverShown: $popoverShown
+                            ) {
+                                if participant.isPinned {
+                                    Task {
+                                        try await call?.unpin(
+                                            sessionId: participant.sessionId
+                                        )
+                                    }
+                                } else {
+                                    Task {
+                                        try await call?.pin(
+                                            sessionId: participant.sessionId
+                                        )
+                                    }
                                 }
                             }
-                            popoverShown = false
-                        } label: {
-                            Text(participant.isPinned ? L10n.Call.Current.unpinUser : L10n.Call.Current.pinUser)
-                                .padding(.horizontal)
-                                .foregroundColor(.primary)
+                            
+                            if call?.state.ownCapabilities.contains(.pinForEveryone) == true {
+                                PopoverButton(
+                                    title: pinForEveryoneTitle,
+                                    popoverShown: $popoverShown
+                                ) {
+                                    if participant.isPinnedRemotely {
+                                        Task {
+                                            try await call?.unpinForEveryone(
+                                                userId: participant.userId,
+                                                sessionId: participant.id
+                                            )
+                                        }
+                                    } else {
+                                        Task {
+                                            try await call?.pinForEveryone(
+                                                userId: participant.userId,
+                                                sessionId: participant.id
+                                            )
+                                        }
+                                    }
+                                }
+                            }
                         }
                         .padding()
                         .modifier(ShadowViewModifier())
@@ -159,6 +182,18 @@ public struct VideoCallParticipantModifier: ViewModifier {
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
+    }
+    
+    private var pinTitle: String {
+        participant.isPinned
+            ? L10n.Call.Current.unpinUser
+            : L10n.Call.Current.pinUser
+    }
+    
+    private var pinForEveryoneTitle: String {
+        participant.isPinnedRemotely
+            ? L10n.Call.Current.unpinForEveryone
+            : L10n.Call.Current.pinForEveryone
     }
     
 }
@@ -276,4 +311,22 @@ public struct SoundIndicator: View {
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
     }
     
+}
+
+struct PopoverButton: View {
+    
+    var title: String
+    @Binding var popoverShown: Bool
+    var action: () -> ()
+    
+    var body: some View {
+        Button {
+            action()
+            popoverShown = false
+        } label: {
+            Text(title)
+                .padding(.horizontal)
+                .foregroundColor(.primary)
+        }
+    }
 }

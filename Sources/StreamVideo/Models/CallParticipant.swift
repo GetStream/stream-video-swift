@@ -100,6 +100,11 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         !pins.isEmpty
     }
     
+    //TODO: temp
+    public var isPinnedRemotely: Bool {
+        pins.filter(\.isRemotePin).count > 0
+    }
+    
     /// Determines whether the track of the participant should be displayed.
     public var shouldDisplayTrack: Bool {
         hasVideo && track != nil && showTrack

@@ -17,6 +17,7 @@ class SfuMiddleware: EventMiddleware {
     var onSocketConnected: (() -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> ())?
     var onSessionMigrationEvent: (() -> Void)?
+    var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> ())?
     
     init(
         sessionID: String,
@@ -88,7 +89,7 @@ class SfuMiddleware: EventMiddleware {
             case .iceRestart(_):
                 log.info("Received ice restart message")
             case .pinsUpdated(let event):
-                log.info("=== Received pins updated \(event.pins.map(\.sessionID))")
+                onPinsChanged?(event.pins)
             }
         }
         return event

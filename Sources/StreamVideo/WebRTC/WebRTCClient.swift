@@ -235,6 +235,7 @@ class WebRTCClient: NSObject {
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
         }
+        sfuMiddleware.onPinsChanged = handlePinsChanged
     }
     
     func prepareForMigration(
@@ -1061,6 +1062,33 @@ class WebRTCClient: NSObject {
             let videoState = callSettings.videoOn
             try await changeVideoState(isEnabled: !videoState)
             try await changeVideoState(isEnabled: videoState)
+        }
+    }
+    
+    private func handlePinsChanged(_ pins: [Stream_Video_Sfu_Models_Pin]) {
+        Task {
+            let participants = await state.callParticipants
+            let sessionIds = pins.map(\.sessionID)
+            var updatedParticipants = [String: CallParticipant]()
+            for (sessionId, participant) in participants {
+                var updated = participant
+                var pins = participant.pins
+                let remotePins = pins.filter(\.isRemotePin)
+                if sessionIds.contains(sessionId) && remotePins.isEmpty {
+                    let pin = PinInfo(
+                        isRemotePin: true,
+                        pinnedAt: Date(),
+                        trackType: .video
+                    )
+                    pins.append(pin)
+                    updated = participant.withUpdated(pins: pins)
+                } else if !sessionIds.contains(sessionId) && !remotePins.isEmpty {
+                    pins.removeAll(where: \.isRemotePin)
+                    updated = participant.withUpdated(pins: pins)
+                }
+                updatedParticipants[sessionId] = updated
+            }
+            await state.update(callParticipants: updatedParticipants)
         }
     }
     
