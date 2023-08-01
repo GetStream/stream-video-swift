@@ -40,7 +40,7 @@ public struct CallTopView: View {
             
             if #available(iOS 14, *) {
                 LayoutMenuView(viewModel: viewModel)
-                    .opacity(viewModel.call?.state.screenSharingSession != nil ? 0 : 1)
+                    .opacity(hideLayoutMenu ? 0 : 1)
                     .accessibility(identifier: "viewMenu")
                 
                 Button {
@@ -63,6 +63,11 @@ public struct CallTopView: View {
             .opacity(sharingPopupDismissed ? 0 : 1)
             : nil
         )
+    }
+    
+    private var hideLayoutMenu: Bool {
+        viewModel.call?.state.screenSharingSession != nil
+            && viewModel.call?.state.isCurrentUserScreensharing == false
     }
     
 }
