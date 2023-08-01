@@ -448,6 +448,7 @@ class WebRTCClient: NSObject {
                 )
                 await state.add(screensharingTrack: screenshareTrack, id: sessionID)
                 await assignTracksToParticipants()
+                toggleVideo()
             } else if localScreenshareTrack?.isEnabled == false {
                 localScreenshareTrack?.isEnabled = true
                 await state.add(screensharingTrack: localScreenshareTrack, id: sessionID)
@@ -1018,6 +1019,16 @@ class WebRTCClient: NSObject {
                 }
             }
             await state.update(pausedTrackIds: [])
+        }
+    }
+    
+    private func toggleVideo() {
+        //NOTE: needed because of an SFU bug.
+        Task {
+            try await Task.sleep(nanoseconds: 2_500_000_000)
+            let videoState = callSettings.videoOn
+            try await changeVideoState(isEnabled: !videoState)
+            try await changeVideoState(isEnabled: videoState)
         }
     }
     
