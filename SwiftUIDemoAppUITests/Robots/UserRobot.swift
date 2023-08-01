@@ -269,10 +269,10 @@ extension UserRobot {
         }
         return self
     }
-    
+
     @discardableResult
-    func waitForDisappearanceOfParticipantEventLabel() -> Self {
-        CallPage.participantEvent.waitForDisappearance(timeout: Self.defaultTimeout)
+    func waitForDisappearanceOfParticipantEventLabel(_ timeout: Double = defaultTimeout) -> Self {
+        CallPage.participantEvent.waitForDisappearance(timeout: timeout)
         return self
     }
     

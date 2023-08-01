@@ -64,7 +64,7 @@ struct LoginView: View {
                             .accessibility(identifier: "Login as Anonymous")
                     }
                     .padding(.all, 8)
-                    #endif // #if DEBUG
+                    #endif
                 } header: {
                     Text("Other")
                 }

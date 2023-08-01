@@ -352,11 +352,12 @@ final class CallViewsTests: StreamTestCase {
                 .joinCall(callId)
         }
         WHEN("user enables spotlight view") {
-            userRobot.setView(mode: .spotlight)
+            userRobot
+                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
+                .setView(mode: .spotlight)
         }
         THEN("user observers the list of participants") {
             userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertSpotlightView(with: participants)
                 .assertSpotlightViewParticipantListVisibity(percent: 0)
         }
