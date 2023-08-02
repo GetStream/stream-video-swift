@@ -398,6 +398,14 @@ final class DescriptionView: UIView {
         container.addArrangedSubview(descriptionLabel)
         container.addArrangedSubview(participantsCountLabel)
 
+        subscribeToParticipantsUpdates()
+        subscribeToParticipantsUpdates()
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
         container.spacing = 8
 
         titleLabel.font = .preferredFont(forTextStyle: .title1)
@@ -408,7 +416,16 @@ final class DescriptionView: UIView {
 
         participantsCountLabel.font = .preferredFont(forTextStyle: .caption1)
         participantsCountLabel.textColor = .secondaryLabel
+    }
 
+    func updateContent() {
+        titleLabel.text = content.title
+        descriptionLabel.isHidden = content.description == nil
+        descriptionLabel.text = content.description
+        participantsCountLabel.text = "\(content.participantsCount) participants"
+    }
+
+    private func subscribeToParticipantsUpdates() {
         call.state
             .$participants
             .receive(on: DispatchQueue.main)
@@ -418,7 +435,9 @@ final class DescriptionView: UIView {
                 content.participantsCount = newValue.count
                 self.content = content
             }.store(in: &cancellables)
+    }
 
+    private func subscribeToCustomUpdates() {
         call.state
             .$custom
             .receive(on: DispatchQueue.main)
@@ -429,13 +448,6 @@ final class DescriptionView: UIView {
                 content.description = newValue["description"]?.stringValue
                 self.content = content
             }.store(in: &cancellables)
-    }
-
-    func updateContent() {
-        titleLabel.text = content.title
-        descriptionLabel.isHidden = content.description == nil
-        descriptionLabel.text = content.description
-        participantsCountLabel.text = "\(content.participantsCount) participants"
     }
 }
 ```
@@ -649,29 +661,28 @@ final class LiveButtonView: UIView {
 
         super.init(frame: .zero)
 
-        call.state
-            .$backstage
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.content = $0 }
-            .store(in: &cancellables)
+        subscribeToBackstageUpdates()
 
-        goLiveButton.setTitle("Go Live", for: .normal)
-        goLiveButton.backgroundColor = .green
-        goLiveButton.layer.cornerRadius = 8
-        goLiveButton.setTitleColor(.darkText, for: .normal)
-        goLiveButton.addTarget(self, action: #selector(goLive), for: .touchUpInside)
-
-        stopLiveButton.setTitle("Stop Live", for: .normal)
-        stopLiveButton.backgroundColor = .red
-        stopLiveButton.layer.cornerRadius = 8
-        stopLiveButton.setTitleColor(.label, for: .normal)
-        stopLiveButton.addTarget(self, action: #selector(stopLive), for: .touchUpInside)
-
+        setUpAppearance()
         updateContent()
     }
 
     deinit {
         activeTask?.cancel()
+    }
+
+    func setUpAppearance() {
+        goLiveButton.setTitle("Go Live", for: .normal)
+        goLiveButton.backgroundColor = .systemGreen
+        goLiveButton.layer.cornerRadius = 8
+        goLiveButton.setTitleColor(.darkText, for: .normal)
+        goLiveButton.addTarget(self, action: #selector(goLive), for: .touchUpInside)
+
+        stopLiveButton.setTitle("Stop Live", for: .normal)
+        stopLiveButton.backgroundColor = .systemRed
+        stopLiveButton.layer.cornerRadius = 8
+        stopLiveButton.setTitleColor(.label, for: .normal)
+        stopLiveButton.addTarget(self, action: #selector(stopLive), for: .touchUpInside)
     }
 
     func updateContent() {
@@ -684,6 +695,14 @@ final class LiveButtonView: UIView {
             addSubview(stopLiveButton)
             stopLiveButton.pin(to: self)
         }
+    }
+
+    private func subscribeToBackstageUpdates() {
+        call.state
+            .$backstage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.content = $0 }
+            .store(in: &cancellables)
     }
 
     @objc
@@ -711,7 +730,7 @@ final class ControlsView: UIView {
         .withHorizontalAxis()
         .withoutTranslatesAutoresizingMaskIntoConstraints()
 
-    lazy var micButtonView: MicButtonView = .init(call: call)
+    lazy var micButtonView: MicButtonView = .init(microphone: call.microphone)
         .withoutTranslatesAutoresizingMaskIntoConstraints()
 
     lazy var liveButtonView: LiveButtonView = .init(call: call)
@@ -774,15 +793,18 @@ final class ParticipantView: UIView {
         
         addSubview(imageview)
         imageview.pin(to: self)
-        
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
         clipsToBounds = true
         imageview.contentMode = .scaleAspectFit
         imageview.placeholderImage = .init(systemName: "person.crop.circle")
         imageview.failureImage = .init(systemName: "person.crop.circle")
         layer.borderWidth = 2
         layer.borderColor = UIColor.systemBackground.cgColor
-        
-        updateContent()
     }
 
     func updateContent() {
@@ -794,7 +816,7 @@ final class ParticipantView: UIView {
         layer.cornerRadius = bounds.height / 2
 
         layer.borderColor = (content?.isSpeaking ?? false)
-        ? UIColor.green.cgColor
+        ? UIColor.systemGreen.cgColor
         : UIColor.gray.cgColor
     }
 }
@@ -868,11 +890,8 @@ final class ParticipantsView: UIView {
             forCellWithReuseIdentifier: "ParticipantCollectionViewCell"
         )
 
-        call.state
-            .$participants
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.content = $0 }
-            .store(in: &cancellables)
+        subscribeToParticipantsUpdates()
+        updateContent()
     }
 
     func updateContent() {
@@ -943,6 +962,14 @@ final class ParticipantsView: UIView {
 
         let layout = UICollectionViewCompositionalLayout(section: section)
         return layout
+    }
+
+    private func subscribeToParticipantsUpdates() {
+        call.state
+            .$participants
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.content = $0 }
+            .store(in: &cancellables)
     }
 }
 
@@ -1021,12 +1048,7 @@ final class PermissionRequestsView: UIView {
 
         super.init(frame: .zero)
 
-        cancellable = call
-            .state
-            .$permissionRequests
-            .receive(on: DispatchQueue.main)
-            .map { $0.first }
-            .sink { [weak self] in self?.content = $0 }
+        subscribeToPermissionRequestUpdates()
 
         addSubview(container)
         container.pin(to: self)
@@ -1035,6 +1057,18 @@ final class PermissionRequestsView: UIView {
         container.addArrangedSubview(acceptButton)
         container.addArrangedSubview(rejectButton)
 
+        NSLayoutConstraint.activate([
+            acceptButton.widthAnchor.constraint(equalToConstant: 50),
+            acceptButton.heightAnchor.constraint(equalToConstant: 50),
+            rejectButton.widthAnchor.constraint(equalTo: acceptButton.widthAnchor),
+            rejectButton.heightAnchor.constraint(equalTo: acceptButton.heightAnchor),
+        ])
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
         titleLabel.textColor = .label
         titleLabel.font = .preferredFont(forTextStyle: .body)
         titleLabel.numberOfLines = 2
@@ -1046,16 +1080,9 @@ final class PermissionRequestsView: UIView {
         rejectButton.setImage(.init(systemName: "hand.thumbsdown.circle"), for: .normal)
         rejectButton.tintColor = .systemRed
         acceptButton.addTarget(self, action: #selector(reject), for: .touchUpInside)
-
-        NSLayoutConstraint.activate([
-            acceptButton.widthAnchor.constraint(equalToConstant: 50),
-            acceptButton.heightAnchor.constraint(equalToConstant: 50),
-            rejectButton.widthAnchor.constraint(equalTo: acceptButton.widthAnchor),
-            rejectButton.heightAnchor.constraint(equalTo: acceptButton.heightAnchor),
-        ])
     }
 
-    private func updateContent() {
+    func updateContent() {
         guard let request = content else {
             container.isHidden = true
             return
@@ -1063,6 +1090,15 @@ final class PermissionRequestsView: UIView {
 
         container.isHidden = false
         titleLabel.text = "\(request.user.name) requested to \(request.permission)"
+    }
+
+    private func subscribeToPermissionRequestUpdates() {
+        cancellable = call
+            .state
+            .$permissionRequests
+            .receive(on: DispatchQueue.main)
+            .map { $0.first }
+            .sink { [weak self] in self?.content = $0 }
     }
 
     @objc
@@ -1167,21 +1203,19 @@ final class MicButtonView: UIButton {
     init(microphone: MicrophoneManager) {
         self.microphone = microphone
         super.init(frame: .zero)
-        setImage(.init(systemName: "mic.circle"), for: .normal)
 
-        cancellable = microphone
-            .$status
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] newValue in
-                self?.setImage(.init(systemName: newValue == .enabled ? "mic.circle" : "mic.slash.circle"), for: .normal)
-                self?.tintColor = newValue == .enabled ? .systemBlue : .systemRed
-            }
+        subscribeToMicrophoneStatusUpdates()
 
-        addTarget(self, action: #selector(toggleMic), for: .touchUpInside)
+        setUpAppearance()
     }
 
     deinit {
         toggleTask?.cancel()
+    }
+
+    func setUpAppearance() {
+        setImage(.init(systemName: "mic.circle"), for: .normal)
+        addTarget(self, action: #selector(toggleMic), for: .touchUpInside)
     }
 
     @objc
@@ -1190,6 +1224,16 @@ final class MicButtonView: UIButton {
         toggleTask = Task {
             try await microphone.toggle()
         }
+    }
+
+    private func subscribeToMicrophoneStatusUpdates() {
+        cancellable = microphone
+            .$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.setImage(.init(systemName: newValue == .enabled ? "mic.circle" : "mic.slash.circle"), for: .normal)
+                self?.tintColor = newValue == .enabled ? .systemBlue : .systemRed
+            }
     }
 }
 ```
@@ -1274,17 +1318,22 @@ final class ParticipantsListHeader: UICollectionReusableView {
     override init(frame: CGRect) {
         super.init(frame: frame)
 
-        titleLabel.font = .preferredFont(forTextStyle: .title3)
-        titleLabel.textColor = .label
         addSubview(titleLabel)
         titleLabel.pin(to: self)
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
+        titleLabel.font = .preferredFont(forTextStyle: .title3)
+        titleLabel.textColor = .label
     }
 
     func updateContent() {
         titleLabel.text = content
     }
 }
-
 ```
 
 We already have a view to display participants so all we need to do is to create another one, here's how the ParticipantsView looks
@@ -1332,11 +1381,7 @@ final class ParticipantsView: UIView {
             withReuseIdentifier: "ParticipantsListHeader"
         )
 
-        call.state
-            .$participants
-            .receive(on: DispatchQueue.main)
-            .sink { [weak self] in self?.content = $0 }
-            .store(in: &cancellables)
+        subscribeToParticipantsUpdates()
     }
 
     func updateContent() {
@@ -1441,6 +1486,14 @@ final class ParticipantsView: UIView {
 
         let layout = UICollectionViewCompositionalLayout(section: section)
         return layout
+    }
+
+    private func subscribeToParticipantsUpdates() {
+        call.state
+            .$participants
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.content = $0 }
+            .store(in: &cancellables)
     }
 }
 ```
