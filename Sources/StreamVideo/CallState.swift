@@ -257,6 +257,7 @@ public class CallState: ObservableObject {
         session = response.session
         settings = response.settings
         egress = response.egress
+        ingress = response.ingress
         if !localCallSettingsUpdate {
             callSettings = response.settings.toCallSettings
         }
