@@ -18,16 +18,24 @@ Let's get started, if you have any questions or feedback be sure to let us know 
 
 ### Step 1 - Create a new project in Xcode
 
+Note that this tutorial was written using **XCode 14**. Setup steps can vary slightly across Xcode versions.
+We recommend using Xcode 14 or newer.
+
+1. Create a new project
+2. Select iOS -> App in the new project template
+3. Select SwiftUI as the interface for your app
+4. Name your project **LivestreamSampleApp**.
+
 ### Step 2 - Install the SDK & Setup the client
 
 Please make sure that you have the required setup:
 - `StreamVideo` SDK added to your project
 - Auth setup and user login
-- Required permissions for camera and microphone
+- Required permissions for camera and microphone ("Privacy - Camera Usage Description" and "Privacy - Microphone Usage Description" in your `Info.plist` file)
 
 ### Step 3 - Broadcast a livestream from your phone
 
-The following code shows how to publish from your phone's camera. Let's open LivestreamSampleApp.swift and replace the LivestreamSampleApp struct with the following code:
+The following code shows how to publish from your phone's camera. Let's open `LivestreamSampleApp.swift` and replace the `LivestreamSampleApp` struct with the following code:
 
 ```swift
 struct LivestreamSampleApp: App {
@@ -124,13 +132,13 @@ To create the first call object, specify the call type as **livestream** and pro
 
 Finally, using `call.join(create: true)` will not only create the call object on our servers but also initiate the real-time transport for audio and video. This allows for seamless and immediate engagement in the livestream.
 
-Note that you can also add members to a call and assign them different roles. For more information, see the [call creation docs](../03-guides/02-joining-creating-calls.mdx)
+Note that you can also add members to a call and assign them different roles. For more information, see the [call creation docs](../03-guides/02-joining-creating-calls.mdx).
 
 ### Step 4 - Rendering the video
 
 In this step we're going to build a UI for showing your local video with a button to start the livestream. This example uses SwiftUI, but you could also use UIKit.
 
-In LivestreamSampleApp.swift replace the LivestreamView with the following code:
+In `LivestreamSampleApp.swift` replace the `LivestreamView` with the following code:
 
 ```swift
 struct LivestreamView: View {
@@ -229,7 +237,8 @@ The livestream layout is built using standard SwiftUI. The [VideoRenderer](../04
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
-Almost all livestream software and hardware supports RTMPs.
+Almost all livestream software and hardware supports RTMPS.
+[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMPS.
 So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
 
 A. Log the URL & Stream Key
@@ -280,10 +289,11 @@ So HLS can be a good option when:
 
 Let's show how to broadcast your call to HLS:
 
-```kotlin
-call.startBroadcast()
-val hlsUrl = call.state.egress.value?.hls
-Log.i("Tutorial", "HLS url = $hlsUrl")
+```swift
+try await call.startBroadcasting()
+if let hls = call.state.egress?.hls?.playlistUrl {
+    print("hls url = \(hls)")
+}
 ```
 
 You can view the HLS video feed using any HLS capable video player.
