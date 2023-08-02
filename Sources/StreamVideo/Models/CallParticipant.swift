@@ -47,7 +47,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
     public var audioLevel: Float
     /// List of the last 10 audio levels.
     public var audioLevels: [Float]
-    public var pins: [PinInfo]
+    public var pin: PinInfo?
     
     public init(
         id: String,
@@ -70,7 +70,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         joinedAt: Date,
         audioLevel: Float,
         audioLevels: [Float],
-        pins: [PinInfo]
+        pin: PinInfo?
     ) {
         self.id = id
         self.userId = userId
@@ -92,17 +92,16 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         self.joinedAt = joinedAt
         self.audioLevel = audioLevel
         self.audioLevels = audioLevels
-        self.pins = pins
+        self.pin = pin
     }
     
-    //TODO: temp
     public var isPinned: Bool {
-        !pins.isEmpty
+        pin != nil
     }
     
     //TODO: temp
     public var isPinnedRemotely: Bool {
-        pins.filter(\.isRemotePin).count > 0
+        pin?.isLocal == false
     }
     
     /// Determines whether the track of the participant should be displayed.
@@ -132,7 +131,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
@@ -158,7 +157,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
@@ -184,7 +183,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
@@ -210,7 +209,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
 
@@ -236,7 +235,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
@@ -262,7 +261,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
 
@@ -288,7 +287,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
 
@@ -323,7 +322,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
@@ -349,7 +348,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
@@ -375,11 +374,11 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
     
-    public func withUpdated(pins: [PinInfo]) -> CallParticipant {
+    public func withUpdated(pin: PinInfo?) -> CallParticipant {
         CallParticipant(
             id: id,
             userId: userId,
@@ -401,14 +400,14 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             joinedAt: joinedAt,
             audioLevel: audioLevel,
             audioLevels: audioLevels,
-            pins: pins
+            pin: pin
         )
     }
 }
 
 extension Stream_Video_Sfu_Models_Participant {
     
-    func toCallParticipant(showTrack: Bool = true) -> CallParticipant {
+    func toCallParticipant(showTrack: Bool = true, pin: PinInfo? = nil) -> CallParticipant {
         CallParticipant(
             id: sessionID,
             userId: userID,
@@ -427,13 +426,12 @@ extension Stream_Video_Sfu_Models_Participant {
             joinedAt: joinedAt.date,
             audioLevel: audioLevel,
             audioLevels: [audioLevel],
-            pins: []
+            pin: pin
         )
     }
 }
 
 public struct PinInfo: Sendable, Equatable {
-    public let isRemotePin: Bool
+    public let isLocal: Bool
     public let pinnedAt: Date
-    public let trackType: TrackType
 }

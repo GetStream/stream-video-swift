@@ -480,20 +480,14 @@ class WebRTCClient: NSObject {
         guard let participant = await state.callParticipants[sessionId] else {
             throw ClientError.Unexpected()
         }
-        var pins = participant.pins
+        var pin: PinInfo?
         if isEnabled {
-            let pin = PinInfo(
-                isRemotePin: false,
-                pinnedAt: Date(),
-                trackType: .video
+            pin = PinInfo(
+                isLocal: true,
+                pinnedAt: Date()
             )
-            pins.append(pin)
-        } else {
-            pins.removeAll { pin in
-                !pin.isRemotePin
-            }
         }
-        let updated = participant.withUpdated(pins: pins)
+        let updated = participant.withUpdated(pin: pin)
         await state.update(callParticipant: updated)
     }
     
@@ -1072,19 +1066,16 @@ class WebRTCClient: NSObject {
             var updatedParticipants = [String: CallParticipant]()
             for (sessionId, participant) in participants {
                 var updated = participant
-                var pins = participant.pins
-                let remotePins = pins.filter(\.isRemotePin)
-                if sessionIds.contains(sessionId) && remotePins.isEmpty {
+                if sessionIds.contains(sessionId)
+                    && (participant.pin == nil || participant.pin?.isLocal == true) {
                     let pin = PinInfo(
-                        isRemotePin: true,
-                        pinnedAt: Date(),
-                        trackType: .video
+                        isLocal: false,
+                        pinnedAt: Date()
                     )
-                    pins.append(pin)
-                    updated = participant.withUpdated(pins: pins)
-                } else if !sessionIds.contains(sessionId) && !remotePins.isEmpty {
-                    pins.removeAll(where: \.isRemotePin)
-                    updated = participant.withUpdated(pins: pins)
+                    updated = participant.withUpdated(pin: pin)
+                } else if !sessionIds.contains(sessionId)
+                            && (participant.pin != nil && participant.pin?.isLocal == false) {
+                    updated = participant.withUpdated(pin: nil)
                 }
                 updatedParticipants[sessionId] = updated
             }
