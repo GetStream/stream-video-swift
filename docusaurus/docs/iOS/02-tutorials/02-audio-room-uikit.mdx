@@ -51,7 +51,6 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        // Override point for customization after application launch.
         return true
     }
 
@@ -62,18 +61,7 @@ final class AppDelegate: UIResponder, UIApplicationDelegate {
         configurationForConnecting connectingSceneSession: UISceneSession,
         options: UIScene.ConnectionOptions
     ) -> UISceneConfiguration {
-        // Called when a new scene session is being created.
-        // Use this method to select a configuration to create the new scene with.
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
-    }
-
-    func application(
-        _ application: UIApplication,
-        didDiscardSceneSessions sceneSessions: Set<UISceneSession>
-    ) {
-        // Called when the user discards a scene session.
-        // If any sessions were discarded while the application was not running, this will be called shortly after application:didFinishLaunchingWithOptions.
-        // Use this method to release any resources that were specific to the discarded scenes, as they will not return.
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 }
 ```
@@ -90,9 +78,6 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         willConnectTo session: UISceneSession,
         options connectionOptions: UIScene.ConnectionOptions
     ) {
-        // Use this method to optionally configure and attach the UIWindow `window` to the provided UIWindowScene `scene`.
-        // If using a storyboard, the `window` property will automatically be initialized and attached to the scene.
-        // This delegate does not imply the connecting scene or session are new (see `application:configurationForConnectingSceneSession` instead).
         guard let windowScene = (scene as? UIWindowScene) else { return }
         let window = UIWindow(windowScene: windowScene)
         window.rootViewController = ContentViewController()
@@ -103,7 +88,43 @@ final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
 }
 ```
 
-The `ContentViewController` will be the main ViewController that our app will use.
+The `ContentViewController` will be the main ViewController that our app will use. Additionally, we are going to use a few convenience methods to keep the code in this tutorial as short as possible. The methods are declared as Extensions on UIKit objects and are the following:
+
+```swift title=Convenience.swift
+extension UIView {
+    func withoutTranslatesAutoresizingMaskIntoConstraints() -> Self {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        return self
+    }
+
+    func pin(to superview: UIView) {
+        NSLayoutConstraint.activate([
+            leadingAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.trailingAnchor),
+            topAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.topAnchor),
+            bottomAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.bottomAnchor),
+        ])
+    }
+
+    static func spacer() -> UIView {
+        UIStackView()
+            .withoutTranslatesAutoresizingMaskIntoConstraints()
+    }
+}
+
+extension UIStackView {
+
+    func withVerticalAxis() -> Self {
+        self.axis = .vertical
+        return self
+    }
+
+    func withHorizontalAxis() -> Self {
+        self.axis = .horizontal
+        return self
+    }
+}
+```
 
 #### App Permissions
 
@@ -649,6 +670,10 @@ final class LiveButtonView: UIView {
         updateContent()
     }
 
+    deinit {
+        activeTask?.cancel()
+    }
+
     func updateContent() {
         if content {
             stopLiveButton.removeFromSuperview()
@@ -728,7 +753,7 @@ Now the app exposes a fake mic control button (more on that later) and a button 
 
 #### List Participants
 
-As a next step, let's render the actual list of participants and show an indicator when they are speaking. To do this we are going to create a `ParticipantView` and render it from the `ParticipantsView`
+As a next step, let's render the actual list of participants and show an indicator when they are speaking. To do this we are going to create a `ParticipantView` and render it from the `ParticipantsView`.
 
 ```swift title=ParticipantView
 final class ParticipantView: UIView {
@@ -1051,7 +1076,8 @@ final class PermissionRequestsView: UIView {
 
     @objc
     private func reject() {
-        content?.reject()
+        guard let request = content else { return }
+        request.reject()
         content = nil
     }
 }
@@ -1152,6 +1178,10 @@ final class MicButtonView: UIButton {
             }
 
         addTarget(self, action: #selector(toggleMic), for: .touchUpInside)
+    }
+
+    deinit {
+        toggleTask?.cancel()
     }
 
     @objc
