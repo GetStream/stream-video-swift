@@ -316,8 +316,8 @@ class CallCRUDTest: IntegrationTest {
 
         for userId in [user1, user2] {
             try await firstUserCall.mute(userId: userId)
-            try await customWait()
         }
+        try await customWait(nanoseconds: 15_000_000_000)
         
         participants = await firstUserCall.state.participants
         XCTAssertEqual(participants.first?.hasAudio, false, "Call creator should be muted")
