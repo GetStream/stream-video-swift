@@ -350,6 +350,39 @@ final class CallController_Tests: ControllerTestCase {
         XCTAssert(updated?.trackSize == size)
     }
     
+    func test_callController_pinAndUnpin() async throws {
+        // Given
+        let sessionId = "test"
+        webRTCClient = makeWebRTCClient()
+        let participant = MockResponseBuilder().makeCallParticipant(id: sessionId)
+        await webRTCClient.state.update(callParticipants: [sessionId: participant])
+        let callController = makeCallController()
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        
+        // When
+        try await callController.joinCall(
+            callType: callType,
+            callId: callId,
+            callSettings: CallSettings(),
+            videoOptions: VideoOptions(),
+            options: nil
+        )
+        callController.call = call
+        try await callController.changePinState(isEnabled: true, sessionId: sessionId)
+        
+        // Then
+        var updated = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssertNotNil(updated?.pin)
+        XCTAssertEqual(updated?.pin?.isLocal, true)
+        
+        // When
+        try await callController.changePinState(isEnabled: false, sessionId: sessionId)
+        
+        // Then
+        updated = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssertNil(updated?.pin)
+    }
+    
     // MARK: - private
     
     private func makeCallController(

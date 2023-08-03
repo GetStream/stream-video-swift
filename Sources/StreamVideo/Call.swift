@@ -621,6 +621,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     // MARK: - Pinning
     
+    /// Pins the user with the provided session id locally.
+    /// - Parameter sessionId: the user's session id.
     public func pin(
         sessionId: String
     ) async throws {
@@ -630,6 +632,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
+    /// Unpins the user with the provided session id locally.
+    /// - Parameter sessionId: the user's session id.
     public func unpin(
         sessionId: String
     ) async throws {
@@ -639,6 +643,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
+    /// Pins the user with the provided session id for everyone in the call.
+    /// - Parameters:
+    ///  - userId: the user's id.
+    ///  - sessionId: the user's session id.
+    /// - Returns: `PinResponse`
     public func pinForEveryone(
         userId: String,
         sessionId: String
@@ -654,6 +663,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
+    /// Unpins the user with the provided session id for everyone in the call.
+    /// - Parameters:
+    ///  - userId: the user's id.
+    ///  - sessionId: the user's session id.
+    /// - Returns: `UnpinResponse`
     public func unpinForEveryone(
         userId: String,
         sessionId: String

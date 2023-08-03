@@ -342,7 +342,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
 }
 
-struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral, Sendable {
+struct TrackType: RawRepresentable, Codable, Hashable, ExpressibleByStringLiteral {
     let rawValue: String
 
     init(rawValue: String) {

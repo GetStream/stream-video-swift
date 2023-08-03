@@ -321,7 +321,7 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
             connectionQuality: connectionQuality,
             joinedAt: joinedAt,
             audioLevel: audioLevel,
-            audioLevels: audioLevels,
+            audioLevels: levels,
             pin: pin
         )
     }
@@ -431,7 +431,10 @@ extension Stream_Video_Sfu_Models_Participant {
     }
 }
 
+/// Provides info whether the user is pinned.
 public struct PinInfo: Sendable, Equatable {
+    /// Determines if it's a local or a remote pin.
     public let isLocal: Bool
+    /// The date of pinning.
     public let pinnedAt: Date
 }

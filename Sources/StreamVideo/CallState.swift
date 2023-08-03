@@ -278,7 +278,7 @@ public class CallState: ObservableObject {
     }
 
     private func didUpdate(_ participants: [CallParticipant]) {
-        self.participants = participants.sorted(by: { $0.id < $1.id })
+        self.participants = participants.sorted(using: defaultComparators)
         var remoteParticipants: [CallParticipant] = []
         var activeSpeakers: [CallParticipant] = []
         var screenSharingSession: ScreenSharingSession?

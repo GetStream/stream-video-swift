@@ -523,4 +523,47 @@ class CallCRUDTest: IntegrationTest {
     func customWait(nanoseconds duration: UInt64 = 3_000_000_000) async throws {
         try await Task.sleep(nanoseconds: duration)
     }
+    
+    func test_pinAndUnpinUser() async throws {
+        let firstUserCall = client.call(callType: .default, callId: randomCallId)
+        try await firstUserCall.create(memberIds: [user1, user2])
+        
+        let secondUserClient = getUserClient(id: user2)
+        let secondUserCall = secondUserClient.call(
+            callType: .default,
+            callId: firstUserCall.callId
+        )
+        
+        try await firstUserCall.join()
+        try await customWait()
+                    
+        try await secondUserCall.join()
+        try await customWait()
+
+        _ = try await firstUserCall.pinForEveryone(userId: user2, sessionId: secondUserCall.state.sessionId)
+        try await customWait()
+        
+        var pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
+        XCTAssertNotNil(pin)
+        XCTAssertEqual(pin?.isLocal, false)
+        
+        _ = try await firstUserCall.unpinForEveryone(userId: user2, sessionId: secondUserCall.state.sessionId)
+        try await customWait()
+        
+        pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
+        XCTAssertNil(pin)
+        
+        try await firstUserCall.pin(sessionId: secondUserCall.state.sessionId)
+        try await customWait()
+        
+        pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
+        XCTAssertNotNil(pin)
+        XCTAssertEqual(pin?.isLocal, true)
+        
+        try await firstUserCall.unpin(sessionId: secondUserCall.state.sessionId)
+        try await customWait()
+        
+        pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
+        XCTAssertNil(pin)
+    }
 }
