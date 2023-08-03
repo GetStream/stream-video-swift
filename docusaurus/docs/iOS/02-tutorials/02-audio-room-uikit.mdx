@@ -1,0 +1,1526 @@
+---
+title: How to Build an iOS Audio Room with UIKit
+description: How to build an audio room using Swift Stream's video SDKs
+---
+
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
+
+This tutorial will teach you how to build an audio room experience like Twitter Spaces or Clubhouse.
+The end result will look like the image on the right and support the following features:
+
+* Backstage mode. You can start the call with your co-hosts and chat a bit before going live
+* Calls run on Stream's global edge network for optimal latency and scalability
+* There is no cap to how many listeners you can have in a room
+* Listeners can raise their hand, and be invited to speak by the host
+* Audio tracks are send multiple times for optimal reliability
+
+![Preview of the final result](../assets/audioroom_tutorial/finish.png)
+
+Time to get started building an audio-room for your app.
+
+### Step 1 - Create a new SwiftUI Application in Xcode
+
+1. Make sure you have Xcode installed and that you are running 14.3 or later
+2. Open Xcode and select "Create a new Project"
+3. Select "iOS" as the platform and "App" as the type of Application
+4. Name your project "AudioRooms" and select "Storyboard" as the interface
+
+### Step 2 - Install the SDK & Setup the project and permissions
+
+Next you need to add our SDK dependencies to your project using Swift Package Manager from Xcode.
+
+1. Click on "Add packages..." from the File menu
+2. Add https://github.com/GetStream/stream-video-swift in the search bar
+3. Select "StreamVideo" and "StreamVideoSwiftUI" and then click Add Package
+
+#### AppDelegate, SceneDelegate and Storyboard
+
+We are going to create our views programmatically so we can remove the Storyboard references to avoid any confusion.
+
+1. Remove the `Main storyboard file base name` entry from your `Info.plist`
+2. Remove the `Storyboard Name` etnry from your `Info.plist` inside `Scene Configuration > Window Application Session Role > Item 0`
+3. Remove the `Main.storyboard` file from the project.
+
+Open up `AudioRooms/AppDelegate.swift` and replace it with this code:
+
+```swift title="AudioRooms/AppDelegate.swift"
+@main
+final class AppDelegate: UIResponder, UIApplicationDelegate {
+
+    func application(
+        _ application: UIApplication,
+        didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
+    ) -> Bool {
+        return true
+    }
+
+    // MARK: UISceneSession Lifecycle
+
+    func application(
+        _ application: UIApplication,
+        configurationForConnecting connectingSceneSession: UISceneSession,
+        options: UIScene.ConnectionOptions
+    ) -> UISceneConfiguration {
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+    }
+}
+```
+
+Finally, open up `AudioRooms/SceneDelegate.swift` and replace it with this code:
+
+```swift title="AudioRooms/SceneDelegate.swift"
+final class SceneDelegate: UIResponder, UIWindowSceneDelegate {
+
+    var window: UIWindow?
+
+    func scene(
+        _ scene: UIScene,
+        willConnectTo session: UISceneSession,
+        options connectionOptions: UIScene.ConnectionOptions
+    ) {
+        guard let windowScene = (scene as? UIWindowScene) else { return }
+        let window = UIWindow(windowScene: windowScene)
+        window.rootViewController = ContentViewController()
+        self.window = window
+
+        window.makeKeyAndVisible()
+    }
+}
+```
+
+The `ContentViewController` will be the main ViewController that our app will use. Additionally, we are going to use a few convenience methods to keep the code in this tutorial as short as possible. The methods are declared as Extensions on UIKit objects and are the following:
+
+```swift title=Convenience.swift
+extension UIView {
+    func withoutTranslatesAutoresizingMaskIntoConstraints() -> Self {
+        self.translatesAutoresizingMaskIntoConstraints = false
+        return self
+    }
+
+    func pin(to superview: UIView) {
+        NSLayoutConstraint.activate([
+            leadingAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.leadingAnchor),
+            trailingAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.trailingAnchor),
+            topAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.topAnchor),
+            bottomAnchor.constraint(equalTo: superview.safeAreaLayoutGuide.bottomAnchor),
+        ])
+    }
+
+    static func spacer() -> UIView {
+        UIStackView()
+            .withoutTranslatesAutoresizingMaskIntoConstraints()
+    }
+}
+
+extension UIStackView {
+
+    func withVerticalAxis() -> Self {
+        self.axis = .vertical
+        return self
+    }
+
+    func withHorizontalAxis() -> Self {
+        self.axis = .horizontal
+        return self
+    }
+}
+```
+
+#### App Permissions
+
+Joining an audio room requires microphone access, you need to request permissions to use them in your app. In order to do this, you will need to add the following key to the `Info.plist` file.
+
+- `Privacy - Microphone Usage Description` - "AudioRooms requires microphone access in order to capture and transmit audio"
+
+![Screenshot shows permissions in the .plist file](../assets/permissions.png)
+
+### Step 3 - Create & Join a call
+
+Create `AudioRooms/ContentViewController.swift` and replace it with this code:
+
+```swift title="AudioRooms/ContentViewController.swift"
+final class ContentViewController: UIViewController {
+    private let call: Call
+    private var callCreated: Bool = false {
+        didSet {
+            var content = contentView.content
+            content.callCreated = true
+            contentView.content = content
+        }
+    }
+
+    private var client: StreamVideo
+    private let apiKey: String = "" // The API key can be found in the Credentials section
+    private let userId: String = "REPLACE_WITH_USER_ID" // The User Id can be found in the Credentials section
+    private let token: String = "REPLACE_WITH_TOKEN" // The Token can be found in the Credentials section
+    private let callId: String = "REPLACE_WITH_CALL_ID" // The CallId can be found in the Credentials section
+
+    private var joinCallTask: Task<Void, Error>?
+    private var cancellables: Set<AnyCancellable> = []
+    private lazy var contentView: ContentView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    init() {
+        let user = User(
+            id: userId,
+            name: "Martin", // name and imageURL are used in the UI
+            imageURL: .init(string: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/a3911/martin-mitrevski.webp")
+        )
+        
+        // Initialize Stream Video client
+        self.client = StreamVideo(
+            apiKey: apiKey,
+            user: user,
+            token: .init(stringLiteral: token)
+        )
+        
+        // Initialize the call object
+        let call = client.call(callType: "audio_room", callId: callId)
+        
+        self.call = call
+        super.init(nibName: nil, bundle: nil)
+    }
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+
+        view.backgroundColor = .systemBackground
+        view.addSubview(contentView)
+        contentView.pin(to: view)
+
+        joinCallTask = Task {
+            guard !callCreated else { return }
+            try await call.join(
+                create: true,
+                options: .init(
+                    members: [
+                        .init(userId: "john_smith"),
+                        .init(userId: "jane_doe"),
+                    ],
+                    custom: [
+                        "title": .string("SwiftUI heads"),
+                        "description": .string("Talking about SwiftUI")
+                    ]
+                )
+            )
+            callCreated = true
+        }
+    }
+}
+```
+
+```swift title="AudioRooms/ContentView.swift"
+final class ContentView: UIView {
+
+    struct Content {
+        var callCreated: Bool
+        var callId: String
+        var participantCount: Int
+
+        static let empty = Content(callCreated: false, callId: "", participantCount: 0)
+    }
+
+    var content: Content = .empty {
+        didSet { updateContent() }
+    }
+
+    lazy var container: UIStackView = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var label: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(container)
+        container.pin(to: self)
+
+        label.textAlignment = .center
+        label.numberOfLines = 3
+
+        let spacerA = UIView.spacer()
+        let spacerB = UIView.spacer()
+
+        container.addArrangedSubview(spacerA)
+        container.addArrangedSubview(label)
+        container.addArrangedSubview(spacerB)
+
+        NSLayoutConstraint.activate([
+            spacerA.heightAnchor.constraint(equalTo: spacerB.heightAnchor)
+        ])
+
+        updateContent()
+    }
+
+    func updateContent() {
+        backgroundColor = .systemBackground
+        container.axis = .vertical
+
+        if content.callCreated {
+            label.text = "Audio Room \(content.callId) has \(content.participantCount) participants"
+            label.textColor = .blue
+            label.font = .systemFont(ofSize: 30)
+        } else {
+            label.text = "loading..."
+            label.textColor = .label
+            label.font = .preferredFont(forTextStyle: .body)
+        }
+    }
+}
+
+```
+
+Let's review the example above and go over the details.
+
+**User** setup. First we create a user object.
+You typically sync your users via a server side integration from your own backend.
+Alternatively, you can also use guest or anonymous users.
+
+```swift
+let user = User(
+    id: userId,
+    name: "Martin"
+)
+```
+
+**Client init**. Next we initialize the client by passing the API Key, user and user token.
+
+```swift
+self.client = StreamVideo(
+    apiKey: apiKey,
+    user: user,
+    token: .init(stringLiteral: token)
+)
+```
+
+**Create and join call** After the user and client are created, we create a call like this:
+
+```swift
+self.call = client.call(callType: "audio_room", callId: callId)
+
+try await call.join(
+    create: true,
+    options: .init(
+        members: [
+            .init(userId: "john_smith"),
+            .init(userId: "jane_doe"),
+        ],
+        custom: [
+            "title": .string("SwiftUI heads"),
+            "description": .string("Talking about SwiftUI")
+        ]
+    )
+)
+```
+
+* This joins and creates a call with the type: "audio_room" and the specified callId
+* The users with id `john_smith` and `jane_doe` are added as members to the call
+* And we set the `title` and `description` custom field on the call object
+
+To actually run this sample we need a valid user token. The user token is typically generated by your server side API.
+When a user logs in to your app you return the user token that gives them access to the call.
+To make this tutorial easier to follow we'll generate a user token for you:
+
+Please update **REPLACE_WITH_USER_ID**, **REPLACE_WITH_TOKEN** and **REPLACE_WITH_CALL_ID** with the actual values shown below:
+
+<TokenSnippet sampleApp='audio-rooms' />
+
+With valid credentials in place, we can join the call. When you run the app you'll see the following:
+
+![Preview of the app after step 3](../assets/audioroom_tutorial/basic.png)
+
+### Step 4 - Adding audio room UI elements
+
+In this next step we'll add:
+
+- Room title and description
+- Controls to toggle live mode on/off
+- A list of participants with their speaking status
+
+#### Room Title & Description
+
+Let's create the components we need to render this and add them to the main app view
+
+```swift title=DescriptionView
+final class DescriptionView: UIView {
+
+    struct Content {
+        var title: String
+        var description: String?
+        var participantsCount: Int
+
+        static let empty: Content = .init(title: "", participantsCount: 0)
+    }
+
+    var content: Content = .empty {
+        didSet { updateContent() }
+    }
+
+    lazy var container: UIStackView = .init()
+        .withVerticalAxis()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var titleLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var descriptionLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var participantsCountLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+    private var cancellables: Set<AnyCancellable> = []
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(container)
+        container.pin(to: self)
+
+        container.addArrangedSubview(titleLabel)
+        container.addArrangedSubview(descriptionLabel)
+        container.addArrangedSubview(participantsCountLabel)
+
+        subscribeToParticipantsUpdates()
+        subscribeToParticipantsUpdates()
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
+        container.spacing = 8
+
+        titleLabel.font = .preferredFont(forTextStyle: .title1)
+        titleLabel.textColor = .label
+
+        descriptionLabel.font = .preferredFont(forTextStyle: .body)
+        descriptionLabel.textColor = .secondaryLabel
+
+        participantsCountLabel.font = .preferredFont(forTextStyle: .caption1)
+        participantsCountLabel.textColor = .secondaryLabel
+    }
+
+    func updateContent() {
+        titleLabel.text = content.title
+        descriptionLabel.isHidden = content.description == nil
+        descriptionLabel.text = content.description
+        participantsCountLabel.text = "\(content.participantsCount) participants"
+    }
+
+    private func subscribeToParticipantsUpdates() {
+        call.state
+            .$participants
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                guard let self = self else { return }
+                var content = self.content
+                content.participantsCount = newValue.count
+                self.content = content
+            }.store(in: &cancellables)
+    }
+
+    private func subscribeToCustomUpdates() {
+        call.state
+            .$custom
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                guard let self = self else { return }
+                var content = self.content
+                content.title = newValue["title"]?.stringValue ?? ""
+                content.description = newValue["description"]?.stringValue
+                self.content = content
+            }.store(in: &cancellables)
+    }
+}
+```
+
+```swift title=ParticipantsView
+final class ParticipantsView: UIView {
+
+    var content: [CallParticipant] = []
+
+    lazy var container: UIStackView = .init()
+        .withVerticalAxis()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var todoLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(container)
+        container.pin(to: self)
+
+        let spacerA = UIView.spacer()
+        let spacerB = UIView.spacer()
+
+        todoLabel.text = "Participants: TODO"
+        todoLabel.textAlignment = .center
+
+        container.addArrangedSubview(spacerA)
+        container.addArrangedSubview(todoLabel)
+        container.addArrangedSubview(spacerB)
+
+        NSLayoutConstraint.activate([
+            spacerA.heightAnchor.constraint(equalTo: spacerB.heightAnchor)
+        ])
+    }
+}
+```
+
+```swift title=ControlsView
+final class ControlsView: UIView {
+
+    lazy var todoLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init() {
+        super.init(frame: .zero)
+
+        addSubview(todoLabel)
+        todoLabel.pin(to: self)
+
+        todoLabel.text = "Controls: TODO"
+        todoLabel.textAlignment = .center
+    }
+}
+```
+
+That's it for the basics, here's how the ContentView should look like now:
+
+```swift
+final class ContentView: UIView {
+
+    struct Content {
+        var callCreated: Bool
+        var callId: String
+        var title: String
+        var description: String?
+        var participantCount: Int
+
+        static let empty = Content(
+            callCreated: false,
+            callId: "",
+            title: "",
+            description: nil,
+            participantCount: 0
+        )
+    }
+
+    var content: Content = .empty {
+        didSet { updateContent() }
+    }
+
+    lazy var container: UIStackView = .init()
+        .withVerticalAxis()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var descriptionView: DescriptionView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var participantsView: ParticipantsView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var controlsView: ControlsView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(container)
+        container.pin(to: self)
+
+        updateContent()
+    }
+
+    func updateContent() {
+        backgroundColor = .systemBackground
+
+        container.arrangedSubviews.forEach {
+            container.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        if content.callCreated {
+            descriptionView.content = .init(
+                title: content.title,
+                description: content.description,
+                participantsCount: content.participantCount
+            )
+
+            container.addArrangedSubview(descriptionView)
+            container.addArrangedSubview(participantsView)
+            container.addArrangedSubview(controlsView)
+        } else {
+            let label = UILabel().withoutTranslatesAutoresizingMaskIntoConstraints()
+            label.text = "loading..."
+            label.textColor = .label
+            label.font = .preferredFont(forTextStyle: .body)
+
+            let spacerA = UIView.spacer()
+            let spacerB = UIView.spacer()
+
+            container.addArrangedSubview(spacerA)
+            container.addArrangedSubview(label)
+            container.addArrangedSubview(spacerB)
+
+            NSLayoutConstraint.activate([
+                spacerA.heightAnchor.constraint(equalTo: spacerB.heightAnchor)
+            ])
+        }
+    }
+}
+
+```
+
+If you run the app now, it should look like this:
+
+![Preview of the app after step 4](../assets/audioroom_tutorial/description.png)
+
+The approach is the same for all components. We take the states of the call by observing `call.state` published vars, such as `call.state.participants` and use it to power our UI.
+
+To make this a little more interactive let's join the audio room from the browser.
+
+<TokenSnippet sampleApp='audio-rooms' displayStyle='join' />
+
+#### Backstage & Live mode control
+
+As you probably noticed by opening the same room from the browser, audio rooms by default are not live. Regular users can only join an audio room when it is in live mode. Let's expand the ControlView and add a button that controls the backstage or the room.
+
+```swift title=MicButtonView
+final class MicButtonView: UIButton {
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init() {
+        super.init(frame: .zero)
+        setImage(.init(systemName: "mic.circle"), for: .normal)
+    }
+}
+```
+
+```swift title=LiveButtonView
+final class LiveButtonView: UIView {
+
+    var content: Bool = true {
+        didSet { updateContent() }
+    }
+
+    lazy var goLiveButton: UIButton = .init(type: .system)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var stopLiveButton: UIButton = .init(type: .system)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+    private var cancellables: Set<AnyCancellable> = []
+    private var activeTask: Task<Void, Error>?
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        subscribeToBackstageUpdates()
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    deinit {
+        activeTask?.cancel()
+    }
+
+    func setUpAppearance() {
+        goLiveButton.setTitle("Go Live", for: .normal)
+        goLiveButton.backgroundColor = .systemGreen
+        goLiveButton.layer.cornerRadius = 8
+        goLiveButton.setTitleColor(.darkText, for: .normal)
+        goLiveButton.addTarget(self, action: #selector(goLive), for: .touchUpInside)
+
+        stopLiveButton.setTitle("Stop Live", for: .normal)
+        stopLiveButton.backgroundColor = .systemRed
+        stopLiveButton.layer.cornerRadius = 8
+        stopLiveButton.setTitleColor(.label, for: .normal)
+        stopLiveButton.addTarget(self, action: #selector(stopLive), for: .touchUpInside)
+    }
+
+    func updateContent() {
+        if content {
+            stopLiveButton.removeFromSuperview()
+            addSubview(goLiveButton)
+            goLiveButton.pin(to: self)
+        } else {
+            goLiveButton.removeFromSuperview()
+            addSubview(stopLiveButton)
+            stopLiveButton.pin(to: self)
+        }
+    }
+
+    private func subscribeToBackstageUpdates() {
+        call.state
+            .$backstage
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.content = $0 }
+            .store(in: &cancellables)
+    }
+
+    @objc
+    private func goLive() {
+        activeTask?.cancel()
+        activeTask = Task {
+            try await call.goLive()
+        }
+    }
+
+    @objc
+    private func stopLive() {
+        activeTask?.cancel()
+        activeTask = Task {
+            try await call.stopLive()
+        }
+    }
+}
+```
+
+```swift title=ControlsView
+final class ControlsView: UIView {
+
+    lazy var container: UIStackView = .init()
+        .withHorizontalAxis()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var micButtonView: MicButtonView = .init(microphone: call.microphone)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var liveButtonView: LiveButtonView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    private let call: Call
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(container)
+        container.pin(to: self)
+
+        container.spacing = 8
+
+        let spacerA = UIView.spacer()
+        let spacerB = UIView.spacer()
+
+        container.addArrangedSubview(spacerA)
+        container.addArrangedSubview(micButtonView)
+        container.addArrangedSubview(liveButtonView)
+        container.addArrangedSubview(spacerB)
+
+        NSLayoutConstraint.activate([
+            spacerA.widthAnchor.constraint(equalTo: spacerB.widthAnchor)
+        ])
+    }
+}
+```
+
+Now the app exposes a fake mic control button (more on that later) and a button that allows to toggle live mode on/off. If you try the web demo of the audio room you should be able to join as a regular user.
+
+![Preview of the app with live button](../assets/audioroom_tutorial/live.png)
+
+#### List Participants
+
+As a next step, let's render the actual list of participants and show an indicator when they are speaking. To do this we are going to create a `ParticipantView` and render it from the `ParticipantsView`.
+
+```swift title=ParticipantView
+final class ParticipantView: UIView {
+
+    lazy var imageview: LazyImageView = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    var content: CallParticipant? {
+        didSet { updateContent() }
+    }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(participant: CallParticipant?) {
+        self.content = participant
+        super.init(frame: .zero)
+        
+        addSubview(imageview)
+        imageview.pin(to: self)
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
+        clipsToBounds = true
+        imageview.contentMode = .scaleAspectFit
+        imageview.placeholderImage = .init(systemName: "person.crop.circle")
+        imageview.failureImage = .init(systemName: "person.crop.circle")
+        layer.borderWidth = 2
+        layer.borderColor = UIColor.systemBackground.cgColor
+    }
+
+    func updateContent() {
+        imageview.url = content?.profileImageURL
+    }
+
+    override func layoutSubviews() {
+        super.layoutSubviews()
+        layer.cornerRadius = bounds.height / 2
+
+        layer.borderColor = (content?.isSpeaking ?? false)
+        ? UIColor.systemGreen.cgColor
+        : UIColor.gray.cgColor
+    }
+}
+
+final class ParticipantCollectionViewCell: UICollectionViewCell {
+    
+    var content: CallParticipant? {
+        didSet { updateContent() }
+    }
+    
+    lazy var participantView: ParticipantView = .init(participant: content)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+    
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+    
+    override init(frame: CGRect) {
+        super.init(frame: .zero)
+        
+        contentView.addSubview(participantView)
+        participantView.pin(to: contentView)
+        
+        contentView.backgroundColor = .systemBackground
+        
+        NSLayoutConstraint.activate([
+            participantView.widthAnchor.constraint(equalTo: participantView.heightAnchor),
+            participantView.heightAnchor.constraint(greaterThanOrEqualToConstant: 68)
+        ])
+    }
+    
+    func updateContent() {
+        participantView.content = content
+    }
+}
+```
+
+```swift title=ParticipantsView
+final class ParticipantsView: UIView {
+
+    private enum ParticipantsListSection: Int {
+        case speakers
+        case listeners
+    }
+
+    var content: [CallParticipant] = [] {
+        didSet { updateContent() }
+    }
+
+    private lazy var collectionViewDatasource: UICollectionViewDiffableDataSource<ParticipantsListSection, CallParticipant.ID> = makeDataSource()
+
+    private lazy var collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: makeCompositionalLayout())
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+    private var cancellables: Set<AnyCancellable> = []
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(collectionView)
+        collectionView.pin(to: self)
+
+        collectionView.dataSource = collectionViewDatasource
+        collectionView.register(
+            ParticipantCollectionViewCell.self,
+            forCellWithReuseIdentifier: "ParticipantCollectionViewCell"
+        )
+
+        subscribeToParticipantsUpdates()
+        updateContent()
+    }
+
+    func updateContent() {
+        guard !content.isEmpty else {
+            loadSnapshot(speakers: [], listeners: [])
+            return
+        }
+
+        var speakers: [CallParticipant] = []
+        var listeners: [CallParticipant] = []
+
+        content.forEach {
+            if $0.isSpeaking { speakers.append($0) }
+            else { listeners.append($0) }
+        }
+
+        loadSnapshot(speakers: speakers, listeners: listeners)
+    }
+
+    private func loadSnapshot(
+        speakers: [CallParticipant],
+        listeners: [CallParticipant]
+    ) {
+        var snapshot = NSDiffableDataSourceSnapshot<ParticipantsListSection, CallParticipant.ID>()
+        snapshot.appendSections([.speakers, .listeners])
+        snapshot.appendItems(speakers.map(\.id), toSection: .speakers)
+        snapshot.appendItems(listeners.map(\.id), toSection: .listeners)
+        collectionViewDatasource.applySnapshotUsingReloadData(snapshot)
+    }
+
+    private func makeDataSource() -> UICollectionViewDiffableDataSource<ParticipantsListSection, CallParticipant.ID> {
+        // Create a cell registration that the diffable data source will use.
+        let cellRegistration = UICollectionView.CellRegistration<ParticipantCollectionViewCell, CallParticipant> {
+            cell, indexPath, item in
+            cell.content = item
+        }
+
+        // Create the diffable data source and its cell provider.
+        return UICollectionViewDiffableDataSource(collectionView: collectionView) { [unowned self] collectionView, indexPath, identifier -> UICollectionViewCell in
+            let participant = self.content.first { $0.id == identifier }!
+            return collectionView.dequeueConfiguredReusableCell(
+                using: cellRegistration,
+                for: indexPath,
+                item: participant
+            )
+        }
+    }
+
+    private func makeCompositionalLayout() -> UICollectionViewCompositionalLayout {
+        let itemSize =
+        NSCollectionLayoutSize(
+            widthDimension: .fractionalHeight(0.3),
+            heightDimension: .fractionalHeight(0.3)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalWidth(0.5)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+
+        let section = NSCollectionLayoutSection(group: group)
+
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+
+    private func subscribeToParticipantsUpdates() {
+        call.state
+            .$participants
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.content = $0 }
+            .store(in: &cancellables)
+    }
+}
+
+extension CallParticipant: Hashable {
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(id)
+    }
+}
+```
+
+With these changes things get more interesting, the app is now showing a list of all participants connected to the call and displays a small circle next to the ones that are speaking.
+
+![Preview of the app with participants list](../assets/audioroom_tutorial/participants.png)
+
+### Step 5 - Go live and join from the browser
+
+If you now join the call from the browser you will see that the participant list updates as you open/close the browser tab.
+
+Note how the web interface won't allow you to share your audio/video. The reason for this is that by default the audio_room call type only allows moderators or admins to speak. Regular participants can request permission. And if different defaults make sense for your app you can edit the call type in the dashboard or create your own.
+
+### Step 6 - Requesting permission to speak
+
+Requesting permission to speak is easy. Let's first have a quick look at how the SDK call object exposes this:
+
+#### Requesting permission to speak
+
+```swift
+let response = try await call.request(permissions: [.sendAudio])
+```
+
+#### Handling permission requests
+
+Permission requests are exposed from `call.state` on the `permissionRequests` published variable.
+
+```swift
+if let request = call.state.permissionRequests.first {
+    // reject it
+    request.reject()
+
+    // grant it
+    try await call.grant(request: request)
+}
+```
+
+Let's add another view that shows the last incoming request as well as the buttons to grant / reject it
+
+```swift title=PermissionRequestsView
+final class PermissionRequestsView: UIView {
+
+    private let call: Call
+    private var cancellable: AnyCancellable?
+
+    private var content: PermissionRequest? {
+        didSet { updateContent() }
+    }
+
+    lazy var container: UIStackView = .init()
+        .withHorizontalAxis()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var titleLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var acceptButton: UIButton = .init(type: .system)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var rejectButton: UIButton = .init(type: .system)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        subscribeToPermissionRequestUpdates()
+
+        addSubview(container)
+        container.pin(to: self)
+
+        container.addArrangedSubview(titleLabel)
+        container.addArrangedSubview(acceptButton)
+        container.addArrangedSubview(rejectButton)
+
+        NSLayoutConstraint.activate([
+            acceptButton.widthAnchor.constraint(equalToConstant: 50),
+            acceptButton.heightAnchor.constraint(equalToConstant: 50),
+            rejectButton.widthAnchor.constraint(equalTo: acceptButton.widthAnchor),
+            rejectButton.heightAnchor.constraint(equalTo: acceptButton.heightAnchor),
+        ])
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
+        titleLabel.textColor = .label
+        titleLabel.font = .preferredFont(forTextStyle: .body)
+        titleLabel.numberOfLines = 2
+
+        acceptButton.setImage(.init(systemName: "hand.thumbsup.circle"), for: .normal)
+        acceptButton.tintColor = .systemGreen
+        acceptButton.addTarget(self, action: #selector(accept), for: .touchUpInside)
+
+        rejectButton.setImage(.init(systemName: "hand.thumbsdown.circle"), for: .normal)
+        rejectButton.tintColor = .systemRed
+        acceptButton.addTarget(self, action: #selector(reject), for: .touchUpInside)
+    }
+
+    func updateContent() {
+        guard let request = content else {
+            container.isHidden = true
+            return
+        }
+
+        container.isHidden = false
+        titleLabel.text = "\(request.user.name) requested to \(request.permission)"
+    }
+
+    private func subscribeToPermissionRequestUpdates() {
+        cancellable = call
+            .state
+            .$permissionRequests
+            .receive(on: DispatchQueue.main)
+            .map { $0.first }
+            .sink { [weak self] in self?.content = $0 }
+    }
+
+    @objc
+    private func accept() {
+        guard let request = content else { return }
+        Task {
+            try await call.grant(request: request)
+            content = nil
+        }
+    }
+
+    @objc
+    private func reject() {
+        guard let request = content else { return }
+        request.reject()
+        content = nil
+    }
+}
+```
+
+And here is the updated ContentView code that includes it:
+
+```swift
+lazy var participantsView: ParticipantsView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+...
+
+func updateContent() {
+        backgroundColor = .systemBackground
+
+        container.arrangedSubviews.forEach {
+            container.removeArrangedSubview($0)
+            $0.removeFromSuperview()
+        }
+
+        if content.callCreated {
+            descriptionView.content = .init(
+                title: content.title,
+                description: content.description,
+                participantsCount: content.participantCount
+            )
+
+            container.addArrangedSubview(descriptionView)
+            container.addArrangedSubview(participantsView)
+            container.addArrangedSubview(permissionRequestsView)
+            container.addArrangedSubview(controlsView)
+        } else {
+            let label = UILabel().withoutTranslatesAutoresizingMaskIntoConstraints()
+            label.text = "loading..."
+            label.textColor = .label
+            label.font = .preferredFont(forTextStyle: .body)
+
+            let spacerA = UIView.spacer()
+            let spacerB = UIView.spacer()
+
+            container.addArrangedSubview(spacerA)
+            container.addArrangedSubview(label)
+            container.addArrangedSubview(spacerB)
+
+            NSLayoutConstraint.activate([
+                spacerA.heightAnchor.constraint(equalTo: spacerB.heightAnchor)
+            ])
+        }
+    }
+```
+
+Now when a user requests access to speak the app will look like this:
+
+![Permission requests](../assets/audioroom_tutorial/permissions.png)
+
+### Step 7 - Add microphone control
+
+You can read & manage the microphone status from the `call.microphone` published variable. 
+
+```swift
+/// Read the microphone's status
+let isEnabled = call.microphone.status == .enabled
+
+/// Toggle between enabled/disabled microphone status.
+try await call.microphone.toggle()
+
+/// Enable the microphone.
+try await call.microphone.enable()
+
+/// Disable the microphone.
+try await call.microphone.disable()
+```
+
+Let's update the `MicButtonView` with microphone handling.
+
+```swift title=MicButtonView
+final class MicButtonView: UIButton {
+
+    private let microphone: MicrophoneManager
+    private var cancellable: AnyCancellable?
+    private var toggleTask: Task<Void, Error>?
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(microphone: MicrophoneManager) {
+        self.microphone = microphone
+        super.init(frame: .zero)
+
+        subscribeToMicrophoneStatusUpdates()
+
+        setUpAppearance()
+    }
+
+    deinit {
+        toggleTask?.cancel()
+    }
+
+    func setUpAppearance() {
+        setImage(.init(systemName: "mic.circle"), for: .normal)
+        addTarget(self, action: #selector(toggleMic), for: .touchUpInside)
+    }
+
+    @objc
+    func toggleMic() {
+        toggleTask?.cancel()
+        toggleTask = Task {
+            try await microphone.toggle()
+        }
+    }
+
+    private func subscribeToMicrophoneStatusUpdates() {
+        cancellable = microphone
+            .$status
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] newValue in
+                self?.setImage(.init(systemName: newValue == .enabled ? "mic.circle" : "mic.slash.circle"), for: .normal)
+                self?.tintColor = newValue == .enabled ? .systemBlue : .systemRed
+            }
+    }
+}
+```
+
+We can now pass the `microphone` ObservedObject from the `ControlsView`
+
+```swift title=ControlsView
+final class ControlsView: UIView {
+
+    lazy var container: UIStackView = .init()
+        .withHorizontalAxis()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var micButtonView: MicButtonView = .init(microphone: call.microphone)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    lazy var liveButtonView: LiveButtonView = .init(call: call)
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    private let call: Call
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(container)
+        container.pin(to: self)
+
+        container.spacing = 8
+
+        let spacerA = UIView.spacer()
+        let spacerB = UIView.spacer()
+
+        container.addArrangedSubview(spacerA)
+        container.addArrangedSubview(micButtonView)
+        container.addArrangedSubview(liveButtonView)
+        container.addArrangedSubview(spacerB)
+
+        NSLayoutConstraint.activate([
+            spacerA.widthAnchor.constraint(equalTo: spacerB.widthAnchor)
+        ])
+    }
+}
+```
+
+### Step 8 - Group participants
+
+It is common for audio rooms and similar interactive audio/video experiences to show users in separate groups. Let's see how we can update this application to render participants in two separate sections: speakers and listeners.
+
+Building custom layouts is very simple, all we need to do is to apply some filtering to the `call.participants` observable.
+
+```swift
+// a list of participants, by default this is list is ordered by the ID of the user
+call.state.participants
+
+// Speakers: participants that have an audio track (ie. are allowed to speak and have a mic configured)
+call.state.participants.filter { $0.hasAudio }
+
+// Listeners: participants that do not have an audio track
+call.state.participants.filter { !$0.hasAudio }
+```
+
+We create header view with that looks like
+
+```swift title=ParticipantsListHeader
+final class ParticipantsListHeader: UICollectionReusableView {
+
+    var content: String = "" {
+        didSet { updateContent() }
+    }
+
+    lazy var titleLabel: UILabel = .init()
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    override init(frame: CGRect) {
+        super.init(frame: frame)
+
+        addSubview(titleLabel)
+        titleLabel.pin(to: self)
+
+        setUpAppearance()
+        updateContent()
+    }
+
+    func setUpAppearance() {
+        titleLabel.font = .preferredFont(forTextStyle: .title3)
+        titleLabel.textColor = .label
+    }
+
+    func updateContent() {
+        titleLabel.text = content
+    }
+}
+```
+
+We already have a view to display participants so all we need to do is to create another one, here's how the ParticipantsView looks
+
+```swift
+final class ParticipantsView: UIView {
+
+    private enum ParticipantsListSection: Int {
+        case speakers
+        case listeners
+    }
+
+    var content: [CallParticipant] = [] {
+        didSet { updateContent() }
+    }
+
+    private lazy var collectionViewDatasource: UICollectionViewDiffableDataSource<ParticipantsListSection, CallParticipant.ID> = makeDataSource()
+
+    private lazy var collectionView: UICollectionView = .init(frame: .zero, collectionViewLayout: makeCompositionalLayout())
+        .withoutTranslatesAutoresizingMaskIntoConstraints()
+
+    private let call: Call
+    private var cancellables: Set<AnyCancellable> = []
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    init(call: Call) {
+        self.call = call
+
+        super.init(frame: .zero)
+
+        addSubview(collectionView)
+        collectionView.pin(to: self)
+
+        collectionView.dataSource = collectionViewDatasource
+        collectionView.register(
+            ParticipantCollectionViewCell.self,
+            forCellWithReuseIdentifier: "ParticipantCollectionViewCell"
+        )
+
+        collectionView.register(
+            ParticipantsListHeader.self,
+            forSupplementaryViewOfKind: "ParticipantsListHeader",
+            withReuseIdentifier: "ParticipantsListHeader"
+        )
+
+        subscribeToParticipantsUpdates()
+    }
+
+    func updateContent() {
+        guard !content.isEmpty else {
+            loadSnapshot(speakers: [], listeners: [])
+            return
+        }
+
+        var speakers: [CallParticipant] = []
+        var listeners: [CallParticipant] = []
+
+        content.forEach {
+            if $0.hasAudio { speakers.append($0) }
+            else { listeners.append($0) }
+        }
+
+        loadSnapshot(speakers: speakers, listeners: listeners)
+    }
+
+    private func loadSnapshot(
+        speakers: [CallParticipant],
+        listeners: [CallParticipant]
+    ) {
+        var snapshot = NSDiffableDataSourceSnapshot<ParticipantsListSection, CallParticipant.ID>()
+        var sections = [ParticipantsListSection]()
+        if !speakers.isEmpty { sections.append(.speakers) }
+        if !listeners.isEmpty { sections.append(.listeners) }
+        snapshot.appendSections(sections)
+
+        if !speakers.isEmpty {
+            snapshot.appendItems(speakers.map(\.id), toSection: .speakers)
+        }
+
+        if !listeners.isEmpty {
+            snapshot.appendItems(listeners.map(\.id), toSection: .listeners)
+        }
+        collectionViewDatasource.applySnapshotUsingReloadData(snapshot)
+    }
+
+    private func makeDataSource() -> UICollectionViewDiffableDataSource<ParticipantsListSection, CallParticipant.ID> {
+        // Create a cell registration that the diffable data source will use.
+        let cellRegistration = UICollectionView.CellRegistration<ParticipantCollectionViewCell, CallParticipant> {
+            cell, indexPath, item in
+            cell.content = item
+        }
+
+        // Create the diffable data source and its cell provider.
+        let datasource: UICollectionViewDiffableDataSource<ParticipantsListSection, CallParticipant.ID> = UICollectionViewDiffableDataSource(collectionView: collectionView) { [unowned self] collectionView, indexPath, identifier -> UICollectionViewCell in
+            let participant = self.content.first { $0.id == identifier }!
+            return collectionView.dequeueConfiguredReusableCell(
+                using: cellRegistration,
+                for: indexPath,
+                item: participant
+            )
+        }
+
+        datasource.supplementaryViewProvider = { [weak self] collectionView, identifier, indexPath in
+            guard let headerView = collectionView.dequeueReusableSupplementaryView(
+                ofKind: "ParticipantsListHeader",
+                withReuseIdentifier: "ParticipantsListHeader",
+                for: indexPath
+            ) as? ParticipantsListHeader
+            else {
+                return UICollectionReusableView()
+            }
+
+            let hasSpeakers = self?.content.first { $0.hasAudio } != nil
+            headerView.content = indexPath.section == 0 && hasSpeakers ? "Speakers" : "Listeners"
+            return headerView
+        }
+
+        return datasource
+    }
+
+    private func makeCompositionalLayout() -> UICollectionViewCompositionalLayout {
+        let itemSize =
+        NSCollectionLayoutSize(
+            widthDimension: .fractionalHeight(1),
+            heightDimension: .fractionalHeight(1)
+        )
+        let item = NSCollectionLayoutItem(layoutSize: itemSize)
+        item.contentInsets = NSDirectionalEdgeInsets(top: 5, leading: 5, bottom: 5, trailing: 5)
+
+        let groupSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .fractionalWidth(0.15)
+        )
+        let group = NSCollectionLayoutGroup.horizontal(
+            layoutSize: groupSize,
+            subitems: [item]
+        )
+
+        let section = NSCollectionLayoutSection(group: group)
+        let headerSize = NSCollectionLayoutSize(
+            widthDimension: .fractionalWidth(1.0),
+            heightDimension: .estimated(50)
+        )
+
+        section.boundarySupplementaryItems = [
+            .init(layoutSize: headerSize, elementKind: "ParticipantsListHeader", alignment: .top)
+        ]
+
+        let layout = UICollectionViewCompositionalLayout(section: section)
+        return layout
+    }
+
+    private func subscribeToParticipantsUpdates() {
+        call.state
+            .$participants
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.content = $0 }
+            .store(in: &cancellables)
+    }
+}
+```
+
+![SplitUI](../assets/audioroom_tutorial/split.png)
+
+## Other built-in features
+There are a few more exciting features that you can use to build audio rooms
+
+- **Query Calls:** You can query calls to easily show upcoming calls, calls that recently finished as well as call previews.
+- **Reactions & Custom events:** Reactions and custom events are supported.
+- **Recording & Broadcasting:** You can record your calls Chat Stream's chat SDKs are fully featured, and you can integrate them in the call.
+- **Moderation:** Moderation capabilities are built-in to the product
+- **Transcriptions:** Transcriptions aren't available yet, but they are due to launch soon
+
+## Recap
+It was fun to see just how quickly you can build an audio-room for your app. Please do let us know if you ran into any issues. Our team is also happy to review your UI designs and offer recommendations on how to achieve it with Stream.
+
+To recap what we've learned:
+
+- You set up a call with call = client.call(callType: "audio_room", callId: "123")
+- The call type "audio_room" controls which features are enabled and how permissions are set up
+- The audio_room by default enables "backstage" mode, and only allows admins and the creator of the call to join before the call goes live
+- When you join a call, realtime communication is set up for audio & video calling: call.join()
+- State objects in `call.state` and `call.state.participants` make it easy to build your own UI
+- Calls run on Stream's global edge network of video servers. Being closer to your users improves the latency and reliability of calls. For audio rooms we use Opus RED and Opus DTX for optimal audio quality.
+
+The SDKs enable you to build audio rooms, video calling and livestreaming in days.
+
+We hope you've enjoyed this tutorial and please do feel free to reach out if you have any suggestions or questions. You can find the code for this tutorial in [this Github repository](https://github.com/GetStream/stream-video-ios-examples/).
