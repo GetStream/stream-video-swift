@@ -26,6 +26,11 @@ module.exports = {
         },
         {
           type: 'doc',
+          id: 'tutorials/audio-room-uikit',
+          label: 'Audio Room UIKit Tutorial',
+        },
+        {
+          type: 'doc',
           id: 'tutorials/livestream',
           label: 'Livestream Tutorial',
         },
