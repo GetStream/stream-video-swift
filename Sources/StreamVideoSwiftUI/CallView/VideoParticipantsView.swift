@@ -122,21 +122,23 @@ public struct VideoCallParticipantModifier: ViewModifier {
                     
                     if popoverShown {
                         VStack(spacing: 16) {
-                            PopoverButton(
-                                title: pinTitle,
-                                popoverShown: $popoverShown
-                            ) {
-                                if participant.isPinned {
-                                    Task {
-                                        try await call?.unpin(
-                                            sessionId: participant.sessionId
-                                        )
-                                    }
-                                } else {
-                                    Task {
-                                        try await call?.pin(
-                                            sessionId: participant.sessionId
-                                        )
+                            if !participant.isPinnedRemotely {
+                                PopoverButton(
+                                    title: pinTitle,
+                                    popoverShown: $popoverShown
+                                ) {
+                                    if participant.isPinned {
+                                        Task {
+                                            try await call?.unpin(
+                                                sessionId: participant.sessionId
+                                            )
+                                        }
+                                    } else {
+                                        Task {
+                                            try await call?.pin(
+                                                sessionId: participant.sessionId
+                                            )
+                                        }
                                     }
                                 }
                             }

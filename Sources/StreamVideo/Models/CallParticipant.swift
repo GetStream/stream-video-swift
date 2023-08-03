@@ -99,9 +99,9 @@ public struct CallParticipant: Identifiable, Sendable, Equatable {
         pin != nil
     }
     
-    //TODO: temp
     public var isPinnedRemotely: Bool {
-        pin?.isLocal == false
+        guard let pin else { return false }
+        return pin.isLocal == false
     }
     
     /// Determines whether the track of the participant should be displayed.
