@@ -18,26 +18,33 @@ Let's get started, if you have any questions or feedback be sure to let us know 
 
 ### Step 1 - Create a new project in Xcode
 
-Note that this tutorial was written using **XCode 14**. Setup steps can vary slightly across Xcode versions.
-We recommend using Xcode 14 or newer.
-
-1. Create a new project
-2. Select iOS -> App in the new project template
-3. Select SwiftUI as the interface for your app
-4. Name your project **LivestreamSampleApp**.
+1. Make sure you have Xcode installed and that you are running 14.3 or later
+2. Open Xcode and select "Create a new Project"
+3. Select "iOS" as the platform and "App" as the type of Application
+4. Name your project **LivestreamSampleApp** and select "SwiftUI" as the interface
 
 ### Step 2 - Install the SDK & Setup the client
 
-Please make sure that you have the required setup:
-- `StreamVideo` SDK added to your project
-- Auth setup and user login
-- Required permissions for camera and microphone ("Privacy - Camera Usage Description" and "Privacy - Microphone Usage Description" in your `Info.plist` file)
+Next you need to add our SDK dependencies to your project using Swift Package Manager from Xcode.
+
+1. Click on "Add packages..." from the File menu
+2. Add https://github.com/GetStream/stream-video-swift in the search bar
+3. Select "StreamVideo" and "StreamVideoSwiftUI" and then click Add Package
+
+#### App Permissions
+
+Publishing a livestream requires camera and microphone access, you need to request permissions to use them in your app. In order to do this, you will need to add the following keys to the `Info.plist` file.
+
+- `Privacy - Microphone Usage Description` - "LivestreamSampleApp requires microphone access in order to capture and transmit audio"
+- `Privacy - Camera Usage Description` - "LivestreamSampleApp needs camera access for broadcasting"
+
+![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
 ### Step 3 - Broadcast a livestream from your phone
 
 The following code shows how to publish from your phone's camera. Let's open `LivestreamSampleApp.swift` and replace the `LivestreamSampleApp` struct with the following code:
 
-```swift
+```swift title=LivestreamSampleApp.swift
 struct LivestreamSampleApp: App {
 
     @State var streamVideo: StreamVideo
