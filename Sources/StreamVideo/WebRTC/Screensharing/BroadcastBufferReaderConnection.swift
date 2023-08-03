@@ -44,7 +44,7 @@ final class BroadcastBufferReaderConnection: BroadcastBufferConnection {
             
             self.setupStreams(
                 clientSocket: clientSocket,
-                delegate: streamDelegate,
+                delegate: self.streamDelegate,
                 handleOutput: false
             )
             self.openStreams()
