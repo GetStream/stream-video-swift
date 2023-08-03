@@ -73,14 +73,14 @@ class BroadcastScreenCapturer: VideoCapturing {
                 width: bufferDimensions.width,
                 height: bufferDimensions.height,
                 size: max(
-                    videoOptions.preferredDimensions.width,
-                    videoOptions.preferredDimensions.height
+                    self.videoOptions.preferredDimensions.width,
+                    self.videoOptions.preferredDimensions.height
                 )
             )
             
             self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
-            if !adaptedOutputFormat {
-                adaptedOutputFormat = true
+            if !self.adaptedOutputFormat {
+                self.adaptedOutputFormat = true
                 self.videoSource.adaptOutputFormat(
                     toWidth: bufferDimensions.width,
                     height: bufferDimensions.height,

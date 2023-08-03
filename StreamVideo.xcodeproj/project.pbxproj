@@ -4122,9 +4122,10 @@
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
 				CODE_SIGN_ENTITLEMENTS = ScreenSharing/ScreenSharing.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_STYLE = Manual;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				DEVELOPMENT_TEAM = "";
+				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = ScreenSharing/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
@@ -4142,6 +4143,8 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.ScreenSharing;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore io.getstream.iOS.VideoDemoApp.ScreenSharing";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
