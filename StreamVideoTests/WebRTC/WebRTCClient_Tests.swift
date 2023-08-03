@@ -26,8 +26,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         sessionId: "123",
         connectionQuality: .excellent,
         joinedAt: Date(),
-        isPinned: false,
-        audioLevel: 0, audioLevels: []
+        audioLevel: 0,
+        audioLevels: [],
+        pin: nil
     )
     
     let mockResponseBuilder = MockResponseBuilder()

@@ -25,8 +25,9 @@ final class CallParticipants_Tests: XCTestCase {
             sessionId: "123",
             connectionQuality: .excellent,
             joinedAt: Date(),
-            isPinned: false,
-            audioLevel: 0, audioLevels: []
+            audioLevel: 0,
+            audioLevels: [],
+            pin: nil
         )
         
         // When

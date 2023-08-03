@@ -112,6 +112,52 @@ final class Sorting_Tests: XCTestCase {
         XCTAssertEqual(sorted.map(\.id), ["3", "2", "4", "5", "1"])
     }
     
+    func testPinnedLocal() {
+        // Given
+        let participant1 = makeCallParticipant(id: "1")
+        let participant2 = makeCallParticipant(id: "2", pin: PinInfo(isLocal: true, pinnedAt: Date()))
+        let participants = [participant1, participant2]
+        
+        // When
+        let sorted = participants.sorted(using: [pinned])
+        
+        // Then
+        XCTAssertEqual(sorted.map(\.id), ["2", "1"])
+    }
+    
+    func testPinnedLocalAndRemote() {
+        // Given
+        let participant1 = makeCallParticipant(id: "1")
+        let participant2 = makeCallParticipant(id: "2", pin: PinInfo(isLocal: true, pinnedAt: Date()))
+        let participant3 = makeCallParticipant(id: "3", pin: PinInfo(isLocal: false, pinnedAt: Date()))
+        let participants = [participant1, participant2, participant3]
+        
+        // When
+        let sorted = participants.sorted(using: [pinned])
+        
+        // Then
+        XCTAssertEqual(sorted.map(\.id), ["3", "2", "1"])
+    }
+    
+    func testPinnedMultipleLocalAndRemote() {
+        // Given
+        let participant1 = makeCallParticipant(id: "1")
+        let participant2 = makeCallParticipant(id: "2", pin: PinInfo(isLocal: true, pinnedAt: Date()))
+        let participant3 = makeCallParticipant(id: "3", pin: PinInfo(isLocal: false, pinnedAt: Date()))
+        let participant4 = makeCallParticipant(id: "4")
+        let participant5 = makeCallParticipant(id: "5", pin: PinInfo(isLocal: true, pinnedAt: Date().addingTimeInterval(-10)))
+        let participant6 = makeCallParticipant(id: "6", pin: PinInfo(isLocal: false, pinnedAt: Date().addingTimeInterval(-10)))
+        let participants = [participant1, participant2, participant3, participant4, participant5, participant6]
+        
+        // When
+        let sorted = participants.sorted(using: [pinned, userId])
+        
+        // Then
+        XCTAssertEqual(sorted.map(\.id), ["3", "6", "2", "5", "4", "1"])
+    }
+    
+    //MARK: - private
+    
     private func makeCallParticipant(
         id: String,
         name: String = "",
@@ -120,7 +166,8 @@ final class Sorting_Tests: XCTestCase {
         hasAudio: Bool = false,
         isScreenSharing: Bool = false,
         isSpeaking: Bool = false,
-        isDominantSpeaker: Bool = false
+        isDominantSpeaker: Bool = false,
+        pin: PinInfo? = nil
     ) -> CallParticipant {
         mockResponseBuilder.makeCallParticipant(
             id: id,
@@ -130,7 +177,8 @@ final class Sorting_Tests: XCTestCase {
             hasAudio: hasAudio,
             isScreenSharing: isScreenSharing,
             isSpeaking: isSpeaking,
-            isDominantSpeaker: isDominantSpeaker
+            isDominantSpeaker: isDominantSpeaker,
+            pin: pin
         )
     }
     

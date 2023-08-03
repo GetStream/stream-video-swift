@@ -169,7 +169,8 @@ class MockResponseBuilder {
         hasAudio: Bool = false,
         isScreenSharing: Bool = false,
         isSpeaking: Bool = false,
-        isDominantSpeaker: Bool = false
+        isDominantSpeaker: Bool = false,
+        pin: PinInfo? = nil
     ) -> CallParticipant {
         let participant = CallParticipant(
             id: id,
@@ -190,9 +191,9 @@ class MockResponseBuilder {
             sessionId: id,
             connectionQuality: .unknown,
             joinedAt: Date(),
-            isPinned: false,
             audioLevel: 0,
-            audioLevels: []
+            audioLevels: [],
+            pin: pin
         )
         return participant
     }
