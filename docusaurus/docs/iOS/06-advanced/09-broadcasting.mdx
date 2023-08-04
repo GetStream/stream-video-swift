@@ -22,12 +22,12 @@ The code above will create and join the call. If you just want to create it (and
 let call = try await call.create(members: members, startsAt: Date(), custom: [:], ring: false)    
 ```
 
-### Start broadcasting
+### Start HLS
 
-You can start broadcasting a call, by calling the method `startBroadcasting`:
+You can start HLS broadcasting a call, by calling the method `startHLS`:
 
 ```swift
-try await call.startBroadcasting()
+try await call.startHLS()
 ```
 
 After few seconds of setup, the call would be broadcasted, and you will receive an event called `BroadcastingStartedEvent`. Also, the `state` of the call would be updated - the `broadcasting` value would become true.
@@ -51,12 +51,12 @@ for await event in call.subscribe() {
 
 In the `BroadcastingStartedEvent`, you will receive the `hlsPlaylistUrl`, a URL that can be used by other participants to watch the broadcasting.
 
-### Stop broadcasting
+### Stop HLS
 
-When you are done with broadcasting, you should call the method `stopBroadcasting`.
+When you are done with broadcasting, you should call the method `stopHLS`.
 
 ```swift
-try await call.stopBroadcasting()
+try await call.stopHLS()
 ```
 
 This action will also send `BroadcastingStoppedEvent` to all participants who are watching the call.

@@ -560,15 +560,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     //MARK: - Broadcasting
     
-    /// Starts broadcasting of the call.
+    /// Starts HLS broadcasting of the call.
     @discardableResult
-    public func startBroadcasting() async throws -> StartBroadcastingResponse {
+    public func startHLS() async throws -> StartBroadcastingResponse {
         return try await coordinatorClient.startBroadcasting(type: callType, id: callId)
     }
     
-    /// Stops broadcasting of the call.
+    /// Stops HLS broadcasting of the call.
     @discardableResult
-    public func stopBroadcasting() async throws -> StopBroadcastingResponse {
+    public func stopHLS() async throws -> StopBroadcastingResponse {
         try await coordinatorClient.stopBroadcasting(type: callType, id: callId)
     }
     
