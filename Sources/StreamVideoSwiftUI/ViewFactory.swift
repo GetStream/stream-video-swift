@@ -83,8 +83,7 @@ public protocol ViewFactory: AnyObject {
     /// - Returns: A view modifier that modifies the appearance of the video call participant.
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
-        participantCount: Int,
-        pinnedParticipant: Binding<CallParticipant?>,
+        call: Call?,
         availableSize: CGSize,
         ratio: CGFloat,
         showAllInfo: Bool
@@ -227,16 +226,14 @@ extension ViewFactory {
     
     public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
-        participantCount: Int,
-        pinnedParticipant: Binding<CallParticipant?>,
+        call: Call?,
         availableSize: CGSize,
         ratio: CGFloat,
         showAllInfo: Bool
     ) -> some ViewModifier {
         VideoCallParticipantModifier(
             participant: participant,
-            pinnedParticipant: pinnedParticipant,
-            participantCount: participantCount,
+            call: call,
             availableSize: availableSize,
             ratio: ratio,
             showAllInfo: showAllInfo

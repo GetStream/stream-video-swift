@@ -64,8 +64,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                             .modifier(
                                 viewFactory.makeVideoCallParticipantModifier(
                                     participant: participant,
-                                    participantCount: viewModel.callParticipants.count,
-                                    pinnedParticipant: $viewModel.pinnedParticipant,
+                                    call: viewModel.call,
                                     availableSize: thumbnailSize,
                                     ratio: 1,
                                     showAllInfo: false

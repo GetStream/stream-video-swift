@@ -30,6 +30,8 @@ internal enum L10n {
       internal static var layoutSpotlight: String { L10n.tr("Localizable", "call.current.layout-spotlight") }
       /// View
       internal static var layoutView: String { L10n.tr("Localizable", "call.current.layout-view") }
+      /// Pin for everyone
+      internal static var pinForEveryone: String { L10n.tr("Localizable", "call.current.pin-for-everyone") }
       /// Pin user
       internal static var pinUser: String { L10n.tr("Localizable", "call.current.pin-user") }
       /// Trying to reconnect to the call
@@ -40,6 +42,8 @@ internal enum L10n {
       internal static var sharing: String { L10n.tr("Localizable", "call.current.sharing") }
       /// Stop sharing
       internal static var stopSharing: String { L10n.tr("Localizable", "call.current.stop-sharing") }
+      /// Unpin for everyone
+      internal static var unpinForEveryone: String { L10n.tr("Localizable", "call.current.unpin-for-everyone") }
       /// Unpin user
       internal static var unpinUser: String { L10n.tr("Localizable", "call.current.unpin-user") }
     }

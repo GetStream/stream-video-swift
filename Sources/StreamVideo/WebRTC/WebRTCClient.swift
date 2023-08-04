@@ -235,6 +235,7 @@ class WebRTCClient: NSObject {
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
         }
+        sfuMiddleware.onPinsChanged = handlePinsChanged
     }
     
     func prepareForMigration(
@@ -470,6 +471,24 @@ class WebRTCClient: NSObject {
         await assignTracksToParticipants()
         try await changeScreensharingState(isEnabled: false)
         try? await screenshareCapturer?.stopCapture()
+    }
+    
+    func changePinState(
+        isEnabled: Bool,
+        sessionId: String
+    ) async throws {
+        guard let participant = await state.callParticipants[sessionId] else {
+            throw ClientError.Unexpected()
+        }
+        var pin: PinInfo?
+        if isEnabled {
+            pin = PinInfo(
+                isLocal: true,
+                pinnedAt: Date()
+            )
+        }
+        let updated = participant.withUpdated(pin: pin)
+        await state.update(callParticipant: updated)
     }
     
     // MARK: - private
@@ -1037,6 +1056,30 @@ class WebRTCClient: NSObject {
             let videoState = callSettings.videoOn
             try await changeVideoState(isEnabled: !videoState)
             try await changeVideoState(isEnabled: videoState)
+        }
+    }
+    
+    private func handlePinsChanged(_ pins: [Stream_Video_Sfu_Models_Pin]) {
+        Task {
+            let participants = await state.callParticipants
+            let sessionIds = pins.map(\.sessionID)
+            var updatedParticipants = [String: CallParticipant]()
+            for (sessionId, participant) in participants {
+                var updated = participant
+                if sessionIds.contains(sessionId)
+                    && (participant.pin == nil || participant.pin?.isLocal == true) {
+                    let pin = PinInfo(
+                        isLocal: false,
+                        pinnedAt: Date()
+                    )
+                    updated = participant.withUpdated(pin: pin)
+                } else if !sessionIds.contains(sessionId)
+                            && (participant.pin != nil && participant.pin?.isLocal == false) {
+                    updated = participant.withUpdated(pin: nil)
+                }
+                updatedParticipants[sessionId] = updated
+            }
+            await state.update(callParticipants: updatedParticipants)
         }
     }
     

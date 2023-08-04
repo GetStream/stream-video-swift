@@ -9,8 +9,8 @@ import WebRTC
 public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
+    var call: Call?
     var participants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var orientation: UIInterfaceOrientation
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
@@ -18,8 +18,8 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     
     public init(
         viewFactory: Factory,
+        call: Call?,
         participants: [CallParticipant],
-        pinnedParticipant: Binding<CallParticipant?>,
         availableSize: CGSize,
         orientation: UIInterfaceOrientation,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
@@ -31,7 +31,7 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
         self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
         self.orientation = orientation
-        _pinnedParticipant = pinnedParticipant
+        self.call = call
     }
     
     public var body: some View {
@@ -39,8 +39,8 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
             if orientation.isPortrait || orientation == .unknown {
                 VideoParticipantsViewPortrait(
                     viewFactory: viewFactory,
+                    call: call,
                     participants: participants,
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
@@ -48,8 +48,8 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
             } else {
                 VideoParticipantsViewLandscape(
                     viewFactory: viewFactory,
+                    call: call,
                     participants: participants,
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
@@ -63,8 +63,8 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
 struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
+    var call: Call?
     var participants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -74,8 +74,8 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
             if participants.count <= 3 {
                 VerticalParticipantsView(
                     viewFactory: viewFactory,
+                    call: call,
                     participants: participants,
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
@@ -85,9 +85,9 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
             } else if participants.count == 4 {
                 TwoColumnParticipantsView(
                     viewFactory: viewFactory,
+                    call: call,
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3]],
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
@@ -97,9 +97,9 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
             } else if participants.count == 5 {
                 TwoColumnParticipantsView(
                     viewFactory: viewFactory,
+                    call: call,
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3], participants[4]],
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
@@ -109,8 +109,8 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
             } else {
                 ParticipantsGridView(
                     viewFactory: viewFactory,
+                    call: call,
                     participants: participants,
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     isPortrait: true
                 ) { participant, view in
@@ -126,8 +126,8 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
 struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
+    var call: Call?
     var participants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -137,8 +137,8 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
             if participants.count <= 3 {
                 HorizontalParticipantsView(
                     viewFactory: viewFactory,
+                    call: call,
                     participants: participants,
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
@@ -148,9 +148,9 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
             } else if participants.count == 4 {
                 TwoRowParticipantsView(
                     viewFactory: viewFactory,
+                    call: call,
                     firstRowParticipants: [participants[0], participants[1]],
                     secondRowParticipants: [participants[2], participants[3]],
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
@@ -160,9 +160,9 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
             } else if participants.count == 5 {
                 TwoRowParticipantsView(
                     viewFactory: viewFactory,
+                    call: call,
                     firstRowParticipants: [participants[0], participants[1]],
                     secondRowParticipants: [participants[2], participants[3], participants[4]],
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     onViewUpdate: { participant, view in
                         onViewRendering(view, participant)
@@ -172,8 +172,8 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
             } else {
                 ParticipantsGridView(
                     viewFactory: viewFactory,
+                    call: call,
                     participants: participants,
-                    pinnedParticipant: $pinnedParticipant,
                     availableSize: availableSize,
                     isPortrait: false
                 ) { participant, view in
@@ -191,9 +191,9 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     
     var viewFactory: Factory
+    var call: Call?
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -202,8 +202,8 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
         HStack(spacing: 0) {
             VerticalParticipantsView(
                 viewFactory: viewFactory,
+                call: call,
                 participants: leftColumnParticipants,
-                pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
                 onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
@@ -212,8 +212,8 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
             
             VerticalParticipantsView(
                 viewFactory: viewFactory,
+                call: call,
                 participants: rightColumnParticipants,
-                pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
                 onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
@@ -234,9 +234,9 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     
     var viewFactory: Factory
+    var call: Call?
     var firstRowParticipants: [CallParticipant]
     var secondRowParticipants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -245,8 +245,8 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
         VStack(spacing: 0) {
             HorizontalParticipantsView(
                 viewFactory: viewFactory,
+                call: call,
                 participants: firstRowParticipants,
-                pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
                 onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
@@ -254,8 +254,8 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
             
             HorizontalParticipantsView(
                 viewFactory: viewFactory,
+                call: call,
                 participants: secondRowParticipants,
-                pinnedParticipant: $pinnedParticipant,
                 availableSize: size,
                 onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
@@ -273,8 +273,8 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
 struct VerticalParticipantsView<Factory: ViewFactory>: View {
             
     var viewFactory: Factory
+    var call: Call?
     var participants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -293,8 +293,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(
                         participant: participant,
-                        participantCount: participants.count,
-                        pinnedParticipant: $pinnedParticipant,
+                        call: call,
                         availableSize: availableSize,
                         ratio: ratio,
                         showAllInfo: true
@@ -320,8 +319,8 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
 struct HorizontalParticipantsView<Factory: ViewFactory>: View {
             
     var viewFactory: Factory
+    var call: Call?
     var participants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
@@ -340,8 +339,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(
                         participant: participant,
-                        participantCount: participants.count,
-                        pinnedParticipant: $pinnedParticipant,
+                        call: call,
                         availableSize: size,
                         ratio: ratio,
                         showAllInfo: true

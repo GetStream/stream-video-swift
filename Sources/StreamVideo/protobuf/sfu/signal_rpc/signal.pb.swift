@@ -20,6 +20,41 @@ fileprivate struct _GeneratedWithProtocGenSwiftVersion: SwiftProtobuf.ProtobufAP
   typealias Version = _2
 }
 
+struct Stream_Video_Sfu_Signal_ICERestartRequest {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var sessionID: String = String()
+
+  var peerType: Stream_Video_Sfu_Models_PeerType = .publisherUnspecified
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Signal_ICERestartResponse {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var error: Stream_Video_Sfu_Models_Error {
+    get {return _error ?? Stream_Video_Sfu_Models_Error()}
+    set {_error = newValue}
+  }
+  /// Returns true if `error` has been explicitly set.
+  var hasError: Bool {return self._error != nil}
+  /// Clears the value of `error`. Subsequent reads from it will return its default value.
+  mutating func clearError() {self._error = nil}
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+
+  fileprivate var _error: Stream_Video_Sfu_Models_Error? = nil
+}
+
 struct Stream_Video_Sfu_Signal_UpdateMuteStatesRequest {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -259,6 +294,8 @@ struct Stream_Video_Sfu_Signal_SetPublisherResponse {
 }
 
 #if swift(>=5.5) && canImport(_Concurrency)
+extension Stream_Video_Sfu_Signal_ICERestartRequest: @unchecked Sendable {}
+extension Stream_Video_Sfu_Signal_ICERestartResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_UpdateMuteStatesRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_UpdateMuteStatesResponse: @unchecked Sendable {}
 extension Stream_Video_Sfu_Signal_TrackMuteState: @unchecked Sendable {}
@@ -277,6 +314,80 @@ extension Stream_Video_Sfu_Signal_SetPublisherResponse: @unchecked Sendable {}
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
 
 fileprivate let _protobuf_package = "stream.video.sfu.signal"
+
+extension Stream_Video_Sfu_Signal_ICERestartRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ICERestartRequest"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "session_id"),
+    2: .standard(proto: "peer_type"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+      case 2: try { try decoder.decodeSingularEnumField(value: &self.peerType) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.sessionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 1)
+    }
+    if self.peerType != .publisherUnspecified {
+      try visitor.visitSingularEnumField(value: self.peerType, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Signal_ICERestartRequest, rhs: Stream_Video_Sfu_Signal_ICERestartRequest) -> Bool {
+    if lhs.sessionID != rhs.sessionID {return false}
+    if lhs.peerType != rhs.peerType {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Signal_ICERestartResponse: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ICERestartResponse"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "error"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularMessageField(value: &self._error) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    // The use of inline closures is to circumvent an issue where the compiler
+    // allocates stack space for every if/case branch local when no optimizations
+    // are enabled. https://github.com/apple/swift-protobuf/issues/1034 and
+    // https://github.com/apple/swift-protobuf/issues/1182
+    try { if let v = self._error {
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
+    } }()
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Signal_ICERestartResponse, rhs: Stream_Video_Sfu_Signal_ICERestartResponse) -> Bool {
+    if lhs._error != rhs._error {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
 
 extension Stream_Video_Sfu_Signal_UpdateMuteStatesRequest: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
   static let protoMessageName: String = _protobuf_package + ".UpdateMuteStatesRequest"

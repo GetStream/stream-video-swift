@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### ✅ Added
 - Screensharing from iOS devices
+- Remote pinning of users
 
 # [0.2.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.2.0)
 _July 18, 2023_

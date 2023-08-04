@@ -15,7 +15,15 @@ public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
 ]
 
 public var pinned: StreamSortComparator<CallParticipant> = { (p1, p2) in
-    booleanComparison(first: p1, second: p2, \.isPinned)
+    if p1.pin == nil && p2.pin == nil { return .orderedSame }
+    if p1.pin == nil && p2.pin != nil { return .orderedAscending }
+    if p1.pin != nil && p2.pin == nil { return .orderedDescending }
+    let result = booleanComparison(first: p1, second: p2, \.pin?.isLocal, preferredValue: false)
+    if result == .orderedSame {
+        return dateComparison(first: p1.pin?.pinnedAt, second: p2.pin?.pinnedAt)
+    } else {
+        return result
+    }
 }
 
 public var screensharing: StreamSortComparator<CallParticipant> = { (p1, p2) in
@@ -85,12 +93,17 @@ public enum SortOrder {
 func booleanComparison<Value, T>(
     first: Value,
     second: Value,
-    _ keyPath: KeyPath<Value, T>
+    _ keyPath: KeyPath<Value, T>,
+    preferredValue: Bool = true
 ) -> ComparisonResult {
     let boolFirst = first[keyPath: keyPath] as? Bool
     let boolSecond = second[keyPath: keyPath] as? Bool
     if boolFirst == boolSecond { return .orderedSame }
-    if boolFirst == true { return .orderedDescending }
-    if boolSecond == true { return .orderedAscending }
+    if boolFirst == preferredValue { return .orderedDescending }
+    if boolSecond == preferredValue { return .orderedAscending }
     return .orderedSame
+}
+
+func dateComparison(first: Date?, second: Date?) -> ComparisonResult {
+    (first ?? Date()) >= (second ?? Date()) ? .orderedDescending : .orderedAscending
 }

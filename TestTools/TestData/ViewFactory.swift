@@ -83,9 +83,9 @@ struct ParticipantFactory {
                 sessionId: "test\(i)",
                 connectionQuality: connectionQuality,
                 joinedAt: Date(),
-                isPinned: false,
                 audioLevel: 0,
-                audioLevels: []
+                audioLevels: [],
+                pin: nil
             )
             factory.append(participant)
         }
