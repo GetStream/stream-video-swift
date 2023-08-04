@@ -241,6 +241,16 @@ The [participant state docs](../03-guides/03-call-and-participant-state.mdx) sho
 The livestream layout is built using standard SwiftUI. The [VideoRenderer](../04-ui-components/02-video-renderer.mdx) component is provided by Stream.
 **VideoRenderer** renders the video and a fallback. You can use it for rendering the local and remote video.
 
+#### Backstage mode
+
+In the example above you might have noticed the `call.goLive()` method and the `call.state.backstage` value.
+The backstage functionality is enabled by default on the livestream call type.
+It makes it easy to build a flow where you and your co-hosts can setup your camera and equipment before going live.
+Only after you call `call.goLive()` will regular users be allowed to join the livestream.
+
+This is convenient for many livestreaming and audio-room use cases. If you want calls to start immediately when you join them that's also possible.
+Simply go the Stream dashboard, click the livestream call type and disable the backstage mode.
+
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
@@ -297,7 +307,7 @@ So HLS can be a good option when:
 Let's show how to broadcast your call to HLS:
 
 ```swift
-try await call.startBroadcasting()
+try await call.startHLS()
 if let hls = call.state.egress?.hls?.playlistUrl {
     print("hls url = \(hls)")
 }
