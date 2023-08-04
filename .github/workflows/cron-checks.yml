@@ -21,6 +21,7 @@ jobs:
       matrix:
         include:
           - ios: 16.4
+            setup_runtime: false
             device: "iPhone 14 Pro Max"
             xcode: 14.3.1
             os: macos-13
@@ -48,6 +49,7 @@ jobs:
         INSTALL_ALLURE: true
         INSTALL_VIDEO_BUDDY: true
     - name: Setup iOS ${{ matrix.ios }} Runtime
+      if: ${{ matrix.setup_runtime != false }}
       timeout-minutes: 60
       run: sudo xcodes runtimes install 'iOS ${{ matrix.ios }}'
     - name: Launch Allure TestOps
