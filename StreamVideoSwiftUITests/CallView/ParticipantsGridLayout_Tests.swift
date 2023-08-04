@@ -9,6 +9,8 @@ import XCTest
 @MainActor
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
+    private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
+    
     private func gridSize(for participantsCount: Int) -> CGSize {
         let heightDivider = CGFloat((participantsCount == 2 || participantsCount == 3) ? participantsCount : 1)
         return CGSize(width: defaultScreenSize.width, height: defaultScreenSize.height / heightDivider)
@@ -18,8 +20,8 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                call: call,
                 participants: ParticipantFactory.get(count, withAudio: true),
-                pinnedParticipant: .constant(nil),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
                 onViewRendering: {_,_ in },
@@ -33,8 +35,8 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                call: call,
                 participants: ParticipantFactory.get(count, withAudio: false),
-                pinnedParticipant: .constant(nil),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
                 onViewRendering: {_,_ in },
@@ -49,8 +51,8 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
             let count = gridParticipants.last!
             let layout = ParticipantsGridLayout(
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                call: call,
                 participants: ParticipantFactory.get(count, connectionQuality: quality),
-                pinnedParticipant: .constant(nil),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
                 onViewRendering: {_,_ in },
@@ -64,8 +66,8 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                call: call,
                 participants: ParticipantFactory.get(count, speaking: true),
-                pinnedParticipant: .constant(nil),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
                 onViewRendering: {_,_ in },

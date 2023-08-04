@@ -9,12 +9,14 @@ import XCTest
 @MainActor
 final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
     
+    private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
+    
     func test_fullscreen_participantWithAudio_snapshot() throws {
         let layout = ParticipantsFullScreenLayout(
             viewFactory: TestViewFactory(),
             participant: ParticipantFactory.get(1, withAudio: true).first!,
+            call: call,
             size: defaultScreenSize,
-            pinnedParticipant: .constant(nil),
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
@@ -25,8 +27,8 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
         let layout = ParticipantsFullScreenLayout(
             viewFactory: TestViewFactory(),
             participant: ParticipantFactory.get(1, withAudio: false).first!,
+            call: call,
             size: defaultScreenSize,
-            pinnedParticipant: .constant(nil),
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
@@ -38,8 +40,8 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             let layout = ParticipantsFullScreenLayout(
                 viewFactory: TestViewFactory(),
                 participant: ParticipantFactory.get(1, connectionQuality: quality).first!,
+                call: call,
                 size: defaultScreenSize,
-                pinnedParticipant: .constant(nil),
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -51,8 +53,8 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
         let layout = ParticipantsFullScreenLayout(
             viewFactory: TestViewFactory(),
             participant: ParticipantFactory.get(1, withAudio: true, speaking: true).first!,
+            call: call,
             size: defaultScreenSize,
-            pinnedParticipant: .constant(nil),
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )

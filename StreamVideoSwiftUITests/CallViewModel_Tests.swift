@@ -460,32 +460,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         try await XCTAssertWithDelay(callViewModel.participants.first?.showTrack == true)
     }
     
-    func test_pinParticipant_layoutChange() async throws {
-        // Given
-        let callViewModel = CallViewModel()
-
-        // When
-        callViewModel.startCall(callType: .default, callId: callId, members: participants)
-        try await waitForCallEvent()
-
-        var participantJoined = Stream_Video_Sfu_Event_ParticipantJoined()
-        participantJoined.callCid = callCid
-
-        var participant = Stream_Video_Sfu_Models_Participant()
-        participant.userID = secondUser.userId
-        participant.sessionID = UUID().uuidString
-        participantJoined.participant = participant
-
-        let controller = callViewModel.call!.callController as! CallController_Mock
-        controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
-
-        let callParticipant = participant.toCallParticipant(showTrack: false)
-        callViewModel.pinnedParticipant = callParticipant
-
-        // Then
-        XCTAssert(callViewModel.participantsLayout == .spotlight)
-    }
-    
     func test_pinParticipant_manualLayoutChange() async throws {
         // Given
         let callViewModel = CallViewModel()
@@ -505,9 +479,6 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         let controller = callViewModel.call!.callController as! CallController_Mock
         controller.webRTCClient.eventNotificationCenter.process(.sfuEvent(.participantJoined(participantJoined)))
         callViewModel.update(participantsLayout: .fullScreen)
-
-        let callParticipant = participant.toCallParticipant(showTrack: false)
-        callViewModel.pinnedParticipant = callParticipant
 
         // Then
         XCTAssert(callViewModel.participantsLayout == .fullScreen)
