@@ -3,6 +3,8 @@ title: Livestream Tutorial
 description: How to build a livestream experience using Stream's video SDKs
 ---
 
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
+
 ### Livestream Quickstart
 
 In this tutorial we'll quickly build a low-latency in-app livestreaming experience. The livestream is broadcasted using Stream's edge network of servers around the world. We'll cover the following topics:
@@ -254,8 +256,8 @@ Simply go the Stream dashboard, click the livestream call type and disable the b
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
-Almost all livestream software and hardware supports RTMPS.
-[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMPS.
+Almost all livestream software and hardware supports RTMP.
+[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMP.
 So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
 
 A. Log the URL & Stream Key
@@ -266,11 +268,12 @@ if let rtmp = state.ingress?.rtmp {
 }
 ```
 
-For example, you can listen to this value with the `onReceive` modifier:
+For example, you can print the RTMP address right after the `call.join` call in the `Task` block:
 
 ```swift
-.onReceive(state.$ingress) { _ in
-    if let rtmp = state.ingress?.rtmp {
+Task {
+    try await call.join(create: true)
+    if let rtmp = call.state.ingress?.rtmp {
         print("RTMP url and streamingKey \(rtmp)")
     }
 }
@@ -280,7 +283,7 @@ B. Open OBS and go to settings -> stream
 
 - Select "custom" service
 - Server: equal to the server URL from the log
-- Stream key: equal to the stream key from the log
+- Stream key: empty, the key is already present in the URL
 
 Press start streaming in OBS. The RTMP stream will now show up in your call just like a regular video participant.
 Now that we've learned to publish using WebRTC or RTMP let's talk about watching the livestream.

@@ -84,8 +84,8 @@ public class CallState: ObservableObject {
         case .typeCallCreatedEvent(let event):
             update(from: event.call)
             mergeMembers(event.members)
-        case .typeCallEndedEvent(_):
-            endedAt = Date()
+        case .typeCallEndedEvent(let event):
+            update(from: event.call)
         case .typeCallLiveStartedEvent(let event):
             update(from: event.call)
         case .typeCallMemberAddedEvent(let event):
@@ -257,7 +257,11 @@ public class CallState: ObservableObject {
         session = response.session
         settings = response.settings
         egress = response.egress
-        ingress = response.ingress
+
+        var ingress = response.ingress
+        ingress.rtmp.address = ingress.rtmp.address.replacingOccurrences(of: "<your_token_here>", with: streamVideo.token.rawValue)
+        self.ingress = ingress
+
         if !localCallSettingsUpdate {
             callSettings = response.settings.toCallSettings
         }
