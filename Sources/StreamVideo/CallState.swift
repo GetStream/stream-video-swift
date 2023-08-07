@@ -63,7 +63,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var custom: [String: RawJSON] = [:]
     @Published public internal(set) var team: String?
     @Published public internal(set) var createdBy: User?
-    @Published public internal(set) var ingress: CallIngressResponse?
+    @Published public internal(set) var ingress: Ingress?
     @Published public internal(set) var permissionRequests: [PermissionRequest] = []
     @Published public internal(set) var transcribing: Bool = false
     @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
@@ -269,12 +269,11 @@ public class CallState: ObservableObject {
         settings = response.settings
         egress = response.egress
 
-        var ingress = response.ingress
-        ingress.rtmp.address = ingress.rtmp.address.replacingOccurrences(
-            of: "<your_token_here>",
-            with: streamVideo.token.rawValue
+        let rtmp = RTMP(
+            address: response.ingress.rtmp.address,
+            streamKey: streamVideo.token.rawValue
         )
-        self.ingress = ingress
+        self.ingress = Ingress(rtmp: rtmp)
 
         if !localCallSettingsUpdate {
             callSettings = response.settings.toCallSettings

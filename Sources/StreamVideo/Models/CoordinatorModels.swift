@@ -59,3 +59,12 @@ public struct CreateCallOptions: Sendable {
         self.team = team
     }
 }
+
+public struct Ingress {
+    public let rtmp: RTMP
+}
+
+public struct RTMP {
+    public let address: String
+    public let streamKey: String
+}
