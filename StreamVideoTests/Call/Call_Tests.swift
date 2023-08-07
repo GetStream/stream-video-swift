@@ -224,4 +224,35 @@ final class Call_Tests: StreamVideoTestCase {
         XCTAssert(call?.state.members.first?.user.name == "newname")
     }
     
+    func test_call_duration() async throws {
+        // Given
+        let call = streamVideo?.call(callType: callType, callId: callId)
+        let startDate = Date()
+        let callResponse = mockResponseBuilder.makeCallResponse(
+            cid: callCid,
+            liveStartedAt: startDate
+        )
+        
+        // When
+        call?.state.update(from: callResponse)
+        try await waitForCallEvent(nanoseconds: 1_500_000_000)
+        
+        // Then
+        var duration = call?.state.duration ?? 0
+        XCTAssertTrue(Int(duration) >= 1)
+        XCTAssertEqual(startDate, call?.state.startedAt)
+        
+        // When
+        let endCallResponse = mockResponseBuilder.makeCallResponse(
+            cid: callCid,
+            liveStartedAt: startDate,
+            liveEndedAt: Date()
+        )
+        call?.state.update(from: endCallResponse)
+        
+        // Then
+        duration = call?.state.duration ?? 0
+        XCTAssertTrue(Int(duration) >= 1)
+    }
+    
 }

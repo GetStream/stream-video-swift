@@ -124,7 +124,11 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         try await waitForCallEvent()
         
         // When
-        let event = CallEndedEvent(callCid: callCid, createdAt: Date())
+        let event = CallEndedEvent(
+            call: mockResponseBuilder.makeCallResponse(cid: callCid),
+            callCid: callCid,
+            createdAt: Date()
+        )
         eventNotificationCenter?.process(.coordinatorEvent(.typeCallEndedEvent(event)))
         
         // Then
