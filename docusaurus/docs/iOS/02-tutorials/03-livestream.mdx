@@ -285,7 +285,7 @@ So let's see how to publish using RTMPs. Feel free to skip this step if you don'
 A. Log the URL & Stream Key
 
 ```swift
-if let rtmp = call.state.ingress {
+if let rtmp = call.state.ingress?.rtmp {
     let address = rtmp.address
     let streamKey = rtmp.streamKey
     print("RTMP url \(address) and streamingKey \(streamKey)")
@@ -297,7 +297,7 @@ For example, you can print the RTMP address right after the `call.join` call in 
 ```swift
 Task {
     try await call.join(create: true)
-    if let rtmp = call.state.ingress {
+    if let rtmp = call.state.ingress?.rtmp {
         let address = rtmp.address
         let streamKey = rtmp.streamKey
         print("RTMP url \(address) and streamingKey \(streamKey)")
