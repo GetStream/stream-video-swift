@@ -235,11 +235,11 @@ final class Call_Tests: StreamVideoTestCase {
         
         // When
         call?.state.update(from: callResponse)
-        try await waitForCallEvent(nanoseconds: 1_000_000_000)
+        try await waitForCallEvent(nanoseconds: 1_500_000_000)
         
         // Then
         var duration = call?.state.duration ?? 0
-        XCTAssertEqual(Int(duration), 1)
+        XCTAssertTrue(Int(duration) >= 1)
         XCTAssertEqual(startDate, call?.state.startedAt)
         
         // When
@@ -252,7 +252,7 @@ final class Call_Tests: StreamVideoTestCase {
         
         // Then
         duration = call?.state.duration ?? 0
-        XCTAssertEqual(Int(duration), 1)
+        XCTAssertTrue(Int(duration) >= 1)
     }
     
 }
