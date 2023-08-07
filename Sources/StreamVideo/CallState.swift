@@ -341,13 +341,17 @@ public class CallState: ObservableObject {
     
     private func setupDurationTimer() {
         resetTimer()
-        durationTimer = Foundation.Timer.scheduledTimer(
-            timeInterval: 1.0,
-            target: self,
-            selector: #selector(updateDuration),
-            userInfo: nil,
-            repeats: true
-        )
+        durationTimer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] timer in
+            guard let self else {
+                timer.invalidate()
+                return
+            }
+            Task {
+                await MainActor.run {
+                    self.updateDuration()
+                }
+            }
+        })
     }
     
     private func resetTimer() {
