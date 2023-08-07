@@ -10,8 +10,8 @@ import WebRTC
 struct ParticipantsGridView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
+    var call: Call?
     var participants: [CallParticipant]
-    @Binding var pinnedParticipant: CallParticipant?
     var availableSize: CGSize
     var isPortrait: Bool
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
@@ -52,8 +52,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
-                    participantCount: participants.count,
-                    pinnedParticipant: $pinnedParticipant,
+                    call: call,
                     availableSize: size,
                     ratio: ratio,
                     showAllInfo: true

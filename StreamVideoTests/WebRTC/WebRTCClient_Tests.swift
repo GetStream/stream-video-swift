@@ -26,8 +26,9 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         sessionId: "123",
         connectionQuality: .excellent,
         joinedAt: Date(),
-        isPinned: false,
-        audioLevel: 0, audioLevels: []
+        audioLevel: 0,
+        audioLevels: [],
+        pin: nil
     )
     
     let mockResponseBuilder = MockResponseBuilder()
@@ -680,6 +681,38 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Then
         current = await webRTCClient.state.callParticipants
         XCTAssert(current.values.first?.isScreensharing == false)
+    }
+    
+    func test_webRTCClient_pinEvents() async throws {
+        // Given
+        webRTCClient = makeWebRTCClient()
+        try await test_webRTCClient_connectionFlow()
+        let sessionId = "123"
+        let participants = [sessionId: callParticipant]
+        await webRTCClient.state.update(callParticipants: participants)
+        
+        // When
+        var event = Stream_Video_Sfu_Event_PinsChanged()
+        var pin = Stream_Video_Sfu_Models_Pin()
+        pin.sessionID = sessionId
+        event.pins = [pin]
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.pinsUpdated(event)))
+        try await waitForCallEvent()
+        
+        // Then
+        var current = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssertNotNil(current?.pin)
+        XCTAssertEqual(current?.pin?.isLocal, false)
+        
+        // When
+        event = Stream_Video_Sfu_Event_PinsChanged()
+        event.pins = []
+        webRTCClient.eventNotificationCenter.process(.sfuEvent(.pinsUpdated(event)))
+        try await waitForCallEvent()
+        
+        // Then
+        current = await webRTCClient.state.callParticipants[sessionId]
+        XCTAssertNil(current?.pin)
     }
     
     // MARK: - private

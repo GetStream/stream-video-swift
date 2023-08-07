@@ -619,6 +619,70 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await queryMembers(filters: nil, limit: nil, next: next, sort: nil)
     }
     
+    // MARK: - Pinning
+    
+    /// Pins the user with the provided session id locally.
+    /// - Parameter sessionId: the user's session id.
+    public func pin(
+        sessionId: String
+    ) async throws {
+        try await callController.changePinState(
+            isEnabled: true,
+            sessionId: sessionId
+        )
+    }
+    
+    /// Unpins the user with the provided session id locally.
+    /// - Parameter sessionId: the user's session id.
+    public func unpin(
+        sessionId: String
+    ) async throws {
+        try await callController.changePinState(
+            isEnabled: false,
+            sessionId: sessionId
+        )
+    }
+    
+    /// Pins the user with the provided session id for everyone in the call.
+    /// - Parameters:
+    ///  - userId: the user's id.
+    ///  - sessionId: the user's session id.
+    /// - Returns: `PinResponse`
+    public func pinForEveryone(
+        userId: String,
+        sessionId: String
+    ) async throws -> PinResponse {
+        if await !currentUserHasCapability(.pinForEveryone) {
+            throw ClientError.MissingPermissions()
+        }
+        let pinRequest = PinRequest(sessionId: sessionId, userId: userId)
+        return try await coordinatorClient.videoPin(
+            type: callType,
+            id: callId,
+            pinRequest: pinRequest
+        )
+    }
+    
+    /// Unpins the user with the provided session id for everyone in the call.
+    /// - Parameters:
+    ///  - userId: the user's id.
+    ///  - sessionId: the user's session id.
+    /// - Returns: `UnpinResponse`
+    public func unpinForEveryone(
+        userId: String,
+        sessionId: String
+    ) async throws -> UnpinResponse {
+        if await !currentUserHasCapability(.pinForEveryone) {
+            throw ClientError.MissingPermissions()
+        }
+        let unpinRequest = UnpinRequest(sessionId: sessionId, userId: userId)
+        return try await coordinatorClient.videoUnpin(
+            type: callType,
+            id: callId,
+            unpinRequest: unpinRequest
+        )
+    }
+    
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {

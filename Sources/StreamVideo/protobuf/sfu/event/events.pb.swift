@@ -193,6 +193,24 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     set {eventPayload = .goAway(newValue)}
   }
 
+  /// ICERestart tells the client to perform ICE restart.
+  var iceRestart: Stream_Video_Sfu_Event_ICERestart {
+    get {
+      if case .iceRestart(let v)? = eventPayload {return v}
+      return Stream_Video_Sfu_Event_ICERestart()
+    }
+    set {eventPayload = .iceRestart(newValue)}
+  }
+
+  /// PinsChanged is sent the list of pins in the call changes. This event contains the entire list of pins.
+  var pinsUpdated: Stream_Video_Sfu_Event_PinsChanged {
+    get {
+      if case .pinsUpdated(let v)? = eventPayload {return v}
+      return Stream_Video_Sfu_Event_PinsChanged()
+    }
+    set {eventPayload = .pinsUpdated(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_EventPayload: Equatable {
@@ -249,6 +267,10 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     /// GoAway tells the client to migrate away from the SFU it is connected to.
     /// The reason field indicates why this message was sent.
     case goAway(Stream_Video_Sfu_Event_GoAway)
+    /// ICERestart tells the client to perform ICE restart.
+    case iceRestart(Stream_Video_Sfu_Event_ICERestart)
+    /// PinsChanged is sent the list of pins in the call changes. This event contains the entire list of pins.
+    case pinsUpdated(Stream_Video_Sfu_Event_PinsChanged)
 
   #if !swift(>=4.1)
     static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, rhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) -> Bool {
@@ -320,11 +342,33 @@ struct Stream_Video_Sfu_Event_SfuEvent {
         guard case .goAway(let l) = lhs, case .goAway(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
+      case (.iceRestart, .iceRestart): return {
+        guard case .iceRestart(let l) = lhs, case .iceRestart(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.pinsUpdated, .pinsUpdated): return {
+        guard case .pinsUpdated(let l) = lhs, case .pinsUpdated(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
       default: return false
       }
     }
   #endif
   }
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Event_PinsChanged {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the list of pins in the call.
+  /// Pins are ordered in descending order (most important first).
+  var pins: [Stream_Video_Sfu_Models_Pin] = []
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
 }
@@ -358,6 +402,18 @@ struct Stream_Video_Sfu_Event_ICETrickle {
   var peerType: Stream_Video_Sfu_Models_PeerType = .publisherUnspecified
 
   var iceCandidate: String = String()
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Event_ICERestart {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var peerType: Stream_Video_Sfu_Models_PeerType = .publisherUnspecified
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -576,6 +632,20 @@ struct Stream_Video_Sfu_Event_JoinRequest {
   /// Clears the value of `migration`. Subsequent reads from it will return its default value.
   mutating func clearMigration() {_uniqueStorage()._migration = nil}
 
+  /// Fast reconnect flag explicitly indicates that if the participant session
+  /// and the associated state is still present in the SFU, the client is ready
+  /// to restore the PeerConnection with an ICE restart. If the SFU replies with
+  /// "reconnected: true" in its JoinResponse, then it is safe to perform an ICE
+  /// restart or else the existing PeerConnections must be cleaned up.
+  ///
+  /// For the SFU, fast_reconnect:false indicates that even if it has the state
+  /// cached, the client state is not in sync and hence it must be cleaned up before
+  /// proceeding further.
+  var fastReconnect: Bool {
+    get {return _storage._fastReconnect}
+    set {_uniqueStorage()._fastReconnect = newValue}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -604,7 +674,6 @@ struct Stream_Video_Sfu_Event_JoinResponse {
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
   // methods supported on all messages.
 
-  /// TODO: include full list of participants with track and audio info
   var callState: Stream_Video_Sfu_Models_CallState {
     get {return _callState ?? Stream_Video_Sfu_Models_CallState()}
     set {_callState = newValue}
@@ -613,6 +682,8 @@ struct Stream_Video_Sfu_Event_JoinResponse {
   var hasCallState: Bool {return self._callState != nil}
   /// Clears the value of `callState`. Subsequent reads from it will return its default value.
   mutating func clearCallState() {self._callState = nil}
+
+  var reconnected: Bool = false
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -1015,8 +1086,10 @@ struct Stream_Video_Sfu_Event_GoAway {
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_PinsChanged: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_Error: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ICETrickle: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_ICERestart: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuRequest: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuRequest.OneOf_RequestPayload: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_HealthCheckRequest: @unchecked Sendable {}
@@ -1069,6 +1142,8 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     18: .same(proto: "error"),
     19: .standard(proto: "call_grants_updated"),
     20: .standard(proto: "go_away"),
+    21: .standard(proto: "ice_restart"),
+    22: .standard(proto: "pins_updated"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1285,6 +1360,32 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
           self.eventPayload = .goAway(v)
         }
       }()
+      case 21: try {
+        var v: Stream_Video_Sfu_Event_ICERestart?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .iceRestart(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .iceRestart(v)
+        }
+      }()
+      case 22: try {
+        var v: Stream_Video_Sfu_Event_PinsChanged?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .pinsUpdated(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .pinsUpdated(v)
+        }
+      }()
       default: break
       }
     }
@@ -1360,6 +1461,14 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
       guard case .goAway(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 20)
     }()
+    case .iceRestart?: try {
+      guard case .iceRestart(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 21)
+    }()
+    case .pinsUpdated?: try {
+      guard case .pinsUpdated(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 22)
+    }()
     case nil: break
     }
     try unknownFields.traverse(visitor: &visitor)
@@ -1367,6 +1476,38 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
 
   static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent, rhs: Stream_Video_Sfu_Event_SfuEvent) -> Bool {
     if lhs.eventPayload != rhs.eventPayload {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_PinsChanged: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".PinsChanged"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "pins"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeRepeatedMessageField(value: &self.pins) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.pins.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.pins, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_PinsChanged, rhs: Stream_Video_Sfu_Event_PinsChanged) -> Bool {
+    if lhs.pins != rhs.pins {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1441,6 +1582,38 @@ extension Stream_Video_Sfu_Event_ICETrickle: SwiftProtobuf.Message, SwiftProtobu
   static func ==(lhs: Stream_Video_Sfu_Event_ICETrickle, rhs: Stream_Video_Sfu_Event_ICETrickle) -> Bool {
     if lhs.peerType != rhs.peerType {return false}
     if lhs.iceCandidate != rhs.iceCandidate {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_ICERestart: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".ICERestart"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "peer_type"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.peerType) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.peerType != .publisherUnspecified {
+      try visitor.visitSingularEnumField(value: self.peerType, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_ICERestart, rhs: Stream_Video_Sfu_Event_ICERestart) -> Bool {
+    if lhs.peerType != rhs.peerType {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1771,6 +1944,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     3: .standard(proto: "subscriber_sdp"),
     4: .standard(proto: "client_details"),
     5: .same(proto: "migration"),
+    6: .standard(proto: "fast_reconnect"),
   ]
 
   fileprivate class _StorageClass {
@@ -1779,6 +1953,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
     var _subscriberSdp: String = String()
     var _clientDetails: Stream_Video_Sfu_Models_ClientDetails? = nil
     var _migration: Stream_Video_Sfu_Event_Migration? = nil
+    var _fastReconnect: Bool = false
 
     static let defaultInstance = _StorageClass()
 
@@ -1790,6 +1965,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       _subscriberSdp = source._subscriberSdp
       _clientDetails = source._clientDetails
       _migration = source._migration
+      _fastReconnect = source._fastReconnect
     }
   }
 
@@ -1813,6 +1989,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         case 3: try { try decoder.decodeSingularStringField(value: &_storage._subscriberSdp) }()
         case 4: try { try decoder.decodeSingularMessageField(value: &_storage._clientDetails) }()
         case 5: try { try decoder.decodeSingularMessageField(value: &_storage._migration) }()
+        case 6: try { try decoder.decodeSingularBoolField(value: &_storage._fastReconnect) }()
         default: break
         }
       }
@@ -1840,6 +2017,9 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
       try { if let v = _storage._migration {
         try visitor.visitSingularMessageField(value: v, fieldNumber: 5)
       } }()
+      if _storage._fastReconnect != false {
+        try visitor.visitSingularBoolField(value: _storage._fastReconnect, fieldNumber: 6)
+      }
     }
     try unknownFields.traverse(visitor: &visitor)
   }
@@ -1854,6 +2034,7 @@ extension Stream_Video_Sfu_Event_JoinRequest: SwiftProtobuf.Message, SwiftProtob
         if _storage._subscriberSdp != rhs_storage._subscriberSdp {return false}
         if _storage._clientDetails != rhs_storage._clientDetails {return false}
         if _storage._migration != rhs_storage._migration {return false}
+        if _storage._fastReconnect != rhs_storage._fastReconnect {return false}
         return true
       }
       if !storagesAreEqual {return false}
@@ -1911,6 +2092,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
   static let protoMessageName: String = _protobuf_package + ".JoinResponse"
   static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
     1: .standard(proto: "call_state"),
+    2: .same(proto: "reconnected"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1920,6 +2102,7 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
       // enabled. https://github.com/apple/swift-protobuf/issues/1034
       switch fieldNumber {
       case 1: try { try decoder.decodeSingularMessageField(value: &self._callState) }()
+      case 2: try { try decoder.decodeSingularBoolField(value: &self.reconnected) }()
       default: break
       }
     }
@@ -1933,11 +2116,15 @@ extension Stream_Video_Sfu_Event_JoinResponse: SwiftProtobuf.Message, SwiftProto
     try { if let v = self._callState {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 1)
     } }()
+    if self.reconnected != false {
+      try visitor.visitSingularBoolField(value: self.reconnected, fieldNumber: 2)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_JoinResponse, rhs: Stream_Video_Sfu_Event_JoinResponse) -> Bool {
     if lhs._callState != rhs._callState {return false}
+    if lhs.reconnected != rhs.reconnected {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }

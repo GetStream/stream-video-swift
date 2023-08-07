@@ -69,7 +69,6 @@ public struct CallTopView: View {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
     }
-    
 }
 
 struct SharingIndicator: View {

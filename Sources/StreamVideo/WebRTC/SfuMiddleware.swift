@@ -17,6 +17,7 @@ class SfuMiddleware: EventMiddleware {
     var onSocketConnected: (() -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> ())?
     var onSessionMigrationEvent: (() -> Void)?
+    var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> ())?
     
     init(
         sessionID: String,
@@ -85,6 +86,11 @@ class SfuMiddleware: EventMiddleware {
             case .goAway(let event):
                 log.info("Received go away event with reason: \(event.reason.rawValue)")
                 onSessionMigrationEvent?()
+            case .iceRestart(_):
+                log.info("Received ice restart message")
+            case .pinsUpdated(let event):
+                log.debug("Pins changed \(event.pins.map(\.sessionID))")
+                onPinsChanged?(event.pins)
             }
         }
         return event
@@ -275,9 +281,14 @@ class SfuMiddleware: EventMiddleware {
         // For more than threshold participants, the activation of track is on view appearance.
         let showTrack = participants.count < participantsThreshold
         var temp = [String: CallParticipant]()
+        let pins = response.callState.pins.map(\.sessionID)
         for participant in participants {
             if participant.userID != recordingUserId {
-                let mapped = participant.toCallParticipant(showTrack: showTrack)
+                var pin: PinInfo?
+                if pins.contains(participant.sessionID) {
+                    pin = PinInfo(isLocal: false, pinnedAt: Date())
+                }
+                let mapped = participant.toCallParticipant(showTrack: showTrack, pin: pin)
                 temp[mapped.id] = mapped
             }
         }

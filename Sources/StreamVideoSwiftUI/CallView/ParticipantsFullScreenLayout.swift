@@ -10,23 +10,23 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
     var participant: CallParticipant
+    var call: Call?
     var size: CGSize
-    @Binding var pinnedParticipant: CallParticipant?
     var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
         viewFactory: Factory,
         participant: CallParticipant,
+        call: Call?,
         size: CGSize,
-        pinnedParticipant: Binding<CallParticipant?>,
         onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
+        self.call = call
         self.size = size
-        _pinnedParticipant = pinnedParticipant
         self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
@@ -45,8 +45,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
         .modifier(
             viewFactory.makeVideoCallParticipantModifier(
                 participant: participant,
-                participantCount: 1,
-                pinnedParticipant: $pinnedParticipant,
+                call: call,
                 availableSize: size,
                 ratio: ratio,
                 showAllInfo: true

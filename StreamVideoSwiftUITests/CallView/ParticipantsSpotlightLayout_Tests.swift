@@ -9,15 +9,17 @@ import XCTest
 @MainActor
 final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
     
+    private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
+    
     func test_spotlight_participantWithAudio_snapshot() {
         for count in spotlightParticipants {
             let participants = ParticipantFactory.get(count, withAudio: true)
             let layout = ParticipantsSpotlightLayout(
                 viewFactory: TestViewFactory(),
                 participant: participants.first!,
+                call: call,
                 participants: participants,
                 size: defaultScreenSize,
-                pinnedParticipant: .constant(nil),
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -31,9 +33,9 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
             let layout = ParticipantsSpotlightLayout(
                 viewFactory: TestViewFactory(),
                 participant: participants.first!,
+                call: call,
                 participants: participants,
                 size: defaultScreenSize,
-                pinnedParticipant: .constant(nil),
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -47,9 +49,9 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
             let layout = ParticipantsSpotlightLayout(
                 viewFactory: TestViewFactory(),
                 participant: participants.first!,
+                call: call,
                 participants: participants,
                 size: defaultScreenSize,
-                pinnedParticipant: .constant(nil),
                 onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -63,9 +65,9 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         let layout = ParticipantsSpotlightLayout(
             viewFactory: TestViewFactory(),
             participant: participants.first!,
+            call: call,
             participants: participants,
             size: defaultScreenSize,
-            pinnedParticipant: .constant(nil),
             onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )

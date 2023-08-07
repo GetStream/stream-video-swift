@@ -170,6 +170,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.3 milestone
 
+- [x] Remote pinning of users
 - [ ] Add chat to the AppStore app (and app clip if possible)
 - [ ] Stability
 - [ ] API integration tests

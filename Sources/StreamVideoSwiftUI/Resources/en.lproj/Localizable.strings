@@ -24,6 +24,8 @@
 "call.current.layout-view" = "View";
 "call.current.pin-user" = "Pin user";
 "call.current.unpin-user" = "Unpin user";
+"call.current.pin-for-everyone" = "Pin for everyone";
+"call.current.unpin-for-everyone" = "Unpin for everyone";
 "call.current.sharing" = "You are sharing your screen";
 "call.current.stop-sharing" = "Stop sharing";
 

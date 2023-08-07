@@ -28,6 +28,10 @@ class CallController_Mock: CallController {
         ),
         environment: WebSocketClient.Environment.mock
     )
+    
+    @MainActor func update(participants: [String: CallParticipant]) {
+        self.call?.state.participantsMap = participants
+    }
 
     override func joinCall(
         create: Bool = true,

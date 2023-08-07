@@ -22,6 +22,10 @@ extension BlockUserResponse: @unchecked Sendable {}
 extension UnblockUserResponse: @unchecked Sendable {}
 extension MuteUsersResponse: @unchecked Sendable {}
 extension MuteUsersRequest: @unchecked Sendable {}
+extension PinRequest: @unchecked Sendable {}
+extension UnpinRequest: @unchecked Sendable {}
+extension PinResponse: @unchecked Sendable {}
+extension UnpinResponse: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 

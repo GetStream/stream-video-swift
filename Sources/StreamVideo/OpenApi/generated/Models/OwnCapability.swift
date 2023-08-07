@@ -17,6 +17,7 @@ public enum OwnCapability: String, Codable, CaseIterable {
     case joinCall = "join-call"
     case joinEndedCall = "join-ended-call"
     case muteUsers = "mute-users"
+    case pinForEveryone = "pin-for-everyone"
     case readCall = "read-call"
     case removeCallMember = "remove-call-member"
     case screenshare = "screenshare"

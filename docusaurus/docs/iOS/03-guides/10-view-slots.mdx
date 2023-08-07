@@ -107,18 +107,16 @@ public func makeVideoParticipantView(
 Additionally, you can change the modifier applied to the view, by implementing the `makeVideoCallParticipantModifier`:
 
 ```swift
-public func makeVideoCallParticipantModifier(
-    participant: CallParticipant,
-    participantCount: Int,
-    pinnedParticipant: Binding<CallParticipant?>,
-    availableSize: CGSize,
-    ratio: CGFloat,
-    showAllInfo: Bool
+public makeVideoCallParticipantModifier(
+        participant: CallParticipant,
+        call: Call?,
+        availableSize: CGSize,
+        ratio: CGFloat,
+        showAllInfo: Bool
 ) -> some ViewModifier {
     VideoCallParticipantModifier(
         participant: participant,
-        pinnedParticipant: pinnedParticipant,
-        participantCount: participantCount,
+        call: call,
         availableSize: availableSize,
         ratio: ratio,
         showAllInfo: showAllInfo

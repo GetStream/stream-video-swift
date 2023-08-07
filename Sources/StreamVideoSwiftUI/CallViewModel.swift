@@ -100,9 +100,6 @@ open class CallViewModel: ObservableObject {
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
         didSet {
-            if let id = pinnedParticipant?.id, callParticipants[id]?.isPinned == false {
-                callParticipants[id] = callParticipants[id]?.withUpdated(pinState: true)
-            }
             log.debug("Call participants updated")
             updateCallStateIfNeeded()
             checkCallSettingsForCurrentUser()
@@ -139,25 +136,6 @@ open class CallViewModel: ObservableObject {
         didSet {
             if participantsLayout != oldValue {
                 lastLayoutChange = Date()
-            }
-        }
-    }
-        
-    @Published public var pinnedParticipant: CallParticipant? {
-        didSet {
-            if let id = pinnedParticipant?.id, callParticipants[id]?.isPinned == false {
-                callParticipants[id] = callParticipants[id]?.withUpdated(pinState: true)
-            }
-            if let id = oldValue?.id, callParticipants[id]?.isPinned == true {
-                callParticipants[id] = callParticipants[id]?.withUpdated(pinState: false)
-            }
-            if !automaticLayoutHandling {
-                return
-            }
-            if pinnedParticipant != nil && participantsLayout == .grid {
-                participantsLayout = .spotlight
-            } else if pinnedParticipant == nil && participantsLayout == .spotlight {
-                participantsLayout = .grid
             }
         }
     }

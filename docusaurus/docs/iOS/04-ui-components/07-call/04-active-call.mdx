@@ -90,17 +90,15 @@ Additionally, you can change the modifier applied to the view, by implementing t
 
 ```swift
 public func makeVideoCallParticipantModifier(
-    participant: CallParticipant,
-    participantCount: Int,
-    pinnedParticipant: Binding<CallParticipant?>,
-    availableSize: CGSize,
-    ratio: CGFloat,
-    showAllInfo: Bool
+        participant: CallParticipant,
+        call: Call?,
+        availableSize: CGSize,
+        ratio: CGFloat,
+        showAllInfo: Bool
 ) -> some ViewModifier {
     VideoCallParticipantModifier(
         participant: participant,
-        pinnedParticipant: pinnedParticipant,
-        participantCount: participantCount,
+        call: call,
         availableSize: availableSize,
         ratio: ratio,
         showAllInfo: showAllInfo

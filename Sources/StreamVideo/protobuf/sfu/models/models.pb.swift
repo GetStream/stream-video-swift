@@ -221,6 +221,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   case participantNotFound // = 200
   case participantMigratingOut // = 201
   case participantMigrationFailed // = 202
+  case participantMigrating // = 203
+  case participantReconnectFailed // = 204
+  case participantMediaTransportFailure // = 205
   case callNotFound // = 300
   case requestValidationFailed // = 400
   case unauthenticated // = 401
@@ -245,6 +248,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case 200: self = .participantNotFound
     case 201: self = .participantMigratingOut
     case 202: self = .participantMigrationFailed
+    case 203: self = .participantMigrating
+    case 204: self = .participantReconnectFailed
+    case 205: self = .participantMediaTransportFailure
     case 300: self = .callNotFound
     case 400: self = .requestValidationFailed
     case 401: self = .unauthenticated
@@ -267,6 +273,9 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case .participantNotFound: return 200
     case .participantMigratingOut: return 201
     case .participantMigrationFailed: return 202
+    case .participantMigrating: return 203
+    case .participantReconnectFailed: return 204
+    case .participantMediaTransportFailure: return 205
     case .callNotFound: return 300
     case .requestValidationFailed: return 400
     case .unauthenticated: return 401
@@ -294,6 +303,9 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     .participantNotFound,
     .participantMigratingOut,
     .participantMigrationFailed,
+    .participantMigrating,
+    .participantReconnectFailed,
+    .participantMediaTransportFailure,
     .callNotFound,
     .requestValidationFailed,
     .unauthenticated,
@@ -506,6 +518,10 @@ struct Stream_Video_Sfu_Models_CallState {
   /// Clears the value of `participantCount`. Subsequent reads from it will return its default value.
   mutating func clearParticipantCount() {self._participantCount = nil}
 
+  /// the list of pins in the call.
+  /// Pins are ordered in descending order (most important first).
+  var pins: [Stream_Video_Sfu_Models_Pin] = []
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   init() {}
@@ -525,6 +541,22 @@ struct Stream_Video_Sfu_Models_ParticipantCount {
 
   /// Total number of anonymous participants in the call.
   var anonymous: UInt32 = 0
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
+struct Stream_Video_Sfu_Models_Pin {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  /// the user to pin
+  var userID: String = String()
+
+  /// the user sesion_id to pin, if not provided, applies to all sessions
+  var sessionID: String = String()
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -920,6 +952,7 @@ extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_GoAwayReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_Pin: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Participant: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_StreamQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_VideoDimension: @unchecked Sendable {}
@@ -987,6 +1020,9 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     200: .same(proto: "ERROR_CODE_PARTICIPANT_NOT_FOUND"),
     201: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATING_OUT"),
     202: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATION_FAILED"),
+    203: .same(proto: "ERROR_CODE_PARTICIPANT_MIGRATING"),
+    204: .same(proto: "ERROR_CODE_PARTICIPANT_RECONNECT_FAILED"),
+    205: .same(proto: "ERROR_CODE_PARTICIPANT_MEDIA_TRANSPORT_FAILURE"),
     300: .same(proto: "ERROR_CODE_CALL_NOT_FOUND"),
     400: .same(proto: "ERROR_CODE_REQUEST_VALIDATION_FAILED"),
     401: .same(proto: "ERROR_CODE_UNAUTHENTICATED"),
@@ -1032,6 +1068,7 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
     1: .same(proto: "participants"),
     2: .standard(proto: "started_at"),
     3: .standard(proto: "participant_count"),
+    4: .same(proto: "pins"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1043,6 +1080,7 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
       case 1: try { try decoder.decodeRepeatedMessageField(value: &self.participants) }()
       case 2: try { try decoder.decodeSingularMessageField(value: &self._startedAt) }()
       case 3: try { try decoder.decodeSingularMessageField(value: &self._participantCount) }()
+      case 4: try { try decoder.decodeRepeatedMessageField(value: &self.pins) }()
       default: break
       }
     }
@@ -1062,6 +1100,9 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
     try { if let v = self._participantCount {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 3)
     } }()
+    if !self.pins.isEmpty {
+      try visitor.visitRepeatedMessageField(value: self.pins, fieldNumber: 4)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -1069,6 +1110,7 @@ extension Stream_Video_Sfu_Models_CallState: SwiftProtobuf.Message, SwiftProtobu
     if lhs.participants != rhs.participants {return false}
     if lhs._startedAt != rhs._startedAt {return false}
     if lhs._participantCount != rhs._participantCount {return false}
+    if lhs.pins != rhs.pins {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
@@ -1107,6 +1149,44 @@ extension Stream_Video_Sfu_Models_ParticipantCount: SwiftProtobuf.Message, Swift
   static func ==(lhs: Stream_Video_Sfu_Models_ParticipantCount, rhs: Stream_Video_Sfu_Models_ParticipantCount) -> Bool {
     if lhs.total != rhs.total {return false}
     if lhs.anonymous != rhs.anonymous {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Models_Pin: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".Pin"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .standard(proto: "user_id"),
+    2: .standard(proto: "session_id"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularStringField(value: &self.userID) }()
+      case 2: try { try decoder.decodeSingularStringField(value: &self.sessionID) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if !self.userID.isEmpty {
+      try visitor.visitSingularStringField(value: self.userID, fieldNumber: 1)
+    }
+    if !self.sessionID.isEmpty {
+      try visitor.visitSingularStringField(value: self.sessionID, fieldNumber: 2)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Models_Pin, rhs: Stream_Video_Sfu_Models_Pin) -> Bool {
+    if lhs.userID != rhs.userID {return false}
+    if lhs.sessionID != rhs.sessionID {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
