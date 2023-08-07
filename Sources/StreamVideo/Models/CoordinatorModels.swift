@@ -59,3 +59,8 @@ public struct CreateCallOptions: Sendable {
         self.team = team
     }
 }
+
+public struct RTMP {
+    public let address: String
+    public let streamKey: String
+}
