@@ -53,6 +53,11 @@ public class CallState: ObservableObject {
     }
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
+    @Published public internal(set) var startedAt: Date? {
+        didSet {
+            setupDurationTimer()
+        }
+    }
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
     @Published public internal(set) var custom: [String: RawJSON] = [:]
@@ -62,14 +67,20 @@ public class CallState: ObservableObject {
     @Published public internal(set) var permissionRequests: [PermissionRequest] = []
     @Published public internal(set) var transcribing: Bool = false
     @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
-    @Published public internal(set) var session: CallSessionResponse?
+    @Published public internal(set) var session: CallSessionResponse? {
+        didSet {
+            didUpdate(session)
+        }
+    }
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
+    @Published public internal(set) var duration: TimeInterval = 0
     
     private var localCallSettingsUpdate = false
+    private var durationTimer: Foundation.Timer?
         
     internal func updateState(from event: VideoEvent) {
         switch event {
@@ -259,7 +270,10 @@ public class CallState: ObservableObject {
         egress = response.egress
 
         var ingress = response.ingress
-        ingress.rtmp.address = ingress.rtmp.address.replacingOccurrences(of: "<your_token_here>", with: streamVideo.token.rawValue)
+        ingress.rtmp.address = ingress.rtmp.address.replacingOccurrences(
+            of: "<your_token_here>",
+            with: streamVideo.token.rawValue
+        )
         self.ingress = ingress
 
         if !localCallSettingsUpdate {
@@ -314,5 +328,45 @@ public class CallState: ObservableObject {
 
     private func didUpdate(_ egress: EgressResponse?) {
         self.broadcasting = egress?.broadcasting ?? false
+    }
+    
+    private func didUpdate(_ session: CallSessionResponse?) {
+        if startedAt != session?.liveStartedAt {
+            startedAt = session?.liveStartedAt
+        }
+        if session?.liveEndedAt != nil {
+            resetTimer()
+        }
+    }
+    
+    private func setupDurationTimer() {
+        resetTimer()
+        durationTimer = Foundation.Timer.scheduledTimer(
+            timeInterval: 1.0,
+            target: self,
+            selector: #selector(updateDuration),
+            userInfo: nil,
+            repeats: true
+        )
+    }
+    
+    private func resetTimer() {
+        durationTimer?.invalidate()
+        durationTimer = nil
+    }
+    
+    @objc private func updateDuration() {
+        guard let startedAt else {
+            update(duration: 0)
+            return
+        }
+        let timeInterval = Date().timeIntervalSince(startedAt)
+        update(duration: timeInterval)
+    }
+    
+    private func update(duration: TimeInterval) {
+        if duration != self.duration {
+            self.duration = duration
+        }
     }
 }
