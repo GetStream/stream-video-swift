@@ -91,7 +91,7 @@ class WebRTCClient: NSObject {
     
     let httpClient: HTTPClient
     var signalService: Stream_Video_Sfu_Signal_SignalServer
-    let peerConnectionFactory = PeerConnectionFactory()
+    let peerConnectionFactory: PeerConnectionFactory
     
     private(set) var publisher: PeerConnection? {
         didSet {
@@ -196,6 +196,7 @@ class WebRTCClient: NSObject {
             hostname: hostname,
             token: token
         )
+        self.peerConnectionFactory = PeerConnectionFactory(videoConfig: videoConfig)
         super.init()
         if let url = URL(string: webSocketURLString) {
             signalChannel = makeWebSocketClient(url: url, apiKey: .init(apiKey))

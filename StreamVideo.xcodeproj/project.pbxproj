@@ -545,6 +545,7 @@
 		84DCA2212A39E380000C3411 /* URLSessionTransport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2202A39E380000C3411 /* URLSessionTransport.swift */; };
 		84DCA2232A39E432000C3411 /* AuthMiddlewares.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */; };
 		84DCA2242A3A0F0D000C3411 /* HTTPClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84A7E1782881922400526C98 /* HTTPClient.swift */; };
+		84E240F32A824AA6000B72EB /* CustomAudioDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E240F22A824AA6000B72EB /* CustomAudioDevice.swift */; };
 		84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7912947476300DD4CE3 /* CallViewHelper.swift */; };
 		84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */; };
 		84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */; };
@@ -1230,6 +1231,7 @@
 		84DCA21E2A39DA15000C3411 /* APIHelper.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = APIHelper.swift; sourceTree = "<group>"; };
 		84DCA2202A39E380000C3411 /* URLSessionTransport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = URLSessionTransport.swift; sourceTree = "<group>"; };
 		84DCA2222A39E432000C3411 /* AuthMiddlewares.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthMiddlewares.swift; sourceTree = "<group>"; };
+		84E240F22A824AA6000B72EB /* CustomAudioDevice.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CustomAudioDevice.swift; sourceTree = "<group>"; };
 		84E4F7912947476300DD4CE3 /* CallViewHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewHelper.swift; sourceTree = "<group>"; };
 		84E4F7D0294CB5F300DD4CE3 /* ConnectionQuality.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQuality.swift; sourceTree = "<group>"; };
 		84E4F7D2294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ConnectionQualityIndicator.swift; sourceTree = "<group>"; };
@@ -1734,6 +1736,7 @@
 				84D6493B29E7F5D2002CA428 /* CallsView.swift */,
 				84D6493D29E7F75E002CA428 /* CallsViewModel.swift */,
 				84BD8FF329B0F208002CFBA0 /* HTTPClient.swift */,
+				84E240F22A824AA6000B72EB /* CustomAudioDevice.swift */,
 				842D8BD62865B37800801910 /* Assets.xcassets */,
 				842D8BD72865B37800801910 /* Preview Content */,
 				8228CD8C29128CA000F32136 /* Info.plist */,
@@ -3103,6 +3106,7 @@
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
 				847B47B32A23F8C6000714CE /* ShareButtonView.swift in Sources */,
 				848C469D2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift in Sources */,
+				84E240F32A824AA6000B72EB /* CustomAudioDevice.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				8403C0AF2897D9940092BD43 /* VoipPushService.swift in Sources */,
 				403BE1012A24C70000988F65 /* StreamVideoSwiftUIApp+Sentry.swift in Sources */,

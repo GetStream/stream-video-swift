@@ -15,7 +15,15 @@ actor PeerConnectionFactory {
         RTCDefaultVideoDecoderFactory().supportedCodecs()
     }()
     
-    private let factory: RTCPeerConnectionFactory = {
+    private let factory: RTCPeerConnectionFactory
+    private let videoConfig: VideoConfig
+    
+    init(videoConfig: VideoConfig) {
+        self.videoConfig = videoConfig
+        self.factory = Self.setupPeerConnectionFactory(videoConfig: videoConfig)
+    }
+    
+    static func setupPeerConnectionFactory(videoConfig: VideoConfig) -> RTCPeerConnectionFactory {
         RTCInitializeSSL()
         let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
         let encoderFactory = RTCVideoEncoderFactorySimulcast(
@@ -23,12 +31,22 @@ actor PeerConnectionFactory {
             fallback: defaultEncoderFactory
         )
         let decoderFactory = RTCDefaultVideoDecoderFactory()
-        let factory = RTCPeerConnectionFactory(
-            encoderFactory: encoderFactory,
-            decoderFactory: decoderFactory
-        )
+        let factory: RTCPeerConnectionFactory
+        if let audioDevice = videoConfig.audioDevice {
+            factory = RTCPeerConnectionFactory(
+                encoderFactory: encoderFactory,
+                decoderFactory: decoderFactory,
+                audioDevice: audioDevice
+            )
+        } else {
+            factory = RTCPeerConnectionFactory(
+                encoderFactory: encoderFactory,
+                decoderFactory: decoderFactory
+            )
+        }
+        
         return factory
-    }()
+    }
     
     func makePeerConnection(
         sessionId: String,

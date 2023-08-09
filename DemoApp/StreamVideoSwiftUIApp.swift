@@ -23,7 +23,7 @@ struct StreamVideoSwiftUIApp: App {
 
     init() {
         checkLoggedInUser()
-        LogConfig.level = .debug
+        LogConfig.level = .error
         configureSentry()
     }
     
@@ -72,11 +72,12 @@ struct StreamVideoSwiftUIApp: App {
     }
 
     private func handleLoggedInUserCredentials(_ credentials: UserCredentials, deeplinkInfo: DeeplinkInfo) {
+        let audioDevice = AVAudioEngineRTCAudioDevice()
         let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
             user: credentials.userInfo,
             token: credentials.token,
-            videoConfig: VideoConfig(),
+            videoConfig: VideoConfig(audioDevice: audioDevice),
             tokenProvider: { result in
                 Task {
                     do {
