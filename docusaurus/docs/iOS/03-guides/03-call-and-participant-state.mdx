@@ -68,7 +68,7 @@ let cancellable = call.state.$participants.sink { participants in
 }
 
 // you
-let me: CallParticipant? = call.state.me
+let localParticipant: CallParticipant? = call.state.localParticipant
 ```
 
 The following fields are available on the participant:

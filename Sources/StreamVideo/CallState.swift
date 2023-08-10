@@ -28,7 +28,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var participantsMap = [String: CallParticipant]() {
         didSet { didUpdate(Array(participantsMap.values)) }
     }
-    @Published public internal(set) var me: CallParticipant?
+    @Published public internal(set) var localParticipant: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
     @Published public internal(set) var activeSpeakers: [CallParticipant] = []
@@ -302,7 +302,7 @@ public class CallState: ObservableObject {
 
         for participant in participants {
             if participant.sessionId == sessionId {
-                me = participant
+                localParticipant = participant
             } else {
                 remoteParticipants.append(participant)
             }
