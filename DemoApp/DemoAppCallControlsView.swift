@@ -28,10 +28,29 @@ struct DemoAppCallControlsView: View {
                 VideoIconView(viewModel: viewModel).asAnyView,
                 MicrophoneIconView(viewModel: viewModel).asAnyView,
                 ToggleCameraIconView(viewModel: viewModel).asAnyView,
-                BroadcastIconView(
-                    viewModel: viewModel,
-                    preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
-                ).asAnyView,
+//                BroadcastIconView(
+//                    viewModel: viewModel,
+//                    preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
+//                ).asAnyView,
+                Button(action: {
+                    Task {
+                      do {
+                        try await requestAudioSession(category: .playAndRecord,
+                                                      mode: .videoChat,
+                                                      options: [.allowBluetoothA2DP,
+                                                                .allowBluetooth,
+                                                                .allowAirPlay,
+                                                                .mixWithOthers,
+                                                                .duckOthers,
+                                                                .mixWithOthers])
+                      } catch {
+                        print(error)
+                      }
+                    }
+                }, label: {
+                    Text("Test")
+                })
+                .asAnyView,
                 HangUpIconView(viewModel: viewModel).asAnyView
             ]
         }

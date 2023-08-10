@@ -1233,3 +1233,50 @@ public final class SimpleAudioConverter {
     return status
   }
 }
+
+func requestAudioSession(category: AVAudioSession.Category,
+                         mode: AVAudioSession.Mode,
+                         options: AVAudioSession.CategoryOptions) async throws {
+  return try await withCheckedThrowingContinuation { cont in
+    let audioSession = AVAudioSession.sharedInstance()
+
+    audioSession.requestRecordPermission { ok in
+      guard ok else {
+          fatalError()
+      }
+      do {
+        try audioSession.setCategory(category,
+                                     mode: mode,
+                                     policy: .default,
+                                     options: options)
+      } catch {
+        print("Set category: \(error)")
+        fatalError()
+      }
+
+      do {
+        try audioSession.setActive(true)
+      } catch {
+        print("Set active: \(error)")
+        fatalError()
+      }
+
+      print("Before \(audioSession.describedState)")
+
+      do {
+        try audioSession.setPreferredSampleRate(6 * 8000)
+      } catch {
+        print("Failed to setPreferredSampleRate: \(error)")
+      }
+
+      do {
+        try audioSession.setPreferredIOBufferDuration(0.02)
+      } catch {
+        print("Failed to setPreferredIOBufferDuration: \(error)")
+      }
+
+      print("After \(audioSession.describedState)")
+      cont.resume(with: .success(()))
+    }
+  }
+}

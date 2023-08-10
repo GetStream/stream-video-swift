@@ -72,7 +72,8 @@ struct StreamVideoSwiftUIApp: App {
     }
 
     private func handleLoggedInUserCredentials(_ credentials: UserCredentials, deeplinkInfo: DeeplinkInfo) {
-        let audioDevice = AVAudioEngineRTCAudioDevice()
+        let audioDevice = AUAudioUnitRTCAudioDevice()
+//        let audioDevice = AVAudioEngineRTCAudioDevice()
         let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
             user: credentials.userInfo,
