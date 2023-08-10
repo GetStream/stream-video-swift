@@ -11,8 +11,6 @@ How does this work? If you initialized the SDK with custom filters support and t
 
 You can find a working example of the filters (together with other great example projects) in our `VideoWithChat` [sample project](https://github.com/GetStream/stream-video-ios-examples/tree/main/VideoWithChat). Here is how the project you are about to build will look like in the end:
 
-// TODO sample video
-
 ## Adding a Video Filter
 
 The `VideoFilter` class allows you to create your own filters. It contains the `id` and `name` of the filter, along with an `async` function that converts the original `CIImage` to an output `CIImage`. If no filter is selected, the same input image is returned.
@@ -150,8 +148,6 @@ That is everything that is needed for a basic video filter support.
 ## Adding AI Filters
 
 In some cases, you might also want to apply AI filters. That can be an addition to the user's face (glasses, moustaches, etc), or an ML filter. In this section this use-case will be covered. Specifically, you will show Stream's logo over the user's face. Whenever the user moves along, you will update the logo's location.
-
-// TODO add sample video
 
 :::tip
 The code will be slightly simplified for the sake of this guide. If you want to see the entire example with the full code, you can see the [sample on GitHub](https://github.com/GetStream/stream-video-ios-examples/tree/main/VideoWithChat).

@@ -275,6 +275,18 @@ Only after you call `call.goLive()` will regular users be allowed to join the li
 This is convenient for many livestreaming and audio-room use cases. If you want calls to start immediately when you join them that's also possible.
 Simply go the Stream dashboard, click the livestream call type and disable the backstage mode.
 
+The `goLive` method can also automatically start HLS livestreaming, recording or transcribing. In order to do that, you need to pass the corresponding optional parameter:
+
+```swift
+Task {
+    try await call.goLive(
+        startHls: true,
+        startRecording: true,
+        startTranscription: true
+    )
+}
+```
+
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
@@ -333,7 +345,9 @@ So HLS can be a good option when:
 * A 10-20 second delay is acceptable
 * Your users want to watch the Stream in poor network conditions
 
-Let's show how to broadcast your call to HLS:
+One option to start HLS is to set the `startHls` parameter to `true` in the `goLive` method, as described above.
+
+If you want to explicitly start it, when you are live, you can use the following method:
 
 ```swift
 try await call.startHLS()

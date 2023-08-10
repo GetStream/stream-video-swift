@@ -15,12 +15,16 @@ public struct UserRequest: Codable, JSONEncodable, Hashable {
     public var image: String?
     /** Optional name of user */
     public var name: String?
+    public var role: String?
+    public var teams: [String]?
 
-    public init(custom: [String: RawJSON]? = nil, id: String, image: String? = nil, name: String? = nil) {
+    public init(custom: [String: RawJSON]? = nil, id: String, image: String? = nil, name: String? = nil, role: String? = nil, teams: [String]? = nil) {
         self.custom = custom
         self.id = id
         self.image = image
         self.name = name
+        self.role = role
+        self.teams = teams
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -28,6 +32,8 @@ public struct UserRequest: Codable, JSONEncodable, Hashable {
         case id
         case image
         case name
+        case role
+        case teams
     }
 
     // Encodable protocol methods
@@ -38,6 +44,8 @@ public struct UserRequest: Codable, JSONEncodable, Hashable {
         try container.encode(id, forKey: .id)
         try container.encodeIfPresent(image, forKey: .image)
         try container.encodeIfPresent(name, forKey: .name)
+        try container.encodeIfPresent(role, forKey: .role)
+        try container.encodeIfPresent(teams, forKey: .teams)
     }
 }
 
