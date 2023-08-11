@@ -135,7 +135,6 @@ class WebRTCClient: NSObject {
     private var fromSfuName: String?
     private var tempSubscriber: PeerConnection?
     private var currentScreenhsareType: ScreensharingType?
-    private var toggledVideo = false
 
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
@@ -450,7 +449,6 @@ class WebRTCClient: NSObject {
                 )
                 await state.add(screensharingTrack: screenshareTrack, id: sessionID)
                 await assignTracksToParticipants()
-                toggleVideo()
             } else if localScreenshareTrack?.isEnabled == false {
                 localScreenshareTrack?.isEnabled = true
                 await state.add(screensharingTrack: localScreenshareTrack, id: sessionID)
@@ -465,7 +463,6 @@ class WebRTCClient: NSObject {
     }
     
     func stopScreensharing() async throws {
-        toggledVideo = false
         await state.removeScreensharingTrack(id: sessionID)
         localScreenshareTrack?.isEnabled = false
         await assignTracksToParticipants()
@@ -626,9 +623,6 @@ class WebRTCClient: NSObject {
         }
         let participants = await self.state.callParticipants
         onParticipantsUpdated?(participants)
-        if localScreenshareTrack?.isEnabled == true && !toggledVideo {
-            toggleVideo()
-        }
     }
     
     private func handleNegotiationNeeded() -> ((PeerConnection, RTCMediaConstraints?) -> Void) {
@@ -1045,20 +1039,7 @@ class WebRTCClient: NSObject {
             await state.update(pausedTrackIds: [])
         }
     }
-    
-    private func toggleVideo() {
-        //NOTE: needed because of an SFU bug.
-        Task {
-            try await Task.sleep(nanoseconds: 2_500_000_000)
-            let participantCount = await state.callParticipants.count
-            guard participantCount > 1, !toggledVideo else { return }
-            toggledVideo = true
-            let videoState = callSettings.videoOn
-            try await changeVideoState(isEnabled: !videoState)
-            try await changeVideoState(isEnabled: videoState)
-        }
-    }
-    
+        
     private func handlePinsChanged(_ pins: [Stream_Video_Sfu_Models_Pin]) {
         Task {
             let participants = await state.callParticipants
