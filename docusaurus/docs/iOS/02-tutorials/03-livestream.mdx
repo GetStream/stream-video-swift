@@ -3,6 +3,8 @@ title: Livestream Tutorial
 description: How to build a livestream experience using Stream's video SDKs
 ---
 
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
+
 ### Livestream Quickstart
 
 In this tutorial we'll quickly build a low-latency in-app livestreaming experience. The livestream is broadcasted using Stream's edge network of servers around the world. We'll cover the following topics:
@@ -156,14 +158,28 @@ struct LivestreamView: View {
     
     @StateObject var state: CallState
     
+    let formatter = DateComponentsFormatter()
+    
     init(call: Call) {
         self.call = call
         _state = StateObject(wrappedValue: call.state)
+        formatter.unitsStyle = .full
+    }
+    
+    var duration: String? {
+        guard call.state.duration > 0  else { return nil }
+        return formatter.string(from: call.state.duration)
     }
     
     var body: some View {
         VStack {
             HStack {
+                if let duration {
+                    Text("Live for \(duration)")
+                        .font(.headline)
+                        .padding(.horizontal)
+                }
+                
                 Spacer()
                 
                 Text("Live \(state.participantCount)")
@@ -227,16 +243,24 @@ Now let's press **Go live** in the iOS app and click the link below to watch the
 
 <TokenSnippet sampleApp='livestream' displayStyle='join' />
 
-Let's take a moment to review the SwiftUI code above. `Call.state` exposes all the `@Published` objects you need.
+#### State & Participants
 
-The most important ones are:
+Let's take a moment to review the SwiftUI code above. `Call.state` exposes all the observable objects you need.
+The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available fields.
 
-```
-call.state
-call.state.participants
-```
+In this example we use:
 
-The [participant state docs](../03-guides/03-call-and-participant-state.mdx) show all the available data.
+* `call.state.backstage`: a boolean that returns if the call is in backstage mode or not
+* `call.state.duration`: how long the call has been running
+* `call.state.participantCount`: the number of participants watching the livestream
+* `call.state.participants`: the list of participants
+
+The `call.state.participants` can optionally contain more information about who's watching the stream.
+If you have multiple people broadcasting video this also contain the video tracks.
+
+There are many possibilities and the [participant state docs](../03-guides/03-call-and-participant-state.mdx) explain this in more detail.
+
+#### Creating a UI to watch a livestream
 
 The livestream layout is built using standard SwiftUI. The [VideoRenderer](../04-ui-components/02-video-renderer.mdx) component is provided by Stream.
 **VideoRenderer** renders the video and a fallback. You can use it for rendering the local and remote video.
@@ -251,27 +275,44 @@ Only after you call `call.goLive()` will regular users be allowed to join the li
 This is convenient for many livestreaming and audio-room use cases. If you want calls to start immediately when you join them that's also possible.
 Simply go the Stream dashboard, click the livestream call type and disable the backstage mode.
 
+The `goLive` method can also automatically start HLS livestreaming, recording or transcribing. In order to do that, you need to pass the corresponding optional parameter:
+
+```swift
+Task {
+    try await call.goLive(
+        startHls: true,
+        startRecording: true,
+        startTranscription: true
+    )
+}
+```
+
 ### Step 4 - (Optional) Publishing RTMP using OBS
 
 The example above showed how to publish your phone's camera to the livestream.
-Almost all livestream software and hardware supports RTMPS.
-[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMPS.
+Almost all livestream software and hardware supports RTMP.
+[OBS](https://obsproject.com/) is one of the most popular livestreaming software packages and we'll use it to explain how to import RTMP.
 So let's see how to publish using RTMPs. Feel free to skip this step if you don't need to use RTMPs.
 
 A. Log the URL & Stream Key
 
 ```swift
-if let rtmp = state.ingress?.rtmp {
-    print("RTMP url and streamingKey \(rtmp)")
+if let rtmp = call.state.ingress?.rtmp {
+    let address = rtmp.address
+    let streamKey = rtmp.streamKey
+    print("RTMP url \(address) and streamingKey \(streamKey)")
 }
 ```
 
-For example, you can listen to this value with the `onReceive` modifier:
+For example, you can print the RTMP address right after the `call.join` call in the `Task` block:
 
 ```swift
-.onReceive(state.$ingress) { _ in
-    if let rtmp = state.ingress?.rtmp {
-        print("RTMP url and streamingKey \(rtmp)")
+Task {
+    try await call.join(create: true)
+    if let rtmp = call.state.ingress?.rtmp {
+        let address = rtmp.address
+        let streamKey = rtmp.streamKey
+        print("RTMP url \(address) and streamingKey \(streamKey)")
     }
 }
 ```
@@ -280,7 +321,7 @@ B. Open OBS and go to settings -> stream
 
 - Select "custom" service
 - Server: equal to the server URL from the log
-- Stream key: equal to the stream key from the log
+- Stream key: empty, the key is already present in the URL
 
 Press start streaming in OBS. The RTMP stream will now show up in your call just like a regular video participant.
 Now that we've learned to publish using WebRTC or RTMP let's talk about watching the livestream.
@@ -304,7 +345,9 @@ So HLS can be a good option when:
 * A 10-20 second delay is acceptable
 * Your users want to watch the Stream in poor network conditions
 
-Let's show how to broadcast your call to HLS:
+One option to start HLS is to set the `startHls` parameter to `true` in the `goLive` method, as described above.
+
+If you want to explicitly start it, when you are live, you can use the following method:
 
 ```swift
 try await call.startHLS()
@@ -323,10 +366,10 @@ It also went into more details about HLS & RTMP-in.
 There are several advanced features that can improve the livestreaming experience:
 
 * ** [Co-hosts](../03-guides/02-joining-creating-calls.mdx) ** You can add members to your livestream with elevated permissions. So you can have co-hosts, moderators etc.
-* ** [Custom events](../03-guides/08-reactions-and-custom-events.mdx) ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
-* ** [Reactions & Chat](../03-guides/08-reactions-and-custom-events.mdx) ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
-* ** [Notifications](../06-advanced/01-ringing.mdx) ** You can notify users via push notifications when the livestream starts
-* ** [Recording](../06-advanced/06-recording.mdx) ** The call recording functionality allows you to record the call with various options and layouts
+* ** [Custom events](../03-guides/09-reactions-and-custom-events.mdx) ** You can use custom events on the call to share any additional data. Think about showing the score for a game, or any other realtime use case.
+* ** [Reactions & Chat](../03-guides/09-reactions-and-custom-events.mdx) ** Users can react to the livestream, and you can add chat. This makes for a more engaging experience.
+* ** [Notifications](../06-advanced/00-ringing.mdx) ** You can notify users via push notifications when the livestream starts
+* ** [Recording](../06-advanced/08-recording.mdx) ** The call recording functionality allows you to record the call with various options and layouts
 
 ### Recap
 

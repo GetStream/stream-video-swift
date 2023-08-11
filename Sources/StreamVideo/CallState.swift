@@ -28,7 +28,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var participantsMap = [String: CallParticipant]() {
         didSet { didUpdate(Array(participantsMap.values)) }
     }
-    @Published public internal(set) var me: CallParticipant?
+    @Published public internal(set) var localParticipant: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
     @Published public internal(set) var activeSpeakers: [CallParticipant] = []
@@ -53,23 +53,34 @@ public class CallState: ObservableObject {
     }
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
+    @Published public internal(set) var startedAt: Date? {
+        didSet {
+            setupDurationTimer()
+        }
+    }
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
     @Published public internal(set) var custom: [String: RawJSON] = [:]
     @Published public internal(set) var team: String?
     @Published public internal(set) var createdBy: User?
-    @Published public internal(set) var ingress: CallIngressResponse?
+    @Published public internal(set) var ingress: Ingress?
     @Published public internal(set) var permissionRequests: [PermissionRequest] = []
     @Published public internal(set) var transcribing: Bool = false
     @Published public internal(set) var egress: EgressResponse? { didSet { didUpdate(egress) } }
-    @Published public internal(set) var session: CallSessionResponse?
+    @Published public internal(set) var session: CallSessionResponse? {
+        didSet {
+            didUpdate(session)
+        }
+    }
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
     @Published public internal(set) var callSettings = CallSettings()
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
+    @Published public internal(set) var duration: TimeInterval = 0
     
     private var localCallSettingsUpdate = false
+    private var durationTimer: Foundation.Timer?
         
     internal func updateState(from event: VideoEvent) {
         switch event {
@@ -84,8 +95,8 @@ public class CallState: ObservableObject {
         case .typeCallCreatedEvent(let event):
             update(from: event.call)
             mergeMembers(event.members)
-        case .typeCallEndedEvent(_):
-            endedAt = Date()
+        case .typeCallEndedEvent(let event):
+            update(from: event.call)
         case .typeCallLiveStartedEvent(let event):
             update(from: event.call)
         case .typeCallMemberAddedEvent(let event):
@@ -257,7 +268,13 @@ public class CallState: ObservableObject {
         session = response.session
         settings = response.settings
         egress = response.egress
-        ingress = response.ingress
+
+        let rtmp = RTMP(
+            address: response.ingress.rtmp.address,
+            streamKey: streamVideo.token.rawValue
+        )
+        self.ingress = Ingress(rtmp: rtmp)
+
         if !localCallSettingsUpdate {
             callSettings = response.settings.toCallSettings
         }
@@ -285,7 +302,7 @@ public class CallState: ObservableObject {
 
         for participant in participants {
             if participant.sessionId == sessionId {
-                me = participant
+                localParticipant = participant
             } else {
                 remoteParticipants.append(participant)
             }
@@ -310,5 +327,49 @@ public class CallState: ObservableObject {
 
     private func didUpdate(_ egress: EgressResponse?) {
         self.broadcasting = egress?.broadcasting ?? false
+    }
+    
+    private func didUpdate(_ session: CallSessionResponse?) {
+        if startedAt != session?.liveStartedAt {
+            startedAt = session?.liveStartedAt
+        }
+        if session?.liveEndedAt != nil {
+            resetTimer()
+        }
+    }
+    
+    private func setupDurationTimer() {
+        resetTimer()
+        durationTimer = Foundation.Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true, block: { [weak self] timer in
+            guard let self else {
+                timer.invalidate()
+                return
+            }
+            Task {
+                await MainActor.run {
+                    self.updateDuration()
+                }
+            }
+        })
+    }
+    
+    private func resetTimer() {
+        durationTimer?.invalidate()
+        durationTimer = nil
+    }
+    
+    @objc private func updateDuration() {
+        guard let startedAt else {
+            update(duration: 0)
+            return
+        }
+        let timeInterval = Date().timeIntervalSince(startedAt)
+        update(duration: timeInterval)
+    }
+    
+    private func update(duration: TimeInterval) {
+        if duration != self.duration {
+            self.duration = duration
+        }
     }
 }

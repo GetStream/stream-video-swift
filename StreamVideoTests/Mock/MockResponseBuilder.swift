@@ -30,18 +30,19 @@ class MockResponseBuilder {
         cid: String,
         acceptedBy: [String: Date] = [:],
         rejectedBy: [String: Date] = [:],
-        recording: Bool = false
+        recording: Bool = false,
+        liveStartedAt: Date? = nil,
+        liveEndedAt: Date? = nil
     ) -> CallResponse {
         let userResponse = makeUserResponse()
         let callIngressResponse = CallIngressResponse(
             rtmp: RTMPIngress(address: "test")
         )
-        let session = CallSessionResponse(
+        let session = makeCallSessionResponse(
             acceptedBy: acceptedBy,
-            id: "test",
-            participants: [],
-            participantsCountByRole: [:],
-            rejectedBy: rejectedBy
+            rejectedBy: rejectedBy,
+            liveStartedAt: liveStartedAt,
+            liveEndedAt: liveEndedAt
         )
         let callResponse = CallResponse(
             backstage: false,
@@ -196,6 +197,25 @@ class MockResponseBuilder {
             pin: pin
         )
         return participant
+    }
+    
+    func makeCallSessionResponse(
+        acceptedBy: [String: Date] = [:],
+        rejectedBy: [String: Date] = [:],
+        liveStartedAt: Date? = nil,
+        liveEndedAt: Date? = nil
+    ) -> CallSessionResponse {
+        CallSessionResponse(
+            acceptedBy: acceptedBy,
+            endedAt: liveEndedAt,
+            id: "test",
+            liveEndedAt: liveEndedAt,
+            liveStartedAt: liveStartedAt,
+            participants: [],
+            participantsCountByRole: [:],
+            rejectedBy: rejectedBy,
+            startedAt: liveStartedAt
+        )
     }
     
 }

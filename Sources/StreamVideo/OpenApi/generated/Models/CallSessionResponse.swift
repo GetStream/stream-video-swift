@@ -12,15 +12,19 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
     public var acceptedBy: [String: Date]
     public var endedAt: Date?
     public var id: String
+    public var liveEndedAt: Date?
+    public var liveStartedAt: Date?
     public var participants: [CallParticipantResponse]
     public var participantsCountByRole: [String: Int]
     public var rejectedBy: [String: Date]
     public var startedAt: Date?
 
-    public init(acceptedBy: [String: Date], endedAt: Date? = nil, id: String, participants: [CallParticipantResponse], participantsCountByRole: [String: Int], rejectedBy: [String: Date], startedAt: Date? = nil) {
+    public init(acceptedBy: [String: Date], endedAt: Date? = nil, id: String, liveEndedAt: Date? = nil, liveStartedAt: Date? = nil, participants: [CallParticipantResponse], participantsCountByRole: [String: Int], rejectedBy: [String: Date], startedAt: Date? = nil) {
         self.acceptedBy = acceptedBy
         self.endedAt = endedAt
         self.id = id
+        self.liveEndedAt = liveEndedAt
+        self.liveStartedAt = liveStartedAt
         self.participants = participants
         self.participantsCountByRole = participantsCountByRole
         self.rejectedBy = rejectedBy
@@ -31,6 +35,8 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
         case acceptedBy = "accepted_by"
         case endedAt = "ended_at"
         case id
+        case liveEndedAt = "live_ended_at"
+        case liveStartedAt = "live_started_at"
         case participants
         case participantsCountByRole = "participants_count_by_role"
         case rejectedBy = "rejected_by"
@@ -44,6 +50,8 @@ public struct CallSessionResponse: Codable, JSONEncodable, Hashable {
         try container.encode(acceptedBy, forKey: .acceptedBy)
         try container.encodeIfPresent(endedAt, forKey: .endedAt)
         try container.encode(id, forKey: .id)
+        try container.encodeIfPresent(liveEndedAt, forKey: .liveEndedAt)
+        try container.encodeIfPresent(liveStartedAt, forKey: .liveStartedAt)
         try container.encode(participants, forKey: .participants)
         try container.encode(participantsCountByRole, forKey: .participantsCountByRole)
         try container.encode(rejectedBy, forKey: .rejectedBy)

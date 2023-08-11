@@ -57,6 +57,7 @@ final class CallEventsHandler_Tests: XCTestCase {
     func test_callEventsHandler_callEndedEvent() {
         // Given
         let rawEvent = CallEndedEvent(
+            call: mockResponseBuilder.makeCallResponse(cid: callCid),
             callCid: callCid,
             createdAt: Date(),
             user: mockResponseBuilder.makeUserResponse()

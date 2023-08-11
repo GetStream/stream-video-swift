@@ -26,6 +26,7 @@ extension PinRequest: @unchecked Sendable {}
 extension UnpinRequest: @unchecked Sendable {}
 extension PinResponse: @unchecked Sendable {}
 extension UnpinResponse: @unchecked Sendable {}
+extension GoLiveResponse: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 
@@ -58,4 +59,13 @@ public struct CreateCallOptions: Sendable {
         self.startsAt = startsAt
         self.team = team
     }
+}
+
+public struct Ingress {
+    public let rtmp: RTMP
+}
+
+public struct RTMP {
+    public let address: String
+    public let streamKey: String
 }

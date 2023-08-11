@@ -522,9 +522,27 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
     
     /// Starts a live call.
+    /// - Parameters:
+    ///  - startsHls: whether hls streaming should be started.
+    ///  - startRecording: whether recording should be started.
+    ///  - startTranscription: whether transcription should be started.
+    /// - Returns: `GoLiveResponse`.
     @discardableResult
-    public func goLive() async throws -> GoLiveResponse {
-        return try await coordinatorClient.goLive(type: callType, id: callId)
+    public func goLive(
+        startHls: Bool? = nil,
+        startRecording: Bool? = nil,
+        startTranscription: Bool? = nil
+    ) async throws -> GoLiveResponse {
+        let goLiveRequest = GoLiveRequest(
+            startHls: startHls,
+            startRecording: startRecording,
+            startTranscription: startTranscription
+        )
+        return try await coordinatorClient.goLive(
+            type: callType,
+            id: callId,
+            goLiveRequest: goLiveRequest
+        )
     }
     
     /// Stops an ongoing live call.
