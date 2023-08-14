@@ -171,14 +171,14 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.3 milestone
 
 - [x] Remote pinning of users
-- [ ] Add chat to the AppStore app (and app clip if possible)
+- [x] Add chat to the AppStore app (and app clip if possible)
 - [ ] Stability
-- [ ] API integration tests
+- [x] API integration tests
 - [ ] Test with many participants
 - [ ] CPU usage improvements
 - [ ] UIKit tutorial (potentially also UI components)
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
-- [ ] Improved chat integration
+- [x] Improved chat integration
 - [ ] Picture-in-picture sample (if we get an entitlement)
 - [x] Screensharing from mobile
 - [ ] Buttons to simulate ice-restart and SFU switching
