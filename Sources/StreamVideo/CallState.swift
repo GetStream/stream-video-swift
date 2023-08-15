@@ -3,6 +3,8 @@
 //
 
 import Foundation
+import UIKit
+import AVKit
 
 public struct PermissionRequest: @unchecked Sendable, Identifiable {
     public let id: UUID = .init()
@@ -49,7 +51,12 @@ public class CallState: ObservableObject {
     @Published public internal(set) var backstage: Bool = false
     @Published public internal(set) var broadcasting: Bool = false
     @Published public internal(set) var createdAt: Date = .distantPast {
-        didSet { if !isInitialized { isInitialized = true }}
+        didSet {
+            if !isInitialized {
+                isInitialized = true
+                subscribeForAppLifecycleEvents()
+            }
+        }
     }
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
@@ -78,9 +85,11 @@ public class CallState: ObservableObject {
     @Published public internal(set) var callSettings = CallSettings()
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
+    @Published public internal(set) var pipSource: CallParticipant?
     
     private var localCallSettingsUpdate = false
     private var durationTimer: Foundation.Timer?
+    private var pictureInPictureActive: Bool = false
         
     internal func updateState(from event: VideoEvent) {
         switch event {
@@ -323,6 +332,12 @@ public class CallState: ObservableObject {
         self.screenSharingSession = screenSharingSession
         self.remoteParticipants = remoteParticipants
         self.activeSpeakers = activeSpeakers
+        
+        if pictureInPictureActive {
+            pipSource = participants.first(where: { participant in
+                participant.id != sessionId
+            })
+        }
     }
 
     private func didUpdate(_ egress: EgressResponse?) {
@@ -371,5 +386,78 @@ public class CallState: ObservableObject {
         if duration != self.duration {
             self.duration = duration
         }
+    }
+    
+    private func subscribeForAppLifecycleEvents() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(startPiP),
+            name: Notification.Name(rawValue: "startPip"),
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(stopPiP),
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+    
+    @objc private func startPiP() {
+        guard AVPictureInPictureController.isPictureInPictureSupported() else {
+            return
+        }
+        pictureInPictureActive = true
+        pipSource = participants.first(where: { participant in
+            participant.id != sessionId
+        })
+        if #available(iOS 15.0, *) {
+            setupPictureInPicture()
+            if pipController?.isPictureInPicturePossible == true {
+                pipController?.startPictureInPicture()
+            }
+
+        }
+    }
+    
+    public func feedBuffer(_ buffer: CMSampleBuffer) {
+        self.sampleBufferVideoCallView?.sampleBufferDisplayLayer.enqueue(buffer)
+    }
+    
+    var sampleBufferVideoCallView: SampleBufferVideoCallView?
+    var pipController: AVPictureInPictureController?
+    var player: AVPlayer?
+    
+    @available(iOS 15.0, *)
+        func setupPictureInPicture() {
+            let sampleBufferVideoCallView = SampleBufferVideoCallView()
+            let pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
+            pipVideoCallViewController.preferredContentSize = CGSize(width: 640, height: 480)
+            pipVideoCallViewController.view.addSubview(sampleBufferVideoCallView)
+            let pipContentSource = AVPictureInPictureController.ContentSource(
+                activeVideoCallSourceView: sampleBufferVideoCallView,
+                contentViewController: pipVideoCallViewController
+            )
+
+            self.sampleBufferVideoCallView = sampleBufferVideoCallView
+            let pipController = AVPictureInPictureController(contentSource: pipContentSource)
+            pipController.canStartPictureInPictureAutomaticallyFromInline = true
+            self.pipController = pipController
+        }
+    
+    @objc private func stopPiP() {
+        pictureInPictureActive = false
+        pipSource = nil
+        pipController?.stopPictureInPicture()
+    }
+}
+
+class SampleBufferVideoCallView: UIView {
+    override class var layerClass: AnyClass {
+        AVSampleBufferDisplayLayer.self
+    }
+
+    var sampleBufferDisplayLayer: AVSampleBufferDisplayLayer {
+        layer as! AVSampleBufferDisplayLayer
     }
 }

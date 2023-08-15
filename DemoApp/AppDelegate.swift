@@ -5,6 +5,7 @@
 import StreamVideo
 import SwiftUI
 import UIKit
+import AVKit
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
@@ -16,6 +17,13 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
         setupRemoteNotifications()
+        let audioSession = AVAudioSession.sharedInstance()
+        
+        do {
+            try audioSession.setCategory(AVAudioSession.Category.playback)
+        } catch  {
+            print("Audio session failed")
+        }
         return true
     }
 

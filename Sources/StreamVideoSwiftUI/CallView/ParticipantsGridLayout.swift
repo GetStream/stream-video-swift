@@ -13,7 +13,6 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     var participants: [CallParticipant]
     var availableSize: CGSize
     var orientation: UIInterfaceOrientation
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
@@ -22,13 +21,11 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
         participants: [CallParticipant],
         availableSize: CGSize,
         orientation: UIInterfaceOrientation,
-        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participants = participants
         self.availableSize = availableSize
-        self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
         self.orientation = orientation
         self.call = call
@@ -42,7 +39,6 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
                     call: call,
                     participants: participants,
                     availableSize: availableSize,
-                    onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
@@ -51,7 +47,6 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
                     call: call,
                     participants: participants,
                     availableSize: availableSize,
-                    onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             }
@@ -66,7 +61,6 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -76,10 +70,7 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                     viewFactory: viewFactory,
                     call: call,
                     participants: participants,
-                    availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    },
+                    availableSize: availableSize,                    
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if participants.count == 4 {
@@ -89,9 +80,6 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3]],
                     availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    },
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if participants.count == 5 {
@@ -101,9 +89,6 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                     leftColumnParticipants: [participants[0], participants[2]],
                     rightColumnParticipants: [participants[1], participants[3], participants[4]],
                     availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    },
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
@@ -112,12 +97,11 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                     call: call,
                     participants: participants,
                     availableSize: availableSize,
-                    isPortrait: true
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                } participantVisibilityChanged: { participant, isVisible in
-                    onChangeTrackVisibility(participant, isVisible)
-                }
+                    isPortrait: true,
+                    participantVisibilityChanged: { participant, isVisible in
+                        onChangeTrackVisibility(participant, isVisible)
+                    }
+                )
             }
         }
     }
@@ -129,7 +113,6 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -140,9 +123,6 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                     call: call,
                     participants: participants,
                     availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    },
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if participants.count == 4 {
@@ -152,9 +132,6 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                     firstRowParticipants: [participants[0], participants[1]],
                     secondRowParticipants: [participants[2], participants[3]],
                     availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    },
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if participants.count == 5 {
@@ -164,9 +141,6 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                     firstRowParticipants: [participants[0], participants[1]],
                     secondRowParticipants: [participants[2], participants[3], participants[4]],
                     availableSize: availableSize,
-                    onViewUpdate: { participant, view in
-                        onViewRendering(view, participant)
-                    },
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
@@ -175,12 +149,11 @@ struct VideoParticipantsViewLandscape<Factory: ViewFactory>: View {
                     call: call,
                     participants: participants,
                     availableSize: availableSize,
-                    isPortrait: false
-                ) { participant, view in
-                    onViewRendering(view, participant)
-                } participantVisibilityChanged: { participant, isVisible in
-                    onChangeTrackVisibility(participant, isVisible)
-                }
+                    isPortrait: false,
+                    participantVisibilityChanged: { participant, isVisible in
+                        onChangeTrackVisibility(participant, isVisible)
+                    }
+                )
             }
         }
     }
@@ -195,7 +168,6 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -205,7 +177,6 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
                 call: call,
                 participants: leftColumnParticipants,
                 availableSize: size,
-                onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
             .adjustVideoFrame(to: size.width)
@@ -215,7 +186,6 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
                 call: call,
                 participants: rightColumnParticipants,
                 availableSize: size,
-                onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
             .adjustVideoFrame(to: size.width)
@@ -238,7 +208,6 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var firstRowParticipants: [CallParticipant]
     var secondRowParticipants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -248,7 +217,6 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
                 call: call,
                 participants: firstRowParticipants,
                 availableSize: size,
-                onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
             
@@ -257,7 +225,6 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
                 call: call,
                 participants: secondRowParticipants,
                 availableSize: size,
-                onViewUpdate: onViewUpdate,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
         }
@@ -276,7 +243,6 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -288,7 +254,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                     availableSize: availableSize,
                     contentMode: .scaleAspectFill,
                     customData: [:],
-                    onViewUpdate: onViewUpdate
+                    call: call
                 )
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(
@@ -322,7 +288,6 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableSize: CGSize
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -334,7 +299,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
                     availableSize: size,
                     contentMode: .scaleAspectFill,
                     customData: [:],
-                    onViewUpdate: onViewUpdate
+                    call: call
                 )
                 .modifier(
                     viewFactory.makeVideoCallParticipantModifier(

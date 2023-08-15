@@ -125,12 +125,9 @@ public struct CallView<Factory: ViewFactory>: View {
                     participant: viewModel.participants[0],
                     availableSize: size,
                     contentMode: .scaleAspectFill,
-                    customData: [:]
-                ) { participant, view in
-                    view.handleViewRendering(for: participant) { size, participant in
-                        viewModel.updateTrackSize(size, for: participant)
-                    }
-                }
+                    customData: [:],
+                    call: viewModel.call
+                )
                 .accessibility(identifier: "minimizedParticipantView")
             } else {
                 EmptyView()
@@ -144,12 +141,9 @@ public struct CallView<Factory: ViewFactory>: View {
             LocalVideoView(
                 viewFactory: viewFactory,
                 participant: localParticipant,
-                callSettings: viewModel.callSettings
-            ) { view in
-                if let track = viewModel.localParticipant?.track {
-                    view.add(track: track)
-                }
-            }
+                callSettings: viewModel.callSettings,
+                call: viewModel.call
+            )
             .opacity(viewModel.localParticipant != nil ? 1 : 0)
             .modifier(viewFactory.makeLocalParticipantViewModifier(
                 localParticipant: localParticipant,

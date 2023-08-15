@@ -20,9 +20,10 @@ public struct CallTopView: View {
     public var body: some View {
         HStack {
             Button {
-                withAnimation {
-                    viewModel.isMinimized = true
-                }
+//                withAnimation {
+//                    viewModel.isMinimized = true
+//                }
+                NotificationCenter.default.post(name: Notification.Name(rawValue: "startPip"), object: nil)
             } label: {
                 Image(systemName: "chevron.left")
                     .foregroundColor(colors.textInverted)

@@ -14,7 +14,6 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
     var participants: [CallParticipant]
     var availableSize: CGSize
     var isPortrait: Bool
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -47,7 +46,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                 availableSize: size,
                 contentMode: .scaleAspectFill,
                 customData: [:],
-                onViewUpdate: onViewUpdate
+                call: call
             )
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(

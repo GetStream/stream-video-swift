@@ -32,7 +32,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         updateRotation()
     }
     
-    func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
+    func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {        
         guard let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer else { return }
         Task {
             let imageBuffer = buffer.pixelBuffer

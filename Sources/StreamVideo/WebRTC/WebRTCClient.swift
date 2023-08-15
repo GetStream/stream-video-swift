@@ -1065,18 +1065,19 @@ class WebRTCClient: NSObject {
     }
     
     private func subscribeToAppLifecycleChanges() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(pauseTracks),
-            name: UIScene.didEnterBackgroundNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(unpauseTracks),
-            name: UIScene.willEnterForegroundNotification,
-            object: nil
-        )
+        //TODO: this!
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(pauseTracks),
+//            name: UIScene.didEnterBackgroundNotification,
+//            object: nil
+//        )
+//        NotificationCenter.default.addObserver(
+//            self,
+//            selector: #selector(unpauseTracks),
+//            name: UIScene.willEnterForegroundNotification,
+//            object: nil
+//        )
     }
     
 }
