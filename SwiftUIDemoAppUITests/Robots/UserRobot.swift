@@ -277,7 +277,7 @@ extension UserRobot {
     }
     
     @discardableResult
-    func waitForParticipantsToJoin(_ participantCount: Int, timeout: Double = defaultTimeout) -> Self {
+    func waitForParticipantsToJoin(_ participantCount: Int = 1, timeout: Double = defaultTimeout) -> Self {
         CallPage.participantMenu.wait(timeout: timeout).tap()
         let user = 1
         let expectedCount = participantCount + user
