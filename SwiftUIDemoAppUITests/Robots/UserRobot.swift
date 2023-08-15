@@ -288,6 +288,12 @@ extension UserRobot {
         return self
     }
     
+    @discardableResult
+    func waitCallControllsToAppear(timeout: Double = defaultTimeout) -> Self {
+        XCTAssertTrue(CallPage.hangUpButton.wait(timeout: timeout).exists, "Can't join the call")
+        return self
+    }
+    
     private func safelyCloseParticipantsMenu() {
         var retries = 0
         let closeButton = CallPage.ParticipantMenu.closeButton

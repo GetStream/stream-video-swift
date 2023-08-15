@@ -7,7 +7,7 @@ import XCTest
 final class Authentication_Tests: StreamTestCase {
     
     let participants = 1
-    let jwtExpirationTimeoutInSeconds = TestRunnerEnvironment.isCI ? "10" : "2"
+    let jwtExpirationTimeoutInSeconds = TestRunnerEnvironment.isCI ? "30" : "2"
     
     override func setUpWithError() throws {
         launchApp = false
@@ -26,19 +26,18 @@ final class Authentication_Tests: StreamTestCase {
         sleep(UInt32(jwtExpirationTimeoutInSeconds)!)
     }
     
-    func test_tokenExpiriesBeforeUserLogsIn() throws {
+    func test_tokenExpiresBeforeUserLogsIn() throws {
         linkToScenario(withId: 2562)
         
         GIVEN("token expires") {
             app.setLaunchArguments(.invalidateJwt)
             app.launch()
-            waitForJwtToExpire()
         }
         WHEN("user logs in") {
             userRobot
-                .logout()
-                .login(waitForLoginPage: true)
+                .login()
                 .startCall(callId)
+                .waitCallControllsToAppear()
         }
         THEN("app requests a token refresh") {}
         WHEN("participant joins the call") {
@@ -47,12 +46,11 @@ final class Authentication_Tests: StreamTestCase {
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .waitForParticipantsToJoin(participants)
-                .assertCallControls()
                 .assertGridView(with: participants)
         }
     }
     
-    func test_tokenExpiriesAfterUserLoggedIn() {
+    func test_tokenExpiresAfterUserLoggedIn() {
         linkToScenario(withId: 2563)
 
         GIVEN("user logs in") {
@@ -60,11 +58,13 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .logout()
-                .login(waitForLoginPage: true)
+                .login()
                 .startCall(callId)
+                .waitCallControllsToAppear()
         }
-        WHEN("token expires") {}
+        WHEN("token expires") {
+            waitForJwtToExpire()
+        }
         THEN("app requests a token refresh") {}
         WHEN("participant joins the call") {
             participantRobot.joinCall(callId)
@@ -77,7 +77,7 @@ final class Authentication_Tests: StreamTestCase {
         }
     }
 
-    func test_tokenExpiriesWhenUserIsInBackground() {
+    func test_tokenExpiresWhenUserIsInBackground() {
         linkToScenario(withId: 2564)
 
         GIVEN("user logs in") {
@@ -85,9 +85,9 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .logout()
-                .login(waitForLoginPage: true)
+                .login()
                 .startCall(callId)
+                .waitCallControllsToAppear()
         }
         AND("user goes to background") {
             deviceRobot.moveApplication(to: .background)
@@ -118,8 +118,7 @@ final class Authentication_Tests: StreamTestCase {
         }
         AND("user tries to log in") {
             userRobot
-                .logout()
-                .login(waitForLoginPage: true)
+                .login()
                 .startCall(callId, waitForCompletion: false)
         }
         WHEN("app requests a token refresh") {}
