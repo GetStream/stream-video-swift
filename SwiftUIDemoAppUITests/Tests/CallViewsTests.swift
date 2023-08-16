@@ -34,13 +34,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         AND("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
-                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -77,13 +77,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         AND("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
-                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -122,13 +122,13 @@ final class CallViewsTests: StreamTestCase {
                 .setUserCount(participants)
                 .setCallDuration(timeout)
                 .joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         AND("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
-                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -162,14 +162,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         AND("user minimizes video view") {
-            userRobot
-                .waitForParticipantsToJoin(participants)
-                .minimizeVideoView()
+            userRobot.minimizeVideoView()
         }
         THEN("video view is minimized for the user") {
             userRobot
@@ -236,6 +235,7 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user enables grid view") {
             userRobot.setView(mode: .grid)
@@ -266,6 +266,7 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user minimizes video view") {
             userRobot.minimizeVideoView()
@@ -295,10 +296,10 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, actions: [.shareScreen])
+            userRobot.waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
         }
         THEN("user observers participant's screen") {
             userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertParticipantStartSharingScreen()
                 .assertScreenSharingParticipantListVisibity(percent: 0)
         }
@@ -321,13 +322,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
         }
         WHEN("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("user observers the list of participants") {
             userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertGridView(with: participants)
                 .assertGridViewParticipantListVisibity(percent: 0)
         }
@@ -350,11 +351,10 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
         }
         WHEN("user enables spotlight view") {
-            userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
-                .setView(mode: .spotlight)
+            userRobot.setView(mode: .spotlight)
         }
         THEN("user observers the list of participants") {
             userRobot

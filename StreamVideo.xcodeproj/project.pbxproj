@@ -22,6 +22,8 @@
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
 		435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */; };
+		82010CAC2A851BD6005C125D /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
+		82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
@@ -29,6 +31,8 @@
 		8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */; };
 		820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784EE29FA8123006DD4F7 /* WebRTC */; };
 		820784F129FA8156006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784F029FA8156006DD4F7 /* WebRTC */; };
+		820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
+		820BD5FB2A73C654003A7B8F /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		82392D542993C9E100941435 /* StreamTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D532993C9E100941435 /* StreamTestCase.swift */; };
 		82392D5F2993CCB300941435 /* ParticipantRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D5E2993CCB300941435 /* ParticipantRobot.swift */; };
@@ -114,6 +118,7 @@
 		82E3BA552A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */; };
 		82E3BA562A0BAF64001AB93E /* WebSocketEngine_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8A29EEACAD00010C4C /* WebSocketEngine_Mock.swift */; };
 		82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F58B8A29EEACAD00010C4C /* WebSocketEngine_Mock.swift */; };
+		82FB89372A702A9200AC16A1 /* Authentication_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FB89362A702A9200AC16A1 /* Authentication_Tests.swift */; };
 		82FF40B52A17C6C200B4D95E /* CallControlsView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40B42A17C6C200B4D95E /* CallControlsView_Tests.swift */; };
 		82FF40B72A17C6CD00B4D95E /* ReconnectionView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40B62A17C6CD00B4D95E /* ReconnectionView_Tests.swift */; };
 		82FF40B92A17C6D600B4D95E /* RecordingView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82FF40B82A17C6D600B4D95E /* RecordingView_Tests.swift */; };
@@ -814,6 +819,7 @@
 		82E2F90D2A0559E60012C037 /* sun.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = sun.png; sourceTree = "<group>"; };
 		82E2F90E2A0559E60012C037 /* skin.png */ = {isa = PBXFileReference; lastKnownFileType = image.png; path = skin.png; sourceTree = "<group>"; };
 		82E3BA522A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketClientEnvironment_Mock.swift; sourceTree = "<group>"; };
+		82FB89362A702A9200AC16A1 /* Authentication_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Authentication_Tests.swift; sourceTree = "<group>"; };
 		82FF40B42A17C6C200B4D95E /* CallControlsView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView_Tests.swift; sourceTree = "<group>"; };
 		82FF40B62A17C6CD00B4D95E /* ReconnectionView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionView_Tests.swift; sourceTree = "<group>"; };
 		82FF40B82A17C6D600B4D95E /* RecordingView_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RecordingView_Tests.swift; sourceTree = "<group>"; };
@@ -1427,7 +1433,6 @@
 			children = (
 				4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */,
 				4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */,
-				8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */,
 			);
 			path = IntegrationTests;
 			sourceTree = "<group>";
@@ -1455,6 +1460,7 @@
 		82392D5C2993CBE200941435 /* TestTools */ = {
 			isa = PBXGroup;
 			children = (
+				8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */,
 				8251E6292A17BE9F00E7257A /* TestData */,
 				82CE900229FC3A7B00770EF6 /* Resources */,
 				824DBAA129F93DA1005ACD09 /* SnapshotTesting */,
@@ -1491,6 +1497,7 @@
 				82B8C0FB29E80A2A001F816C /* CallLifecycleTests.swift */,
 				82D858B729EDAE0A00CF9F8B /* ParticipantActionsTests.swift */,
 				824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */,
+				82FB89362A702A9200AC16A1 /* Authentication_Tests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -2627,6 +2634,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 842D8BD12865B31D00801910 /* Build configuration list for PBXNativeTarget "DemoApp" */;
 			buildPhases = (
+				82DE10C72A827B010057BDA8 /* ShellScript */,
 				842D8BBF2865B31B00801910 /* Sources */,
 				842D8BC02865B31B00801910 /* Frameworks */,
 				842D8BC12865B31B00801910 /* Resources */,
@@ -2673,6 +2681,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8493225D2908378B0013C029 /* Build configuration list for PBXNativeTarget "DemoAppUIKit" */;
 			buildPhases = (
+				82010CAD2A851C06005C125D /* ShellScript */,
 				84932248290837890013C029 /* Sources */,
 				84932249290837890013C029 /* Frameworks */,
 				8493224A290837890013C029 /* Resources */,
@@ -2933,6 +2942,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
+				820BD5FB2A73C654003A7B8F /* Credentials.xcconfig in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 			);
@@ -2949,6 +2959,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				82010CAC2A851BD6005C125D /* Credentials.xcconfig in Resources */,
 				8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */,
 				849322582908378B0013C029 /* Assets.xcassets in Resources */,
 			);
@@ -3026,6 +3037,24 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
+		82010CAD2A851C06005C125D /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "touch TestTools/Credentials.xcconfig\n";
+		};
 		827297E42A4585EA00774306 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -3042,8 +3071,26 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch StreamVideoTests/IntegrationTests/Credentials.xcconfig\n";
+			shellScript = "touch TestTools/Credentials.xcconfig\n";
 			showEnvVarsInLog = 0;
+		};
+		82DE10C72A827B010057BDA8 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+			);
+			outputFileListPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "touch TestTools/Credentials.xcconfig\n";
 		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3082,6 +3129,7 @@
 				82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */,
 				82392D6F2994027C00941435 /* Sinatra.swift in Sources */,
 				82392D6D2993CE7200941435 /* StreamVideoUITests.swift in Sources */,
+				82FB89372A702A9200AC16A1 /* Authentication_Tests.swift in Sources */,
 				82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */,
 				824DBAA029F6D77B005ACD09 /* ReconnectionTests.swift in Sources */,
 				828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */,
@@ -3123,6 +3171,7 @@
 				842D8BDA2865B37800801910 /* StreamVideoSwiftUIApp.swift in Sources */,
 				845C573228DDC57B00D38FCC /* DemoAppUtils.swift in Sources */,
 				84BD8FF429B0F208002CFBA0 /* HTTPClient.swift in Sources */,
+				820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */,
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
 				847B47B12A23EE44000714CE /* CustomWaitingUserView.swift in Sources */,
@@ -3153,6 +3202,7 @@
 				84BD8FF829B0F97B002CFBA0 /* TokenService.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
+				82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */,
 				84BD8FFB29B0FA5B002CFBA0 /* LoginView.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				84BD8FF729B0F964002CFBA0 /* LoginViewModel.swift in Sources */,
@@ -3768,6 +3818,416 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		820EB3112A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++17";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_BITCODE = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG STREAM_TESTS";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				VERSIONING_SYSTEM = "apple-generic";
+			};
+			name = Test;
+		};
+		820EB3122A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Sources/StreamVideo/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = "";
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideo;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Test;
+		};
+		820EB3132A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG TESTS";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
+		820EB3142A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Sources/StreamVideoSwiftUI/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = "";
+				OTHER_SWIFT_FLAGS = "-DSTREAM_SNAPSHOT_TESTS -DSTREAM_E2E_TESTS";
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoSwiftUI;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Test;
+		};
+		820EB3152A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoSwiftUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "";
+			};
+			name = Test;
+		};
+		820EB3162A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
+				BUILD_LIBRARY_FOR_DISTRIBUTION = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				DYLIB_COMPATIBILITY_VERSION = 1;
+				DYLIB_CURRENT_VERSION = 1;
+				DYLIB_INSTALL_NAME_BASE = "@rpath";
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Sources/StreamVideoUIKit/Info.plist;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				MARKETING_VERSION = "";
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoUIKit;
+				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				VERSIONING_SYSTEM = "apple-generic";
+				VERSION_INFO_PREFIX = "";
+			};
+			name = Test;
+		};
+		820EB3172A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
+				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "-DSTREAM_SNAPSHOT_TESTS";
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoUIKitTests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
+		820EB3182A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
+			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_ENTITLEMENTS = "DemoApp/DemoApp-Debug.entitlements";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_ASSET_PATHS = "\"DemoApp/Preview Content\"";
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
+				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "DemoApp requires microphone access in order to capture and transmit audio";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+				);
+				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "-DSTREAM_E2E_TESTS";
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_STRICT_CONCURRENCY = targeted;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
+		820EB3192A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = DemoAppUIKit/DemoAppUIKit.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEFINES_MODULE = YES;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_FILE = DemoAppUIKit/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
+				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
+				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
+				INFOPLIST_KEY_NSMicrophoneUsageDescription = "DemoApp requires microphone access in order to capture and transmit audio";
+				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
+				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
+				INFOPLIST_KEY_UIMainStoryboardFile = "";
+				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				LIBRARY_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(SDKROOT)/usr/lib/swift",
+				);
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.DemoAppUIKit;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE_SPECIFIER = "";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
+		820EB31A2A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.5;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.SwiftUIDemoAppUITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = DemoApp;
+			};
+			name = Test;
+		};
+		820EB31B2A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_PKGINFO_FILE = YES;
+				INFOPLIST_FILE = CallIntent/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.1;
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
+		820EB31C2A7A8A56009FDCA5 /* Test */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+				CODE_SIGN_ENTITLEMENTS = ScreenSharing/ScreenSharing.entitlements;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = EHV7XZLAHA;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ScreenSharing/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				MARKETING_VERSION = 1.0.1;
+				OTHER_LDFLAGS = (
+					"-Xlinker",
+					"-no_application_extension",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.ScreenSharing;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Test;
+		};
 		82392D592993C9E100941435 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -3927,7 +4387,7 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
-				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG STREAM_TESTS STREAM_E2E_TESTS STREAM_SNAPSHOT_TESTS";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = "DEBUG STREAM_TESTS";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -3995,6 +4455,7 @@
 		};
 		842D8BD22865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -4028,6 +4489,7 @@
 					"$(SDKROOT)/usr/lib/swift",
 				);
 				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -4382,6 +4844,7 @@
 					"@loader_path/Frameworks",
 				);
 				MARKETING_VERSION = "";
+				OTHER_SWIFT_FLAGS = "";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoSwiftUI;
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
@@ -4552,6 +5015,7 @@
 				GENERATE_INFOPLIST_FILE = YES;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.4;
 				MARKETING_VERSION = 1.0;
+				OTHER_SWIFT_FLAGS = "-DSTREAM_SNAPSHOT_TESTS";
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.StreamVideoUIKitTests;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
@@ -4585,6 +5049,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				82392D592993C9E100941435 /* Debug */,
+				820EB31A2A7A8A56009FDCA5 /* Test */,
 				82392D5A2993C9E100941435 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4594,6 +5059,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8427FF6D2A03D1D100AFD2C3 /* Debug */,
+				820EB31B2A7A8A56009FDCA5 /* Test */,
 				8427FF6E2A03D1D100AFD2C3 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4603,6 +5069,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				842D8BCF2865B31D00801910 /* Debug */,
+				820EB3112A7A8A56009FDCA5 /* Test */,
 				842D8BD02865B31D00801910 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4612,6 +5079,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				842D8BD22865B31D00801910 /* Debug */,
+				820EB3182A7A8A56009FDCA5 /* Test */,
 				842D8BD32865B31D00801910 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4621,6 +5089,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				848C46AD2A6ABF7E00E5AC09 /* Debug */,
+				820EB31C2A7A8A56009FDCA5 /* Test */,
 				848C46AE2A6ABF7E00E5AC09 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4630,6 +5099,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				8493225E2908378B0013C029 /* Debug */,
+				820EB3192A7A8A56009FDCA5 /* Test */,
 				8493225F2908378B0013C029 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4639,6 +5109,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84F737FD287C13AD00A363F4 /* Debug */,
+				820EB3122A7A8A56009FDCA5 /* Test */,
 				84F737FE287C13AD00A363F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4648,6 +5119,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84F73800287C13AD00A363F4 /* Debug */,
+				820EB3132A7A8A56009FDCA5 /* Test */,
 				84F73801287C13AD00A363F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4657,6 +5129,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84F7381D287C141000A363F4 /* Debug */,
+				820EB3142A7A8A56009FDCA5 /* Test */,
 				84F7381E287C141000A363F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4666,6 +5139,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84F73821287C141000A363F4 /* Debug */,
+				820EB3152A7A8A56009FDCA5 /* Test */,
 				84F73822287C141000A363F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4675,6 +5149,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84F73838287C146D00A363F4 /* Debug */,
+				820EB3162A7A8A56009FDCA5 /* Test */,
 				84F73839287C146D00A363F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
@@ -4684,6 +5159,7 @@
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				84F7383B287C146D00A363F4 /* Debug */,
+				820EB3172A7A8A56009FDCA5 /* Test */,
 				84F7383C287C146D00A363F4 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;

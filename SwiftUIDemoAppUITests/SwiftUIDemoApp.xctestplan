@@ -9,7 +9,17 @@
     }
   ],
   "defaultOptions" : {
-
+    "environmentVariableEntries" : [
+      {
+        "key" : "STREAM_VIDEO_SECRET",
+        "value" : "$(STREAM_VIDEO_SECRET)"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:StreamVideo.xcodeproj",
+      "identifier" : "842D8BC22865B31B00801910",
+      "name" : "DemoApp"
+    }
   },
   "testTargets" : [
     {

@@ -235,6 +235,12 @@ extension UserRobot {
         }
         return self
     }
+    
+    @discardableResult
+    func assertConnectionErrorAlert() -> Self {
+        XCTAssertTrue(CallDetailsPage.connectionErrorAlert.wait().exists)
+        return self
+    }
 }
 
 extension XCUIElement {
