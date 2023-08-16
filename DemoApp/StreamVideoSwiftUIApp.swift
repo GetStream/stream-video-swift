@@ -5,6 +5,7 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import WebRTC
 
 @main
 struct StreamVideoSwiftUIApp: App {
@@ -72,11 +73,16 @@ struct StreamVideoSwiftUIApp: App {
     }
 
     private func handleLoggedInUserCredentials(_ credentials: UserCredentials, deeplinkInfo: DeeplinkInfo) {
+        let audioProcessingModule = RTCDefaultAudioProcessingModule(
+            config: nil,
+            capturePostProcessingDelegate: appState.voiceProcessor,
+            renderPreProcessingDelegate: nil
+        )
         let streamVideo = StreamVideo(
             apiKey: Config.apiKey,
             user: credentials.userInfo,
             token: credentials.token,
-            videoConfig: VideoConfig(),
+            videoConfig: VideoConfig(audioProcessingModule: audioProcessingModule),
             tokenProvider: { result in
                 Task {
                     do {

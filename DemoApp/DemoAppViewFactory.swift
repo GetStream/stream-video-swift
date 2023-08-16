@@ -22,4 +22,8 @@ class DemoAppViewFactory: ViewFactory {
         DemoAppCallControlsView(viewModel: viewModel)
 #endif
     }
+    
+    func makeCallTopView(viewModel: CallViewModel) -> some View {
+        CustomCallTopView(viewModel: viewModel)
+    }
 }
