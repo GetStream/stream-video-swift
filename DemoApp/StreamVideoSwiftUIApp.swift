@@ -124,6 +124,12 @@ struct StreamVideoSwiftUIApp: App {
     }
     
     private func checkLoggedInUser() {
+        #if STREAM_E2E_TESTS
+        if ProcessInfo.processInfo.arguments.contains("MOCK_JWT") {
+            return
+        }
+        #endif
+        
         if let userCredentials = userRepository.loadCurrentUser() {
             appState.currentUser = userCredentials.userInfo
             appState.userState = .loggedIn

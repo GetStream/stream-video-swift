@@ -48,6 +48,12 @@ class TokenService {
     }
 
     func fetchToken(for userId: String, callIds: [String] = []) async throws -> UserToken {
+        #if STREAM_E2E_TESTS
+        if ProcessInfo.processInfo.arguments.contains("MOCK_JWT") {
+            return fetchTestToken(for: userId)
+        }
+        #endif
+        
         var parameters: [String: String] = [
             "user_id": userId,
             "api_key": Config.apiKey
@@ -75,4 +81,12 @@ struct Config {
     static let apiKeyLocal = "892s22ypvt6m"
     static let baseURL = URL(string: "https://staging.getstream.io/")!
     static let appURLScheme = "streamvideo"
+}
+
+extension TokenService {
+    
+    func fetchTestToken(for userId: String) -> UserToken {
+        let expiration = Int(ProcessInfo.processInfo.environment["JWT_EXPIRATION"] ?? "100")!
+        return TokenGenerator.shared.fetchToken(for: userId, expiration: expiration)!
+    }
 }

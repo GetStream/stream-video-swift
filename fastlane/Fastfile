@@ -12,12 +12,13 @@ sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 sinatra_port = 4567
 video_buddy_port = 5678
+app_secret = ENV.fetch('STREAM_VIDEO_SECRET', nil)
 
 before_all do |lane|
   if is_ci
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
-    xcodes(version: xcode_version, select_for_current_build_only: true) unless [:allure_launch].include?(lane)
+    xcversion(version: xcode_version) unless [:publish_release, :allure_launch].include?(lane)
   elsif lane == :test_e2e
     clean_up_ports_for_e2e_test
   end
@@ -87,6 +88,7 @@ end
 
 private_lane :upload_beta do |options|
   match_me
+  create_credentials_config
   testflight_build(
     api_key: appstore_api_key,
     xcode_project: xcode_project,
@@ -106,14 +108,18 @@ private_lane :appstore_api_key do
   )
 end
 
-desc 'Runs LLC tests in Debug config'
+lane :create_credentials_config do
+  # Make sure xcconfig exists even though it won't be used on CI
+  sh('touch ../TestTools/Credentials.xcconfig')
+end
+
+desc 'Runs LLC tests'
 lane :test do |options|
   next unless is_check_required(sources: sources_matrix[:unit])
 
   update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
 
-  # Make sure xcconfig exists even though it won't be used
-  sh('touch ../StreamVideoTests/IntegrationTests/Credentials.xcconfig')
+  create_credentials_config
 
   scan(
     project: xcode_project,
@@ -121,16 +127,16 @@ lane :test do |options|
     testplan: 'StreamVideo',
     clean: true,
     devices: options[:device],
-    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{ENV.fetch('STREAM_VIDEO_SECRET', nil)}" : ''
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
   )
 end
 
-desc 'Runs SwiftUI tests in Debug config'
+desc 'Runs SwiftUI tests'
 lane :test_swiftui do |options|
   test_ui(scheme: 'StreamVideoSwiftUI', source: :swiftui, device: options[:device], record: options[:record])
 end
 
-desc 'Runs UIKit tests in Debug config'
+desc 'Runs UIKit tests'
 lane :test_uikit do |options|
   test_ui(scheme: 'StreamVideoUIKit', source: :uikit, device: options[:device], record: options[:record])
 end
@@ -173,25 +179,26 @@ lane :stop_video_buddy do
   sh("lsof -t -i:#{video_buddy_port} | xargs kill -9")
 end
 
-desc 'Runs e2e ui tests in Debug config'
+desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
   next unless is_check_required(sources: sources_matrix[:e2e])
 
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
+  create_credentials_config
   start_sinatra
   start_video_buddy
 
-  device = options[:ios] ? "#{options[:device]} (#{options[:ios]})" : options[:device]
-  prepare_simulator(device: device) if is_ci
+  prepare_simulator(device: options[:device]) if is_ci
 
   scan_options = {
     project: xcode_project,
     scheme: 'DemoApp',
     testplan: 'SwiftUIDemoApp',
     result_bundle: true,
-    devices: device,
-    number_of_retries: 2
+    devices: options[:device],
+    number_of_retries: 2,
+    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
   }
 
   build_for_testing = is_ci && options[:cron].nil?
@@ -253,6 +260,8 @@ private_lane :build_example_app do |options|
     end
   next unless is_check_required(sources: sources_matrix[app_sources])
 
+  create_credentials_config
+
   scan(
     project: xcode_project,
     scheme: options[:scheme],
@@ -275,6 +284,8 @@ end
 
 desc 'Build and upload DemoApp to Emerge'
 private_lane :emerge_upload do |options|
+  create_credentials_config
+
   gym(
     export_method: 'ad-hoc',
     project: xcode_project,
