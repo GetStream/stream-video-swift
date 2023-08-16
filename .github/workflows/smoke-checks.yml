@@ -1,18 +1,10 @@
 name: Smoke Checks
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths-ignore:
-      - 'docusaurus/**'
-      - 'README.md'
-      - 'CHANGELOG.md'
-
   pull_request:
     branches:
       - '**'
+      - '!main'
     paths-ignore:
       - 'docusaurus/**'
       - 'README.md'

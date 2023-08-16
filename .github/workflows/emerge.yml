@@ -1,19 +1,9 @@
 name: Size Check
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths-ignore:
-      - 'docusaurus/**'
-      - 'README.md'
-      - 'CHANGELOG.md'
-
   pull_request:
     branches:
-      - main
-      - develop
+      - '**'
     paths-ignore:
       - 'docusaurus/**'
       - 'README.md'
