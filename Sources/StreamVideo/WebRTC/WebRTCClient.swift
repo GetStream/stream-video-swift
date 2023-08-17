@@ -5,7 +5,6 @@
 import Combine
 import Foundation
 @preconcurrency import WebRTC
-import Accelerate
 
 class WebRTCClient: NSObject {
     

@@ -9,11 +9,13 @@ public struct VideoConfig: Sendable {
     /// An array of `VideoFilter` objects representing the filters to apply to the video.
     public let videoFilters: [VideoFilter]
     
+    /// Custom audio processing module.
     public let audioProcessingModule: RTCAudioProcessingModule?
         
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
+    ///   - audioProcessingModule: Option to provide your own audio processing.
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],
