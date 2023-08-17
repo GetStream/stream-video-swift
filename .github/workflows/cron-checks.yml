@@ -56,7 +56,7 @@ jobs:
     - name: Setup iOS ${{ matrix.ios }} Runtime
       if: ${{ matrix.setup_runtime }}
       timeout-minutes: 60
-      run: xcversion simulators --install='iOS ${{ matrix.ios }}'
+      run: bundle exec xcversion simulators --install='iOS ${{ matrix.ios }}'
     - name: Launch Allure TestOps
       run: bundle exec fastlane allure_launch cron:true
     - name: Run UI Tests (Debug)
@@ -125,7 +125,7 @@ jobs:
     - name: Setup iOS ${{ matrix.ios }} Runtime
       if: ${{ matrix.setup_runtime }}
       timeout-minutes: 60
-      run: xcversion simulators --install='iOS ${{ matrix.ios }}'
+      run: bundle exec xcversion simulators --install='iOS ${{ matrix.ios }}'
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ matrix.device }} (${{ matrix.ios }})"
       timeout-minutes: 30
