@@ -10,9 +10,9 @@ final class EventTests: XCTestCase {
 
     private lazy var customVideoEvent: CustomVideoEvent! = CustomVideoEvent(
         callCid: "123",
-        createdAt: .now,
+        createdAt: Date(),
         custom: [:],
-        user: .init(createdAt: .now, custom: [:], id: "456", role: "admin", teams: [], updatedAt: .now)
+        user: .init(createdAt: Date(), custom: [:], id: "456", role: "admin", teams: [], updatedAt: Date())
     )
 
     override func tearDown() {
@@ -73,7 +73,7 @@ final class EventTests: XCTestCase {
     func test_forCall_isNotWSCallEvent_returnsFalse() {
         let subject = VideoEvent.typeHealthCheckEvent(.init(
             connectionId: UUID().uuidString,
-            createdAt: .now)
+            createdAt: Date())
         )
 
         XCTAssertFalse(subject.forCall(cid: "123"))
