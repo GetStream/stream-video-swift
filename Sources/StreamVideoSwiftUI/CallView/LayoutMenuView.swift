@@ -6,11 +6,15 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-struct LayoutMenuView: View {
+public struct LayoutMenuView: View {
     
     @ObservedObject var viewModel: CallViewModel
     
-    var body: some View {
+    public init(viewModel: CallViewModel) {
+        _viewModel = ObservedObject(initialValue: viewModel)
+    }
+    
+    public var body: some View {
         Menu {
             LayoutMenuItem(
                 title: L10n.Call.Current.layoutGrid,
