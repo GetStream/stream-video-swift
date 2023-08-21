@@ -60,6 +60,7 @@
 		829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */; };
 		829EF8792A9364630045D166 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */; };
 		829EF87A2A9364630045D166 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */; };
+		829EF87B2A93664F0045D166 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */; };
 		829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* ViewFactory.swift */; };
 		829F7BFB29FABC0E003EBACE /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* ViewFactory.swift */; };
 		829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
@@ -2991,6 +2992,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */,
+				829EF87B2A93664F0045D166 /* PrivacyInfo.xcprivacy in Resources */,
 				8434C539289BBBBA0001490A /* L10n_template.stencil in Resources */,
 				8458B706290ACFE400F8E487 /* incoming.wav in Resources */,
 				8434C53B289BBF020001490A /* Localizable.strings in Resources */,
