@@ -95,7 +95,7 @@ private_lane :upload_beta do |options|
     sdk_target: 'StreamVideo',
     app_target: options[:app_target],
     app_identifier: options[:app_identifier],
-    extensions: ['CallIntent']
+    extensions: ['CallIntent', 'ScreenSharing']
   )
 end
 
