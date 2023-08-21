@@ -182,7 +182,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Picture-in-picture sample (if we get an entitlement)
 - [x] Screensharing from mobile
 - [ ] Buttons to simulate ice-restart and SFU switching
-- [ ] Button to switch speakerphone/earpiece
+- [x] Button to switch speakerphone/earpiece
 
 ### 0.4 milestone
 

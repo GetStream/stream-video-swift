@@ -1,29 +1,39 @@
 //
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
-
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
 
 struct CustomCallTopView: View {
-            
+
     @Injected(\.colors) var colors
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
-    
+
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var appState = AppState.shared
-    
+
     @State var sharingPopupDismissed = false
-    
+
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         HStack {
             Menu {
+                Button {
+                    viewModel.toggleSpeaker()
+                } label: {
+                    HStack {
+                        Text("Speaker")
+                        if viewModel.callSettings.speakerOn {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+
+                }
                 Button {
                     if appState.audioFilter == nil {
                         appState.audioFilter = RobotVoiceFilter(pitchShift: 0.8)
@@ -37,7 +47,6 @@ struct CustomCallTopView: View {
                             Image(systemName: "checkmark")
                         }
                     }
-                    
                 }
             } label: {
                 Image(systemName: "ellipsis")
@@ -45,19 +54,19 @@ struct CustomCallTopView: View {
                     .font(fonts.bodyBold)
                     .padding()
             }
-            
+
             if viewModel.recordingState == .recording {
                 RecordingView()
                     .accessibility(identifier: "recordingLabel")
             }
 
             Spacer()
-            
+
             if #available(iOS 14, *) {
                 LayoutMenuView(viewModel: viewModel)
                     .opacity(hideLayoutMenu ? 0 : 1)
                     .accessibility(identifier: "viewMenu")
-                
+
                 Button {
                     viewModel.participantsShown.toggle()
                 } label: {
@@ -79,7 +88,7 @@ struct CustomCallTopView: View {
             : nil
         )
     }
-    
+
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
