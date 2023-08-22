@@ -148,6 +148,7 @@
 		840626722A37A431004B8748 /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626702A37A431004B8748 /* IncomingCall.swift */; };
 		8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626992A37A5E2004B8748 /* CallEvents.swift */; };
 		8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8406269B2A37A653004B8748 /* CallEventsHandler.swift */; };
+		8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */; };
 		84093811288A90390089A35B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* HomeView.swift */; };
 		8409465629AF4EEC007AF5BF /* CallReactionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */; };
 		8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465129AF4EEC007AF5BF /* CallRecording.swift */; };
@@ -851,6 +852,7 @@
 		840626702A37A431004B8748 /* IncomingCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		840626992A37A5E2004B8748 /* CallEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallEvents.swift; sourceTree = "<group>"; };
 		8406269B2A37A653004B8748 /* CallEventsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEventsHandler.swift; sourceTree = "<group>"; };
+		8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturingUtils.swift; sourceTree = "<group>"; };
 		84093810288A90390089A35B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallReactionEvent.swift; sourceTree = "<group>"; };
 		8409465129AF4EEC007AF5BF /* CallRecording.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallRecording.swift; sourceTree = "<group>"; };
@@ -2564,6 +2566,7 @@
 				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
 				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
 				84F0867A29632DA30099907A /* VideoFilters.swift */,
+				8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -3425,6 +3428,7 @@
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
 				842B8E2E2A2DFED900863A87 /* RejectCallResponse.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
+				8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */,
 				84DC38D929ADFCFD00946713 /* OpenISO8601DateFormatter.swift in Sources */,
 				84DC38A929ADFCFD00946713 /* CallUpdatedEvent.swift in Sources */,
 				843DAB9A29E695CF00E0EB63 /* CreateGuestRequest.swift in Sources */,
@@ -4194,7 +4198,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4224,7 +4228,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-Xlinker",
 					"-no_application_extension",
@@ -4297,7 +4301,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4328,7 +4332,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -4579,7 +4583,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-Xlinker",
 					"-no_application_extension",
@@ -4615,7 +4619,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-Xlinker",
 					"-no_application_extension",

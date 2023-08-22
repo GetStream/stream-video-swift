@@ -138,8 +138,7 @@ final class Call_Tests: StreamVideoTestCase {
             callType: callType,
             callId: callId,
             coordinatorClient: defaultAPI,
-            callController: callController,
-            videoOptions: VideoOptions()
+            callController: callController
         )
         let event = UpdatedCallPermissionsEvent(
             callCid: callCid,

@@ -34,7 +34,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
 
@@ -53,7 +52,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -98,7 +96,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -144,7 +141,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -178,7 +174,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -202,7 +197,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -225,7 +219,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -247,7 +240,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -268,7 +260,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -289,7 +280,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -313,7 +303,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -339,7 +328,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call
@@ -364,7 +352,6 @@ final class CallController_Tests: ControllerTestCase {
             callType: callType,
             callId: callId,
             callSettings: CallSettings(),
-            videoOptions: VideoOptions(),
             options: nil
         )
         callController.call = call

@@ -38,7 +38,6 @@ class CallController_Mock: CallController {
         callType: String,
         callId: String,
         callSettings: CallSettings?,
-        videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         migratingFrom: String? = nil,
         sessionID: String? = nil,

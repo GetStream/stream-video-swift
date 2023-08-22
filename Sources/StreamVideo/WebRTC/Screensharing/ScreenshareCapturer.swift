@@ -61,7 +61,12 @@ class ScreenshareCapturer: VideoCapturing {
     }
     
     func handle(sampleBuffer: CMSampleBuffer, type: RPSampleBufferType, for device: AVCaptureDevice) {
-        let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
+        let outputFormat = VideoCapturingUtils.outputFormat(
+            for: device,
+            preferredFormat: videoOptions.preferredFormat,
+            preferredDimensions: videoOptions.preferredDimensions,
+            preferredFps: videoOptions.preferredFps
+        )
 
         if type == .video {
             guard CMSampleBufferGetNumSamples(sampleBuffer) == 1,

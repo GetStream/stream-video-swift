@@ -6,45 +6,61 @@ import Foundation
 @preconcurrency import WebRTC
 
 /// Configuration for the video options for a call.
-public struct VideoOptions: Sendable {
+struct VideoOptions: Sendable {
     
     /// The preferred video format.
-    public var preferredFormat: AVCaptureDevice.Format?
+    var preferredFormat: AVCaptureDevice.Format?
     /// The preferred video dimensions.
-    public var preferredDimensions: CMVideoDimensions
+    var preferredDimensions: CMVideoDimensions
     /// The preferred frames per second.
-    public var preferredFps: Int
+    var preferredFps: Int
     /// The supported codecs.
-    public var supportedCodecs: [VideoCodec]
+    var supportedCodecs: [VideoCodec]
     
-    public init(
-        supportedCodecs: [VideoCodec] = VideoCodec.defaultCodecs,
+    init(
+        targetResolution: TargetResolution? = nil,
         preferredFormat: AVCaptureDevice.Format? = nil,
-        preferredDimensions: CMVideoDimensions = .full,
         preferredFps: Int = 30
     ) {
         self.preferredFormat = preferredFormat
-        self.preferredDimensions = preferredDimensions
         self.preferredFps = preferredFps
-        self.supportedCodecs = supportedCodecs
+        if let targetResolution {
+            self.preferredDimensions = CMVideoDimensions(
+                width: Int32(targetResolution.width),
+                height: Int32(targetResolution.height)
+            )
+            do {
+                self.supportedCodecs = try VideoCapturingUtils.codecs(
+                    preferredFormat: preferredFormat,
+                    preferredDimensions: preferredDimensions,
+                    preferredFps: preferredFps,
+                    preferredBitrate: targetResolution.bitrate
+                )
+            } catch {
+                self.supportedCodecs = VideoCodec.defaultCodecs
+            }
+        } else {
+            self.preferredDimensions = .full
+            self.supportedCodecs = VideoCodec.defaultCodecs
+        }
     }
 }
 
 /// Represents a video codec.
-public struct VideoCodec: Sendable {
+struct VideoCodec: Sendable {
     /// The dimensions of the codec.
-    public let dimensions: CMVideoDimensions
+    let dimensions: CMVideoDimensions
     /// The codec quality.
-    public let quality: String
+    let quality: String
     /// The maximum bitrate.
-    public let maxBitrate: Int
+    let maxBitrate: Int
     /// Factor that tells how much the resolution should be scalled down.
-    public var scaleDownFactor: Int32?
+    var scaleDownFactor: Int32?
 }
 
 extension VideoCodec {
     
-    public static let defaultCodecs = [quarter, half, full]
+    static let defaultCodecs = [quarter, half, full]
     
     static let full = VideoCodec(
         dimensions: .full,
