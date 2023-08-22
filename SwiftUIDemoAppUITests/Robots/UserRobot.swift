@@ -165,12 +165,6 @@ extension UserRobot {
     }
     
     @discardableResult
-    func minimizeCall() -> Self {
-        CallPage.minimizeCallViewButton.wait().tap()
-        return self
-    }
-    
-    @discardableResult
     func endCall() -> Self {
         CallPage.hangUpButton.firstMatch.safeTap()
         return self
@@ -187,12 +181,6 @@ extension UserRobot {
         case .spotlight:
             CallPage.ViewMenu.spotlight.tapFrameCenter()
         }
-        return self
-    }
-    
-    @discardableResult
-    func minimizeVideoView() -> Self {
-        CallPage.minimizeCallViewButton.wait().tap()
         return self
     }
     

@@ -11,7 +11,6 @@ enum CallPage {
     static var cameraPositionToggle: XCUIElement { app.buttons["cameraPositionToggle"] }
     static var hangUpButton: XCUIElement { app.buttons["hangUp"] }
     
-    static var minimizeCallViewButton: XCUIElement { app.buttons["minimizeCallViewButton"] }
     static var recordingLabel: XCUIElement { app.staticTexts["recordingLabel"] }
     static var participantMenu: XCUIElement { app.buttons["participantMenu"] }
     static var cornerDragableView: XCUIElement { app.otherElements["cornerDragableView"].otherElements.firstMatch }
