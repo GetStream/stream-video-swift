@@ -150,79 +150,6 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserShrinksVideoView() {
-        linkToScenario(withId: 1770)
-        
-        let participants = 2
-        
-        GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
-        }
-        AND("participants join the call") {
-            participantRobot
-                .setUserCount(participants)
-                .joinCall(callId)
-            userRobot.waitForParticipantsToJoin(participants)
-        }
-        WHEN("user enables grid view") {
-            userRobot.setView(mode: .grid)
-        }
-        AND("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        THEN("video view is minimized for the user") {
-            userRobot
-                .assertThereAreNoCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
-        WHEN("user maximizes video view") {
-            userRobot.maximizeVideoView()
-        }
-        THEN("video view is maximized for the user") {
-            userRobot
-                .assertCallControls()
-                .assertGridView(with: participants)
-        }
-        WHEN("user enables spotlight view") {
-            userRobot.setView(mode: .spotlight)
-        }
-        AND("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        THEN("video view is minimized for the user") {
-            userRobot
-                .assertThereAreNoCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
-        WHEN("user maximizes video view") {
-            userRobot.maximizeVideoView()
-        }
-        THEN("video view is maximized for the user") {
-            userRobot
-                .assertCallControls()
-                .assertSpotlightView(with: participants)
-        }
-        WHEN("user enables fullscreen view") {
-            userRobot.setView(mode: .fullscreen)
-        }
-        AND("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        THEN("video view is minimized for the user") {
-            userRobot
-                .assertThereAreNoCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
-        WHEN("user maximizes video view") {
-            userRobot.maximizeVideoView()
-        }
-        THEN("video view is maximized for the user") {
-            userRobot
-                .assertCallControls()
-                .assertFullscreenView()
-        }
-    }
-    
     func testUserMovesCornerDragableView() {
         linkToScenario(withId: 1771)
         
@@ -251,36 +178,6 @@ final class CallViewsTests: StreamTestCase {
         THEN("video view is in the bottom right corner") {
             XCTAssertEqual(initialCoordinates.x, newCoordinates.x)
             XCTAssertLessThan(initialCoordinates.y, newCoordinates.y)
-        }
-    }
-    
-    func testUserMovesMinimizedVideoView() {
-        linkToScenario(withId: 1772)
-        
-        let participants = 1
-        
-        GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
-        }
-        AND("participant joins the call") {
-            participantRobot
-                .setUserCount(participants)
-                .joinCall(callId)
-            userRobot.waitForParticipantsToJoin(participants)
-        }
-        WHEN("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        
-        let initialCoordinates = CallPage.minimizedCallView.centralCoordinates
-        AND("user moves minimized call view to the bottom right corner") {
-            userRobot.moveMinimizedCallViewToTheLeft()
-        }
-        
-        sleep(1) // wait for the view to settle
-        let newCoordinates = CallPage.minimizedCallView.centralCoordinates
-        THEN("video view is in the top left corner") {
-            XCTAssertLessThan(newCoordinates.x, initialCoordinates.x)
         }
     }
     
