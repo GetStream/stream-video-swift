@@ -69,7 +69,7 @@ public protocol ViewFactory: AnyObject {
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         customData: [String: RawJSON],
-        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+        call: Call?
     ) -> ParticipantViewType
     
     associatedtype ParticipantViewModifierType: ViewModifier = VideoCallParticipantModifier
@@ -212,7 +212,7 @@ extension ViewFactory {
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         customData: [String: RawJSON],
-        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+        call: Call?
     ) -> some View {
         VideoCallParticipantView(
             participant: participant,
@@ -220,7 +220,7 @@ extension ViewFactory {
             availableSize: availableSize,
             contentMode: contentMode,
             customData: customData,
-            onViewUpdate: onViewUpdate
+            call: call
         )
     }
     

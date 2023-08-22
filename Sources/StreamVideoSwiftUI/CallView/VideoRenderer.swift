@@ -13,23 +13,23 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     @Injected(\.streamVideo) var streamVideo
     
     private let callSettings: CallSettings
-    private var onLocalVideoUpdate: (VideoRenderer) -> Void
     private var viewFactory: Factory
     private var participant: CallParticipant
     private var idSuffix: String
+    private var call: Call?
     
     public init(
         viewFactory: Factory,
         participant: CallParticipant,
         idSuffix: String = "local",
         callSettings: CallSettings,
-        onLocalVideoUpdate: @escaping (VideoRenderer) -> Void
+        call: Call?
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
         self.idSuffix = idSuffix
         self.callSettings = callSettings
-        self.onLocalVideoUpdate = onLocalVideoUpdate
+        self.call = call
     }
             
     public var body: some View {
@@ -39,10 +39,9 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
                 id: "\(streamVideo.user.id)-\(idSuffix)",
                 availableSize: reader.size,
                 contentMode: .scaleAspectFill,
-                customData: ["videoOn": .bool(callSettings.videoOn)]
-            ) { participant, view in
-                onLocalVideoUpdate(view)
-            }
+                customData: ["videoOn": .bool(callSettings.videoOn)],
+                call: call
+            )
             .rotation3DEffect(
                 .degrees(shouldRotate ? 180 : 0),
                 axis: (x: 0, y: 1, z: 0)

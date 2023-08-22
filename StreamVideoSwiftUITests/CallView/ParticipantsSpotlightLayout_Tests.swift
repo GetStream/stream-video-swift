@@ -20,7 +20,6 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 size: defaultScreenSize,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
@@ -36,7 +35,6 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 size: defaultScreenSize,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
@@ -52,7 +50,6 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 call: call,
                 participants: participants,
                 size: defaultScreenSize,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             
@@ -68,7 +65,6 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
             call: call,
             participants: participants,
             size: defaultScreenSize,
-            onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
         AssertSnapshot(layout)

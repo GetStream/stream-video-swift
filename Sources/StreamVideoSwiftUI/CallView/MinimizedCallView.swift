@@ -35,12 +35,9 @@ public struct MinimizedCallView: View {
                     participant: viewModel.participants[0],
                     availableSize: proxy.size,
                     contentMode: .scaleAspectFill,
-                    customData: [:]
-                ) { participant, view in
-                    view.handleViewRendering(for: participant) { size, participant in
-                        viewModel.updateTrackSize(size, for: participant)
-                    }
-                }
+                    customData: [:],
+                    call: viewModel.call
+                )
             } else {
                 EmptyView()
             }

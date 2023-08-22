@@ -55,12 +55,9 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                                 id: "\(participant.id)-screenshare-participant",
                                 availableSize: thumbnailSize,
                                 contentMode: .scaleAspectFill,
-                                customData: [:]
-                            ) { participant, view in
-                                view.handleViewRendering(for: participant) { size, participant in
-                                    viewModel.updateTrackSize(size, for: participant)
-                                }
-                            }
+                                customData: [:],
+                                call: viewModel.call
+                            )
                             .modifier(
                                 viewFactory.makeVideoCallParticipantModifier(
                                     participant: participant,

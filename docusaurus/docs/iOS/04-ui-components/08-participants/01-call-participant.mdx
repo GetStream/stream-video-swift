@@ -39,7 +39,7 @@ public func makeVideoParticipantView(
     availableSize: CGSize,
     contentMode: UIView.ContentMode,
     customData: [String: RawJSON],
-    onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    call: Call?
 ) -> some View {
     VideoCallParticipantView(
         participant: participant,
@@ -47,7 +47,7 @@ public func makeVideoParticipantView(
         availableSize: availableSize,
         contentMode: contentMode,
         customData: customData,
-        onViewUpdate: onViewUpdate
+        call: call
     )
 }
 
@@ -74,15 +74,7 @@ For the `VideoCallParticipantView`, the required parameters are:
 - `availableSize` - the available size for the view
 - `contentMode` - the content mode of the view
 - `customData` - any custom data that you can pass to the view
-- `onViewUpdate` - called when the view is updated - this is where you should add the track:
-
-```swift
-private func onViewUpdate(_ view: VideoRenderer, participant: CallParticipant) {
-    view.handleViewRendering(for: participant) { size, participant in
-        viewModel.updateTrackSize(size, for: participant)
-    }
-}
-```
+- `call` - the current call
 
 For the `VideoCallParticipantModifier` you should provide the following parameters:
 - `participant` - the `CallParticipant` object representing a user in a call

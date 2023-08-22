@@ -15,7 +15,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     var participants: [CallParticipant]
     var size: CGSize
     var call: Call?
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
@@ -24,7 +23,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         call: Call?,
         participants: [CallParticipant],
         size: CGSize,
-        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
@@ -32,7 +30,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.participants = participants
         self.size = size
         self.call = call
-        self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
 
@@ -44,10 +41,9 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 id: "\(participant.id)-spotlight",
                 availableSize: .init(width: thumbnailSize, height: thumbnailSize),
                 contentMode: .scaleAspectFill,
-                customData: [:]
-            ) { participant, view in
-                onViewRendering(view, participant)
-            }
+                customData: [:],
+                call: call
+            )
             .modifier(
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
@@ -74,10 +70,9 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                             id: participant.id,
                             availableSize: .init(width: thumbnailSize, height: thumbnailSize),
                             contentMode: .scaleAspectFill,
-                            customData: [:]
-                        ) { participant, view in
-                            onViewRendering(view, participant)
-                        }
+                            customData: [:],
+                            call: call
+                        )
                         .onAppear {
                             onChangeTrackVisibility(participant, true)
                         }
