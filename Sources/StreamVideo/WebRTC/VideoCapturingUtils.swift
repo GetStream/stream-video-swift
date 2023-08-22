@@ -5,7 +5,7 @@
 import Foundation
 import WebRTC
 
-class VideoCapturingUtils {
+enum VideoCapturingUtils {
     static func codecs(
         preferredFormat: AVCaptureDevice.Format?,
         preferredDimensions: CMVideoDimensions,
