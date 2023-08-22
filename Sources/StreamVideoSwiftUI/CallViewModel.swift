@@ -147,9 +147,7 @@ open class CallViewModel: ObservableObject {
         })
             .map { $1 }
     }
-    
-    public var videoOptions = VideoOptions()
-            
+                
     private var participantUpdates: AnyCancellable?
     private var callUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?

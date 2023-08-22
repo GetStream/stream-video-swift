@@ -28,8 +28,12 @@ class VideoCapturer: CameraVideoCapturing {
         #endif
     }
     
+    func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {
+        VideoCapturingUtils.capturingDevice(for: cameraPosition)
+    }
+    
     func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
-        guard let device = capturingDevice(for: cameraPosition) else {
+        guard let device = VideoCapturingUtils.capturingDevice(for: cameraPosition) else {
             throw ClientError.Unexpected()
         }
         try await startCapture(device: device)
@@ -39,24 +43,18 @@ class VideoCapturer: CameraVideoCapturing {
         videoCaptureHandler?.selectedFilter = videoFilter
     }
     
-    func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {
-        let devices = RTCCameraVideoCapturer.captureDevices()
-        
-        guard let device = devices.first(where: { $0.position == cameraPosition }) ?? devices.first else {
-            log.warning("No camera video capture devices available")
-            return nil
-        }
-        
-        return device
-    }
-    
     func startCapture(device: AVCaptureDevice?) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {
                 continuation.resume(throwing: ClientError.Unexpected())
                 return
             }
-            let outputFormat = self.outputFormat(for: device, videoOptions: videoOptions)
+            let outputFormat = VideoCapturingUtils.outputFormat(
+                for: device,
+                preferredFormat: videoOptions.preferredFormat,
+                preferredDimensions: videoOptions.preferredDimensions,
+                preferredFps: videoOptions.preferredFps
+            )
             guard let selectedFormat = outputFormat.format, let dimensions = outputFormat.dimensions else {
                 continuation.resume(throwing: ClientError.Unexpected())
                 return
