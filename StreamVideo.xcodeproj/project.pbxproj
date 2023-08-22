@@ -22,7 +22,6 @@
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
 		435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */; };
-		82010CAC2A851BD6005C125D /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
@@ -32,7 +31,6 @@
 		820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784EE29FA8123006DD4F7 /* WebRTC */; };
 		820784F129FA8156006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784F029FA8156006DD4F7 /* WebRTC */; };
 		820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
-		820BD5FB2A73C654003A7B8F /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		82392D542993C9E100941435 /* StreamTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D532993C9E100941435 /* StreamTestCase.swift */; };
 		82392D5F2993CCB300941435 /* ParticipantRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D5E2993CCB300941435 /* ParticipantRobot.swift */; };
@@ -179,7 +177,6 @@
 		841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */; };
 		841FF5152A5E99B400809BBB /* CallEventsHandler_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5142A5E99B400809BBB /* CallEventsHandler_Tests.swift */; };
 		841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */; };
-		841FF5182A5ECBF600809BBB /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		841FF51B2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
@@ -2951,7 +2948,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
-				820BD5FB2A73C654003A7B8F /* Credentials.xcconfig in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 			);
@@ -2968,7 +2964,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82010CAC2A851BD6005C125D /* Credentials.xcconfig in Resources */,
 				8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */,
 				849322582908378B0013C029 /* Assets.xcassets in Resources */,
 			);
@@ -2986,7 +2981,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				841FF5182A5ECBF600809BBB /* Credentials.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3065,7 +3059,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Credentials.xcconfig\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
 		};
 		827297E42A4585EA00774306 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3083,7 +3077,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Credentials.xcconfig\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		82DE10C72A827B010057BDA8 /* ShellScript */ = {
@@ -3102,7 +3096,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Credentials.xcconfig\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
 		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -4470,7 +4464,6 @@
 		};
 		842D8BD22865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -4801,7 +4794,6 @@
 		};
 		84F73800287C13AD00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;
