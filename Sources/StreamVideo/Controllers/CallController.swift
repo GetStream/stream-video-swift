@@ -216,8 +216,12 @@ class CallController {
                 response.call.settings.audio,
                 .init()
             )
-            webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
-            webRTCClient?.onSessionMigrationEvent = handleSessionMigrationEvent
+            webRTCClient?.onSignalConnectionStateChange = { [weak self] state in
+                self?.handleSignalChannelConnectionStateChange(state)
+            }
+            webRTCClient?.onSessionMigrationEvent = { [weak self] in
+                self?.handleSessionMigrationEvent()
+            }
             webRTCClient?.onSessionMigrationCompleted = { [weak self] in
                 self?.call?.update(reconnectionStatus: .connected)
             }
