@@ -116,12 +116,9 @@ var body: some View {
                     VideoCallParticipantView(
                         participant: dominantSpeaker,
                         availableSize: reader.size,
-                        contentMode: .scaleAspectFit
-                    ) { participant, view in
-                        if let track = dominantSpeaker.track {
-                            view.add(track: track)
-                        }
-                    }
+                        contentMode: .scaleAspectFit,
+                        call: call
+                    )
                 }
 
                 VStack {
