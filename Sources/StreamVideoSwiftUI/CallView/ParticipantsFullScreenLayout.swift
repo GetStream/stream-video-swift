@@ -12,7 +12,6 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     var participant: CallParticipant
     var call: Call?
     var size: CGSize
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
@@ -20,14 +19,12 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
         participant: CallParticipant,
         call: Call?,
         size: CGSize,
-        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
         self.call = call
         self.size = size
-        self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
     
@@ -38,9 +35,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
             availableSize: size,
             contentMode: .scaleAspectFit,
             customData: [:],
-            onViewUpdate: { participant, view in
-                onViewRendering(view, participant)
-            }
+            call: call
         )
         .modifier(
             viewFactory.makeVideoCallParticipantModifier(
@@ -58,7 +53,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
         .modifier(ParticipantChangeModifier(
             participant: participant,
             onChangeTrackVisibility: onChangeTrackVisibility)
-        )        
+        )
     }
     
     private var ratio: CGFloat {

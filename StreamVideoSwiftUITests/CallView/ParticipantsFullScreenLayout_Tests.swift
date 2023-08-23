@@ -17,7 +17,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             participant: ParticipantFactory.get(1, withAudio: true).first!,
             call: call,
             size: defaultScreenSize,
-            onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
         AssertSnapshot(layout)
@@ -29,7 +28,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             participant: ParticipantFactory.get(1, withAudio: false).first!,
             call: call,
             size: defaultScreenSize,
-            onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
         AssertSnapshot(layout)
@@ -42,7 +40,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
                 participant: ParticipantFactory.get(1, connectionQuality: quality).first!,
                 call: call,
                 size: defaultScreenSize,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "\(quality)")
@@ -55,7 +52,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             participant: ParticipantFactory.get(1, withAudio: true, speaking: true).first!,
             call: call,
             size: defaultScreenSize,
-            onViewRendering: {_,_ in },
             onChangeTrackVisibility: {_,_ in }
         )
         AssertSnapshot(layout)
