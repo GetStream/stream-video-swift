@@ -53,7 +53,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
         .modifier(ParticipantChangeModifier(
             participant: participant,
             onChangeTrackVisibility: onChangeTrackVisibility)
-        )        
+        )
     }
     
     private var ratio: CGFloat {

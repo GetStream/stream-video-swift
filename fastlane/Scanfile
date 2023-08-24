@@ -9,7 +9,7 @@ devices(["iPhone 12"])
 # Needed for Sonar
 code_coverage(true)
 
-configuration("Debug")
+configuration("Test")
 
 result_bundle(true)
 

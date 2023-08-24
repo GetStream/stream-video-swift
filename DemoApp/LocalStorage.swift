@@ -97,5 +97,4 @@ class UnsecureUserRepository: UserRepository, VoipTokenHandler, PushTokenHandler
         defaults.set(nil, forKey: pushTokenKey)
     }
     
-    
 }

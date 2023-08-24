@@ -17,6 +17,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call and turns on mic") {
             participantRobot.joinCall(callId, options: [.withMicrophone])
+            userRobot.waitForParticipantsToJoin()
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -39,6 +40,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call and turns off mic") {
             participantRobot.joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin()
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -61,6 +63,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call and turns camera on") {
             participantRobot.joinCall(callId, options: [.withCamera, .withMicrophone])
+            userRobot.waitForParticipantsToJoin()
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -83,6 +86,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call and turns camera off") {
             participantRobot.joinCall(callId, options: [.withMicrophone])
+            userRobot.waitForParticipantsToJoin()
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -105,6 +109,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin()
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -118,8 +123,6 @@ final class ParticipantActionsTests: StreamTestCase {
     
     func testParticipantRecordsCall() throws {
         linkToScenario(withId: 1769)
-        
-        throw XCTSkip("Recording the call is broken on the backend")
                 
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
@@ -128,6 +131,7 @@ final class ParticipantActionsTests: StreamTestCase {
             participantRobot
                 .setCallRecordingDuration(35)
                 .joinCall(callId, actions: [.recordCall])
+            userRobot.waitForParticipantsToJoin()
         }
         for view in allViews {
             WHEN("user turns on \(view.rawValue) view") {
@@ -159,6 +163,7 @@ final class ParticipantActionsTests: StreamTestCase {
             participantRobot
                 .setScreenSharingDuration(10)
                 .joinCall(callId, actions: [.shareScreen])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         THEN("user observers participant's screen") {
             userRobot

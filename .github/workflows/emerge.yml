@@ -1,19 +1,9 @@
 name: Size Check
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths-ignore:
-      - 'docusaurus/**'
-      - 'README.md'
-      - 'CHANGELOG.md'
-
   pull_request:
     branches:
-      - main
-      - develop
+      - '**'
     paths-ignore:
       - 'docusaurus/**'
       - 'README.md'
@@ -36,6 +26,7 @@ jobs:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.number }}
       GITHUB_COMMIT_SHA: ${{ github.event.pull_request.head.sha }}
+      GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
       EMERGE_API_TOKEN: ${{ secrets.EMERGE_API_TOKEN }}
     steps:
       - name: Install Bot SSH Key

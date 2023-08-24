@@ -10,6 +10,8 @@
         <string>match AppStore io.getstream.iOS.DemoAppUIKit</string>
         <key>io.getstream.iOS.VideoDemoApp.CallIntent</key>
         <string>match AppStore io.getstream.iOS.VideoDemoApp.CallIntent</string>
+        <key>io.getstream.iOS.VideoDemoApp.ScreenSharing</key>
+        <string>match AppStore io.getstream.iOS.VideoDemoApp.ScreenSharing</string>
     </dict>
 </dict>
 </plist>

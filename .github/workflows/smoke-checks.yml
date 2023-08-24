@@ -1,18 +1,10 @@
 name: Smoke Checks
 
 on:
-  push:
-    branches:
-      - main
-      - develop
-    paths-ignore:
-      - 'docusaurus/**'
-      - 'README.md'
-      - 'CHANGELOG.md'
-
   pull_request:
     branches:
       - '**'
+      # - '!main' TODO: commented until `develop` branch is in place
     paths-ignore:
       - 'docusaurus/**'
       - 'README.md'
@@ -139,7 +131,7 @@ jobs:
           fastlane/test_output/snapshots
 
   build-apps:
-    name: Build Demo App
+    name: Build Demo Apps
     runs-on: macos-13
     if: ${{ github.event_name != 'push' }}
     env:
@@ -184,6 +176,7 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_EMAIL: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_EMAIL }}
         STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
+        STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     - name: Allure TestOps Upload
       if: env.LAUNCH_ID != '' && (success() || failure())
       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID

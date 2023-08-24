@@ -1,9 +1,11 @@
 name: Test Flight Deploy DemoApp
 
 on:
-  # pull_request: # TODO: Uncomment this once we have a develop branch
+  # TODO: commented until `develop` branch is in place
+  # pull_request:
   #   branches:
   #     - 'main'
+
   release:
     types: [published]
 

@@ -234,7 +234,9 @@ class WebRTCClient: NSObject {
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
         }
-        sfuMiddleware.onPinsChanged = handlePinsChanged
+        sfuMiddleware.onPinsChanged = { [weak self] pins in
+            self?.handlePinsChanged(pins)
+        }
     }
     
     func prepareForMigration(

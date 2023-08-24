@@ -70,7 +70,7 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                     viewFactory: viewFactory,
                     call: call,
                     participants: participants,
-                    availableSize: availableSize,                    
+                    availableSize: availableSize,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if participants.count == 4 {

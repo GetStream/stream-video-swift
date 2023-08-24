@@ -34,13 +34,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         AND("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
-                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -77,13 +77,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         AND("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
-                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -122,13 +122,13 @@ final class CallViewsTests: StreamTestCase {
                 .setUserCount(participants)
                 .setCallDuration(timeout)
                 .joinCall(callId, options: [.withCamera])
+            userRobot.waitForParticipantsToJoin(participants)
         }
         AND("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
-                .waitForParticipantsToJoin(participants)
                 .assertCallControls()
                 .assertGridView(with: participants)
         }
@@ -150,80 +150,6 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserShrinksVideoView() {
-        linkToScenario(withId: 1770)
-        
-        let participants = 2
-        
-        GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
-        }
-        AND("participants join the call") {
-            participantRobot
-                .setUserCount(participants)
-                .joinCall(callId)
-        }
-        WHEN("user enables grid view") {
-            userRobot.setView(mode: .grid)
-        }
-        AND("user minimizes video view") {
-            userRobot
-                .waitForParticipantsToJoin(participants)
-                .minimizeVideoView()
-        }
-        THEN("video view is minimized for the user") {
-            userRobot
-                .assertThereAreNoCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
-        WHEN("user maximizes video view") {
-            userRobot.maximizeVideoView()
-        }
-        THEN("video view is maximized for the user") {
-            userRobot
-                .assertCallControls()
-                .assertGridView(with: participants)
-        }
-        WHEN("user enables spotlight view") {
-            userRobot.setView(mode: .spotlight)
-        }
-        AND("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        THEN("video view is minimized for the user") {
-            userRobot
-                .assertThereAreNoCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
-        WHEN("user maximizes video view") {
-            userRobot.maximizeVideoView()
-        }
-        THEN("video view is maximized for the user") {
-            userRobot
-                .assertCallControls()
-                .assertSpotlightView(with: participants)
-        }
-        WHEN("user enables fullscreen view") {
-            userRobot.setView(mode: .fullscreen)
-        }
-        AND("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        THEN("video view is minimized for the user") {
-            userRobot
-                .assertThereAreNoCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
-        WHEN("user maximizes video view") {
-            userRobot.maximizeVideoView()
-        }
-        THEN("video view is maximized for the user") {
-            userRobot
-                .assertCallControls()
-                .assertFullscreenView()
-        }
-    }
-    
     func testUserMovesCornerDragableView() {
         linkToScenario(withId: 1771)
         
@@ -236,6 +162,7 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user enables grid view") {
             userRobot.setView(mode: .grid)
@@ -254,35 +181,6 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserMovesMinimizedVideoView() {
-        linkToScenario(withId: 1772)
-        
-        let participants = 1
-        
-        GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
-        }
-        AND("participant joins the call") {
-            participantRobot
-                .setUserCount(participants)
-                .joinCall(callId)
-        }
-        WHEN("user minimizes video view") {
-            userRobot.minimizeVideoView()
-        }
-        
-        let initialCoordinates = CallPage.minimizedCallView.centralCoordinates
-        AND("user moves minimized call view to the bottom right corner") {
-            userRobot.moveMinimizedCallViewToTheLeft()
-        }
-        
-        sleep(1) // wait for the view to settle
-        let newCoordinates = CallPage.minimizedCallView.centralCoordinates
-        THEN("video view is in the top left corner") {
-            XCTAssertLessThan(newCoordinates.x, initialCoordinates.x)
-        }
-    }
-    
     func testUserCanSeeAllParticipantsInScreenSharingView() {
         linkToScenario(withId: 1774)
         
@@ -295,10 +193,10 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, actions: [.shareScreen])
+            userRobot.waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
         }
         THEN("user observers participant's screen") {
             userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertParticipantStartSharingScreen()
                 .assertScreenSharingParticipantListVisibity(percent: 0)
         }
@@ -321,13 +219,13 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
         }
         WHEN("user enables grid view") {
             userRobot.setView(mode: .grid)
         }
         THEN("user observers the list of participants") {
             userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
                 .assertGridView(with: participants)
                 .assertGridViewParticipantListVisibity(percent: 0)
         }
@@ -350,11 +248,10 @@ final class CallViewsTests: StreamTestCase {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId)
+            userRobot.waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
         }
         WHEN("user enables spotlight view") {
-            userRobot
-                .waitForParticipantsToJoin(participants, timeout: UserRobot.defaultTimeout * 1.5)
-                .setView(mode: .spotlight)
+            userRobot.setView(mode: .spotlight)
         }
         THEN("user observers the list of participants") {
             userRobot

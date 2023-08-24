@@ -1,49 +1,58 @@
 //
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
-
-import StreamVideo
 import SwiftUI
+import StreamVideo
+import StreamVideoSwiftUI
 
-public struct CallTopView: View {
-            
+struct CustomCallTopView: View {
+
     @Injected(\.colors) var colors
     @Injected(\.images) var images
-    
+    @Injected(\.fonts) var fonts
+
     @ObservedObject var viewModel: CallViewModel
+    @ObservedObject var appState = AppState.shared
+
     @State var sharingPopupDismissed = false
-    
+
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
-    
+
     public var body: some View {
         HStack {
-            Button {
-//                withAnimation {
-//                    viewModel.isMinimized = true
-//                }
-                NotificationCenter.default.post(name: Notification.Name(rawValue: "startPip"), object: nil)
+            Menu {
+                Button {
+                    viewModel.toggleSpeaker()
+                } label: {
+                    HStack {
+                        Text("Speaker")
+                        if viewModel.callSettings.speakerOn {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+
+                }
             } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(colors.textInverted)
+                Image(systemName: "ellipsis")
+                    .foregroundColor(.white)
+                    .font(fonts.bodyBold)
                     .padding()
             }
-            .accessibility(identifier: "minimizeCallViewButton")
-            
+
             if viewModel.recordingState == .recording {
                 RecordingView()
                     .accessibility(identifier: "recordingLabel")
             }
 
             Spacer()
-            
-            
+
             if #available(iOS 14, *) {
                 LayoutMenuView(viewModel: viewModel)
                     .opacity(hideLayoutMenu ? 0 : 1)
                     .accessibility(identifier: "viewMenu")
-                
+
                 Button {
                     viewModel.participantsShown.toggle()
                 } label: {
@@ -65,47 +74,9 @@ public struct CallTopView: View {
             : nil
         )
     }
-    
+
     private var hideLayoutMenu: Bool {
         viewModel.call?.state.screenSharingSession != nil
             && viewModel.call?.state.isCurrentUserScreensharing == false
     }
-}
-
-public struct SharingIndicator: View {
-            
-    @ObservedObject var viewModel: CallViewModel
-    @Binding var sharingPopupDismissed: Bool
-    
-    public init(viewModel: CallViewModel, sharingPopupDismissed: Binding<Bool>) {
-        _viewModel = ObservedObject(initialValue: viewModel)
-        _sharingPopupDismissed = sharingPopupDismissed
-    }
-    
-    public var body: some View {
-        HStack {
-            Text(L10n.Call.Current.sharing)
-                .font(.headline)
-            Divider()
-            Button {
-                viewModel.stopScreensharing()
-            } label: {
-                Text(L10n.Call.Current.stopSharing)
-                    .font(.headline)
-            }
-            Button {
-                sharingPopupDismissed = true
-            } label: {
-                Image(systemName: "xmark")
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(height: 14)
-            }
-            .padding(.leading, 4)
-
-        }
-        .padding(.all, 8)
-        .modifier(ShadowViewModifier())
-    }
-    
 }

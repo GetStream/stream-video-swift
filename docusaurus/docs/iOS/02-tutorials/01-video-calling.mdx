@@ -168,7 +168,11 @@ var body: some Scene {
         VStack {
             if callCreated {
                 ZStack {
-                    ParticipantsView(participants: call.state.remoteParticipants, onChangeTrackVisibility: changeTrackVisibility(_:isVisible:))
+                    ParticipantsView(
+                        call: call,
+                        participants: call.state.remoteParticipants, 
+                        onChangeTrackVisibility: changeTrackVisibility(_:isVisible:)
+                    )
                     FloatingParticipantView(participant: call.state.me)
                 }
             } else {
@@ -201,6 +205,7 @@ We will now create
 ```swift title=VideoCall/ParticipantsView.swift
 struct ParticipantsView: View {
 
+    var call: Call
     var participants: [CallParticipant]
     var onChangeTrackVisibility: (CallParticipant?, Bool) -> Void
 
@@ -234,9 +239,7 @@ struct ParticipantsView: View {
             availableSize: size,
             contentMode: .scaleAspectFit,
             customData: [:],
-            onViewUpdate: { participant, videoRenderer in
-                videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
-            }
+            call: call
         )
         .onAppear { onChangeTrackVisibility(participant, true) }
         .onDisappear{ onChangeTrackVisibility(participant, false) }
@@ -285,9 +288,7 @@ VideoCallParticipantView(
     availableSize: size,
     contentMode: .scaleAspectFit,
     customData: [:],
-    onViewUpdate: { participant, videoRenderer in
-        videoRenderer.handleViewRendering(for: participant, onTrackSizeUpdate: { _, _ in })
-    }
+    call: call
 )
 .onAppear { onChangeTrackVisibility(participant, true) }
 .onDisappear{ onChangeTrackVisibility(participant, false) }

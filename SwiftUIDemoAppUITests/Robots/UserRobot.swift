@@ -165,12 +165,6 @@ extension UserRobot {
     }
     
     @discardableResult
-    func minimizeCall() -> Self {
-        CallPage.minimizeCallViewButton.wait().tap()
-        return self
-    }
-    
-    @discardableResult
     func endCall() -> Self {
         CallPage.hangUpButton.firstMatch.safeTap()
         return self
@@ -187,12 +181,6 @@ extension UserRobot {
         case .spotlight:
             CallPage.ViewMenu.spotlight.tapFrameCenter()
         }
-        return self
-    }
-    
-    @discardableResult
-    func minimizeVideoView() -> Self {
-        CallPage.minimizeCallViewButton.wait().tap()
         return self
     }
     
@@ -277,7 +265,7 @@ extension UserRobot {
     }
     
     @discardableResult
-    func waitForParticipantsToJoin(_ participantCount: Int, timeout: Double = defaultTimeout) -> Self {
+    func waitForParticipantsToJoin(_ participantCount: Int = 1, timeout: Double = defaultTimeout) -> Self {
         CallPage.participantMenu.wait(timeout: timeout).tap()
         let user = 1
         let expectedCount = participantCount + user
@@ -285,6 +273,12 @@ extension UserRobot {
             .waitForValue("\(expectedCount)", timeout: timeout)
             .tapFrameCenter() // to take a screenshot
         safelyCloseParticipantsMenu()
+        return self
+    }
+    
+    @discardableResult
+    func waitCallControllsToAppear(timeout: Double = defaultTimeout) -> Self {
+        XCTAssertTrue(CallPage.hangUpButton.wait(timeout: timeout).exists, "Can't join the call")
         return self
     }
     

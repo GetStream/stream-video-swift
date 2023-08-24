@@ -184,8 +184,7 @@ public class StreamVideo: ObservableObject {
             callType: callType,
             callId: callId,
             coordinatorClient: coordinatorClient,
-            callController: callController,
-            videoOptions: VideoOptions()
+            callController: callController
         )
         eventsMiddleware.add(subscriber: call)
         return call

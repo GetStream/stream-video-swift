@@ -82,12 +82,14 @@ final class CallLifecycleTests: StreamTestCase {
     func testUserReentersTheCall() {
         linkToScenario(withId: 1780)
         
+        let participants = 1
+        
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
-            userRobot.waitForParticipantsToJoin(1)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user re-enters the call as the same user") {
             userRobot
@@ -97,12 +99,14 @@ final class CallLifecycleTests: StreamTestCase {
         THEN("there is one participant on the call") {
             userRobot
                 .assertCallControls()
-                .assertParticipantsAreVisible(count: 1)
+                .assertParticipantsAreVisible(count: participants)
         }
     }
     
     func testUserReentersTheCallAsTheSameUserAfterLoggingOut() {
         linkToScenario(withId: 1781)
+        
+        let participants = 1
         
         GIVEN("user starts a call") {
             userRobot
@@ -112,7 +116,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
-            userRobot.waitForParticipantsToJoin(1)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user re-enters the call as the same user") {
             userRobot
@@ -124,12 +128,14 @@ final class CallLifecycleTests: StreamTestCase {
         THEN("there is one participant on the call") {
             userRobot
                 .assertCallControls()
-                .assertParticipantsAreVisible(count: 1)
+                .assertParticipantsAreVisible(count: participants)
         }
     }
     
     func testUserReentersTheCallAsAnotherUser() {
         linkToScenario(withId: 1782)
+        
+        let participants = 1
         
         GIVEN("user starts a call") {
             userRobot
@@ -139,7 +145,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
-            userRobot.waitForParticipantsToJoin(1)
+            userRobot.waitForParticipantsToJoin(participants)
         }
         WHEN("user re-enters the call as another user") {
             userRobot
@@ -151,7 +157,7 @@ final class CallLifecycleTests: StreamTestCase {
         THEN("there is one participant on the call") {
             userRobot
                 .assertCallControls()
-                .assertParticipantsAreVisible(count: 1)
+                .assertParticipantsAreVisible(count: participants)
         }
     }
     

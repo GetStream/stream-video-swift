@@ -188,7 +188,7 @@ GEM
       bundler
       fastlane
       pry
-    fastlane-plugin-stream_actions (0.3.18)
+    fastlane-plugin-stream_actions (0.3.19)
       xctest_list (= 1.2.1)
     fastlane-plugin-versioning (0.5.1)
     ffi (1.15.5)
@@ -406,7 +406,7 @@ DEPENDENCIES
   fastlane
   fastlane-plugin-emerge
   fastlane-plugin-lizard
-  fastlane-plugin-stream_actions (= 0.3.18)
+  fastlane-plugin-stream_actions (= 0.3.19)
   fastlane-plugin-versioning
   jazzy
   json
