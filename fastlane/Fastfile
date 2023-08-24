@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '14.3.1'
+xcode_version = ENV['XCODE_VERSION'] || '15.0'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
@@ -115,7 +115,7 @@ end
 
 desc 'Runs LLC tests'
 lane :test do |options|
-  next unless is_check_required(sources: sources_matrix[:unit])
+  # next unless is_check_required(sources: sources_matrix[:unit]) FIXME
 
   update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
 
@@ -142,7 +142,7 @@ lane :test_uikit do |options|
 end
 
 private_lane :test_ui do |options|
-  next unless is_check_required(sources: sources_matrix[options[:source]])
+  # next unless is_check_required(sources: sources_matrix[options[:source]]) FIXME
 
   remove_snapshots(scheme: options[:scheme]) if options[:record]
 
@@ -181,7 +181,7 @@ end
 
 desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
-  next unless is_check_required(sources: sources_matrix[:e2e])
+  # next unless is_check_required(sources: sources_matrix[:e2e]) FIXME
 
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
@@ -251,14 +251,14 @@ lane :build_uikit_demo do
 end
 
 private_lane :build_example_app do |options|
-  app_sources =
-    case options[:scheme]
-    when 'DemoApp'
-      :swiftui_sample_apps
-    when 'DemoAppUIKit'
-      :uikit_sample_apps
-    end
-  next unless is_check_required(sources: sources_matrix[app_sources])
+  # app_sources =
+  #   case options[:scheme]
+  #   when 'DemoApp'
+  #     :swiftui_sample_apps
+  #   when 'DemoAppUIKit'
+  #     :uikit_sample_apps
+  #   end
+  # next unless is_check_required(sources: sources_matrix[app_sources]) FIXME
 
   create_credentials_config
 
@@ -271,13 +271,13 @@ private_lane :build_example_app do |options|
 end
 
 lane :emerge_swiftui do
-  next unless is_check_required(sources: sources_matrix[:emerge_swiftui])
+  # next unless is_check_required(sources: sources_matrix[:emerge_swiftui]) FIXME
 
   emerge_upload(scheme: 'DemoApp')
 end
 
 lane :emerge_uikit do
-  next unless is_check_required(sources: sources_matrix[:emerge_uikit])
+  # next unless is_check_required(sources: sources_matrix[:emerge_uikit]) FIXME
 
   emerge_upload(scheme: 'DemoApp')
 end
@@ -368,7 +368,7 @@ end
 
 desc 'Run fastlane linting'
 lane :rubocop do
-  next unless is_check_required(sources: sources_matrix[:ruby])
+  # next unless is_check_required(sources: sources_matrix[:ruby]) FIXME
 
   sh('bundle exec rubocop')
 end
