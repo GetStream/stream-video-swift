@@ -51,7 +51,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     viewFactory.makeCallTopView(viewModel: viewModel)
 
                     if (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true),
-                        viewModel.participantsLayout == .grid {
+                       viewModel.participantsLayout == .grid, viewModel.participants.count <= 3 {
                         CornerDragableView(
                             content: contentDragableView(size: reader.size),
                             proxy: reader
