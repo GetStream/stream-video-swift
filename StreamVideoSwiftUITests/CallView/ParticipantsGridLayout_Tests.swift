@@ -46,7 +46,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 participants: ParticipantFactory.get(count, withAudio: true),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
@@ -61,7 +60,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 participants: ParticipantFactory.get(count, withAudio: false),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "with_\(count)_participants")
@@ -77,7 +75,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 participants: ParticipantFactory.get(count, connectionQuality: quality),
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "\(quality)")
@@ -98,7 +95,6 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 participants: participants,
                 availableSize: gridSize(for: count),
                 orientation: .portrait,
-                onViewRendering: {_,_ in },
                 onChangeTrackVisibility: {_,_ in }
             )
             AssertSnapshot(layout, suffix: "with_\(count)_participants")

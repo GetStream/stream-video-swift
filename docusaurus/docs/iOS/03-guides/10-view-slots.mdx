@@ -86,20 +86,20 @@ In the method, the following parameters are provided:
 If you want to customize one particular participant view, you can change it via the method `makeVideoParticipantView`:
 
 ```swift
-public func makeVideoParticipantView(
+func makeVideoParticipantView(
     participant: CallParticipant,
     id: String,
     availableSize: CGSize,
     contentMode: UIView.ContentMode,
     customData: [String: RawJSON],
-    onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    call: Call?
 ) -> some View {
     VideoCallParticipantView(
         participant: participant,
         id: id,
         availableSize: availableSize,
         contentMode: contentMode,
-        onViewUpdate: onViewUpdate
+        call: call
     )
 }
 ```

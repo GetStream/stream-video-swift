@@ -5,9 +5,10 @@ on:
     # Runs "At 01:00 every night"
     - cron: '0 1 * * *'
 
-  pull_request:
-    branches:
-      - 'main'
+  # TODO: commented until `develop` branch is in place
+  # pull_request:
+  #   branches:
+  #     - 'main'
 
   workflow_dispatch:
 
@@ -29,7 +30,7 @@ jobs:
             os: macos-13
             device: "iPhone 14 Pro Max"
             setup_runtime: false
-          - ios: 15.5
+          - ios: 15.4
             xcode: 14.2
             os: macos-12
             device: "iPhone 8"

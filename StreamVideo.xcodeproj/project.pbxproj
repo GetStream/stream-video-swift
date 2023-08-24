@@ -22,7 +22,6 @@
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
 		435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */; };
-		82010CAC2A851BD6005C125D /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
@@ -32,7 +31,6 @@
 		820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784EE29FA8123006DD4F7 /* WebRTC */; };
 		820784F129FA8156006DD4F7 /* WebRTC in Frameworks */ = {isa = PBXBuildFile; productRef = 820784F029FA8156006DD4F7 /* WebRTC */; };
 		820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
-		820BD5FB2A73C654003A7B8F /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		82392D542993C9E100941435 /* StreamTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D532993C9E100941435 /* StreamTestCase.swift */; };
 		82392D5F2993CCB300941435 /* ParticipantRobot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82392D5E2993CCB300941435 /* ParticipantRobot.swift */; };
@@ -58,6 +56,9 @@
 		828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */; };
 		829A1F6929FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */; };
 		829A1F6B29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */; };
+		829EF8792A9364630045D166 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */; };
+		829EF87A2A9364630045D166 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */; };
+		829EF87B2A93664F0045D166 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */; };
 		829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* ViewFactory.swift */; };
 		829F7BFB29FABC0E003EBACE /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BF929FABC0E003EBACE /* ViewFactory.swift */; };
 		829F7BFD29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */; };
@@ -145,6 +146,7 @@
 		840626722A37A431004B8748 /* IncomingCall.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626702A37A431004B8748 /* IncomingCall.swift */; };
 		8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626992A37A5E2004B8748 /* CallEvents.swift */; };
 		8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8406269B2A37A653004B8748 /* CallEventsHandler.swift */; };
+		8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */; };
 		84093811288A90390089A35B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* HomeView.swift */; };
 		8409465629AF4EEC007AF5BF /* CallReactionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */; };
 		8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465129AF4EEC007AF5BF /* CallRecording.swift */; };
@@ -175,7 +177,6 @@
 		841FF5052A5D815700809BBB /* VideoCapturerUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5042A5D815700809BBB /* VideoCapturerUtils_Tests.swift */; };
 		841FF5152A5E99B400809BBB /* CallEventsHandler_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5142A5E99B400809BBB /* CallEventsHandler_Tests.swift */; };
 		841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */; };
-		841FF5182A5ECBF600809BBB /* Credentials.xcconfig in Resources */ = {isa = PBXBuildFile; fileRef = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */; };
 		841FF51B2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
@@ -425,7 +426,6 @@
 		84B9A59329140D44004DE31A /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59229140D44004DE31A /* Nuke */; };
 		84B9A59529140D44004DE31A /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 84B9A59429140D44004DE31A /* NukeUI */; };
 		84BAD7712A6AE33700733156 /* StreamVideo.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; };
-		84BAD7722A6AE33700733156 /* StreamVideo.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		84BAD7782A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7772A6BFE8A00733156 /* BroadcastBufferUploadConnection.swift */; };
 		84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD7792A6BFEF900733156 /* BroadcastBufferUploader.swift */; };
 		84BAD77C2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BAD77B2A6BFF4300733156 /* BroadcastBufferReaderConnection.swift */; };
@@ -742,7 +742,6 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				84BAD7722A6AE33700733156 /* StreamVideo.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -798,6 +797,7 @@
 		828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserRobot+Asserts.swift"; sourceTree = "<group>"; };
 		829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridLayout_Tests.swift; sourceTree = "<group>"; };
 		829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsSpotlightLayout_Tests.swift; sourceTree = "<group>"; };
+		829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		829F7BF929FABC0E003EBACE /* ViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewFactory.swift; sourceTree = "<group>"; };
 		829F7BFC29FAC116003EBACE /* ParticipantsFullScreenLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsFullScreenLayout_Tests.swift; sourceTree = "<group>"; };
 		82AD932429E6FCCF00D4D295 /* LobbyPage.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LobbyPage.swift; sourceTree = "<group>"; };
@@ -851,6 +851,7 @@
 		840626702A37A431004B8748 /* IncomingCall.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IncomingCall.swift; sourceTree = "<group>"; };
 		840626992A37A5E2004B8748 /* CallEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallEvents.swift; sourceTree = "<group>"; };
 		8406269B2A37A653004B8748 /* CallEventsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEventsHandler.swift; sourceTree = "<group>"; };
+		8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturingUtils.swift; sourceTree = "<group>"; };
 		84093810288A90390089A35B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallReactionEvent.swift; sourceTree = "<group>"; };
 		8409465129AF4EEC007AF5BF /* CallRecording.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallRecording.swift; sourceTree = "<group>"; };
@@ -1683,6 +1684,7 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
+				829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */,
 				84F737E7287C137000A363F4 /* Sources */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				8493224D2908378A0013C029 /* DemoAppUIKit */,
@@ -2566,6 +2568,7 @@
 				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
 				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
 				84F0867A29632DA30099907A /* VideoFilters.swift */,
+				8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -2950,7 +2953,6 @@
 			buildActionMask = 2147483647;
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
-				820BD5FB2A73C654003A7B8F /* Credentials.xcconfig in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 			);
@@ -2967,7 +2969,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				82010CAC2A851BD6005C125D /* Credentials.xcconfig in Resources */,
 				8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */,
 				849322582908378B0013C029 /* Assets.xcassets in Resources */,
 			);
@@ -2977,6 +2978,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				829EF8792A9364630045D166 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2984,7 +2986,6 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				841FF5182A5ECBF600809BBB /* Credentials.xcconfig in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2993,6 +2994,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */,
+				829EF87B2A93664F0045D166 /* PrivacyInfo.xcprivacy in Resources */,
 				8434C539289BBBBA0001490A /* L10n_template.stencil in Resources */,
 				8458B706290ACFE400F8E487 /* incoming.wav in Resources */,
 				8434C53B289BBF020001490A /* Localizable.strings in Resources */,
@@ -3022,6 +3024,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				829EF87A2A9364630045D166 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3061,7 +3064,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Credentials.xcconfig\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
 		};
 		827297E42A4585EA00774306 /* ShellScript */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3079,7 +3082,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Credentials.xcconfig\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
 			showEnvVarsInLog = 0;
 		};
 		82DE10C72A827B010057BDA8 /* ShellScript */ = {
@@ -3098,7 +3101,7 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "touch TestTools/Credentials.xcconfig\n";
+			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
 		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
@@ -3425,6 +3428,7 @@
 				84A737CF28F4716E001A6769 /* signal.twirp.swift in Sources */,
 				842B8E2E2A2DFED900863A87 /* RejectCallResponse.swift in Sources */,
 				84A7E1942883652000526C98 /* EventMiddleware.swift in Sources */,
+				8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */,
 				84DC38D929ADFCFD00946713 /* OpenISO8601DateFormatter.swift in Sources */,
 				84DC38A929ADFCFD00946713 /* CallUpdatedEvent.swift in Sources */,
 				843DAB9A29E695CF00E0EB63 /* CreateGuestRequest.swift in Sources */,
@@ -4194,7 +4198,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4213,7 +4217,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = ScreenSharing/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -4223,7 +4228,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-Xlinker",
 					"-no_application_extension",
@@ -4296,7 +4301,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -4327,7 +4332,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = io.getstream.iOS.VideoDemoApp.CallIntent;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -4465,7 +4470,6 @@
 		};
 		842D8BD22865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -4567,7 +4571,8 @@
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = ScreenSharing/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -4577,7 +4582,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-Xlinker",
 					"-no_application_extension",
@@ -4602,7 +4607,8 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = "";
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = EHV7XZLAHA;
-				GENERATE_INFOPLIST_FILE = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				GENERATE_PKGINFO_FILE = YES;
 				INFOPLIST_FILE = ScreenSharing/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
@@ -4612,7 +4618,7 @@
 					"@executable_path/Frameworks",
 					"@executable_path/../../Frameworks",
 				);
-				MARKETING_VERSION = 1.0.1;
+				MARKETING_VERSION = 1.0;
 				OTHER_LDFLAGS = (
 					"-Xlinker",
 					"-no_application_extension",
@@ -4794,7 +4800,6 @@
 		};
 		84F73800287C13AD00A363F4 /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				CODE_SIGN_STYLE = Automatic;

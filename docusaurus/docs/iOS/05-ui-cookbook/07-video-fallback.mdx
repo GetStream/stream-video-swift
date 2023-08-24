@@ -20,14 +20,14 @@ func makeVideoParticipantView(
     availableSize: CGSize,
     contentMode: UIView.ContentMode,
     customData: [String: RawJSON],
-    onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+    call: Call?
 ) -> some View {
     CustomVideoCallParticipantView(
         participant: participant,
         id: id,
         availableSize: availableSize,
         contentMode: contentMode,
-        onViewUpdate: onViewUpdate
+        call: call
     )
 }
 ```
@@ -35,7 +35,7 @@ func makeVideoParticipantView(
 The implementation of the `CustomVideoCallParticipantView` looks like this:
 
 ```swift
-struct CustomVideoCallParticipantView: View {
+public struct CustomVideoCallParticipantView: View {
     
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
@@ -45,7 +45,7 @@ struct CustomVideoCallParticipantView: View {
     var availableSize: CGSize
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    var call: Call?
     
     public init(
         participant: CallParticipant,
@@ -53,55 +53,46 @@ struct CustomVideoCallParticipantView: View {
         availableSize: CGSize,
         contentMode: UIView.ContentMode,
         edgesIgnoringSafeArea: Edge.Set = .all,
-        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+        call: Call?
     ) {
         self.participant = participant
         self.id = id ?? participant.id
         self.availableSize = availableSize
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
-        self.onViewUpdate = onViewUpdate
+        self.call = call
     }
     
     public var body: some View {
         VideoRendererView(
             id: id,
             size: availableSize,
-            contentMode: contentMode
-        ) { view in
-            onViewUpdate(participant, view)
-        }
+            contentMode: contentMode,
+            handleRendering: { view in
+                view.handleViewRendering(for: participant) { size, participant in
+                    Task {
+                        await call?.updateTrackSize(size, for: participant)
+                    }
+                }
+            }
+        )
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
         .overlay(
-            ZStack {
-                LinearGradient(
-                    colors: [Color.green, Color.black, Color.green],
-                    startPoint: .top,
-                    endPoint: .bottom
-                )
-                .frame(width: availableSize.width)
-                .opacity(showVideo ? 0 : 1)
-
-                ZStack {
-                    Circle()
-                        .fill(Color.black)
-                        .frame(width: 50, height: 50)
-                    Image(systemName: "mic.fill")
-                        .foregroundColor(.white)
-                }
-                .overlay(
-                    participant.isSpeaking ? Circle().stroke(Color.green, lineWidth: 2) : nil
-                )
-                .opacity(showVideo ? 0 : 1)
-            }
+            CallParticipantImageView(
+                id: participant.id,
+                name: participant.name,
+                imageURL: participant.profileImageURL
+            )
+            .frame(width: availableSize.width)
+            .opacity(showVideo ? 0 : 1)
         )
     }
     
     private var showVideo: Bool {
-        participant.shouldDisplayTrack
+        participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
     }
 }
 ```

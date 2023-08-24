@@ -113,12 +113,9 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                     viewFactory: viewFactory,
                     participant: localParticipant,
                     idSuffix: "waiting",
-                    callSettings: viewModel.callSettings
-                ) { view in
-                    if let track = localParticipant.track {
-                        view.add(track: track)
-                    }
-                }
+                    callSettings: viewModel.callSettings,
+                    call: viewModel.call
+                )
             } else {
                 DefaultBackgroundGradient()
             }

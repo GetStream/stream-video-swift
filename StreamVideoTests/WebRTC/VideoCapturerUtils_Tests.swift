@@ -67,5 +67,28 @@ final class VideoCapturerUtils_Tests: XCTestCase {
         // Then
         XCTAssert(result == 2)
     }
+    
+    func test_make_codecs() {
+        // Given
+        let targetResolution = CMVideoDimensions(width: 1024, height: 720)
+        let preferredBitrate = 1_000_000_000
+        
+        // When
+        let codecs = VideoCapturingUtils.makeCodecs(
+            with: targetResolution,
+            preferredBitrate: preferredBitrate
+        )
+        
+        // Then
+        XCTAssert(codecs.count == 3)
+        XCTAssert(codecs[0].dimensions.width == targetResolution.width / 4)
+        XCTAssert(codecs[0].dimensions.height == targetResolution.height / 4)
+        XCTAssert(codecs[1].dimensions.width == targetResolution.width / 2)
+        XCTAssert(codecs[1].dimensions.height == targetResolution.height / 2)
+        XCTAssert(codecs[2].dimensions.width == targetResolution.width)
+        XCTAssert(codecs[2].dimensions.height == targetResolution.height)
+        XCTAssert(codecs[2].maxBitrate == preferredBitrate)
+
+    }
 
 }

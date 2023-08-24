@@ -30,7 +30,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public let speaker: SpeakerManager
     
     internal let callController: CallController
-    private let videoOptions: VideoOptions
     private var eventHandlers = [EventHandling]()
     private let coordinatorClient: DefaultAPI
     private var cancellables = Set<AnyCancellable>()
@@ -39,14 +38,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         callType: String,
         callId: String,
         coordinatorClient: DefaultAPI,
-        callController: CallController,
-        videoOptions: VideoOptions = VideoOptions()
+        callController: CallController
     ) {
         self.callId = callId
         self.callType = callType
         self.coordinatorClient = coordinatorClient
         self.callController = callController
-        self.videoOptions = videoOptions
         self.microphone = MicrophoneManager(
             callController: callController,
             initialStatus: .enabled
@@ -103,7 +100,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 callType: callType,
                 callId: callId,
                 callSettings: callSettings,
-                videoOptions: videoOptions,
                 options: options,
                 ring: ring,
                 notify: notify

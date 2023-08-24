@@ -4,7 +4,7 @@ on:
   pull_request:
     branches:
       - '**'
-      - '!main'
+      # - '!main' TODO: commented until `develop` branch is in place
     paths-ignore:
       - 'docusaurus/**'
       - 'README.md'

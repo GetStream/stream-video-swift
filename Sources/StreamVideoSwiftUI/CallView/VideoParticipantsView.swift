@@ -4,6 +4,7 @@
 
 import StreamVideo
 import SwiftUI
+import WebRTC
 
 public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
@@ -37,7 +38,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     participant: first,
                     call: viewModel.call,
                     size: availableSize,
-                    onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if viewModel.participantsLayout == .spotlight, let first = viewModel.participants.first {
@@ -47,7 +47,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     call: viewModel.call,
                     participants: Array(viewModel.participants.dropFirst()),
                     size: availableSize,
-                    onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
@@ -57,7 +56,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     participants: viewModel.participants,
                     availableSize: availableSize,
                     orientation: orientation,
-                    onViewRendering: onViewRendering,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             }
@@ -211,7 +209,7 @@ public struct VideoCallParticipantView: View {
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
-    var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
+    var call: Call?
     
     public init(
         participant: CallParticipant,
@@ -220,7 +218,7 @@ public struct VideoCallParticipantView: View {
         contentMode: UIView.ContentMode,
         edgesIgnoringSafeArea: Edge.Set = .all,
         customData: [String: RawJSON],
-        onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
+        call: Call?
     ) {
         self.participant = participant
         self.id = id ?? participant.id
@@ -228,17 +226,22 @@ public struct VideoCallParticipantView: View {
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.customData = customData
-        self.onViewUpdate = onViewUpdate
+        self.call = call
     }
     
     public var body: some View {
         VideoRendererView(
             id: id,
             size: availableSize,
-            contentMode: contentMode
-        ) { view in
-            onViewUpdate(participant, view)
-        }
+            contentMode: contentMode,
+            handleRendering: { view in
+                view.handleViewRendering(for: participant) { size, participant in
+                    Task {
+                        await call?.updateTrackSize(size, for: participant)
+                    }
+                }
+            }
+        )
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")

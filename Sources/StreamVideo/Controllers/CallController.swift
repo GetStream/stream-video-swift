@@ -66,7 +66,6 @@ class CallController {
         callType: String,
         callId: String,
         callSettings: CallSettings?,
-        videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         migratingFrom: String? = nil,
         sessionID: String? = nil,
@@ -77,7 +76,6 @@ class CallController {
             create: create,
             callType: callType,
             callId: callId,
-            videoOptions: videoOptions,
             options: options,
             migratingFrom: migratingFrom,
             ring: ring,
@@ -93,7 +91,6 @@ class CallController {
             callType: callType,
             callId: callId,
             callSettings: settings,
-            videoOptions: videoOptions,
             ring: ring,
             migrating: migratingFrom != nil
         )
@@ -202,7 +199,6 @@ class CallController {
         callType: String,
         callId: String,
         callSettings: CallSettings,
-        videoOptions: VideoOptions,
         ring: Bool,
         migrating: Bool
     ) async throws {
@@ -220,8 +216,12 @@ class CallController {
                 response.call.settings.audio,
                 .init()
             )
-            webRTCClient?.onSignalConnectionStateChange = handleSignalChannelConnectionStateChange(_:)
-            webRTCClient?.onSessionMigrationEvent = handleSessionMigrationEvent
+            webRTCClient?.onSignalConnectionStateChange = { [weak self] state in
+                self?.handleSignalChannelConnectionStateChange(state)
+            }
+            webRTCClient?.onSessionMigrationEvent = { [weak self] in
+                self?.handleSessionMigrationEvent()
+            }
             webRTCClient?.onSessionMigrationCompleted = { [weak self] in
                 self?.call?.update(reconnectionStatus: .connected)
             }
@@ -237,6 +237,9 @@ class CallController {
             )
         }
         
+        let videoOptions = VideoOptions(
+            targetResolution: response.call.settings.video.targetResolution
+        )
         let connectOptions = ConnectOptions(iceServers: response.credentials.iceServers)
         try await webRTCClient?.connect(
             callSettings: callSettings,
@@ -334,7 +337,6 @@ class CallController {
                     callType: call.callType,
                     callId: call.callId,
                     callSettings: webRTCClient?.callSettings ?? CallSettings(),
-                    videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                     options: nil,
                     migratingFrom: nil,
                     sessionID: sessionId
@@ -367,7 +369,6 @@ class CallController {
                 callType: callType,
                 callId: callId,
                 callSettings: call?.state.callSettings ?? CallSettings(),
-                videoOptions: webRTCClient?.videoOptions ?? VideoOptions(),
                 migratingFrom: currentSFU,
                 sessionID: webRTCClient?.sessionID,
                 ring: false,
@@ -380,7 +381,6 @@ class CallController {
         create: Bool,
         callType: String,
         callId: String,
-        videoOptions: VideoOptions,
         options: CreateCallOptions? = nil,
         migratingFrom: String?,
         ring: Bool,
