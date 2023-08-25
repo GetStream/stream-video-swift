@@ -55,6 +55,7 @@ struct CallingGroupView: View {
                                 title: "+\(participants.count - 2)",
                                 size: .standardAvatarSize
                             )
+                            .frame(width: .standardAvatarSize, height: .standardAvatarSize)
                         }
                     }
                     .background(
