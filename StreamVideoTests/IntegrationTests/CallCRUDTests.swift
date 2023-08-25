@@ -16,6 +16,38 @@ class CallCRUDTest: IntegrationTest {
     let randomCallId = UUID().uuidString
     let userIdKey = MemberRequest.CodingKeys.userId.rawValue
     
+    func customWait(nanoseconds duration: UInt64 = 3_000_000_000) async throws {
+        try await Task.sleep(nanoseconds: duration)
+    }
+    
+    func waitForCapability(
+        _ capability: OwnCapability,
+        on call: Call,
+        granted: Bool = true,
+        timeout: Double = defaultTimeout
+    ) async -> Bool {
+        let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
+        var userHasRequiredCapability = !granted
+        while userHasRequiredCapability != granted && endTime > Date().timeIntervalSince1970 * 1000 {
+            userHasRequiredCapability = await call.currentUserHasCapability(capability)
+        }
+        return userHasRequiredCapability
+    }
+    
+    func waitForAudio(
+        participant: CallParticipant,
+        on call: Call,
+        muted: Bool = false,
+        timeout: Double = defaultTimeout
+    ) -> Bool {
+        let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
+        var userHasAudio = !muted
+        while userHasAudio != muted && endTime > Date().timeIntervalSince1970 * 1000 {
+            userHasAudio = participant.hasAudio
+        }
+        return userHasAudio
+    }
+    
     func test_callCreateAndUpdate() async throws {
         let colorKey = "color"
         let red: RawJSON = "red"
@@ -297,9 +329,8 @@ class CallCRUDTest: IntegrationTest {
         
         try await firstUserCall.join()
         try await customWait()
-            
+        
         try await firstUserCall.microphone.enable()
-        try await customWait()
         
         try await secondUserCall.join()
         try await customWait()
@@ -308,20 +339,22 @@ class CallCRUDTest: IntegrationTest {
         try await customWait()
             
         try await secondUserCall.microphone.enable()
-        try await customWait()
         
         var participants = await firstUserCall.state.participants
-        XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should have audio enabled")
-        XCTAssertEqual(participants.last?.hasAudio, true, "Participant should have audio enabled")
+        var firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall)
+        var secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall)
+        XCTAssertTrue(firstParticipantHasAudio, "Call creator should have audio enabled")
+        XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
 
         for userId in [user1, user2] {
             try await firstUserCall.mute(userId: userId)
         }
-        try await customWait(nanoseconds: 15_000_000_000)
         
         participants = await firstUserCall.state.participants
-        XCTAssertEqual(participants.first?.hasAudio, false, "Call creator should be muted")
-        XCTAssertEqual(participants.last?.hasAudio, false, "All participants should be muted")
+        firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall, muted: true)
+        secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall, muted: true)
+        XCTAssertFalse(firstParticipantHasAudio, "Call creator should be muted")
+        XCTAssertFalse(secondParticipantHasAudio, "Participant should be muted")
     }
     
     func test_muteAllUsers() async throws {
@@ -348,18 +381,20 @@ class CallCRUDTest: IntegrationTest {
         try await customWait()
             
         try await secondUserCall.microphone.enable()
-        try await customWait()
         
         var participants = await firstUserCall.state.participants
-        XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should have audio enabled")
-        XCTAssertEqual(participants.last?.hasAudio, true, "Participant should have audio enabled")
+        var firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall)
+        var secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall)
+        XCTAssertTrue(firstParticipantHasAudio, "Call creator should have audio enabled")
+        XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
 
         try await firstUserCall.muteAllUsers()
-        try await customWait(nanoseconds: 15_000_000_000)
         
         participants = await firstUserCall.state.participants
-        XCTAssertEqual(participants.first?.hasAudio, true, "Call creator should not be muted")
-        XCTAssertEqual(participants.last?.hasAudio, false, "All participants should be muted")
+        firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall, muted: true)
+        secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall, muted: true)
+        XCTAssertFalse(firstParticipantHasAudio, "Call creator should be muted")
+        XCTAssertFalse(secondParticipantHasAudio, "Participant should be muted")
     }
     
     func test_blockAndUnblockUser() async throws {
@@ -400,20 +435,18 @@ class CallCRUDTest: IntegrationTest {
         
         let expectedPermissions: [Permission] = [.sendAudio, .sendVideo, .screenshare]
         try await call.revoke(permissions: expectedPermissions, for: user1)
-        try await customWait()
         
         for permission in expectedPermissions {
             let capability = try XCTUnwrap(OwnCapability(rawValue: permission.rawValue))
-            let userHasRequiredCapability = await call.currentUserHasCapability(capability)
+            let userHasRequiredCapability = await waitForCapability(capability, on: call, granted: false)
             XCTAssertFalse(userHasRequiredCapability, "\(permission.rawValue) should not be granted")
         }
         
         try await call.grant(permissions: expectedPermissions, for: user1)
-        try await customWait()
         
         for permission in expectedPermissions {
             let capability = try XCTUnwrap(OwnCapability(rawValue: permission.rawValue))
-            let userHasRequiredCapability = await call.currentUserHasCapability(capability)
+            let userHasRequiredCapability = await waitForCapability(capability, on: call)
             XCTAssertTrue(userHasRequiredCapability, "\(permission.rawValue) permission should be granted")
         }
     }
@@ -431,15 +464,13 @@ class CallCRUDTest: IntegrationTest {
         refreshStreamVideoProviderKey()
         
         try await firstUserCall.revoke(permissions: [.sendAudio], for: secondUserClient.user.id)
-        try await customWait()
                 
-        var userHasUnexpectedCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
+        var userHasUnexpectedCapability = await waitForCapability(.sendAudio, on: secondUserCall, granted: false)
         XCTAssertFalse(userHasUnexpectedCapability)
         
         try await secondUserCall.request(permissions: [.sendAudio])
-        try await customWait()
         
-        userHasUnexpectedCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
+        userHasUnexpectedCapability = await waitForCapability(.sendAudio, on: secondUserCall, granted: false)
         XCTAssertFalse(userHasUnexpectedCapability)
         
         await assertNext(firstUserCall.state.$permissionRequests) { value in
@@ -449,8 +480,8 @@ class CallCRUDTest: IntegrationTest {
             try await firstUserCall.grant(request: p)
         }
         
-        let userHasExpectedCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
-        XCTAssertFalse(userHasExpectedCapability)
+        let userHasExpectedCapability = await waitForCapability(.sendAudio, on: secondUserCall)
+        XCTAssertTrue(userHasExpectedCapability)
     }
     
     func test_acceptCall() async throws {
@@ -518,10 +549,6 @@ class CallCRUDTest: IntegrationTest {
         try await customWait()
         listDevices = try await call.streamVideo.listDevices()
         XCTAssertFalse(listDevices.contains(where: { $0.id == deviceId }))
-    }
-    
-    func customWait(nanoseconds duration: UInt64 = 3_000_000_000) async throws {
-        try await Task.sleep(nanoseconds: duration)
     }
     
     func test_pinAndUnpinUser() async throws {
