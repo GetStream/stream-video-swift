@@ -171,6 +171,7 @@
 		8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8414081429F28FFC00FF2D7C /* CallSettings_Tests.swift */; };
 		8415D3E1290B2AF2006E53CB /* outgoing.m4a in Resources */ = {isa = PBXBuildFile; fileRef = 8415D3E0290B2AF2006E53CB /* outgoing.m4a */; };
 		8415D3E3290BC882006E53CB /* Sounds.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8415D3E2290BC882006E53CB /* Sounds.swift */; };
+		841765292A98AEAA00DCE443 /* CustomAudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FFB0672A8D0B1B005BA275 /* CustomAudioFilter.swift */; };
 		841947982886D9CD0007B36E /* BundleExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841947972886D9CD0007B36E /* BundleExtensions.swift */; };
 		841F2C8029429DEC00D8D655 /* StreamVideoSwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 84F73807287C141000A363F4 /* StreamVideoSwiftUI.framework */; };
 		841FF5032A5D6FEC00809BBB /* CallsController_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5022A5D6FEC00809BBB /* CallsController_Tests.swift */; };
@@ -3218,6 +3219,7 @@
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				84BD8FF729B0F964002CFBA0 /* LoginViewModel.swift in Sources */,
 				40B713692A275F1400D1FE67 /* AppState.swift in Sources */,
+				841765292A98AEAA00DCE443 /* CustomAudioFilter.swift in Sources */,
 				8493226E2909235C0013C029 /* AddUserView.swift in Sources */,
 				844299442942484A0037232A /* DemoUsers.swift in Sources */,
 				40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */,
