@@ -73,7 +73,7 @@ final class CallViewsTests: StreamTestCase {
                 .startCall(callId)
                 .microphone(.disable)
         }
-        WHEN("two participants joins the call") {
+        WHEN("two participants join the call") {
             participantRobot
                 .setUserCount(participants)
                 .joinCall(callId, options: [.withCamera])
