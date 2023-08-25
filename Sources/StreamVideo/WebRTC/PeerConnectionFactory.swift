@@ -15,20 +15,13 @@ actor PeerConnectionFactory {
         RTCDefaultVideoDecoderFactory().supportedCodecs()
     }()
     
-    private let factory: RTCPeerConnectionFactory = {
-        RTCInitializeSSL()
-        let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
-        let encoderFactory = RTCVideoEncoderFactorySimulcast(
-            primary: defaultEncoderFactory,
-            fallback: defaultEncoderFactory
+    private let factory: RTCPeerConnectionFactory
+    
+    init(audioProcessingModule: RTCAudioProcessingModule?) {
+        self.factory = Self.createRTCPeerConnectionFactory(
+            audioProcessingModule: audioProcessingModule
         )
-        let decoderFactory = RTCDefaultVideoDecoderFactory()
-        let factory = RTCPeerConnectionFactory(
-            encoderFactory: encoderFactory,
-            decoderFactory: decoderFactory
-        )
-        return factory
-    }()
+    }
     
     func makePeerConnection(
         sessionId: String,
@@ -87,5 +80,33 @@ actor PeerConnectionFactory {
         }
         
         return peerConnection
+    }
+    
+    private static func createRTCPeerConnectionFactory(
+        audioProcessingModule: RTCAudioProcessingModule?
+    ) -> RTCPeerConnectionFactory {
+        RTCInitializeSSL()
+        let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
+        let encoderFactory = RTCVideoEncoderFactorySimulcast(
+            primary: defaultEncoderFactory,
+            fallback: defaultEncoderFactory
+        )
+        let decoderFactory = RTCDefaultVideoDecoderFactory()
+        let factory: RTCPeerConnectionFactory
+        if let audioProcessingModule {
+            factory = RTCPeerConnectionFactory(
+                bypassVoiceProcessing: false,
+                encoderFactory: encoderFactory,
+                decoderFactory: decoderFactory,
+                audioProcessingModule: audioProcessingModule
+            )
+        } else {
+            factory = RTCPeerConnectionFactory(
+                encoderFactory: encoderFactory,
+                decoderFactory: decoderFactory
+            )
+        }
+        
+        return factory
     }
 }

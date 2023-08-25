@@ -25,8 +25,14 @@ class AppState: ObservableObject {
         }
     }
     @Published var activeCall: Call?
-
     @Published var activeAnonymousCallId: String = ""
+    @Published var audioFilter: AudioFilter? {
+        didSet {
+            voiceProcessor.setAudioFilter(audioFilter)
+        }
+    }
+    
+    let voiceProcessor = CustomVoiceProcessor()
     
     var streamVideo: StreamVideo? {
         didSet {

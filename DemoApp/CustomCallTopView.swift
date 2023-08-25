@@ -34,6 +34,20 @@ struct CustomCallTopView: View {
                     }
 
                 }
+                Button {
+                    if appState.audioFilter == nil {
+                        appState.audioFilter = RobotVoiceFilter(pitchShift: 0.8)
+                    } else {
+                        appState.audioFilter = nil
+                    }
+                } label: {
+                    HStack {
+                        Text("Robot voice")
+                        if appState.audioFilter != nil {
+                            Image(systemName: "checkmark")
+                        }
+                    }
+                }
             } label: {
                 Image(systemName: "ellipsis")
                     .foregroundColor(.white)

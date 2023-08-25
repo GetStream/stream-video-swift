@@ -25,8 +25,7 @@
   "testTargets" : [
     {
       "skippedTests" : [
-        "CallCRUDTest\/test_muteAllUsers()",
-        "CallCRUDTest\/test_pinAndUnpinUser()"
+        "CallCRUDTest\/test_muteAllUsers()"
       ],
       "target" : {
         "containerPath" : "container:StreamVideo.xcodeproj",

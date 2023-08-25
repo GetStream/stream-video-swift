@@ -641,7 +641,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Given
         let httpClient = HTTPClient_Mock()
         let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
-        for _ in 0..<10 {
+        for _ in 0..<15 {
             let data = try response.serializedData()
             httpClient.dataResponses.append(data)
         }
@@ -764,7 +764,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     }
     
     private func makeVideoTrack() async -> RTCVideoTrack {
-        let factory = PeerConnectionFactory()
+        let factory = PeerConnectionFactory(audioProcessingModule: nil)
         let videoSource = await factory.makeVideoSource(forScreenShare: false)
         let track = await factory.makeVideoTrack(source: videoSource)
         return track

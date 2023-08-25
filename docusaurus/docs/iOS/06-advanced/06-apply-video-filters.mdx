@@ -3,7 +3,7 @@ title: Video & Audio filters
 description: How to build video or audio filters
 ---
 
-## Introduction
+## Video Filters
 
 Some calling apps allow filters to be applied to the current user's video, such as blurring the background, adding AR elements (glasses, moustaches, etc) or applying image filters (such as sepia, bloom etc). StreamVideo's iOS SDK has support for injecting your custom filters into the calling experience.
 
@@ -246,3 +246,111 @@ The end result will look like this (supposedly with a different face):
 This guide shows you a concrete example how to add a specific AI filter. However, with the way this is structured we aim to give you full control over what you can build with this.
 
 We would love to see the cool things you'll build with this functionality, feel free to tweet about them and [tag us](https://twitter.com/getstream_io).
+
+## Audio Filters
+
+The StreamVideo SDK also supports custom audio processing of the local track. This opens up possibilities for custom echo filtering, voice changing or other audio effects.
+
+If you want to have custom audio processing, you need to provide your own implementation of the `AudioProcessingModule` protocol in our `VideoConfig`. 
+
+In the following example, we will build a simple audio filter that gives the user's voice a robotic touch.
+
+```swift
+let voiceProcessor = CustomVoiceProcessor()
+let filter = RobotVoiceFilter(pitchShift: 0.8)
+voiceProcessor.setAudioFilter(filter)
+let audioProcessingModule = RTCDefaultAudioProcessingModule(
+    config: nil,
+    capturePostProcessingDelegate: voiceProcessor,
+    renderPreProcessingDelegate: nil
+)
+```
+
+In this code, we are using several newly defined objects, so let's go through them. First, we create a `CustomVoiceProcessor`. 
+
+```swift
+class CustomVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
+        
+    private var audioFilter: AudioFilter?
+    
+    func audioProcessingInitialize(sampleRate sampleRateHz: Int, channels: Int) {}
+    
+    func audioProcessingProcess(audioBuffer: RTCAudioBuffer) {
+        var audioBuffer = audioBuffer
+        audioFilter?.applyEffect(to: &audioBuffer)
+    }
+    
+    func audioProcessingRelease() {}
+    
+    func setAudioFilter(_ audioFilter: AudioFilter?) {
+        self.audioFilter = audioFilter
+    }
+}
+
+protocol AudioFilter {
+    
+    func applyEffect(to audioBuffer: inout RTCAudioBuffer)
+    
+}
+
+extension RTCDefaultAudioProcessingModule: AudioProcessingModule, @unchecked Sendable {}
+```
+
+The `CustomVoiceProcessor` conforms to the `RTCAudioCustomProcessingDelegate`, which has 3 mandatory methods to implement. For our case, we only need to implement the `audioProcessingProcess(audioBuffer: RTCAudioBuffer)` method. 
+
+In this method, we are calling a method called `applyEffect`, which is available via our newly defined `AudioFilter` protocol. This protocol has one method, called `applyEffect(to audioBuffer: inout RTCAudioBuffer)`. 
+
+By default, there is no filter (the `audioFilter` property is nil), but we expose a method called `setAudioFilter`, so we can set one from the UI.
+
+Next, let's see our sample implementation of the `AudioFilter` protocol, namely the `RobotVoiceFilter`.
+
+```swift
+class RobotVoiceFilter: AudioFilter {
+    
+    let pitchShift: Float
+    
+    init(pitchShift: Float) {
+        self.pitchShift = pitchShift
+    }
+    
+    func applyEffect(to audioBuffer: inout RTCAudioBuffer) {
+        let frameSize = 256
+        let hopSize = 128
+        let scaleFactor = Float(frameSize) / Float(hopSize)
+        
+        let numFrames = (audioBuffer.frames - frameSize) / hopSize
+        
+        for channel in 0..<audioBuffer.channels {
+            let channelBuffer = audioBuffer.rawBuffer(forChannel: channel)
+            
+            for i in 0..<numFrames {
+                let inputOffset = i * hopSize
+                let outputOffset = Int(Float(i) * scaleFactor) * hopSize
+                
+                var outputFrame = [Float](repeating: 0.0, count: frameSize)
+                
+                // Apply pitch shift
+                for j in 0..<frameSize {
+                    let shiftedIndex = Int(Float(j) * pitchShift)
+                    let originalIndex = inputOffset + j
+                    if shiftedIndex >= 0 && shiftedIndex < frameSize && originalIndex >= 0 && originalIndex < audioBuffer.frames {
+                        outputFrame[shiftedIndex] = channelBuffer[originalIndex]
+                    }
+                }
+                
+                // Copy back to the input buffer
+                for j in 0..<frameSize {
+                    let outputIndex = outputOffset + j
+                    if outputIndex >= 0 && outputIndex < audioBuffer.frames {
+                        channelBuffer[outputIndex] = outputFrame[j]
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+The filter is initalized with pitch shift, which configures how much the channel buffer's indexes should be shifted for the effect. We use a default value of 0.8, but you can configure it depending on how "robotic" the voice should be.
+
+This is a simple algorithm that just does shifting of the indexes. For a more complex one, you can also use some voice processing library. The important part is that you update the `channelBuffer` with the filtered values.
