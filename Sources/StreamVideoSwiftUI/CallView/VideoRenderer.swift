@@ -122,36 +122,39 @@ public class VideoRenderer: RTCMTLVideoView {
     public override func renderFrame(_ frame: RTCVideoFrame?) {
         super.renderFrame(frame)
         
-        if let feedFrames {
-            guard let frame = frame else {
-                return
-            }
-            
-            if let pixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                guard let sampleBuffer = CMSampleBuffer.from(pixelBuffer.pixelBuffer) else {
-                    log.warning("Failed to convert CVPixelBuffer to CMSampleBuffer")
+        DispatchQueue.global(qos: .userInitiated).async { [unowned self] in
+            if let feedFrames {
+                guard let frame = frame else {
                     return
                 }
+                
+                if let pixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                    guard let sampleBuffer = CMSampleBuffer.from(pixelBuffer.pixelBuffer) else {
+                        log.warning("Failed to convert CVPixelBuffer to CMSampleBuffer")
+                        return
+                    }
 
-                DispatchQueue.main.async {
-                    feedFrames(sampleBuffer)
-                }
-            } else if let i420buffer = frame.buffer as? RTCI420Buffer {
-                guard let image = convertWebRTCFrame(frame: frame), let cgImage = image.cgImage else {
-                    return
-                }
-                let ciImage = CIImage(cgImage: cgImage)
-                guard let pixelBuffer = buffer(from: ciImage),
-                        let sampleBuffer = CMSampleBuffer.from(pixelBuffer) else {
-                    log.warning("Failed to convert CVPixelBuffer to CMSampleBuffer")
-                    return
-                }
+                    DispatchQueue.main.async {
+                        feedFrames(sampleBuffer)
+                    }
+                } else if let i420buffer = frame.buffer as? RTCI420Buffer {
+                    guard let image = i420buffer.toCGImage() else {
+                        return
+                    }
+                    let ciImage = CIImage(cgImage: image)
+                    guard let pixelBuffer = buffer(from: ciImage),
+                            let sampleBuffer = CMSampleBuffer.from(pixelBuffer) else {
+                        log.warning("Failed to convert CVPixelBuffer to CMSampleBuffer")
+                        return
+                    }
 
-                DispatchQueue.main.async {
-                    feedFrames(sampleBuffer)
+                    DispatchQueue.main.async {
+                        feedFrames(sampleBuffer)
+                    }
                 }
             }
         }
+        
         
     }
     
@@ -235,57 +238,149 @@ func buffer(from image: CIImage) -> CVPixelBuffer? {
 import UIKit
 import WebRTC
 
-func convertWebRTCFrame(frame: RTCVideoFrame) -> UIImage? {
-    guard let buffer = frame.buffer as? RTCI420Buffer else {
-        return nil
-    }
-    
-    let width = Int(buffer.width)
-    let height = Int(buffer.height)
-    let bytesPerPixel = 4
-    guard let rgbBuffer = malloc(width * height * bytesPerPixel) else {
-        return nil
-    }
-    defer {
-        free(rgbBuffer)
-    }
-    
-    for row in 0..<height {
-        let yLine = buffer.dataY.advanced(by: row * Int(buffer.strideY))
-        let uLine = buffer.dataU.advanced(by: (row >> 1) * Int(buffer.strideU))
-        let vLine = buffer.dataV.advanced(by: (row >> 1) * Int(buffer.strideV))
-        
-        for x in 0..<width {
-            let y = Int16(yLine[x])
-            let u = Int16(uLine[x >> 1]) - 128
-            let v = Int16(vLine[x >> 1]) - 128
-            
-            let r = Int16(roundf(Float(y) + Float(v) * 1.4))
-            let g = Int16(roundf(Float(y) + Float(u) * -0.343 + Float(v) * -0.711))
-            let b = Int16(roundf(Float(y) + Float(u) * 1.765))
-            
-            let rgb = rgbBuffer.advanced(by: (row * width + x) * bytesPerPixel).assumingMemoryBound(to: UInt8.self)
-            rgb[0] = 0xff
-            rgb[1] = clamp(value: b)
-            rgb[2] = clamp(value: g)
-            rgb[3] = clamp(value: r)
+extension RTCI420Buffer {
+    func toCGImage() -> CGImage? {
+        let width = Int(self.width)
+        let height = Int(self.height)
+        let yData = self.dataY
+        let uData = self.dataU
+        let vData = self.dataV
+
+        // Create a CVPixelBuffer
+        var pixelBuffer: CVPixelBuffer?
+        let status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, nil, &pixelBuffer)
+
+        if status != kCVReturnSuccess {
+            print("Error creating pixel buffer")
+            return nil
         }
-    }
-    
-    let colorSpace = CGColorSpaceCreateDeviceRGB()
-    
-    guard let context = CGContext(data: rgbBuffer, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * bytesPerPixel, space: colorSpace, bitmapInfo: CGBitmapInfo(rawValue: CGImageAlphaInfo.noneSkipLast.rawValue | CGBitmapInfo.byteOrder32Little.rawValue).rawValue) else {
+
+        CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+        let yPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 0)
+        let uPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 1)
+        let vPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 2)
+
+        let yBytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer!, 0)
+        let uvBytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer!, 1)
+        let yLength = yBytesPerRow * height
+        let uvLength = uvBytesPerRow * height / 2
+        
+        if let yPlane {
+            let yDataConverted = Data(bytes: yData, count: Int(yLength))
+            yDataConverted.copyBytes(to: yPlane.assumingMemoryBound(to: UInt8.self), count: Int(yLength))
+        }
+        if let uPlane {
+            let uDataConverted = Data(bytes: uData, count: Int(uvLength))
+            uDataConverted.copyBytes(to: uPlane.assumingMemoryBound(to: UInt8.self), count: Int(uvLength))
+        }
+        if let vPlane {
+            let vDataConverted = Data(bytes: vData, count: Int(uvLength))
+            vDataConverted.copyBytes(to: vPlane.assumingMemoryBound(to: UInt8.self), count: Int(uvLength))
+        }
+
+        CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+
+        // Create a CIImage
+        let ciImage = CIImage(cvPixelBuffer: pixelBuffer!)
+
+        // Convert CIImage to UIImage
+//        let context = CIContext(options: nil)
+        let context = CIContext()
+
+        if let cgImage = context.createCGImage(ciImage, from: ciImage.extent) {
+            return cgImage
+        }
+
         return nil
     }
-    
-    if let cgImage = context.makeImage() {
-        let image = UIImage(cgImage: cgImage)
-        return image
-    }
-        
-    return nil
 }
 
 func clamp(value: Int16) -> UInt8 {
     return UInt8(min(max(value, 0), 255))
+}
+
+import CoreMedia
+import CoreVideo
+
+extension RTCI420Buffer {
+    func toCMSampleBuffer() -> CMSampleBuffer? {
+        let width = Int(self.width)
+        let height = Int(self.height)
+        let yData = self.dataY
+        let uData = self.dataU
+        let vData = self.dataV
+
+        // Create a CVPixelBuffer
+        var pixelBuffer: CVPixelBuffer?
+        let pixelBufferAttributes: [String: Any] = [
+            kCVPixelBufferWidthKey as String: width,
+            kCVPixelBufferHeightKey as String: height,
+            kCVPixelBufferPixelFormatTypeKey as String: kCVPixelFormatType_420YpCbCr8BiPlanarFullRange
+        ]
+
+        let status = CVPixelBufferCreate(kCFAllocatorDefault, width, height, kCVPixelFormatType_420YpCbCr8BiPlanarFullRange, pixelBufferAttributes as CFDictionary, &pixelBuffer)
+
+        if status != kCVReturnSuccess {
+            print("Error creating pixel buffer")
+            return nil
+        }
+
+        CVPixelBufferLockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+        let yPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 0)
+        let uvPlane = CVPixelBufferGetBaseAddressOfPlane(pixelBuffer!, 1)
+
+        let yBytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer!, 0)
+        let uvBytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(pixelBuffer!, 1)
+        let yLength = yBytesPerRow * height
+        let uvLength = uvBytesPerRow * height / 2
+
+        yData.withMemoryRebound(to: UInt8.self, capacity: Int(yLength)) { srcY in
+            let destY = yPlane?.assumingMemoryBound(to: UInt8.self)
+            memcpy(destY, srcY, Int(yLength))
+        }
+
+        uData.withMemoryRebound(to: UInt8.self, capacity: Int(uvLength)) { srcU in
+            let destU = uvPlane?.assumingMemoryBound(to: UInt8.self)
+            memcpy(destU, srcU, Int(uvLength))
+        }
+
+        vData.withMemoryRebound(to: UInt8.self, capacity: Int(uvLength)) { srcV in
+            let destV = uvPlane?.advanced(by: Int(uvLength)).assumingMemoryBound(to: UInt8.self)
+            memcpy(destV, srcV, Int(uvLength))
+        }
+
+        CVPixelBufferUnlockBaseAddress(pixelBuffer!, CVPixelBufferLockFlags(rawValue: 0))
+
+        // Create a CMSampleBuffer
+        var sampleBuffer: CMSampleBuffer?
+        var formatDescription: CMFormatDescription?
+
+        CMVideoFormatDescriptionCreateForImageBuffer(allocator: kCFAllocatorDefault, imageBuffer: pixelBuffer!, formatDescriptionOut: &formatDescription)
+
+        var sampleTimingInfo = CMSampleTimingInfo(duration: CMTime.invalid, presentationTimeStamp: CMTime.zero, decodeTimeStamp: CMTime.invalid)
+
+        let sampleSizeArray = [yLength + uvLength]
+        let blockBufferLength = yLength + uvLength
+        var blockBuffer: CMBlockBuffer?
+        CMBlockBufferCreateWithMemoryBlock(allocator: kCFAllocatorDefault, memoryBlock: nil, blockLength: blockBufferLength, blockAllocator: kCFAllocatorNull, customBlockSource: nil, offsetToData: 0, dataLength: blockBufferLength, flags: kCMBlockBufferAlwaysCopyDataFlag, blockBufferOut: &blockBuffer)
+        CMBlockBufferReplaceDataBytes(with: yData, blockBuffer: blockBuffer!, offsetIntoDestination: 0, dataLength: yLength)
+        CMBlockBufferReplaceDataBytes(with: uData, blockBuffer: blockBuffer!, offsetIntoDestination: yLength, dataLength: uvLength)
+
+        CMSampleBufferCreate(
+            allocator: kCFAllocatorDefault,
+            dataBuffer: blockBuffer!,
+            dataReady: true,
+            makeDataReadyCallback: nil,
+            refcon: nil,
+            formatDescription: formatDescription!,
+            sampleCount: 1,
+            sampleTimingEntryCount: 1,
+            sampleTimingArray: &sampleTimingInfo,
+            sampleSizeEntryCount: 1,
+            sampleSizeArray: sampleSizeArray,
+            sampleBufferOut: &sampleBuffer
+        )
+
+        return sampleBuffer
+    }
 }

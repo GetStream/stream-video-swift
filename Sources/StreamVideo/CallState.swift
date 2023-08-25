@@ -55,6 +55,7 @@ public class CallState: ObservableObject {
             if !isInitialized {
                 isInitialized = true
                 subscribeForAppLifecycleEvents()
+                startPiP()
             }
         }
     }
