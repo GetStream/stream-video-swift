@@ -137,3 +137,5 @@ struct StreamVideoSwiftUIApp: App {
         }
     }
 }
+
+extension RTCDefaultAudioProcessingModule: AudioProcessingModule, @unchecked Sendable {}

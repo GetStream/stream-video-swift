@@ -251,7 +251,7 @@ We would love to see the cool things you'll build with this functionality, feel 
 
 The StreamVideo SDK also supports custom audio processing of the local track. This opens up possibilities for custom echo filtering, voice changing or other audio effects.
 
-If you want to have custom audio processing, you need to provide your own implementation of the `RTCAudioProcessingModule` protocol in our `VideoConfig`. 
+If you want to have custom audio processing, you need to provide your own implementation of the `AudioProcessingModule` protocol in our `VideoConfig`. 
 
 In the following example, we will build a simple audio filter that gives the user's voice a robotic touch.
 
@@ -271,7 +271,7 @@ In this code, we are using several newly defined objects, so let's go through th
 ```swift
 class CustomVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
         
-    var audioFilter: AudioFilter?
+    private var audioFilter: AudioFilter?
     
     func audioProcessingInitialize(sampleRate sampleRateHz: Int, channels: Int) {}
     
@@ -292,6 +292,8 @@ protocol AudioFilter {
     func applyEffect(to audioBuffer: inout RTCAudioBuffer)
     
 }
+
+extension RTCDefaultAudioProcessingModule: AudioProcessingModule, @unchecked Sendable {}
 ```
 
 The `CustomVoiceProcessor` conforms to the `RTCAudioCustomProcessingDelegate`, which has 3 mandatory methods to implement. For our case, we only need to implement the `audioProcessingProcess(audioBuffer: RTCAudioBuffer)` method. 

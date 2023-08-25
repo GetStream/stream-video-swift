@@ -3,14 +3,14 @@
 //
 
 import Foundation
-@preconcurrency import WebRTC
+import WebRTC
 
 public struct VideoConfig: Sendable {
     /// An array of `VideoFilter` objects representing the filters to apply to the video.
     public let videoFilters: [VideoFilter]
     
     /// Custom audio processing module.
-    public let audioProcessingModule: RTCAudioProcessingModule?
+    public let audioProcessingModule: AudioProcessingModule?
         
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
@@ -19,9 +19,11 @@ public struct VideoConfig: Sendable {
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],
-        audioProcessingModule: RTCAudioProcessingModule? = nil
+        audioProcessingModule: AudioProcessingModule? = nil
     ) {
         self.videoFilters = videoFilters
         self.audioProcessingModule = audioProcessingModule
     }
 }
+
+public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {}

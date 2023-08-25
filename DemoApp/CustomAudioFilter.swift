@@ -14,7 +14,7 @@ protocol AudioFilter {
 
 class CustomVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
         
-    var audioFilter: AudioFilter?
+    private var audioFilter: AudioFilter?
     
     func audioProcessingInitialize(sampleRate sampleRateHz: Int, channels: Int) {}
     
