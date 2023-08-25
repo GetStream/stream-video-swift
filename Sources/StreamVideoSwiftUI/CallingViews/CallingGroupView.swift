@@ -55,6 +55,7 @@ struct CallingGroupView: View {
                                 title: "+\(participants.count - 2)",
                                 size: .standardAvatarSize
                             )
+                            .frame(width: .standardAvatarSize, height: .standardAvatarSize)
                         }
                     }
                     .background(
@@ -132,7 +133,7 @@ struct CircledTitleView: View {
                 .font(fonts.title)
                 .padding()
         }
-        .frame(width: size, height: size)
+        .frame(maxWidth: size, maxHeight: size)
         .modifier(ShadowModifier())
     }
 }

@@ -281,7 +281,7 @@ public struct ParticipantInfoView: View {
                     .foregroundColor(.white)
                     .padding(.trailing, 4)
             }
-            Text(participant.name)
+            Text(participant.name.isEmpty ? participant.id : participant.name)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
@@ -301,6 +301,7 @@ public struct ParticipantInfoView: View {
 public struct SoundIndicator: View {
             
     @Injected(\.images) var images
+    @Injected(\.colors) var colors
     
     let participant: CallParticipant
     
@@ -310,7 +311,7 @@ public struct SoundIndicator: View {
     
     public var body: some View {
         (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-            .foregroundColor(.white)
+            .foregroundColor(participant.hasAudio ? .white : colors.accentRed)
             .padding(.all, 4)
             .accessibility(identifier: "participantMic")
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
