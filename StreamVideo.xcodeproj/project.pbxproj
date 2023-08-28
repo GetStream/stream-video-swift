@@ -5188,7 +5188,7 @@
 			repositoryURL = "https://github.com/GetStream/stream-chat-swift-test-helpers";
 			requirement = {
 				kind = exactVersion;
-				version = 0.2.11;
+				version = 0.2.5;
 			};
 		};
 		8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */ = {
