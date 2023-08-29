@@ -8,8 +8,8 @@ import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
 
-struct StreamCallingView: View {
-    
+struct DebugCallingView: View {
+
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
 
@@ -77,7 +77,7 @@ struct StreamCallingView: View {
                     }
                     viewModel.enterLobby(callType: .default, callId: text, members: [])
                 } label: {
-                    CallButtonView(title: "Join Call", maxWidth: 120)
+                    CallButtonView(title: "Join Call", maxWidth: 120, isDisabled: text.isEmpty)
                 }
             }
             
@@ -93,7 +93,7 @@ struct StreamCallingView: View {
                 resignFirstResponder()
                 viewModel.startCall(callType: .default, callId: UUID().uuidString, members: [])
             } label: {
-                CallButtonView(title: "Start New Call")
+                CallButtonView(title: "Start New Call", isDisabled: appState.loading)
             }
             .padding(.bottom)
             
@@ -119,23 +119,3 @@ struct StreamCallingView: View {
         })
     }
 }
-
-struct CallButtonView: View {
-    
-    @Injected(\.colors) var colors
-    
-    var title: String
-    var maxWidth: CGFloat?
-    
-    var body: some View {
-        Text(title)
-            .bold()
-            .foregroundColor(.white)
-            .padding(.all, 12)
-            .frame(maxWidth: maxWidth ?? .infinity)
-            .background(colors.primaryButtonBackground)
-            .cornerRadius(8)
-    }
-    
-}
-

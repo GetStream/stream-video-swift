@@ -25,6 +25,7 @@
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
+		4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
@@ -41,6 +42,30 @@
 		40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		40F445C52A9E1D91004BE3DA /* MockServer in Frameworks */ = {isa = PBXBuildFile; productRef = 40F445C42A9E1D91004BE3DA /* MockServer */; };
 		40F445C72A9E1D91004BE3DA /* StreamChatTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 40F445C62A9E1D91004BE3DA /* StreamChatTestHelpers */; };
+		40F445CA2A9E1FB0004BE3DA /* MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C92A9E1FB0004BE3DA /* MicrophoneChecking.swift */; };
+		40F445CC2A9E1FC9004BE3DA /* StreamChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* StreamChatViewFactory.swift */; };
+		40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */; };
+		40F445D22A9E2033004BE3DA /* ReactionsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */; };
+		40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D32A9E2051004BE3DA /* Reaction.swift */; };
+		40F445D82A9E21BB004BE3DA /* DemoCallModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D72A9E21BB004BE3DA /* DemoCallModifier.swift */; };
+		40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */; };
+		40F445DE2A9E22B9004BE3DA /* CallButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */; };
+		40F445E02A9E22EA004BE3DA /* ReleaseCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DF2A9E22EA004BE3DA /* ReleaseCallingView.swift */; };
+		40F445E22A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E12A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift */; };
+		40F445E52A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E42A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift */; };
+		40F445E82A9E2824004BE3DA /* Call+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */; };
+		40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */; };
+		40F445ED2A9E2A24004BE3DA /* DemoControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EC2A9E2A24004BE3DA /* DemoControls.swift */; };
+		40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EF2A9E2A4B004BE3DA /* LoadingView.swift */; };
+		40F445F32A9E2A87004BE3DA /* ReactionIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F22A9E2A87004BE3DA /* ReactionIcon.swift */; };
+		40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F42A9E2AA1004BE3DA /* ReactionOverlayView.swift */; };
+		40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F62A9E2AAC004BE3DA /* ReactionsViewModifier.swift */; };
+		40F445FA2A9E2B0D004BE3DA /* ShareActivityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F92A9E2B0D004BE3DA /* ShareActivityView.swift */; };
+		40F445FE2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */; };
+		40F446002A9E2B5E004BE3DA /* LinkInfoView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445FF2A9E2B5E004BE3DA /* LinkInfoView.swift */; };
+		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
+		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
+		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
@@ -169,7 +194,7 @@
 		8406269A2A37A5E2004B8748 /* CallEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 840626992A37A5E2004B8748 /* CallEvents.swift */; };
 		8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8406269B2A37A653004B8748 /* CallEventsHandler.swift */; };
 		8408A6222A949DB700DB1DFA /* VideoCapturingUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */; };
-		84093811288A90390089A35B /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* HomeView.swift */; };
+		84093811288A90390089A35B /* TestCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* TestCallingView.swift */; };
 		8409465629AF4EEC007AF5BF /* CallReactionEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */; };
 		8409465729AF4EEC007AF5BF /* CallRecording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465129AF4EEC007AF5BF /* CallRecording.swift */; };
 		8409465829AF4EEC007AF5BF /* SendReactionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8409465229AF4EEC007AF5BF /* SendReactionRequest.swift */; };
@@ -340,10 +365,8 @@
 		8479E74429EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479E74229EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift */; };
 		8479E74529EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479E74329EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift */; };
 		8479F83429C09EF1009ECE37 /* UserAvatar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8479F83329C09EF1009ECE37 /* UserAvatar.swift */; };
-		847B47AD2A210C6A000714CE /* StreamCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47AC2A210C6A000714CE /* StreamCallingView.swift */; };
+		847B47AD2A210C6A000714CE /* DebugCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47AC2A210C6A000714CE /* DebugCallingView.swift */; };
 		847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47AE2A233AE2000714CE /* DemoAppViewFactory.swift */; };
-		847B47B12A23EE44000714CE /* CustomWaitingUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B02A23EE44000714CE /* CustomWaitingUserView.swift */; };
-		847B47B32A23F8C6000714CE /* ShareButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B22A23F8C6000714CE /* ShareButtonView.swift */; };
 		847B47B52A249E7E000714CE /* Examples.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B42A249E7E000714CE /* Examples.swift */; };
 		847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B62A260CF0000714CE /* CustomCallView.swift */; };
 		847BE09C29DADE0100B55D21 /* Call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847BE09B29DADE0100B55D21 /* Call.swift */; };
@@ -573,7 +596,7 @@
 		84EA5D3F28C09AAC004D3531 /* CallController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D3E28C09AAB004D3531 /* CallController.swift */; };
 		84EA5D4328C1E944004D3531 /* AudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D4228C1E944004D3531 /* AudioSession.swift */; };
 		84EBA4A22A72B81100577297 /* BroadcastBufferConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBA4A12A72B81100577297 /* BroadcastBufferConnection.swift */; };
-		84ED240D286C9515002A3186 /* CallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240C286C9515002A3186 /* CallView.swift */; };
+		84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240C286C9515002A3186 /* DemoCallContainerView.swift */; };
 		84F0867B29632DA40099907A /* VideoFilters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F0867A29632DA30099907A /* VideoFilters.swift */; };
 		84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F3B0D9289083E70088751D /* WebSocketConstants.swift */; };
 		84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F3B0DD28913E0E0088751D /* CallControlsView.swift */; };
@@ -623,7 +646,7 @@
 		84FC2C2228ACF2E000181490 /* PeerConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C2128ACF2E000181490 /* PeerConnection.swift */; };
 		84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */; };
 		84FC2C2828AD350100181490 /* WebRTCEvents.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FC2C2728AD350100181490 /* WebRTCEvents.swift */; };
-		84FFB06A2A8D1380005BA275 /* CustomCallTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FFB0692A8D1380005BA275 /* CustomCallTopView.swift */; };
+		84FFB06A2A8D1380005BA275 /* DemoCallTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FFB0692A8D1380005BA275 /* DemoCallTopView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -784,6 +807,8 @@
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
+		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
+		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingSession.swift; sourceTree = "<group>"; };
 		40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCredentials.swift; sourceTree = "<group>"; };
@@ -796,6 +821,30 @@
 		40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotVoiceFilter.swift; sourceTree = "<group>"; };
 		40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCDefaultAudioProcessingModule+AudioProcessingModule.swift"; sourceTree = "<group>"; };
 		40F445C12A9E1449004BE3DA /* JoinCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCallView.swift; sourceTree = "<group>"; };
+		40F445C92A9E1FB0004BE3DA /* MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecking.swift; sourceTree = "<group>"; };
+		40F445CB2A9E1FC9004BE3DA /* StreamChatViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamChatViewFactory.swift; sourceTree = "<group>"; };
+		40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoReactionsOverlayView.swift; sourceTree = "<group>"; };
+		40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsHelper.swift; sourceTree = "<group>"; };
+		40F445D32A9E2051004BE3DA /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
+		40F445D72A9E21BB004BE3DA /* DemoCallModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallModifier.swift; sourceTree = "<group>"; };
+		40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallContentView.swift; sourceTree = "<group>"; };
+		40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallButtonView.swift; sourceTree = "<group>"; };
+		40F445DF2A9E22EA004BE3DA /* ReleaseCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReleaseCallingView.swift; sourceTree = "<group>"; };
+		40F445E12A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoCallParticipantModifier.swift; sourceTree = "<group>"; };
+		40F445E42A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoCallParticipantView.swift; sourceTree = "<group>"; };
+		40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Call+Identifiable.swift"; sourceTree = "<group>"; };
+		40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallStateResponseFields+Identifiable.swift"; sourceTree = "<group>"; };
+		40F445EC2A9E2A24004BE3DA /* DemoControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoControls.swift; sourceTree = "<group>"; };
+		40F445EF2A9E2A4B004BE3DA /* LoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoadingView.swift; sourceTree = "<group>"; };
+		40F445F22A9E2A87004BE3DA /* ReactionIcon.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionIcon.swift; sourceTree = "<group>"; };
+		40F445F42A9E2AA1004BE3DA /* ReactionOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionOverlayView.swift; sourceTree = "<group>"; };
+		40F445F62A9E2AAC004BE3DA /* ReactionsViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsViewModifier.swift; sourceTree = "<group>"; };
+		40F445F92A9E2B0D004BE3DA /* ShareActivityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareActivityView.swift; sourceTree = "<group>"; };
+		40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoWaitingLocalUserView.swift; sourceTree = "<group>"; };
+		40F445FF2A9E2B5E004BE3DA /* LinkInfoView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkInfoView.swift; sourceTree = "<group>"; };
+		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
+		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
+		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
 		4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTest.swift; sourceTree = "<group>"; };
 		4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
@@ -805,7 +854,6 @@
 		8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SystemEnvironment+Version.swift"; sourceTree = "<group>"; };
 		822257892A42F93600CFFD96 /* TokenGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenGenerator.swift; sourceTree = "<group>"; };
 		8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAppUIKit.entitlements; sourceTree = "<group>"; };
-		8228CD8C29128CA000F32136 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		82392D512993C9E100941435 /* SwiftUIDemoAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftUIDemoAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		82392D532993C9E100941435 /* StreamTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamTestCase.swift; sourceTree = "<group>"; };
 		82392D5E2993CCB300941435 /* ParticipantRobot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantRobot.swift; sourceTree = "<group>"; };
@@ -879,7 +927,7 @@
 		840626992A37A5E2004B8748 /* CallEvents.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallEvents.swift; sourceTree = "<group>"; };
 		8406269B2A37A653004B8748 /* CallEventsHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEventsHandler.swift; sourceTree = "<group>"; };
 		8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoCapturingUtils.swift; sourceTree = "<group>"; };
-		84093810288A90390089A35B /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		84093810288A90390089A35B /* TestCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TestCallingView.swift; sourceTree = "<group>"; };
 		8409465029AF4EEB007AF5BF /* CallReactionEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallReactionEvent.swift; sourceTree = "<group>"; };
 		8409465129AF4EEC007AF5BF /* CallRecording.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallRecording.swift; sourceTree = "<group>"; };
 		8409465229AF4EEC007AF5BF /* SendReactionRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = SendReactionRequest.swift; sourceTree = "<group>"; };
@@ -1051,10 +1099,8 @@
 		8479E74229EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallBroadcastingStoppedEvent.swift; sourceTree = "<group>"; };
 		8479E74329EE89FC00169EF5 /* CallBroadcastingStartedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallBroadcastingStartedEvent.swift; sourceTree = "<group>"; };
 		8479F83329C09EF1009ECE37 /* UserAvatar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserAvatar.swift; sourceTree = "<group>"; };
-		847B47AC2A210C6A000714CE /* StreamCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallingView.swift; sourceTree = "<group>"; };
+		847B47AC2A210C6A000714CE /* DebugCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugCallingView.swift; sourceTree = "<group>"; };
 		847B47AE2A233AE2000714CE /* DemoAppViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAppViewFactory.swift; sourceTree = "<group>"; };
-		847B47B02A23EE44000714CE /* CustomWaitingUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomWaitingUserView.swift; sourceTree = "<group>"; };
-		847B47B22A23F8C6000714CE /* ShareButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareButtonView.swift; sourceTree = "<group>"; };
 		847B47B42A249E7E000714CE /* Examples.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Examples.swift; sourceTree = "<group>"; };
 		847B47B62A260CF0000714CE /* CustomCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCallView.swift; sourceTree = "<group>"; };
 		847BE09B29DADE0100B55D21 /* Call.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Call.swift; sourceTree = "<group>"; };
@@ -1275,7 +1321,7 @@
 		84EA5D4228C1E944004D3531 /* AudioSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSession.swift; sourceTree = "<group>"; };
 		84EBA4A12A72B81100577297 /* BroadcastBufferConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferConnection.swift; sourceTree = "<group>"; };
 		84EBAA92288C137E00BE3176 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
-		84ED240C286C9515002A3186 /* CallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallView.swift; sourceTree = "<group>"; };
+		84ED240C286C9515002A3186 /* DemoCallContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallContainerView.swift; sourceTree = "<group>"; };
 		84F0867A29632DA30099907A /* VideoFilters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoFilters.swift; sourceTree = "<group>"; };
 		84F3B0D9289083E70088751D /* WebSocketConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConstants.swift; sourceTree = "<group>"; };
 		84F3B0DD28913E0E0088751D /* CallControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView.swift; sourceTree = "<group>"; };
@@ -1315,7 +1361,7 @@
 		84FC2C2128ACF2E000181490 /* PeerConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PeerConnection.swift; sourceTree = "<group>"; };
 		84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCEventDecoder.swift; sourceTree = "<group>"; };
 		84FC2C2728AD350100181490 /* WebRTCEvents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebRTCEvents.swift; sourceTree = "<group>"; };
-		84FFB0692A8D1380005BA275 /* CustomCallTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomCallTopView.swift; sourceTree = "<group>"; };
+		84FFB0692A8D1380005BA275 /* DemoCallTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallTopView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -1446,6 +1492,7 @@
 			isa = PBXGroup;
 			children = (
 				401A64AA2A9DF7EC00534ED1 /* StreamChatWrapper.swift */,
+				40F445CB2A9E1FC9004BE3DA /* StreamChatViewFactory.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -1466,6 +1513,7 @@
 				40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */,
 				40F445AD2A9DFC34004BE3DA /* UserState.swift */,
 				40F445AF2A9DFC58004BE3DA /* CallKitState.swift */,
+				40F445D32A9E2051004BE3DA /* Reaction.swift */,
 			);
 			path = Models;
 			sourceTree = "<group>";
@@ -1473,9 +1521,9 @@
 		4030E5912A9DF3E6003E8CBA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
-				8228CD8C29128CA000F32136 /* Info.plist */,
 				4030E5932A9DF439003E8CBA /* Assets */,
 				4030E5922A9DF3ED003E8CBA /* Entitlements */,
+				4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1514,17 +1562,22 @@
 		4030E5952A9DF488003E8CBA /* Views */ = {
 			isa = PBXGroup;
 			children = (
-				84201792288AB699004964B3 /* AddUserView.swift */,
-				84ED240C286C9515002A3186 /* CallView.swift */,
-				84FFB0692A8D1380005BA275 /* CustomCallTopView.swift */,
-				847B47B62A260CF0000714CE /* CustomCallView.swift */,
-				847B47B02A23EE44000714CE /* CustomWaitingUserView.swift */,
-				848C469C2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift */,
-				84093810288A90390089A35B /* HomeView.swift */,
-				40F445C12A9E1449004BE3DA /* JoinCallView.swift */,
-				847B47B22A23F8C6000714CE /* ShareButtonView.swift */,
-				847B47AC2A210C6A000714CE /* StreamCallingView.swift */,
+				40F445FC2A9E2B3A004BE3DA /* WaitingLocalUserView */,
+				40F445FB2A9E2B32004BE3DA /* LinkInfoView */,
+				40F445F82A9E2AF3004BE3DA /* ShareActivityView */,
+				40F445EE2A9E2A42004BE3DA /* LoadingView */,
+				40F445EB2A9E2A12004BE3DA /* Controls */,
 				4030E59D2A9DF4D0003E8CBA /* CallsView */,
+				40F445E62A9E27BB004BE3DA /* VideoCallParticipantView */,
+				40F445E32A9E2779004BE3DA /* VideoCallParticipantModifier */,
+				40F445DC2A9E22AE004BE3DA /* CallButtonView */,
+				40F445D92A9E226D004BE3DA /* CallView */,
+				40F445D62A9E21A8004BE3DA /* CallModifier */,
+				40F445D52A9E2157004BE3DA /* CallTopView */,
+				40F445CD2A9E1FDB004BE3DA /* Reactions */,
+				847B47B62A260CF0000714CE /* CustomCallView.swift */,
+				848C469C2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift */,
+				40F445C12A9E1449004BE3DA /* JoinCallView.swift */,
 				4030E5982A9DF4B5003E8CBA /* Login */,
 			);
 			path = Views;
@@ -1533,6 +1586,8 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				40F445D02A9E2028004BE3DA /* Reactions */,
+				40F445C82A9E1FA5004BE3DA /* MicrophoneChecking */,
 				40F445B82A9E0809004BE3DA /* AudioFilter */,
 				40F445B72A9E05C2004BE3DA /* Services */,
 				40F445B62A9E04EF004BE3DA /* Deeplinks */,
@@ -1555,6 +1610,10 @@
 				401A64B42A9DF88C00534ED1 /* String+Unique.swift */,
 				40F445B12A9DFFBB004BE3DA /* User+Demo.swift */,
 				40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */,
+				40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */,
+				40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */,
+				40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */,
+				40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -1562,6 +1621,7 @@
 		4030E5982A9DF4B5003E8CBA /* Login */ = {
 			isa = PBXGroup;
 			children = (
+				84201792288AB699004964B3 /* AddUserView.swift */,
 				8456E6C1287EB405004E180E /* LoginView.swift */,
 				8456E6C3287EB43A004E180E /* LoginViewModel.swift */,
 			);
@@ -1635,6 +1695,126 @@
 				40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */,
 			);
 			path = AudioFilter;
+			sourceTree = "<group>";
+		};
+		40F445C82A9E1FA5004BE3DA /* MicrophoneChecking */ = {
+			isa = PBXGroup;
+			children = (
+				40F445C92A9E1FB0004BE3DA /* MicrophoneChecking.swift */,
+			);
+			path = MicrophoneChecking;
+			sourceTree = "<group>";
+		};
+		40F445CD2A9E1FDB004BE3DA /* Reactions */ = {
+			isa = PBXGroup;
+			children = (
+				40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */,
+				40F445F22A9E2A87004BE3DA /* ReactionIcon.swift */,
+				40F445F42A9E2AA1004BE3DA /* ReactionOverlayView.swift */,
+				40F445F62A9E2AAC004BE3DA /* ReactionsViewModifier.swift */,
+			);
+			path = Reactions;
+			sourceTree = "<group>";
+		};
+		40F445D02A9E2028004BE3DA /* Reactions */ = {
+			isa = PBXGroup;
+			children = (
+				40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */,
+			);
+			path = Reactions;
+			sourceTree = "<group>";
+		};
+		40F445D52A9E2157004BE3DA /* CallTopView */ = {
+			isa = PBXGroup;
+			children = (
+				84FFB0692A8D1380005BA275 /* DemoCallTopView.swift */,
+			);
+			path = CallTopView;
+			sourceTree = "<group>";
+		};
+		40F445D62A9E21A8004BE3DA /* CallModifier */ = {
+			isa = PBXGroup;
+			children = (
+				40F445D72A9E21BB004BE3DA /* DemoCallModifier.swift */,
+			);
+			path = CallModifier;
+			sourceTree = "<group>";
+		};
+		40F445D92A9E226D004BE3DA /* CallView */ = {
+			isa = PBXGroup;
+			children = (
+				84093810288A90390089A35B /* TestCallingView.swift */,
+				847B47AC2A210C6A000714CE /* DebugCallingView.swift */,
+				84ED240C286C9515002A3186 /* DemoCallContainerView.swift */,
+				40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */,
+				40F445DF2A9E22EA004BE3DA /* ReleaseCallingView.swift */,
+				40F446012A9E2C23004BE3DA /* DemoCallView.swift */,
+			);
+			path = CallView;
+			sourceTree = "<group>";
+		};
+		40F445DC2A9E22AE004BE3DA /* CallButtonView */ = {
+			isa = PBXGroup;
+			children = (
+				40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */,
+			);
+			path = CallButtonView;
+			sourceTree = "<group>";
+		};
+		40F445E32A9E2779004BE3DA /* VideoCallParticipantModifier */ = {
+			isa = PBXGroup;
+			children = (
+				40F445E12A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift */,
+			);
+			path = VideoCallParticipantModifier;
+			sourceTree = "<group>";
+		};
+		40F445E62A9E27BB004BE3DA /* VideoCallParticipantView */ = {
+			isa = PBXGroup;
+			children = (
+				40F445E42A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift */,
+			);
+			path = VideoCallParticipantView;
+			sourceTree = "<group>";
+		};
+		40F445EB2A9E2A12004BE3DA /* Controls */ = {
+			isa = PBXGroup;
+			children = (
+				40F445EC2A9E2A24004BE3DA /* DemoControls.swift */,
+			);
+			path = Controls;
+			sourceTree = "<group>";
+		};
+		40F445EE2A9E2A42004BE3DA /* LoadingView */ = {
+			isa = PBXGroup;
+			children = (
+				40F445EF2A9E2A4B004BE3DA /* LoadingView.swift */,
+			);
+			path = LoadingView;
+			sourceTree = "<group>";
+		};
+		40F445F82A9E2AF3004BE3DA /* ShareActivityView */ = {
+			isa = PBXGroup;
+			children = (
+				40F445F92A9E2B0D004BE3DA /* ShareActivityView.swift */,
+			);
+			path = ShareActivityView;
+			sourceTree = "<group>";
+		};
+		40F445FB2A9E2B32004BE3DA /* LinkInfoView */ = {
+			isa = PBXGroup;
+			children = (
+				40F445FF2A9E2B5E004BE3DA /* LinkInfoView.swift */,
+			);
+			path = LinkInfoView;
+			sourceTree = "<group>";
+		};
+		40F445FC2A9E2B3A004BE3DA /* WaitingLocalUserView */ = {
+			isa = PBXGroup;
+			children = (
+				40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */,
+			);
+			path = WaitingLocalUserView;
 			sourceTree = "<group>";
 		};
 		4351AEAB2A40586B00D32D0D /* IntegrationTests */ = {
@@ -1923,6 +2103,7 @@
 		842D8BD42865B37800801910 /* DemoApp */ = {
 			isa = PBXGroup;
 			children = (
+				4046DEEA2A9E38DC00CA6D2F /* Info.plist */,
 				4030E5942A9DF45C003E8CBA /* Sources */,
 				4030E5912A9DF3E6003E8CBA /* Resources */,
 				842D8BD72865B37800801910 /* Preview Content */,
@@ -3129,6 +3310,7 @@
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
+				4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -3338,47 +3520,69 @@
 			buildActionMask = 2147483647;
 			files = (
 				8456E6C4287EB43A004E180E /* LoginViewModel.swift in Sources */,
+				40F445FA2A9E2B0D004BE3DA /* ShareActivityView.swift in Sources */,
+				40F445F32A9E2A87004BE3DA /* ReactionIcon.swift in Sources */,
+				40F445D82A9E21BB004BE3DA /* DemoCallModifier.swift in Sources */,
 				4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */,
 				40F445B42A9E01B2004BE3DA /* TokenProvider.swift in Sources */,
-				847B47B32A23F8C6000714CE /* ShareButtonView.swift in Sources */,
 				848C469D2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift in Sources */,
+				40F445ED2A9E2A24004BE3DA /* DemoControls.swift in Sources */,
 				401A64AE2A9DF81200534ED1 /* UserProvider.swift in Sources */,
 				40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
+				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
+				40F445E02A9E22EA004BE3DA /* ReleaseCallingView.swift in Sources */,
 				8403C0AF2897D9940092BD43 /* VoIPPushService.swift in Sources */,
+				40F445CA2A9E1FB0004BE3DA /* MicrophoneChecking.swift in Sources */,
 				403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */,
 				40F445C02A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */,
 				842D3B5C29F6A4A10051698A /* AppDelegate.swift in Sources */,
 				403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */,
-				847B47AD2A210C6A000714CE /* StreamCallingView.swift in Sources */,
+				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
+				847B47AD2A210C6A000714CE /* DebugCallingView.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
+				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				40F445BE2A9E0823004BE3DA /* RobotVoiceFilter.swift in Sources */,
-				84093811288A90390089A35B /* HomeView.swift in Sources */,
-				84ED240D286C9515002A3186 /* CallView.swift in Sources */,
+				84093811288A90390089A35B /* TestCallingView.swift in Sources */,
+				84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */,
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
 				40F445B02A9DFC58004BE3DA /* CallKitState.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
+				40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */,
+				40F445CC2A9E1FC9004BE3DA /* StreamChatViewFactory.swift in Sources */,
 				842D8BDA2865B37800801910 /* DemoApp.swift in Sources */,
+				40F445E82A9E2824004BE3DA /* Call+Identifiable.swift in Sources */,
+				40F445FE2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift in Sources */,
 				401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */,
 				401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */,
 				40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */,
 				40F445BA2A9E0815004BE3DA /* AudioFilter.swift in Sources */,
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
+				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
 				820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */,
+				40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */,
 				4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */,
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
+				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
 				401A64AB2A9DF7EC00534ED1 /* StreamChatWrapper.swift in Sources */,
-				847B47B12A23EE44000714CE /* CustomWaitingUserView.swift in Sources */,
+				40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */,
+				40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */,
+				40F446002A9E2B5E004BE3DA /* LinkInfoView.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
+				40F445E22A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift in Sources */,
 				8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */,
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
+				40F445DE2A9E22B9004BE3DA /* CallButtonView.swift in Sources */,
 				8434C5222899572F0001490A /* CallService.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
-				84FFB06A2A8D1380005BA275 /* CustomCallTopView.swift in Sources */,
+				40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */,
+				40F445D22A9E2033004BE3DA /* ReactionsHelper.swift in Sources */,
+				40F445E52A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift in Sources */,
+				84FFB06A2A8D1380005BA275 /* DemoCallTopView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4267,7 +4471,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = "${TARGET_NAME}/Resources/Info.plist";
+				INFOPLIST_FILE = DemoApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -4667,7 +4871,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = "${TARGET_NAME}/Resources/Info.plist";
+				INFOPLIST_FILE = DemoApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -4715,7 +4919,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = "${TARGET_NAME}/Resources/Info.plist";
+				INFOPLIST_FILE = DemoApp/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";

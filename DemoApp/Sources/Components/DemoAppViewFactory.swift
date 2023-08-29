@@ -4,26 +4,62 @@
 
 import StreamVideo
 import StreamVideoSwiftUI
+import struct StreamChatSwiftUI.InjectedValues
 import SwiftUI
 
-class DemoAppViewFactory: ViewFactory {
-    
+final class DemoAppViewFactory: ViewFactory {
+
     static let shared = DemoAppViewFactory()
-    
+
+    @Injected(\.colors) var colors
+
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
-        CustomWaitingLocalUserView(viewModel: viewModel, viewFactory: self)
+        DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
     }
-    
-    @ViewBuilder
+
+    func makeUserAvatar(imageURL: URL?, size: CGFloat) -> AnyView {
+        .init(UserAvatar(imageURL: imageURL, size: size))
+    }
+
+    func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {
+        .init(WaitingLocalUserView(viewModel: viewModel, viewFactory: self))
+    }
+
+    func makeCallView(viewModel: CallViewModel) -> DemoCallView<DemoAppViewFactory> {
+        DemoCallView(
+            viewFactory: self,
+            microphoneChecker: MicrophoneChecker(),
+            viewModel: viewModel
+        )
+    }
+
+    func makeInnerCallView(viewModel: CallViewModel) -> AnyView {
+        .init(StreamVideoSwiftUI.CallView(viewFactory: self, viewModel: viewModel))
+    }
+
     func makeCallControlsView(viewModel: CallViewModel) -> some View {
-#if targetEnvironment(simulator)
-        DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
-#else
-        DemoAppCallControlsView(viewModel: viewModel)
-#endif
+        AppControlsWithChat(viewModel: viewModel)
     }
-    
-    func makeCallTopView(viewModel: CallViewModel) -> some View {
-        CustomCallTopView(viewModel: viewModel)
+
+    func makeCallTopView(viewModel: CallViewModel) -> DemoCallTopView {
+        DemoCallTopView(viewModel: viewModel)
+    }
+
+    func makeVideoParticipantView(
+        participant: CallParticipant,
+        id: String,
+        availableSize: CGSize,
+        contentMode: UIView.ContentMode,
+        customData: [String : RawJSON],
+        call: Call?
+    ) -> DemoVideoCallParticipantView {
+        DemoVideoCallParticipantView(
+            participant: participant,
+            id: id,
+            availableSize: availableSize,
+            contentMode: contentMode,
+            customData: customData,
+            call: call
+        )
     }
 }

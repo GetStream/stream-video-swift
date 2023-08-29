@@ -1,0 +1,33 @@
+//
+//  DemoReactionsOverlayView.swift
+//  DemoApp
+//
+//  Created by Ilias Pavlidakis on 29/8/23.
+//
+
+import Foundation
+import StreamChat
+import StreamChatSwiftUI
+import SwiftUI
+
+struct DemoReactionsOverlayView<Factory: ViewFactory>: View {
+
+    var factory: Factory
+    var channel: ChatChannel
+    var currentSnapshot: UIImage
+    var messageDisplayInfo: MessageDisplayInfo
+    var onBackgroundTap: () -> Void
+    var onActionExecuted: (MessageActionInfo) -> Void
+
+    var body: some View {
+        ReactionsOverlayView(
+            factory: factory,
+            channel: channel,
+            currentSnapshot: currentSnapshot,
+            messageDisplayInfo: messageDisplayInfo,
+            onBackgroundTap: onBackgroundTap,
+            onActionExecuted: onActionExecuted
+        )
+        .offset(y: -29)
+    }
+}

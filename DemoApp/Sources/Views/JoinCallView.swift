@@ -44,8 +44,3 @@ struct JoinCallView: View {
         .overlay( AppState.shared.loading ? ProgressView() : nil)
     }
 }
-
-
-#Preview {
-    JoinCallView(viewModel: .init(), completion: { _ in })
-}

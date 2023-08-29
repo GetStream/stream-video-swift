@@ -15,6 +15,9 @@ import WebRTC
 final class Router: ObservableObject {
 
     // MARK: - Properties
+    // MARK: Singleton
+
+    static let shared = Router(.shared)
 
     // MARK: Instance
     var streamVideoUI: StreamVideoUI?
@@ -26,7 +29,7 @@ final class Router: ObservableObject {
 
     // MARK: - Lifecycle
 
-    init(_ appState: AppState) {
+    private init(_ appState: AppState) {
         self.appState = appState
 
         if appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration {

@@ -24,6 +24,7 @@ final class AppState: ObservableObject {
     @Published var users: [User]
 
     let unsecureRepository = UnsecureRepository()
+    let reactionsHelper = ReactionsHelper()
 
     // MARK: Mutable
 

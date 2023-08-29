@@ -3,7 +3,6 @@
 //
 
 import StreamVideo
-import StreamVideoSwiftUI
 import SwiftUI
 
 /// View controller reprensetable which wraps up the activity view controller.
@@ -11,6 +10,11 @@ struct ShareActivityView: UIViewControllerRepresentable {
 
     var activityItems: [Any]
     var applicationActivities: [UIActivity]? = nil
+
+    init(activityItems: [Any], applicationActivities: [UIActivity]? = nil) {
+        self.activityItems = activityItems
+        self.applicationActivities = applicationActivities
+    }
 
     func makeUIViewController(
         context: UIViewControllerRepresentableContext<ShareActivityView>

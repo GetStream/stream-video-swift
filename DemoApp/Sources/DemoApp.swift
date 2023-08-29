@@ -20,22 +20,22 @@ struct DemoApp: App {
     // MARK: - Lifecycle
 
     init() {
-        let appState = AppState.shared
-        self._appState = .init(wrappedValue: appState)
-        self.router = .init(appState)
+        let router = Router.shared
+        self._appState = .init(wrappedValue: router.appState)
+        self.router = router
 
         LogConfig.level = .debug
         configureSentry()
     }
-    
+
     var body: some Scene {
         WindowGroup {
             ZStack {
                 if appState.userState == .loggedIn {
-                    CallView(callId: appState.deeplinkInfo.callId)
+                    DemoCallContainerView(callId: appState.deeplinkInfo.callId)
                 } else {
                     if AppEnvironment.configuration.isRelease {
-                        EmptyView()
+                        LoadingView()
                     } else {
                         LoginView() { router.handleLoggedInUserCredentials($0, deeplinkInfo: .empty) }
                     }

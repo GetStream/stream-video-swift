@@ -8,25 +8,25 @@
 import Foundation
 import StreamVideo
 
-internal struct DeeplinkInfo: Equatable {
-    internal var callId: String
-    internal var callType: String
+struct DeeplinkInfo: Equatable {
+    var callId: String
+    var callType: String
 
-    internal static let empty = DeeplinkInfo(callId: "", callType: "")
+    static let empty = DeeplinkInfo(callId: "", callType: "")
 }
 
-internal struct DeeplinkAdapter {
-    internal var baseURL: URL
+struct DeeplinkAdapter {
+    var baseURL: URL
 
-    internal init(baseURL: URL) {
+    init(baseURL: URL) {
         self.baseURL = baseURL
     }
 
-    internal func canHandle(url: URL) -> Bool {
+    func canHandle(url: URL) -> Bool {
         url.absoluteString.contains(baseURL.absoluteString) || url.scheme == AppEnvironment.appURLScheme
     }
 
-    internal func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {
+    func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {
         guard canHandle(url: url) else {
             return (.empty, nil)
         }

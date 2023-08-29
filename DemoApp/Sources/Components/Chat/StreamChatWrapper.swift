@@ -40,7 +40,7 @@ struct StreamChatWrapper {
 }
 
 /// Returns the current value for the `StreamVideo` instance.
-internal struct StreamChatProviderKey: StreamChatSwiftUI.InjectionKey {
+struct StreamChatProviderKey: StreamChatSwiftUI.InjectionKey {
     static var currentValue: StreamChatWrapper?
 }
 

@@ -44,9 +44,3 @@ struct CallsView: View {
         }
     }
 }
-
-extension Call: Identifiable {
-    public var id: String {
-        cId
-    }
-}

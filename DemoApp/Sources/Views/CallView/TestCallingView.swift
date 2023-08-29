@@ -8,7 +8,7 @@ import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
 
-struct HomeView: View {
+struct TestCallingView: View {
     @ObservedObject var viewModel: CallViewModel
     
     @Injected(\.streamVideo) var streamVideo
