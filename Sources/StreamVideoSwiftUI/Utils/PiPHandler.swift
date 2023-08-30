@@ -14,20 +14,16 @@ class PiPHandler: NSObject {
     var sampleBufferVideoCallView: SampleBufferVideoCallView?
     var pipController: AVPictureInPictureController?
     
-    var sourceView: VideoRenderer?
+    private var sourceView: VideoRenderer?
     
     private let pipRenderer = PiPRenderer()
     
-    init(sourceView: VideoRenderer?) {
-        super.init()
+    func setupPictureInPicture(with sourceView: VideoRenderer?) {
+        guard self.sourceView == nil else { return }
         self.sourceView = sourceView
         if #available(iOS 15.0, *) {
             setupPictureInPicture()
         }
-    }
-    
-    func test() {
-        print("====== test")
     }
     
     func startPiP() {
@@ -39,7 +35,6 @@ class PiPHandler: NSObject {
             if pipController?.isPictureInPicturePossible == true {
                 pipController?.startPictureInPicture()
             }
-            
         }
     }
     
@@ -60,8 +55,46 @@ class PiPHandler: NSObject {
         }
     }
     
+    func stopPiP() {
+        sourceView = nil
+        pictureInPictureActive = false
+        pipController?.stopPictureInPicture()
+    }
+    
+    func addObservers() {
+        // Observe when the system interrupts the capture session.
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleInterruptionStarted),
+            name: .AVCaptureSessionWasInterrupted,
+            object: nil
+        )
+
+    }
+    
+    @objc func handleInterruptionStarted(notification: Notification) {
+        guard let userInfo = notification.userInfo,
+              let reasonValue = userInfo[AVCaptureSessionInterruptionReasonKey] as? Int,
+              let reason = AVCaptureSession.InterruptionReason(rawValue: reasonValue) else {
+            log.error("Failed to parse the interruption reason.")
+            return
+        }
+
+
+        switch reason {
+        case .videoDeviceNotAvailableInBackground:
+            log.warning("Camera not available in background")
+        case .videoDeviceNotAvailableWithMultipleForegroundApps:
+            log.warning("Camera not available for multiple foreground apps")
+        case .videoDeviceNotAvailableDueToSystemPressure:
+            log.warning("Camera interrupted because of increasing system pressure")
+        default:
+            log.warning("Camera interrupted because of \(reason)")
+        }
+    }
+    
     @available(iOS 15.0, *)
-    func setupPictureInPicture() {
+    private func setupPictureInPicture() {
         guard let view = self.sourceView else { return }
         DispatchQueue.main.async {
             let sampleBufferVideoCallView = SampleBufferVideoCallView()
@@ -101,43 +134,6 @@ class PiPHandler: NSObject {
             self.pipController = pipController
                 
             self.addObservers()
-        }
-    }
-    
-    func stopPiP() {
-        pictureInPictureActive = false
-        pipController?.stopPictureInPicture()
-    }
-    
-    func addObservers() {
-        // Observe when the system interrupts the capture session.
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(handleInterruptionStarted),
-            name: .AVCaptureSessionWasInterrupted,
-            object: nil
-        )
-
-    }
-    
-    @objc func handleInterruptionStarted(notification: Notification) {
-        guard let userInfo = notification.userInfo,
-              let reasonValue = userInfo[AVCaptureSessionInterruptionReasonKey] as? Int,
-              let reason = AVCaptureSession.InterruptionReason(rawValue: reasonValue) else {
-            log.error("Failed to parse the interruption reason.")
-            return
-        }
-
-
-        switch reason {
-        case .videoDeviceNotAvailableInBackground:
-            log.warning("Camera not available in background")
-        case .videoDeviceNotAvailableWithMultipleForegroundApps:
-            log.warning("Camera not available for multiple foreground apps")
-        case .videoDeviceNotAvailableDueToSystemPressure:
-            log.warning("Camera interrupted because of increasing system pressure")
-        default:
-            log.warning("Camera interrupted because of \(reason)")
         }
     }
 }
