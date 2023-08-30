@@ -78,7 +78,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     }
 
     private func setUpPerformanceTracking() {
-        guard AppEnvironment.configuration.isDebug else { return }
+        guard AppEnvironment.performanceTrackerVisibility == .visible else { return }
         // PerformanceMonitor seems to have a bug where it cannot find the
         // hierarchy when trying to place its view.
         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

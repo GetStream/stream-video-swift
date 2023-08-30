@@ -124,7 +124,7 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    enum LoggedInView: CaseIterable, Hashable, Debuggable {
+    enum LoggedInView: Hashable, Debuggable {
         case simple, detailed
 
         var title: String {
@@ -144,6 +144,32 @@ extension AppEnvironment {
         return .detailed
 #else
         return .simple
+#endif
+    }()
+}
+
+extension AppEnvironment {
+
+    enum PerformanceTrackerVisibility: Hashable, Debuggable {
+        case visible, hidden
+
+        var title: String {
+            switch self {
+            case .visible:
+                return "Visible"
+            case .hidden:
+                return "Hidden"
+            }
+        }
+    }
+
+    static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
+#if STREAM_RELEASE
+        return .hidden
+#elseif STREAM_E2E_TESTS
+        return .hidden
+#else
+        return .hidden
 #endif
     }()
 }

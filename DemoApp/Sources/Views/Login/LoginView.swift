@@ -4,6 +4,7 @@
 
 import SwiftUI
 import StreamVideo
+import StreamVideoSwiftUI
 
 struct LoginView: View {
 
@@ -24,43 +25,41 @@ struct LoginView: View {
             List {
                 Section {
                     ForEach(appState.users) { user in
-                        Button {
-                            viewModel.login(user: user, completion: completion)
-                        } label: {
-                            Text(user.name)
-                                .accessibility(identifier: "userName")
-                        }
-                        .padding(8)
+                        BuiltInUserView(
+                            user: user,
+                            viewModel: viewModel,
+                            completion: completion
+                        )
                     }
 
-                    Button {
+                    LoginItemView {
                         addUserShown = true
-                    } label: {
-                        HStack {
-                            Image(systemName: "plus")
-                            Text("Add user")
-                        }
+                    } title: {
+                        Text("Add user")
+                    } icon: {
+                        Image(systemName: "plus")
                     }
-                    .padding(8)
+                } header: {
+                    Text("Built-In")
                 }
 
                 Section {
-                    Button {
+                    LoginItemView {
                         viewModel.login(user: .guest(UUID().uuidString), completion: completion)
-                    } label: {
+                    } title: {
                         Text("Guest User")
                             .accessibility(identifier: "Login as Guest")
+                    } icon: {
+                        Image(systemName: "person.crop.circle.badge.clock.fill")
                     }
-                    .padding(.all, 8)
 
-                    if AppEnvironment.configuration.isDebug {
-                        Button {
-                            showJoinCallPopup.toggle()
-                        } label: {
-                            Text("Anonymous User")
-                                .accessibility(identifier: "Login as Anonymous")
-                        }
-                        .padding(.all, 8)
+                    LoginItemView {
+                        showJoinCallPopup.toggle()
+                    } title: {
+                        Text("Join call")
+                            .accessibility(identifier: "Join call anonymously")
+                    } icon: {
+                        Image(systemName: "phone.arrow.right.fill")
                     }
                 } header: {
                     Text("Other")
@@ -79,75 +78,48 @@ struct LoginView: View {
         }
         .navigationTitle("Select a user")
         .toolbar {
-             ToolbarItem(placement: .navigationBarTrailing) {
-                 DebugMenu()
-              }
-          }
+            ToolbarItem(placement: .navigationBarTrailing) {
+                DebugMenu()
+            }
+        }
     }
 }
-struct DebugMenu: View {
 
-    @Injected(\.colors) var colors
+struct LoginItemView<Title: View, Icon: View>: View {
 
-    @State private var loggedInView: AppEnvironment.LoggedInView = AppEnvironment.loggedInView {
-        didSet { AppEnvironment.loggedInView = loggedInView }
-    }
-
-    @State private var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL {
-        didSet {
-            switch baseURL {
-            case .staging:
-                AppEnvironment.baseURL = .staging
-                AppEnvironment.apiKey = .staging
-            case .production:
-                AppEnvironment.baseURL = .production
-                AppEnvironment.apiKey = .production
-            }
-        }
-    }
+    var action: () -> ()
+    var title: () -> Title
+    var icon: () -> Icon
 
     var body: some View {
-        Menu {
-            makeMenu(
-                for: [.production, .staging],
-                currentValue: baseURL,
-                label: "Environment"
-            ) { self.baseURL = $0 }
-
-            makeMenu(
-                for: [.simple, .detailed],
-                currentValue: loggedInView,
-                label: "LoggedIn View"
-            ) { self.loggedInView = $0 }
+        Button {
+            action()
         } label: {
-            Image(systemName: "gearshape.fill")
-                .foregroundColor(colors.text)
-        }
-    }
-
-    @ViewBuilder
-    private func makeMenu<Item: Debuggable>(
-        for items: [Item],
-        currentValue: Item,
-        label: String,
-        updater: @escaping (Item) -> Void
-    ) -> some View {
-        Menu {
-            ForEach(items, id: \.self) { item in
-                Button {
-                    updater(item)
-                } label: {
-                    Label {
-                        Text(item.title)
-                    } icon: {
-                        currentValue == item
-                        ? AnyView(Image(systemName: "checkmark"))
-                        : AnyView(EmptyView())
-                    }
-                }
+            Label {
+                title()
+            } icon: {
+                icon()
             }
-        } label: {
-            Text(label)
+        }
+        .padding(8)
+    }
+}
+
+struct BuiltInUserView: View {
+
+    var user: User
+    var viewModel: LoginViewModel
+    var completion: (UserCredentials) -> Void
+
+    var body: some View {
+        LoginItemView {
+            viewModel.login(user: user, completion: completion)
+        } title: {
+            Text(user.name)
+                .accessibility(identifier: "userName")
+        } icon: {
+            UserAvatar(imageURL: user.imageURL, size: 32)
+                .accessibilityIdentifier("userAvatar")
         }
     }
 }

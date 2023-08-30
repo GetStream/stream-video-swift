@@ -88,14 +88,16 @@ struct DebugCallingView: View {
                 Spacer()
             }
             .padding(.top)
-            
-            Button {
-                resignFirstResponder()
-                viewModel.startCall(callType: .default, callId: UUID().uuidString, members: [])
-            } label: {
-                CallButtonView(title: "Start New Call", isDisabled: appState.loading)
+
+            if let currentUser = appState.currentUser, currentUser.type != .anonymous {
+                Button {
+                    resignFirstResponder()
+                    viewModel.startCall(callType: .default, callId: UUID().uuidString, members: [])
+                } label: {
+                    CallButtonView(title: "Start New Call", isDisabled: appState.loading)
+                }
+                .padding(.bottom)
             }
-            .padding(.bottom)
             
             Spacer()
         }
