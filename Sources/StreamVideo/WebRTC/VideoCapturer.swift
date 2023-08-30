@@ -25,6 +25,17 @@ class VideoCapturer: CameraVideoCapturing {
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
         videoCaptureHandler = handler
         videoCapturer = RTCCameraVideoCapturer(delegate: handler)
+        if #available(iOS 16, *) {
+            let captureSession = (videoCapturer as! RTCCameraVideoCapturer).captureSession
+            // Configure the capture session.
+            captureSession.beginConfiguration()
+
+            if captureSession.isMultitaskingCameraAccessSupported {
+                // Enable use of the camera in multitasking modes.
+                captureSession.isMultitaskingCameraAccessEnabled = true
+            }
+            captureSession.commitConfiguration()
+        }
         #endif
     }
     

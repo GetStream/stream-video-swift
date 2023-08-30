@@ -203,7 +203,8 @@ class WebRTCClient: NSObject {
             signalChannel = makeWebSocketClient(url: url, apiKey: .init(apiKey))
         }
         addOnParticipantsChangeHandler()
-        subscribeToAppLifecycleChanges()
+        //TODO: don't forget this!!
+//        subscribeToAppLifecycleChanges()
     }
     
     func connect(

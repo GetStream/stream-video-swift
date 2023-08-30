@@ -298,6 +298,8 @@
 		8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593D29BF214700134EA0 /* ViewExtensions.swift */; };
 		846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CD29E056C40084C264 /* StringExtensions.swift */; };
 		846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */; };
+		846BA2AB2A9F5BA5001AD0AF /* PiPRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846BA2AA2A9F5BA5001AD0AF /* PiPRenderer.swift */; };
+		846BA2AD2A9F602C001AD0AF /* SampleBufferVideoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */; };
 		846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16212A52B8D00036CE4C /* MicrophoneManager.swift */; };
 		846D16242A52C3D50036CE4C /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16232A52C3D50036CE4C /* CameraManager.swift */; };
 		846D16262A52CE8C0036CE4C /* SpeakerManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16252A52CE8C0036CE4C /* SpeakerManager.swift */; };
@@ -345,6 +347,8 @@
 		848C46A42A6ABF7E00E5AC09 /* ReplayKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 848C46A32A6ABF7E00E5AC09 /* ReplayKit.framework */; };
 		848C46A72A6ABF7E00E5AC09 /* SampleHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848C46A62A6ABF7E00E5AC09 /* SampleHandler.swift */; };
 		848C46AB2A6ABF7E00E5AC09 /* ScreenSharing.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = 848C46A22A6ABF7E00E5AC09 /* ScreenSharing.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		848FE1E72A9CBC1800B45AC2 /* PiPUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */; };
+		848FE1EF2A9DEAD700B45AC2 /* PiPHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848FE1ED2A9DEA2600B45AC2 /* PiPHandler.swift */; };
 		8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */; };
 		8490032129D308A000AD9BB4 /* RingSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031A29D308A000AD9BB4 /* RingSettingsRequest.swift */; };
 		8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031B29D308A000AD9BB4 /* AudioSettingsRequest.swift */; };
@@ -1002,6 +1006,8 @@
 		8469593D29BF214700134EA0 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		846A06CD29E056C40084C264 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions_Tests.swift; sourceTree = "<group>"; };
+		846BA2AA2A9F5BA5001AD0AF /* PiPRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPRenderer.swift; sourceTree = "<group>"; };
+		846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBufferVideoCallView.swift; sourceTree = "<group>"; };
 		846D16212A52B8D00036CE4C /* MicrophoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneManager.swift; sourceTree = "<group>"; };
 		846D16232A52C3D50036CE4C /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
 		846D16252A52CE8C0036CE4C /* SpeakerManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SpeakerManager.swift; sourceTree = "<group>"; };
@@ -1045,6 +1051,8 @@
 		848C46A62A6ABF7E00E5AC09 /* SampleHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleHandler.swift; sourceTree = "<group>"; };
 		848C46A82A6ABF7E00E5AC09 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		848C46AF2A6AC6F800E5AC09 /* ScreenSharing.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = ScreenSharing.entitlements; sourceTree = "<group>"; };
+		848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPUtils.swift; sourceTree = "<group>"; };
+		848FE1ED2A9DEA2600B45AC2 /* PiPHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPHandler.swift; sourceTree = "<group>"; };
 		8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sorting_Tests.swift; sourceTree = "<group>"; };
 		8490031A29D308A000AD9BB4 /* RingSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RingSettingsRequest.swift; sourceTree = "<group>"; };
 		8490031B29D308A000AD9BB4 /* AudioSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioSettingsRequest.swift; sourceTree = "<group>"; };
@@ -1790,6 +1798,8 @@
 				847D001F29C8AB1E00DD0A50 /* RecordingView.swift */,
 				84366E7B29C9FB6600287D14 /* VideoRendererFactory.swift */,
 				846E4AFC29D1DDE8003733AB /* LayoutMenuView.swift */,
+				846BA2AA2A9F5BA5001AD0AF /* PiPRenderer.swift */,
+				846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -2385,6 +2395,8 @@
 				827D893D2A16369300838B1A /* LazyImageExtensions.swift */,
 				4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */,
 				8457BF7B2A5BF9E0000AE567 /* ToastView.swift */,
+				848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */,
+				848FE1ED2A9DEA2600B45AC2 /* PiPHandler.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2875,7 +2887,7 @@
 					};
 					84F737EC287C13AC00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
-						LastSwiftMigration = 1420;
+						LastSwiftMigration = 1430;
 					};
 					84F737F3287C13AD00A363F4 = {
 						CreatedOnToolsVersion = 13.3.1;
@@ -3563,11 +3575,13 @@
 				8434C542289BC0B00001490A /* L10n.swift in Sources */,
 				846FBE8628AA696900147F6E /* ColorExtensions.swift in Sources */,
 				84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */,
+				846BA2AD2A9F602C001AD0AF /* SampleBufferVideoCallView.swift in Sources */,
 				842C7EAE28A2773700C2AB7F /* IncomingCallView.swift in Sources */,
 				84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
 				84366E7C29C9FB6600287D14 /* VideoRendererFactory.swift in Sources */,
+				848FE1EF2A9DEAD700B45AC2 /* PiPHandler.swift in Sources */,
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
@@ -3587,6 +3601,7 @@
 				84DCA2092A382B16000C3411 /* CallModels.swift in Sources */,
 				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
+				846BA2AB2A9F5BA5001AD0AF /* PiPRenderer.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
@@ -3595,6 +3610,7 @@
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
+				848FE1E72A9CBC1800B45AC2 /* PiPUtils.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				846E4AFD29D1DDE8003733AB /* LayoutMenuView.swift in Sources */,
 				846E4AFB29CDF87C003733AB /* ParticipantsSpotlightLayout.swift in Sources */,
@@ -3925,6 +3941,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
@@ -4093,7 +4110,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4493,7 +4510,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4541,7 +4558,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4753,6 +4770,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
@@ -4790,6 +4808,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME:c99extidentifier)";
 				SKIP_INSTALL = YES;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
