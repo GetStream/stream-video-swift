@@ -40,6 +40,11 @@ struct ChatVideoViewModel: EnvironmentKey {
 extension EnvironmentValues {
     var chatVideoViewModel: StreamChatVideoViewModel? {
         get { self[ChatVideoViewModel.self] }
-        set { self[ChatVideoViewModel.self] = newValue }
+        set {
+            if newValue == nil {
+                print()
+            }
+            self[ChatVideoViewModel.self] = newValue
+        }
     }
 }

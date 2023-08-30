@@ -91,7 +91,7 @@ struct AppControlsWithChat: View {
             }
             .offset(y: -15)
         )
-        .onReceive(chatViewModel!.$isChatVisible) { isChatVisible = canOpenChat && $0 }
+        .onReceive(chatViewModel?.$isChatVisible) { isChatVisible = canOpenChat && $0 }
         .onReceive(viewModel.$call, perform: { call in
             reactionsHelper.call = call
         })
@@ -134,6 +134,7 @@ struct ChatControlsHeader: View {
 struct ChatIconView: View {
 
     @Injected(\.images) var images
+    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: StreamChatVideoViewModel
     let size: CGFloat
@@ -160,7 +161,7 @@ struct ChatIconView: View {
                             if viewModel.unreadCount > 0 {
                                 Text("\(viewModel.unreadCount)")
                                     .font(.caption.monospacedDigit())
-                                    .foregroundColor(.primary)
+                                    .foregroundColor(colors.text)
                                     .padding([.leading, .trailing], 4)
                                     .padding([.top, .bottom], 2)
                                     .background(Color.red)
@@ -335,7 +336,6 @@ struct ChatView: View {
                 viewFactory: StreamChatViewFactory.shared,
                 channelController: channelController
             )
-            .preferredColorScheme(.dark)
             .onAppear { chatViewModel.markAsRead() }
             .onDisappear { chatViewModel.channelDisappeared() }
             .navigationBarHidden(true)

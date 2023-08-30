@@ -30,7 +30,7 @@ struct LinkInfoView: View {
                 .font(.headline)
                 .fixedSize(horizontal: false, vertical: true)
                 .lineLimit(3)
-                .foregroundColor(.white)
+                .foregroundColor(appearance.colors.text)
 
             Spacer()
         }

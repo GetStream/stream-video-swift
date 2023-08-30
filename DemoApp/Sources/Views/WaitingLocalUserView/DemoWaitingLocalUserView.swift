@@ -1,8 +1,5 @@
 //
-//  AppWaitingLocalUserView.swift
-//  DemoApp
-//
-//  Created by Martin Mitrevski on 28.5.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import SwiftUI
@@ -45,16 +42,14 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                                 Text(callLink)
                                     .font(.subheadline)
                                     .fontWeight(.bold)
+                                    .foregroundColor(appearance.colors.text)
                                 Spacer()
                                 Image(systemName: "doc.on.doc")
                             }
-                            .foregroundColor(Color(appearance.colors.textLowEmphasis))
                             .padding(.all, 12)
-                            .background(Color("textFieldBackground"))
-                            .overlay(
-                                RoundedRectangle(cornerRadius: 8)
-                                    .stroke(Color("textFieldBorder"), lineWidth: 1)
-                            )
+                            .background(appearance.colors.background)
+                            .clipShape(RoundedRectangle(cornerRadius: 8))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis.cgColor), lineWidth: 1))
                             .padding(.vertical)
                         }
 

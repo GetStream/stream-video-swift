@@ -14,11 +14,11 @@ struct DemoCallContentView: View {
     var body: some View {
         switch (AppEnvironment.configuration.isRelease, AppEnvironment.loggedInView) {
         case (true, _):
-            ReleaseCallingView(viewModel: viewModel, callId: callId)
+            SimpleCallingView(viewModel: viewModel, callId: callId)
         case (false, .simple):
-            DebugCallingView(viewModel: viewModel)
+            SimpleCallingView(viewModel: viewModel, callId: callId)
         case (false, .detailed):
-            TestCallingView(viewModel: viewModel)
+            DetailedCallingView(viewModel: viewModel)
         }
     }
 
