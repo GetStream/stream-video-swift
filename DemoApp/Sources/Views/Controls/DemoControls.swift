@@ -31,10 +31,12 @@ struct AppControlsWithChat: View {
     var body: some View {
         VStack {
             HStack(alignment: .top) {
-                Group {
-                    Spacer()
+                if chatViewModel?.isChatEnabled == true {
+                    Group {
+                        Spacer()
 
-                    ChatIconView(viewModel: chatViewModel!)
+                        ChatIconView(viewModel: chatViewModel!)
+                    }
                 }
 
                 Group {
@@ -201,6 +203,7 @@ struct VideoIconView: View {
             }
         )
         .accessibility(identifier: "cameraToggle")
+        .streamAccessibility(value: viewModel.callSettings.videoOn ? "1" : "0")
     }
 }
 
@@ -230,6 +233,7 @@ struct MicrophoneIconView: View {
             }
         )
         .accessibility(identifier: "microphoneToggle")
+        .streamAccessibility(value: viewModel.callSettings.audioOn ? "1" : "0")
     }
 }
 
@@ -259,6 +263,7 @@ struct ToggleCameraIconView: View {
             }
         )
         .accessibility(identifier: "cameraPositionToggle")
+        .streamAccessibility(value: viewModel.callSettings.cameraPosition == .front ? "1" : "0")
     }
 }
 

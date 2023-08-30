@@ -43,12 +43,9 @@ struct StreamChatProviderKey: StreamChatSwiftUI.InjectionKey {
 
 extension StreamChatSwiftUI.InjectedValues {
     /// Provides access to the `StreamVideo` instance in the views and view models.
-    var streamChatWrapper: StreamChatWrapper {
+    var streamChatWrapper: StreamChatWrapper? {
         get {
-            guard let injected = Self[StreamChatProviderKey.self] else {
-                fatalError("Chat client was not setup")
-            }
-            return injected
+            Self[StreamChatProviderKey.self]
         }
         set {
             Self[StreamChatProviderKey.self] = newValue
@@ -70,6 +67,7 @@ final class StreamChatVideoViewModel: ObservableObject, ChatChannelControllerDel
     @Published var unreadCount = 0
 
     private var channelId: ChannelId?
+    var isChatEnabled: Bool { chatWrapper != nil }
 
     init(_ callViewModel: CallViewModel) {
         self.callUpdateCancellable = callViewModel.$call.sink { [weak self] newCall in
@@ -80,7 +78,7 @@ final class StreamChatVideoViewModel: ObservableObject, ChatChannelControllerDel
 
             let channelId = ChannelId(type: .custom("videocall"), id: newCall.callId)
             self.channelId = channelId
-            self.channelController = self.chatWrapper
+            self.channelController = self.chatWrapper?
                 .chatClient
                 .channelController(for: channelId)
         }
@@ -114,7 +112,7 @@ final class StreamChatVideoViewModel: ObservableObject, ChatChannelControllerDel
 
     func channelDisappeared() {
         guard let channelId = channelId else { return }
-        self.channelController = self.chatWrapper
+        self.channelController = self.chatWrapper?
             .chatClient
             .channelController(for: channelId)
     }
