@@ -1,8 +1,5 @@
 //
-//  ReactionsHelper.swift
-//  VideoDogfooding
-//
-//  Created by Martin Mitrevski on 28.2.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -17,7 +14,7 @@ final class ReactionsHelper: ObservableObject {
 
     var player: AVAudioPlayer?
 
-    private var reactionsTask: Task<Any, Error>?
+    private var reactionsTask: Task<Void, Error>?
 
     @Published var reactionsShown = false
     @Published var showFireworks = false
