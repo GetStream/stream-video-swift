@@ -1,8 +1,5 @@
 //
-//  DemoCallContentView.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 29/8/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -15,13 +12,13 @@ struct DemoCallContentView: View {
     var callId: String
 
     var body: some View {
-        switch AppEnvironment.configuration {
-        case .test:
-            TestCallingView(viewModel: viewModel)
-        case .debug:
-            DebugCallingView(viewModel: viewModel)
-        case .release:
+        switch (AppEnvironment.configuration.isRelease, AppEnvironment.loggedInView) {
+        case (true, _):
             ReleaseCallingView(viewModel: viewModel, callId: callId)
+        case (false, .simple):
+            DebugCallingView(viewModel: viewModel)
+        case (false, .detailed):
+            TestCallingView(viewModel: viewModel)
         }
     }
 

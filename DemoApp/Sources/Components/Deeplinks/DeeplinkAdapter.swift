@@ -1,8 +1,5 @@
 //
-//  DeeplinkAdapter.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 29/5/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation

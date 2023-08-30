@@ -26,6 +26,8 @@
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
 		4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */; };
+		4046DEEE2A9F404300CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */; };
+		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
@@ -1389,6 +1391,7 @@
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
+				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
 				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
 				401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */,
@@ -1422,6 +1425,7 @@
 			files = (
 				84AF64BC287C34320012A503 /* WebRTC in Frameworks */,
 				84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */,
+				4046DEEE2A9F404300CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1548,13 +1552,13 @@
 		4030E5942A9DF45C003E8CBA /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				401A64AF2A9DF82C00534ED1 /* Models */,
+				842D3B5B29F6A4A10051698A /* AppDelegate.swift */,
+				842D8BD52865B37800801910 /* DemoApp.swift */,
+				4030E5962A9DF48C003E8CBA /* Components */,
 				4030E59E2A9DF4E1003E8CBA /* Examples */,
 				4030E5972A9DF490003E8CBA /* Extensions */,
-				4030E5962A9DF48C003E8CBA /* Components */,
+				401A64AF2A9DF82C00534ED1 /* Models */,
 				4030E5952A9DF488003E8CBA /* Views */,
-				842D8BD52865B37800801910 /* DemoApp.swift */,
-				842D3B5B29F6A4A10051698A /* AppDelegate.swift */,
 			);
 			path = Sources;
 			sourceTree = "<group>";
@@ -3018,6 +3022,7 @@
 				8423B7552950BB0B00012F8D /* Sentry */,
 				401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */,
 				401A64A72A9DF7B400534ED1 /* EffectsLibrary */,
+				4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* DemoApp.app */;
@@ -3083,6 +3088,7 @@
 			packageProductDependencies = (
 				84AF64BB287C34320012A503 /* WebRTC */,
 				84BE8A5528BE314000B34D2F /* SwiftProtobuf */,
+				4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */,
 			);
 			productName = StreamVideo;
 			productReference = 84F737ED287C13AC00A363F4 /* StreamVideo.framework */;
@@ -3269,6 +3275,7 @@
 				401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
 				401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */,
 				40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */,
+				4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -5587,6 +5594,14 @@
 				minimumVersion = 1.0.0;
 			};
 		};
+		4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/dani-gavrilov/GDPerformanceView-Swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swift-test-helpers";
@@ -5647,6 +5662,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */;
 			productName = EffectsLibrary;
+		};
+		4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */;
+			productName = "GDPerformanceView-Swift";
+		};
+		4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */;
+			productName = "GDPerformanceView-Swift";
 		};
 		40F445C42A9E1D91004BE3DA /* MockServer */ = {
 			isa = XCSwiftPackageProductDependency;

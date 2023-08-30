@@ -1,8 +1,5 @@
 //
-//  Router.swift
-//  StreamVideoCallApp
-//
-//  Created by Ilias Pavlidakis on 22/8/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -128,7 +125,7 @@ final class Router: ObservableObject {
         )
 
         let streamVideo = StreamVideo(
-            apiKey: AppEnvironment.apiKey,
+            apiKey: AppEnvironment.apiKey.rawValue,
             user: user,
             token: .init(stringLiteral: token),
             videoConfig: VideoConfig(audioProcessingModule: audioProcessingModule),

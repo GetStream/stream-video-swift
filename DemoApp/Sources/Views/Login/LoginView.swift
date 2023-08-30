@@ -6,7 +6,7 @@ import SwiftUI
 import StreamVideo
 
 struct LoginView: View {
-    
+
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> ()
     
@@ -21,10 +21,6 @@ struct LoginView: View {
     
     var body: some View {
         VStack {
-            Text("Select a user")
-                .font(.title)
-                .bold()
-
             List {
                 Section {
                     ForEach(appState.users) { user in
@@ -80,6 +76,78 @@ struct LoginView: View {
         }
         .sheet(isPresented: $showJoinCallPopup) {
             JoinCallView(viewModel: viewModel, completion: completion)
+        }
+        .navigationTitle("Select a user")
+        .toolbar {
+             ToolbarItem(placement: .navigationBarTrailing) {
+                 DebugMenu()
+              }
+          }
+    }
+}
+struct DebugMenu: View {
+
+    @Injected(\.colors) var colors
+
+    @State private var loggedInView: AppEnvironment.LoggedInView = AppEnvironment.loggedInView {
+        didSet { AppEnvironment.loggedInView = loggedInView }
+    }
+
+    @State private var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL {
+        didSet {
+            switch baseURL {
+            case .staging:
+                AppEnvironment.baseURL = .staging
+                AppEnvironment.apiKey = .staging
+            case .production:
+                AppEnvironment.baseURL = .production
+                AppEnvironment.apiKey = .production
+            }
+        }
+    }
+
+    var body: some View {
+        Menu {
+            makeMenu(
+                for: [.production, .staging],
+                currentValue: baseURL,
+                label: "Environment"
+            ) { self.baseURL = $0 }
+
+            makeMenu(
+                for: [.simple, .detailed],
+                currentValue: loggedInView,
+                label: "LoggedIn View"
+            ) { self.loggedInView = $0 }
+        } label: {
+            Image(systemName: "gearshape.fill")
+                .foregroundColor(colors.text)
+        }
+    }
+
+    @ViewBuilder
+    private func makeMenu<Item: Debuggable>(
+        for items: [Item],
+        currentValue: Item,
+        label: String,
+        updater: @escaping (Item) -> Void
+    ) -> some View {
+        Menu {
+            ForEach(items, id: \.self) { item in
+                Button {
+                    updater(item)
+                } label: {
+                    Label {
+                        Text(item.title)
+                    } icon: {
+                        currentValue == item
+                        ? AnyView(Image(systemName: "checkmark"))
+                        : AnyView(EmptyView())
+                    }
+                }
+            }
+        } label: {
+            Text(label)
         }
     }
 }

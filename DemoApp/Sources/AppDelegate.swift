@@ -5,6 +5,7 @@
 import StreamVideo
 import SwiftUI
 import UIKit
+import GDPerformanceView_Swift
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
     
@@ -15,7 +16,8 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
         UNUserNotificationCenter.current().delegate = self
-        setupRemoteNotifications()
+        setUpRemoteNotifications()
+        setUpPerformanceTracking()
         return true
     }
 
@@ -44,7 +46,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let userInfo = response.notification.request.content.userInfo
         log.debug("push notification received \(userInfo)")
         guard let stream = userInfo["stream"] as? [String: Any],
-                let callCid = stream["call_cid"] as? String else {
+              let callCid = stream["call_cid"] as? String else {
             return
         }
         let components = callCid.components(separatedBy: ":")
@@ -61,7 +63,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         }
     }
 
-    func setupRemoteNotifications() {
+    // MARK: - Private Helpers
+
+    private func setUpRemoteNotifications() {
         UNUserNotificationCenter
             .current()
             .requestAuthorization(options: [.alert, .sound, .badge]) { granted, _ in
@@ -71,5 +75,17 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
                     }
                 }
             }
+    }
+
+    private func setUpPerformanceTracking() {
+        guard AppEnvironment.configuration.isDebug else { return }
+        // PerformanceMonitor seems to have a bug where it cannot find the
+        // hierarchy when trying to place its view.
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+            PerformanceMonitor.shared().performanceViewConfigurator.options = [
+                .performance
+            ]
+            PerformanceMonitor.shared().start()
+        }
     }
 }

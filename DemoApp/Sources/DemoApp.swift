@@ -37,7 +37,9 @@ struct DemoApp: App {
                     if AppEnvironment.configuration.isRelease {
                         LoadingView()
                     } else {
-                        LoginView() { router.handleLoggedInUserCredentials($0, deeplinkInfo: .empty) }
+                        NavigationView {
+                            LoginView() { router.handleLoggedInUserCredentials($0, deeplinkInfo: .empty) }
+                        }
                     }
                 }
             }

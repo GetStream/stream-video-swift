@@ -1,8 +1,5 @@
 //
-//  TokenProvider.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 29/8/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -24,7 +21,7 @@ enum TokenProvider {
                 .appendingPathComponent("api")
                 .appendingPathComponent("auth")
                 .appendingPathComponent("create-token")
-                .appending(URLQueryItem(name: "api_key", value: AppEnvironment.apiKey))
+                .appending(URLQueryItem(name: "api_key", value: AppEnvironment.apiKey.rawValue))
                 .appending(URLQueryItem(name: "user_id", value: userId))
 
             if !callIds.isEmpty {

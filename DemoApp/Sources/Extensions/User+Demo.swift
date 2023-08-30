@@ -1,8 +1,5 @@
 //
-//  User+Demo.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 29/8/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -45,7 +42,7 @@ extension User {
             (
                 "ilias",
                 "Ilias",
-                "https://ca.slack-edge.com/T02RM6X6B-U04LTJUTXFW-bc6e23c4e7ee-48"
+                "https://getstream.io/static/62cdddcc7759dc8c3ba5b1f67153658c/802d2/ilias-pavlidakis.webp"
             )
         ].map {
             User(id: $0.0, name: $0.1, imageURL: URL(string: $0.2))

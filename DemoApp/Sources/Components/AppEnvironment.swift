@@ -1,11 +1,12 @@
 //
-//  Environment.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 29/8/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
+
+protocol Debuggable: Hashable {
+    var title: String { get }
+}
 
 enum AppEnvironment {}
 
@@ -19,7 +20,7 @@ extension AppEnvironment {
         var isTest: Bool { self == .test }
     }
 
-    static var configuration: Configuration {
+    static var configuration: Configuration = {
 #if STREAM_RELEASE
         return .release
 #elseif STREAM_E2E_TESTS
@@ -27,19 +28,27 @@ extension AppEnvironment {
 #else
         return .debug
 #endif
-    }
+    }()
 }
 
 extension AppEnvironment {
 
-    enum BaseURL: String {
+    enum BaseURL: String, Debuggable {
         case staging = "https://staging.getstream.io"
         case production = "https://getstream.io"
 
         var url: URL { URL(string: rawValue)! }
+        var title: String {
+            switch self {
+            case .staging:
+                return "Staging"
+            case .production:
+                return "Production"
+            }
+        }
     }
 
-    static var baseURL: BaseURL {
+    static var baseURL: BaseURL = {
 #if STREAM_RELEASE
         return .production
 #elseif STREAM_E2E_TESTS
@@ -47,7 +56,7 @@ extension AppEnvironment {
 #else
         return .staging
 #endif
-    }
+    }()
 }
 
 extension AppEnvironment {
@@ -57,15 +66,15 @@ extension AppEnvironment {
         case production = "mmhfdzb5evj2"
     }
 
-    static var apiKey: String {
+    static var apiKey: APIKey = {
 #if STREAM_RELEASE
-        return APIKey.production.rawValue
+        return APIKey.production
 #elseif STREAM_E2E_TESTS
-        return APIKey.staging.rawValue
+        return APIKey.staging
 #else
-        return APIKey.staging.rawValue
+        return APIKey.staging
 #endif
-    }
+    }()
 }
 
 extension AppEnvironment {
@@ -74,7 +83,7 @@ extension AppEnvironment {
         case universal = "streamvideo"
     }
 
-    static var appURLScheme: String { AppURLScheme.universal.rawValue }
+    static var appURLScheme: String = { AppURLScheme.universal.rawValue }()
 }
 
 
@@ -86,7 +95,7 @@ extension AppEnvironment {
         var url: URL { URL(string: rawValue)! }
     }
 
-    static var authBaseURL: URL { AuthBaseURL.universal.url }
+    static var authBaseURL: URL = { AuthBaseURL.universal.url }()
 }
 
 extension AppEnvironment {
@@ -111,4 +120,30 @@ extension AppEnvironment {
             .processInfo
             .environment[variable.rawValue]
     }
+}
+
+extension AppEnvironment {
+
+    enum LoggedInView: CaseIterable, Hashable, Debuggable {
+        case simple, detailed
+
+        var title: String {
+            switch self {
+            case .simple:
+                return "Simple"
+            case .detailed:
+                return "Detailed"
+            }
+        }
+    }
+
+    static var loggedInView: LoggedInView = {
+#if STREAM_RELEASE
+        return .simple
+#elseif STREAM_E2E_TESTS
+        return .detailed
+#else
+        return .simple
+#endif
+    }()
 }

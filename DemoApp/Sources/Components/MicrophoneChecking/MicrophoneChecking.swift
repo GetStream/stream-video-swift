@@ -1,8 +1,5 @@
 //
-//  MicrophoneChecking.swift
-//  StreamVideoCallCore
-//
-//  Created by Ilias Pavlidakis on 2/6/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation

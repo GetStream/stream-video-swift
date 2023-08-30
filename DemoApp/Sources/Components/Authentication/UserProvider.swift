@@ -1,8 +1,5 @@
 //
-//  UserProvider.swift
-//  StreamVideoCallCore
-//
-//  Created by Ilias Pavlidakis on 2/6/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -23,7 +20,7 @@ enum UserProvider {
             .appendingPathComponent("auth")
             .appendingPathComponent("create-token")
             .appending(URLQueryItem(name: "user_id", value: userId))
-            .appending(URLQueryItem(name: "api_key", value: AppEnvironment.apiKey))
+            .appending(URLQueryItem(name: "api_key", value: AppEnvironment.apiKey.rawValue))
 
         let (data, _) = try await URLSession.shared.data(from: url)
         let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
