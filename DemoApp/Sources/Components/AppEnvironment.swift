@@ -49,13 +49,14 @@ extension AppEnvironment {
     }
 
     static var baseURL: BaseURL = {
-#if STREAM_RELEASE
-        return .production
-#elseif STREAM_E2E_TESTS
-        return .staging
-#else
-        return .staging
-#endif
+        switch configuration {
+        case .test:
+            return .staging
+        case .debug:
+            return .staging
+        case .release:
+            return .production
+        }
     }()
 }
 
@@ -67,13 +68,14 @@ extension AppEnvironment {
     }
 
     static var apiKey: APIKey = {
-#if STREAM_RELEASE
-        return APIKey.production
-#elseif STREAM_E2E_TESTS
-        return APIKey.staging
-#else
-        return APIKey.staging
-#endif
+        switch configuration {
+        case .test:
+            return APIKey.staging
+        case .debug:
+            return APIKey.staging
+        case .release:
+            return APIKey.production
+        }
     }()
 }
 
@@ -138,13 +140,14 @@ extension AppEnvironment {
     }
 
     static var loggedInView: LoggedInView = {
-#if STREAM_RELEASE
-        return .simple
-#elseif STREAM_E2E_TESTS
-        return .detailed
-#else
-        return .simple
-#endif
+        switch configuration {
+        case .test:
+            return .detailed
+        case .debug:
+            return .simple
+        case .release:
+            return .simple
+        }
     }()
 }
 
@@ -164,12 +167,6 @@ extension AppEnvironment {
     }
 
     static var performanceTrackerVisibility: PerformanceTrackerVisibility = {
-#if STREAM_RELEASE
-        return .hidden
-#elseif STREAM_E2E_TESTS
-        return .hidden
-#else
-        return .hidden
-#endif
+        .hidden
     }()
 }
