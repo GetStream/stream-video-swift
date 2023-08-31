@@ -40,6 +40,7 @@ struct DemoApp: App {
                         NavigationView {
                             LoginView() { router.handleLoggedInUserCredentials($0, deeplinkInfo: .empty) }
                         }
+                        .navigationViewStyle(StackNavigationViewStyle())
                     }
                 }
             }

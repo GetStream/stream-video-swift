@@ -131,7 +131,7 @@ struct CircledTitleView: View {
             Text(title)
                 .foregroundColor(.white)
                 .font(fonts.title)
-                .minimumScaleFactor(0.5)
+                .minimumScaleFactor(0.4)
                 .padding()
         }
         .frame(maxWidth: size, maxHeight: size)

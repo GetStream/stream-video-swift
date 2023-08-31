@@ -89,6 +89,7 @@ struct SimpleCallingView: View {
             Spacer()
         }
         .padding()
+        .alignedToReadableContentGuide()
         .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         .onChange(of: appState.deeplinkInfo) { deeplinkInfo in
             self.text = deeplinkInfo.callId

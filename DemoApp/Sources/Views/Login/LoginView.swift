@@ -66,6 +66,7 @@ struct LoginView: View {
                 }
             }
         }
+        .alignedToReadableContentGuide()
         .foregroundColor(.primary)
         .overlay(
             appState.loading ? ProgressView() : nil
