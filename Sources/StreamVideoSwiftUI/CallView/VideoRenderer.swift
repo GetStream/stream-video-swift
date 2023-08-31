@@ -97,6 +97,14 @@ public class VideoRenderer: RTCMTLVideoView {
     
     weak var track: RTCVideoTrack?
     
+    var feedFrames: ((CMSampleBuffer) -> ())?
+    
+    private var skip = true
+    
+    var trackId: String? {
+        self.track?.trackId
+    }
+    
     public func add(track: RTCVideoTrack) {
         queue.sync {
             if track.trackId == self.track?.trackId && track.readyState == .live {
@@ -109,6 +117,39 @@ public class VideoRenderer: RTCMTLVideoView {
             log.debug("Adding track to the view")
             self.track = track
             track.add(self)
+        }
+    }
+    
+    public override func renderFrame(_ frame: RTCVideoFrame?) {
+        super.renderFrame(frame)
+        
+        guard let feedFrames else { return }
+        
+        skip.toggle()
+        if skip {
+           return
+        }
+        
+        DispatchQueue.global(qos: .userInitiated).async {
+            guard let frame = frame else {
+                return
+            }
+
+            if let pixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                guard let sampleBuffer = CMSampleBuffer.from(pixelBuffer.pixelBuffer) else {
+                    log.warning("Failed to convert CVPixelBuffer to CMSampleBuffer")
+                    return
+                }
+
+                feedFrames(sampleBuffer)
+            } else if let i420buffer = frame.buffer as? RTCI420Buffer {
+                guard let buffer = convertI420BufferToPixelBuffer(i420buffer),
+                        let sampleBuffer = CMSampleBuffer.from(buffer) else {
+                    return
+                }
+                
+                feedFrames(sampleBuffer)
+            }
         }
     }
     

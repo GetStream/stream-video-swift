@@ -47,6 +47,14 @@ class VideoRendererFactory {
         return view
     }
     
+    func view(for id: String, isScreensharing: Bool) -> VideoRenderer? {
+        var viewId = id
+        if isScreensharing {
+            viewId = "\(id)-screenshare"
+        }
+        return views[viewId]
+    }
+    
     @objc func handleParticipantLeft(_ notification: Notification) {
         guard let participantId = notification.userInfo?["id"] as? String else {
             return
@@ -58,6 +66,6 @@ class VideoRendererFactory {
     }
     
     @objc func clearViews() {
-        views = [String: VideoRenderer]()
+//        views = [String: VideoRenderer]()
     }
 }

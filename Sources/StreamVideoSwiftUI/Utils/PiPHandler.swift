@@ -9,17 +9,21 @@ import MetalKit
 import StreamVideo
 
 class PiPHandler: NSObject {
-        
+            
     private(set) var pictureInPictureActive = false
     var sampleBufferVideoCallView: SampleBufferVideoCallView?
     var pipController: AVPictureInPictureController?
     
     private var sourceView: VideoRenderer?
-    
-    private let pipRenderer = PiPRenderer()
-    
+        
     func setupPictureInPicture(with sourceView: VideoRenderer?) {
-        guard self.sourceView == nil else { return }
+        guard (self.sourceView == nil
+               || sourceView?.trackId != self.sourceView?.trackId) else {
+            return
+        }
+        if self.sourceView != nil {
+            cleanUp()
+        }
         self.sourceView = sourceView
         if #available(iOS 15.0, *) {
             setupPictureInPicture()
@@ -56,9 +60,7 @@ class PiPHandler: NSObject {
     }
     
     func stopPiP() {
-        sourceView = nil
-        pictureInPictureActive = false
-        pipController?.stopPictureInPicture()
+        cleanUp()
     }
     
     func addObservers() {
@@ -102,6 +104,7 @@ class PiPHandler: NSObject {
             sampleBufferVideoCallView.sampleBufferDisplayLayer.videoGravity = .resizeAspect
 
             let pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
+            //TODO: don't hardcode content size.
             pipVideoCallViewController.preferredContentSize = CGSize(width: 1280, height: 720)
             pipVideoCallViewController.view.addSubview(sampleBufferVideoCallView)
             
@@ -117,11 +120,10 @@ class PiPHandler: NSObject {
             sampleBufferVideoCallView.bounds = pipVideoCallViewController.view.frame
             self.sampleBufferVideoCallView = sampleBufferVideoCallView
             
-            self.pipRenderer.feedFrames = { buffer in
+            view.feedFrames = { buffer in
                 self.feedBuffer(buffer)
             }
-            view.track?.add(self.pipRenderer)
-            
+                    
             let pipContentSource = AVPictureInPictureController.ContentSource(
                 activeVideoCallSourceView: view,
                 contentViewController: pipVideoCallViewController
@@ -135,6 +137,20 @@ class PiPHandler: NSObject {
                 
             self.addObservers()
         }
+    }
+    
+    private func cleanUp() {
+        sourceView?.feedFrames = nil
+        sourceView = nil
+        sampleBufferVideoCallView?.sampleBufferDisplayLayer.flushAndRemoveImage()
+        sampleBufferVideoCallView?.removeFromSuperview()
+        sampleBufferVideoCallView = nil
+        pictureInPictureActive = false
+        pipController?.stopPictureInPicture()
+        if #available(iOS 15.0, *) {
+            pipController?.contentSource = nil
+        }
+        pipController = nil
     }
 }
 

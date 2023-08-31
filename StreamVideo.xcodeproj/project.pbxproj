@@ -256,6 +256,7 @@
 		843DAB9A29E695CF00E0EB63 /* CreateGuestRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */; };
 		843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */; };
 		843DAB9E29E757B600E0EB63 /* CallsController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9D29E757B500E0EB63 /* CallsController.swift */; };
+		843FF37E2AA08C0400753E80 /* PiPTrackSelectionUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843FF37D2AA08C0400753E80 /* PiPTrackSelectionUtils.swift */; };
 		8440861E2901A1700027849C /* SfuMiddleware.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8440861D2901A16F0027849C /* SfuMiddleware.swift */; };
 		84429933293FA48B0037232A /* ScreenSharingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429931293FA4850037232A /* ScreenSharingView.swift */; };
 		844299362940A17F0037232A /* ZoomableScrollView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299342940A16F0037232A /* ZoomableScrollView.swift */; };
@@ -298,7 +299,6 @@
 		8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8469593D29BF214700134EA0 /* ViewExtensions.swift */; };
 		846A06CE29E056C40084C264 /* StringExtensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CD29E056C40084C264 /* StringExtensions.swift */; };
 		846A06D029E0591D0084C264 /* StringExtensions_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */; };
-		846BA2AB2A9F5BA5001AD0AF /* PiPRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846BA2AA2A9F5BA5001AD0AF /* PiPRenderer.swift */; };
 		846BA2AD2A9F602C001AD0AF /* SampleBufferVideoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */; };
 		846D16222A52B8D00036CE4C /* MicrophoneManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16212A52B8D00036CE4C /* MicrophoneManager.swift */; };
 		846D16242A52C3D50036CE4C /* CameraManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D16232A52C3D50036CE4C /* CameraManager.swift */; };
@@ -964,6 +964,7 @@
 		843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateGuestRequest.swift; sourceTree = "<group>"; };
 		843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo_Tests.swift; sourceTree = "<group>"; };
 		843DAB9D29E757B500E0EB63 /* CallsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsController.swift; sourceTree = "<group>"; };
+		843FF37D2AA08C0400753E80 /* PiPTrackSelectionUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPTrackSelectionUtils.swift; sourceTree = "<group>"; };
 		8440861D2901A16F0027849C /* SfuMiddleware.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SfuMiddleware.swift; sourceTree = "<group>"; };
 		84429931293FA4850037232A /* ScreenSharingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingView.swift; sourceTree = "<group>"; };
 		844299342940A16F0037232A /* ZoomableScrollView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ZoomableScrollView.swift; sourceTree = "<group>"; };
@@ -1006,7 +1007,6 @@
 		8469593D29BF214700134EA0 /* ViewExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewExtensions.swift; sourceTree = "<group>"; };
 		846A06CD29E056C40084C264 /* StringExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions.swift; sourceTree = "<group>"; };
 		846A06CF29E0591D0084C264 /* StringExtensions_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StringExtensions_Tests.swift; sourceTree = "<group>"; };
-		846BA2AA2A9F5BA5001AD0AF /* PiPRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPRenderer.swift; sourceTree = "<group>"; };
 		846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SampleBufferVideoCallView.swift; sourceTree = "<group>"; };
 		846D16212A52B8D00036CE4C /* MicrophoneManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneManager.swift; sourceTree = "<group>"; };
 		846D16232A52C3D50036CE4C /* CameraManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CameraManager.swift; sourceTree = "<group>"; };
@@ -1798,7 +1798,6 @@
 				847D001F29C8AB1E00DD0A50 /* RecordingView.swift */,
 				84366E7B29C9FB6600287D14 /* VideoRendererFactory.swift */,
 				846E4AFC29D1DDE8003733AB /* LayoutMenuView.swift */,
-				846BA2AA2A9F5BA5001AD0AF /* PiPRenderer.swift */,
 				846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */,
 			);
 			path = CallView;
@@ -2397,6 +2396,7 @@
 				8457BF7B2A5BF9E0000AE567 /* ToastView.swift */,
 				848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */,
 				848FE1ED2A9DEA2600B45AC2 /* PiPHandler.swift */,
+				843FF37D2AA08C0400753E80 /* PiPTrackSelectionUtils.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -3601,7 +3601,6 @@
 				84DCA2092A382B16000C3411 /* CallModels.swift in Sources */,
 				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
 				84E86D4F2905E731004BA44C /* Utils.swift in Sources */,
-				846BA2AB2A9F5BA5001AD0AF /* PiPRenderer.swift in Sources */,
 				84D419B828E7155100F574F9 /* CallContainer.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
@@ -3655,6 +3654,7 @@
 				8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */,
 				840042CD2A7020FD00917B30 /* BroadcastPickerView.swift in Sources */,
 				84A6CD6128D49A7700318EC3 /* CallBackgrounds.swift in Sources */,
+				843FF37E2AA08C0400753E80 /* PiPTrackSelectionUtils.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4110,7 +4110,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4510,7 +4510,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4558,7 +4558,7 @@
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

@@ -21,8 +21,8 @@ open class CallViewModel: ObservableObject {
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] participants in
-                    if let first = self?.first {
-                        self?.pipHandler.setupPictureInPicture(with: first)
+                    if let pipVideoRenderer = self?.pipVideoRenderer {
+                        self?.pipHandler.setupPictureInPicture(with: pipVideoRenderer)
                     }
                     self?.callParticipants = participants
             })
@@ -167,15 +167,14 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
-    private lazy var pipHandler: PiPHandler = PiPHandler()
+    private lazy var pipHandler = PiPHandler()
+    private lazy var pipTrackSelectionUtils = PiPTrackSelectionUtils()
     
-    private var first: VideoRenderer? {
-        if let pipSourceId = callParticipants.keys.first,
-            let view = utils.videoRendererFactory.views[pipSourceId] {
-            return view
-        }
-        
-        return utils.videoRendererFactory.views.values.first
+    private var pipVideoRenderer: VideoRenderer? {
+        pipTrackSelectionUtils.pipVideoRenderer(
+            from: callParticipants,
+            currentSessionId: call?.state.sessionId
+        )
     }
     
     public var participants: [CallParticipant] {
