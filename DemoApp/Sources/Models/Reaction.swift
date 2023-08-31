@@ -29,6 +29,6 @@ struct Reaction: Identifiable, Codable {
     static let like = Reaction(id: .like, duration: 5, userSpecific: true, iconName: "hand.thumbsup.fill", title: "Like")
     static let hello = Reaction(id: .hello, duration: 5, userSpecific: true, iconName: "hand.wave.fill", title: "Hello")
     static let dislike = Reaction(id: .dislike, duration: 5, userSpecific: true, iconName: "hand.thumbsdown.fill", title: "Dislike")
-    static let smile = Reaction(id: .smile, duration: 5, userSpecific: true, iconName: "face.smiling", title: "Smile")
+    static let smile = Reaction(id: .smile, duration: 5, userSpecific: true, iconName: "face.smiling.fill", title: "Smile")
     static let heart = Reaction(id: .heart, duration: 5, userSpecific: true, iconName: "heart.fill", title: "Heart")
 }
