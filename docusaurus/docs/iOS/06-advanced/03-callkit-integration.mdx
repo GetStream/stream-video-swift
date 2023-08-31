@@ -62,24 +62,23 @@ In order for the CallKit integration to work, you should have a logged in user i
 
 ### PushKit integration
 
-For handling VoIP push notifications, we will create a new class, called `VoipPushService`, that implements the `PKPushRegistryDelegate`. Internally, we will create an instance of `PKPushRegistry`, which requests the delivery and handles the receipt of PushKit notifications.
+For handling VoIP push notifications, we will create a new class, called `VoIPPushService`, that implements the `PKPushRegistryDelegate`. Internally, we will create an instance of `PKPushRegistry`, which requests the delivery and handles the receipt of PushKit notifications.
 
 ```swift
-class VoipPushService: NSObject, PKPushRegistryDelegate {
+class VoIPPushService: NSObject, PKPushRegistryDelegate {
 
     @Injected(\.streamVideo) var streamVideo
 
-    private let voipQueue: DispatchQueue
-    private let voipRegistry: PKPushRegistry
-    private let voipTokenHandler: VoipTokenHandler
-    private lazy var voipNotificationsController = streamVideo.makeVoipNotificationsController()
+    private let queue: DispatchQueue
+    private let registry: PKPushRegistry
+    private let tokenHandler: VoIPTokenHandler
 
-    var onReceiveIncomingPush: VoipPushHandler
+    var onReceiveIncomingPush: VoIPPushHandler
 
-    init(voipTokenHandler: VoipTokenHandler, pushHandler: @escaping VoipPushHandler) {
-        self.voipTokenHandler = voipTokenHandler
-        self.voipQueue = DispatchQueue(label: "io.getstream.voip")
-        self.voipRegistry = PKPushRegistry(queue: voipQueue)
+    init(voIPTokenHandler: VoIPTokenHandler, pushHandler: @escaping VoIPPushHandler) {
+        self.tokenHandler = voIPTokenHandler
+        self.queue = DispatchQueue(label: "io.getstream.voip")
+        self.registry = PKPushRegistry(queue: queue)
         self.onReceiveIncomingPush = pushHandler
     }
 }
@@ -89,8 +88,8 @@ When the app is started, we need to register for VoIP push notifications, by add
 
 ```swift
 func registerForVoIPPushes() {
-    self.voipRegistry.delegate = self
-    self.voipRegistry.desiredPushTypes = [.voIP]
+    self.registry.delegate = self
+    self.registry.desiredPushTypes = [.voIP]
 }
 ```
 
@@ -105,17 +104,17 @@ func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCrede
     log.debug("pushRegistry deviceToken = \(deviceToken)")
     Task {
         await MainActor.run(body: {
-            AppState.shared.voipPushToken = deviceToken
+            AppState.shared.voIPPushToken = deviceToken
         })
     }
 }
         
 func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
     log.debug("pushRegistry:didInvalidatePushTokenForType:")
-    if let savedToken = voipTokenHandler.currentVoipPushToken() {
+    if let savedToken = tokenHandler.currentVoIPPushToken() {
         Task {
             try await streamVideo.deleteDevice(id: savedToken)
-            voipTokenHandler.save(voipPushToken: nil)
+            tokenHandler.save(voIPPushToken: nil)
         }
     }
 }
@@ -163,36 +162,45 @@ The method `pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith 
 The `CallService` class handles the `onReceiveIncomingPush` callbacks invoked by the `VoipPushService`. Whenever the handler is called, the `CallService` uses another class, called `CallKitService`, that handles the `CallKit` integration.
 
 ```swift
-class CallService {
-    
-    private static let defaultCallText = "Unknown Caller"
-    
+final class CallService {
+
     static let shared = CallService()
     
     let callService = CallKitService()
-    
-    lazy var voipPushService = VoipPushService(
-        voipTokenHandler: UnsecureUserRepository.shared
-    ) { [weak self] payload, type, completion in
-        let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
-        let callCid = streamDict?["call_cid"] as? String ?? "unknown"
-        let createdByName = streamDict?["created_by_display_name"] as? String ?? Self.defaultCallText
-        let createdById = streamDict?["created_by_id"] as? String ?? Self.defaultCallText
-        self?.callService.reportIncomingCall(
-            callCid: callCid,
-            displayName: createdByName,
-            callerId: createdById
-        ) { _ in
-            completion()
-        }
-    }
-    
+    lazy var voIPPushService = makeVoIPPushService()
+
+    private init() {}
+
     func registerForIncomingCalls() {
     #if targetEnvironment(simulator)
         log.info("CallKit notifications not working on a simulator")
     #else
-        voipPushService.registerForVoIPPushes()
+        VoIPPushService.registerForVoIPPushes()
     #endif
+    }
+
+    private func makeVoIPPushService() -> VoIPPushService {
+        let defaultCallText = "Unknown Caller"
+
+        return .init(voIPTokenHandler: AppState.shared.unsecureRepository) { [weak self] payload, type, completion in
+            guard let self = self else {
+                completion()
+                return
+            }
+
+            let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
+            let callCid = streamDict?["call_cid"] as? String ?? "unknown"
+            let createdByName = streamDict?["created_by_display_name"] as? String ?? defaultCallText
+            let createdById = streamDict?["created_by_id"] as? String ?? defaultCallText
+            
+            self.callService.reportIncomingCall(
+                callCid: callCid,
+                displayName: createdByName,
+                callerId: createdById
+            ) { _ in
+                completion()
+            }
+        }
     }
 }
 ```

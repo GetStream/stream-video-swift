@@ -11,7 +11,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     @Injected(\.appearance) var appearance
 
-    var microphoneChecker: MicrophoneChecking
+    var microphoneChecker: MicrophoneChecker
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var reactionsHelper: ReactionsHelper = AppState.shared.reactionsHelper
@@ -22,7 +22,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     init(
         viewFactory: ViewFactory,
-        microphoneChecker: MicrophoneChecking,
+        microphoneChecker: MicrophoneChecker,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory

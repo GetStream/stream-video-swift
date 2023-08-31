@@ -18,7 +18,7 @@ final class AppState: ObservableObject {
     @Published var loading = false
     @Published var activeCall: Call?
     @Published var activeAnonymousCallId: String = ""
-    @Published var voipPushToken: String? { didSet { didSet(VoIPPushToken: voipPushToken) } }
+    @Published var voIPPushToken: String? { didSet { didSet(voIPPushToken: voIPPushToken) } }
     @Published var pushToken: String? { didSet { didSet(pushToken: pushToken) } }
     @Published var audioFilter: AudioFilter? { didSet { didSet(audioFilter: audioFilter) } }
     @Published var users: [User]
@@ -28,7 +28,7 @@ final class AppState: ObservableObject {
 
     // MARK: Mutable
 
-    var streamVideo: StreamVideo? { didSet { didSet(pushToken: nil); didSet(VoIPPushToken: nil); } }
+    var streamVideo: StreamVideo? { didSet { didSet(pushToken: nil); didSet(voIPPushToken: nil); } }
 
     // MARK: Immutable
 
@@ -82,11 +82,11 @@ final class AppState: ObservableObject {
 
     // MARK: - Private API
 
-    private func didSet(VoIPPushToken: String?) {
-        unsecureRepository.save(voIPPushToken: VoIPPushToken)
-        if let VoIPPushToken, let streamVideo {
+    private func didSet(voIPPushToken: String?) {
+        unsecureRepository.save(voIPPushToken: voIPPushToken)
+        if let voIPPushToken, let streamVideo {
             Task {
-                try await streamVideo.setVoipDevice(id: VoIPPushToken)
+                try await streamVideo.setVoipDevice(id: voIPPushToken)
             }
         }
     }

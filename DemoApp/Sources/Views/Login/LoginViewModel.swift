@@ -13,9 +13,6 @@ final class LoginViewModel: ObservableObject {
         Task {
             let token = try await TokenProvider.fetchToken(for: user.id, callIds: [callId])
             let credentials = UserCredentials(userInfo: user, token: token)
-//            AppState.shared.unsecureRepository.save(user: credentials)
-//            AppState.shared.currentUser = user
-//            AppState.shared.userState = .loggedIn
             // Perform login
             completion(credentials)
         }
@@ -26,8 +23,6 @@ final class LoginViewModel: ObservableObject {
         Task {
             let token = try await TokenProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
             let credentials = UserCredentials(userInfo: User.anonymous, token: token)
-//            AppState.shared.currentUser = .anonymous
-//            AppState.shared.userState = .loggedIn
             // Perform login
             completion(credentials)
             AppState.shared.activeAnonymousCallId = callId

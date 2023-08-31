@@ -18,8 +18,8 @@ final class VoIPPushService: NSObject, PKPushRegistryDelegate {
 
     var onReceiveIncomingPush: VoIPPushHandler
     
-    init(voipTokenHandler: VoIPTokenHandler, pushHandler: @escaping VoIPPushHandler) {
-        self.tokenHandler = voipTokenHandler
+    init(voIPTokenHandler: VoIPTokenHandler, pushHandler: @escaping VoIPPushHandler) {
+        self.tokenHandler = voIPTokenHandler
         self.queue = DispatchQueue(label: "io.getstream.voip")
         self.registry = PKPushRegistry(queue: queue)
         self.onReceiveIncomingPush = pushHandler
@@ -36,7 +36,7 @@ final class VoIPPushService: NSObject, PKPushRegistryDelegate {
         log.debug("pushRegistry deviceToken = \(deviceToken)")
         Task {
             await MainActor.run(body: {
-                AppState.shared.voipPushToken = deviceToken
+                AppState.shared.voIPPushToken = deviceToken
             })
         }
     }

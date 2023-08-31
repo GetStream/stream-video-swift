@@ -30,50 +30,18 @@ struct AppControlsWithChat: View {
 
     var body: some View {
         VStack {
-            HStack(alignment: .top) {
-                if chatViewModel?.isChatEnabled == true {
-                    Group {
-                        Spacer()
-
-                        ChatIconView(viewModel: chatViewModel!)
-                    }
+            HStack(alignment: .center, spacing: 16) {
+                if let chatViewModel, chatViewModel.isChatEnabled {
+                    ChatIconView(viewModel: chatViewModel)
                 }
-
-                Group {
-                    Spacer()
-
-                    VideoIconView(viewModel: viewModel)
-                }
-
-                Group {
-                    Spacer()
-
-                    MicrophoneIconView(viewModel: viewModel)
-
-                }
-
-                Group {
-                    Spacer()
-
-                    ToggleCameraIconView(viewModel: viewModel)
-                }
-
-                Group {
-                    Spacer()
-
-                    BroadcastIconView(
-                        viewModel: viewModel,
-                        preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
-                    )
-                }
-
-                Group {
-                    Spacer()
-
-                    HangUpIconView(viewModel: viewModel)
-                }
-
-                Spacer()
+                VideoIconView(viewModel: viewModel)
+                MicrophoneIconView(viewModel: viewModel)
+                ToggleCameraIconView(viewModel: viewModel)
+                BroadcastIconView(
+                    viewModel: viewModel,
+                    preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
+                )
+                HangUpIconView(viewModel: viewModel)
             }
             .frame(height: 85)
         }

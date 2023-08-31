@@ -6,7 +6,7 @@ import Foundation
 import StreamVideoSwiftUI
 import Combine
 
-extension MicrophoneChecker: MicrophoneChecking {
+extension MicrophoneChecker {
 
     internal var decibelsPublisher: AnyPublisher<[Float], Never> {
         $audioLevels.eraseToAnyPublisher()
