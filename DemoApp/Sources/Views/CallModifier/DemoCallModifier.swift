@@ -41,9 +41,7 @@ extension EnvironmentValues {
     var chatVideoViewModel: StreamChatVideoViewModel? {
         get { self[ChatVideoViewModel.self] }
         set {
-            if newValue == nil {
-                print()
-            }
+            guard AppEnvironment.chatIntegration == .enabled else { return }
             self[ChatVideoViewModel.self] = newValue
         }
     }

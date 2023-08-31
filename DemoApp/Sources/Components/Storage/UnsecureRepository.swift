@@ -47,6 +47,7 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
         case voIPPushToken = "stream.video.voip.token"
         case pushToken = "stream.video.push.token"
         case lastRunConfiguration = "stream.video.last.run.configuration"
+        case lastRunBaseURL = "stream.video.last.run.baseURL"
     }
 
     private let defaults: UserDefaults
@@ -122,5 +123,16 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
             return nil
         }
         return .init(rawValue: lastConfigurationString)
+    }
+
+    func save(baseURL: AppEnvironment.BaseURL) {
+        set(baseURL.rawValue, for: .lastRunBaseURL)
+    }
+
+    func currentBaseURL() -> AppEnvironment.BaseURL? {
+        guard let lastBaseURLString: String = get(for: .lastRunBaseURL) else {
+            return nil
+        }
+        return .init(rawValue: lastBaseURLString)
     }
 }

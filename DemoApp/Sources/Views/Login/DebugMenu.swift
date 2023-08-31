@@ -11,6 +11,8 @@ struct DebugMenu: View {
 
     @Injected(\.colors) var colors
 
+    private var appState: AppState = .shared
+
     @State private var loggedInView: AppEnvironment.LoggedInView = AppEnvironment.loggedInView {
         didSet { AppEnvironment.loggedInView = loggedInView }
     }
@@ -25,6 +27,7 @@ struct DebugMenu: View {
                 AppEnvironment.baseURL = .production
                 AppEnvironment.apiKey = .production
             }
+            appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
         }
     }
 
@@ -42,6 +45,10 @@ struct DebugMenu: View {
         }
     }
 
+    @State private var chatIntegration: AppEnvironment.ChatIntegration = AppEnvironment.chatIntegration {
+        didSet { AppEnvironment.chatIntegration = chatIntegration }
+    }
+
     var body: some View {
         Menu {
             makeMenu(
@@ -55,6 +62,12 @@ struct DebugMenu: View {
                 currentValue: loggedInView,
                 label: "LoggedIn View"
             ) { self.loggedInView = $0 }
+
+            makeMenu(
+                for: [.enabled, .disabled],
+                currentValue: chatIntegration,
+                label: "Chat Integration"
+            ) { self.chatIntegration = $0 }
 
             makeMenu(
                 for: [.visible, .hidden],

@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "842D8BC22865B31B00801910"
-               BuildableName = "DemoApp.app"
+               BuildableName = "StreamVideoCallApp.app"
                BlueprintName = "DemoApp"
                ReferencedContainer = "container:StreamVideo.xcodeproj">
             </BuildableReference>
@@ -62,7 +62,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "842D8BC22865B31B00801910"
-            BuildableName = "DemoApp.app"
+            BuildableName = "StreamVideoCallApp.app"
             BlueprintName = "DemoApp"
             ReferencedContainer = "container:StreamVideo.xcodeproj">
          </BuildableReference>
@@ -79,7 +79,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "842D8BC22865B31B00801910"
-            BuildableName = "DemoApp.app"
+            BuildableName = "StreamVideoCallApp.app"
             BlueprintName = "DemoApp"
             ReferencedContainer = "container:StreamVideo.xcodeproj">
          </BuildableReference>

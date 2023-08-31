@@ -29,7 +29,10 @@ final class Router: ObservableObject {
     private init(_ appState: AppState) {
         self.appState = appState
 
-        if appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration {
+        if 
+            appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration
+                || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL
+        {
             // Clean up the currently logged in use, if we run in different
             // configuration since the last time.
             appState.unsecureRepository.removeCurrentUser()
@@ -37,6 +40,7 @@ final class Router: ObservableObject {
 
         // Store the current AppEnvironment configuration.
         appState.unsecureRepository.save(configuration: AppEnvironment.configuration)
+        appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
 
         Task {
             try await loadLoggedInUser()

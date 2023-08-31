@@ -170,3 +170,23 @@ extension AppEnvironment {
         .hidden
     }()
 }
+
+extension AppEnvironment {
+
+    enum ChatIntegration: Hashable, Debuggable {
+        case enabled, disabled
+
+        var title: String {
+            switch self {
+            case .enabled:
+                return "Enabled"
+            case .disabled:
+                return "Disabled"
+            }
+        }
+    }
+
+    static var chatIntegration: ChatIntegration = {
+        .enabled
+    }()
+}

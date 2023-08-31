@@ -82,7 +82,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                 }
             }
         }
-        .onReceive(chatViewModel!.$isChatVisible) { isChatVisible = $0 }
+        .onReceive(chatViewModel?.$isChatVisible) { isChatVisible = $0 }
     }
 
     private var callLink: String {
