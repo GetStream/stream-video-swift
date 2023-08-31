@@ -25,6 +25,6 @@ struct DemoReactionsOverlayView<Factory: ViewFactory>: View {
             onBackgroundTap: onBackgroundTap,
             onActionExecuted: onActionExecuted
         )
-        .offset(y: -29)
+        .offset(y: -32)
     }
 }
