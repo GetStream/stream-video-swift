@@ -29,7 +29,9 @@ class PiPTrackSelectionUtils {
         }
         
         let firstId = participants.first?.id
-        if let firstId, let view = utils.videoRendererFactory.views[firstId] {
+        if let firstId, let view = utils.videoRendererFactory.view(
+            for: firstId, isScreensharing: false
+        ) {
             return view
         }
         

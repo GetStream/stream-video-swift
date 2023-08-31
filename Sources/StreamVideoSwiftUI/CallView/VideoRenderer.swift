@@ -143,7 +143,8 @@ public class VideoRenderer: RTCMTLVideoView {
 
                 feedFrames(sampleBuffer)
             } else if let i420buffer = frame.buffer as? RTCI420Buffer {
-                guard let buffer = convertI420BufferToPixelBuffer(i420buffer),
+                let reductionFactor = UIDevice.current.userInterfaceIdiom == .pad ? 4 : 8
+                guard let buffer = convertI420BufferToPixelBuffer(i420buffer, reductionFactor: reductionFactor),
                         let sampleBuffer = CMSampleBuffer.from(buffer) else {
                     return
                 }

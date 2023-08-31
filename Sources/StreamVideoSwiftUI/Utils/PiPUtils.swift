@@ -44,7 +44,7 @@ extension CMSampleBuffer {
     }
 }
 
-func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer, reductionFactor: Int = 4) -> CVPixelBuffer? {
+func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer, reductionFactor: Int = 8) -> CVPixelBuffer? {
     let width = Int(i420Buffer.width) / reductionFactor
     let height = Int(i420Buffer.height) / reductionFactor
 

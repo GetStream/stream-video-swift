@@ -25,17 +25,7 @@ class VideoCapturer: CameraVideoCapturing {
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
         videoCaptureHandler = handler
         videoCapturer = RTCCameraVideoCapturer(delegate: handler)
-        if #available(iOS 16, *) {
-            let captureSession = (videoCapturer as! RTCCameraVideoCapturer).captureSession
-            // Configure the capture session.
-            captureSession.beginConfiguration()
-
-            if captureSession.isMultitaskingCameraAccessSupported {
-                // Enable use of the camera in multitasking modes.
-                captureSession.isMultitaskingCameraAccessEnabled = true
-            }
-            captureSession.commitConfiguration()
-        }
+        checkForBackgroundCameraAccess()
         #endif
     }
     
@@ -104,6 +94,24 @@ class VideoCapturer: CameraVideoCapturing {
             } else {
                 continuation.resume(returning: ())
             }
+        }
+    }
+    
+    //MARK: - private
+    
+    private func checkForBackgroundCameraAccess() {
+        if #available(iOS 16, *) {
+            guard let captureSession = (videoCapturer as? RTCCameraVideoCapturer)?.captureSession else {
+                return
+            }
+            // Configure the capture session.
+            captureSession.beginConfiguration()
+
+            if captureSession.isMultitaskingCameraAccessSupported {
+                // Enable use of the camera in multitasking modes.
+                captureSession.isMultitaskingCameraAccessEnabled = true
+            }
+            captureSession.commitConfiguration()
         }
     }
 }

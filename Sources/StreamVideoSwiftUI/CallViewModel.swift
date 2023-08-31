@@ -702,6 +702,7 @@ extension CallViewModel {
     }
         
     @objc func startPiP() {
+        utils.videoRendererFactory.prepareForPictureInPicture()
         pipHandler.startPiP()
     }
     

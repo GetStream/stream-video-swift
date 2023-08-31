@@ -104,8 +104,7 @@ class PiPHandler: NSObject {
             sampleBufferVideoCallView.sampleBufferDisplayLayer.videoGravity = .resizeAspect
 
             let pipVideoCallViewController = AVPictureInPictureVideoCallViewController()
-            //TODO: don't hardcode content size.
-            pipVideoCallViewController.preferredContentSize = CGSize(width: 1280, height: 720)
+            pipVideoCallViewController.preferredContentSize = self.preferredPiPContentSize()
             pipVideoCallViewController.view.addSubview(sampleBufferVideoCallView)
             
             sampleBufferVideoCallView.translatesAutoresizingMaskIntoConstraints = false
@@ -136,6 +135,17 @@ class PiPHandler: NSObject {
             self.pipController = pipController
                 
             self.addObservers()
+        }
+    }
+    
+    private func preferredPiPContentSize() -> CGSize {
+        let width = 640
+        let height = 480
+        let orientation = UIDevice.current.orientation
+        if orientation.isPortrait {
+            return CGSize(width: height, height: width)
+        } else {
+            return CGSize(width: width, height: height)
         }
     }
     

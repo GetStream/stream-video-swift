@@ -9,6 +9,7 @@ import SwiftUI
 class VideoRendererFactory {
     private let queue = DispatchQueue(label: "io.getstream.videoRendererFactory")
     private(set) var views = [String: VideoRenderer]()
+    private var pipRendererId: String?
     
     init() {
         NotificationCenter.default.addObserver(
@@ -29,12 +30,6 @@ class VideoRendererFactory {
             name: UIApplication.didReceiveMemoryWarningNotification,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(clearViews),
-            name: UIScene.didEnterBackgroundNotification,
-            object: nil
-        )
     }
     
     func view(for id: String, size: CGSize) -> VideoRenderer {
@@ -52,7 +47,9 @@ class VideoRendererFactory {
         if isScreensharing {
             viewId = "\(id)-screenshare"
         }
-        return views[viewId]
+        let view = views[viewId]
+        self.pipRendererId = viewId
+        return view
     }
     
     @objc func handleParticipantLeft(_ notification: Notification) {
@@ -66,6 +63,19 @@ class VideoRendererFactory {
     }
     
     @objc func clearViews() {
-//        views = [String: VideoRenderer]()
+        views = [String: VideoRenderer]()
+    }
+    
+    func prepareForPictureInPicture() {
+        var pipRenderer: VideoRenderer?
+        var updated = [String: VideoRenderer]()
+        if let pipRendererId {
+            pipRenderer = views[pipRendererId]
+            updated[pipRendererId] = pipRenderer
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                pipRenderer?.track?.isEnabled = true
+            })
+        }
+        views = updated
     }
 }
