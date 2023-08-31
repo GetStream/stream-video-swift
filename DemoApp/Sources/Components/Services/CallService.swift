@@ -18,7 +18,7 @@ final class CallService {
     #if targetEnvironment(simulator)
         log.info("CallKit notifications not working on a simulator")
     #else
-        VoIPPushService.registerForVoIPPushes()
+        voIPPushService.registerForVoIPPushes()
     #endif
     }
 
