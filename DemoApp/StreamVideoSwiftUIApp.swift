@@ -24,7 +24,7 @@ struct StreamVideoSwiftUIApp: App {
 
     init() {
         checkLoggedInUser()
-        LogConfig.level = .error
+        LogConfig.level = .debug
         configureSentry()
     }
     

@@ -1,8 +1,5 @@
 //
-//  SampleBufferVideoCallView.swift
-//  StreamVideoSwiftUI
-//
-//  Created by Martin Mitrevski on 30.8.23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import UIKit

@@ -17,25 +17,25 @@ class PiPHandler: NSObject {
     private var sourceView: VideoRenderer?
         
     func setupPictureInPicture(with sourceView: VideoRenderer?) {
-        guard (self.sourceView == nil
-               || sourceView?.trackId != self.sourceView?.trackId) else {
-            return
-        }
-        if self.sourceView != nil {
-            cleanUp()
-        }
-        self.sourceView = sourceView
         if #available(iOS 15.0, *) {
+            guard (self.sourceView == nil
+                   || sourceView?.trackId != self.sourceView?.trackId) else {
+                return
+            }
+            if self.sourceView != nil {
+                cleanUp()
+            }
+            self.sourceView = sourceView
             setupPictureInPicture()
         }
     }
     
     func startPiP() {
-        guard AVPictureInPictureController.isPictureInPictureSupported() else {
-            return
-        }
-        pictureInPictureActive = true
         if #available(iOS 15.0, *) {
+            guard AVPictureInPictureController.isPictureInPictureSupported() else {
+                return
+            }
+            pictureInPictureActive = true
             if pipController?.isPictureInPicturePossible == true {
                 pipController?.startPictureInPicture()
             }
@@ -46,7 +46,8 @@ class PiPHandler: NSObject {
         guard pictureInPictureActive else {
             return
         }
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             let layer = self.sampleBufferVideoCallView?.sampleBufferDisplayLayer
             if #available(iOS 14.0, *) {
                 if layer?.requiresFlushToResumeDecoding == true {
@@ -98,7 +99,8 @@ class PiPHandler: NSObject {
     @available(iOS 15.0, *)
     private func setupPictureInPicture() {
         guard let view = self.sourceView else { return }
-        DispatchQueue.main.async {
+        DispatchQueue.main.async { [weak self] in
+            guard let self else { return }
             let sampleBufferVideoCallView = SampleBufferVideoCallView()
             sampleBufferVideoCallView.contentMode = .scaleAspectFit
             sampleBufferVideoCallView.sampleBufferDisplayLayer.videoGravity = .resizeAspect
