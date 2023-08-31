@@ -55,7 +55,7 @@ struct SimpleCallingView: View {
             HStack {
                 TextField("Call ID", text: $text)
                     .padding(.all, 12)
-                    .background(appearance.colors.background)
+                    .background(Color(appearance.colors.background.cgColor))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
                     .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis.cgColor), lineWidth: 1))
                 Button {

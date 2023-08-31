@@ -21,6 +21,5 @@ struct DemoCallContentView: View {
             DetailedCallingView(viewModel: viewModel)
         }
     }
-
 }
 

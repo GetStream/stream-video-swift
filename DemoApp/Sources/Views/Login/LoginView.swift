@@ -65,6 +65,7 @@ struct LoginView: View {
                     Text("Other")
                 }
             }
+            .listStyle(.plain)
         }
         .alignedToReadableContentGuide()
         .foregroundColor(.primary)

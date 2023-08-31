@@ -19,7 +19,7 @@ public struct Colors {
     public var textInverted = Color(.streamWhite)
     public var onlineIndicatorColor = Color(.streamAccentGreen)
     public var whiteSmoke = Color(.streamWhiteSmoke)
-    public var background: Color = Color(.streamWhiteSnow)
+    public var background: UIColor = .streamWhiteSnow
     public var background1: UIColor = .streamWhiteSmoke
     public var textLowEmphasis: UIColor = .streamGrayDisabledText
     public var callBackground: UIColor = .streamDarkBackground

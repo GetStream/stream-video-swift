@@ -104,8 +104,10 @@ struct DetailedCallingView: View {
 
                 Spacer()
             }
+            .alignedToReadableContentGuide()
         }
-        .navigationBarHidden(true)
+        .navigationViewStyle(StackNavigationViewStyle())
+//        .navigationBarHidden(true)
         .onAppear() {
             CallService.shared.registerForIncomingCalls()
         }
