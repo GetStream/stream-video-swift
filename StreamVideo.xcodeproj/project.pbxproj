@@ -17,9 +17,6 @@
 		401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
 		401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
-		4030E59A2A9DF4BF003E8CBA /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
-		4030E59B2A9DF4BF003E8CBA /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
-		4030E59C2A9DF4BF003E8CBA /* VoIPPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoIPPushService.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
@@ -29,11 +26,42 @@
 		4046DEEE2A9F404300CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */; };
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
+		406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
+		406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
+		406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AF2A9DFC58004BE3DA /* CallKitState.swift */; };
+		406A8E932AA1D7BF001F598A /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C3287EB43A004E180E /* LoginViewModel.swift */; };
+		406A8E942AA1D7C5001F598A /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */; };
+		406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
+		406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B12A9DFFBB004BE3DA /* User+Demo.swift */; };
+		406A8E982AA1D7E9001F598A /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */; };
+		406A8E992AA1D7E9001F598A /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
+		406A8E9A2AA1D7E9001F598A /* Call+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */; };
+		406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */; };
+		406A8E9D2AA1D7E9001F598A /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
+		406A8E9E2AA1D7E9001F598A /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
+		406A8E9F2AA1D7E9001F598A /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
+		406A8EA02AA1D7E9001F598A /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
+		406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D32A9E2051004BE3DA /* Reaction.swift */; };
+		406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
+		406A8EA82AA1D80C001F598A /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B92A9E0815004BE3DA /* AudioFilter.swift */; };
+		406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */; };
+		406A8EAA2AA1D80C001F598A /* DemoVoiceProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */; };
+		406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */; };
+		406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
+		406A8EAD2AA1D80C001F598A /* UserProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AD2A9DF81200534ED1 /* UserProvider.swift */; };
+		406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
+		406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
+		406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
+		406A8EB22AA1D80C001F598A /* VoIPPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoIPPushService.swift */; };
+		406A8EB32AA1D80C001F598A /* TokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B32A9E01B2004BE3DA /* TokenProvider.swift */; };
+		406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
+		406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
+		406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
+		406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
-		40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		40F161AB2A4C6B5C00846E3E /* ScreenSharingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */; };
 		40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */; };
 		40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
@@ -414,7 +442,6 @@
 		8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 849322592908378B0013C029 /* LaunchScreen.storyboard */; };
 		849322612908385C0013C029 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322602908385C0013C029 /* HomeViewController.swift */; };
 		8493226A290919F10013C029 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932269290919F10013C029 /* LoginViewController.swift */; };
-		84932270290923960013C029 /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
 		84932274290929290013C029 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932273290929290013C029 /* UIView+Extensions.swift */; };
 		84932276290929630013C029 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932275290929630013C029 /* Animation.swift */; };
 		84932278290929EF0013C029 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */; };
@@ -477,7 +504,6 @@
 		84BB570E2A20D7BB0002C123 /* Mapping_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */; };
 		84BBF62B28AFC24000387A02 /* PeerConnectionFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62A28AFC24000387A02 /* PeerConnectionFactory.swift */; };
 		84BBF62D28AFC72700387A02 /* DefaultRTCMediaConstraints.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */; };
-		84BD8FFB29B0FA5B002CFBA0 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84429945294248A20037232A /* LoginView.swift */; };
 		84BE8A5628BE314000B34D2F /* SwiftProtobuf in Frameworks */ = {isa = PBXBuildFile; productRef = 84BE8A5528BE314000B34D2F /* SwiftProtobuf */; };
 		84C267C928F5980F00F0F673 /* ConnectOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C267C828F5980F00F0F673 /* ConnectOptions.swift */; };
 		84C28C922A84D16A00742E33 /* GoLiveRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84C28C912A84D16A00742E33 /* GoLiveRequest.swift */; };
@@ -1045,7 +1071,6 @@
 		8442993929422BEA0037232A /* BackportStateObject.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackportStateObject.swift; sourceTree = "<group>"; };
 		8442993B294232360037232A /* IncomingCallView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView_iOS13.swift; sourceTree = "<group>"; };
 		844299402942394C0037232A /* VideoView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView_iOS13.swift; sourceTree = "<group>"; };
-		84429945294248A20037232A /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginView.swift; sourceTree = "<group>"; };
 		8446AF902A4D84F4002AB07B /* Retries_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries_Tests.swift; sourceTree = "<group>"; };
 		844ECF4E2A33458A0023263C /* Member.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		84530C6B2A3C4E0700F2678E /* CallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState.swift; sourceTree = "<group>"; };
@@ -2396,7 +2421,6 @@
 				849322502908378A0013C029 /* SceneDelegate.swift */,
 				84932269290919F10013C029 /* LoginViewController.swift */,
 				849322602908385C0013C029 /* HomeViewController.swift */,
-				84429945294248A20037232A /* LoginView.swift */,
 				84E4F7912947476300DD4CE3 /* CallViewHelper.swift */,
 				849322572908378B0013C029 /* Assets.xcassets */,
 				849322592908378B0013C029 /* LaunchScreen.storyboard */,
@@ -3618,18 +3642,44 @@
 			buildActionMask = 2147483647;
 			files = (
 				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
-				84932270290923960013C029 /* UnsecureRepository.swift in Sources */,
+				406A8EB32AA1D80C001F598A /* TokenProvider.swift in Sources */,
+				406A8EAD2AA1D80C001F598A /* UserProvider.swift in Sources */,
+				406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */,
+				406A8E9A2AA1D7E9001F598A /* Call+Identifiable.swift in Sources */,
+				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
+				406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */,
+				406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
+				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
+				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
+				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
+				406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */,
+				406A8EA82AA1D80C001F598A /* AudioFilter.swift in Sources */,
+				406A8EA02AA1D7E9001F598A /* View+OptionalPublisher.swift in Sources */,
+				406A8E9E2AA1D7E9001F598A /* URL+Convenience.swift in Sources */,
+				406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */,
+				406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */,
+				406A8E9D2AA1D7E9001F598A /* String+Unique.swift in Sources */,
+				406A8E942AA1D7C5001F598A /* UserCredentials.swift in Sources */,
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
+				406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */,
 				82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */,
-				84BD8FFB29B0FA5B002CFBA0 /* LoginView.swift in Sources */,
-				4030E59B2A9DF4BF003E8CBA /* CallKitService.swift in Sources */,
-				4030E59C2A9DF4BF003E8CBA /* VoIPPushService.swift in Sources */,
+				406A8EAA2AA1D80C001F598A /* DemoVoiceProcessor.swift in Sources */,
+				406A8E932AA1D7BF001F598A /* LoginViewModel.swift in Sources */,
+				406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */,
+				406A8E9F2AA1D7E9001F598A /* CallViewModel+CallSettingsPublisher.swift in Sources */,
+				406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */,
+				406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */,
+				406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */,
+				406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */,
+				406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */,
+				406A8E982AA1D7E9001F598A /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
+				406A8EB22AA1D80C001F598A /* VoIPPushService.swift in Sources */,
 				40B713692A275F1400D1FE67 /* AppState.swift in Sources */,
-				40B7136A2A275F1700D1FE67 /* DeeplinkAdapter.swift in Sources */,
-				4030E59A2A9DF4BF003E8CBA /* CallService.swift in Sources */,
+				406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */,
+				406A8E992AA1D7E9001F598A /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -4535,7 +4585,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -4952,7 +5002,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5472,7 +5522,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -5518,7 +5568,7 @@
 				INFOPLIST_KEY_UIMainStoryboardFile = "";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations = UIInterfaceOrientationPortrait;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown";
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
