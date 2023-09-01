@@ -641,7 +641,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         // Given
         let httpClient = HTTPClient_Mock()
         let response = Stream_Video_Sfu_Signal_UpdateMuteStatesResponse()
-        for _ in 0..<15 {
+        for _ in 0..<20 {
             let data = try response.serializedData()
             httpClient.dataResponses.append(data)
         }

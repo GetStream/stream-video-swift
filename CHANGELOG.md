@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- Picture-in-Picture support
 
 # [0.3.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.3.0)
 _August 25, 2023_

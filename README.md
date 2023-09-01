@@ -184,8 +184,8 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.4 milestone
 
+- [x] Picture-in-picture support
 - [ ] Buttons to simulate ice-restart and SFU switching
-- [ ] Picture-in-picture sample (if we get an entitlement)
 - [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
 - [ ] Test with many participants
 - [ ] Video UIKit tutorial

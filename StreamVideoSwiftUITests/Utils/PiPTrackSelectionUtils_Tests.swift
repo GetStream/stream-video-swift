@@ -12,6 +12,11 @@ final class PiPTrackSelectionUtils_Tests: StreamVideoTestCase {
     
     let trackSelectionUtils = PiPTrackSelectionUtils()
     
+    override func setUp() {
+        super.setUp()
+        utils.videoRendererFactory.clearViews()
+    }
+    
     func test_trackSelection_otherUser() {
         // Given
         let currentUserId = "current"
