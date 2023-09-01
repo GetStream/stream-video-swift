@@ -27,6 +27,7 @@ extension UnpinRequest: @unchecked Sendable {}
 extension PinResponse: @unchecked Sendable {}
 extension UnpinResponse: @unchecked Sendable {}
 extension GoLiveResponse: @unchecked Sendable {}
+extension SendReactionResponse: @unchecked Sendable {}
 
 public struct FetchingLocationError: Error {}
 

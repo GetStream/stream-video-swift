@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import class StreamChat.ChatClient
+@preconcurrency import class StreamChat.ChatClient
 import class StreamChat.ChatChannelController
 import struct StreamChat.ChannelId
 import protocol StreamChat.ChatChannelControllerDelegate
