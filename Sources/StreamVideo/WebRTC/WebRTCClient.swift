@@ -1024,8 +1024,10 @@ class WebRTCClient: NSObject {
             var pausedTrackIds = [String]()
             let tracks = await state.tracks
             for (id, track) in tracks {
-                track.isEnabled = false
-                pausedTrackIds.append(id)
+                if id != sessionID {
+                    track.isEnabled = false
+                    pausedTrackIds.append(id)
+                }
             }
             await state.update(pausedTrackIds: pausedTrackIds)
         }

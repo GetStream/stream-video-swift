@@ -12,6 +12,7 @@ import WebRTC
 open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.utils) var utils
     
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -20,6 +21,9 @@ open class CallViewModel: ObservableObject {
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] participants in
+                    if let pipVideoRenderer = self?.pipVideoRenderer {
+                        self?.pipHandler.setupPictureInPicture(with: pipVideoRenderer)
+                    }
                     self?.callParticipants = participants
             })
             callUpdates = call?.state.$blockedUserIds
@@ -163,6 +167,15 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
+    private lazy var pipHandler = PiPHandler()
+    private lazy var pipTrackSelectionUtils = PiPTrackSelectionUtils()
+    
+    private var pipVideoRenderer: VideoRenderer? {
+        pipTrackSelectionUtils.pipVideoRenderer(
+            from: callParticipants,
+            currentSessionId: call?.state.sessionId
+        )
+    }
     
     public var participants: [CallParticipant] {
         callParticipants
@@ -189,6 +202,7 @@ open class CallViewModel: ObservableObject {
         self.callSettings = callSettings ?? CallSettings()
         self.localCallSettingsChange = callSettings != nil
         self.subscribeToCallEvents()
+        self.subscribeForAppLifecycleEvents()
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -668,4 +682,31 @@ public enum ParticipantsLayout {
     case grid
     case spotlight
     case fullScreen
+}
+
+extension CallViewModel {
+    
+    func subscribeForAppLifecycleEvents() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(startPiP),
+            name: UIScene.didEnterBackgroundNotification,
+            object: nil
+        )
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(stopPiP),
+            name: UIScene.willEnterForegroundNotification,
+            object: nil
+        )
+    }
+        
+    @objc func startPiP() {
+        utils.videoRendererFactory.prepareForPictureInPicture()
+        pipHandler.startPiP()
+    }
+    
+    @objc func stopPiP() {
+        pipHandler.stopPiP()
+    }
 }

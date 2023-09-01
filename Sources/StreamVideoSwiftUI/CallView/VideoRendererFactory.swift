@@ -9,6 +9,7 @@ import SwiftUI
 class VideoRendererFactory {
     private let queue = DispatchQueue(label: "io.getstream.videoRendererFactory")
     private(set) var views = [String: VideoRenderer]()
+    private var pipRendererId: String?
     
     init() {
         NotificationCenter.default.addObserver(
@@ -29,12 +30,6 @@ class VideoRendererFactory {
             name: UIApplication.didReceiveMemoryWarningNotification,
             object: nil
         )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(clearViews),
-            name: UIScene.didEnterBackgroundNotification,
-            object: nil
-        )
     }
     
     func view(for id: String, size: CGSize) -> VideoRenderer {
@@ -44,6 +39,16 @@ class VideoRendererFactory {
         }
         let view = VideoRenderer(frame: .init(origin: .zero, size: size))
         views[id] = view
+        return view
+    }
+    
+    func view(for id: String, isScreensharing: Bool) -> VideoRenderer? {
+        var viewId = id
+        if isScreensharing {
+            viewId = "\(id)-screenshare"
+        }
+        let view = views[viewId]
+        self.pipRendererId = viewId
         return view
     }
     
@@ -59,5 +64,18 @@ class VideoRendererFactory {
     
     @objc func clearViews() {
         views = [String: VideoRenderer]()
+    }
+    
+    func prepareForPictureInPicture() {
+        var pipRenderer: VideoRenderer?
+        var updated = [String: VideoRenderer]()
+        if let pipRendererId {
+            pipRenderer = views[pipRendererId]
+            updated[pipRendererId] = pipRenderer
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
+                pipRenderer?.track?.isEnabled = true
+            })
+        }
+        views = updated
     }
 }
