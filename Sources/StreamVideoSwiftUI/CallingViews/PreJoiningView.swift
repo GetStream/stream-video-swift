@@ -324,10 +324,14 @@ struct ParticipantsInCallView: View {
             LazyHStack {
                 ForEach(participantsInCall) { participant in
                     VStack {
-                        UserAvatar(
-                            imageURL: participant.user.imageURL,
-                            size: 40
-                        )
+                        if let imageURL = participant.user.imageURL {
+                            UserAvatar(imageURL: imageURL, size: 40)
+                        } else {
+                            CircledTitleView(
+                                title: participant.user.name.isEmpty ? participant.user.id : String(participant.user.name.uppercased().first!),
+                                size: 40
+                            )
+                        }
                         Text(participant.user.name)
                             .font(.caption)
                     }
