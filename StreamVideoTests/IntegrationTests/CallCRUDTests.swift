@@ -7,7 +7,7 @@ import XCTest
 @preconcurrency import Combine
 @testable import StreamVideo
 
-class CallCRUDTest: IntegrationTest {
+final class CallCRUDTest: IntegrationTest {
     
     let user1 = "thierry"
     let user2 = "tommaso"

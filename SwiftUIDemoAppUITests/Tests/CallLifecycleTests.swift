@@ -178,7 +178,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserSwichesCalls() {
+    func testUserSwitchesCalls() {
         linkToScenario(withId: 1784)
         
         let anotherCallId = StreamTestCase.randomCallId

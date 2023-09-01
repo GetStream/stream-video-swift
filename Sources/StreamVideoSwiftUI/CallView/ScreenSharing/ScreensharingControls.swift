@@ -68,6 +68,7 @@ public struct BroadcastIconView: View {
             .foregroundColor(iconStyle.foregroundColor)
         }
         .frame(width: size, height: size)
+        .modifier(ShadowModifier())
         .onChange(of: broadcastObserver.broadcastState, perform: { newValue in
             if newValue == .started {
                 viewModel.startScreensharing(type: .broadcast)

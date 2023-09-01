@@ -55,7 +55,7 @@ private extension UIColor {
     static let streamDisabled = mode(0xb4b7bb, 0x4c525c)
     static let streamDarkBackground = mode(0x272a30, 0x272a30)
     static let streamPulsingColor = mode(0x005fff, 0x005fff)
-    static let streamCallControlsBackground = mode(0x1c1e22, 0x1c1e22)
+    static let streamCallControlsBackground = mode(0xffffff, 0x1c1e22)
     static let streamWaitingRoomBackground = mode(0xffffff, 0x2c2c2e)
     static let streamWaitingRoomSecondaryBackground = mode(0xf2f2f2, 0x1c1c1e)
     static let streamBlue = mode(0x005fff, 0x005fff)
