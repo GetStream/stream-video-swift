@@ -143,6 +143,8 @@ public class VideoRenderer: RTCMTLVideoView {
 
                 feedFrames(sampleBuffer)
             } else if let i420buffer = frame.buffer as? RTCI420Buffer {
+                // We reduce the track resolution, since it's displayed in a smaller place.
+                // Values are picked depending on how much the PiP view takes in an average iPhone or iPad.
                 let reductionFactor = UIDevice.current.userInterfaceIdiom == .pad ? 4 : 6
                 guard let buffer = convertI420BufferToPixelBuffer(i420buffer, reductionFactor: reductionFactor),
                         let sampleBuffer = CMSampleBuffer.from(buffer) else {
