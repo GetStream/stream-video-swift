@@ -13,4 +13,6 @@ By default, iOS does not allow access to the user's camera, while in background.
 - Your app has the [multitasking camera access](https://developer.apple.com/documentation/bundleresources/entitlements/com_apple_developer_avfoundation_multitasking-camera-access?changes=__8) entitlement. This entitlement can be requested directly from Apple.
 - iPads with Stage Manager support, starting from iOS 16 can access the camera in the background, without the entitlement above. Our SDK already does the required steps to setup the capture session with background support. More details about this topic can be found [here](https://developer.apple.com/documentation/avkit/accessing_the_camera_while_multitasking_on_ipad?changes=__8).
 
+:::note
 Note that the second option has limited devices support. If you are building an app for mass usage, you would need Apple's entitlement. However, the approval of such entitlement can take a longer time.
+:::

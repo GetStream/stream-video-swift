@@ -101,7 +101,7 @@ final class PiPTrackSelectionUtils_Tests: StreamVideoTestCase {
     
     //MARK: - private
     
-    func makeCallParticipant(
+    private func makeCallParticipant(
         id: String,
         name: String = "",
         roles: [String] = [],

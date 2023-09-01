@@ -4,7 +4,7 @@
 
 import StreamVideo
 
-class PiPTrackSelectionUtils {
+final class PiPTrackSelectionUtils {
     
     @Injected(\.utils) private var utils
     

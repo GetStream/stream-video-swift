@@ -8,7 +8,7 @@ import AVKit
 import MetalKit
 import StreamVideo
 
-class PiPHandler: NSObject {
+final class PiPHandler: NSObject {
             
     private(set) var pictureInPictureActive = false
     var sampleBufferVideoCallView: SampleBufferVideoCallView?

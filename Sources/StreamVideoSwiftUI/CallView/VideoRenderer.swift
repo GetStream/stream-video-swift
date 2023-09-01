@@ -99,7 +99,7 @@ public class VideoRenderer: RTCMTLVideoView {
     
     var feedFrames: ((CMSampleBuffer) -> ())?
     
-    private var skip = true
+    private var skipNextFrameRendering = true
     
     var trackId: String? {
         self.track?.trackId
@@ -125,12 +125,12 @@ public class VideoRenderer: RTCMTLVideoView {
         
         guard let feedFrames else { return }
         
-        skip.toggle()
-        if skip {
+        skipNextFrameRendering.toggle()
+        if skipNextFrameRendering {
            return
         }
         
-        DispatchQueue.global(qos: .userInitiated).async {
+        DispatchQueue.global(qos: .userInteractive).async {
             guard let frame = frame else {
                 return
             }

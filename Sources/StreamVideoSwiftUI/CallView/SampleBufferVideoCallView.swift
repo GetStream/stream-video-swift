@@ -5,7 +5,7 @@
 import UIKit
 import AVKit
 
-class SampleBufferVideoCallView: UIView {
+final class SampleBufferVideoCallView: UIView {
     override class var layerClass: AnyClass {
         AVSampleBufferDisplayLayer.self
     }
