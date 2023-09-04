@@ -7,6 +7,7 @@
 	<key>com.apple.developer.associated-domains</key>
 	<array>
 		<string>applinks:staging.getstream.io</string>
+		<string>applinks:getstream.io</string>
 	</array>
 	<key>com.apple.security.application-groups</key>
 	<array>

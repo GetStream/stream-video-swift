@@ -13,14 +13,15 @@ struct DeeplinkInfo: Equatable {
 }
 
 struct DeeplinkAdapter {
-    var baseURL: URL
-
-    init(baseURL: URL) {
-        self.baseURL = baseURL
-    }
-
     func canHandle(url: URL) -> Bool {
-        url.absoluteString.contains(baseURL.absoluteString) || url.scheme == AppEnvironment.appURLScheme
+        if url.scheme == AppEnvironment.appURLScheme {
+            return true
+        }
+
+        return AppEnvironment
+            .supportedDeeplinks
+            .compactMap(\.deeplinkURL.host)
+            .first { url.host == $0 } != nil
     }
 
     func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {

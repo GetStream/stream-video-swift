@@ -19,7 +19,7 @@ final class Router: ObservableObject {
     // MARK: Instance
     var streamVideoUI: StreamVideoUI?
     var streamChatWrapper: StreamChatWrapper?
-    private lazy var deeplinkAdapter = DeeplinkAdapter(baseURL: AppEnvironment.baseURL.url)
+    private lazy var deeplinkAdapter = DeeplinkAdapter()
 
     // MARK: Published
     let appState: AppState
