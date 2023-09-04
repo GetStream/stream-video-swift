@@ -49,6 +49,8 @@ struct DebugMenu: View {
         didSet { AppEnvironment.chatIntegration = chatIntegration }
     }
 
+    @State private var isLogsViewerVisible: Bool = false
+
     var body: some View {
         Menu {
             makeMenu(
@@ -74,9 +76,24 @@ struct DebugMenu: View {
                 currentValue: performanceTrackerVisibility,
                 label: "Performance Tracker"
             ) { self.performanceTrackerVisibility = $0 }
+
+            Button {
+                isLogsViewerVisible = true
+            } label: {
+                Label {
+                    Text("Show logs")
+                } icon: {
+                    Image(systemName: "text.insert")
+                }
+            }
+
         } label: {
             Image(systemName: "gearshape.fill")
                 .foregroundColor(colors.text)
+        }.sheet(isPresented: $isLogsViewerVisible) {
+            NavigationView {
+                MemoryLogViewer()
+            }
         }
     }
 

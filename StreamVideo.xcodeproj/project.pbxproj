@@ -58,6 +58,11 @@
 		406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
+		407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
+		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
+		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
+		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
+		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
@@ -846,6 +851,9 @@
 		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
+		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
+		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
+		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
 		409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadableContentGuide.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
@@ -1634,6 +1642,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
 				40F445D02A9E2028004BE3DA /* Reactions */,
 				40F445B82A9E0809004BE3DA /* AudioFilter */,
 				40F445B72A9E05C2004BE3DA /* Services */,
@@ -1692,6 +1701,16 @@
 				847B47B42A249E7E000714CE /* Examples.swift */,
 			);
 			path = Examples;
+			sourceTree = "<group>";
+		};
+		409386182AA09E3900FF5AF4 /* MemoryLogDestination */ = {
+			isa = PBXGroup;
+			children = (
+				409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */,
+				4093861B2AA0A11500FF5AF4 /* LogQueue.swift */,
+				4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */,
+			);
+			path = MemoryLogDestination;
 			sourceTree = "<group>";
 		};
 		409BFA412A9F7BAA003341EF /* ReadableContentGuide */ = {
@@ -3589,6 +3608,7 @@
 				40F445D82A9E21BB004BE3DA /* DemoCallModifier.swift in Sources */,
 				4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */,
 				40F445B42A9E01B2004BE3DA /* TokenProvider.swift in Sources */,
+				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				848C469D2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift in Sources */,
 				40F445ED2A9E2A24004BE3DA /* DemoControls.swift in Sources */,
 				401A64AE2A9DF81200534ED1 /* UserProvider.swift in Sources */,
@@ -3631,8 +3651,10 @@
 				4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */,
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
 				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
+				4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */,
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
 				401A64AB2A9DF7EC00534ED1 /* StreamChatWrapper.swift in Sources */,
+				4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */,
 				40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */,
 				40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */,
 				40F446002A9E2B5E004BE3DA /* LinkInfoView.swift in Sources */,
@@ -3676,6 +3698,7 @@
 				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
 				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
+				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
 				406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */,
 				406A8EA82AA1D80C001F598A /* AudioFilter.swift in Sources */,
 				406A8EA02AA1D7E9001F598A /* View+OptionalPublisher.swift in Sources */,
@@ -3692,6 +3715,7 @@
 				406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */,
 				406A8E9F2AA1D7E9001F598A /* CallViewModel+CallSettingsPublisher.swift in Sources */,
 				406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */,
+				407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */,
 				406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */,
 				406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */,
 				406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */,
