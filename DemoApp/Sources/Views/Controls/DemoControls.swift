@@ -30,7 +30,7 @@ struct AppControlsWithChat: View {
 
     var body: some View {
         VStack {
-            HStack(alignment: .center, spacing: 16) {
+            HStack(alignment: .center, spacing: 12) {
                 if let chatViewModel, chatViewModel.isChatEnabled {
                     ChatIconView(viewModel: chatViewModel)
                 }
