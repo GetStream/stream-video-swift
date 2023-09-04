@@ -10,7 +10,8 @@ struct LoginView: View {
 
     @StateObject var viewModel: LoginViewModel
     var completion: (UserCredentials) -> ()
-    
+    @Injected(\.appearance) var appearance
+
     @State var addUserShown = false
     @State private var appState: AppState = .shared
     @State private var showJoinCallPopup = false
@@ -68,14 +69,14 @@ struct LoginView: View {
             .listStyle(.plain)
         }
         .alignedToReadableContentGuide()
-        .foregroundColor(.primary)
+        .foregroundColor(appearance.colors.text)
         .overlay(
             appState.loading ? ProgressView() : nil
         )
         .sheet(isPresented: $addUserShown, onDismiss: {}) {
             AddUserView()
         }
-        .sheet(isPresented: $showJoinCallPopup) {
+        .halfSheetIfAvailable(isPresented: $showJoinCallPopup) {
             JoinCallView(viewModel: viewModel, completion: completion)
         }
         .navigationTitle("Select a user")

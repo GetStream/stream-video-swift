@@ -14,30 +14,24 @@ struct JoinCallView: View {
     @State private var callId = ""
 
     var body: some View {
-        VStack {
-            Text("Join Call")
-                .font(.title)
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding([.bottom])
+        NavigationView {
+            ScrollView {
+                VStack {
+                    TextField("Call Id", text: $callId)
+                        .textFieldStyle(DemoTextfieldStyle())
 
-            VStack(spacing: 16) {
-                TextField("Enter call id", text: $callId)
-
-                Button {
-                    presentationMode.wrappedValue.dismiss()
-                    viewModel.joinCallAnonymously(callId: callId, completion: completion)
-                } label: {
-                    Text("Join call")
+                    Button {
+                        presentationMode.wrappedValue.dismiss()
+                        viewModel.joinCallAnonymously(callId: callId, completion: completion)
+                    } label: {
+                        CallButtonView(title: "Join", isDisabled: callId.isEmpty)
+                            .disabled(callId.isEmpty)
+                    }
                 }
-                .frame(maxWidth: .infinity, minHeight: 50)
-                .background(Color.blue)
-                .foregroundColor(Color.white)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
             }
-
-            Spacer()
+            .padding()
+            .navigationTitle("Join Call")
+            .overlay( AppState.shared.loading ? ProgressView() : nil)
         }
-        .padding()
-        .overlay( AppState.shared.loading ? ProgressView() : nil)
     }
 }
