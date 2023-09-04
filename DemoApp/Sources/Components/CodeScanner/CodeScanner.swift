@@ -25,7 +25,6 @@ enum ScanError: Error {
 /// The result from a successful scan: the string that was scanned, and also the type of data that was found.
 /// The type is useful for times when you've asked to scan several different code types at the same time, because
 /// it will report the exact code type that was found.
-@available(macCatalyst 14.0, *)
 struct ScanResult {
     /// The contents of the code.
     let string: String
@@ -65,7 +64,6 @@ struct CodeScannerView: UIViewControllerRepresentable {
     var simulatedData = ""
     var shouldVibrateOnSuccess: Bool
     var isTorchOn: Bool
-    var isGalleryPresented: Binding<Bool>
     var videoCaptureDevice: AVCaptureDevice?
     var completion: (Result<ScanResult, ScanError>) -> Void
 
@@ -78,7 +76,6 @@ struct CodeScannerView: UIViewControllerRepresentable {
         simulatedData: String = "",
         shouldVibrateOnSuccess: Bool = true,
         isTorchOn: Bool = false,
-        isGalleryPresented: Binding<Bool> = .constant(false),
         videoCaptureDevice: AVCaptureDevice? = AVCaptureDevice.bestForVideo,
         completion: @escaping (Result<ScanResult, ScanError>) -> Void
     ) {
@@ -90,7 +87,6 @@ struct CodeScannerView: UIViewControllerRepresentable {
         self.simulatedData = simulatedData
         self.shouldVibrateOnSuccess = shouldVibrateOnSuccess
         self.isTorchOn = isTorchOn
-        self.isGalleryPresented = isGalleryPresented
         self.videoCaptureDevice = videoCaptureDevice
         self.completion = completion
     }
@@ -103,7 +99,6 @@ struct CodeScannerView: UIViewControllerRepresentable {
         uiViewController.parentView = self
         uiViewController.updateViewController(
             isTorchOn: isTorchOn,
-            isGalleryPresented: isGalleryPresented.wrappedValue,
             isManualCapture: scanMode == .manual,
             isManualSelect: manualSelect
         )
@@ -111,7 +106,6 @@ struct CodeScannerView: UIViewControllerRepresentable {
 
 }
 
-@available(macCatalyst 14.0, *)
 struct CodeScannerView_Previews: PreviewProvider {
     static var previews: some View {
         CodeScannerView(codeTypes: [.qr]) { result in
@@ -120,7 +114,7 @@ struct CodeScannerView_Previews: PreviewProvider {
     }
 }
 
-final class ScannerViewController: UIViewController, UIImagePickerControllerDelegate, UINavigationControllerDelegate, AVCaptureMetadataOutputObjectsDelegate, UIAdaptivePresentationControllerDelegate {
+final class ScannerViewController: UIViewController, UINavigationControllerDelegate, AVCaptureMetadataOutputObjectsDelegate, UIAdaptivePresentationControllerDelegate {
     private let photoOutput = AVCapturePhotoOutput()
     private var isCapturing = false
     private var handler: ((UIImage) -> Void)?
@@ -132,15 +126,6 @@ final class ScannerViewController: UIViewController, UIImagePickerControllerDele
 
     let fallbackVideoCaptureDevice = AVCaptureDevice.default(for: .video)
 
-    private var isGalleryShowing: Bool = false {
-        didSet {
-            // Update binding
-            if parentView.isGalleryPresented.wrappedValue != isGalleryShowing {
-                parentView.isGalleryPresented.wrappedValue = isGalleryShowing
-            }
-        }
-    }
-
     init(showViewfinder: Bool = true, parentView: CodeScannerView) {
         self.parentView = parentView
         self.showViewfinder = showViewfinder
@@ -150,62 +135,6 @@ final class ScannerViewController: UIViewController, UIImagePickerControllerDele
     required init?(coder: NSCoder) {
         self.showViewfinder = false
         super.init(coder: coder)
-    }
-
-    func openGallery() {
-        isGalleryShowing = true
-        let imagePicker = UIImagePickerController()
-        imagePicker.delegate = self
-        imagePicker.presentationController?.delegate = self
-        present(imagePicker, animated: true, completion: nil)
-    }
-
-    @objc func openGalleryFromButton(_ sender: UIButton) {
-        openGallery()
-    }
-
-    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey: Any]) {
-        isGalleryShowing = false
-
-        if let qrcodeImg = info[.originalImage] as? UIImage {
-            let detector = CIDetector(ofType: CIDetectorTypeQRCode, context: nil, options: [CIDetectorAccuracy: CIDetectorAccuracyHigh])!
-            let ciImage = CIImage(image:qrcodeImg)!
-            var qrCodeLink = ""
-
-            let features = detector.features(in: ciImage)
-
-            for feature in features as! [CIQRCodeFeature] {
-                qrCodeLink = feature.messageString!
-                if qrCodeLink == "" {
-                    didFail(reason: .badOutput)
-                } else {
-                    let corners = [
-                        feature.bottomLeft,
-                        feature.bottomRight,
-                        feature.topRight,
-                        feature.topLeft
-                    ]
-                    let result = ScanResult(string: qrCodeLink, type: .qr, image: qrcodeImg, corners: corners)
-                    found(result)
-                }
-
-            }
-
-        } else {
-            print("Something went wrong")
-        }
-
-        dismiss(animated: true, completion: nil)
-    }
-
-    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
-        isGalleryShowing = false
-        dismiss(animated: true, completion: nil)
-    }
-
-    func presentationControllerDidDismiss(_ presentationController: UIPresentationController) {
-        // Gallery is no longer being presented
-        isGalleryShowing = false
     }
 
     var captureSession: AVCaptureSession?
@@ -457,7 +386,11 @@ final class ScannerViewController: UIViewController, UIImagePickerControllerDele
         manualCaptureButton.isHidden = !isManualCapture
     }
 
-    func updateViewController(isTorchOn: Bool, isGalleryPresented: Bool, isManualCapture: Bool, isManualSelect: Bool) {
+    func updateViewController(
+        isTorchOn: Bool,
+        isManualCapture: Bool,
+        isManualSelect: Bool
+    ) {
         guard let videoCaptureDevice = parentView.videoCaptureDevice ?? fallbackVideoCaptureDevice else {
             return
         }
@@ -466,10 +399,6 @@ final class ScannerViewController: UIViewController, UIImagePickerControllerDele
             try? videoCaptureDevice.lockForConfiguration()
             videoCaptureDevice.torchMode = isTorchOn ? .on : .off
             videoCaptureDevice.unlockForConfiguration()
-        }
-
-        if isGalleryPresented && !isGalleryShowing {
-            openGallery()
         }
 
 #if !targetEnvironment(simulator)
