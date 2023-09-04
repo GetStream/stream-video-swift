@@ -58,6 +58,8 @@
 		406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
+		407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
+		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
@@ -3696,6 +3698,7 @@
 				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
 				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
+				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
 				406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */,
 				406A8EA82AA1D80C001F598A /* AudioFilter.swift in Sources */,
 				406A8EA02AA1D7E9001F598A /* View+OptionalPublisher.swift in Sources */,
@@ -3712,6 +3715,7 @@
 				406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */,
 				406A8E9F2AA1D7E9001F598A /* CallViewModel+CallSettingsPublisher.swift in Sources */,
 				406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */,
+				407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */,
 				406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */,
 				406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */,
 				406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */,
