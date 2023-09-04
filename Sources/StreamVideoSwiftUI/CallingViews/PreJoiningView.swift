@@ -66,36 +66,54 @@ struct LobbyContentView: View {
     @Binding var callSettings: CallSettings
     var onJoinCallTap: () -> ()
     var onCloseLobby: () -> ()
+
+    @State private var contentSize: CGSize = .zero
     
     var body: some View {
-        GeometryReader { reader in
-            ZStack {
+        VStack {
+            HStack {
+                Button {} label: { Image(systemName: "xmark") }
+                    .hidden()
+                    .padding()
+
                 VStack {
-                    Spacer()
                     Text(L10n.WaitingRoom.title)
                         .font(.title)
                         .foregroundColor(colors.text)
                         .bold()
-                    
+
                     Text(L10n.WaitingRoom.subtitle)
                         .font(.body)
                         .foregroundColor(Color(colors.textLowEmphasis))
-                    
+                }
+                .frame(maxWidth: .infinity)
+
+                Button {
+                    onCloseLobby()
+                } label: {
+                    Image(systemName: "xmark")
+                        .foregroundColor(colors.text)
+                }
+                .padding()
+            }
+
+            ScrollView {
+                VStack {
                     CameraCheckView(
                         viewModel: viewModel,
                         microphoneChecker: microphoneChecker,
                         callSettings: callSettings,
-                        availableSize: reader.size
+                        availableSize: contentSize
                     )
-                    
+
                     if microphoneChecker.isSilent {
                         Text(L10n.WaitingRoom.Mic.notWorking)
                             .font(.caption)
                             .foregroundColor(colors.text)
                     }
-                                        
+
                     CallSettingsView(callSettings: $callSettings)
-                    
+
                     JoinCallView(
                         callId: callId,
                         callType: callType,
@@ -103,24 +121,16 @@ struct LobbyContentView: View {
                         onJoinCallTap: onJoinCallTap
                     )
                 }
-                .padding()
-                
-                TopRightView {
-                    Button {
-                        onCloseLobby()
-                    } label: {
-                        Image(systemName: "xmark")
-                            .foregroundColor(colors.text)
-                    }
-                    .padding()
-                }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+            .padding()
         }
-        .onAppear {
-            viewModel.startCamera(front: true)
+        .modifier(SizeModifier())
+        .onPreferenceChange(SizePreferenceKey.self) {
+            self.contentSize = $0
         }
+        .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear { viewModel.startCamera(front: true) }
         .onDisappear {
             viewModel.stopCamera()
             viewModel.cleanUp()
@@ -138,14 +148,17 @@ struct CameraCheckView: View {
     @ObservedObject var microphoneChecker: MicrophoneChecker
     var callSettings: CallSettings
     var availableSize: CGSize
-    
+
+    var availableWidth: CGFloat { max(availableSize.width - 32, 0) }
+    var availableHeight: CGFloat { cameraSize }
+
     var body: some View {
         Group {
             if let image = viewModel.viewfinderImage, callSettings.videoOn {
                 image
                     .resizable()
                     .aspectRatio(contentMode: .fill)
-                    .frame(width: availableSize.width - 32, height: cameraSize)
+                    .frame(width: availableWidth, height: availableHeight)
                     .cornerRadius(16)
                     .accessibility(identifier: "cameraCheckView")
                     .streamAccessibility(value: "1")
@@ -153,7 +166,7 @@ struct CameraCheckView: View {
                 ZStack {
                     Rectangle()
                         .fill(colors.lobbySecondaryBackground)
-                        .frame(width: availableSize.width - 32, height: cameraSize)
+                        .frame(width: availableWidth, height: availableHeight)
                         .cornerRadius(16)
 
                     if #available(iOS 14.0, *) {
@@ -163,7 +176,7 @@ struct CameraCheckView: View {
                     }
                 }
                 .opacity(callSettings.videoOn ? 0 : 1)
-                .frame(width: availableSize.width - 32, height: cameraSize)
+                .frame(width: availableWidth, height: availableHeight)
             }
         }
         .overlay(
@@ -340,5 +353,28 @@ struct ParticipantsInCallView: View {
             }
         }
         .frame(height: viewSize)
+    }
+}
+
+struct SizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
+    }
+}
+
+struct SizeModifier: ViewModifier {
+    private var sizeView: some View {
+        GeometryReader { geometry in
+            Color
+                .clear
+                .preference(key: SizePreferenceKey.self, value: geometry.size)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    func body(content: Content) -> some View {
+        content.overlay(sizeView)
     }
 }
