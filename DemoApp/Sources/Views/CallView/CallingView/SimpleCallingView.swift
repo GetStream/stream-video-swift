@@ -42,22 +42,22 @@ struct SimpleCallingView: View {
 
             Text("Build reliable video calling, audio rooms, and live streaming with our easy-to-use SDKs and global edge network")
                 .multilineTextAlignment(.center)
-                .foregroundColor(.init(appearance.colors.textLowEmphasis.cgColor))
+                .foregroundColor(.init(appearance.colors.textLowEmphasis))
                 .padding()
 
             HStack {
                 Text("Call ID number")
                     .font(.caption)
-                    .foregroundColor(.init(appearance.colors.textLowEmphasis.cgColor))
+                    .foregroundColor(.init(appearance.colors.textLowEmphasis))
                 Spacer()
             }
 
             HStack {
                 TextField("Call ID", text: $text)
                     .padding(.all, 12)
-                    .background(Color(appearance.colors.background.cgColor))
+                    .background(Color(appearance.colors.background))
                     .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis.cgColor), lineWidth: 1))
+                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
                 Button {
                     resignFirstResponder()
                     viewModel.enterLobby(callType: .default, callId: text, members: [])
@@ -71,7 +71,7 @@ struct SimpleCallingView: View {
             HStack {
                 Text("Don't have a Call ID?")
                     .font(.caption)
-                    .foregroundColor(.init(appearance.colors.textLowEmphasis.cgColor))
+                    .foregroundColor(.init(appearance.colors.textLowEmphasis))
                 Spacer()
             }
             .padding(.top)

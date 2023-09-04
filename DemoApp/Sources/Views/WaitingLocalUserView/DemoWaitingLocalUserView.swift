@@ -47,9 +47,9 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                                 Image(systemName: "doc.on.doc")
                             }
                             .padding(.all, 12)
-                            .background(Color(appearance.colors.background.cgColor))
+                            .background(Color(appearance.colors.background))
                             .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis.cgColor), lineWidth: 1))
+                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
                             .padding(.vertical)
                         }
 
