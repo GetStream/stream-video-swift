@@ -67,6 +67,9 @@
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
+		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
+		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
+		40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */; };
 		40F161AB2A4C6B5C00846E3E /* ScreenSharingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */; };
 		40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */; };
 		40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
@@ -857,6 +860,9 @@
 		409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadableContentGuide.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
+		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
+		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
+		40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingTopView.swift; sourceTree = "<group>"; };
 		40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSharingSession.swift; sourceTree = "<group>"; };
 		40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserCredentials.swift; sourceTree = "<group>"; };
 		40F445AD2A9DFC34004BE3DA /* UserState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserState.swift; sourceTree = "<group>"; };
@@ -1643,6 +1649,7 @@
 			isa = PBXGroup;
 			children = (
 				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
+				40D9463F2AA5ECDC00C8861B /* CodeScanner */,
 				40F445D02A9E2028004BE3DA /* Reactions */,
 				40F445B82A9E0809004BE3DA /* AudioFilter */,
 				40F445B72A9E05C2004BE3DA /* Services */,
@@ -1746,6 +1753,14 @@
 			path = Events;
 			sourceTree = "<group>";
 		};
+		40D9463F2AA5ECDC00C8861B /* CodeScanner */ = {
+			isa = PBXGroup;
+			children = (
+				40D946402AA5ECEF00C8861B /* CodeScanner.swift */,
+			);
+			path = CodeScanner;
+			sourceTree = "<group>";
+		};
 		40F445B52A9E04B2004BE3DA /* Storage */ = {
 			isa = PBXGroup;
 			children = (
@@ -1822,6 +1837,8 @@
 			children = (
 				409BFA442A9F7E92003341EF /* CallingView */,
 				84ED240C286C9515002A3186 /* DemoCallContainerView.swift */,
+				40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */,
+				40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */,
 				40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */,
 				40F446012A9E2C23004BE3DA /* DemoCallView.swift */,
 			);
@@ -3624,6 +3641,7 @@
 				403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */,
 				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
+				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
 				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
@@ -3634,6 +3652,7 @@
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
 				40F445B02A9DFC58004BE3DA /* CallKitState.swift in Sources */,
+				40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */,
 				40F445CC2A9E1FC9004BE3DA /* StreamChatViewFactory.swift in Sources */,
@@ -3655,6 +3674,7 @@
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
 				401A64AB2A9DF7EC00534ED1 /* StreamChatWrapper.swift in Sources */,
 				4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */,
+				40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */,
 				40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */,
 				40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */,
 				40F446002A9E2B5E004BE3DA /* LinkInfoView.swift in Sources */,

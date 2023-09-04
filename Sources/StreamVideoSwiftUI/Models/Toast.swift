@@ -11,9 +11,21 @@ public struct Toast: Equatable {
     public var message: String
     /// The placement of the toast.
     /// The default placement is `.top`.
-    public var placement: ToastPlacement = .top
+    public var placement: ToastPlacement
     /// The duration of the toast.
-    public var duration: Double = 2.5
+    public var duration: Double
+
+    public init(
+        style: ToastStyle,
+        message: String,
+        placement: ToastPlacement = .top,
+        duration: Double = 2.5
+    ) {
+        self.style = style
+        self.message = message
+        self.placement = placement
+        self.duration = duration
+    }
 }
 
 public enum ToastPlacement {

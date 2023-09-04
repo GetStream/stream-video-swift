@@ -8,6 +8,8 @@ import Combine
 
 extension URL {
 
+    var isWeb: Bool { scheme == "http" || scheme == "https" }
+
     var queryParameters: [String: String] {
         guard
             let components = URLComponents(url: self, resolvingAgainstBaseURL: true),
@@ -42,5 +44,9 @@ extension URL {
         components.queryItems = (components.queryItems ?? []) + [queryItem]
 
         return components.url ?? self
+    }
+
+    var host: String? {
+        URLComponents(url: self, resolvingAgainstBaseURL: false)?.host
     }
 }

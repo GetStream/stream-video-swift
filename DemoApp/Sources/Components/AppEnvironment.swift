@@ -33,7 +33,7 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    enum BaseURL: String, Debuggable {
+    enum BaseURL: String, Debuggable, CaseIterable {
         case staging = "https://staging.getstream.io"
         case production = "https://getstream.io"
 
@@ -188,5 +188,42 @@ extension AppEnvironment {
 
     static var chatIntegration: ChatIntegration = {
         .enabled
+    }()
+}
+
+extension AppEnvironment {
+
+    enum SupportedDeeplink: Debuggable {
+        case staging
+        case production
+
+        var deeplinkURL: URL {
+            switch self {
+            case .staging:
+                return BaseURL.staging.url
+            case .production:
+                return BaseURL.production.url
+            }
+        }
+
+        var title: String {
+            switch self {
+            case .staging:
+                return "Staging"
+            case .production:
+                return "Production"
+            }
+        }
+    }
+
+    static var supportedDeeplinks: [SupportedDeeplink] = {
+        switch configuration {
+        case .debug:
+            return [.staging, .production]
+        case .test:
+            return [.staging]
+        case .release:
+            return [.production]
+        }
     }()
 }

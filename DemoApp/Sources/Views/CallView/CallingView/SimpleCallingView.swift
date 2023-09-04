@@ -26,7 +26,7 @@ struct SimpleCallingView: View {
 
     var body: some View {
         VStack {
-            TopView()
+            DemoCallingTopView()
 
             Spacer()
 
@@ -53,17 +53,25 @@ struct SimpleCallingView: View {
             }
 
             HStack {
-                TextField("Call ID", text: $text)
-                    .padding(.all, 12)
-                    .background(Color(appearance.colors.background))
-                    .clipShape(RoundedRectangle(cornerRadius: 8))
-                    .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                HStack {
+                    TextField("Call ID", text: $text)
+                        .foregroundColor(appearance.colors.text)
+                        .padding(.all, 12)
+
+                    DemoQRCodeScannerButton(viewModel: viewModel) { self.text = $0 ?? self.text }
+                }
+                .background(Color(appearance.colors.background))
+                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+
                 Button {
                     resignFirstResponder()
                     viewModel.enterLobby(callType: .default, callId: text, members: [])
                 } label: {
-                    CallButtonView(title: "Join Call", maxWidth: 120, isDisabled: appState.loading || text.isEmpty)
-                        .disabled(appState.loading || text.isEmpty)
+                    CallButtonView(
+                        title: "Join Call", maxWidth: 120, isDisabled: appState.loading || text.isEmpty
+                    )
+                    .disabled(appState.loading || text.isEmpty)
                 }
                 .disabled(appState.loading || text.isEmpty)
             }
@@ -119,55 +127,6 @@ struct SimpleCallingView: View {
             await MainActor.run {
                 viewModel.joinCall(callType: callType, callId: callId)
             }
-        }
-    }
-}
-
-private struct TopView: View {
-
-    @Injected(\.streamVideo) var streamVideo
-
-    @State var logoutAlertShown = false
-
-    var body: some View {
-        HStack {
-            if AppEnvironment.configuration.isRelease {
-                Label {
-                    Text(streamVideo.user.name)
-                        .bold()
-                        .foregroundColor(.primary)
-                } icon: {
-                    UserAvatar(imageURL: streamVideo.user.imageURL, size: 32)
-                        .accessibilityIdentifier("userAvatar")
-                }
-            } else {
-                Button {
-                    logoutAlertShown = !AppEnvironment.configuration.isRelease
-                } label: {
-                    Label {
-                        Text(streamVideo.user.name)
-                            .bold()
-                            .foregroundColor(.primary)
-                    } icon: {
-                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 32)
-                            .accessibilityIdentifier("userAvatar")
-                    }
-                }
-            }
-
-            Spacer()
-        }
-        .alert(isPresented: $logoutAlertShown) {
-            Alert(
-                title: Text("Sign out"),
-                message: Text("Are you sure you want to sign out?"),
-                primaryButton: .destructive(Text("Sign out")) {
-                    withAnimation {
-                        AppState.shared.logout()
-                    }
-                },
-                secondaryButton: .cancel()
-            )
         }
     }
 }

@@ -31,6 +31,10 @@ struct DebugMenu: View {
         }
     }
 
+    @State private var supportedDeeplinks: [AppEnvironment.SupportedDeeplink] = AppEnvironment.supportedDeeplinks {
+        didSet { AppEnvironment.supportedDeeplinks = supportedDeeplinks }
+    }
+
     @State private var performanceTrackerVisibility: AppEnvironment.PerformanceTrackerVisibility = AppEnvironment.performanceTrackerVisibility {
         didSet {
             switch performanceTrackerVisibility {
@@ -58,6 +62,18 @@ struct DebugMenu: View {
                 currentValue: baseURL,
                 label: "Environment"
             ) { self.baseURL = $0 }
+
+            makeMultipleSelectMenu(
+                for: [AppEnvironment.SupportedDeeplink.production, .staging],
+                currentValues: .init(supportedDeeplinks),
+                label: "Supported Deeplinks"
+            ) { item, isSelected in
+                if isSelected {
+                    supportedDeeplinks = supportedDeeplinks.filter { item != $0 }
+                } else {
+                    supportedDeeplinks.append(item)
+                }
+            }
 
             makeMenu(
                 for: [.simple, .detailed],
@@ -122,5 +138,30 @@ struct DebugMenu: View {
             Text(label)
         }
     }
-}
 
+    @ViewBuilder
+    private func makeMultipleSelectMenu<Item: Debuggable>(
+        for items: [Item],
+        currentValues: Set<Item>,
+        label: String,
+        updater: @escaping (Item, Bool) -> Void
+    ) -> some View {
+        Menu {
+            ForEach(items, id: \.self) { item in
+                Button {
+                    updater(item, currentValues.contains(item))
+                } label: {
+                    Label {
+                        Text(item.title)
+                    } icon: {
+                        currentValues.contains(item)
+                        ? AnyView(Image(systemName: "checkmark"))
+                        : AnyView(EmptyView())
+                    }
+                }
+            }
+        } label: {
+            Text(label)
+        }
+    }
+}
