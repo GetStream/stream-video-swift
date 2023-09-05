@@ -21,10 +21,25 @@ class LivestreamPlayerViewModel: ObservableObject {
         }
     }
     @Published private(set) var streamPaused = false
+    @Published private(set) var loading = false
+    @Published var errorAlertShown = false
     
+    let call: Call
+    let showParticipantCount: Bool
+    
+    private let audioOn: Bool
     private let formatter = DateComponentsFormatter()
     
-    init() {
+    init(
+        type: String,
+        id: String,
+        audioOn: Bool = false,
+        showParticipantCount: Bool = true
+    ) {
+        let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
+        self.call = call
+        self.audioOn = audioOn
+        self.showParticipantCount = showParticipantCount
         formatter.unitsStyle = .positional
     }
     
@@ -43,5 +58,19 @@ class LivestreamPlayerViewModel: ObservableObject {
     func duration(from state: CallState) -> String? {
         guard state.duration > 0  else { return nil }
         return formatter.string(from: state.duration)
+    }
+    
+    func joinLivestream() {
+        Task {
+            do {
+                loading = true
+                try await call.join(callSettings: CallSettings(audioOn: audioOn))
+                loading = false
+            } catch {
+                errorAlertShown = true
+                loading = false
+                log.error("Error joining livestream")
+            }
+        }
     }
 }

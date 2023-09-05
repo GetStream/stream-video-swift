@@ -10,73 +10,92 @@ public struct LivestreamPlayer: View {
     
     @Injected(\.colors) var colors
     
-    var call: Call
     var onFullScreenStateChange: ((Bool) -> ())?
     
     @StateObject var state: CallState
     @StateObject var viewModel: LivestreamPlayerViewModel
     
     public init(
-        call: Call,
+        type: String,
+        id: String,
+        audioOn: Bool = false,
+        showParticipantCount: Bool = true,
         onFullScreenStateChange: ((Bool) -> ())? = nil
     ) {
-        self.call = call
-        _viewModel = StateObject(wrappedValue: LivestreamPlayerViewModel())
-        _state = StateObject(wrappedValue: call.state)
+        let viewModel = LivestreamPlayerViewModel(
+            type: type,
+            id: id,
+            audioOn: audioOn,
+            showParticipantCount: showParticipantCount
+        )
+        _viewModel = StateObject(wrappedValue: viewModel)
+        _state = StateObject(wrappedValue: viewModel.call.state)
         self.onFullScreenStateChange = onFullScreenStateChange
     }
     
     public var body: some View {
-        if state.backstage {
-            Text(L10n.Call.Livestream.notStarted)
-        } else {
-            ZStack {
-                GeometryReader { reader in
-                    if let participant = state.participants.first {
-                        VideoCallParticipantView(
-                            participant: participant,
-                            availableSize: reader.size,
-                            contentMode: .scaleAspectFit,
-                            customData: [:],
-                            call: call
-                        )
-                        .onTapGesture {
-                            viewModel.update(controlsShown: true)
-                        }
-                        .overlay(
-                            viewModel.controlsShown ? LivestreamPlayPauseButton(
-                                viewModel: viewModel
-                            ) {
-                                participant.track?.isEnabled = !viewModel.streamPaused
-                                if !viewModel.streamPaused {
-                                    viewModel.update(controlsShown: false)
-                                }
-                            } : nil
-                        )
-                    }
-                }
-
-                if viewModel.controlsShown || !viewModel.fullScreen {
-                    VStack {
-                        Spacer()
-                        HStack(spacing: 16) {
-                            LivestreamDurationView(duration: viewModel.duration(from: state))
-                            LivestreamParticipantsView(
-                                participantsCount: Int(call.state.participantCount)
+        ZStack {
+            if viewModel.loading {
+                ProgressView()
+            } else if state.backstage {
+                Text(L10n.Call.Livestream.notStarted)
+            } else {
+                ZStack {
+                    GeometryReader { reader in
+                        if let participant = state.participants.first {
+                            VideoCallParticipantView(
+                                participant: participant,
+                                availableSize: reader.size,
+                                contentMode: .scaleAspectFit,
+                                customData: [:],
+                                call: viewModel.call
                             )
-                            Spacer()
-                            FullScreenButton(viewModel: viewModel)
+                            .onTapGesture {
+                                viewModel.update(controlsShown: true)
+                            }
+                            .overlay(
+                                viewModel.controlsShown ? LivestreamPlayPauseButton(
+                                    viewModel: viewModel
+                                ) {
+                                    participant.track?.isEnabled = !viewModel.streamPaused
+                                    if !viewModel.streamPaused {
+                                        viewModel.update(controlsShown: false)
+                                    }
+                                } : nil
+                            )
                         }
-                        .padding()
-                        .background(Color.clear)
-                        .foregroundColor(colors.text)
+                    }
+
+                    if viewModel.controlsShown || !viewModel.fullScreen {
+                        VStack {
+                            Spacer()
+                            HStack(spacing: 16) {
+                                LivestreamDurationView(duration: viewModel.duration(from: state))
+                                if viewModel.showParticipantCount {
+                                    LivestreamParticipantsView(
+                                        participantsCount: Int(viewModel.call.state.participantCount)
+                                    )
+                                }                                
+                                Spacer()
+                                FullScreenButton(viewModel: viewModel)
+                            }
+                            .padding()
+                            .background(Color.clear)
+                            .foregroundColor(colors.text)
+                        }
                     }
                 }
-            }
-            .onChange(of: viewModel.fullScreen) { newValue in
-                onFullScreenStateChange?(newValue)
+                .onChange(of: viewModel.fullScreen) { newValue in
+                    onFullScreenStateChange?(newValue)
+                }
             }
         }
+        .onAppear {
+            viewModel.joinLivestream()
+        }
+        .alert(isPresented: $viewModel.errorAlertShown, content: {
+            return Alert.defaultErrorAlert
+        })
     }
 }
 

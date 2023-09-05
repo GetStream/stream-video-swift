@@ -8,14 +8,24 @@ import SnapshotTesting
 import XCTest
 
 final class LivestreamPlayer_Tests: StreamVideoTestCase {
+    
+    private let callId = "test"
+    private let callType = "livestream"
 
     @MainActor
     func test_livestreamPlayer_snapshot() async throws {
         // Given
-        let call = streamVideo?.call(callType: .livestream, callId: "test")
+        let player = LivestreamPlayer(type: callType, id: callId)
+            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
-        // When
-        let player = LivestreamPlayer(call: call!)
+        // Then
+        assertSnapshot(matching: player, as: .image)
+    }
+    
+    @MainActor
+    func test_livestreamPlayer_snapshotHideParticipantCount() async throws {
+        // Given
+        let player = LivestreamPlayer(type: callType, id: callId, showParticipantCount: false)
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
@@ -25,7 +35,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_durationSeconds() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         let callState = CallState()
         callState.duration = 5
         
@@ -39,7 +49,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_durationMinutes() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         let callState = CallState()
         callState.duration = 65
         
@@ -53,7 +63,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_durationHours() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         let callState = CallState()
         callState.duration = 3605
         
@@ -67,7 +77,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_durationEmpty() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         let callState = CallState()
         
         // When
@@ -80,7 +90,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_updateFullScreen() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         
         // When
         viewModel.update(fullScreen: true)
@@ -92,7 +102,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_updateControlsShown() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)
         
         // When
         viewModel.update(controlsShown: false)
@@ -104,7 +114,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     @MainActor
     func test_livestreamPlayerVM_pauseStream() {
         // Given
-        let viewModel = LivestreamPlayerViewModel()
+        let viewModel = LivestreamPlayerViewModel(type: callType, id: callId)        
         
         // When
         viewModel.update(streamPaused: true)
