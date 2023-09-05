@@ -535,6 +535,7 @@
 		84D424C32AA0EA6300473150 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84D424C22AA0EA6300473150 /* Assets.xcassets */; };
 		84D425082AA61E9900473150 /* LivestreamPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D425062AA61E7C00473150 /* LivestreamPlayer.swift */; };
 		84D4250D2AA6240A00473150 /* LivestreamPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D4250C2AA6240A00473150 /* LivestreamPlayerViewModel.swift */; };
+		84D425102AA72F3500473150 /* LivestreamPlayer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D4250F2AA72F3500473150 /* LivestreamPlayer_Tests.swift */; };
 		84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493B29E7F5D2002CA428 /* CallsView.swift */; };
 		84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493D29E7F75E002CA428 /* CallsViewModel.swift */; };
 		84D6494029E94C14002CA428 /* CallsQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493F29E94C14002CA428 /* CallsQuery.swift */; };
@@ -1275,6 +1276,7 @@
 		84D424C22AA0EA6300473150 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		84D425062AA61E7C00473150 /* LivestreamPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamPlayer.swift; sourceTree = "<group>"; };
 		84D4250C2AA6240A00473150 /* LivestreamPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamPlayerViewModel.swift; sourceTree = "<group>"; };
+		84D4250F2AA72F3500473150 /* LivestreamPlayer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamPlayer_Tests.swift; sourceTree = "<group>"; };
 		84D6493B29E7F5D2002CA428 /* CallsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsView.swift; sourceTree = "<group>"; };
 		84D6493D29E7F75E002CA428 /* CallsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsViewModel.swift; sourceTree = "<group>"; };
 		84D6493F29E94C14002CA428 /* CallsQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsQuery.swift; sourceTree = "<group>"; };
@@ -2629,6 +2631,14 @@
 			path = Livestreaming;
 			sourceTree = "<group>";
 		};
+		84D4250E2AA72F1200473150 /* Livestreaming */ = {
+			isa = PBXGroup;
+			children = (
+				84D4250F2AA72F3500473150 /* LivestreamPlayer_Tests.swift */,
+			);
+			path = Livestreaming;
+			sourceTree = "<group>";
+		};
 		84D6494529E9F2B7002CA428 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
@@ -2958,6 +2968,7 @@
 				401480332A5423C70029166A /* Utils */,
 				829F7BFF29FAC5B1003EBACE /* CallView */,
 				82FF40BC2A17C6F500B4D95E /* CallingViews */,
+				84D4250E2AA72F1200473150 /* Livestreaming */,
 				84D424C22AA0EA6300473150 /* Assets.xcassets */,
 			);
 			path = StreamVideoSwiftUITests;
@@ -4192,6 +4203,7 @@
 				82FF40C22A17C74600B4D95E /* CallingParticipantView_Tests.swift in Sources */,
 				82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */,
 				82FF40BB2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift in Sources */,
+				84D425102AA72F3500473150 /* LivestreamPlayer_Tests.swift in Sources */,
 				82FF40C02A17C73C00B4D95E /* CallingGroupView_Tests.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
