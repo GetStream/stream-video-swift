@@ -41,3 +41,4 @@
 "alert.actions.ok" = "Ok";
 
 "call.livestream.not-started" = "Livestream is not started. Please come back later.";
+"call.livestream.live" = "Live";

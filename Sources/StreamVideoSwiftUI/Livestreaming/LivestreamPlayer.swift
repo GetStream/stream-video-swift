@@ -74,13 +74,7 @@ public struct LivestreamPlayer: View {
                         VStack {
                             Spacer()
                             HStack(spacing: 8) {
-                                Text("Live")
-                                    .font(.headline)
-                                    .padding(.vertical, 4)
-                                    .padding(.horizontal, 8)
-                                    .foregroundColor(controlsColor)
-                                    .background(colors.primaryButtonBackground)
-                                    .cornerRadius(8)
+                                LiveIndicator(controlsColor: controlsColor)
                                 if viewModel.showParticipantCount {
                                     LivestreamParticipantsView(
                                         participantsCount: Int(viewModel.call.state.participantCount)
@@ -115,6 +109,23 @@ public struct LivestreamPlayer: View {
     }
 }
 
+struct LiveIndicator: View {
+    
+    @Injected(\.colors) var colors
+    var controlsColor: Color
+    
+    var body: some View {
+        Text(L10n.Call.Livestream.live)
+            .font(.headline)
+            .padding(.vertical, 4)
+            .padding(.horizontal, 8)
+            .foregroundColor(controlsColor)
+            .background(colors.primaryButtonBackground)
+            .cornerRadius(8)
+    }
+    
+}
+
 struct LivestreamPlayPauseButton: View {
     
     @Injected(\.colors) var colors
@@ -136,7 +147,6 @@ struct LivestreamPlayPauseButton: View {
         }
 
     }
-    
 }
 
 struct LivestreamParticipantsView: View {
@@ -152,7 +162,6 @@ struct LivestreamParticipantsView: View {
         .padding(.all, 8)
         .cornerRadius(8)
     }
-    
 }
 
 struct LivestreamDurationView: View {
