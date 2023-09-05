@@ -5,7 +5,7 @@
 import Foundation
 
 /// Handles the speaker state during a call.
-public class SpeakerManager: ObservableObject, CallSettingsManager {
+public final class SpeakerManager: ObservableObject, CallSettingsManager, @unchecked Sendable {
         
     internal let callController: CallController
     @Published public internal(set) var status: CallSettingsStatus

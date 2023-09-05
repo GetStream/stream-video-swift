@@ -39,3 +39,5 @@
 "alert.error.title" = "Something went wrong.";
 "alert.error.message" = "The operation couldn't be completed.";
 "alert.actions.ok" = "Ok";
+
+"call.livestream.not-started" = "Livestream is not started. Please come back later.";

@@ -533,6 +533,8 @@
 		84D2E37929DC856D001D2118 /* CallMemberAddedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D2E37329DC856C001D2118 /* CallMemberAddedEvent.swift */; };
 		84D419B828E7155100F574F9 /* CallContainer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D419B728E7155100F574F9 /* CallContainer.swift */; };
 		84D424C32AA0EA6300473150 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 84D424C22AA0EA6300473150 /* Assets.xcassets */; };
+		84D425082AA61E9900473150 /* LivestreamPlayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D425062AA61E7C00473150 /* LivestreamPlayer.swift */; };
+		84D4250D2AA6240A00473150 /* LivestreamPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D4250C2AA6240A00473150 /* LivestreamPlayerViewModel.swift */; };
 		84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493B29E7F5D2002CA428 /* CallsView.swift */; };
 		84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493D29E7F75E002CA428 /* CallsViewModel.swift */; };
 		84D6494029E94C14002CA428 /* CallsQuery.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493F29E94C14002CA428 /* CallsQuery.swift */; };
@@ -1271,6 +1273,8 @@
 		84D2E37329DC856C001D2118 /* CallMemberAddedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallMemberAddedEvent.swift; sourceTree = "<group>"; };
 		84D419B728E7155100F574F9 /* CallContainer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallContainer.swift; sourceTree = "<group>"; };
 		84D424C22AA0EA6300473150 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		84D425062AA61E7C00473150 /* LivestreamPlayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamPlayer.swift; sourceTree = "<group>"; };
+		84D4250C2AA6240A00473150 /* LivestreamPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LivestreamPlayerViewModel.swift; sourceTree = "<group>"; };
 		84D6493B29E7F5D2002CA428 /* CallsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsView.swift; sourceTree = "<group>"; };
 		84D6493D29E7F75E002CA428 /* CallsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsViewModel.swift; sourceTree = "<group>"; };
 		84D6493F29E94C14002CA428 /* CallsQuery.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallsQuery.swift; sourceTree = "<group>"; };
@@ -2616,6 +2620,15 @@
 			path = Controllers;
 			sourceTree = "<group>";
 		};
+		84D425052AA61E6A00473150 /* Livestreaming */ = {
+			isa = PBXGroup;
+			children = (
+				84D425062AA61E7C00473150 /* LivestreamPlayer.swift */,
+				84D4250C2AA6240A00473150 /* LivestreamPlayerViewModel.swift */,
+			);
+			path = Livestreaming;
+			sourceTree = "<group>";
+		};
 		84D6494529E9F2B7002CA428 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
@@ -2925,6 +2938,7 @@
 				84D419B728E7155100F574F9 /* CallContainer.swift */,
 				8458872828A3F920002A81BF /* CallingViews */,
 				8434C523289AA2B60001490A /* CallView */,
+				84D425052AA61E6A00473150 /* Livestreaming */,
 				84EBAA91288C135700BE3176 /* Utils */,
 				8406266E2A37A3FB004B8748 /* Models */,
 				8434C532289BB8BE0001490A /* Resources */,
@@ -4078,8 +4092,10 @@
 				401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */,
 				84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */,
 				8435EB9029CDAADA00E02651 /* ParticipantsGridLayout.swift in Sources */,
+				84D4250D2AA6240A00473150 /* LivestreamPlayerViewModel.swift in Sources */,
 				8434C52D289AA41D0001490A /* ImageExtensions.swift in Sources */,
 				849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */,
+				84D425082AA61E9900473150 /* LivestreamPlayer.swift in Sources */,
 				848A73C229269E7D0089AA6E /* CornerDragableView.swift in Sources */,
 				84DC382D29A8B9EC00946713 /* CallParticipantMenuAction.swift in Sources */,
 				8490032B29D4769700AD9BB4 /* CallConnectingView.swift in Sources */,

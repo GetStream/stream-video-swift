@@ -12,7 +12,7 @@ protocol CallSettingsManager {
         newState state: Bool,
         current: Bool,
         action: (Bool) async throws  -> (),
-        onUpdate: (Bool) -> ()
+        onUpdate: @Sendable (Bool) -> ()
     ) async throws
 }
 
@@ -21,7 +21,7 @@ extension CallSettingsManager {
         newState state: Bool,
         current: Bool,
         action: (Bool) async throws  -> (),
-        onUpdate: (Bool) -> ()
+        onUpdate: @Sendable (Bool) -> ()
     ) async throws {
         let updatingState = await self.state.updatingState
         if state == current || updatingState == state {
@@ -29,7 +29,9 @@ extension CallSettingsManager {
         }
         await self.state.setUpdatingState(state)
         try await action(state)
-        onUpdate(state)
+        await MainActor.run {
+            onUpdate(state)
+        }
         await self.state.setUpdatingState(nil)
     }
 }
@@ -41,7 +43,7 @@ actor CallSettingsState {
     }
 }
 
-public enum CallSettingsStatus: String {
+public enum CallSettingsStatus: String, Sendable {
     case enabled
     case disabled
     
