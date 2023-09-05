@@ -10,6 +10,7 @@ public struct LivestreamPlayer: View {
     
     @Injected(\.colors) var colors
     
+    var controlsColor: Color
     var onFullScreenStateChange: ((Bool) -> ())?
     
     @StateObject var state: CallState
@@ -20,6 +21,7 @@ public struct LivestreamPlayer: View {
         id: String,
         audioOn: Bool = false,
         showParticipantCount: Bool = true,
+        controlsColor: Color = .white,
         onFullScreenStateChange: ((Bool) -> ())? = nil
     ) {
         let viewModel = LivestreamPlayerViewModel(
@@ -30,6 +32,7 @@ public struct LivestreamPlayer: View {
         )
         _viewModel = StateObject(wrappedValue: viewModel)
         _state = StateObject(wrappedValue: viewModel.call.state)
+        self.controlsColor = controlsColor
         self.onFullScreenStateChange = onFullScreenStateChange
     }
     
@@ -55,7 +58,8 @@ public struct LivestreamPlayer: View {
                             }
                             .overlay(
                                 viewModel.controlsShown ? LivestreamPlayPauseButton(
-                                    viewModel: viewModel
+                                    viewModel: viewModel,
+                                    controlsColor: controlsColor
                                 ) {
                                     participant.track?.isEnabled = !viewModel.streamPaused
                                     if !viewModel.streamPaused {
@@ -69,19 +73,31 @@ public struct LivestreamPlayer: View {
                     if viewModel.controlsShown || !viewModel.fullScreen {
                         VStack {
                             Spacer()
-                            HStack(spacing: 16) {
-                                LivestreamDurationView(duration: viewModel.duration(from: state))
+                            HStack(spacing: 8) {
+                                Text("Live")
+                                    .font(.headline)
+                                    .padding(.vertical, 4)
+                                    .padding(.horizontal, 8)
+                                    .foregroundColor(controlsColor)
+                                    .background(colors.primaryButtonBackground)
+                                    .cornerRadius(8)
                                 if viewModel.showParticipantCount {
                                     LivestreamParticipantsView(
                                         participantsCount: Int(viewModel.call.state.participantCount)
                                     )
-                                }                                
+                                }
                                 Spacer()
                                 FullScreenButton(viewModel: viewModel)
                             }
                             .padding()
-                            .background(Color.clear)
-                            .foregroundColor(colors.text)
+                            .background(Color.black.opacity(0.4).edgesIgnoringSafeArea(.bottom))
+                            .foregroundColor(controlsColor)
+                            .overlay(
+                                LivestreamDurationView(
+                                    duration: viewModel.duration(from: state),
+                                    controlsColor: controlsColor
+                                )
+                            )
                         }
                     }
                 }
@@ -104,6 +120,7 @@ struct LivestreamPlayPauseButton: View {
     @Injected(\.colors) var colors
     
     @ObservedObject var viewModel: LivestreamPlayerViewModel
+    var controlsColor: Color
     var trackUpdate: () -> ()
     
     var body: some View {
@@ -115,7 +132,7 @@ struct LivestreamPlayPauseButton: View {
                 .resizable()
                 .aspectRatio(contentMode: .fit)
                 .frame(width: 60)
-                .foregroundColor(colors.text)
+                .foregroundColor(controlsColor)
         }
 
     }
@@ -128,12 +145,11 @@ struct LivestreamParticipantsView: View {
     
     var body: some View {
         HStack {
-            Image(systemName: "person")
+            Image(systemName: "eye")
             Text("\(participantsCount)")
                 .font(.headline)
         }
         .padding(.all, 8)
-        .background(Color.black.opacity(0.4))
         .cornerRadius(8)
     }
     
@@ -142,6 +158,7 @@ struct LivestreamParticipantsView: View {
 struct LivestreamDurationView: View {
     
     let duration: String?
+    var controlsColor: Color
     
     var body: some View {
         HStack {
@@ -152,6 +169,7 @@ struct LivestreamDurationView: View {
             if let duration {
                 Text(duration)
                     .font(.headline.monospacedDigit())
+                    .foregroundColor(controlsColor)
             }
         }
     }
@@ -169,6 +187,8 @@ struct FullScreenButton: View {
         } label: {
             Image(systemName: "viewfinder")
                 .padding(.all, 8)
+                .background(Color.black.opacity(0.6))
+                .cornerRadius(8)
         }
     }
 }
