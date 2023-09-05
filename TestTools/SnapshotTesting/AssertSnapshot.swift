@@ -159,11 +159,10 @@ func AssertSnapshot<View: SwiftUI.View>(
     let variantsToTest = record ? variants : variants + variants.reversed()
 
     variantsToTest.forEach { variant in
+        let layout: SwiftUISnapshotLayout = size != nil ? .sizeThatFits : .device(config: device)
         assertSnapshot(
             matching: view,
-            as: size != nil ?
-                .image(perceptualPrecision: perceptualPrecision, layout: .sizeThatFits)
-                : .image(perceptualPrecision: perceptualPrecision, layout: .device(config: device), traits: variant.traits),
+            as: .image(perceptualPrecision: perceptualPrecision, layout: layout, traits: variant.traits),
             named: variant.snapshotName + (suffix.map { "." + $0 } ?? ""),
             record: overrideRecording ?? record,
             file: file,
