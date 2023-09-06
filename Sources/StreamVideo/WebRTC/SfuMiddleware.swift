@@ -144,6 +144,7 @@ class SfuMiddleware: EventMiddleware {
         let participant = event.participant.toCallParticipant()
         await state.removeCallParticipant(with: participant.id)
         await state.removeTrack(id: participant.trackLookupPrefix ?? participant.id)
+        await state.removeAudioTrack(id: participant.trackLookupPrefix ?? participant.id)
         log.debug("Participant \(participant.name) left the call")
         postNotification(
             with: CallNotification.participantLeft,
@@ -238,6 +239,7 @@ class SfuMiddleware: EventMiddleware {
         if event.type == .audio {
             let updated = participant.withUpdated(audio: false)
             await state.update(callParticipant: updated)
+            await state.removeAudioTrack(id: userId)
         } else if event.type == .video {
             let updated = participant.withUpdated(video: false)
             await state.removeTrack(id: updated.trackLookupPrefix ?? updated.id)

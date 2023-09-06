@@ -22,24 +22,26 @@ class LivestreamPlayerViewModel: ObservableObject {
     }
     @Published private(set) var streamPaused = false
     @Published private(set) var loading = false
+    @Published private(set) var muted: Bool
     @Published var errorAlertShown = false
+    
+    private var mutedOnJoin = false
     
     let call: Call
     let showParticipantCount: Bool
     
-    private let audioOn: Bool
     private let formatter = DateComponentsFormatter()
     
     init(
         type: String,
         id: String,
-        audioOn: Bool = false,
+        muted: Bool = false,
         showParticipantCount: Bool = true
     ) {
         let call = InjectedValues[\.streamVideo].call(callType: type, callId: id)
         self.call = call
-        self.audioOn = audioOn
         self.showParticipantCount = showParticipantCount
+        self.muted = muted
         formatter.unitsStyle = .positional
     }
     
@@ -60,11 +62,30 @@ class LivestreamPlayerViewModel: ObservableObject {
         return formatter.string(from: state.duration)
     }
     
+    func muteLivestreamOnJoin() {
+        guard !mutedOnJoin else { return }
+        Task {
+            try await call.speaker.disableAudioOutput()
+            mutedOnJoin = true
+        }
+    }
+    
+    func toggleAudioOutput() {
+        Task {
+            if !muted {
+                try await call.speaker.disableAudioOutput()
+            } else {
+                try await call.speaker.enableAudioOutput()
+            }
+            muted.toggle()
+        }
+    }
+    
     func joinLivestream() {
         Task {
             do {
                 loading = true
-                try await call.join(callSettings: CallSettings(audioOn: audioOn))
+                try await call.join(callSettings: CallSettings(audioOn: false, videoOn: false))
                 loading = false
             } catch {
                 errorAlertShown = true

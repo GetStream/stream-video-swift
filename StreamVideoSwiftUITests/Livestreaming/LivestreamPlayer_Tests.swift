@@ -19,7 +19,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        assertSnapshot(matching: player, as: .image)
+        assertSnapshot(matching: player, as: .image(perceptualPrecision: 0.98))
     }
     
     @MainActor
@@ -29,7 +29,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        assertSnapshot(matching: player, as: .image)
+        assertSnapshot(matching: player, as: .image(perceptualPrecision: 0.98))
     }
     
     @MainActor

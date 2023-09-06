@@ -19,7 +19,7 @@ public struct LivestreamPlayer: View {
     public init(
         type: String,
         id: String,
-        audioOn: Bool = false,
+        muted: Bool = false,
         showParticipantCount: Bool = true,
         controlsColor: Color = .white,
         onFullScreenStateChange: ((Bool) -> ())? = nil
@@ -27,7 +27,7 @@ public struct LivestreamPlayer: View {
         let viewModel = LivestreamPlayerViewModel(
             type: type,
             id: id,
-            audioOn: audioOn,
+            muted: muted,
             showParticipantCount: showParticipantCount
         )
         _viewModel = StateObject(wrappedValue: viewModel)
@@ -81,7 +81,14 @@ public struct LivestreamPlayer: View {
                                     )
                                 }
                                 Spacer()
-                                FullScreenButton(viewModel: viewModel)
+                                LivestreamButton(
+                                    imageName: !viewModel.muted ? "speaker.wave.2.fill" : "speaker.slash.fill"
+                                ) {
+                                    viewModel.toggleAudioOutput()
+                                }
+                                LivestreamButton(imageName: "viewfinder") {
+                                    viewModel.update(fullScreen: !viewModel.fullScreen)
+                                }
                             }
                             .padding()
                             .background(Color.black.opacity(0.4).edgesIgnoringSafeArea(.bottom))
@@ -100,6 +107,11 @@ public struct LivestreamPlayer: View {
                 }
             }
         }
+        .onChange(of: state.participants, perform: { newValue in
+            if viewModel.muted && newValue.first?.track != nil {
+                viewModel.muteLivestreamOnJoin()
+            }
+        })
         .onAppear {
             viewModel.joinLivestream()
         }
@@ -184,20 +196,25 @@ struct LivestreamDurationView: View {
     }
 }
 
-struct FullScreenButton: View {
+struct LivestreamButton: View {
     
-    @ObservedObject var viewModel: LivestreamPlayerViewModel
+    private let buttonSize: CGFloat = 32
+    
+    var imageName: String
+    var action: () -> ()
     
     var body: some View {
         Button {
             withAnimation {
-                viewModel.update(fullScreen: !viewModel.fullScreen)
+                action()
             }
         } label: {
-            Image(systemName: "viewfinder")
-                .padding(.all, 8)
+            Image(systemName: imageName)
+                .padding(.all, 4)
+                .frame(width: buttonSize, height: buttonSize)
                 .background(Color.black.opacity(0.6))
                 .cornerRadius(8)
         }
+        .padding(.horizontal, 2)        
     }
 }
