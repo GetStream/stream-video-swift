@@ -41,7 +41,7 @@ Make sure that the livestream id exists, and the call is not in backstage mode. 
 ### Customization options
 
 Apart from the required parameters, you can also specify some optional ones in the `LivestreamPlayer`'s init method:
-- `muted`: `Bool` - whether the livestream audio should be on when joining the stream (default is `true`).
+- `muted`: `Bool` - whether the livestream audio should be on when joining the stream (default is `false`).
 - `showParticipantCount`: `Bool` - whether the participant count should be shown (default is `true`).
 - `controlsColor`: `Color` - the color of the controls (default is `white`).
 - `onFullScreenStateChange`: `((Bool) -> ())?` - closure that is invoked when the full screen state changes. Useful if you use the livestream component as part of your custom views, since this is the chance to update the visibility of your custom UI elements.
