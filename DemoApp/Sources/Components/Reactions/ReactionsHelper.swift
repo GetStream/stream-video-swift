@@ -77,8 +77,11 @@ final class ReactionsHelper: ObservableObject {
             reactionsTask?.cancel()
             return
         }
+
+        let callReactionEventsStream = call.subscribe(for: CallReactionEvent.self)
+
         reactionsTask = Task { [weak self] in
-            for await event in call.subscribe(for: CallReactionEvent.self) {
+            for await event in callReactionEventsStream {
                 guard
                     let reaction = self?.reaction(for: event)
                 else {
