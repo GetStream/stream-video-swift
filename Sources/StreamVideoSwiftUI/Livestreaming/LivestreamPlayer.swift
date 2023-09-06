@@ -91,7 +91,7 @@ public struct LivestreamPlayer: View {
                                 }
                             }
                             .padding()
-                            .background(Color.black.opacity(0.4).edgesIgnoringSafeArea(.bottom))
+                            .background(Color.black.opacity(0.4).edgesIgnoringSafeArea(.all))
                             .foregroundColor(controlsColor)
                             .overlay(
                                 LivestreamDurationView(
