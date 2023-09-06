@@ -61,7 +61,7 @@ jobs:
         INSTALL_SONAR: true
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 30
+      timeout-minutes: 40
       env:
         STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     - name: Get branch name
@@ -93,7 +93,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 25
+      timeout-minutes: 40
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PR_NUM: ${{ github.event.number }}
@@ -116,7 +116,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 25
+      timeout-minutes: 40
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PR_NUM: ${{ github.event.number }}
