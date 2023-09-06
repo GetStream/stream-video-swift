@@ -105,3 +105,5 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
         )
     }
 }
+
+extension CMSampleBuffer: @unchecked Sendable {}
