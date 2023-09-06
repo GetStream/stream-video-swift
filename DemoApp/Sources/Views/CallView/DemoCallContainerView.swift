@@ -13,13 +13,13 @@ internal struct DemoCallContainerView: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
     @StateObject var viewModel: CallViewModel
-    @StateObject var chatViewModel: StreamChatVideoViewModel
+    @StateObject var chatViewModel: DemoChatViewModel
     @ObservedObject var appState = AppState.shared
 
     internal init(callId: String) {
         let callViewModel = CallViewModel()
         _viewModel = StateObject(wrappedValue: callViewModel)
-        _chatViewModel = StateObject(wrappedValue: StreamChatVideoViewModel(callViewModel))
+        _chatViewModel = StateObject(wrappedValue: DemoChatViewModel(callViewModel))
         self.callId = callId
     }
 
