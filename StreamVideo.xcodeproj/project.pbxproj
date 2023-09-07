@@ -924,6 +924,7 @@
 		8251E62E2A17BEEF00E7257A /* ImageFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageFactory.swift; sourceTree = "<group>"; };
 		8268615F290A7556005BFFED /* SystemEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SystemEnvironment.swift; sourceTree = "<group>"; };
 		827D893D2A16369300838B1A /* LazyImageExtensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LazyImageExtensions.swift; sourceTree = "<group>"; };
+		82820FEB2AA9D3250033F3DC /* StreamVideoAPITests.xctestplan */ = {isa = PBXFileReference; lastKnownFileType = text; path = StreamVideoAPITests.xctestplan; sourceTree = "<group>"; };
 		828DE5BC299521EF00F93197 /* UserRobot+Asserts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UserRobot+Asserts.swift"; sourceTree = "<group>"; };
 		829A1F6829FACCAF0072ED75 /* ParticipantsGridLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridLayout_Tests.swift; sourceTree = "<group>"; };
 		829A1F6A29FACCC20072ED75 /* ParticipantsSpotlightLayout_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsSpotlightLayout_Tests.swift; sourceTree = "<group>"; };
@@ -2932,6 +2933,7 @@
 				40AB31232A49836800C270E1 /* WebSockets */,
 				4351AEAB2A40586B00D32D0D /* IntegrationTests */,
 				84932245290831DB0013C029 /* StreamVideo.xctestplan */,
+				82820FEB2AA9D3250033F3DC /* StreamVideoAPITests.xctestplan */,
 				84DCA2162A398BFD000C3411 /* Call */,
 				846D16272A52F38A0036CE4C /* CallSettings */,
 				84F58B6E29EE911500010C4C /* WebSocketClient */,

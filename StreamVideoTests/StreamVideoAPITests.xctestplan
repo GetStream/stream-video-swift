@@ -1,7 +1,7 @@
 {
   "configurations" : [
     {
-      "id" : "52D2F0B8-32A4-4C72-A8CE-D2AE40A4C18F",
+      "id" : "0F9808DD-C377-4933-9ED3-B1CDE4964045",
       "name" : "Configuration 1",
       "options" : {
 
@@ -9,14 +9,22 @@
     }
   ],
   "defaultOptions" : {
-    "codeCoverage" : false,
     "environmentVariableEntries" : [
-
-    ]
+      {
+        "key" : "STREAM_VIDEO_SECRET",
+        "value" : "$(STREAM_VIDEO_SECRET)"
+      }
+    ],
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:StreamVideo.xcodeproj",
+      "identifier" : "84F737F3287C13AD00A363F4",
+      "name" : "StreamVideoTests"
+    },
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
-      "skippedTests" : [
+      "selectedTests" : [
         "CallCRUDTest",
         "IntegrationTest"
       ],

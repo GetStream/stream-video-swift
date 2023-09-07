@@ -18,7 +18,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
-    xcversion(version: xcode_version) unless [:publish_release, :allure_launch].include?(lane)
+    xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload].include?(lane)
   elsif lane == :test_e2e
     clean_up_ports_for_e2e_test
   end
@@ -115,19 +115,31 @@ end
 
 desc 'Runs LLC tests'
 lane :test do |options|
-  # next unless is_check_required(sources: sources_matrix[:unit]) FIXME
-
-  update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
+  next unless is_check_required(sources: sources_matrix[:unit])
 
   create_credentials_config
+  testplan = 'StreamVideoAPITests'
+
+  update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
 
   scan(
     project: xcode_project,
     scheme: 'StreamVideo',
-    testplan: 'StreamVideo',
+    testplan: testplan,
     clean: true,
     devices: options[:device],
+    number_of_retries: 2,
     xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
+  )
+
+  testplan = 'StreamVideo'
+  update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
+
+  scan(
+    project: xcode_project,
+    scheme: 'StreamVideo',
+    testplan: testplan,
+    devices: options[:device]
   )
 end
 
@@ -142,7 +154,7 @@ lane :test_uikit do |options|
 end
 
 private_lane :test_ui do |options|
-  # next unless is_check_required(sources: sources_matrix[options[:source]]) FIXME
+  next unless is_check_required(sources: sources_matrix[options[:source]])
 
   remove_snapshots(scheme: options[:scheme]) if options[:record]
 
@@ -181,7 +193,7 @@ end
 
 desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
-  # next unless is_check_required(sources: sources_matrix[:e2e]) FIXME
+  next unless is_check_required(sources: sources_matrix[:e2e])
 
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
@@ -251,14 +263,14 @@ lane :build_uikit_demo do
 end
 
 private_lane :build_example_app do |options|
-  # app_sources =
-  #   case options[:scheme]
-  #   when 'DemoApp'
-  #     :swiftui_sample_apps
-  #   when 'DemoAppUIKit'
-  #     :uikit_sample_apps
-  #   end
-  # next unless is_check_required(sources: sources_matrix[app_sources]) FIXME
+  app_sources =
+    case options[:scheme]
+    when 'DemoApp'
+      :swiftui_sample_apps
+    when 'DemoAppUIKit'
+      :uikit_sample_apps
+    end
+  next unless is_check_required(sources: sources_matrix[app_sources])
 
   create_credentials_config
 
@@ -271,13 +283,13 @@ private_lane :build_example_app do |options|
 end
 
 lane :emerge_swiftui do
-  # next unless is_check_required(sources: sources_matrix[:emerge_swiftui]) FIXME
+  next unless is_check_required(sources: sources_matrix[:emerge_swiftui])
 
   emerge_upload(scheme: 'DemoApp')
 end
 
 lane :emerge_uikit do
-  # next unless is_check_required(sources: sources_matrix[:emerge_uikit]) FIXME
+  next unless is_check_required(sources: sources_matrix[:emerge_uikit])
 
   emerge_upload(scheme: 'DemoApp')
 end
@@ -368,7 +380,7 @@ end
 
 desc 'Run fastlane linting'
 lane :rubocop do
-  # next unless is_check_required(sources: sources_matrix[:ruby]) FIXME
+  next unless is_check_required(sources: sources_matrix[:ruby])
 
   sh('bundle exec rubocop')
 end
