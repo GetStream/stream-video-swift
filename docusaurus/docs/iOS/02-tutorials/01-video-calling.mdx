@@ -173,7 +173,7 @@ var body: some Scene {
                         participants: call.state.remoteParticipants, 
                         onChangeTrackVisibility: changeTrackVisibility(_:isVisible:)
                     )
-                    FloatingParticipantView(participant: call.state.me)
+                    FloatingParticipantView(participant: call.state.localParticipant)
                 }
             } else {
                 Text("loading...")
@@ -298,7 +298,7 @@ It only displays the video and doesn't add any other UI elements. The video is l
 
 
 ```swift
-FloatingParticipantView(participant: call.state.me)
+FloatingParticipantView(participant: call.state.localParticipant)
 ```
 
 `FloatingParticipantVideo` renders a display of your own video. It uses `VideoRendererView` which is the componet used by `VideoCallParticipantView` to simply display the video without adding any other UI elements.

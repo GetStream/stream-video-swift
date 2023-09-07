@@ -42,3 +42,4 @@
 
 "call.livestream.not-started" = "Livestream is not started. Please come back later.";
 "call.livestream.live" = "Live";
+"call.livestream.error" = "Error joining the livestream. Please try again later.";

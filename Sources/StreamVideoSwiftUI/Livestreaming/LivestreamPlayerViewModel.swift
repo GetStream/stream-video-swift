@@ -6,7 +6,7 @@ import StreamVideo
 import SwiftUI
 
 @MainActor
-class LivestreamPlayerViewModel: ObservableObject {
+final class LivestreamPlayerViewModel: ObservableObject {
     @Published private(set) var fullScreen = false
     @Published private(set) var controlsShown = false {
         didSet {
@@ -23,7 +23,7 @@ class LivestreamPlayerViewModel: ObservableObject {
     @Published private(set) var streamPaused = false
     @Published private(set) var loading = false
     @Published private(set) var muted: Bool
-    @Published var errorAlertShown = false
+    @Published var errorShown = false
     
     private var mutedOnJoin = false
     
@@ -88,10 +88,14 @@ class LivestreamPlayerViewModel: ObservableObject {
                 try await call.join(callSettings: CallSettings(audioOn: false, videoOn: false))
                 loading = false
             } catch {
-                errorAlertShown = true
+                errorShown = true
                 loading = false
                 log.error("Error joining livestream")
             }
         }
+    }
+    
+    func leaveLivestream() {
+        call.leave()
     }
 }
