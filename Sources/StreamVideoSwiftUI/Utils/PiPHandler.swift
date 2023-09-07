@@ -37,6 +37,9 @@ final class PiPHandler: NSObject {
             }
             pictureInPictureActive = true
             if pipController?.isPictureInPicturePossible == true {
+                sourceView?.feedFrames = { buffer in
+                    self.feedBuffer(buffer)
+                }
                 pipController?.startPictureInPicture()
             }
         }
@@ -120,10 +123,6 @@ final class PiPHandler: NSObject {
 
             sampleBufferVideoCallView.bounds = pipVideoCallViewController.view.frame
             self.sampleBufferVideoCallView = sampleBufferVideoCallView
-            
-            view.feedFrames = { buffer in
-                self.feedBuffer(buffer)
-            }
                     
             let pipContentSource = AVPictureInPictureController.ContentSource(
                 activeVideoCallSourceView: view,
