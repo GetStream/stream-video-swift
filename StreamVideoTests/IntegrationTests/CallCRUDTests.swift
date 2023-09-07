@@ -354,6 +354,7 @@ final class CallCRUDTest: IntegrationTest {
         try await customWait()
             
         try await secondUserCall.microphone.enable()
+        try await customWait()
         
         var firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
         var secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
@@ -363,6 +364,7 @@ final class CallCRUDTest: IntegrationTest {
         for userId in [user1, user2] {
             try await firstUserCall.mute(userId: userId)
         }
+        try await customWait()
         
         firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
         secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
@@ -394,6 +396,7 @@ final class CallCRUDTest: IntegrationTest {
         try await customWait()
             
         try await secondUserCall.microphone.enable()
+        try await customWait()
         
         var firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
         var secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
@@ -401,6 +404,7 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
 
         try await firstUserCall.muteAllUsers()
+        try await customWait()
         
         firstParticipantHasAudio = await waitForAudioLoss(on: firstUserCall)
         secondParticipantHasAudio = await waitForAudioLoss(on: firstUserCall)
@@ -570,7 +574,7 @@ final class CallCRUDTest: IntegrationTest {
         
         let secondUserClient = getUserClient(id: user2)
         let secondUserCall = secondUserClient.call(
-            callType: firstUserCall.callType,
+            callType: .default,
             callId: firstUserCall.callId
         )
         
