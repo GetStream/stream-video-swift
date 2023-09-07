@@ -507,6 +507,16 @@ class WebRTCClient: NSObject {
         await state.update(callParticipant: updated)
     }
     
+    func tapToFocus(at point: CGPoint) throws {
+        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+            throw ClientError.Unexpected()
+        }
+        try videoCapturer.tapToFocus(
+            at: point,
+            cameraPosition: callSettings.cameraPosition == .front ? .front : .back
+        )
+    }
+    
     // MARK: - private
     
     private func handleOnSocketConnected() {

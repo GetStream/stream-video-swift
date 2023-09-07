@@ -44,6 +44,23 @@ class VideoCapturer: CameraVideoCapturing {
         videoCaptureHandler?.selectedFilter = videoFilter
     }
     
+    func tapToFocus(at point: CGPoint, cameraPosition: AVCaptureDevice.Position) throws {
+        guard let device = VideoCapturingUtils.capturingDevice(for: cameraPosition) else {
+            throw ClientError.Unexpected()
+        }
+        
+        try device.lockForConfiguration()
+        if device.isFocusPointOfInterestSupported {
+            device.focusPointOfInterest = point
+            device.focusMode = AVCaptureDevice.FocusMode.autoFocus
+        }
+        if device.isExposurePointOfInterestSupported {
+            device.exposurePointOfInterest = point
+            device.exposureMode = AVCaptureDevice.ExposureMode.autoExpose
+        }
+        device.unlockForConfiguration()
+    }
+    
     func startCapture(device: AVCaptureDevice?) async throws {
         return try await withCheckedThrowingContinuation { continuation in
             guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {

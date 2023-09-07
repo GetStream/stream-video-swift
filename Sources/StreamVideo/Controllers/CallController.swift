@@ -182,6 +182,11 @@ class CallController {
         }
     }
     
+    func tapToFocus(at point: CGPoint) throws {
+        let webRTCClient = try currentWebRTCClient()
+        try webRTCClient.tapToFocus(at: point)
+    }
+    
     /// Cleans up the call controller.
     func cleanUp() {
         call = nil

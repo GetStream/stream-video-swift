@@ -697,6 +697,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
+    public func tapToFocus(at point: CGPoint) throws {
+        try callController.tapToFocus(at: point)
+    }
+    
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
