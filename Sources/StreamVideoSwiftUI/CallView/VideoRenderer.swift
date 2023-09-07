@@ -47,6 +47,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
                 .degrees(shouldRotate ? 180 : 0),
                 axis: (x: 0, y: 1, z: 0)
             )
+            .modifier(GestureModifier(call: call))
         }
     }
     
@@ -54,6 +55,25 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
         callSettings.cameraPosition == .front && callSettings.videoOn
     }
     
+}
+
+struct GestureModifier: ViewModifier {
+    
+    var call: Call?
+    
+    func body(content: Content) -> some View {
+        if #available(iOS 16, *) {
+            content.onTapGesture { location in
+                do {
+                    try call?.tapToFocus(at: location)
+                } catch {
+                    print("===== \(error)")
+                }
+            }
+        } else {
+            content
+        }
+    }
 }
 
 public struct VideoRendererView: UIViewRepresentable {
