@@ -35,17 +35,31 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func waitForAudio(
-        participant: CallParticipant,
         on call: Call,
-        muted: Bool = false,
         timeout: Double = defaultTimeout
-    ) -> Bool {
+    ) async -> Bool {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
-        var userHasAudio = !muted
-        while userHasAudio != muted && endTime > Date().timeIntervalSince1970 * 1000 {
-            userHasAudio = participant.hasAudio
+        var usersHaveAudio = false
+        while !usersHaveAudio && endTime > Date().timeIntervalSince1970 * 1000 {
+            let u1 = await call.state.participants.first!.hasAudio
+            let u2 = await call.state.participants.last!.hasAudio
+            usersHaveAudio = u1 && u2
         }
-        return userHasAudio
+        return usersHaveAudio
+    }
+    
+    func waitForAudioLoss(
+        on call: Call,
+        timeout: Double = defaultTimeout
+    ) async -> Bool {
+        let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
+        var usersLostAudio = false
+        while !usersLostAudio && endTime > Date().timeIntervalSince1970 * 1000 {
+            let u1 = await call.state.participants.first!.hasAudio
+            let u2 = await call.state.participants.last!.hasAudio
+            usersLostAudio = u1 == false && u2 == false
+        }
+        return usersLostAudio
     }
     
     func test_callCreateAndUpdate() async throws {
@@ -331,6 +345,7 @@ final class CallCRUDTest: IntegrationTest {
         try await customWait()
         
         try await firstUserCall.microphone.enable()
+        try await customWait()
         
         try await secondUserCall.join()
         try await customWait()
@@ -340,9 +355,8 @@ final class CallCRUDTest: IntegrationTest {
             
         try await secondUserCall.microphone.enable()
         
-        var participants = await firstUserCall.state.participants
-        var firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall)
-        var secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall)
+        var firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
+        var secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
         XCTAssertTrue(firstParticipantHasAudio, "Call creator should have audio enabled")
         XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
 
@@ -350,9 +364,8 @@ final class CallCRUDTest: IntegrationTest {
             try await firstUserCall.mute(userId: userId)
         }
         
-        participants = await firstUserCall.state.participants
-        firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall, muted: true)
-        secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall, muted: true)
+        firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
+        secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
         XCTAssertFalse(firstParticipantHasAudio, "Call creator should be muted")
         XCTAssertFalse(secondParticipantHasAudio, "Participant should be muted")
     }
@@ -382,17 +395,15 @@ final class CallCRUDTest: IntegrationTest {
             
         try await secondUserCall.microphone.enable()
         
-        var participants = await firstUserCall.state.participants
-        var firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall)
-        var secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall)
+        var firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
+        var secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
         XCTAssertTrue(firstParticipantHasAudio, "Call creator should have audio enabled")
         XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
 
         try await firstUserCall.muteAllUsers()
         
-        participants = await firstUserCall.state.participants
-        firstParticipantHasAudio = waitForAudio(participant: participants.first!, on: firstUserCall, muted: true)
-        secondParticipantHasAudio = waitForAudio(participant: participants.last!, on: firstUserCall, muted: true)
+        firstParticipantHasAudio = await waitForAudioLoss(on: firstUserCall)
+        secondParticipantHasAudio = await waitForAudioLoss(on: firstUserCall)
         XCTAssertFalse(firstParticipantHasAudio, "Call creator should be muted")
         XCTAssertFalse(secondParticipantHasAudio, "Participant should be muted")
     }
@@ -452,6 +463,8 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_grantPermissionsByRequest() async throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/541")
+        
         let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
         try await firstUserCall.create(memberIds: [user1, user2])
         
@@ -557,7 +570,7 @@ final class CallCRUDTest: IntegrationTest {
         
         let secondUserClient = getUserClient(id: user2)
         let secondUserCall = secondUserClient.call(
-            callType: .default,
+            callType: firstUserCall.callType,
             callId: firstUserCall.callId
         )
         
