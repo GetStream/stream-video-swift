@@ -23,6 +23,9 @@ struct DebugMenu: View {
             case .staging:
                 AppEnvironment.baseURL = .staging
                 AppEnvironment.apiKey = .staging
+            case .pronto:
+                AppEnvironment.baseURL = .pronto
+                AppEnvironment.apiKey = .staging
             case .production:
                 AppEnvironment.baseURL = .production
                 AppEnvironment.apiKey = .production
@@ -58,7 +61,7 @@ struct DebugMenu: View {
     var body: some View {
         Menu {
             makeMenu(
-                for: [.production, .staging],
+                for: [.production, .pronto, .staging],
                 currentValue: baseURL,
                 label: "Environment"
             ) { self.baseURL = $0 }
