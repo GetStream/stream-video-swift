@@ -5,7 +5,7 @@
 import Foundation
 
 /// Handles the microphone state during a call.
-public class MicrophoneManager: ObservableObject, CallSettingsManager {
+public final class MicrophoneManager: ObservableObject, CallSettingsManager, @unchecked Sendable {
     
     internal let callController: CallController
     /// The status of the microphone.

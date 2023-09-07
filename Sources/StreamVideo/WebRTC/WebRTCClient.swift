@@ -24,6 +24,7 @@ class WebRTCClient: NSObject {
         }
         var tracks = [String: RTCVideoTrack]()
         var screensharingTracks = [String: RTCVideoTrack]()
+        var audioTracks = [String: RTCAudioTrack]()
         var pausedTrackIds = [String]()
         private var continuation: AsyncStream<[Bool]>.Continuation?
         
@@ -59,6 +60,14 @@ class WebRTCClient: NSObject {
             self.screensharingTracks[id] = nil
         }
         
+        func add(audioTrack: RTCAudioTrack?, id: String) {
+            self.audioTracks[id] = audioTrack
+        }
+        
+        func removeAudioTrack(id: String) {
+            self.audioTracks[id] = nil
+        }
+        
         func update(tracks: [String: RTCVideoTrack]) {
             self.tracks = tracks
         }
@@ -81,6 +90,7 @@ class WebRTCClient: NSObject {
         func cleanUp() {
             callParticipants = [:]
             tracks = [:]
+            audioTracks = [:]
             screensharingTracks = [:]
             connectionState = .disconnected(reason: .user)
             continuation?.finish()
@@ -402,6 +412,10 @@ class WebRTCClient: NSObject {
     
     func changeSoundState(isEnabled: Bool) async throws {
         await audioSession.setAudioSessionEnabled(isEnabled)
+        let audioTracks = await state.audioTracks
+        for track in audioTracks.values {
+            track.isEnabled = isEnabled
+        }
         callSettings = callSettings.withUpdatedAudioOutputState(isEnabled)
     }
     
@@ -595,12 +609,16 @@ class WebRTCClient: NSObject {
         let idParts = stream.streamId.components(separatedBy: ":")
         let trackId = idParts.first ?? UUID().uuidString
         let track = stream.videoTracks.first
+        let audioTrack = stream.audioTracks.first
         Task {
             let last = idParts.last
             if last == Constants.videoTrackType && track != nil {
                 await self.state.add(track: track, id: trackId)
             } else if last == Constants.screenshareTrackType && track != nil {
                 await self.state.add(screensharingTrack: track, id: trackId)
+            }
+            if audioTrack != nil {
+                await self.state.add(audioTrack: audioTrack, id: trackId)
             }
             await assignTracksToParticipants()
         }

@@ -28,6 +28,8 @@ public struct Colors {
     public var primaryButtonBackground: Color = Color(.streamBlue)
     public var callPulsingColor = Color(.streamPulsingColor)
     public var callControlsBackground = Color(.streamCallControlsBackground)
+    public var livestreamBackground = Color.black.opacity(0.4)
+    public var livestreamCallControlsColor = Color.white
 }
 
 // Those colors are default defined stream constants, which are fallback values if you don't implement your color theme.

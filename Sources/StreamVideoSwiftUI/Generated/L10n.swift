@@ -55,6 +55,14 @@ internal enum L10n {
       /// Joining
       internal static var title: String { L10n.tr("Localizable", "call.joining.title") }
     }
+    internal enum Livestream {
+      /// Error joining the livestream. Please try again later.
+      internal static var error: String { L10n.tr("Localizable", "call.livestream.error") }
+      /// Live
+      internal static var live: String { L10n.tr("Localizable", "call.livestream.live") }
+      /// Livestream is not started. Please come back later.
+      internal static var notStarted: String { L10n.tr("Localizable", "call.livestream.not-started") }
+    }
     internal enum Outgoing {
       /// Calling
       internal static var title: String { L10n.tr("Localizable", "call.outgoing.title") }
