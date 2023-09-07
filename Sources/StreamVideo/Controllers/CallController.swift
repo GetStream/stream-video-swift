@@ -184,6 +184,7 @@ class CallController {
     
     /// Cleans up the call controller.
     func cleanUp() {
+        guard call != nil else { return }
         call = nil
         Task {
             await webRTCClient?.cleanUp()
