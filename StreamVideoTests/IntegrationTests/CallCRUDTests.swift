@@ -36,7 +36,7 @@ final class CallCRUDTest: IntegrationTest {
     
     func waitForAudio(
         on call: Call,
-        timeout: Double = defaultTimeout
+        timeout: Double = 20
     ) async -> Bool {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var usersHaveAudio = false
@@ -50,7 +50,7 @@ final class CallCRUDTest: IntegrationTest {
     
     func waitForAudioLoss(
         on call: Call,
-        timeout: Double = defaultTimeout
+        timeout: Double = 20
     ) async -> Bool {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var usersLostAudio = false
