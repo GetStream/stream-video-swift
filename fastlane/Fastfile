@@ -132,6 +132,8 @@ lane :test do |options|
     xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
   )
 
+  next if options[:api_tests_only]
+
   testplan = 'StreamVideo'
   update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
 
