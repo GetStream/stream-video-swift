@@ -64,6 +64,8 @@ jobs:
       timeout-minutes: 40
       env:
         STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
+        IOS_SIMULATOR_DEVICE: "iPhone 14 Pro (16.4)" # TODO: delete this line as soon as Xcode 15 is stable on CI
+        XCODE_VERSION: "14.3.1" # TODO: delete this line as soon as Xcode 15 is stable on CI
     - name: Get branch name
       id: get_branch_name
       run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
