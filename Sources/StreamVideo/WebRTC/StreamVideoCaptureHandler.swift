@@ -15,7 +15,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
-    
+
     init(source: RTCVideoSource, filters: [VideoFilter], handleRotation: Bool = true) {
         self.source = source
         self.filters = filters
@@ -34,21 +34,28 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
         guard let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer else { return }
-        Task {
-            let imageBuffer = buffer.pixelBuffer
-            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-            let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
-            let outputImage = await filter(image: inputImage)
-            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-            self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
-            let updatedFrame = handleRotation ? adjustRotation(capturer, for: buffer, frame: frame) : frame
+        Task { [weak self] in
+            guard let self else { return }
+            await applyFilter(on: buffer)
+
+            let updatedFrame = handleRotation
+            ? adjustRotation(capturer, for: buffer, frame: frame)
+            : frame
+
             self.source.capturer(capturer, didCapture: updatedFrame)
         }
     }
     
     @objc private func updateRotation() {
-        DispatchQueue.main.async {
-            self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+        DispatchQueue.main.async { [weak self] in
+            guard
+                let self,
+                let windowScene = UIApplication.shared.windows.first?.windowScene
+            else { return }
+            if self.sceneOrientation != windowScene.interfaceOrientation {
+                log.debug("WindowScene orientation changed from \(self.sceneOrientation) → \(windowScene.interfaceOrientation)")
+                self.sceneOrientation = windowScene.interfaceOrientation
+            }
         }
     }
     
@@ -57,26 +64,40 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         for buffer: RTCCVPixelBuffer,
         frame: RTCVideoFrame
     ) -> RTCVideoFrame {
-        var rotation = RTCVideoRotation._0
+        var rotation = frame.rotation
         switch sceneOrientation {
         case .portrait:
             rotation = ._90
         case .portraitUpsideDown:
             rotation = ._270
-        case .landscapeRight:
-            rotation = currentCameraPosition == .front ? ._180 : ._0
         case .landscapeLeft:
             rotation = currentCameraPosition == .front ? ._0 : ._180
+        case .landscapeRight:
+            rotation = currentCameraPosition == .front ? ._180 : ._0
         default:
-            rotation = ._90
+            break
         }
-        let updatedFrame = RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
-        return updatedFrame
+
+
+        return rotation != frame.rotation
+        ? RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
+        : frame
     }
     
-    private func filter(image: CIImage) async -> CIImage {
-        guard let selectedFilter = selectedFilter else { return image }
-        return await selectedFilter.filter(image)
+    private func applyFilter(on buffer: RTCCVPixelBuffer) async {
+        if let selectedFilter {
+            let imageBuffer = buffer.pixelBuffer
+            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+            let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
+            let outputImage = await selectedFilter.filter(inputImage)
+            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+            context.render(
+                outputImage,
+                to: imageBuffer,
+                bounds: outputImage.extent,
+                colorSpace: colorSpace
+            )
+        }
     }
     
     deinit {
