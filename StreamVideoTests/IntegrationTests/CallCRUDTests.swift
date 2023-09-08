@@ -62,6 +62,32 @@ final class CallCRUDTest: IntegrationTest {
         return usersLostAudio
     }
     
+    func waitForPinning(
+        firstUserCall: Call,
+        secondUserCall: Call,
+        timeout: Double = 20
+    ) async {
+        let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
+        var userIsPinned = false
+        while !userIsPinned && endTime > Date().timeIntervalSince1970 * 1000 {
+            let pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
+            userIsPinned = pin != nil
+        }
+    }
+    
+    func waitForUnpinning(
+        firstUserCall: Call,
+        secondUserCall: Call,
+        timeout: Double = 20
+    ) async {
+        let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
+        var userIsUnpinned = false
+        while !userIsUnpinned && endTime > Date().timeIntervalSince1970 * 1000 {
+            let pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
+            userIsUnpinned = pin == nil
+        }
+    }
+    
     func test_callCreateAndUpdate() async throws {
         let colorKey = "color"
         let red: RawJSON = "red"
@@ -587,27 +613,27 @@ final class CallCRUDTest: IntegrationTest {
         try await customWait()
 
         _ = try await firstUserCall.pinForEveryone(userId: user2, sessionId: secondUserCall.state.sessionId)
-        try await customWait()
+        await waitForPinning(firstUserCall: firstUserCall, secondUserCall: secondUserCall)
         
         var pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
         XCTAssertNotNil(pin)
         XCTAssertEqual(pin?.isLocal, false)
         
         _ = try await firstUserCall.unpinForEveryone(userId: user2, sessionId: secondUserCall.state.sessionId)
-        try await customWait()
+        await waitForUnpinning(firstUserCall: firstUserCall, secondUserCall: secondUserCall)
         
         pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
         XCTAssertNil(pin)
         
         try await firstUserCall.pin(sessionId: secondUserCall.state.sessionId)
-        try await customWait()
+        await waitForPinning(firstUserCall: firstUserCall, secondUserCall: secondUserCall)
         
         pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
         XCTAssertNotNil(pin)
         XCTAssertEqual(pin?.isLocal, true)
         
         try await firstUserCall.unpin(sessionId: secondUserCall.state.sessionId)
-        try await customWait()
+        await waitForUnpinning(firstUserCall: firstUserCall, secondUserCall: secondUserCall)
         
         pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
         XCTAssertNil(pin)
