@@ -78,6 +78,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var callSettings = CallSettings()
     @Published public internal(set) var isCurrentUserScreensharing: Bool = false
     @Published public internal(set) var duration: TimeInterval = 0
+    @Published public internal(set) var statsReport: CallStatsReport?
     
     private var localCallSettingsUpdate = false
     private var durationTimer: Foundation.Timer?
@@ -283,6 +284,10 @@ public class CallState: ObservableObject {
     internal func update(callSettings: CallSettings) {
         self.callSettings = callSettings
         localCallSettingsUpdate = true
+    }
+    
+    internal func update(statsReport: CallStatsReport?) {
+        self.statsReport = statsReport
     }
     
     private func updateOwnCapabilities(_ event: UpdatedCallPermissionsEvent) {

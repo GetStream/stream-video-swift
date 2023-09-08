@@ -30,8 +30,7 @@ actor PeerConnectionFactory {
         type: PeerConnectionType,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
         constraints: RTCMediaConstraints = RTCMediaConstraints.defaultConstraints,
-        videoOptions: VideoOptions,
-        reportsStats: Bool = true
+        videoOptions: VideoOptions
     ) throws -> PeerConnection {
         let pc = try makePeerConnection(
             configuration: configuration,
@@ -44,8 +43,7 @@ actor PeerConnectionFactory {
             pc: pc,
             type: type,
             signalService: signalService,
-            videoOptions: videoOptions,
-            reportStats: reportsStats
+            videoOptions: videoOptions
         )
         return peerConnection
     }

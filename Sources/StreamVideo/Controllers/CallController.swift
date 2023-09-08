@@ -27,6 +27,7 @@ class CallController {
     private let environment: CallController.Environment
     private var cachedLocation: String?
     private var currentSFU: String?
+    private var statsTimer: Foundation.Timer?
     
     init(
         defaultAPI: DefaultAPI,
@@ -94,6 +95,8 @@ class CallController {
             ring: ring,
             migrating: migratingFrom != nil
         )
+        
+        setupStatsTimer()
         
         return response
     }
@@ -185,6 +188,8 @@ class CallController {
     /// Cleans up the call controller.
     func cleanUp() {
         call = nil
+        statsTimer?.invalidate()
+        statsTimer = nil
         Task {
             await webRTCClient?.cleanUp()
             webRTCClient = nil
@@ -453,6 +458,25 @@ class CallController {
         return joinCallResponse
     }
     
+    private func setupStatsTimer() {
+        DispatchQueue.main.async { [weak self] in
+            self?.statsTimer?.invalidate()
+            self?.statsTimer = Foundation.Timer.scheduledTimer(
+                withTimeInterval: 5.0,
+                repeats: true,
+                block: { [weak self] _ in
+                    self?.collectStats()
+                }
+            )
+        }
+    }
+    
+    private func collectStats() {
+        Task {
+            let stats = await webRTCClient?.collectStats()
+            await call?.state.update(statsReport: stats)
+        }
+    }
 }
 
 extension CallController {

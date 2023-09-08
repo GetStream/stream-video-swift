@@ -6,7 +6,7 @@ import Combine
 import Foundation
 @preconcurrency import WebRTC
 
-class WebRTCClient: NSObject {
+class WebRTCClient: NSObject, @unchecked Sendable {
     
     enum Constants {
         static let screenshareTrackType = "TRACK_TYPE_SCREEN_SHARE"
@@ -507,6 +507,16 @@ class WebRTCClient: NSObject {
         await state.update(callParticipant: updated)
     }
     
+    func collectStats() async -> CallStatsReport {
+        async let statsPublisher = publisher?.statsReport()
+        async let statsSubscriber = subscriber?.statsReport()
+        let result = await [statsPublisher, statsSubscriber]
+        return StatsReporter.createStatsReport(
+            from: result,
+            datacenter: signalService.hostname
+        )
+    }
+    
     // MARK: - private
     
     private func handleOnSocketConnected() {
@@ -859,8 +869,7 @@ class WebRTCClient: NSObject {
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
             signalService: migratingSignalService ?? signalService,
-            videoOptions: videoOptions,
-            reportsStats: false
+            videoOptions: videoOptions
         )
         
         if let localAudioTrack {
