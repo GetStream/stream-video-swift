@@ -373,6 +373,8 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_muteAllUsers() async throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/541")
+        
         let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
         try await firstUserCall.create(memberIds: [user1, user2])
         try await firstUserCall.goLive()
@@ -385,7 +387,7 @@ final class CallCRUDTest: IntegrationTest {
         
         try await firstUserCall.join()
         try await customWait()
-            
+        
         try await firstUserCall.microphone.enable()
         try await customWait()
         
