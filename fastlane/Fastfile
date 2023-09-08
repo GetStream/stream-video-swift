@@ -118,8 +118,8 @@ lane :test do |options|
   next unless is_check_required(sources: sources_matrix[:unit])
 
   create_credentials_config
-  testplan = 'StreamVideoAPITests'
 
+  testplan = 'StreamVideoAPITests'
   update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
 
   scan(
@@ -129,7 +129,7 @@ lane :test do |options|
     clean: true,
     devices: options[:device],
     number_of_retries: 2,
-    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
+    xcargs: ENV['STREAM_VIDEO_SECRET'] ? "STREAM_VIDEO_SECRET=#{ENV['STREAM_VIDEO_SECRET']}" : ''
   )
 
   next if options[:api_tests_only]
