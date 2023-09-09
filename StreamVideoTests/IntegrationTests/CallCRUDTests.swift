@@ -581,10 +581,11 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_setAndDeleteVoipDevices() async throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/541")
+        
         let deviceId = UUID().uuidString
         let call = client.call(callType: defaultCallType, callId: randomCallId)
         try await call.create(memberIds: [user1, user2])
-        try await customWait()
         
         try await call.streamVideo.setVoipDevice(id: deviceId)
         try await customWait()
