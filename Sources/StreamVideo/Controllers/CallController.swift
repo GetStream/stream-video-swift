@@ -473,7 +473,7 @@ class CallController {
     
     private func collectStats() {
         Task {
-            let stats = await webRTCClient?.collectStats()
+            let stats = try await webRTCClient?.collectStats()
             await call?.state.update(statsReport: stats)
         }
     }

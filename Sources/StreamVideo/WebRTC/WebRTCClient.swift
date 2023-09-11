@@ -507,10 +507,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         await state.update(callParticipant: updated)
     }
     
-    func collectStats() async -> CallStatsReport {
+    func collectStats() async throws -> CallStatsReport {
         async let statsPublisher = publisher?.statsReport()
         async let statsSubscriber = subscriber?.statsReport()
-        let result = await [statsPublisher, statsSubscriber]
+        let result = try await [statsPublisher, statsSubscriber]
         return StatsReporter.createStatsReport(
             from: result,
             datacenter: signalService.hostname

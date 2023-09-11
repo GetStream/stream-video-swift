@@ -246,9 +246,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.pc.setConfiguration(configuration)
     }
     
-    func statsReport() async -> RTCStatisticsReport {
-        return await withCheckedContinuation { [weak self] continuation in
-            guard let self else { return }
+    func statsReport() async throws -> RTCStatisticsReport {
+        return try await withCheckedThrowingContinuation { [weak self] continuation in
+            guard let self else {
+                return continuation.resume(throwing: ClientError.Unexpected())
+            }
             pc.statistics { report in
                 continuation.resume(returning: report)
             }

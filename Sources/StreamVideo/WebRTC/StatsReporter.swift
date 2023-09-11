@@ -36,6 +36,7 @@ enum StatsReporter {
         for (index, report) in reports.enumerated() {
             let values = report?.statistics
             var current = [String: [String: Any]]()
+            var fallbackCodecId: String?
             if let values {
                 for (_, value) in values {
                     let stats = value.values
@@ -50,13 +51,20 @@ enum StatsReporter {
                             current[trackIdentifier] = stats
                         }
                     }
+                    if let codecId = stats[StatsConstants.codecId] as? String,
+                        stats[StatsConstants.kind] as? String == "video" {
+                        fallbackCodecId = codecId
+                    }
                 }
             }
             for (key, stats) in current {
+                let codecId = stats[StatsConstants.codecId] as? String ?? fallbackCodecId ?? ""
+                let codecInfo = values?[codecId] as? RTCStatistics
+                let codec = codecInfo?.values[StatsConstants.mimeType] as? String ?? ""
                 let baseStats = BaseStats(
                     bytesSent: stats[StatsConstants.bytesSent] as? Int ?? 0,
                     bytesReceived: stats[StatsConstants.bytesReceived] as? Int ?? 0,
-                    codec: stats[StatsConstants.codecId] as? String ?? "",
+                    codec: codec,
                     currentRoundTripTime: stats[StatsConstants.currentRoundTripTime] as? Double ?? 0,
                     frameWidth: stats[StatsConstants.frameWidth] as? Int ?? 0,
                     frameHeight: stats[StatsConstants.frameHeight] as? Int ?? 0,
@@ -146,4 +154,5 @@ enum StatsConstants {
     static let qualityLimitationReason = "qualityLimitationReason"
     static let rid = "rid"
     static let ssrc = "ssrc"
+    static let mimeType = "mimeType"
 }
