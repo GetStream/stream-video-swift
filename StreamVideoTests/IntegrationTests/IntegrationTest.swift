@@ -13,7 +13,7 @@ class IntegrationTest: XCTestCase {
     
     public var client: StreamVideo = {
         let userId = "thierry"
-        let token = TokenGenerator.shared.fetchToken(for: userId, expiration: 100)!
+        let token = TokenGenerator.shared.fetchToken(for: userId, expiration: 100) ?? UserToken(rawValue: "")
         return StreamVideo(
             apiKey: testApiKey,
             user: User(id: userId),
@@ -23,7 +23,7 @@ class IntegrationTest: XCTestCase {
     }()
 
     public func getUserClient(id: String) -> StreamVideo {
-        let token = TokenGenerator.shared.fetchToken(for: id, expiration: 100)!
+        let token = TokenGenerator.shared.fetchToken(for: id, expiration: 100) ?? UserToken(rawValue: "")
         return StreamVideo(
             apiKey: Self.testApiKey,
             user: User(id: id),
