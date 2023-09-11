@@ -21,6 +21,22 @@ final class DemoAppViewFactory: ViewFactory {
         .init(UserAvatar(imageURL: imageURL, size: size))
     }
 
+    func makeLobbyView(
+        viewModel: CallViewModel,
+        lobbyInfo: LobbyInfo,
+        callSettings: Binding<CallSettings>
+    ) -> some View {
+        DefaultViewFactory
+            .shared
+            .makeLobbyView(
+                viewModel: viewModel,
+                lobbyInfo: lobbyInfo,
+                callSettings: callSettings
+            )
+            .alignedToReadableContentGuide()
+            .background(Appearance.default.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+    }
+
     func makeInnerWaitingLocalUserView(viewModel: CallViewModel) -> AnyView {
         .init(WaitingLocalUserView(viewModel: viewModel, viewFactory: self))
     }
