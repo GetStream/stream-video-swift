@@ -18,7 +18,7 @@ concurrency:
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
-  IOS_SIMULATOR_DEVICE: "iPhone 14 Pro (16.4)"
+  IOS_SIMULATOR_DEVICE: "iPhone 14 Pro (17.0)"
 
 jobs:
   automated-code-review:
@@ -61,9 +61,11 @@ jobs:
         INSTALL_SONAR: true
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 30
+      timeout-minutes: 40
       env:
         STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
+        IOS_SIMULATOR_DEVICE: "iPhone 14 Pro (16.4)" # TODO: delete this line as soon as Xcode 15 is stable on CI
+        XCODE_VERSION: "14.3.1" # TODO: delete this line as soon as Xcode 15 is stable on CI
     - name: Get branch name
       id: get_branch_name
       run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
@@ -93,7 +95,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 25
+      timeout-minutes: 40
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PR_NUM: ${{ github.event.number }}
@@ -116,7 +118,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}"
-      timeout-minutes: 25
+      timeout-minutes: 40
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         GITHUB_PR_NUM: ${{ github.event.number }}
@@ -177,6 +179,8 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
         STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
+        IOS_SIMULATOR_DEVICE: "iPhone 14 Pro (16.4)" # TODO: delete this line as soon as Xcode 15 is stable on CI
+        XCODE_VERSION: "14.3.1" # TODO: delete this line as soon as Xcode 15 is stable on CI
     - name: Allure TestOps Upload
       if: env.LAUNCH_ID != '' && (success() || failure())
       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID

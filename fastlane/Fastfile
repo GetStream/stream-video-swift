@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '14.3.1'
+xcode_version = ENV['XCODE_VERSION'] || '15.0'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
@@ -18,7 +18,7 @@ before_all do |lane|
   if is_ci
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
-    xcversion(version: xcode_version) unless [:publish_release, :allure_launch].include?(lane)
+    xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload].include?(lane)
   elsif lane == :test_e2e
     clean_up_ports_for_e2e_test
   end
@@ -117,17 +117,31 @@ desc 'Runs LLC tests'
 lane :test do |options|
   next unless is_check_required(sources: sources_matrix[:unit])
 
-  update_testplan_on_ci(path: 'StreamVideoTests/StreamVideo.xctestplan')
-
   create_credentials_config
+
+  testplan = 'StreamVideoAPITests'
+  update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
 
   scan(
     project: xcode_project,
     scheme: 'StreamVideo',
-    testplan: 'StreamVideo',
+    testplan: testplan,
     clean: true,
     devices: options[:device],
-    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
+    number_of_retries: 2,
+    xcargs: ENV['STREAM_VIDEO_SECRET'] ? "STREAM_VIDEO_SECRET=#{ENV['STREAM_VIDEO_SECRET']}" : ''
+  )
+
+  next if options[:api_tests_only]
+
+  testplan = 'StreamVideo'
+  update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
+
+  scan(
+    project: xcode_project,
+    scheme: 'StreamVideo',
+    testplan: testplan,
+    devices: options[:device]
   )
 end
 

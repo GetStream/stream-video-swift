@@ -1,7 +1,7 @@
 {
   "configurations" : [
     {
-      "id" : "3227EC6C-417B-465C-A70D-02897501100D",
+      "id" : "0F9808DD-C377-4933-9ED3-B1CDE4964045",
       "name" : "Configuration 1",
       "options" : {
 
@@ -17,16 +17,21 @@
     ],
     "targetForVariableExpansion" : {
       "containerPath" : "container:StreamVideo.xcodeproj",
-      "identifier" : "842D8BC22865B31B00801910",
-      "name" : "DemoApp"
-    }
+      "identifier" : "84F737F3287C13AD00A363F4",
+      "name" : "StreamVideoTests"
+    },
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
+      "selectedTests" : [
+        "CallCRUDTest",
+        "IntegrationTest"
+      ],
       "target" : {
         "containerPath" : "container:StreamVideo.xcodeproj",
-        "identifier" : "82392D502993C9E100941435",
-        "name" : "SwiftUIDemoAppUITests"
+        "identifier" : "84F737F3287C13AD00A363F4",
+        "name" : "StreamVideoTests"
       }
     }
   ],
