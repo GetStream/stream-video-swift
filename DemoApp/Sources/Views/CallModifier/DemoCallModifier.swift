@@ -21,6 +21,8 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
         self.chatViewModel = chatViewModel
+
+        InjectedValues[\.chatViewModel] = chatViewModel
     }
 
     func body(content: Content) -> some View {
@@ -29,6 +31,5 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
             viewFactory: viewFactory,
             viewModel: viewModel
         )
-        .environment(\.chatViewModel, chatViewModel)
     }
 }

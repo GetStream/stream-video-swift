@@ -13,8 +13,8 @@ struct AppControlsWithChat: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
     @Injected(\.colors) var colors
+    @Injected(\.chatViewModel) var chatViewModel
 
-    @Environment(\.chatViewModel) var chatViewModel
     private var canOpenChat: Bool
 
     private let size: CGFloat = 50
@@ -83,8 +83,8 @@ struct ChatControlsHeader: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
     @Injected(\.colors) var colors
+    @Injected(\.chatViewModel) var chatViewModel
 
-    @Environment(\.chatViewModel) var chatViewModel
 
     private let size: CGFloat = 50
 

@@ -1,8 +1,5 @@
 //
-//  DemoChatViewModel.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 6/9/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -75,24 +72,5 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
         self.channelController = self.chatWrapper?
             .chatClient
             .channelController(for: channelId)
-    }
-}
-
-extension DemoChatViewModel {
-
-    struct EnvironmentKey: SwiftUI.EnvironmentKey {
-        static var defaultValue: DemoChatViewModel?
-    }
-}
-
-
-extension EnvironmentValues {
-
-    var chatViewModel: DemoChatViewModel? {
-        get { self[DemoChatViewModel.EnvironmentKey.self] }
-        set {
-            guard AppEnvironment.chatIntegration == .enabled else { return }
-            self[DemoChatViewModel.EnvironmentKey.self] = newValue
-        }
     }
 }

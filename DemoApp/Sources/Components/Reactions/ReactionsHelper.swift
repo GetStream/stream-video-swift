@@ -69,7 +69,7 @@ final class ReactionsHelper: ObservableObject {
             forName: .init(CallNotification.callEnded),
             object: nil,
             queue: nil
-        ) { [weak self] _ in self?.handleCallEnded() }
+        ) { _ in Task { await MainActor.run { [weak self] in self?.handleCallEnded() } } }
     }
 
     private func subscribeToReactionEvents() {
@@ -174,7 +174,7 @@ final class ReactionsHelper: ObservableObject {
         activeReactions[userId] = userReactions
     }
 
-    nonisolated private func handleCallEnded() {
+    private func handleCallEnded() {
         Task {
             await MainActor.run { [weak self] in
                 self?.reactionsTask?.cancel()
