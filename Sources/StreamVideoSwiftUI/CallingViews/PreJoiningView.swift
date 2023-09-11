@@ -66,17 +66,21 @@ struct LobbyContentView: View {
     @Binding var callSettings: CallSettings
     var onJoinCallTap: () -> ()
     var onCloseLobby: () -> ()
-
-    @State private var contentSize: CGSize = .zero
     
     var body: some View {
         VStack {
-            HStack {
-                Button {} label: { Image(systemName: "xmark") }
-                    .hidden()
-                    .padding()
+            ZStack {
+                HStack {
+                    Spacer()
+                    Button {
+                        onCloseLobby()
+                    } label: {
+                        Image(systemName: "xmark")
+                            .foregroundColor(colors.text)
+                    }
+                }
 
-                VStack {
+                VStack(alignment: .center) {
                     Text(L10n.WaitingRoom.title)
                         .font(.title)
                         .foregroundColor(colors.text)
@@ -86,47 +90,33 @@ struct LobbyContentView: View {
                         .font(.body)
                         .foregroundColor(Color(colors.textLowEmphasis))
                 }
-                .frame(maxWidth: .infinity)
-
-                Button {
-                    onCloseLobby()
-                } label: {
-                    Image(systemName: "xmark")
-                        .foregroundColor(colors.text)
-                }
-                .padding()
-            }
-
-            ScrollView {
-                VStack {
-                    CameraCheckView(
-                        viewModel: viewModel,
-                        microphoneChecker: microphoneChecker,
-                        callSettings: callSettings,
-                        availableSize: contentSize
-                    )
-
-                    if microphoneChecker.isSilent {
-                        Text(L10n.WaitingRoom.Mic.notWorking)
-                            .font(.caption)
-                            .foregroundColor(colors.text)
-                    }
-
-                    CallSettingsView(callSettings: $callSettings)
-
-                    JoinCallView(
-                        callId: callId,
-                        callType: callType,
-                        callParticipants: viewModel.participants,
-                        onJoinCallTap: onJoinCallTap
-                    )
-                }
             }
             .padding()
-        }
-        .modifier(SizeModifier())
-        .onPreferenceChange(SizePreferenceKey.self) {
-            self.contentSize = $0
+            .zIndex(1)
+
+            VStack {
+                CameraCheckView(
+                    viewModel: viewModel,
+                    microphoneChecker: microphoneChecker,
+                    callSettings: callSettings
+                )
+
+                if microphoneChecker.isSilent {
+                    Text(L10n.WaitingRoom.Mic.notWorking)
+                        .font(.caption)
+                        .foregroundColor(colors.text)
+                }
+
+                CallSettingsView(callSettings: $callSettings)
+
+                JoinCallView(
+                    callId: callId,
+                    callType: callType,
+                    callParticipants: viewModel.participants,
+                    onJoinCallTap: onJoinCallTap
+                )
+            }
+            .padding()
         }
         .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -147,63 +137,50 @@ struct CameraCheckView: View {
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
     var callSettings: CallSettings
-    var availableSize: CGSize
-
-    var availableWidth: CGFloat { max(availableSize.width - 32, 0) }
-    var availableHeight: CGFloat { cameraSize }
 
     var body: some View {
-        Group {
-            if let image = viewModel.viewfinderImage, callSettings.videoOn {
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: availableWidth, height: availableHeight)
-                    .cornerRadius(16)
-                    .accessibility(identifier: "cameraCheckView")
-                    .streamAccessibility(value: "1")
-            } else {
-                ZStack {
-                    Rectangle()
-                        .fill(colors.lobbySecondaryBackground)
-                        .frame(width: availableWidth, height: availableHeight)
-                        .cornerRadius(16)
+        GeometryReader { proxy in
+            Group {
+                if let image = viewModel.viewfinderImage, callSettings.videoOn {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .accessibility(identifier: "cameraCheckView")
+                        .streamAccessibility(value: "1")
+                } else {
+                    ZStack {
+                        Rectangle()
+                            .fill(colors.lobbySecondaryBackground)
 
-                    if #available(iOS 14.0, *) {
-                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
-                            .accessibility(identifier: "cameraCheckView")
-                            .streamAccessibility(value: "0")
+                        if #available(iOS 14.0, *) {
+                            UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
+                                .accessibility(identifier: "cameraCheckView")
+                                .streamAccessibility(value: "0")
+                        }
                     }
+                    .opacity(callSettings.videoOn ? 0 : 1)
                 }
-                .opacity(callSettings.videoOn ? 0 : 1)
-                .frame(width: availableWidth, height: availableHeight)
             }
-        }
-        .overlay(
-            VStack {
-                Spacer()
-                HStack {
-                    MicrophoneCheckView(
-                        audioLevels: microphoneChecker.audioLevels,
-                        microphoneOn: callSettings.audioOn,
-                        isSilent: microphoneChecker.isSilent
-                    )
-                    .accessibility(identifier: "microphoneCheckView")
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                VStack {
                     Spacer()
+                    HStack {
+                        MicrophoneCheckView(
+                            audioLevels: microphoneChecker.audioLevels,
+                            microphoneOn: callSettings.audioOn,
+                            isSilent: microphoneChecker.isSilent
+                        )
+                        .accessibility(identifier: "microphoneCheckView")
+                        Spacer()
+                    }
+                    .padding()
                 }
-                .padding()
-            }
-        )
-    }
-    
-    private var cameraSize: CGFloat {
-        if viewModel.participants.count > 0 {
-            return availableSize.height / 2 - 64
-        } else {
-            return availableSize.height / 2
+            )
         }
     }
-    
 }
 
 struct JoinCallView: View {
