@@ -26,7 +26,7 @@ open class CallViewModel: ObservableObject {
                     }
                     self?.callParticipants = participants
             })
-            callUpdates = call?.state.$blockedUserIds
+            blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] blockedUserIds in
                     self?.blockedUsers = blockedUserIds.map { User(id: $0) }
@@ -153,7 +153,7 @@ open class CallViewModel: ObservableObject {
     }
                 
     private var participantUpdates: AnyCancellable?
-    private var callUpdates: AnyCancellable?
+    private var blockedUserUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?
     private var recordingUpdates: AnyCancellable?
     private var screenSharingUpdates: AnyCancellable?
@@ -476,8 +476,8 @@ open class CallViewModel: ObservableObject {
         enteringCallTask = nil
         participantUpdates?.cancel()
         participantUpdates = nil
-        callUpdates?.cancel()
-        callUpdates = nil
+        blockedUserUpdates?.cancel()
+        blockedUserUpdates = nil
         automaticLayoutHandling = true
         reconnectionUpdates?.cancel()
         reconnectionUpdates = nil

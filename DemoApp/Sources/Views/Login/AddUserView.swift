@@ -6,7 +6,8 @@ import SwiftUI
 import StreamVideo
 
 struct AddUserView: View {
-    
+
+    @Injected(\.appearance) var appearance
     @Environment(\.presentationMode) var presentationMode
     
     @State var name = ""
@@ -14,47 +15,61 @@ struct AddUserView: View {
     @State var token = ""
     
     var body: some View {
-        VStack {
-            Text("Add a new user")
-                .font(.title)
-                .padding()
-            
-            TextField("User id", text: $id)
-                .textFieldStyle(.roundedBorder)
-                .padding(.all, 8)
-            
-            TextField("Name", text: $name)
-                .textFieldStyle(.roundedBorder)
-                .padding(.all, 8)
-            
-            TextField("Token", text: $token)
-                .textFieldStyle(.roundedBorder)
-                .padding(.all, 8)
-            
-            Button {
-                let userInfo = User(
-                    id: id,
-                    name: name,
-                    imageURL: nil,
-                    customData: [:]
-                )
-                AppState.shared.users.append(userInfo)
-                presentationMode.wrappedValue.dismiss()
-            } label: {
-                Text("Add user")
-                    .padding()
-            }
-            .foregroundColor(Color.white)
-            .background(buttonDisabled ? Color.gray : Color.blue)
-            .disabled(buttonDisabled)
-            .cornerRadius(16)
+        NavigationView {
+            ScrollView {
+                VStack {
+                    Group {
+                        TextField("User id", text: $id)
 
-            Spacer()
+                        TextField("Name", text: $name)
+
+                        TextField("Token", text: $token)
+                    }
+
+                    Button {
+                        let userInfo = User(
+                            id: id,
+                            name: name,
+                            imageURL: nil,
+                            customData: [:]
+                        )
+                        AppState.shared.users.append(userInfo)
+                        presentationMode.wrappedValue.dismiss()
+                    } label: {
+                        CallButtonView(
+                            title: "Add User",
+                            isDisabled: buttonDisabled
+                        )
+                        .disabled(buttonDisabled)
+                    }
+                }
+                .textFieldStyle(DemoTextfieldStyle())
+            }
+            .padding()
+            .navigationTitle("Add a new User")
         }
     }
     
     private var buttonDisabled: Bool {
         name.isEmpty || id.isEmpty || token.isEmpty
     }
-    
+}
+
+struct DemoTextfieldStyle: TextFieldStyle {
+
+    @Injected(\.appearance) var appearance
+
+    @State var cornerRadius: CGFloat = 8
+
+    @ViewBuilder
+    private var clipShape: some Shape { RoundedRectangle(cornerRadius: cornerRadius) }
+
+    func _body(configuration: TextField<Self._Label>) -> some View {
+        configuration
+            .padding()
+            .foregroundColor(appearance.colors.text)
+            .background(Color(appearance.colors.background))
+            .overlay(clipShape.stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+            .clipShape(clipShape)
+    }
 }

@@ -15,7 +15,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
-    
+
     init(source: RTCVideoSource, filters: [VideoFilter], handleRotation: Bool = true) {
         self.source = source
         self.filters = filters
@@ -34,14 +34,22 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
         guard let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer else { return }
-        Task {
-            let imageBuffer = buffer.pixelBuffer
-            CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-            let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
-            let outputImage = await filter(image: inputImage)
-            CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-            self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
-            let updatedFrame = handleRotation ? adjustRotation(capturer, for: buffer, frame: frame) : frame
+        Task { [weak self] in
+            guard let self else { return }
+
+            if selectedFilter != nil {
+                let imageBuffer = buffer.pixelBuffer
+                CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+                let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
+                let outputImage = await filter(image: inputImage)
+                CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+                self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
+            }
+
+            let updatedFrame = handleRotation
+            ? adjustRotation(capturer, for: buffer, frame: frame)
+            : frame
+
             self.source.capturer(capturer, didCapture: updatedFrame)
         }
     }
@@ -57,7 +65,10 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         for buffer: RTCCVPixelBuffer,
         frame: RTCVideoFrame
     ) -> RTCVideoFrame {
+        #if os(macOS)
         var rotation = RTCVideoRotation._0
+        #else
+        var rotation = RTCVideoRotation._90
         switch sceneOrientation {
         case .portrait:
             rotation = ._90
@@ -68,10 +79,12 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         case .landscapeLeft:
             rotation = currentCameraPosition == .front ? ._0 : ._180
         default:
-            rotation = ._90
+            break
         }
-        let updatedFrame = RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
-        return updatedFrame
+        #endif
+        return rotation != frame.rotation
+        ? RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
+        : frame
     }
     
     private func filter(image: CIImage) async -> CIImage {

@@ -68,59 +68,59 @@ struct LobbyContentView: View {
     var onCloseLobby: () -> ()
     
     var body: some View {
-        GeometryReader { reader in
+        VStack {
             ZStack {
-                VStack {
+                HStack {
                     Spacer()
-                    Text(L10n.WaitingRoom.title)
-                        .font(.title)
-                        .foregroundColor(colors.text)
-                        .bold()
-                    
-                    Text(L10n.WaitingRoom.subtitle)
-                        .font(.body)
-                        .foregroundColor(Color(colors.textLowEmphasis))
-                    
-                    CameraCheckView(
-                        viewModel: viewModel,
-                        microphoneChecker: microphoneChecker,
-                        callSettings: callSettings,
-                        availableSize: reader.size
-                    )
-                    
-                    if microphoneChecker.isSilent {
-                        Text(L10n.WaitingRoom.Mic.notWorking)
-                            .font(.caption)
-                            .foregroundColor(colors.text)
-                    }
-                                        
-                    CallSettingsView(callSettings: $callSettings)
-                    
-                    JoinCallView(
-                        callId: callId,
-                        callType: callType,
-                        callParticipants: viewModel.participants,
-                        onJoinCallTap: onJoinCallTap
-                    )
-                }
-                .padding()
-                
-                TopRightView {
                     Button {
                         onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")
                             .foregroundColor(colors.text)
                     }
-                    .padding()
+                }
+
+                VStack(alignment: .center) {
+                    Text(L10n.WaitingRoom.title)
+                        .font(.title)
+                        .foregroundColor(colors.text)
+                        .bold()
+
+                    Text(L10n.WaitingRoom.subtitle)
+                        .font(.body)
+                        .foregroundColor(Color(colors.textLowEmphasis))
                 }
             }
-            .frame(maxWidth: .infinity, maxHeight: .infinity)
-            .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+            .padding()
+            .zIndex(1)
+
+            VStack {
+                CameraCheckView(
+                    viewModel: viewModel,
+                    microphoneChecker: microphoneChecker,
+                    callSettings: callSettings
+                )
+
+                if microphoneChecker.isSilent {
+                    Text(L10n.WaitingRoom.Mic.notWorking)
+                        .font(.caption)
+                        .foregroundColor(colors.text)
+                }
+
+                CallSettingsView(callSettings: $callSettings)
+
+                JoinCallView(
+                    callId: callId,
+                    callType: callType,
+                    callParticipants: viewModel.participants,
+                    onJoinCallTap: onJoinCallTap
+                )
+            }
+            .padding()
         }
-        .onAppear {
-            viewModel.startCamera(front: true)
-        }
+        .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .onAppear { viewModel.startCamera(front: true) }
         .onDisappear {
             viewModel.stopCamera()
             viewModel.cleanUp()
@@ -137,60 +137,50 @@ struct CameraCheckView: View {
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
     var callSettings: CallSettings
-    var availableSize: CGSize
-    
-    var body: some View {
-        Group {
-            if let image = viewModel.viewfinderImage, callSettings.videoOn {
-                image
-                    .resizable()
-                    .aspectRatio(contentMode: .fill)
-                    .frame(width: availableSize.width - 32, height: cameraSize)
-                    .cornerRadius(16)
-                    .accessibility(identifier: "cameraCheckView")
-                    .streamAccessibility(value: "1")
-            } else {
-                ZStack {
-                    Rectangle()
-                        .fill(colors.lobbySecondaryBackground)
-                        .frame(width: availableSize.width - 32, height: cameraSize)
-                        .cornerRadius(16)
 
-                    if #available(iOS 14.0, *) {
-                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
-                            .accessibility(identifier: "cameraCheckView")
-                            .streamAccessibility(value: "0")
+    var body: some View {
+        GeometryReader { proxy in
+            Group {
+                if let image = viewModel.viewfinderImage, callSettings.videoOn {
+                    image
+                        .resizable()
+                        .aspectRatio(contentMode: .fill)
+                        .accessibility(identifier: "cameraCheckView")
+                        .streamAccessibility(value: "1")
+                } else {
+                    ZStack {
+                        Rectangle()
+                            .fill(colors.lobbySecondaryBackground)
+
+                        if #available(iOS 14.0, *) {
+                            UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
+                                .accessibility(identifier: "cameraCheckView")
+                                .streamAccessibility(value: "0")
+                        }
                     }
+                    .opacity(callSettings.videoOn ? 0 : 1)
                 }
-                .opacity(callSettings.videoOn ? 0 : 1)
-                .frame(width: availableSize.width - 32, height: cameraSize)
             }
-        }
-        .overlay(
-            VStack {
-                Spacer()
-                HStack {
-                    MicrophoneCheckView(
-                        audioLevels: microphoneChecker.audioLevels,
-                        microphoneOn: callSettings.audioOn,
-                        isSilent: microphoneChecker.isSilent
-                    )
-                    .accessibility(identifier: "microphoneCheckView")
+            .frame(width: proxy.size.width, height: proxy.size.height)
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .overlay(
+                VStack {
                     Spacer()
+                    HStack {
+                        MicrophoneCheckView(
+                            audioLevels: microphoneChecker.audioLevels,
+                            microphoneOn: callSettings.audioOn,
+                            isSilent: microphoneChecker.isSilent
+                        )
+                        .accessibility(identifier: "microphoneCheckView")
+                        Spacer()
+                    }
+                    .padding()
                 }
-                .padding()
-            }
-        )
-    }
-    
-    private var cameraSize: CGFloat {
-        if viewModel.participants.count > 0 {
-            return availableSize.height / 2 - 64
-        } else {
-            return availableSize.height / 2
+            )
         }
     }
-    
 }
 
 struct JoinCallView: View {
@@ -340,5 +330,28 @@ struct ParticipantsInCallView: View {
             }
         }
         .frame(height: viewSize)
+    }
+}
+
+struct SizePreferenceKey: PreferenceKey {
+    static var defaultValue: CGSize = .zero
+
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) {
+        value = nextValue()
+    }
+}
+
+struct SizeModifier: ViewModifier {
+    private var sizeView: some View {
+        GeometryReader { geometry in
+            Color
+                .clear
+                .preference(key: SizePreferenceKey.self, value: geometry.size)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+
+    func body(content: Content) -> some View {
+        content.overlay(sizeView)
     }
 }

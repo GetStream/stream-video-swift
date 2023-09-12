@@ -12,11 +12,20 @@
 		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
 		401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */; };
 		401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A72A9DF7B400534ED1 /* EffectsLibrary */; };
-		401A64AB2A9DF7EC00534ED1 /* StreamChatWrapper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* StreamChatWrapper.swift */; };
+		401A64AB2A9DF7EC00534ED1 /* DemoChatAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */; };
 		401A64AE2A9DF81200534ED1 /* UserProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AD2A9DF81200534ED1 /* UserProvider.swift */; };
 		401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
 		401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
+		4029A6222AB068EC0065DAFB /* CallButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */; };
+		4029A6232AB068FC0065DAFB /* DemoControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EC2A9E2A24004BE3DA /* DemoControls.swift */; };
+		4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
+		4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */; };
+		4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
+		4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */; };
+		4029A6282AB0693C0065DAFB /* DemoReactionsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */; };
+		4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 4029A6292AB069600065DAFB /* StreamChatSwiftUI */; };
+		402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
@@ -26,6 +35,7 @@
 		4046DEEE2A9F404300CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */; };
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
+		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
 		406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AF2A9DFC58004BE3DA /* CallKitState.swift */; };
@@ -83,7 +93,7 @@
 		40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		40F445C52A9E1D91004BE3DA /* MockServer in Frameworks */ = {isa = PBXBuildFile; productRef = 40F445C42A9E1D91004BE3DA /* MockServer */; };
 		40F445C72A9E1D91004BE3DA /* StreamChatTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 40F445C62A9E1D91004BE3DA /* StreamChatTestHelpers */; };
-		40F445CC2A9E1FC9004BE3DA /* StreamChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* StreamChatViewFactory.swift */; };
+		40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */; };
 		40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */; };
 		40F445D22A9E2033004BE3DA /* ReactionsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */; };
 		40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D32A9E2051004BE3DA /* Reaction.swift */; };
@@ -850,11 +860,12 @@
 		4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser.swift; sourceTree = "<group>"; };
 		401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser_Tests.swift; sourceTree = "<group>"; };
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
-		401A64AA2A9DF7EC00534ED1 /* StreamChatWrapper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamChatWrapper.swift; sourceTree = "<group>"; };
+		401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatAdapter.swift; sourceTree = "<group>"; };
 		401A64AD2A9DF81200534ED1 /* UserProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProvider.swift; sourceTree = "<group>"; };
 		401A64B02A9DF83200534ED1 /* TokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenResponse.swift; sourceTree = "<group>"; };
 		401A64B22A9DF86200534ED1 /* URL+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Convenience.swift"; sourceTree = "<group>"; };
 		401A64B42A9DF88C00534ED1 /* String+Unique.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Unique.swift"; sourceTree = "<group>"; };
+		402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatViewModel.swift; sourceTree = "<group>"; };
 		4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
@@ -863,6 +874,7 @@
 		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
+		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
@@ -883,7 +895,7 @@
 		40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotVoiceFilter.swift; sourceTree = "<group>"; };
 		40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCDefaultAudioProcessingModule+AudioProcessingModule.swift"; sourceTree = "<group>"; };
 		40F445C12A9E1449004BE3DA /* JoinCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCallView.swift; sourceTree = "<group>"; };
-		40F445CB2A9E1FC9004BE3DA /* StreamChatViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamChatViewFactory.swift; sourceTree = "<group>"; };
+		40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatViewFactory.swift; sourceTree = "<group>"; };
 		40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoReactionsOverlayView.swift; sourceTree = "<group>"; };
 		40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReactionsHelper.swift; sourceTree = "<group>"; };
 		40F445D32A9E2051004BE3DA /* Reaction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Reaction.swift; sourceTree = "<group>"; };
@@ -1485,6 +1497,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */,
 				84A26C9929435F4100B29E53 /* NukeUI in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
 				84767502290A824B0015DC53 /* WebRTC in Frameworks */,
@@ -1571,8 +1584,10 @@
 		401A64A92A9DF7E600534ED1 /* Chat */ = {
 			isa = PBXGroup;
 			children = (
-				401A64AA2A9DF7EC00534ED1 /* StreamChatWrapper.swift */,
-				40F445CB2A9E1FC9004BE3DA /* StreamChatViewFactory.swift */,
+				401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */,
+				40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */,
+				402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */,
+				4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */,
 			);
 			path = Chat;
 			sourceTree = "<group>";
@@ -3211,6 +3226,7 @@
 			packageProductDependencies = (
 				84767501290A824B0015DC53 /* WebRTC */,
 				84A26C9829435F4100B29E53 /* NukeUI */,
+				4029A6292AB069600065DAFB /* StreamChatSwiftUI */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -3686,6 +3702,7 @@
 				40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
+				4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */,
 				40F445E02A9E22EA004BE3DA /* SimpleCallingView.swift in Sources */,
 				8403C0AF2897D9940092BD43 /* VoIPPushService.swift in Sources */,
 				403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */,
@@ -3709,7 +3726,7 @@
 				40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */,
-				40F445CC2A9E1FC9004BE3DA /* StreamChatViewFactory.swift in Sources */,
+				40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */,
 				842D8BDA2865B37800801910 /* DemoApp.swift in Sources */,
 				40F445E82A9E2824004BE3DA /* Call+Identifiable.swift in Sources */,
 				40F445FE2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift in Sources */,
@@ -3727,7 +3744,7 @@
 				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
 				4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */,
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
-				401A64AB2A9DF7EC00534ED1 /* StreamChatWrapper.swift in Sources */,
+				401A64AB2A9DF7EC00534ED1 /* DemoChatAdapter.swift in Sources */,
 				4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */,
 				40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */,
 				40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */,
@@ -3739,6 +3756,7 @@
 				8430FD1C2AB07FAA007AA3E6 /* ParticipantStatsView.swift in Sources */,
 				4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */,
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
+				402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */,
 				40F445DE2A9E22B9004BE3DA /* CallButtonView.swift in Sources */,
 				8434C5222899572F0001490A /* CallService.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
@@ -3761,17 +3779,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */,
 				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
 				406A8EB32AA1D80C001F598A /* TokenProvider.swift in Sources */,
+				4029A6282AB0693C0065DAFB /* DemoReactionsOverlayView.swift in Sources */,
 				406A8EAD2AA1D80C001F598A /* UserProvider.swift in Sources */,
 				406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */,
 				406A8E9A2AA1D7E9001F598A /* Call+Identifiable.swift in Sources */,
+				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
 				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
 				406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */,
+				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
 				406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
 				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
+				4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */,
 				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
 				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
@@ -3793,10 +3816,12 @@
 				406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */,
 				407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */,
 				406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */,
+				4029A6222AB068EC0065DAFB /* CallButtonView.swift in Sources */,
 				406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */,
 				406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */,
 				406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */,
 				406A8E982AA1D7E9001F598A /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */,
+				4029A6232AB068FC0065DAFB /* DemoControls.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				406A8EB22AA1D80C001F598A /* VoIPPushService.swift in Sources */,
 				40B713692A275F1400D1FE67 /* AppState.swift in Sources */,
@@ -5861,6 +5886,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */;
 			productName = EffectsLibrary;
+		};
+		4029A6292AB069600065DAFB /* StreamChatSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;
+			productName = StreamChatSwiftUI;
 		};
 		4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */ = {
 			isa = XCSwiftPackageProductDependency;

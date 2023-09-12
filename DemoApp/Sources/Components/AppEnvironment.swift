@@ -35,6 +35,7 @@ extension AppEnvironment {
 
     enum BaseURL: String, Debuggable, CaseIterable {
         case staging = "https://staging.getstream.io"
+        case pronto = "https://pronto.getstream.io"
         case production = "https://getstream.io"
 
         var url: URL { URL(string: rawValue)! }
@@ -42,6 +43,8 @@ extension AppEnvironment {
             switch self {
             case .staging:
                 return "Staging"
+            case .pronto:
+                return "Pronto"
             case .production:
                 return "Production"
             }
@@ -195,12 +198,15 @@ extension AppEnvironment {
 
     enum SupportedDeeplink: Debuggable {
         case staging
+        case pronto
         case production
 
         var deeplinkURL: URL {
             switch self {
             case .staging:
                 return BaseURL.staging.url
+            case .pronto:
+                return BaseURL.pronto.url
             case .production:
                 return BaseURL.production.url
             }
@@ -210,6 +216,8 @@ extension AppEnvironment {
             switch self {
             case .staging:
                 return "Staging"
+            case .pronto:
+                return "Pronto"
             case .production:
                 return "Production"
             }
@@ -219,7 +227,7 @@ extension AppEnvironment {
     static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
-            return [.staging, .production]
+            return [.staging, .pronto, .production]
         case .test:
             return [.staging]
         case .release:
