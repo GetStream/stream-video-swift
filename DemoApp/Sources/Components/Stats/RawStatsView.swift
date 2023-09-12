@@ -1,0 +1,75 @@
+//
+// Copyright © 2023 Stream.io Inc. All rights reserved.
+//
+
+import StreamVideo
+import SwiftUI
+import WebRTC
+
+struct RawStatsView: View {
+        
+    var statsReport: CallStatsReport?
+    
+    var body: some View {
+        NavigationView {
+            if statsReport != nil {
+                ScrollView {
+                    LazyVStack(alignment: .leading) {
+                        Text("Subscriber stats")
+                            .font(.headline)
+                        ForEach(subscriberJsonStrings, id: \.self) { jsonString in
+                            Text(jsonString)
+                        }
+                        Text("Publisher stats")
+                            .font(.headline)
+                        ForEach(publisherJsonStrings, id: \.self) { jsonString in
+                            Text(jsonString)
+                        }
+                    }
+                    .padding()
+                }
+                .toolbar {
+                    ToolbarItem(placement: .principal) {
+                        Text("Call stats")
+                            .bold()
+                    }
+                }
+                .navigationBarTitleDisplayMode(.inline)
+            } else {
+                Text("Stats not available")
+            }
+        }
+    }
+    
+    var subscriberJsonStrings: [String] {
+        guard let report = statsReport?.subscriberRawStats else { return [] }
+        return jsonString(from: report)
+    }
+    
+    var publisherJsonStrings: [String] {
+        guard let report = statsReport?.publisherRawStats else { return [] }
+        return jsonString(from: report)
+    }
+    
+    func jsonString(from report: RTCStatisticsReport) -> [String] {
+        let stats = report.statistics
+        var result = [String]()
+        for (key, value) in stats {
+            if let jsonData = try? JSONSerialization.data(
+                withJSONObject: value.values,
+                options: [.prettyPrinted]
+            ) {
+                if let jsonString = String(
+                    data: jsonData,
+                    encoding: .ascii
+                ) {
+                    let text = "{\n\"\(key)\": \(jsonString)\n}"
+                    result.append(text)
+                }
+            }
+        }
+        
+        return result
+    }
+    
+}

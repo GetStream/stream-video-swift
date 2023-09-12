@@ -318,6 +318,9 @@
 		842D8BDA2865B37800801910 /* DemoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842D8BD52865B37800801910 /* DemoApp.swift */; };
 		842D8BDB2865B37800801910 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD62865B37800801910 /* Assets.xcassets */; };
 		842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 842D8BD82865B37800801910 /* Preview Assets.xcassets */; };
+		8430FD1C2AB07FAA007AA3E6 /* ParticipantStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD1B2AB07FAA007AA3E6 /* ParticipantStatsView.swift */; };
+		8430FD1E2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD1D2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift */; };
+		8430FD202AB0B0B6007AA3E6 /* RawStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD1F2AB0B0B6007AA3E6 /* RawStatsView.swift */; };
 		8434C5222899572F0001490A /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
 		8434C525289AA2E20001490A /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C524289AA2E20001490A /* Fonts.swift */; };
 		8434C527289AA2F00001490A /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C526289AA2F00001490A /* Images.swift */; };
@@ -1070,6 +1073,9 @@
 		842D8BD52865B37800801910 /* DemoApp.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoApp.swift; sourceTree = "<group>"; };
 		842D8BD62865B37800801910 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		842D8BD82865B37800801910 /* Preview Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = "Preview Assets.xcassets"; sourceTree = "<group>"; };
+		8430FD1B2AB07FAA007AA3E6 /* ParticipantStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantStatsView.swift; sourceTree = "<group>"; };
+		8430FD1D2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantStatsViewModel.swift; sourceTree = "<group>"; };
+		8430FD1F2AB0B0B6007AA3E6 /* RawStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawStatsView.swift; sourceTree = "<group>"; };
 		8434C5212899572F0001490A /* CallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallService.swift; sourceTree = "<group>"; };
 		8434C524289AA2E20001490A /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
 		8434C526289AA2F00001490A /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
@@ -1670,6 +1676,7 @@
 				40F445B52A9E04B2004BE3DA /* Storage */,
 				401A64AC2A9DF80900534ED1 /* Authentication */,
 				401A64A92A9DF7E600534ED1 /* Chat */,
+				8430FD1A2AB07F91007AA3E6 /* Stats */,
 				847B47AE2A233AE2000714CE /* DemoAppViewFactory.swift */,
 				8456E6C5287EB55F004E180E /* AppState.swift */,
 				4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */,
@@ -2222,6 +2229,16 @@
 				842D8BD82865B37800801910 /* Preview Assets.xcassets */,
 			);
 			path = "Preview Content";
+			sourceTree = "<group>";
+		};
+		8430FD1A2AB07F91007AA3E6 /* Stats */ = {
+			isa = PBXGroup;
+			children = (
+				8430FD1B2AB07FAA007AA3E6 /* ParticipantStatsView.swift */,
+				8430FD1D2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift */,
+				8430FD1F2AB0B0B6007AA3E6 /* RawStatsView.swift */,
+			);
+			path = Stats;
 			sourceTree = "<group>";
 		};
 		8434C523289AA2B60001490A /* CallView */ = {
@@ -3687,6 +3704,7 @@
 				409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */,
 				8403C0AD2897CF4D0092BD43 /* CallKitService.swift in Sources */,
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
+				8430FD1E2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift in Sources */,
 				40F445B02A9DFC58004BE3DA /* CallKitState.swift in Sources */,
 				40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
@@ -3699,6 +3717,7 @@
 				401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */,
 				40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */,
 				40F445BA2A9E0815004BE3DA /* AudioFilter.swift in Sources */,
+				8430FD202AB0B0B6007AA3E6 /* RawStatsView.swift in Sources */,
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
 				820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */,
@@ -3717,6 +3736,7 @@
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
 				40F445E22A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift in Sources */,
 				8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */,
+				8430FD1C2AB07FAA007AA3E6 /* ParticipantStatsView.swift in Sources */,
 				4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */,
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
 				40F445DE2A9E22B9004BE3DA /* CallButtonView.swift in Sources */,
