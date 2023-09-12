@@ -26,7 +26,7 @@ enum StatsReporter {
         )
     }
     
-    private static func participantsStats(
+    static func participantsStats(
         from reports: [RTCStatisticsReport?]
     ) -> ParticipantsStats {
         guard reports.count >= 2 else {
@@ -61,21 +61,7 @@ enum StatsReporter {
                 let codecId = stats[StatsConstants.codecId] as? String ?? fallbackCodecId ?? ""
                 let codecInfo = values?[codecId] as? RTCStatistics
                 let codec = codecInfo?.values[StatsConstants.mimeType] as? String ?? ""
-                let baseStats = BaseStats(
-                    bytesSent: stats[StatsConstants.bytesSent] as? Int ?? 0,
-                    bytesReceived: stats[StatsConstants.bytesReceived] as? Int ?? 0,
-                    codec: codec,
-                    currentRoundTripTime: stats[StatsConstants.currentRoundTripTime] as? Double ?? 0,
-                    frameWidth: stats[StatsConstants.frameWidth] as? Int ?? 0,
-                    frameHeight: stats[StatsConstants.frameHeight] as? Int ?? 0,
-                    framesPerSecond: stats[StatsConstants.framesPerSecond] as? Int ?? 0,
-                    jitter: stats[StatsConstants.jitter] as? Double ?? 0,
-                    kind: stats[StatsConstants.kind] as? String ?? "video",
-                    qualityLimitationReason: stats[StatsConstants.qualityLimitationReason] as? String ?? "",
-                    rid: stats[StatsConstants.rid] as? String ?? "",
-                    ssrc: stats[StatsConstants.ssrc] as? Int ?? 0,
-                    isPublisher: index == 0
-                )
+                let baseStats = makeBaseStats(from: stats, codec: codec, index: index)
                 participants[key] = baseStats
             }
         }
@@ -83,7 +69,31 @@ enum StatsReporter {
         return ParticipantsStats(report: participants)
     }
     
-    private static func publisherStats(
+    static func makeBaseStats(
+        from stats: [String: Any],
+        codec: String,
+        index: Int
+    ) -> BaseStats {
+        let baseStats = BaseStats(
+            bytesSent: stats[StatsConstants.bytesSent] as? Int ?? 0,
+            bytesReceived: stats[StatsConstants.bytesReceived] as? Int ?? 0,
+            codec: codec,
+            currentRoundTripTime: stats[StatsConstants.currentRoundTripTime] as? Double ?? 0,
+            frameWidth: stats[StatsConstants.frameWidth] as? Int ?? 0,
+            frameHeight: stats[StatsConstants.frameHeight] as? Int ?? 0,
+            framesPerSecond: stats[StatsConstants.framesPerSecond] as? Int ?? 0,
+            jitter: stats[StatsConstants.jitter] as? Double ?? 0,
+            kind: stats[StatsConstants.kind] as? String ?? "video",
+            qualityLimitationReason: stats[StatsConstants.qualityLimitationReason] as? String ?? "",
+            rid: stats[StatsConstants.rid] as? String ?? "",
+            ssrc: stats[StatsConstants.ssrc] as? Int ?? 0,
+            isPublisher: index == 0
+        )
+        
+        return baseStats
+    }
+    
+    static func publisherStats(
         from stats: ParticipantsStats,
         timestamp: Double
     ) -> AggregatedStatsReport {
@@ -91,7 +101,7 @@ enum StatsReporter {
         return aggregatedReport(from: filteredStats, timestamp: timestamp)
     }
     
-    private static func subscriberStats(
+    static func subscriberStats(
         from stats: ParticipantsStats,
         timestamp: Double
     ) -> AggregatedStatsReport {
@@ -99,7 +109,7 @@ enum StatsReporter {
         return aggregatedReport(from: filteredStats, timestamp: timestamp)
     }
     
-    private static func aggregatedReport(
+    static func aggregatedReport(
         from stats: [BaseStats],
         timestamp: Double
     ) -> AggregatedStatsReport {
