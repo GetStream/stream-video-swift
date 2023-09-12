@@ -11,16 +11,18 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
 
     var viewFactory: Factory
     var viewModel: CallViewModel
-    var chatViewModel: StreamChatVideoViewModel
+    var chatViewModel: DemoChatViewModel
 
     init(
         viewFactory: Factory,
         viewModel: CallViewModel,
-        chatViewModel: StreamChatVideoViewModel
+        chatViewModel: DemoChatViewModel
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
         self.chatViewModel = chatViewModel
+
+        InjectedValues[\.chatViewModel] = chatViewModel
     }
 
     func body(content: Content) -> some View {
@@ -29,20 +31,5 @@ struct DemoCallModifier<Factory: ViewFactory>: ViewModifier {
             viewFactory: viewFactory,
             viewModel: viewModel
         )
-        .environment(\.chatVideoViewModel, chatViewModel)
-    }
-}
-
-struct ChatVideoViewModel: EnvironmentKey {
-    static var defaultValue: StreamChatVideoViewModel?
-}
-
-extension EnvironmentValues {
-    var chatVideoViewModel: StreamChatVideoViewModel? {
-        get { self[ChatVideoViewModel.self] }
-        set {
-            guard AppEnvironment.chatIntegration == .enabled else { return }
-            self[ChatVideoViewModel.self] = newValue
-        }
     }
 }

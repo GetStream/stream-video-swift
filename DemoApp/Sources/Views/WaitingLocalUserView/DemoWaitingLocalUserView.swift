@@ -9,7 +9,7 @@ import StreamVideoSwiftUI
 struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     @Injected(\.appearance) var appearance
-    @Environment(\.chatVideoViewModel) var chatViewModel
+    @Injected(\.chatViewModel) var chatViewModel
 
     @ObservedObject var viewModel: CallViewModel
 

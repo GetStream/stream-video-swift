@@ -15,6 +15,7 @@ final class ReactionsHelper: ObservableObject {
     var player: AVAudioPlayer?
 
     private var reactionsTask: Task<Void, Error>?
+    private var callEndedNotificationObserver: Any?
 
     @Published var reactionsShown = false
     @Published var showFireworks = false
@@ -36,7 +37,9 @@ final class ReactionsHelper: ObservableObject {
         }
     }
 
-    init() {}
+    init() {
+        subscribeToCallStatusUpdates()
+    }
 
     func send(reaction: Reaction) {
         Task {
@@ -61,19 +64,30 @@ final class ReactionsHelper: ObservableObject {
         unregister(reaction: .raiseHand, for: userId)
     }
 
+    private func subscribeToCallStatusUpdates() {
+        callEndedNotificationObserver = NotificationCenter.default.addObserver(
+            forName: .init(CallNotification.callEnded),
+            object: nil,
+            queue: nil
+        ) { _ in Task { await MainActor.run { [weak self] in self?.handleCallEnded() } } }
+    }
+
     private func subscribeToReactionEvents() {
         guard let call else {
             reactionsTask?.cancel()
             return
         }
-        reactionsTask = Task {
-            for await event in call.subscribe(for: CallReactionEvent.self) {
+
+        let callReactionEventsStream = call.subscribe(for: CallReactionEvent.self)
+
+        reactionsTask = Task { [weak self] in
+            for await event in callReactionEventsStream {
                 guard
-                    let reaction = reaction(for: event)
+                    let reaction = self?.reaction(for: event)
                 else {
                     continue
                 }
-                handleReaction(reaction, from: event.reaction.user.toUser)
+                self?.handleReaction(reaction, from: event.reaction.user.toUser)
             }
             return
         }
@@ -158,5 +172,14 @@ final class ReactionsHelper: ObservableObject {
             }
         }
         activeReactions[userId] = userReactions
+    }
+
+    private func handleCallEnded() {
+        Task {
+            await MainActor.run { [weak self] in
+                self?.reactionsTask?.cancel()
+                self?.reactionsTask = nil
+            }
+        }
     }
 }

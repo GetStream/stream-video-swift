@@ -18,7 +18,7 @@ final class Router: ObservableObject {
 
     // MARK: Instance
     var streamVideoUI: StreamVideoUI?
-    var streamChatWrapper: StreamChatWrapper?
+    var streamChatWrapper: DemoChatAdapter?
     private lazy var deeplinkAdapter = DeeplinkAdapter()
 
     // MARK: Published

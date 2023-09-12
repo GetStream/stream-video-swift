@@ -13,8 +13,8 @@ struct AppControlsWithChat: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
     @Injected(\.colors) var colors
+    @Injected(\.chatViewModel) var chatViewModel
 
-    @Environment(\.chatVideoViewModel) var chatViewModel
     private var canOpenChat: Bool
 
     private let size: CGFloat = 50
@@ -30,7 +30,7 @@ struct AppControlsWithChat: View {
 
     var body: some View {
         VStack {
-            HStack(alignment: .center, spacing: 16) {
+            HStack(alignment: .center, spacing: 12) {
                 if let chatViewModel, chatViewModel.isChatEnabled {
                     ChatIconView(viewModel: chatViewModel)
                 }
@@ -83,8 +83,8 @@ struct ChatControlsHeader: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.images) var images
     @Injected(\.colors) var colors
+    @Injected(\.chatViewModel) var chatViewModel
 
-    @Environment(\.chatVideoViewModel) var chatViewModel
 
     private let size: CGFloat = 50
 
@@ -104,10 +104,10 @@ struct ChatIconView: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
 
-    @ObservedObject var viewModel: StreamChatVideoViewModel
+    @ObservedObject var viewModel: DemoChatViewModel
     let size: CGFloat
 
-    init(viewModel: StreamChatVideoViewModel, size: CGFloat = 50) {
+    init(viewModel: DemoChatViewModel, size: CGFloat = 50) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -149,13 +149,13 @@ struct ChatIconView: View {
 struct ChatView: View {
 
     var channelController: ChatChannelController
-    var chatViewModel: StreamChatVideoViewModel
+    var chatViewModel: DemoChatViewModel
     var callViewModel: CallViewModel
 
     var body: some View {
         NavigationView {
             ChatChannelView(
-                viewFactory: StreamChatViewFactory.shared,
+                viewFactory: DemoChatViewFactory.shared,
                 channelController: channelController
             )
             .onAppear { chatViewModel.markAsRead() }

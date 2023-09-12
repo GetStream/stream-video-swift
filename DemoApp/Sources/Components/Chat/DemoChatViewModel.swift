@@ -3,60 +3,17 @@
 //
 
 import Foundation
-@preconcurrency import class StreamChat.ChatClient
-import class StreamChat.ChatChannelController
-import struct StreamChat.ChannelId
-import protocol StreamChat.ChatChannelControllerDelegate
-import enum StreamChat.EntityChange
-import struct StreamChat.ChatChannel
 import StreamVideo
+@preconcurrency import StreamChat
 import StreamChatSwiftUI
 import Combine
 import StreamVideoSwiftUI
-
-struct StreamChatWrapper {
-
-    let chatClient: ChatClient
-    let streamChatUI: StreamChat
-
-    init(_ user: User, token: String) {
-        let chatClient = ChatClient(config: .init(apiKeyString: AppEnvironment.apiKey.rawValue))
-
-        self.chatClient = chatClient
-        self.streamChatUI = .init(chatClient: chatClient)
-
-        StreamChatProviderKey.currentValue = self
-
-        chatClient.connectUser(
-            userInfo: .init(
-                id: user.id,
-                name: user.name,
-                imageURL: user.imageURL
-            )) { result in result(.success(.init(stringLiteral: token))) }
-    }
-}
-
-/// Returns the current value for the `StreamVideo` instance.
-struct StreamChatProviderKey: StreamChatSwiftUI.InjectionKey {
-    static var currentValue: StreamChatWrapper?
-}
-
-extension StreamChatSwiftUI.InjectedValues {
-    /// Provides access to the `StreamVideo` instance in the views and view models.
-    var streamChatWrapper: StreamChatWrapper? {
-        get {
-            Self[StreamChatProviderKey.self]
-        }
-        set {
-            Self[StreamChatProviderKey.self] = newValue
-        }
-    }
-}
+import SwiftUI
 
 @MainActor
-final class StreamChatVideoViewModel: ObservableObject, ChatChannelControllerDelegate {
+final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
 
-    @StreamChatSwiftUI.Injected(\.streamChatWrapper) var chatWrapper
+    @StreamChatSwiftUI.Injected(\.chatWrapper) var chatWrapper
 
     private var callUpdateCancellable: AnyCancellable?
     @Published private(set) var channelController: ChatChannelController? {
