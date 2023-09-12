@@ -17,6 +17,14 @@
 		401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
 		401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
+		4029A6222AB068EC0065DAFB /* CallButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */; };
+		4029A6232AB068FC0065DAFB /* DemoControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EC2A9E2A24004BE3DA /* DemoControls.swift */; };
+		4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
+		4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */; };
+		4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
+		4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */; };
+		4029A6282AB0693C0065DAFB /* DemoReactionsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */; };
+		4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 4029A6292AB069600065DAFB /* StreamChatSwiftUI */; };
 		402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
@@ -1477,6 +1485,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */,
 				84A26C9929435F4100B29E53 /* NukeUI in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
 				84767502290A824B0015DC53 /* WebRTC in Frameworks */,
@@ -3191,6 +3200,7 @@
 			packageProductDependencies = (
 				84767501290A824B0015DC53 /* WebRTC */,
 				84A26C9829435F4100B29E53 /* NukeUI */,
+				4029A6292AB069600065DAFB /* StreamChatSwiftUI */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -3740,17 +3750,22 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */,
 				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
 				406A8EB32AA1D80C001F598A /* TokenProvider.swift in Sources */,
+				4029A6282AB0693C0065DAFB /* DemoReactionsOverlayView.swift in Sources */,
 				406A8EAD2AA1D80C001F598A /* UserProvider.swift in Sources */,
 				406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */,
 				406A8E9A2AA1D7E9001F598A /* Call+Identifiable.swift in Sources */,
+				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
 				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
 				406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */,
+				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
 				406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
 				84E4F7922947476400DD4CE3 /* CallViewHelper.swift in Sources */,
 				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
+				4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */,
 				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
 				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
@@ -3772,10 +3787,12 @@
 				406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */,
 				407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */,
 				406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */,
+				4029A6222AB068EC0065DAFB /* CallButtonView.swift in Sources */,
 				406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */,
 				406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */,
 				406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */,
 				406A8E982AA1D7E9001F598A /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */,
+				4029A6232AB068FC0065DAFB /* DemoControls.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				406A8EB22AA1D80C001F598A /* VoIPPushService.swift in Sources */,
 				40B713692A275F1400D1FE67 /* AppState.swift in Sources */,
@@ -5837,6 +5854,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */;
 			productName = EffectsLibrary;
+		};
+		4029A6292AB069600065DAFB /* StreamChatSwiftUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;
+			productName = StreamChatSwiftUI;
 		};
 		4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */ = {
 			isa = XCSwiftPackageProductDependency;
