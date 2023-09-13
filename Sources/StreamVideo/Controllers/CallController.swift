@@ -2,6 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import WebRTC
 
@@ -27,6 +28,7 @@ class CallController {
     private let environment: CallController.Environment
     private var cachedLocation: String?
     private var currentSFU: String?
+    private var statsCancellable: AnyCancellable?
     
     init(
         defaultAPI: DefaultAPI,
@@ -94,6 +96,8 @@ class CallController {
             ring: ring,
             migrating: migratingFrom != nil
         )
+        
+        setupStatsTimer()
         
         return response
     }
@@ -186,6 +190,8 @@ class CallController {
     func cleanUp() {
         guard call != nil else { return }
         call = nil
+        statsCancellable?.cancel()
+        statsCancellable = nil
         Task {
             await webRTCClient?.cleanUp()
             webRTCClient = nil
@@ -454,6 +460,26 @@ class CallController {
         return joinCallResponse
     }
     
+    private func setupStatsTimer() {
+        statsCancellable?.cancel()
+        statsCancellable = Foundation.Timer.publish(
+            every: 5,
+            on: .main,
+            in: .default
+        )
+        .autoconnect()
+        .receive(on: DispatchQueue.main)
+        .sink { [weak self] _ in
+            self?.collectStats()
+        }
+    }
+    
+    private func collectStats() {
+        Task {
+            let stats = try await webRTCClient?.collectStats()
+            await call?.state.update(statsReport: stats)
+        }
+    }
 }
 
 extension CallController {

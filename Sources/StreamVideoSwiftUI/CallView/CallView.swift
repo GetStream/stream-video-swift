@@ -147,7 +147,8 @@ public struct CallView<Factory: ViewFactory>: View {
             .opacity(viewModel.localParticipant != nil ? 1 : 0)
             .modifier(viewFactory.makeLocalParticipantViewModifier(
                 localParticipant: localParticipant,
-                callSettings: $viewModel.callSettings
+                callSettings: $viewModel.callSettings,
+                call: viewModel.call
             ))
         } else {
             EmptyView()

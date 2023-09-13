@@ -2,7 +2,7 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-@preconcurrency import ReplayKit
+import ReplayKit
 
 /// Handler that can be used in broadcast upload extension to support screensharing from the background.
 open class BroadcastSampleHandler: RPBroadcastSampleHandler {

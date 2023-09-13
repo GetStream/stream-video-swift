@@ -13,7 +13,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
     @StateObject private var microphoneChecker: MicrophoneChecker
     @Binding private var callSettings: CallSettings
 
-    init(
+    public init(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>
     ) {

@@ -65,11 +65,15 @@ public struct BottomRightView<Content: View>: View {
     }
 }
 
-struct BottomView<Content: View>: View {
+public struct BottomView<Content: View>: View {
     
     var content: () -> Content
     
-    var body: some View {
+    public init(content: @escaping () -> Content) {
+        self.content = content
+    }
+    
+    public var body: some View {
         VStack {
             Spacer()
             content()

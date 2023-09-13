@@ -21,8 +21,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
-    private let reportStats: Bool
-    private var statsTimer: Foundation.Timer?
     private(set) var transceiver: RTCRtpTransceiver?
     private(set) var transceiverScreenshare: RTCRtpTransceiver?
     internal var pendingIceCandidates = [RTCIceCandidate]()
@@ -44,14 +42,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         pc: RTCPeerConnection,
         type: PeerConnectionType,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
-        videoOptions: VideoOptions,
-        reportStats: Bool = false
+        videoOptions: VideoOptions
     ) {
         self.sessionId = sessionId
         self.pc = pc
         self.signalService = signalService
         self.type = type
-        self.reportStats = reportStats
         self.videoOptions = videoOptions
         self.callCid = callCid
         eventDecoder = WebRTCEventDecoder()
@@ -250,6 +246,17 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.pc.setConfiguration(configuration)
     }
     
+    func statsReport() async throws -> RTCStatisticsReport {
+        return try await withCheckedThrowingContinuation { [weak self] continuation in
+            guard let self else {
+                return continuation.resume(throwing: ClientError.Unexpected())
+            }
+            pc.statistics { report in
+                continuation.resume(returning: report)
+            }
+        }
+    }
+    
     // MARK: - private
     
     private func encodingParams(for trackType: TrackType) -> [RTCRtpEncodingParameters] {
@@ -273,54 +280,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         return encodingParams
     }
     
-    private func setupStatsTimer() {
-        if reportStats {
-            statsTimer = Foundation.Timer.scheduledTimer(
-                withTimeInterval: 15.0,
-                repeats: true,
-                block: { [weak self] _ in
-                    self?.reportCurrentStats()
-                }
-            )
-        }
-    }
-    
-    private func reportCurrentStats() {
-        pc.statistics(completionHandler: { _ in
-            log.debug("Stats still not reported", subsystems: .webRTC)
-            /*
-             Task {
-                 let stats = report.statistics
-                 var updated = [String: Any]()
-                 for (key, value) in stats {
-                     let mapped = [
-                         "id": value.id,
-                         "type": value.type,
-                         "timestamp_us": value.timestamp_us,
-                         "values": value.values
-                     ]
-                     updated[key] = mapped
-                 }
-                 guard let jsonData = try? JSONSerialization.data(
-                     withJSONObject: updated,
-                     options: .prettyPrinted
-                 ) else { return }
-                  var request = Stream_Video_Coordinator_ClientV1Rpc_ReportCallStatsRequest()
-                  request.callCid = self.callCid
-                  request.statsJson = jsonData
-                  do {
-                      _ = try await self.coordinatorService.reportCallStats(
-                          reportCallStatsRequest: request
-                      )
-                      log.debug("successfully sent stats for \(self.type)")
-                  } catch {
-                      log.error("error reporting stats for \(self.type)")
-                  }
-             }
-              */
-        })
-    }
-    
     @discardableResult
     private func add(candidate: RTCIceCandidate) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
@@ -334,11 +293,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 }
             }
         }
-    }
-    
-    deinit {
-        statsTimer?.invalidate()
-        statsTimer = nil
     }
 }
 

@@ -29,7 +29,7 @@ The following fields are available on the call:
 | Attribute | Description|
 | --------- | ---------- |
 | `participants` | The list of call participants. |
-| `me` | Shortcut to your own participant state. |
+| `localParticipant` | Shortcut to your own participant state. |
 | `remoteParticipants` | The list of call participants other than yourself. |
 | `activeSpeakers` | The list of participants who are currently speaking. |
 | `dominantSpeaker` | The dominant speaker. |
@@ -56,6 +56,8 @@ The following fields are available on the call:
 | `session` | the session associated with the call. |
 | `reconnectionStatus` | whether the call is reconnecting. |
 | `participantCount` | number of participants connected to the call. |
+| `duration` | The duration of the call. |
+| `statsReport` | Returns stats of the call, updated every 5 seconds. |
 
 ### Participant State
 

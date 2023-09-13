@@ -60,21 +60,31 @@ final class DemoAppViewFactory: ViewFactory {
     func makeCallTopView(viewModel: CallViewModel) -> DemoCallTopView {
         DemoCallTopView(viewModel: viewModel)
     }
-
-    func makeVideoParticipantView(
+    
+    func makeVideoCallParticipantModifier(
         participant: CallParticipant,
-        id: String,
+        call: Call?,
         availableSize: CGSize,
-        contentMode: UIView.ContentMode,
-        customData: [String : RawJSON],
-        call: Call?
-    ) -> DemoVideoCallParticipantView {
-        DemoVideoCallParticipantView(
+        ratio: CGFloat,
+        showAllInfo: Bool
+    ) -> some ViewModifier {
+        DemoVideoCallParticipantModifier(
             participant: participant,
-            id: id,
+            call: call,
             availableSize: availableSize,
-            contentMode: contentMode,
-            customData: customData,
+            ratio: ratio,
+            showAllInfo: showAllInfo
+        )
+    }
+    
+    func makeLocalParticipantViewModifier(
+        localParticipant: CallParticipant,
+        callSettings: Binding<CallSettings>,
+        call: Call?
+    ) -> some ViewModifier {
+        DemoLocalViewModifier(
+            localParticipant: localParticipant,
+            callSettings: callSettings,
             call: call
         )
     }
