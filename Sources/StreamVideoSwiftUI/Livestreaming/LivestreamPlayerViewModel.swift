@@ -13,8 +13,8 @@ final class LivestreamPlayerViewModel: ObservableObject {
             if controlsShown {
                 DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: { [weak self] in
                     guard let self else { return }
-                    if !streamPaused {
-                        controlsShown = false
+                    if !self.streamPaused {
+                        self.controlsShown = false
                     }
                 })
             }
