@@ -331,6 +331,7 @@
 		8430FD1C2AB07FAA007AA3E6 /* ParticipantStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD1B2AB07FAA007AA3E6 /* ParticipantStatsView.swift */; };
 		8430FD1E2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD1D2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift */; };
 		8430FD202AB0B0B6007AA3E6 /* RawStatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD1F2AB0B0B6007AA3E6 /* RawStatsView.swift */; };
+		8430FD222AB1AB4C007AA3E6 /* ParticipantPopoverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */; };
 		8434C5222899572F0001490A /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
 		8434C525289AA2E20001490A /* Fonts.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C524289AA2E20001490A /* Fonts.swift */; };
 		8434C527289AA2F00001490A /* Images.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C526289AA2F00001490A /* Images.swift */; };
@@ -1088,6 +1089,7 @@
 		8430FD1B2AB07FAA007AA3E6 /* ParticipantStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantStatsView.swift; sourceTree = "<group>"; };
 		8430FD1D2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantStatsViewModel.swift; sourceTree = "<group>"; };
 		8430FD1F2AB0B0B6007AA3E6 /* RawStatsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RawStatsView.swift; sourceTree = "<group>"; };
+		8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantPopoverView.swift; sourceTree = "<group>"; };
 		8434C5212899572F0001490A /* CallService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallService.swift; sourceTree = "<group>"; };
 		8434C524289AA2E20001490A /* Fonts.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Fonts.swift; sourceTree = "<group>"; };
 		8434C526289AA2F00001490A /* Images.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Images.swift; sourceTree = "<group>"; };
@@ -2280,6 +2282,7 @@
 				84366E7B29C9FB6600287D14 /* VideoRendererFactory.swift */,
 				846E4AFC29D1DDE8003733AB /* LayoutMenuView.swift */,
 				846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */,
+				8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -4174,6 +4177,7 @@
 				84E4F7D3294CCBE700DD4CE3 /* ConnectionQualityIndicator.swift in Sources */,
 				8434C52F289AA77B0001490A /* BundleExtensions.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
+				8430FD222AB1AB4C007AA3E6 /* ParticipantPopoverView.swift in Sources */,
 				84366E7C29C9FB6600287D14 /* VideoRendererFactory.swift in Sources */,
 				848FE1EF2A9DEAD700B45AC2 /* PiPHandler.swift in Sources */,
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,

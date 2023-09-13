@@ -11,8 +11,6 @@ internal struct DemoVideoCallParticipantView: View {
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
-    @State var statsShown = false
-
     let participant: CallParticipant
     var id: String
     var availableSize: CGSize
@@ -49,24 +47,5 @@ internal struct DemoVideoCallParticipantView: View {
             call: call
         )
         .modifier(ReactionsViewModifier(participant: participant, availableSize: availableSize))
-        .overlay(
-            VStack(alignment: .center) {
-                Spacer()
-                if statsShown, let call {
-                    ParticipantStatsView(call: call, participant: participant)
-                }
-                Button {
-                    statsShown.toggle()
-                } label: {
-                    if let image = UIImage(systemName: "waveform.path.ecg.rectangle") {
-                        CallIconView(icon: Image(uiImage: image))
-                    } else {
-                        Text("Stats")
-                            .bold()
-                    }
-                }
-                .padding(.bottom, 32)
-            }
-        )
     }
 }
