@@ -102,7 +102,6 @@
 		40F445DE2A9E22B9004BE3DA /* CallButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */; };
 		40F445E02A9E22EA004BE3DA /* SimpleCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */; };
 		40F445E22A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E12A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift */; };
-		40F445E52A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E42A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift */; };
 		40F445E82A9E2824004BE3DA /* Call+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */; };
 		40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */; };
 		40F445ED2A9E2A24004BE3DA /* DemoControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EC2A9E2A24004BE3DA /* DemoControls.swift */; };
@@ -275,6 +274,7 @@
 		841FF5172A5EA7F600809BBB /* CallParticipants_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */; };
 		841FF51B2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = 841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */; };
 		84201793288AB699004964B3 /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
+		842145112AB1B81A00D1A4E9 /* DemoLocalViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842145102AB1B81A00D1A4E9 /* DemoLocalViewModifier.swift */; };
 		84231E4728B2506B007985EF /* VideoRenderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84231E4628B2506B007985EF /* VideoRenderer.swift */; };
 		8423B7562950BB0B00012F8D /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 8423B7552950BB0B00012F8D /* Sentry */; };
 		842747E529EECD0100E063AD /* ClientError_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 842747E429EECD0100E063AD /* ClientError_Tests.swift */; };
@@ -905,7 +905,6 @@
 		40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallButtonView.swift; sourceTree = "<group>"; };
 		40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimpleCallingView.swift; sourceTree = "<group>"; };
 		40F445E12A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoCallParticipantModifier.swift; sourceTree = "<group>"; };
-		40F445E42A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoCallParticipantView.swift; sourceTree = "<group>"; };
 		40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "Call+Identifiable.swift"; sourceTree = "<group>"; };
 		40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallStateResponseFields+Identifiable.swift"; sourceTree = "<group>"; };
 		40F445EC2A9E2A24004BE3DA /* DemoControls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoControls.swift; sourceTree = "<group>"; };
@@ -1033,6 +1032,7 @@
 		841FF5162A5EA7F600809BBB /* CallParticipants_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipants_Tests.swift; sourceTree = "<group>"; };
 		841FF51A2A5FED4800809BBB /* SystemEnvironment+XStreamClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SystemEnvironment+XStreamClient.swift"; sourceTree = "<group>"; };
 		84201792288AB699004964B3 /* AddUserView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AddUserView.swift; sourceTree = "<group>"; };
+		842145102AB1B81A00D1A4E9 /* DemoLocalViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoLocalViewModifier.swift; sourceTree = "<group>"; };
 		84231E4628B2506B007985EF /* VideoRenderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer.swift; sourceTree = "<group>"; };
 		842747E429EECD0100E063AD /* ClientError_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClientError_Tests.swift; sourceTree = "<group>"; };
 		842747E629EECF9600E063AD /* ErrorPayload_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ErrorPayload_Tests.swift; sourceTree = "<group>"; };
@@ -1666,7 +1666,6 @@
 				40F445EE2A9E2A42004BE3DA /* LoadingView */,
 				40F445EB2A9E2A12004BE3DA /* Controls */,
 				4030E59D2A9DF4D0003E8CBA /* CallsView */,
-				40F445E62A9E27BB004BE3DA /* VideoCallParticipantView */,
 				40F445E32A9E2779004BE3DA /* VideoCallParticipantModifier */,
 				40F445DC2A9E22AE004BE3DA /* CallButtonView */,
 				40F445D92A9E226D004BE3DA /* CallView */,
@@ -1894,16 +1893,9 @@
 			isa = PBXGroup;
 			children = (
 				40F445E12A9E2772004BE3DA /* DemoVideoCallParticipantModifier.swift */,
+				842145102AB1B81A00D1A4E9 /* DemoLocalViewModifier.swift */,
 			);
 			path = VideoCallParticipantModifier;
-			sourceTree = "<group>";
-		};
-		40F445E62A9E27BB004BE3DA /* VideoCallParticipantView */ = {
-			isa = PBXGroup;
-			children = (
-				40F445E42A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift */,
-			);
-			path = VideoCallParticipantView;
 			sourceTree = "<group>";
 		};
 		40F445EB2A9E2A12004BE3DA /* Controls */ = {
@@ -3713,6 +3705,7 @@
 				842D3B5C29F6A4A10051698A /* AppDelegate.swift in Sources */,
 				403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */,
 				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
+				842145112AB1B81A00D1A4E9 /* DemoLocalViewModifier.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
 				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
@@ -3765,7 +3758,6 @@
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
 				40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */,
 				40F445D22A9E2033004BE3DA /* ReactionsHelper.swift in Sources */,
-				40F445E52A9E27B6004BE3DA /* DemoVideoCallParticipantView.swift in Sources */,
 				84FFB06A2A8D1380005BA275 /* DemoCallTopView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
