@@ -468,7 +468,7 @@ class CallController {
             in: .default
         )
         .autoconnect()
-        .receive(on: RunLoop.main)
+        .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in
             self?.collectStats()
         }

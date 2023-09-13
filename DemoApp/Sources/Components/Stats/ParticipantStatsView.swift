@@ -10,6 +10,7 @@ struct ParticipantStatsView: View {
 
     @StateObject var viewModel: ParticipantStatsViewModel
     @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
         
     var gridItem: GridItem {
         GridItem.init(
@@ -33,7 +34,7 @@ struct ParticipantStatsView: View {
             ForEach(viewModel.statsEntries) { entry in
                 VStack(spacing: spacing) {
                     Text(entry.title)
-                        .font(.caption)
+                        .font(fonts.caption1)
                         .lineLimit(1)
                     Text(entry.value)
                         .font(valueFont)
@@ -59,7 +60,8 @@ struct ParticipantStatsView: View {
         .frame(width: 2 * itemSize + 4 * spacing)
         .padding()
         .background(colors.callControlsBackground)
-        .cornerRadius(8)
+        .clipped()
+        .clipShape(RoundedRectangle(cornerRadius: 8))
         .opacity(viewModel.statsEntries.count > 0 ? 1 : 0)
         .sheet(
             isPresented: $viewModel.allStatsShown,
@@ -84,7 +86,7 @@ struct ParticipantStatsView: View {
             if #available(iOS 16.0, *) {
                 return .system(.caption, weight: .bold)
             } else {
-                return .caption
+                return fonts.caption1
             }
         }
     }

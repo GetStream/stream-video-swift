@@ -8,7 +8,7 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 @MainActor
-class ParticipantStatsViewModel: ObservableObject {
+final class ParticipantStatsViewModel: ObservableObject {
     
     let call: Call
     let participant: CallParticipant

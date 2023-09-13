@@ -7,6 +7,8 @@ import SwiftUI
 import WebRTC
 
 struct RawStatsView: View {
+    
+    @Injected(\.fonts) var fonts
         
     var statsReport: CallStatsReport?
     
@@ -16,12 +18,12 @@ struct RawStatsView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
                         Text("Subscriber stats")
-                            .font(.headline)
+                            .font(fonts.headline)
                         ForEach(subscriberJsonStrings, id: \.self) { jsonString in
                             Text(jsonString)
                         }
                         Text("Publisher stats")
-                            .font(.headline)
+                            .font(fonts.headline)
                         ForEach(publisherJsonStrings, id: \.self) { jsonString in
                             Text(jsonString)
                         }
