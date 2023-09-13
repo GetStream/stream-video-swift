@@ -46,4 +46,20 @@ public final class ThermalStateObserver: ObservableObject {
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
     }
+
+    /// Depending on the Device's thermal state we adapt the request participants resolution.
+    public var scale: CGFloat {
+        switch state {
+        case .nominal:
+            return 1
+        case .fair:
+            return 1.5
+        case .serious:
+            return 2
+        case .critical:
+            return 4
+        @unknown default:
+            return 1
+        }
+    }
 }

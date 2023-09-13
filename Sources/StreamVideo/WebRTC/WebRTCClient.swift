@@ -927,21 +927,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         var tracks = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
         let callParticipants = await state.callParticipants
 
-        /// Depending on the Device's thermal state we adapt the request participants resolution.
-        let scale: CGFloat = {
-            switch ThermalStateObserver.shared.state {
-            case .nominal:
-                return 1
-            case .fair:
-                return 1.5
-            case .serious:
-                return 2
-            case .critical:
-                return 4
-            @unknown default:
-                return 1
-            }
-        }()
+       
 
         for (_, value) in callParticipants {
             if value.id != sessionID {
@@ -949,6 +935,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                     log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)", subsystems: .webRTC)
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
 
+                    let scale = ThermalStateObserver.shared.scale
                     dimension.height = UInt32(value.trackSize.height / scale)
                     dimension.width = UInt32(value.trackSize.width / scale)
                     let trackSubscriptionDetails = trackSubscriptionDetails(
