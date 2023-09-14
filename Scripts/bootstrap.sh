@@ -68,4 +68,5 @@ fi
 
 if [[ ${INSTALL_VIDEO_BUDDY-default} == true ]]; then
   npm install -g "https://github.com/GetStream/stream-video-buddy#${STREAM_VIDEO_BUDDY_VERSION}"
+  npx playwright install
 fi
