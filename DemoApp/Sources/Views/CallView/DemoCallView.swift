@@ -77,7 +77,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     }
 
     private func updateMicrophoneChecker() {
-        if !viewModel.callSettings.audioOn {
+        if viewModel.call != nil, !viewModel.callSettings.audioOn {
             microphoneChecker.startListening()
         } else {
             microphoneChecker.stopListening()

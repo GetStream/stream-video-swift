@@ -73,6 +73,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                 if let error = error {
                     continuation.resume(throwing: error)
                 } else if let sdp = sdp {
+                    log.debug("""
+                    Offer created
+                    \(sdp.sdp)
+                    """)
                     continuation.resume(returning: sdp)
                 } else {
                     continuation.resume(throwing: ClientError.Unknown())
@@ -111,6 +115,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     func setRemoteDescription(_ sdp: String, type: RTCSdpType) async throws {
+        guard pc.remoteDescription?.sdp != sdp || pc.remoteDescription?.type != type else { return }
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
         return try await withCheckedThrowingContinuation { continuation in
             pc.setRemoteDescription(sessionDescription) { [weak self] error in
