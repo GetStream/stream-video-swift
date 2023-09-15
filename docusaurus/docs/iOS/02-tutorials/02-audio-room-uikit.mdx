@@ -18,7 +18,7 @@ The end result will look like the image on the right and support the following f
 
 Time to get started building an audio-room for your app.
 
-### Step 1 - Create a new SwiftUI Application in Xcode
+### Step 1 - Create a new UIKit Application in Xcode
 
 1. Make sure you have Xcode installed and that you are running 14.3 or later
 2. Open Xcode and select "Create a new Project"
@@ -31,14 +31,14 @@ Next you need to add our SDK dependencies to your project using Swift Package Ma
 
 1. Click on "Add packages..." from the File menu
 2. Add https://github.com/GetStream/stream-video-swift in the search bar
-3. Select "StreamVideo" and "StreamVideoSwiftUI" and then click Add Package
+3. Select "StreamVideo" and "StreamVideoUIKit" and then click Add Package
 
 #### AppDelegate, SceneDelegate and Storyboard
 
 We are going to create our views programmatically so we can remove the Storyboard references to avoid any confusion.
 
 1. Remove the `Main storyboard file base name` entry from your `Info.plist`
-2. Remove the `Storyboard Name` etnry from your `Info.plist` inside `Scene Configuration > Window Application Session Role > Item 0`
+2. Remove the `Storyboard Name` etnry from your `Info.plist` inside `Application Scene Manifest > Scene Configuration > Window Application Session Role > Item 0`
 3. Remove the `Main.storyboard` file from the project.
 
 Open up `AudioRooms/AppDelegate.swift` and replace it with this code:
@@ -139,13 +139,20 @@ Joining an audio room requires microphone access, you need to request permission
 Create `AudioRooms/ContentViewController.swift` and replace it with this code:
 
 ```swift title="AudioRooms/ContentViewController.swift"
+import UIKit
+import Combine
+import StreamVideo
+
 final class ContentViewController: UIViewController {
     private let call: Call
     private var callCreated: Bool = false {
         didSet {
-            var content = contentView.content
-            content.callCreated = true
-            contentView.content = content
+            contentView.content = .init(
+                callCreated: true,
+                callId: call.callId,
+                title: "",
+                participantCount: call.state.participants.count
+            )
         }
     }
 
@@ -166,24 +173,24 @@ final class ContentViewController: UIViewController {
             name: "Martin", // name and imageURL are used in the UI
             imageURL: .init(string: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/a3911/martin-mitrevski.webp")
         )
-        
+
         // Initialize Stream Video client
         self.client = StreamVideo(
             apiKey: apiKey,
             user: user,
             token: .init(stringLiteral: token)
         )
-        
+
         // Initialize the call object
         let call = client.call(callType: "audio_room", callId: callId)
-        
+
         self.call = call
         super.init(nibName: nil, bundle: nil)
     }
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
@@ -213,6 +220,9 @@ final class ContentViewController: UIViewController {
 ```
 
 ```swift title="AudioRooms/ContentView.swift"
+import UIKit
+import StreamVideo
+
 final class ContentView: UIView {
 
     struct Content {
@@ -353,6 +363,10 @@ In this next step we'll add:
 Let's create the components we need to render this and add them to the main app view
 
 ```swift title=DescriptionView
+import UIKit
+import Combine
+import StreamVideo
+
 final class DescriptionView: UIView {
 
     struct Content {
@@ -522,6 +536,9 @@ final class ControlsView: UIView {
 That's it for the basics, here's how the ContentView should look like now:
 
 ```swift
+import UIKit
+import StreamVideo
+
 final class ContentView: UIView {
 
     struct Content {
@@ -633,14 +650,18 @@ final class MicButtonView: UIButton {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    init() {
+    init(microphone: MicrophoneManager) {
         super.init(frame: .zero)
-        setImage(.init(systemName: "mic.circle"), for: .normal)
+        setImage(.init(systemName: microphone.status == .enabled ? "mic.circle" : "mic.slash.circle"), for: .normal)
     }
 }
 ```
 
 ```swift title=LiveButtonView
+import UIKit
+import Combine
+import StreamVideo
+
 final class LiveButtonView: UIView {
 
     var content: Bool = true {
@@ -779,6 +800,8 @@ Now the app exposes a fake mic control button (more on that later) and a button 
 As a next step, let's render the actual list of participants and show an indicator when they are speaking. To do this we are going to create a `ParticipantView` and render it from the `ParticipantsView`.
 
 ```swift title=ParticipantView
+import NukeUI
+
 final class ParticipantView: UIView {
 
     lazy var imageview: LazyImageView = .init()
@@ -794,7 +817,7 @@ final class ParticipantView: UIView {
     init(participant: CallParticipant?) {
         self.content = participant
         super.init(frame: .zero)
-        
+
         addSubview(imageview)
         imageview.pin(to: self)
 
@@ -826,31 +849,31 @@ final class ParticipantView: UIView {
 }
 
 final class ParticipantCollectionViewCell: UICollectionViewCell {
-    
+
     var content: CallParticipant? {
         didSet { updateContent() }
     }
-    
+
     lazy var participantView: ParticipantView = .init(participant: content)
         .withoutTranslatesAutoresizingMaskIntoConstraints()
-    
+
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
-    
+
     override init(frame: CGRect) {
         super.init(frame: .zero)
-        
+
         contentView.addSubview(participantView)
         participantView.pin(to: contentView)
-        
+
         contentView.backgroundColor = .systemBackground
-        
+
         NSLayoutConstraint.activate([
             participantView.widthAnchor.constraint(equalTo: participantView.heightAnchor),
             participantView.heightAnchor.constraint(greaterThanOrEqualToConstant: 68)
         ])
     }
-    
+
     func updateContent() {
         participantView.content = content
     }
@@ -858,6 +881,10 @@ final class ParticipantCollectionViewCell: UICollectionViewCell {
 ```
 
 ```swift title=ParticipantsView
+import UIKit
+import Combine
+import StreamVideo
+
 final class ParticipantsView: UIView {
 
     private enum ParticipantsListSection: Int {
@@ -1022,6 +1049,10 @@ if let request = call.state.permissionRequests.first {
 Let's add another view that shows the last incoming request as well as the buttons to grant / reject it
 
 ```swift title=PermissionRequestsView
+import UIKit
+import Combine
+import StreamVideo
+
 final class PermissionRequestsView: UIView {
 
     private let call: Call
@@ -1176,7 +1207,7 @@ Now when a user requests access to speak the app will look like this:
 
 ### Step 7 - Add microphone control
 
-You can read & manage the microphone status from the `call.microphone` published variable. 
+You can read & manage the microphone status from the `call.microphone` published variable.
 
 ```swift
 /// Read the microphone's status
@@ -1195,6 +1226,10 @@ try await call.microphone.disable()
 Let's update the `MicButtonView` with microphone handling.
 
 ```swift title=MicButtonView
+import UIKit
+import Combine
+import StreamVideo
+
 final class MicButtonView: UIButton {
 
     private let microphone: MicrophoneManager
@@ -1343,6 +1378,10 @@ final class ParticipantsListHeader: UICollectionReusableView {
 We already have a view to display participants so all we need to do is to create another one, here's how the ParticipantsView looks
 
 ```swift
+import UIKit
+import Combine
+import StreamVideo
+
 final class ParticipantsView: UIView {
 
     private enum ParticipantsListSection: Int {
