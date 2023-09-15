@@ -652,7 +652,7 @@ final class MicButtonView: UIButton {
 
     init(microphone: MicrophoneManager) {
         super.init(frame: .zero)
-        setImage(.init(systemName: microphone.status == .enabled ? "mic.circle" : "mic.slash.circle"), for: .normal)
+        setImage(.init(systemName: "mic.circle"), for: .normal)
     }
 }
 ```
