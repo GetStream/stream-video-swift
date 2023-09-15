@@ -36,6 +36,7 @@ public final class ThermalStateObserver: ObservableObject {
     }
 
     private var notificationCenterCancellable: AnyCancellable?
+    private let preferredRenderingFramesPerSecond = 60
 
     private init() {
         notificationCenterCancellable = NotificationCenter
@@ -60,6 +61,21 @@ public final class ThermalStateObserver: ObservableObject {
             return 4
         @unknown default:
             return 1
+        }
+    }
+
+    public var renderingFramesPerSecond: Int {
+        switch state {
+        case .nominal:
+            return preferredRenderingFramesPerSecond
+        case .fair:
+            return preferredRenderingFramesPerSecond
+        case .serious:
+            return preferredRenderingFramesPerSecond / 2
+        case .critical:
+            return preferredRenderingFramesPerSecond / 3
+        @unknown default:
+            return preferredRenderingFramesPerSecond
         }
     }
 }

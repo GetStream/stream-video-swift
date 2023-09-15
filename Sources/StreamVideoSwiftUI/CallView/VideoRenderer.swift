@@ -111,7 +111,7 @@ public class VideoRenderer: RTCMTLVideoView {
                 return
             }
             let view = subviews.compactMap { $0 as? MTKView }.first
-            view?.preferredFramesPerSecond = 60
+            view?.preferredFramesPerSecond = ThermalStateObserver.shared.renderingFramesPerSecond
             self.track?.remove(self)
             self.track = nil
             log.debug("Adding track to the view")

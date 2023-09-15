@@ -17,6 +17,7 @@ struct DemoCallTopView: View {
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var appState = AppState.shared
     @State var sharingPopupDismissed = false
+    @State private var isLogsViewerVisible = false
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
@@ -50,9 +51,19 @@ struct DemoCallTopView: View {
                         }
                     }
                 }
-
-
                 reactionsList()
+
+                if AppEnvironment.configuration == .debug {
+                    Button {
+                        isLogsViewerVisible = true
+                    } label: {
+                        Label {
+                            Text("Show logs")
+                        } icon: {
+                            Image(systemName: "text.insert")
+                        }
+                    }
+                }
             } label: {
                 Image(systemName: "ellipsis")
                     .foregroundColor(.white)
@@ -93,7 +104,11 @@ struct DemoCallTopView: View {
             )
             .opacity(sharingPopupDismissed ? 0 : 1)
             : nil
-        )
+        ).sheet(isPresented: $isLogsViewerVisible) {
+            NavigationView {
+                MemoryLogViewer()
+            }
+        }
     }
 
     private var hideLayoutMenu: Bool {
