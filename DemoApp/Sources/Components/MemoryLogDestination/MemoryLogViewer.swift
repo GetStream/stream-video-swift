@@ -7,11 +7,12 @@ import SwiftUI
 import StreamVideo
 
 struct MemoryLogViewer: View {
-
+    
     @Injected(\.appearance) var appearance
-
+    
     @State private var logs = LogQueue.queue.elements
 
+    
     var body: some View {
         List {
             ForEach(logs, id: \.date) { entry in
@@ -23,8 +24,18 @@ struct MemoryLogViewer: View {
             }
         }
         .navigationTitle("Logs Viewer")
+        .modifier(
+            SearchableModifier { query in
+                if query.isEmpty {
+                    logs = LogQueue.queue.elements
+                } else {
+                    logs = LogQueue.queue
+                        .elements
+                        .filter { $0.message.contains(query) }
+                }
+            })
     }
-
+    
     @ViewBuilder
     func makeEntryView(for entry: LogDetails) -> some View {
         let (iconName, iconColor): (String, Color) = {
@@ -39,7 +50,7 @@ struct MemoryLogViewer: View {
                 return ("x.circle", appearance.colors.accentRed)
             }
         }()
-
+        
         Label {
             Text(entry.message)
                 .font(appearance.fonts.body)
@@ -52,12 +63,28 @@ struct MemoryLogViewer: View {
     }
 }
 
+struct SearchableModifier: ViewModifier {
+    
+    @State var query: String = ""
+    var searchCompletionHandler: (String) -> Void
+    
+    func body(content: Content) -> some View {
+        if #available(iOS 15, *) {
+            content
+                .searchable(text: $query)
+                .onChange(of: query) { searchCompletionHandler($0) }
+        } else {
+            content
+        }
+    }
+}
+
 struct MemoryLogEntryViewer: View {
-
+    
     @Injected(\.appearance) var appearance
-
+    
     var entry: LogDetails
-
+    
     var body: some View {
         Label {
             ScrollView {
@@ -71,7 +98,7 @@ struct MemoryLogEntryViewer: View {
         }
         .padding(.horizontal)
     }
-
+    
     private var iconView: some View {
         VStack(spacing: 16) {
             switch entry.level {
@@ -88,11 +115,11 @@ struct MemoryLogEntryViewer: View {
                 Image(systemName: "x.circle")
                     .foregroundColor(appearance.colors.accentRed)
             }
-
+            
             copyMessageView
         }
     }
-
+    
     private var copyMessageView: some View {
         Button {
             UIPasteboard.general.string = entry.message

@@ -98,6 +98,7 @@ public class MicrophoneChecker: ObservableObject {
     }
     
     private func captureAudio() {
+        guard audioRecorder == nil else { return }
         // `kAudioFormatLinearPCM` is being used to be able to support multiple
         // instances of AVAudioRecorders. (useful when using MicrophoneChecker
         // during a Call).
@@ -135,13 +136,15 @@ public class MicrophoneChecker: ObservableObject {
     }
     
     private func stopTimer() {
+        guard timer != nil else { return }
         timer?.invalidate()
         timer = nil
     }
     
     private func stopAudioRecorder() {
-        self.audioRecorder?.stop()
-        self.audioRecorder = nil
+        guard audioRecorder != nil else { return }
+        audioRecorder?.stop()
+        audioRecorder = nil
     }
 
     deinit {

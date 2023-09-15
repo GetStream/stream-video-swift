@@ -33,11 +33,13 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
-        guard let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer else { return }
         Task { [weak self] in
             guard let self else { return }
 
-            if selectedFilter != nil {
+            var _buffer: RTCCVPixelBuffer?
+
+            if selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                _buffer = buffer
                 let imageBuffer = buffer.pixelBuffer
                 CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
                 let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
@@ -47,7 +49,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             }
 
             let updatedFrame = handleRotation
-            ? adjustRotation(capturer, for: buffer, frame: frame)
+            ? adjustRotation(capturer, for: _buffer, frame: frame)
             : frame
 
             self.source.capturer(capturer, didCapture: updatedFrame)
@@ -62,7 +64,7 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     
     private func adjustRotation(
         _ capturer: RTCVideoCapturer,
-        for buffer: RTCCVPixelBuffer,
+        for buffer: RTCCVPixelBuffer?,
         frame: RTCVideoFrame
     ) -> RTCVideoFrame {
         #if os(macOS)
@@ -82,9 +84,14 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             break
         }
         #endif
-        return rotation != frame.rotation
-        ? RTCVideoFrame(buffer: buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
-        : frame
+        if rotation != frame.rotation, let _buffer = buffer ?? frame.buffer as? RTCCVPixelBuffer {
+            return RTCVideoFrame(buffer: _buffer, rotation: rotation, timeStampNs: frame.timeStampNs)
+        } else if rotation != frame.rotation, buffer == nil {
+            log.error("Unavailable buffer for frame rotation")
+            return frame
+        } else {
+            return frame
+        }
     }
     
     private func filter(image: CIImage) async -> CIImage {
