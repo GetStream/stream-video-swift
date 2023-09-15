@@ -139,11 +139,10 @@ try await call.join(create: true)
 
 As soon as you use call.join the connection for video & audio is setup.
 
-Lastly, the UI is rendered by observing call.state (participants and connection states):
+Lastly, the UI is rendered by observing call.state and participants state:
 
 ```swift
-call.state.participantCount
-call.state.reconnectionStatus
+call.state.participants.count
 ```
 
 You'll find all relevant state for the call in `call.state` and `call.state.participants`. The documentation on [Call state and Participant state](../../guides/call-and-participant-state) explains this in further detail.
@@ -170,7 +169,7 @@ var body: some Scene {
                 ZStack {
                     ParticipantsView(
                         call: call,
-                        participants: call.state.remoteParticipants, 
+                        participants: call.state.remoteParticipants,
                         onChangeTrackVisibility: changeTrackVisibility(_:isVisible:)
                     )
                     FloatingParticipantView(participant: call.state.localParticipant)
