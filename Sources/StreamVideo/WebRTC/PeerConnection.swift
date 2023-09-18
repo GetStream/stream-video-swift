@@ -27,7 +27,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
     private let badConnectionStates: [RTCIceConnectionState] = [.disconnected, .failed, .closed]
-        
+    
+    var connectionState: RTCPeerConnectionState {
+        pc.connectionState
+    }
+  
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
     var onConnected: ((PeerConnection) -> Void)?
@@ -172,6 +176,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             return
         }
         try await add(candidate: iceCandidate)
+    }
+    
+    func restartIce() {
+        pc.restartIce()
     }
     
     func close() {

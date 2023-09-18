@@ -9,7 +9,7 @@ import Foundation
 
 
 public struct JoinCallResponse: Codable, JSONEncodable, Hashable {
-    public var blockedUsers: [UserResponse]
+    public var blockedUsers: [UserResponse]!
     public var call: CallResponse
     public var created: Bool
     public var credentials: Credentials
@@ -18,8 +18,8 @@ public struct JoinCallResponse: Codable, JSONEncodable, Hashable {
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
-    public init(blockedUsers: [UserResponse], call: CallResponse, created: Bool, credentials: Credentials, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
-        self.blockedUsers = blockedUsers
+    public init(blockedUsers: [UserResponse]?, call: CallResponse, created: Bool, credentials: Credentials, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
+        self.blockedUsers = blockedUsers ?? []
         self.call = call
         self.created = created
         self.credentials = credentials

@@ -14,7 +14,7 @@ class SfuMiddleware: EventMiddleware {
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
-    var onSocketConnected: (() -> Void)?
+    var onSocketConnected: ((Bool) -> Void)?
     var onParticipantCountUpdated: ((UInt32) -> ())?
     var onSessionMigrationEvent: (() -> Void)?
     var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> ())?
@@ -71,7 +71,7 @@ class SfuMiddleware: EventMiddleware {
             case .dominantSpeakerChanged(let event):
                 await handleDominantSpeakerChanged(event)
             case .joinResponse(let event):
-                onSocketConnected?()
+                onSocketConnected?(event.reconnected)
                 await loadParticipants(from: event)
             case .healthCheckResponse(let event):
                 onParticipantCountUpdated?(event.participantCount.total)

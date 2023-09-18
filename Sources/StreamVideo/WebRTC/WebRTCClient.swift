@@ -138,6 +138,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var videoOptions = VideoOptions()
     private let environment: WebSocketClient.Environment
     private let apiKey: String
+    private let fastReconnectTimeout: TimeInterval = 4.0
     
     private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
     private var migratingWSClient: WebSocketClient?
@@ -519,10 +520,15 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     // MARK: - private
     
-    private func handleOnSocketConnected() {
+    private func handleOnSocketConnected(reconnected: Bool) {
         Task {
             do {
-                try await self.setupPeerConnections()
+                if !reconnected {
+                    try await self.setupPeerConnections()
+                } else {
+                    log.debug("reconnected - restarting publisher ice")
+                    publisher?.restartIce()
+                }
             } catch {
                 log.error("Error setting up peer connections", subsystems: .webRTC, error: error)
                 await self.state.update(connectionState: .disconnected())
@@ -530,7 +536,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
     }
         
-    private func handleOnMigrationJoinResponse() {
+    private func handleOnMigrationJoinResponse(reconnected: Bool) {
         signalChannel?.connectionStateDelegate = nil
         signalChannel?.onWSConnectionEstablished = nil
         signalChannel?.disconnect {}
@@ -792,12 +798,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private func makeJoinRequest(
         subscriberSdp: String,
-        migrating: Bool = false
+        migrating: Bool = false,
+        fastReconnect: Bool = false
     ) async -> Stream_Video_Sfu_Event_JoinRequest {
         log.debug("Executing join request", subsystems: .webRTC)
         var joinRequest = Stream_Video_Sfu_Event_JoinRequest()
         joinRequest.sessionID = sessionID
         joinRequest.subscriberSdp = subscriberSdp
+        joinRequest.fastReconnect = fastReconnect
         if migrating {
             joinRequest.token = migratingToken ?? token
             var migration = Stream_Video_Sfu_Event_Migration()
@@ -894,8 +902,16 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         return offer.sdp
     }
     
-    private func sendJoinRequest(with sdp: String, migrating: Bool = false) async {
-        let payload = await makeJoinRequest(subscriberSdp: sdp, migrating: migrating)
+    private func sendJoinRequest(
+        with sdp: String,
+        migrating: Bool = false,
+        fastReconnect: Bool = false
+    ) async {
+        let payload = await makeJoinRequest(
+            subscriberSdp: sdp,
+            migrating: migrating,
+            fastReconnect: fastReconnect
+        )
         var event = Stream_Video_Sfu_Event_SfuRequest()
         event.requestPayload = .joinRequest(payload)
         if migrating {
@@ -1121,6 +1137,29 @@ class WebRTCClient: NSObject, @unchecked Sendable {
 
 extension WebRTCClient: ConnectionStateDelegate {
     func webSocketClient(_ client: WebSocketClient, didUpdateConnectionState state: WebSocketConnectionState) {
-        onSignalConnectionStateChange?(state)
+        if case let .disconnected(reason) = state, reason != .userInitiated {
+            fastReconnect(state: state)
+        } else {
+            onSignalConnectionStateChange?(state)
+        }
+    }
+    
+    private func fastReconnect(state: WebSocketConnectionState) {
+        Task {
+            log.debug("Trying to perform fast reconnect")
+            let sdp = try await tempOfferSdp()
+            await sendJoinRequest(with: sdp, migrating: false, fastReconnect: true)
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + fastReconnectTimeout) { [weak self] in
+            guard let self else { return }
+            var shouldFullyReconnect = publisher != nil ? publisher?.connectionState == .connected : false
+            shouldFullyReconnect = subscriber != nil ? subscriber?.connectionState == .connected : shouldFullyReconnect
+            if shouldFullyReconnect {
+                log.debug("Fast reconnect failed, doing full reconnect")
+                onSignalConnectionStateChange?(state)
+            } else {
+                log.debug("Fast reconnect successfull")
+            }
+        }
     }
 }

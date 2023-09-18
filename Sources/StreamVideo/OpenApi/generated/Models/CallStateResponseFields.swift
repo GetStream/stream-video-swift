@@ -9,15 +9,15 @@ import Foundation
 
 
 public struct CallStateResponseFields: Codable, JSONEncodable, Hashable {
-    public var blockedUsers: [UserResponse]
+    public var blockedUsers: [UserResponse]!
     public var call: CallResponse
     /** List of call members */
     public var members: [MemberResponse]
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
 
-    public init(blockedUsers: [UserResponse], call: CallResponse, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
-        self.blockedUsers = blockedUsers
+    public init(blockedUsers: [UserResponse]?, call: CallResponse, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
+        self.blockedUsers = blockedUsers ?? []
         self.call = call
         self.members = members
         self.membership = membership
