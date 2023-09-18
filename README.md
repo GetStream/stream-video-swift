@@ -185,16 +185,27 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4 milestone
 
 - [x] Picture-in-picture support
-- [ ] Buttons to simulate ice-restart and SFU switching
-- [ ] Dynascale 2.0 (codecs, f resolution switches, resolution webrtc handling)
-- [ ] Test with many participants
-- [ ] Video UIKit tutorial
-- [ ] Call Analytics / Stats
-- [ ] Improve logging / Sentry integration
+- [x] Address testing feedback
+- [x] Call Analytics / Stats
+- [ ] Thermal state improvements
 - [ ] Complete reconnection flows
-- [ ] Analytics integration
-- [ ] Pagination on query members
+- [ ] Buttons to simulate ice-restart and SFU switching
+- [ ] Test with many participants
+- [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
+- [ ] Dynascale 2.0
+
+### 0.5.0 milestone
+
+- [ ] Video UIKit tutorial
+- [ ] Improve logging / Sentry integration
+- [ ] Testing on more devices
+- [ ] Enable SFU switching
+- [ ] Camera controls
 - [ ] Tap to focus
-- [ ] Picture of the video stream at highest resolution
-- [ ] Address testing feedback
-- [ ] Improve livestream tutorial (depends on RTMP support)
+
+### Dynascale 2.0
+
+- currently we support selecting which of the 3 layers you want to send: f, h and q. in addition we should support:
+- changing the resolution of the f track
+- changing the codec that's used from VP8 to h264 or vice versa
+- detecting when webrtc changes the resolution of the f track, and notifying the server about it (if needed)
