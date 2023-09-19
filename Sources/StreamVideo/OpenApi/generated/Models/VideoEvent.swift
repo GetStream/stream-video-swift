@@ -15,10 +15,10 @@ internal class VideoEventMapping: Decodable {
 public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeBlockedUserEvent(BlockedUserEvent)
     case typeCallAcceptedEvent(CallAcceptedEvent)
-    case typeCallBroadcastingStartedEvent(CallBroadcastingStartedEvent)
-    case typeCallBroadcastingStoppedEvent(CallBroadcastingStoppedEvent)
     case typeCallCreatedEvent(CallCreatedEvent)
     case typeCallEndedEvent(CallEndedEvent)
+    case typeCallHLSBroadcastingStartedEvent(CallHLSBroadcastingStartedEvent)
+    case typeCallHLSBroadcastingStoppedEvent(CallHLSBroadcastingStoppedEvent)
     case typeCallLiveStartedEvent(CallLiveStartedEvent)
     case typeCallMemberAddedEvent(CallMemberAddedEvent)
     case typeCallMemberRemovedEvent(CallMemberRemovedEvent)
@@ -35,6 +35,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallSessionParticipantLeftEvent(CallSessionParticipantLeftEvent)
     case typeCallSessionStartedEvent(CallSessionStartedEvent)
     case typeCallUpdatedEvent(CallUpdatedEvent)
+    case typeCallUserMuted(CallUserMuted)
     case typeConnectedEvent(ConnectedEvent)
     case typeConnectionErrorEvent(ConnectionErrorEvent)
     case typeCustomVideoEvent(CustomVideoEvent)
@@ -48,13 +49,13 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value.type
         case .typeCallAcceptedEvent(let value):
             return value.type
-        case .typeCallBroadcastingStartedEvent(let value):
-            return value.type
-        case .typeCallBroadcastingStoppedEvent(let value):
-            return value.type
         case .typeCallCreatedEvent(let value):
             return value.type
         case .typeCallEndedEvent(let value):
+            return value.type
+        case .typeCallHLSBroadcastingStartedEvent(let value):
+            return value.type
+        case .typeCallHLSBroadcastingStoppedEvent(let value):
             return value.type
         case .typeCallLiveStartedEvent(let value):
             return value.type
@@ -87,6 +88,8 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallSessionStartedEvent(let value):
             return value.type
         case .typeCallUpdatedEvent(let value):
+            return value.type
+        case .typeCallUserMuted(let value):
             return value.type
         case .typeConnectedEvent(let value):
             return value.type
@@ -110,13 +113,13 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value
         case .typeCallAcceptedEvent(let value):
             return value
-        case .typeCallBroadcastingStartedEvent(let value):
-            return value
-        case .typeCallBroadcastingStoppedEvent(let value):
-            return value
         case .typeCallCreatedEvent(let value):
             return value
         case .typeCallEndedEvent(let value):
+            return value
+        case .typeCallHLSBroadcastingStartedEvent(let value):
+            return value
+        case .typeCallHLSBroadcastingStoppedEvent(let value):
             return value
         case .typeCallLiveStartedEvent(let value):
             return value
@@ -149,6 +152,8 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallSessionStartedEvent(let value):
             return value
         case .typeCallUpdatedEvent(let value):
+            return value
+        case .typeCallUserMuted(let value):
             return value
         case .typeConnectedEvent(let value):
             return value
@@ -173,13 +178,13 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             try container.encode(value)
         case .typeCallAcceptedEvent(let value):
             try container.encode(value)
-        case .typeCallBroadcastingStartedEvent(let value):
-            try container.encode(value)
-        case .typeCallBroadcastingStoppedEvent(let value):
-            try container.encode(value)
         case .typeCallCreatedEvent(let value):
             try container.encode(value)
         case .typeCallEndedEvent(let value):
+            try container.encode(value)
+        case .typeCallHLSBroadcastingStartedEvent(let value):
+            try container.encode(value)
+        case .typeCallHLSBroadcastingStoppedEvent(let value):
             try container.encode(value)
         case .typeCallLiveStartedEvent(let value):
             try container.encode(value)
@@ -212,6 +217,8 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallSessionStartedEvent(let value):
             try container.encode(value)
         case .typeCallUpdatedEvent(let value):
+            try container.encode(value)
+        case .typeCallUserMuted(let value):
             try container.encode(value)
         case .typeConnectedEvent(let value):
             try container.encode(value)
@@ -239,18 +246,18 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.blocked_user" {
             let value = try container.decode(BlockedUserEvent.self)
             self = .typeBlockedUserEvent(value)
-        } else if dto.type == "call.broadcasting_started" {
-            let value = try container.decode(CallBroadcastingStartedEvent.self)
-            self = .typeCallBroadcastingStartedEvent(value)
-        } else if dto.type == "call.broadcasting_stopped" {
-            let value = try container.decode(CallBroadcastingStoppedEvent.self)
-            self = .typeCallBroadcastingStoppedEvent(value)
         } else if dto.type == "call.created" {
             let value = try container.decode(CallCreatedEvent.self)
             self = .typeCallCreatedEvent(value)
         } else if dto.type == "call.ended" {
             let value = try container.decode(CallEndedEvent.self)
             self = .typeCallEndedEvent(value)
+        } else if dto.type == "call.hls_broadcasting_started" {
+            let value = try container.decode(CallHLSBroadcastingStartedEvent.self)
+            self = .typeCallHLSBroadcastingStartedEvent(value)
+        } else if dto.type == "call.hls_broadcasting_stopped" {
+            let value = try container.decode(CallHLSBroadcastingStoppedEvent.self)
+            self = .typeCallHLSBroadcastingStoppedEvent(value)
         } else if dto.type == "call.live_started" {
             let value = try container.decode(CallLiveStartedEvent.self)
             self = .typeCallLiveStartedEvent(value)
@@ -308,6 +315,9 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.updated" {
             let value = try container.decode(CallUpdatedEvent.self)
             self = .typeCallUpdatedEvent(value)
+        } else if dto.type == "call.user_muted" {
+            let value = try container.decode(CallUserMuted.self)
+            self = .typeCallUserMuted(value)
         } else if dto.type == "connection.error" {
             let value = try container.decode(ConnectionErrorEvent.self)
             self = .typeConnectionErrorEvent(value)

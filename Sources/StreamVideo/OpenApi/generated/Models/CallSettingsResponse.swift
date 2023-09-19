@@ -11,15 +11,16 @@ import Foundation
 public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
     public var audio: AudioSettings
     public var backstage: BackstageSettings
-    public var broadcasting: BroadcastSettings
+    public var broadcasting: BroadcastSettingsResponse
     public var geofencing: GeofenceSettings
-    public var recording: RecordSettings
+    public var recording: RecordSettingsResponse
     public var ring: RingSettings
     public var screensharing: ScreensharingSettings
+    public var thumbnails: ThumbnailsSettings
     public var transcription: TranscriptionSettings
     public var video: VideoSettings
 
-    public init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettings, geofencing: GeofenceSettings, recording: RecordSettings, ring: RingSettings, screensharing: ScreensharingSettings, transcription: TranscriptionSettings, video: VideoSettings) {
+    public init(audio: AudioSettings, backstage: BackstageSettings, broadcasting: BroadcastSettingsResponse, geofencing: GeofenceSettings, recording: RecordSettingsResponse, ring: RingSettings, screensharing: ScreensharingSettings, thumbnails: ThumbnailsSettings, transcription: TranscriptionSettings, video: VideoSettings) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
@@ -27,6 +28,7 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         self.recording = recording
         self.ring = ring
         self.screensharing = screensharing
+        self.thumbnails = thumbnails
         self.transcription = transcription
         self.video = video
     }
@@ -39,6 +41,7 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         case recording
         case ring
         case screensharing
+        case thumbnails
         case transcription
         case video
     }
@@ -54,6 +57,7 @@ public struct CallSettingsResponse: Codable, JSONEncodable, Hashable {
         try container.encode(recording, forKey: .recording)
         try container.encode(ring, forKey: .ring)
         try container.encode(screensharing, forKey: .screensharing)
+        try container.encode(thumbnails, forKey: .thumbnails)
         try container.encode(transcription, forKey: .transcription)
         try container.encode(video, forKey: .video)
     }

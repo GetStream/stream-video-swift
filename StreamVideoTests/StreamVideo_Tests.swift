@@ -211,7 +211,6 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         let httpClient = HTTPClient_Mock()
         let callResponse = makeCallResponse()
         let getCallResponse = GetCallResponse(
-            blockedUsers: [],
             call: callResponse,
             duration: "1",
             members: [],

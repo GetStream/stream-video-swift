@@ -31,13 +31,14 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
     /** Date/time when the call will start */
     public var startsAt: Date?
     public var team: String?
+    public var thumbnails: ThumbnailResponse?
     public var transcribing: Bool
     /** The type of call */
     public var type: String
     /** Date/time of the last update */
     public var updatedAt: Date
 
-    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: RawJSON], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, transcribing: Bool, type: String, updatedAt: Date) {
+    public init(backstage: Bool, blockedUserIds: [String], cid: String, createdAt: Date, createdBy: UserResponse, currentSessionId: String, custom: [String: RawJSON], egress: EgressResponse, endedAt: Date? = nil, id: String, ingress: CallIngressResponse, recording: Bool, session: CallSessionResponse? = nil, settings: CallSettingsResponse, startsAt: Date? = nil, team: String? = nil, thumbnails: ThumbnailResponse? = nil, transcribing: Bool, type: String, updatedAt: Date) {
         self.backstage = backstage
         self.blockedUserIds = blockedUserIds
         self.cid = cid
@@ -54,6 +55,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
         self.settings = settings
         self.startsAt = startsAt
         self.team = team
+        self.thumbnails = thumbnails
         self.transcribing = transcribing
         self.type = type
         self.updatedAt = updatedAt
@@ -76,6 +78,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
         case settings
         case startsAt = "starts_at"
         case team
+        case thumbnails
         case transcribing
         case type
         case updatedAt = "updated_at"
@@ -101,6 +104,7 @@ public struct CallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(settings, forKey: .settings)
         try container.encodeIfPresent(startsAt, forKey: .startsAt)
         try container.encodeIfPresent(team, forKey: .team)
+        try container.encodeIfPresent(thumbnails, forKey: .thumbnails)
         try container.encode(transcribing, forKey: .transcribing)
         try container.encode(type, forKey: .type)
         try container.encode(updatedAt, forKey: .updatedAt)

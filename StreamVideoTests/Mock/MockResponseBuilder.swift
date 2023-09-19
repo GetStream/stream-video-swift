@@ -8,7 +8,6 @@ class MockResponseBuilder {
     
     func makeJoinCallResponse(cid: String, recording: Bool = false) -> JoinCallResponse {
         JoinCallResponse(
-            blockedUsers: [],
             call: makeCallResponse(cid: cid, recording: recording),
             created: true,
             credentials: Credentials(
@@ -70,13 +69,11 @@ class MockResponseBuilder {
     
     func makeQueryCallsResponse() -> QueryCallsResponse {
         let first = CallStateResponseFields(
-            blockedUsers: [],
             call: makeCallResponse(cid: "default:123"),
             members: [],
             ownCapabilities: [.sendAudio, .sendVideo]
         )
         let second = CallStateResponseFields(
-            blockedUsers: [],
             call: makeCallResponse(cid: "default:test"),
             members: [],
             ownCapabilities: [.sendAudio, .sendVideo]
@@ -119,15 +116,15 @@ class MockResponseBuilder {
             speakerDefaultOn: true
         )
         let backstageSettings = BackstageSettings(enabled: false)
-        let broadcastSettings = BroadcastSettings(
+        let broadcastSettings = BroadcastSettingsResponse(
             enabled: false,
-            hls: HLSSettings(autoOn: false, enabled: false, qualityTracks: [])
+            hls: HLSSettingsResponse(autoOn: false, enabled: false, qualityTracks: [])
         )
         let geofenceSettings = GeofenceSettings(names: [])
-        let recordSettings = RecordSettings(
+        let recordSettings = RecordSettingsResponse(
             audioOnly: false,
-            mode: .disabled,
-            quality: ._1080p
+            mode: "disabled",
+            quality: "1080p"
         )
         let ringSettings = RingSettings(
             autoCancelTimeoutMs: 15000,
@@ -148,6 +145,7 @@ class MockResponseBuilder {
             enabled: true,
             targetResolution: .init(bitrate: 100, height: 100, width: 100)
         )
+        let thumbnailsSettings = ThumbnailsSettings(enabled: false)
         
         return CallSettingsResponse(
             audio: audioSettings,
@@ -157,6 +155,7 @@ class MockResponseBuilder {
             recording: recordSettings,
             ring: ringSettings,
             screensharing: screensharingSettings,
+            thumbnails: thumbnailsSettings,
             transcription: transcriptionSettings,
             video: videoSettings
         )

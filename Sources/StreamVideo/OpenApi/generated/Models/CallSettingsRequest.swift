@@ -16,10 +16,11 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
     public var recording: RecordSettingsRequest?
     public var ring: RingSettingsRequest?
     public var screensharing: ScreensharingSettingsRequest?
+    public var thumbnails: ThumbnailsSettingsRequest?
     public var transcription: TranscriptionSettingsRequest?
     public var video: VideoSettingsRequest?
 
-    public init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, broadcasting: BroadcastSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
+    public init(audio: AudioSettingsRequest? = nil, backstage: BackstageSettingsRequest? = nil, broadcasting: BroadcastSettingsRequest? = nil, geofencing: GeofenceSettingsRequest? = nil, recording: RecordSettingsRequest? = nil, ring: RingSettingsRequest? = nil, screensharing: ScreensharingSettingsRequest? = nil, thumbnails: ThumbnailsSettingsRequest? = nil, transcription: TranscriptionSettingsRequest? = nil, video: VideoSettingsRequest? = nil) {
         self.audio = audio
         self.backstage = backstage
         self.broadcasting = broadcasting
@@ -27,6 +28,7 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
         self.recording = recording
         self.ring = ring
         self.screensharing = screensharing
+        self.thumbnails = thumbnails
         self.transcription = transcription
         self.video = video
     }
@@ -39,6 +41,7 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
         case recording
         case ring
         case screensharing
+        case thumbnails
         case transcription
         case video
     }
@@ -54,6 +57,7 @@ public struct CallSettingsRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(recording, forKey: .recording)
         try container.encodeIfPresent(ring, forKey: .ring)
         try container.encodeIfPresent(screensharing, forKey: .screensharing)
+        try container.encodeIfPresent(thumbnails, forKey: .thumbnails)
         try container.encodeIfPresent(transcription, forKey: .transcription)
         try container.encodeIfPresent(video, forKey: .video)
     }

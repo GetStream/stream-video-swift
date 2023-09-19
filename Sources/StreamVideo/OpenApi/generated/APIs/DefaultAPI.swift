@@ -899,14 +899,14 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
-     Start broadcasting
+     Start HLS broadcasting
      
      - parameter type: (path)
      - parameter id: (path)
-     - returns: StartBroadcastingResponse
+     - returns: StartHLSBroadcastingResponse
      */
 
-    open func startBroadcasting(type: String, id: String) async throws -> StartBroadcastingResponse {
+    open func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse {
         var localVariablePath = "/call/{type}/{id}/start_broadcasting"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -920,16 +920,16 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(StartBroadcastingResponse.self, from: $0)
+            try self.jsonDecoder.decode(StartHLSBroadcastingResponse.self, from: $0)
         }
     }
     /**
-     Start broadcasting
+     Start HLS broadcasting
      - POST /call/{type}/{id}/start_broadcasting
-     - Starts broadcasting  Required permissions: - StartBroadcasting
+     - Starts HLS broadcasting  Required permissions: - StartBroadcasting
      - parameter type: (path)
      - parameter id: (path)
-     - returns: RequestBuilder<StartBroadcastingResponse>
+     - returns: RequestBuilder<StartHLSBroadcastingResponse>
      */
 
 
@@ -1004,14 +1004,14 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
-     Stop broadcasting
+     Stop HLS broadcasting
      
      - parameter type: (path)
      - parameter id: (path)
-     - returns: StopBroadcastingResponse
+     - returns: StopHLSBroadcastingResponse
      */
 
-    open func stopBroadcasting(type: String, id: String) async throws -> StopBroadcastingResponse {
+    open func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse {
         var localVariablePath = "/call/{type}/{id}/stop_broadcasting"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
@@ -1025,16 +1025,16 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
             httpMethod: "POST"
         )
         return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(StopBroadcastingResponse.self, from: $0)
+            try self.jsonDecoder.decode(StopHLSBroadcastingResponse.self, from: $0)
         }
     }
     /**
-     Stop broadcasting
+     Stop HLS broadcasting
      - POST /call/{type}/{id}/stop_broadcasting
-     - Stops broadcasting  Required permissions: - StopBroadcasting
+     - Stops HLS broadcasting  Required permissions: - StopBroadcasting
      - parameter type: (path)
      - parameter id: (path)
-     - returns: RequestBuilder<StopBroadcastingResponse>
+     - returns: RequestBuilder<StopHLSBroadcastingResponse>
      */
 
 
@@ -1438,7 +1438,7 @@ protocol DefaultAPIEndpoints {
         func sendVideoReaction(type: String, id: String, sendReactionRequest: SendReactionRequest) async throws -> SendReactionResponse
 
 
-        func startBroadcasting(type: String, id: String) async throws -> StartBroadcastingResponse
+        func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
 
 
         func startRecording(type: String, id: String) async throws -> StartRecordingResponse
@@ -1447,7 +1447,7 @@ protocol DefaultAPIEndpoints {
         func startTranscription(type: String, id: String) async throws -> StartTranscriptionResponse
 
 
-        func stopBroadcasting(type: String, id: String) async throws -> StopBroadcastingResponse
+        func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
 
 
         func stopLive(type: String, id: String) async throws -> StopLiveResponse
