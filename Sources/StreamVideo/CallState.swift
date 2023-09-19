@@ -89,9 +89,9 @@ public class CallState: ObservableObject {
             blockUser(id: event.user.id)
         case .typeCallAcceptedEvent(let event):
             update(from: event.call)
-        case .typeCallBroadcastingStartedEvent(_):
+        case .typeCallHLSBroadcastingStartedEvent(_):
             self.egress?.broadcasting = true
-        case .typeCallBroadcastingStoppedEvent(_):
+        case .typeCallHLSBroadcastingStoppedEvent(_):
             self.egress?.broadcasting = false
         case .typeCallCreatedEvent(let event):
             update(from: event.call)
@@ -160,6 +160,8 @@ public class CallState: ObservableObject {
             break
         case .typeHealthCheckEvent(_):
             // note: health checks are not relevant for call state sync'ing
+            break
+        case .typeCallUserMuted(_):
             break
         }
     }
