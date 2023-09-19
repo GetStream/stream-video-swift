@@ -576,14 +576,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     /// Starts HLS broadcasting of the call.
     @discardableResult
-    public func startHLS() async throws -> StartBroadcastingResponse {
-        return try await coordinatorClient.startBroadcasting(type: callType, id: callId)
+    public func startHLS() async throws -> StartHLSBroadcastingResponse {
+        return try await coordinatorClient.startHLSBroadcasting(type: callType, id: callId)
     }
     
     /// Stops HLS broadcasting of the call.
     @discardableResult
-    public func stopHLS() async throws -> StopBroadcastingResponse {
-        try await coordinatorClient.stopBroadcasting(type: callType, id: callId)
+    public func stopHLS() async throws -> StopHLSBroadcastingResponse {
+        try await coordinatorClient.stopHLSBroadcasting(type: callType, id: callId)
     }
     
     //MARK: - Events
