@@ -115,7 +115,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     func setRemoteDescription(_ sdp: String, type: RTCSdpType) async throws {
-        guard pc.remoteDescription?.sdp != sdp || pc.remoteDescription?.type != type else { return }
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
         return try await withCheckedThrowingContinuation { continuation in
             pc.setRemoteDescription(sessionDescription) { [weak self] error in
