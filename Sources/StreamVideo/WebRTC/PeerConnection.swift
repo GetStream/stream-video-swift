@@ -18,7 +18,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
     private let callCid: String
-    private let type: PeerConnectionType
+    let type: PeerConnectionType
     private let videoOptions: VideoOptions
     private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
     private(set) var transceiver: RTCRtpTransceiver?
@@ -119,7 +119,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     func setRemoteDescription(_ sdp: String, type: RTCSdpType) async throws {
-        guard pc.remoteDescription?.sdp != sdp || pc.remoteDescription?.type != type else { return }
         let sessionDescription = RTCSessionDescription(type: type, sdp: sdp)
         return try await withCheckedThrowingContinuation { continuation in
             pc.setRemoteDescription(sessionDescription) { [weak self] error in

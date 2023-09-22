@@ -138,7 +138,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var videoOptions = VideoOptions()
     private let environment: WebSocketClient.Environment
     private let apiKey: String
-    private let fastReconnectTimeout: TimeInterval = 4.0
+    private let fastReconnectTimeout: TimeInterval = 5.0
     
     private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
     private var migratingWSClient: WebSocketClient?
@@ -146,6 +146,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var fromSfuName: String?
     private var tempSubscriber: PeerConnection?
     private var currentScreenhsareType: ScreensharingType?
+    private var isFastReconnecting = false
 
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
@@ -215,16 +216,18 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         addOnParticipantsChangeHandler()
         subscribeToAppLifecycleChanges()
+        subscribeToInternetConnectionUpdates()
     }
     
     func connect(
         callSettings: CallSettings,
         videoOptions: VideoOptions,
         connectOptions: ConnectOptions,
-        migrating: Bool = false
+        migrating: Bool = false,
+        fastReconnect: Bool = false
     ) async throws {
         let connectionStatus = await state.connectionState
-        if (connectionStatus == .connected || connectionStatus == .connecting) && !migrating {
+        if (connectionStatus == .connected || connectionStatus == .connecting) && (!migrating && !fastReconnect) {
             log.debug("Skipping connection, already connected or connecting", subsystems: .webRTC)
             return
         }
@@ -234,16 +237,20 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         log.debug("Connecting to SFU", subsystems: .webRTC)
         await state.update(connectionState: .connecting)
         log.debug("Setting user media", subsystems: .webRTC)
-        if !migrating {
+        if !migrating && !fastReconnect {
             await setupUserMedia(callSettings: callSettings)
             log.debug("Connecting WS channel", subsystems: .webRTC)
             signalChannel?.connect()
             sfuMiddleware.onSocketConnected = handleOnSocketConnected
-        } else {
+        } else if migrating {
             log.debug("Performing session migration", subsystems: .webRTC)
             migratingWSClient?.connect()
             publisher?.update(configuration: connectOptions.rtcConfiguration)
             sfuMiddleware.onSocketConnected = handleOnMigrationJoinResponse
+        } else if fastReconnect {
+            log.debug("Performing fast reconnect", subsystems: .webRTC)
+            signalChannel?.connect()
+            sfuMiddleware.onSocketConnected = handleOnSocketConnected
         }
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
@@ -528,6 +535,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 } else {
                     log.debug("reconnected - restarting publisher ice")
                     publisher?.restartIce()
+                    await state.update(connectionState: .connected)
+                    signalChannel?.engine?.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
                 }
             } catch {
                 log.error("Error setting up peer connections", subsystems: .webRTC, error: error)
@@ -612,7 +621,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             )
             publisher?.onNegotiationNeeded = handleNegotiationNeeded()
             publisher?.onDisconnect = { [weak self] _ in
-                self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+//                self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
             }
         } else {
             publisher?.signalService = signalService
@@ -681,7 +690,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         constraints: RTCMediaConstraints? = nil
     ) async throws {
         guard let peerConnection else { return }
-        log.debug("Negotiating peer connection", subsystems: .webRTC)
+        log.debug("Negotiating peer connection for \(peerConnection.type)", subsystems: .webRTC)
         let initialOffer = try await peerConnection.createOffer(
             constraints: constraints ?? .defaultConstraints
         )
@@ -829,7 +838,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey,
-        isMigrating: Bool = false
+        isMigrating: Bool = false,
+        isFastReconnect: Bool = false
     ) -> WebSocketClient {
         let config = URLSessionConfiguration.default
         config.waitsForConnectivity = false
@@ -853,7 +863,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 if isMigrating {
                     await self.sendMigrationJoinRequest()
                 } else {
-                    try await self.handleSocketConnected()
+                    try await self.handleSocketConnected(fastReconnect: isFastReconnect)
                 }
             }
         }
@@ -861,9 +871,15 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         return webSocketClient
     }
     
-    private func handleSocketConnected() async throws {
-        let sdp = try await tempOfferSdp()
-        await sendJoinRequest(with: sdp)
+    private func handleSocketConnected(fastReconnect: Bool = false) async throws {
+        let sdp: String
+        if fastReconnect, let subscriber {
+            let offer = try await subscriber.createOffer()
+            sdp = offer.sdp
+        } else {
+            sdp = try await tempOfferSdp()
+        }
+        await sendJoinRequest(with: sdp, fastReconnect: fastReconnect)
     }
     
     private func tempOfferSdp() async throws -> String {
@@ -942,8 +958,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private func loadTrackSubscriptionDetails() async -> [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
         var tracks = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
         let callParticipants = await state.callParticipants
-
-       
 
         for (_, value) in callParticipants {
             if value.id != sessionID {
@@ -1133,33 +1147,59 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         )
     }
     
+    private func subscribeToInternetConnectionUpdates() {
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(handleConnectionStateChange),
+            name: .internetConnectionStatusDidChange,
+            object: nil
+        )
+    }
+    
+    @objc private func handleConnectionStateChange(_ notification: NSNotification) {
+        guard let status = notification.userInfo?[Notification.internetConnectionStatusUserInfoKey] as? InternetConnection.Status else {
+            return
+        }
+
+        if status == .unavailable {
+            if !isFastReconnecting {
+                isFastReconnecting = true
+            }
+            return
+        }
+        if status.isAvailable && isFastReconnecting, let url = signalChannel?.connectURL {
+            signalChannel = makeWebSocketClient(
+                url: url,
+                apiKey: .init(apiKey),
+                isFastReconnect: true
+            )
+            Task {
+                try await connect(
+                    callSettings: callSettings,
+                    videoOptions: videoOptions,
+                    connectOptions: connectOptions!,
+                    fastReconnect: true
+                )
+                DispatchQueue.main.asyncAfter(deadline: .now() + fastReconnectTimeout) { [weak self] in
+                    guard let self else { return }
+                    self.isFastReconnecting = false
+                    let reconnectPublisher = publisher != nil ? publisher?.connectionState == .connected : false
+                    let reconnectSubscriber = subscriber != nil ? subscriber?.connectionState == .connected : false
+                    let shouldFullyReconnect = reconnectPublisher || reconnectSubscriber
+                    if shouldFullyReconnect {
+                        log.debug("===== Fast reconnect failed, doing full reconnect")
+                        //                    onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+                    } else {
+                        log.debug("Fast reconnect successfull")
+                    }
+                }
+            }
+        }
+    }
 }
 
 extension WebRTCClient: ConnectionStateDelegate {
     func webSocketClient(_ client: WebSocketClient, didUpdateConnectionState state: WebSocketConnectionState) {
-        if case let .disconnected(reason) = state, reason != .userInitiated {
-            fastReconnect(state: state)
-        } else {
-            onSignalConnectionStateChange?(state)
-        }
-    }
-    
-    private func fastReconnect(state: WebSocketConnectionState) {
-        Task {
-            log.debug("Trying to perform fast reconnect")
-            let sdp = try await tempOfferSdp()
-            await sendJoinRequest(with: sdp, migrating: false, fastReconnect: true)
-        }
-        DispatchQueue.main.asyncAfter(deadline: .now() + fastReconnectTimeout) { [weak self] in
-            guard let self else { return }
-            var shouldFullyReconnect = publisher != nil ? publisher?.connectionState == .connected : false
-            shouldFullyReconnect = subscriber != nil ? subscriber?.connectionState == .connected : shouldFullyReconnect
-            if shouldFullyReconnect {
-                log.debug("Fast reconnect failed, doing full reconnect")
-                onSignalConnectionStateChange?(state)
-            } else {
-                log.debug("Fast reconnect successfull")
-            }
-        }
+        log.debug("ws state changed to \(state)")
     }
 }

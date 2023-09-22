@@ -39,6 +39,10 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
         return try await execute(request: updateMuteStatesRequest, path: "UpdateMuteStates")
     }
     
+    func iceRestart(iCERestartRequest: Stream_Video_Sfu_Signal_ICERestartRequest) async throws -> Stream_Video_Sfu_Signal_ICERestartResponse {
+        return try await execute(request: iCERestartRequest, path: "IceRestart")
+    }
+    
     func update(userToken: String) {
         syncQueue.async { [weak self] in
             self?.token = userToken
