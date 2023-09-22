@@ -119,29 +119,15 @@ lane :test do |options|
 
   create_credentials_config
 
-  testplan = 'StreamVideoAPITests'
-  update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
+  update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
 
   scan(
     project: xcode_project,
     scheme: 'StreamVideo',
-    testplan: testplan,
-    clean: true,
+    testplan: 'StreamVideo',
     devices: options[:device],
     number_of_retries: 2,
     xcargs: ENV['STREAM_VIDEO_SECRET'] ? "STREAM_VIDEO_SECRET=#{ENV['STREAM_VIDEO_SECRET']}" : ''
-  )
-
-  next if options[:api_tests_only]
-
-  testplan = 'StreamVideo'
-  update_testplan_on_ci(path: "StreamVideoTests/#{testplan}.xctestplan")
-
-  scan(
-    project: xcode_project,
-    scheme: 'StreamVideo',
-    testplan: testplan,
-    devices: options[:device]
   )
 end
 
