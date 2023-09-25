@@ -206,7 +206,7 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange newState: RTCIceConnectionState) {
-        log.debug("Peer connection state changed to \(newState)")
+        log.debug("Peer connection state for \(type) changed to \(newState)")
         if newState == .disconnected {
             log.debug("Peer connection state changed to \(newState)", subsystems: .webRTC)
             onDisconnect?(self)

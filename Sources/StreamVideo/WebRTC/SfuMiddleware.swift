@@ -184,8 +184,8 @@ class SfuMiddleware: EventMiddleware {
     }
     
     private func handleICETrickle(_ event: Stream_Video_Sfu_Models_ICETrickle) async throws {
-        log.debug("Handling ice trickle")
         let peerType = event.peerType
+        log.debug("Handling ice trickle for \(peerType)")        
         guard let data = event.iceCandidate.data(
             using: .utf8,
             allowLossyConversion: false

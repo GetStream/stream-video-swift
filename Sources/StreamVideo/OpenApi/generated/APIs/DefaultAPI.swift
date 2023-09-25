@@ -520,8 +520,11 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let sfu_id = "sfu-edc6814.aws-mum1.stream-io-video.com"
         let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true),
+            "sfu_id": (wrappedValue: sfu_id.encodeToJSON(), isExplode: false),
+            "cascading": (wrappedValue: true, isExplode: false)
         ])
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
