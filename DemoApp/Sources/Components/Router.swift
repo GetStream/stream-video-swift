@@ -50,14 +50,17 @@ final class Router: ObservableObject {
     // MARK: - Handle URL
 
     func handle(url: URL) {
+        log.debug("Request to handle deeplink \(url)")
         let (deeplinkInfo, _) = deeplinkAdapter.handle(url: url)
 
         guard
             deeplinkInfo != .empty
         else {
+            log.warning("Request to handle deeplink \(url) denied ❌")
             return
         }
 
+        log.debug("Request to handle deeplink \(url) accepted ✅")
         if streamVideoUI != nil {
             appState.deeplinkInfo = deeplinkInfo
         } else {

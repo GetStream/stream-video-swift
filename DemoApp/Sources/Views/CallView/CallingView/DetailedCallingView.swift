@@ -10,15 +10,15 @@ import StreamVideoSwiftUI
 
 struct DetailedCallingView: View {
     @ObservedObject var viewModel: CallViewModel
-    
+
     @Injected(\.streamVideo) var streamVideo
-    
+
     private let imageSize: CGFloat = 32
-        
+
     @State private var callId = ""
-    
+
     @State private var callAction = CallAction.startCall
-    
+
     @State private var callFlow: CallFlow = .joinImmediately
 
     var participants: [User] {
@@ -28,13 +28,13 @@ struct DetailedCallingView: View {
         }
         return participants
     }
-    
+
     @State var selectedParticipants = [User]()
     @State var incomingCallInfo: IncomingCall?
     @State var logoutAlertShown = false
-    
+
     @ObservedObject var appState = AppState.shared
-    
+
     var body: some View {
         NavigationView {
             VStack {
@@ -53,7 +53,7 @@ struct DetailedCallingView: View {
                     Text("Call details")
                         .font(.title)
                         .padding()
-                    
+
                     HStack {
                         Spacer()
                         ZStack {
@@ -71,18 +71,18 @@ struct DetailedCallingView: View {
                         .padding()
                     }
                 }
-                
+
                 Picker("Call action", selection: $callAction) {
                     Text(CallAction.startCall.rawValue).tag(CallAction.startCall)
                     Text(CallAction.joinCall.rawValue).tag(CallAction.joinCall)
                 }
                 .pickerStyle(.segmented)
-                
+
                 TextField("Insert a call id", text: $callId)
                     .textFieldStyle(.roundedBorder)
                     .padding()
                     .accessibilityIdentifier("callId")
-                
+
                 if callAction == .startCall {
                     startCallView
                         .transition(.opacity)
@@ -107,7 +107,7 @@ struct DetailedCallingView: View {
             .alignedToReadableContentGuide()
         }
         .navigationViewStyle(StackNavigationViewStyle())
-//        .navigationBarHidden(true)
+        //        .navigationBarHidden(true)
         .onAppear() {
             CallService.shared.registerForIncomingCalls()
         }
@@ -140,12 +140,16 @@ struct DetailedCallingView: View {
             self.callId = callId
             viewModel.joinCall(callType: .default, callId: callId)
         }
+        .onChange(of: appState.deeplinkInfo) { deeplinkInfo in
+            self.callId = deeplinkInfo.callId
+            joinCallIfNeeded(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
+        }
     }
-    
+
     private var makeCallEnabled: Bool {
         callId.isEmpty || participants.isEmpty
     }
-    
+
     var startCallView: some View {
         Group {
             HStack {
@@ -154,7 +158,7 @@ struct DetailedCallingView: View {
                 Spacer()
             }
             .padding(.horizontal)
-            
+
             List(participants) { participant in
                 Button {
                     if selectedParticipants.contains(participant) {
@@ -179,7 +183,7 @@ struct DetailedCallingView: View {
             .frame(maxHeight: UIScreen.main.bounds.height / 4)
             .listStyle(PlainListStyle())
             .accessibility(identifier: "participantList")
-            
+
             Picker("Call flow", selection: $callFlow) {
                 Text(CallFlow.joinImmediately.rawValue)
                     .tag(CallFlow.joinImmediately)
@@ -192,7 +196,7 @@ struct DetailedCallingView: View {
                     .accessibility(identifier: CallFlow.lobby.rawValue)
             }
             .pickerStyle(.segmented)
-                        
+
             Button {
                 resignFirstResponder()
                 if callFlow == .lobby {
@@ -216,7 +220,7 @@ struct DetailedCallingView: View {
             .cornerRadius(16)
         }
     }
-    
+
     var members: [MemberRequest] {
         var members: [MemberRequest] = selectedParticipants.map {
             MemberRequest(custom: $0.customData, role: $0.role, userId: $0.id)
@@ -232,7 +236,19 @@ struct DetailedCallingView: View {
         }
         return members
     }
-    
+
+    private func joinCallIfNeeded(with callId: String, callType: String = .default) {
+        guard !callId.isEmpty, viewModel.callingState == .idle else {
+            return
+        }
+
+        Task {
+            try await streamVideo.connect()
+            await MainActor.run {
+                viewModel.joinCall(callType: callType, callId: callId)
+            }
+        }
+    }
 }
 
 enum CallAction: String {

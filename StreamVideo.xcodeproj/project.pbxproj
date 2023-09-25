@@ -77,6 +77,9 @@
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
+		40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */; };
+		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
+		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40D7E7962AB1C9590017095E /* ThermalStateViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D7E7952AB1C9580017095E /* ThermalStateViewModifier.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
@@ -894,6 +897,8 @@
 		409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadableContentGuide.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
+		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
+		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
 		40D7E7952AB1C9580017095E /* ThermalStateViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateViewModifier.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
@@ -1772,6 +1777,7 @@
 			isa = PBXGroup;
 			children = (
 				409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */,
+				40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */,
 				4093861B2AA0A11500FF5AF4 /* LogQueue.swift */,
 				4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */,
 			);
@@ -2038,6 +2044,7 @@
 				82D858B729EDAE0A00CF9F8B /* ParticipantActionsTests.swift */,
 				824DBA9F29F6D77B005ACD09 /* ReconnectionTests.swift */,
 				82FB89362A702A9200AC16A1 /* Authentication_Tests.swift */,
+				40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */,
 			);
 			path = Tests;
 			sourceTree = "<group>";
@@ -3694,6 +3701,7 @@
 				82C837E229A532C000CB6B0E /* LoginPage.swift in Sources */,
 				82392D542993C9E100941435 /* StreamTestCase.swift in Sources */,
 				82C837E029A531ED00CB6B0E /* CallPage.swift in Sources */,
+				40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */,
 				82B8C0FA29E80997001F816C /* RingProcessTests.swift in Sources */,
 				82392D6B2993CDF500941435 /* UserRobot.swift in Sources */,
 				82D858B829EDAE0A00CF9F8B /* ParticipantActionsTests.swift in Sources */,
@@ -3704,6 +3712,7 @@
 				82AD932529E6FCCF00D4D295 /* LobbyPage.swift in Sources */,
 				824DBAA029F6D77B005ACD09 /* ReconnectionTests.swift in Sources */,
 				828DE5BD299521EF00F93197 /* UserRobot+Asserts.swift in Sources */,
+				40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */,
 				82B8C0FC29E80A2A001F816C /* CallLifecycleTests.swift in Sources */,
 				82392D71299403B200941435 /* CallViewsTests.swift in Sources */,
 				820221622A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
@@ -3779,6 +3788,7 @@
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
 				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
 				4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */,
+				40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */,
 				84D6493E29E7F75E002CA428 /* CallsViewModel.swift in Sources */,
 				401A64AB2A9DF7EC00534ED1 /* DemoChatAdapter.swift in Sources */,
 				4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */,
