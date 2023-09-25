@@ -15,11 +15,22 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     actor State: ObservableObject {
+        private var scheduledUpdate = false
         private var cancellables = Set<AnyCancellable>()
+        private(set) var lastUpdate: TimeInterval = Date().timeIntervalSince1970
         var connectionState = ConnectionState.disconnected(reason: nil)
         @Published var callParticipants = [String: CallParticipant]() {
             didSet {
-                continuation?.yield([true])
+                if !scheduledUpdate {
+                    scheduledUpdate = true
+                    Task {
+                        try? await Task.sleep(nanoseconds: 250_000_000)
+                        lastUpdate = Date().timeIntervalSince1970
+                        continuation?.yield([true])
+                        scheduledUpdate = false
+                    }
+                }
+
             }
         }
         var tracks = [String: RTCVideoTrack]()
@@ -912,9 +923,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let connectionState = await state.connectionState
         if connectionState == .connected && !tracks.isEmpty {
             request.tracks = tracks
-            let connectURL = signalChannel?.connectURL
+            let lastUpdate = await state.lastUpdate
             try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
-                self?.sfuChanged(connectURL) == false
+                let currentUpdate = await self?.state.lastUpdate
+                return currentUpdate == lastUpdate
             }) {
                 _ = try await signalService.updateSubscriptions(
                     updateSubscriptionsRequest: request
