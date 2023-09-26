@@ -9,6 +9,6 @@ import OSLog
 final class OSLogDestination: BaseLogDestination {
 
     override func write(message: String) {
-        os_log("%@", message)
+        os_log("%{public}s", message)
     }
 }
