@@ -120,6 +120,8 @@
 		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
+		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
+		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
@@ -936,6 +938,8 @@
 		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
+		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
+		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
 		4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntegrationTest.swift; sourceTree = "<group>"; };
 		4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallCRUDTests.swift; sourceTree = "<group>"; };
@@ -1974,6 +1978,15 @@
 			path = WaitingLocalUserView;
 			sourceTree = "<group>";
 		};
+		40FBEF472AC3030C007CFF17 /* UITests */ = {
+			isa = PBXGroup;
+			children = (
+				40FBEF482AC30343007CFF17 /* Safari.swift */,
+				40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */,
+			);
+			path = UITests;
+			sourceTree = "<group>";
+		};
 		4351AEAB2A40586B00D32D0D /* IntegrationTests */ = {
 			isa = PBXGroup;
 			children = (
@@ -2006,6 +2019,7 @@
 		82392D5C2993CBE200941435 /* TestTools */ = {
 			isa = PBXGroup;
 			children = (
+				40FBEF472AC3030C007CFF17 /* UITests */,
 				8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */,
 				8251E6292A17BE9F00E7257A /* TestData */,
 				82CE900229FC3A7B00770EF6 /* Resources */,
@@ -3704,6 +3718,7 @@
 				40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */,
 				82B8C0FA29E80997001F816C /* RingProcessTests.swift in Sources */,
 				82392D6B2993CDF500941435 /* UserRobot.swift in Sources */,
+				40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */,
 				82D858B829EDAE0A00CF9F8B /* ParticipantActionsTests.swift in Sources */,
 				82B8C0F829E80933001F816C /* LobbyTests.swift in Sources */,
 				82392D6F2994027C00941435 /* Sinatra.swift in Sources */,
@@ -3716,6 +3731,7 @@
 				82B8C0FC29E80A2A001F816C /* CallLifecycleTests.swift in Sources */,
 				82392D71299403B200941435 /* CallViewsTests.swift in Sources */,
 				820221622A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
+				40FBEF492AC30343007CFF17 /* Safari.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
