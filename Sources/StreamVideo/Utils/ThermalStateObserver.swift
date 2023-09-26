@@ -10,11 +10,12 @@ extension LogSubsystem {
 }
 
 public final class ThermalStateObserver: ObservableObject {
-
     public static let shared = ThermalStateObserver()
 
+    /// Published property to observe the thermal state
     @Published public private(set) var state: ProcessInfo.ThermalState {
         didSet {
+            // Determine the appropriate log level based on the thermal state
             let logLevel: LogLevel
             switch state {
             case .nominal, .fair:
@@ -26,6 +27,7 @@ public final class ThermalStateObserver: ObservableObject {
             @unknown default:
                 logLevel = .debug
             }
+            // Log the thermal state change with the calculated log level
             log.log(
                 logLevel,
                 message: "Thermal state changed \(oldValue) → state",
@@ -35,22 +37,33 @@ public final class ThermalStateObserver: ObservableObject {
         }
     }
 
+    /// Cancellable object to manage notifications
     private var notificationCenterCancellable: AnyCancellable?
+    private var thermalStateProvider: () -> ProcessInfo.ThermalState
 
-    private init() {
-        self.state = ProcessInfo.processInfo.thermalState
+    convenience init() {
+        self.init { ProcessInfo.processInfo.thermalState }
+    }
+    
 
+    init(thermalStateProvider: @escaping () -> ProcessInfo.ThermalState) {
+        // Initialize the thermal state with the current process's thermal state
+        self.state = thermalStateProvider()
+        self.thermalStateProvider = thermalStateProvider
+
+        // Set up a publisher to monitor thermal state changes
         notificationCenterCancellable = NotificationCenter
             .default
             .publisher(for: ProcessInfo.thermalStateDidChangeNotification)
             .receive(on: DispatchQueue.global(qos: .utility))
-            .map { _ in ProcessInfo.processInfo.thermalState }
+            .map { [thermalStateProvider] _ in thermalStateProvider() }
             .receive(on: DispatchQueue.main)
             .assign(to: \.state, on: self)
     }
 
     /// Depending on the Device's thermal state we adapt the request participants resolution.
     public var scale: CGFloat {
+        // Determine the appropriate scaling factor based on the thermal state
         switch state {
         case .nominal:
             return 1
