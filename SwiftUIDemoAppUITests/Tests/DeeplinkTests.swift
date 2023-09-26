@@ -39,7 +39,9 @@ final class DeeplinkTests: StreamTestCase {
 
     func test_universalLink_production_joinsExpectedCall() {
         WHEN("") {
-            Safari.openUniversalLinkFromSmartBanner(MockDeeplink.production)
+            Safari()
+                .open(MockDeeplink.production)
+                .tapButton("OPEN")
         }
         THEN("user joins the the specified call") {
             userRobot
@@ -50,7 +52,9 @@ final class DeeplinkTests: StreamTestCase {
 
     func test_customSchemeURL_joinsExpectedCall() {
         WHEN("User opens a URL that contains a custom scheme") {
-            Safari.openApp(MockDeeplink.customScheme)
+            Safari()
+                .open(MockDeeplink.customScheme)
+                .tapButton("Open")
         }
         THEN("user joins the the specified call") {
             userRobot
