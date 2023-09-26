@@ -13,7 +13,7 @@ public final class ThermalStateObserver: ObservableObject {
 
     public static let shared = ThermalStateObserver()
 
-    @Published public private(set) var state: ProcessInfo.ThermalState = .nominal {
+    @Published public private(set) var state: ProcessInfo.ThermalState {
         didSet {
             let logLevel: LogLevel
             switch state {
@@ -38,6 +38,8 @@ public final class ThermalStateObserver: ObservableObject {
     private var notificationCenterCancellable: AnyCancellable?
 
     private init() {
+        self.state = ProcessInfo.processInfo.thermalState
+
         notificationCenterCancellable = NotificationCenter
             .default
             .publisher(for: ProcessInfo.thermalStateDidChangeNotification)
