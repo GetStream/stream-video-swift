@@ -140,7 +140,7 @@ struct DetailedCallingView: View {
             self.callId = callId
             viewModel.joinCall(callType: .default, callId: callId)
         }
-        .onChange(of: appState.deeplinkInfo) { deeplinkInfo in
+        .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
             self.callId = deeplinkInfo.callId
             joinCallIfNeeded(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
         }

@@ -229,7 +229,7 @@ extension AppEnvironment {
         case .debug:
             return [.staging, .pronto, .production]
         case .test:
-            return [.staging]
+            return [.staging, .pronto, .production]
         case .release:
             return [.production]
         }
