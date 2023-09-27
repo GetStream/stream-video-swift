@@ -53,6 +53,8 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
+
+        MemoryLeakDetector.track(self)
     }
     
     var audioTrackPublished: Bool {

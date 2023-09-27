@@ -41,6 +41,8 @@ public class CallsController: ObservableObject {
         self.streamVideo = streamVideo
         self.subscribeToWatchEvents()
         self.subscribeToConnectionUpdates()
+
+        MemoryLeakDetector.track(self)
     }
     
     /// Loads the next page of calls.

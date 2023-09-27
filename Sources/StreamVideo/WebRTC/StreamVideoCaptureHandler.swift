@@ -30,6 +30,8 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             object: nil
         )
         updateRotation()
+
+        MemoryLeakDetector.track(self)
     }
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {

@@ -31,6 +31,8 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
     ) {
         self.urlSession = urlSession
         self.tokenProvider = tokenProvider
+
+        MemoryLeakDetector.track(self)
     }
     
     func execute(request: URLRequest) async throws -> Data {

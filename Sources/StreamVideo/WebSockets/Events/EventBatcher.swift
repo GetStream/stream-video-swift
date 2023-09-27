@@ -49,6 +49,8 @@ final class Batcher<Item> {
         self.period = max(period, 0)
         self.timerType = timerType
         self.handler = handler
+
+        MemoryLeakDetector.track(self)
     }
     
     func append(_ item: Item) {

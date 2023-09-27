@@ -5,10 +5,6 @@
 import Foundation
 import Combine
 
-extension LogSubsystem {
-    public static let thermalState = Self(rawValue: 1 << 6)
-}
-
 public final class ThermalStateObserver: ObservableObject {
 
     public static let shared = ThermalStateObserver()

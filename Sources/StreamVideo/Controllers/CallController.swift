@@ -49,6 +49,8 @@ class CallController {
         self.environment = environment
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
+
+        MemoryLeakDetector.track(self)
     }
     
     /// Joins a call with the provided information.

@@ -90,6 +90,8 @@ class WebSocketClient {
         self.connectURL = connectURL
         self.eventNotificationCenter = eventNotificationCenter
         self.requiresAuth = requiresAuth
+
+        MemoryLeakDetector.track(self)
     }
     
     /// Connects the web connect.

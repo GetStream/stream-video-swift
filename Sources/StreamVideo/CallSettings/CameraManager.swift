@@ -20,6 +20,8 @@ public final class CameraManager: ObservableObject, CallSettingsManager, @unchec
         self.callController = callController
         self.status = initialStatus
         self.direction = initialDirection
+
+        MemoryLeakDetector.track(self)
     }
 
     /// Toggles the camera state.

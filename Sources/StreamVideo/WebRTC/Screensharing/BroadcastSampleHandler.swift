@@ -32,6 +32,8 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
             self.setupConnection()
             self.uploader = BroadcastBufferUploader(connection: connection)
         }
+
+        MemoryLeakDetector.track(self)
     }
     
     override public func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {

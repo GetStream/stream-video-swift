@@ -72,6 +72,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         self.transport = transport
         self.middlewares = middlewares
         self.jsonDecoder = jsonDecoder
+
+        MemoryLeakDetector.track(self)
     }
 
     func send<Response: Codable>(

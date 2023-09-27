@@ -74,6 +74,8 @@
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
+		4093F5042AC43A9600D7F330 /* MemoryLeakDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093F5032AC43A9600D7F330 /* MemoryLeakDetector.swift */; };
+		4093F5072AC4482000D7F330 /* MemoryLeaksViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093F5062AC4482000D7F330 /* MemoryLeaksViewer.swift */; };
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
@@ -896,6 +898,8 @@
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
+		4093F5032AC43A9600D7F330 /* MemoryLeakDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLeakDetector.swift; sourceTree = "<group>"; };
+		4093F5062AC4482000D7F330 /* MemoryLeaksViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLeaksViewer.swift; sourceTree = "<group>"; };
 		409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadableContentGuide.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
@@ -1714,6 +1718,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				4093F5052AC4481100D7F330 /* MemoryLeaksViewer */,
 				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
 				40D9463F2AA5ECDC00C8861B /* CodeScanner */,
 				40F445D02A9E2028004BE3DA /* Reactions */,
@@ -1786,6 +1791,22 @@
 				4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */,
 			);
 			path = MemoryLogDestination;
+			sourceTree = "<group>";
+		};
+		4093F5022AC43A8900D7F330 /* MemoryLeakDetector */ = {
+			isa = PBXGroup;
+			children = (
+				4093F5032AC43A9600D7F330 /* MemoryLeakDetector.swift */,
+			);
+			path = MemoryLeakDetector;
+			sourceTree = "<group>";
+		};
+		4093F5052AC4481100D7F330 /* MemoryLeaksViewer */ = {
+			isa = PBXGroup;
+			children = (
+				4093F5062AC4482000D7F330 /* MemoryLeaksViewer.swift */,
+			);
+			path = MemoryLeaksViewer;
 			sourceTree = "<group>";
 		};
 		409BFA412A9F7BAA003341EF /* ReadableContentGuide */ = {
@@ -2657,6 +2678,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				4093F5022AC43A8900D7F330 /* MemoryLeakDetector */,
 				8456E6C7287EC343004E180E /* Logger */,
 				84C2997C28784BB30034B735 /* Utils.swift */,
 				84AF64D4287C79320012A503 /* RawJSON.swift */,
@@ -3792,6 +3814,7 @@
 				40F445E82A9E2824004BE3DA /* Call+Identifiable.swift in Sources */,
 				40F445FE2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift in Sources */,
 				401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */,
+				4093F5072AC4482000D7F330 /* MemoryLeaksViewer.swift in Sources */,
 				401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */,
 				40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */,
 				40F445BA2A9E0815004BE3DA /* AudioFilter.swift in Sources */,
@@ -3942,6 +3965,7 @@
 				84274F482884251600CF8794 /* InternetConnection.swift in Sources */,
 				84DC389129ADFCFD00946713 /* VideoSettings.swift in Sources */,
 				8456E6D6287EC343004E180E /* LogFormatter.swift in Sources */,
+				4093F5042AC43A9600D7F330 /* MemoryLeakDetector.swift in Sources */,
 				43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */,
 				84A7E18C288363AC00526C98 /* EventNotificationCenter.swift in Sources */,
 				84A7E1962883661A00526C98 /* BackgroundTaskScheduler.swift in Sources */,

@@ -15,6 +15,8 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
     init(callController: CallController, initialStatus: CallSettingsStatus) {
         self.callController = callController
         self.status = initialStatus
+
+        MemoryLeakDetector.track(self)
     }
 
     /// Toggles the microphone state.

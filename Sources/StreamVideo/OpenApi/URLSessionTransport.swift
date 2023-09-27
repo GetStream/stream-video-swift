@@ -19,6 +19,8 @@ final class URLSessionTransport: DefaultAPITransport, @unchecked Sendable {
     ) {
         self.urlSession = urlSession
         self.tokenProvider = tokenProvider
+
+        MemoryLeakDetector.track(self)
     }
 
     func setTokenUpdater(_ tokenUpdater: @escaping UserTokenUpdater) {

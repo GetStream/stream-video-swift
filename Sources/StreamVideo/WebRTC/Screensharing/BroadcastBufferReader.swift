@@ -18,7 +18,9 @@ private class Message {
     var imageOrientation: CGImagePropertyOrientation = .up
     private var framedMessage: CFHTTPMessage?
     
-    init() {}
+    init() {
+        MemoryLeakDetector.track(self)
+    }
     
     func appendBytes(buffer: [UInt8], length: Int) -> Int {
         if framedMessage == nil {

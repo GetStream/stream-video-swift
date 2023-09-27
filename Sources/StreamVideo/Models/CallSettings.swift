@@ -33,6 +33,8 @@ public final class CallSettings: ObservableObject, Sendable {
         #else
         self.videoOn = videoOn
         #endif
+
+        MemoryLeakDetector.track(self)
     }
     
     public var shouldPublish: Bool {

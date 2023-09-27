@@ -29,6 +29,8 @@ class URLSessionWebSocketEngine: NSObject, WebSocketEngine {
         delegateOperationQueue.underlyingQueue = callbackQueue
 
         super.init()
+
+        MemoryLeakDetector.track(self)
     }
     
     func connect() {

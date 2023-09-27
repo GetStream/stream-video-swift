@@ -27,6 +27,8 @@ class VideoCapturer: CameraVideoCapturing {
         videoCapturer = RTCCameraVideoCapturer(delegate: handler)
         checkForBackgroundCameraAccess()
         #endif
+
+        MemoryLeakDetector.track(self)
     }
     
     func capturingDevice(for cameraPosition: AVCaptureDevice.Position) -> AVCaptureDevice? {

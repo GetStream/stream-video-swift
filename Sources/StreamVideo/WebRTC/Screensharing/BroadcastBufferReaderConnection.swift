@@ -22,6 +22,9 @@ final class BroadcastBufferReaderConnection: BroadcastBufferConnection {
         guard socketHandle >= 0 else {
             return nil
         }
+
+        super.init()
+        MemoryLeakDetector.track(self)
     }
     
     func open() -> Bool {

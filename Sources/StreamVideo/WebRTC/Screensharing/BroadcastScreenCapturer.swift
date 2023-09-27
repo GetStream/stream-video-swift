@@ -30,6 +30,8 @@ class BroadcastScreenCapturer: VideoCapturing {
         videoCaptureHandler = handler
         videoCapturer = RTCCameraVideoCapturer(delegate: handler)
 #endif
+
+        MemoryLeakDetector.track(self)
     }
     
     func startCapture(device: AVCaptureDevice?) async throws {

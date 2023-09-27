@@ -60,6 +60,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         self.callController.call = self
         self.subscribeToLocalCallSettingsChanges()
+
+        MemoryLeakDetector.track(self)
     }
     
     convenience internal init(

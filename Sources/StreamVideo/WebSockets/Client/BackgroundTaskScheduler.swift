@@ -49,6 +49,10 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler {
         group.wait()
         return isActive
     }
+
+    init() {
+        MemoryLeakDetector.track(self)
+    }
     
     func beginTask(expirationHandler: (() -> Void)?) -> Bool {
         activeBackgroundTask = app?.beginBackgroundTask { [weak self] in

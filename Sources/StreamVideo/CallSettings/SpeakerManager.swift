@@ -20,6 +20,8 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
         self.callController = callController
         self.status = initialSpeakerStatus
         self.audioOutputStatus = initialAudioOutputStatus
+
+        MemoryLeakDetector.track(self)
     }
     
     /// Toggles the speaker during a call.

@@ -9,7 +9,13 @@ class EventNotificationCenter: NotificationCenter {
     private(set) var middlewares: [EventMiddleware] = []
 
     var eventPostingQueue = DispatchQueue(label: "io.getstream.event-notification-center")
-    
+
+    override init() {
+        super.init()
+
+        MemoryLeakDetector.track(self)
+    }
+
     func add(middlewares: [EventMiddleware]) {
         self.middlewares.append(contentsOf: middlewares)
     }

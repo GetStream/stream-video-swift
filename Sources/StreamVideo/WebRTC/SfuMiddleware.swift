@@ -35,6 +35,8 @@ class SfuMiddleware: EventMiddleware {
         self.subscriber = subscriber
         self.publisher = publisher
         participantsThreshold = participantThreshold
+
+        MemoryLeakDetector.track(self)
     }
     
     func update(subscriber: PeerConnection?) {

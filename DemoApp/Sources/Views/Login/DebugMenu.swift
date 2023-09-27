@@ -57,6 +57,7 @@ struct DebugMenu: View {
     }
 
     @State private var isLogsViewerVisible: Bool = false
+    @State private var isMemoryLeaksViewerVisible: Bool = false
 
     var body: some View {
         Menu {
@@ -96,24 +97,16 @@ struct DebugMenu: View {
                 label: "Performance Tracker"
             ) { self.performanceTrackerVisibility = $0 }
 
-            Button {
-                isLogsViewerVisible = true
-            } label: {
-                Label {
-                    Text("Show logs")
-                } icon: {
-                    Image(systemName: "text.insert")
-                }
-            }
-
+            RealtimeDebugMenu(
+                isLogsViewerVisible: $isLogsViewerVisible,
+                isMemoryLeaksViewerVisible: $isMemoryLeaksViewerVisible
+            )
         } label: {
             Image(systemName: "gearshape.fill")
                 .foregroundColor(colors.text)
-        }.sheet(isPresented: $isLogsViewerVisible) {
-            NavigationView {
-                MemoryLogViewer()
-            }
         }
+        .sheet(isPresented: $isLogsViewerVisible) { NavigationView { MemoryLogViewer() } }
+        .sheet(isPresented: $isMemoryLeaksViewerVisible) { NavigationView { MemoryLeaksViewer() } }
     }
 
     @ViewBuilder
@@ -165,6 +158,45 @@ struct DebugMenu: View {
             }
         } label: {
             Text(label)
+        }
+    }
+}
+
+struct RealtimeDebugMenu: View {
+
+    @Injected(\.colors) var colors
+
+    @Binding var isLogsViewerVisible: Bool
+    @Binding var isMemoryLeaksViewerVisible: Bool
+
+    var body: some View {
+        Menu {
+            Button {
+                isLogsViewerVisible = true
+            } label: {
+                Label {
+                    Text("Show logs")
+                } icon: {
+                    Image(systemName: "text.insert")
+                }
+            }
+
+            Button {
+                isMemoryLeaksViewerVisible = true
+            } label: {
+                Label {
+                    Text("Show MemoryLeaks")
+                } icon: {
+                    Image(systemName: "memorychip")
+                }
+            }
+        } label: {
+            Label {
+                Text("Realtime")
+            } icon: {
+                Image(systemName: "flowchart")
+            }
+            .foregroundColor(colors.text)
         }
     }
 }

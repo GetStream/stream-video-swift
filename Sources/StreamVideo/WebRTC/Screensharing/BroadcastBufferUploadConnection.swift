@@ -21,6 +21,10 @@ class BroadcastBufferUploadConnection: BroadcastBufferConnection {
         guard socketHandle != -1 else {
             return nil
         }
+
+        super.init()
+        
+        MemoryLeakDetector.track(self)
     }
     
     func open() -> Bool {

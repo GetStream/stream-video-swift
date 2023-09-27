@@ -18,6 +18,9 @@ struct DemoCallTopView: View {
     @ObservedObject var appState = AppState.shared
     @State var sharingPopupDismissed = false
 
+    @State private var isLogsViewerVisible: Bool = false
+    @State private var isMemoryLeaksViewerVisible: Bool = false
+
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
@@ -53,6 +56,13 @@ struct DemoCallTopView: View {
 
 
                 reactionsList()
+
+                if AppEnvironment.configuration == .debug {
+                    RealtimeDebugMenu(
+                        isLogsViewerVisible: $isLogsViewerVisible,
+                        isMemoryLeaksViewerVisible: $isMemoryLeaksViewerVisible
+                    )
+                }
             } label: {
                 Image(systemName: "ellipsis")
                     .foregroundColor(.white)
@@ -94,6 +104,8 @@ struct DemoCallTopView: View {
             .opacity(sharingPopupDismissed ? 0 : 1)
             : nil
         )
+        .sheet(isPresented: $isLogsViewerVisible) { NavigationView { MemoryLogViewer() } }
+        .sheet(isPresented: $isMemoryLeaksViewerVisible) { NavigationView { MemoryLeaksViewer() } }
     }
 
     private var hideLayoutMenu: Bool {

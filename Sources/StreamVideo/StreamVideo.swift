@@ -162,6 +162,8 @@ public class StreamVideo: ObservableObject {
                 try await self.connectUser(isInitial: true)
             }
         }
+
+        MemoryLeakDetector.track(self)
     }
     
     /// Connects the current user.
@@ -242,7 +244,7 @@ public class StreamVideo: ObservableObject {
     public func disconnect() async {
         eventHandlers.removeAll()
 
-        await withCheckedContinuation { [webSocketClient] continuation in
+        await withCheckedContinuation { [weak webSocketClient] continuation in
             if let webSocketClient = webSocketClient {
                 webSocketClient.disconnect {
                     continuation.resume()
@@ -563,7 +565,7 @@ extension StreamVideo: ConnectionStateDelegate {
         case let .disconnected(source):
             if let serverError = source.serverError, serverError.isInvalidTokenError
                 || (source.serverError as? APIError)?.isTokenExpiredError == true {
-                Task {
+                Task { [weak webSocketClient] in
                     do {
                         guard let apiTransport = apiTransport as? URLSessionTransport else { return }
                         self.token = try await apiTransport.refreshToken()

@@ -4,7 +4,7 @@
 
 import Foundation
 
-class LocationFetcher {
+enum LocationFetcher {
     
     static func getLocation() async throws -> String {
         guard let url = URL(string: "https://hint.stream-io-video.com/") else {

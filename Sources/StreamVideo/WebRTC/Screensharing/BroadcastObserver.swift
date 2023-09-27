@@ -14,7 +14,9 @@ public class BroadcastObserver: ObservableObject {
     
     @Published public var broadcastState: BroadcastState = .notStarted
     
-    public init() {}
+    public init() {
+        MemoryLeakDetector.track(self)
+    }
     
     lazy var broadcastStarted: CFNotificationCallback = { center, observer, name, object, userInfo in
         postNotification(with: BroadcastConstants.broadcastStartedNotification)

@@ -49,6 +49,8 @@ final class DefaultConnectionRecoveryHandler: ConnectionRecoveryHandler {
         self.keepConnectionAliveInBackground = keepConnectionAliveInBackground
 
         subscribeOnNotifications()
+
+        MemoryLeakDetector.track(self)
     }
     
     deinit {

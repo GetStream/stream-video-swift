@@ -62,6 +62,8 @@ class WebSocketPingController {
         self.timerType = timerType
         self.timerQueue = timerQueue
         self.webSocketClientType = webSocketClientType
+
+        MemoryLeakDetector.track(self)
     }
     
     /// `WebSocketClient` should call this when the connection state did change.

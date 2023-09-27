@@ -24,5 +24,7 @@ public final class VideoFilter: @unchecked Sendable {
         self.id = id
         self.name = name
         self.filter = filter
+
+        MemoryLeakDetector.track(self)
     }
 }

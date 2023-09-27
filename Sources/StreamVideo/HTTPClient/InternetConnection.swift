@@ -59,6 +59,8 @@ class InternetConnection {
         status = monitor.status
         monitor.delegate = self
         monitor.start()
+
+        MemoryLeakDetector.track(self)
     }
     
     deinit {
@@ -202,7 +204,11 @@ extension InternetConnection {
             
             return .available(quality)
         }
-        
+
+        init() {
+            MemoryLeakDetector.track(self)
+        }
+
         deinit {
             stop()
         }

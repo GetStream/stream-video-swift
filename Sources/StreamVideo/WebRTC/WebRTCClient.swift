@@ -214,6 +214,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         addOnParticipantsChangeHandler()
         subscribeToAppLifecycleChanges()
+
+        MemoryLeakDetector.track(self)
     }
     
     func connect(

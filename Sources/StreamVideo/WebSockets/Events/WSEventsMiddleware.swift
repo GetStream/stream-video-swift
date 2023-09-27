@@ -8,6 +8,10 @@ final class WSEventsMiddleware: EventMiddleware {
     
     private var subscribers = NSHashTable<AnyObject>.weakObjects()
 
+    init() {
+        MemoryLeakDetector.track(self)
+    }
+
     func handle(event: WrappedEvent) -> WrappedEvent? {
         var streamVideo: StreamVideo?
         for subscriber in subscribers.allObjects {

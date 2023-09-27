@@ -12,7 +12,12 @@ class BroadcastBufferConnection: NSObject {
     
     var streamQueue: DispatchQueue?
     var shouldKeepRunning = false
-    
+
+    override init() {
+        super.init()
+        MemoryLeakDetector.track(self)
+    }
+
     func writeToStream(buffer: UnsafePointer<UInt8>, maxLength length: Int) -> Int {
         outputStream?.write(buffer, maxLength: length) ?? 0
     }

@@ -82,7 +82,11 @@ public class CallState: ObservableObject {
     
     private var localCallSettingsUpdate = false
     private var durationTimer: Foundation.Timer?
-        
+
+    public init() {
+        MemoryLeakDetector.track(self)
+    }
+
     internal func updateState(from event: VideoEvent) {
         switch event {
         case .typeBlockedUserEvent(let event):
