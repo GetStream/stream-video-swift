@@ -1,8 +1,5 @@
 //
-//  MemoryLeaksViewer.swift
-//  DemoApp
-//
-//  Created by Ilias Pavlidakis on 27/9/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation

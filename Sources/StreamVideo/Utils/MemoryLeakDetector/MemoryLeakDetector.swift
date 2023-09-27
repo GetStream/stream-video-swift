@@ -1,17 +1,23 @@
 //
-//  MemoryLeakDetector.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 27/9/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
 
 actor MemoryLeakDetector {
 
-    fileprivate static let `default` = MemoryLeakDetector()
+    struct Entry {
+        var typeName: String
+        var count: Int
+        var maxExpectedCount: Int
+        var file: StaticString
+        var function: StaticString
+        var line: UInt
+    }
 
-    fileprivate var entries: [String: Entry] = [:]
+    static let `default` = MemoryLeakDetector()
+
+    private(set) var entries: [String: Entry] = [:]
 
     private init() {}
 
@@ -100,7 +106,6 @@ public final class MemorySnapshot: ObservableObject {
         includeDeallocatedObjects: Bool,
         includeNotLeaked: Bool
     ) {
-
         Task {
             var memoryEntries = await MemoryLeakDetector.default.entries
             if !includeDeallocatedObjects {
@@ -115,16 +120,6 @@ public final class MemorySnapshot: ObservableObject {
                 .sorted { $0.typeName >= $1.typeName }
         }
     }
-}
-
-fileprivate struct Entry {
-
-    var typeName: String
-    var count: Int
-    var maxExpectedCount: Int
-    var file: StaticString
-    var function: StaticString
-    var line: UInt
 }
 
 fileprivate final class DeallocTracker {
