@@ -8,7 +8,7 @@ import UIKit
 import GDPerformanceView_Swift
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
-    
+
     @Injected(\.streamVideo) var streamVideo
 
     func application(
@@ -21,11 +21,25 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         return true
     }
 
+    /// Method used to handle custom URL schemes
     func application(
         _ app: UIApplication,
         open url: URL,
         options: [UIApplication.OpenURLOptionsKey : Any] = [:]
     ) -> Bool {
+        Router.shared.handle(url: url)
+        return true
+    }
+
+    /// Method used to handle universal deeplinks
+    func application(
+        _ application: UIApplication,
+        continue userActivity: NSUserActivity,
+        restorationHandler: @escaping ([UIUserActivityRestoring]?
+        ) -> Void) -> Bool {
+        guard let url = userActivity.webpageURL else {
+            return false
+        }
         Router.shared.handle(url: url)
         return true
     }
@@ -37,7 +51,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         let deviceToken = deviceToken.map { String(format: "%02x", $0) }.joined()
         AppState.shared.pushToken = deviceToken
     }
-    
+
     func userNotificationCenter(
         _ center: UNUserNotificationCenter,
         didReceive response: UNNotificationResponse,
