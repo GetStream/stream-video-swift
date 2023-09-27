@@ -37,10 +37,12 @@ struct AppControlsWithChat: View {
                 VideoIconView(viewModel: viewModel)
                 MicrophoneIconView(viewModel: viewModel)
                 ToggleCameraIconView(viewModel: viewModel)
-                BroadcastIconView(
-                    viewModel: viewModel,
-                    preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
-                )
+                if !ProcessInfo.processInfo.isiOSAppOnMac {
+                    BroadcastIconView(
+                        viewModel: viewModel,
+                        preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
+                    )
+                }
                 HangUpIconView(viewModel: viewModel)
             }
             .frame(height: 85)
