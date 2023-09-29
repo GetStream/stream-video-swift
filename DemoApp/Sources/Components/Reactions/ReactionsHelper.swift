@@ -17,7 +17,6 @@ final class ReactionsHelper: ObservableObject {
     private var reactionsTask: Task<Void, Error>?
     private var callEndedNotificationObserver: Any?
 
-    @Published var reactionsShown = false
     @Published var showFireworks = false
     @Published var availableReactions: [Reaction] = [
         .fireworks,
@@ -158,7 +157,9 @@ final class ReactionsHelper: ObservableObject {
             activeReactions[userId] = []
         }
 
-        activeReactions[userId]?.append(reaction)
+        if activeReactions[userId]?.first?.id != reaction.id {
+            activeReactions[userId]?.append(reaction)
+        }
     }
 
     private func unregister(reaction: Reaction, for userId: String) {
