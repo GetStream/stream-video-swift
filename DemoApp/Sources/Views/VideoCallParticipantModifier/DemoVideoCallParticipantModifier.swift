@@ -83,6 +83,7 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
                     }
                 }
             )
+            .modifier(ReactionsViewModifier(participant: participant, availableSize: availableSize))
             .onTapGesture(count: 2, perform: {
                 popoverShown = true
             })

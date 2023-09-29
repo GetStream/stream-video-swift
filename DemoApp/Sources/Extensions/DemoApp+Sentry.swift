@@ -21,14 +21,15 @@ extension DemoApp {
             }
 
             LogConfig.destinationTypes = [
-                ConsoleLogDestination.self,
                 SentryLogDestination.self,
-                MemoryLogDestination.self
+                MemoryLogDestination.self,
+                OSLogDestination.self
             ]
         } else {
+            LogConfig.level = .debug
             LogConfig.destinationTypes = [
-                ConsoleLogDestination.self,
-                MemoryLogDestination.self
+                MemoryLogDestination.self,
+                OSLogDestination.self
             ]
         }
     }
