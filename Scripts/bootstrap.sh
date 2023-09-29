@@ -4,8 +4,6 @@
 # This script will:
 #   - install Mint and bootstrap its dependencies
 #   - link git hooks
-#   - install required ruby gems
-#   - install sonar dependencies if `INSTALL_SONAR` environment variable is provided
 #   - install allure dependencies if `INSTALL_ALLURE` environment variable is provided
 # You should have homebrew installed.
 # If you get `zsh: permission denied: ./bootstrap.sh` error, please run `chmod +x bootstrap.sh` first
@@ -38,21 +36,11 @@ ln -sf ../../hooks/pre-commit.sh .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
 chmod +x ./hooks/git-format-staged
 
-puts "Install bundle dependencies"
-bundle install
-
 puts "Install brew dependencies"
 brew bundle -d
 
-if [[ ${XCODE_ACTIONS-default} == default ]]; then
-  puts "Bootstrap Mint dependencies"
-  mint bootstrap --link
-fi
-
-if [[ ${INSTALL_SONAR-default} == true ]]; then
-  puts "Install sonar dependencies"
-  pip install lizard
-fi
+puts "Bootstrap Mint dependencies"
+mint bootstrap --link
 
 if [[ ${INSTALL_ALLURE-default} == true ]]; then
   puts "Install allurectl"
@@ -69,4 +57,12 @@ fi
 if [[ ${INSTALL_VIDEO_BUDDY-default} == true ]]; then
   npm install -g "https://github.com/GetStream/stream-video-buddy#${STREAM_VIDEO_BUDDY_VERSION}"
   npx playwright install
+fi
+
+if [[ ${INSTALL_YEETD-default} == true ]]; then
+  PACKAGE="yeetd-normal.pkg"
+  wget "https://github.com/biscuitehh/yeetd/releases/download/${YEETD_VERSION}/${PACKAGE}"
+  sudo installer -pkg ${PACKAGE} -target /
+  puts "Running yeetd daemon"
+  yeetd &
 fi

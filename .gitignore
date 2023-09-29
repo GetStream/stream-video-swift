@@ -84,6 +84,8 @@ push_payload.json
 sinatra-log.txt
 video-buddy-log.txt
 video-buddy-session.json
+derived_data/
+spm_cache/
 
 # Ignore Products folder
 Products/

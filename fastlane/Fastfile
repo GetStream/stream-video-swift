@@ -13,15 +13,22 @@ github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 sinatra_port = 4567
 video_buddy_port = 5678
 app_secret = ENV.fetch('STREAM_VIDEO_SECRET', nil)
+derived_data_path = 'derived_data'
+source_packages_path = 'spm_cache'
+buildcache_xcargs = 'CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++'
+is_localhost = !is_ci
+@force_check = false
 
 before_all do |lane|
   if is_ci
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
+    ENV['FASTLANE_XCODEBUILD_SETTINGS_RETRIES'] = '10'
     xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload].include?(lane)
   elsif lane == :test_e2e
     clean_up_ports_for_e2e_test
   end
+  create_credentials_config
 end
 
 after_all do |lane|
@@ -88,7 +95,6 @@ end
 
 private_lane :upload_beta do |options|
   match_me
-  create_credentials_config
   testflight_build(
     api_key: appstore_api_key,
     xcode_project: xcode_project,
@@ -113,11 +119,23 @@ lane :create_credentials_config do
   sh('touch ../TestTools/Credentials.xcconfig')
 end
 
+lane :build_test_app_and_frameworks do
+  scan(
+    project: xcode_project,
+    scheme: 'DemoApp',
+    testplan: 'SwiftUIDemoApp',
+    result_bundle: true,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    clean: is_localhost,
+    build_for_testing: true,
+    xcargs: buildcache_xcargs
+  )
+end
+
 desc 'Runs LLC tests'
 lane :test do |options|
-  next unless is_check_required(sources: sources_matrix[:unit])
-
-  create_credentials_config
+  next unless is_check_required(sources: sources_matrix[:unit], force_check: @force_check)
 
   update_testplan_on_ci(path: "StreamVideoTests/StreamVideo.xctestplan")
 
@@ -125,24 +143,40 @@ lane :test do |options|
     project: xcode_project,
     scheme: 'StreamVideo',
     testplan: 'StreamVideo',
+    clean: is_localhost,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
     devices: options[:device],
     number_of_retries: 2,
-    xcargs: ENV['STREAM_VIDEO_SECRET'] ? "STREAM_VIDEO_SECRET=#{ENV['STREAM_VIDEO_SECRET']}" : ''
+    skip_build: options[:skip_build],
+    xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
   )
 end
 
 desc 'Runs SwiftUI tests'
 lane :test_swiftui do |options|
-  test_ui(scheme: 'StreamVideoSwiftUI', source: :swiftui, device: options[:device], record: options[:record])
+  test_ui(
+    scheme: 'StreamVideoSwiftUI',
+    source: :swiftui,
+    device: options[:device],
+    record: options[:record],
+    skip_build: options[:skip_build]
+  )
 end
 
 desc 'Runs UIKit tests'
 lane :test_uikit do |options|
-  test_ui(scheme: 'StreamVideoUIKit', source: :uikit, device: options[:device], record: options[:record])
+  test_ui(
+    scheme: 'StreamVideoUIKit',
+    source: :swiftui,
+    device: options[:device],
+    record: options[:record],
+    skip_build: options[:skip_build]
+  )
 end
 
 private_lane :test_ui do |options|
-  next unless is_check_required(sources: sources_matrix[options[:source]])
+  next unless is_check_required(sources: sources_matrix[options[:source]], force_check: @force_check)
 
   remove_snapshots(scheme: options[:scheme]) if options[:record]
 
@@ -152,9 +186,13 @@ private_lane :test_ui do |options|
     project: xcode_project,
     scheme: options[:scheme],
     testplan: options[:scheme],
-    clean: true,
+    clean: is_localhost,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    skip_build: options[:skip_build],
     result_bundle: true,
-    devices: options[:device]
+    devices: options[:device],
+    xcargs: buildcache_xcargs
   )
 end
 
@@ -181,11 +219,10 @@ end
 
 desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
-  next unless is_check_required(sources: sources_matrix[:e2e])
+  next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
 
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
-  create_credentials_config
   start_sinatra
   start_video_buddy
 
@@ -196,25 +233,25 @@ lane :test_e2e do |options|
     scheme: 'DemoApp',
     testplan: 'SwiftUIDemoApp',
     result_bundle: true,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    clean: is_localhost,
+    test_without_building: options[:test_without_building],
     devices: options[:device],
-    number_of_retries: 2,
-    xcargs: is_ci ? "STREAM_VIDEO_SECRET=#{app_secret}" : ''
+    number_of_retries: 3,
+    xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
   }
 
-  build_for_testing = is_ci && options[:cron].nil?
-  scan(scan_options.merge(clean: true, build_for_testing: build_for_testing))
-
-  if build_for_testing
-    parallelize_tests_on_ci(
-      scan: scan_options,
-      derived_data: lane_context[SharedValues::SCAN_DERIVED_DATA_PATH],
-      batch: options[:batch]
-    )
+  if is_localhost || options[:cron]
+    scan(scan_options)
+  else
+    parallelize_tests_on_ci(scan: scan_options, batch: options[:batch])
   end
 end
 
 private_lane :parallelize_tests_on_ci do |options|
-  xctestrun = Dir.glob("#{options[:derived_data]}/Build/Products/*.xctestrun").first
+  products_dir = File.expand_path("../#{derived_data_path}/Build/Products")
+  xctestrun = Dir.glob(File.expand_path("#{products_dir}/*.xctestrun")).first
   tests = retrieve_xctest_names(xctestrun: xctestrun).values.flatten
   slice_size = (tests.size / ENV['MATRIX_SIZE'].to_f).ceil
   only_testing = []
@@ -222,13 +259,7 @@ private_lane :parallelize_tests_on_ci do |options|
   only_testing_batch = only_testing[options[:batch].to_i]
 
   UI.success("Tests in total: #{only_testing.flatten.size}. Running #{only_testing_batch.size} of them ⌛️")
-  scan(
-    options[:scan].merge(
-      test_without_building: true,
-      derived_data_path: options[:derived_data],
-      only_testing: only_testing_batch
-    )
-  )
+  scan(options[:scan].merge(only_testing: only_testing_batch))
 end
 
 private_lane :clean_up_ports_for_e2e_test do
@@ -258,41 +289,41 @@ private_lane :build_example_app do |options|
     when 'DemoAppUIKit'
       :uikit_sample_apps
     end
-  next unless is_check_required(sources: sources_matrix[app_sources])
-
-  create_credentials_config
+  next unless is_check_required(sources: sources_matrix[app_sources], force_check: @force_check)
 
   scan(
     project: xcode_project,
     scheme: options[:scheme],
-    clean: true,
+    clean: is_localhost,
+    derived_data_path: derived_data_path,
+    cloned_source_packages_path: source_packages_path,
+    xcargs: buildcache_xcargs,
     build_for_testing: true
   )
 end
 
 lane :emerge_swiftui do
-  next unless is_check_required(sources: sources_matrix[:emerge_swiftui])
+  next unless is_check_required(sources: sources_matrix[:emerge_swiftui], force_check: @force_check)
 
   emerge_upload(scheme: 'DemoApp')
 end
 
 lane :emerge_uikit do
-  next unless is_check_required(sources: sources_matrix[:emerge_uikit])
+  next unless is_check_required(sources: sources_matrix[:emerge_uikit], force_check: @force_check)
 
   emerge_upload(scheme: 'DemoApp')
 end
 
 desc 'Build and upload DemoApp to Emerge'
 private_lane :emerge_upload do |options|
-  create_credentials_config
-
   gym(
     export_method: 'ad-hoc',
     project: xcode_project,
     scheme: options[:scheme],
     skip_package_ipa: true,
     skip_archive: false,
-    clean: true
+    clean: is_localhost,
+    xcargs: buildcache_xcargs
   )
 
   emerge(
@@ -368,7 +399,7 @@ end
 
 desc 'Run fastlane linting'
 lane :rubocop do
-  next unless is_check_required(sources: sources_matrix[:ruby])
+  next unless is_check_required(sources: sources_matrix[:ruby], force_check: @force_check)
 
   sh('bundle exec rubocop')
 end
@@ -378,6 +409,20 @@ lane :run_linter do
   Dir.chdir('..') do
     UI.error('SwiftFormat lint was skipped. Check out https://github.com/GetStream/ios-issues-tracking/issues/465 for more info')
     # sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi')
+  end
+end
+
+lane :install_sim do |options|
+  xcode_install_cache_dir = File.expand_path('~/Library/Caches/XcodeInstall')
+  sim_dmg_path = Dir["#{xcode_install_cache_dir}/*.dmg"].first
+  sim_pkg_path = Dir["#{xcode_install_cache_dir}/*.pkg"].first
+  if is_localhost || sim_dmg_path.nil? || sim_pkg_path.nil?
+    sh("bundle exec xcversion simulators --install='iOS #{options[:ios]}'")
+  else
+    sh("hdiutil attach '#{sim_dmg_path}'")
+    sh("sudo installer -pkg '#{sim_pkg_path}' -target /")
+    mount_point = sh("hdiutil attach '#{sim_dmg_path}' | grep Volumes | cut -f 3").strip
+    sh("hdiutil detach '#{mount_point}'")
   end
 end
 

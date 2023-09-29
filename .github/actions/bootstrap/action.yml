@@ -7,10 +7,6 @@ runs:
       shell: bash
     - run: echo "$HOME/.mint/bin" >> $GITHUB_PATH
       shell: bash
-    - uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: 3.1
-        bundler-cache: true
     - name: Cache Mint
       uses: actions/cache@v3
       id: mint-cache
@@ -24,16 +20,12 @@ runs:
       with:
         path: |
           ~/Library/Caches/Homebrew/mint*
+          ~/Library/Caches/Homebrew/vale*
           ~/Library/Caches/Homebrew/xcparse*
           ~/Library/Caches/Homebrew/sonar-scanner*
         key: ${{ env.IMAGE }}-brew-${{ hashFiles('**/Brewfile.lock.json') }}
         restore-keys: ${{ env.IMAGE }}-brew-
-    - name: Cache SPM
-      uses: actions/cache@v3
-      id: spm-cache
-      with:
-        path: ~/Library/Developer/Xcode/DerivedData/**/SourcePackages/checkouts
-        key: ${{ env.IMAGE }}-spm-${{ hashFiles('**/Package.resolved') }}
-        restore-keys: ${{ env.IMAGE }}-spm-
+    - uses: ./.github/actions/ruby-cache
+    - uses: ./.github/actions/xcode-cache
     - run: ./Scripts/bootstrap.sh
       shell: bash
