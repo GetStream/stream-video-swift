@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */; };
 		401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */; };
 		401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */; };
 		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
@@ -874,6 +875,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserverTests.swift; sourceTree = "<group>"; };
 		4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser.swift; sourceTree = "<group>"; };
 		401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser_Tests.swift; sourceTree = "<group>"; };
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
@@ -2222,6 +2224,7 @@
 				84BB570D2A20D7BB0002C123 /* Mapping_Tests.swift */,
 				84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */,
 				845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */,
+				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -4214,6 +4217,7 @@
 				8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */,
 				84D6494729E9F2D0002CA428 /* WebRTCClient_Tests.swift in Sources */,
 				82E3BA532A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
+				400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */,
 				8414081529F28FFC00FF2D7C /* CallSettings_Tests.swift in Sources */,
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
