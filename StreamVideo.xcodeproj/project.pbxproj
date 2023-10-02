@@ -4601,8 +4601,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideo/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -4659,8 +4659,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideoSwiftUI/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -4718,7 +4718,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideoUIKit/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoUIKit/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -4776,7 +4776,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/DemoApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -4821,7 +4821,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = DemoAppUIKit/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/DemoAppUIKit/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -4881,7 +4881,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = CallIntent/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/CallIntent/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -4911,7 +4911,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = ScreenSharing/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ScreenSharing/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -4984,7 +4984,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = CallIntent/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/CallIntent/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -5015,7 +5015,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = CallIntent/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/CallIntent/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = CallIntent;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -5176,7 +5176,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/DemoApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -5224,7 +5224,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = DemoApp/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/DemoApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -5266,7 +5266,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = ScreenSharing/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ScreenSharing/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -5302,7 +5302,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = ScreenSharing/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/ScreenSharing/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = ScreenSharing;
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				IPHONEOS_DEPLOYMENT_TARGET = 14.0;
@@ -5341,7 +5341,7 @@
 				DEVELOPMENT_TEAM = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = DemoAppUIKit/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/DemoAppUIKit/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -5387,7 +5387,7 @@
 				"DEVELOPMENT_TEAM[sdk=iphoneos*]" = EHV7XZLAHA;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = DemoAppUIKit/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/DemoAppUIKit/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -5431,8 +5431,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideo/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -5469,8 +5469,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideo/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideo/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -5543,8 +5543,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideoSwiftUI/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -5580,8 +5580,8 @@
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
-				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideoSwiftUI/Info.plist;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoSwiftUI/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -5657,7 +5657,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideoUIKit/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoUIKit/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
@@ -5694,7 +5694,7 @@
 				DYLIB_CURRENT_VERSION = 1;
 				DYLIB_INSTALL_NAME_BASE = "@rpath";
 				GENERATE_INFOPLIST_FILE = YES;
-				INFOPLIST_FILE = Sources/StreamVideoUIKit/Info.plist;
+				INFOPLIST_FILE = "$(SRCROOT)/Sources/StreamVideoUIKit/Info.plist";
 				INFOPLIST_KEY_NSHumanReadableCopyright = "";
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
