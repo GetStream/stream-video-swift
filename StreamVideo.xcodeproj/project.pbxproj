@@ -5935,7 +5935,7 @@
 			repositoryURL = "https://github.com/webrtc-sdk/Specs";
 			requirement = {
 				kind = exactVersion;
-				version = 114.5735.4;
+				version = 114.5735.8;
 			};
 		};
 		84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */ = {
