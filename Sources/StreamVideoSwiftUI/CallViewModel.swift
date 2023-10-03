@@ -586,6 +586,10 @@ open class CallViewModel: ObservableObject {
                         }
                     }
                 } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
+                    guard participants.count < 25 else {
+                        log.debug("Skipping participant events for big calls")
+                        return
+                    }
                     self.participantEvent = participantEvent
                     if participantEvent.action == .leave &&
                         callParticipants.count == 1

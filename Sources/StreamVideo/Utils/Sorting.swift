@@ -7,7 +7,7 @@ import Foundation
 public typealias StreamSortComparator<Value> = (Value, Value) -> ComparisonResult
 
 public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
-    pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
+    pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, joinedAt, userId
 ]
 
 public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
@@ -62,6 +62,10 @@ public var roles: StreamSortComparator<CallParticipant> = { (p1, p2) in
 
 public var userId: StreamSortComparator<CallParticipant> = { (p1, p2) in
     p1.id >= p2.id ? .orderedDescending : .orderedAscending
+}
+
+public var joinedAt: StreamSortComparator<CallParticipant> = { (p1, p2) in
+    p1.joinedAt <= p2.joinedAt ? .orderedDescending : .orderedAscending
 }
 
 public extension Sequence {

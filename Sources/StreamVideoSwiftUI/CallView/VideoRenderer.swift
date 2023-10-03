@@ -105,6 +105,8 @@ public class VideoRenderer: RTCMTLVideoView {
         self.track?.trackId
     }
     
+    private var viewSize: CGSize?
+    
     public func add(track: RTCVideoTrack) {
         queue.sync {
             if track.trackId == self.track?.trackId && track.readyState == .live {
@@ -118,6 +120,15 @@ public class VideoRenderer: RTCMTLVideoView {
             self.track = track
             track.add(self)
         }
+    }
+    
+    public override func layoutSubviews() {
+        super.layoutSubviews()
+        let scale = UIScreen.main.scale
+        self.viewSize = CGSize(
+            width: self.bounds.size.width * scale,
+            height: self.bounds.size.height * scale
+        )
     }
     
     public override func renderFrame(_ frame: RTCVideoFrame?) {
@@ -171,15 +182,11 @@ extension VideoRenderer {
         if let track = participant.track {
             log.debug("adding track to a view \(self)")
             self.add(track: track)
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.01) {
+            DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
+                guard let self else { return }
                 let prev = participant.trackSize
-                let scale = UIScreen.main.scale
-                let newSize = CGSize(
-                    width: self.bounds.size.width * scale,
-                    height: self.bounds.size.height * scale
-                )
-                if prev != newSize {
-                    onTrackSizeUpdate(newSize, participant)
+                if let viewSize, prev != viewSize {
+                    onTrackSizeUpdate(viewSize, participant)
                 }
             }
         }

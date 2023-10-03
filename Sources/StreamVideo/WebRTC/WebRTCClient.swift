@@ -24,7 +24,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 if !scheduledUpdate {
                     scheduledUpdate = true
                     Task {
-                        try? await Task.sleep(nanoseconds: 250_000_000)
+                        try? await Task.sleep(nanoseconds: participantUpdatesDelay)
                         lastUpdate = Date().timeIntervalSince1970
                         continuation?.yield([true])
                         scheduledUpdate = false
@@ -105,6 +105,19 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             screensharingTracks = [:]
             connectionState = .disconnected(reason: .user)
             continuation?.finish()
+        }
+        
+        private var participantUpdatesDelay: UInt64 {
+            let count = callParticipants.count
+            if count < 16 {
+                return 0
+            } else if count < 50 {
+                return 250_000_000
+            } else if count < 100 {
+                return 500_000_000
+            } else {
+                return 1_000_000_000
+            }
         }
     }
     
