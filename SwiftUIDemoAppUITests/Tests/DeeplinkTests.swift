@@ -26,6 +26,8 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_associationFile_validationWasSuccessful() throws {
+        linkToScenario(withId: 2855)
+        
         let contentData = try Data(contentsOf: .init(string: "https://getstream.io/.well-known/apple-app-site-association")!)
         let content = try XCTUnwrap(String(data: contentData, encoding: .utf8))
             .trimmingCharacters(in: .whitespacesAndNewlines)
@@ -38,10 +40,13 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_universalLink_production_joinsExpectedCall() {
-        WHEN("") {
+        linkToScenario(withId: 2856)
+        
+        WHEN("user navigates to the app through deeplink") {
             Safari()
                 .open(MockDeeplink.production)
-                .tapButton("OPEN")
+                .alertHandler()
+                .tapOnOpenButton()
         }
         THEN("user joins the the specified call") {
             userRobot
@@ -51,10 +56,12 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_customSchemeURL_joinsExpectedCall() {
-        WHEN("User opens a URL that contains a custom scheme") {
+        linkToScenario(withId: 2857)
+        
+        WHEN("user opens a URL that contains a custom scheme") {
             Safari()
                 .open(MockDeeplink.customScheme)
-                .tapButton("Open")
+                .tapOnOpenButton()
         }
         THEN("user joins the the specified call") {
             userRobot
