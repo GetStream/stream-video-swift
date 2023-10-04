@@ -175,6 +175,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var tempSubscriber: PeerConnection?
     private var currentScreenhsareType: ScreensharingType?
 
+    @Injected(\.thermalStateObserver) private var thermalStateObserver
+
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
     var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
     var onParticipantCountUpdated: ((UInt32) -> ())?
@@ -965,7 +967,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                     log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)", subsystems: .webRTC)
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
 
-                    let scale = ThermalStateObserver.shared.scale
+                    let scale = thermalStateObserver.scale
                     dimension.height = UInt32(value.trackSize.height / scale)
                     dimension.width = UInt32(value.trackSize.width / scale)
                     let trackSubscriptionDetails = trackSubscriptionDetails(

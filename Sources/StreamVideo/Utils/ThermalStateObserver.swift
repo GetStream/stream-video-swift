@@ -9,11 +9,20 @@ extension LogSubsystem {
     public static let thermalState = Self(rawValue: 1 << 6)
 }
 
-public final class ThermalStateObserver: ObservableObject {
-    public static let shared = ThermalStateObserver()
+public protocol ThermalStateObserving: ObservableObject {
+
+    var state: ProcessInfo.ThermalState { get }
+
+    var statePublisher: AnyPublisher<ProcessInfo.ThermalState, Never> { get }
+
+    var scale: CGFloat { get }
+}
+
+final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
+    static let shared = ThermalStateObserver()
 
     /// Published property to observe the thermal state
-    @Published public private(set) var state: ProcessInfo.ThermalState {
+    @Published private(set) var state: ProcessInfo.ThermalState {
         didSet {
             // Determine the appropriate log level based on the thermal state
             let logLevel: LogLevel
@@ -37,11 +46,13 @@ public final class ThermalStateObserver: ObservableObject {
         }
     }
 
+    var statePublisher: AnyPublisher<ProcessInfo.ThermalState, Never> { $state.eraseToAnyPublisher() }
+
     /// Cancellable object to manage notifications
     private var notificationCenterCancellable: AnyCancellable?
     private var thermalStateProvider: () -> ProcessInfo.ThermalState
 
-    convenience init() {
+    private convenience init() {
         self.init { ProcessInfo.processInfo.thermalState }
     }
     
@@ -62,7 +73,7 @@ public final class ThermalStateObserver: ObservableObject {
     }
 
     /// Depending on the Device's thermal state we adapt the request participants resolution.
-    public var scale: CGFloat {
+    var scale: CGFloat {
         // Determine the appropriate scaling factor based on the thermal state
         switch state {
         case .nominal:
@@ -75,6 +86,23 @@ public final class ThermalStateObserver: ObservableObject {
             return 4
         @unknown default:
             return 1
+        }
+    }
+}
+
+/// Provides the default value of the `Appearance` class.
+public struct ThermalStateObserverKey: InjectionKey {
+    public static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
+}
+
+extension InjectedValues {
+
+    public var thermalStateObserver: any ThermalStateObserving {
+        get {
+            Self[ThermalStateObserverKey.self]
+        }
+        set {
+            Self[ThermalStateObserverKey.self] = newValue
         }
     }
 }

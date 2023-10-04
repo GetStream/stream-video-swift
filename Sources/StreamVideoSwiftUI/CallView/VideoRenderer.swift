@@ -7,6 +7,7 @@ import StreamVideo
 import SwiftUI
 import WebRTC
 import MetalKit
+import Combine
 
 public struct LocalVideoView<Factory: ViewFactory>: View {
     
@@ -60,7 +61,7 @@ public struct VideoRendererView: UIViewRepresentable {
     public typealias UIViewType = VideoRenderer
     
     @Injected(\.utils) var utils
-    
+
     var id: String
     var size: CGSize
     var contentMode: UIView.ContentMode
@@ -93,6 +94,8 @@ public struct VideoRendererView: UIViewRepresentable {
 
 public class VideoRenderer: RTCMTLVideoView {
     
+    @Injected(\.thermalStateObserver) private var thermalStateObserver
+
     let queue = DispatchQueue(label: "video-track")
     
     weak var track: RTCVideoTrack?
@@ -100,14 +103,45 @@ public class VideoRenderer: RTCMTLVideoView {
     var feedFrames: ((CMSampleBuffer) -> ())?
     
     private var skipNextFrameRendering = true
-    
-    var trackId: String? {
-        self.track?.trackId
+    private var cancellable: AnyCancellable?
+
+    private(set) var preferredFramesPerSecond: Int = UIScreen.main.maximumFramesPerSecond {
+        didSet {
+            metalView?.preferredFramesPerSecond = preferredFramesPerSecond
+            log.debug("🔄 preferredFramesPerSecond was updated to \(preferredFramesPerSecond).")
+        }
     }
-    
+    private lazy var metalView: MTKView? = { subviews.compactMap { $0 as? MTKView }.first }()
+    var trackId: String? { self.track?.trackId }
     private var viewSize: CGSize?
-    
-    private lazy var scale: CGFloat = UIScreen.main.scale
+    private var scale: CGFloat { thermalStateObserver.scale }
+
+    @available(*, unavailable)
+    required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
+    public override init(frame: CGRect) {
+        super.init(frame: frame)
+        cancellable = thermalStateObserver
+            .statePublisher
+            .sink { [weak self] in
+                switch $0 {
+                case .nominal, .fair:
+                    self?.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+                case .serious:
+                    self?.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.5)
+                case .critical:
+                    self?.preferredFramesPerSecond = Int(Double(UIScreen.main.maximumFramesPerSecond) * 0.4)
+                @unknown default:
+                    self?.preferredFramesPerSecond = UIScreen.main.maximumFramesPerSecond
+                }
+            }
+    }
+
+    deinit {
+        cancellable?.cancel()
+        log.debug("Deinit of video view")
+        track?.remove(self)
+    }
     
     public func add(track: RTCVideoTrack) {
         queue.sync {
@@ -166,11 +200,6 @@ public class VideoRenderer: RTCMTLVideoView {
                 feedFrames(sampleBuffer)
             }
         }
-    }
-    
-    deinit {
-        log.debug("Deinit of video view")
-        track?.remove(self)
     }
 }
 

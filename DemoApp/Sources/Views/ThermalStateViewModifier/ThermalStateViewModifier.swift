@@ -9,13 +9,13 @@ import StreamVideoSwiftUI
 
 struct ThermalStateViewModifier: ViewModifier {
 
-    @StateObject private var thermalStateObserver: ThermalStateObserver = .shared
+    @Injected(\.thermalStateObserver) var thermalStateObserver
     @State private var toast: Toast? = nil
 
     func body(content: Content) -> some View {
         content
             .toastView(toast: $toast)
-            .onReceive(thermalStateObserver.$state) { state in
+            .onReceive(thermalStateObserver.statePublisher) { state in
                 switch state {
                 case .nominal:
                     toast = nil
