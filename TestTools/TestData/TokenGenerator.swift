@@ -47,9 +47,7 @@ class TokenGenerator {
         }
         #endif
         
-        let secret = ProcessInfo.processInfo.environment["STREAM_VIDEO_SECRET"]
-        guard let secret = secret else { return nil }
-        
+        let secret = ProcessInfo.processInfo.environment["STREAM_VIDEO_SECRET"]!
         let privateKey = SymmetricKey(data: secret.data(using: .utf8)!)
         
         guard let headerJSONData = try? JSONEncoder().encode(Header()) else { return nil }

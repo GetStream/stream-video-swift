@@ -2,6 +2,7 @@ coverage_service: sonarqube_xml
 xcodeproj: StreamVideo.xcodeproj
 scheme: StreamVideo
 configuration: Test
+build_directory: derived_data/
 source_directory: Sources/
 output_directory: reports
 ignore:

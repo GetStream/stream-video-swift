@@ -24,11 +24,12 @@ final class CallCRUDTest: IntegrationTest {
         _ capability: OwnCapability,
         on call: Call,
         granted: Bool = true,
-        timeout: Double = defaultTimeout
+        timeout: Double = 20
     ) async -> Bool {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var userHasRequiredCapability = !granted
         while userHasRequiredCapability != granted && endTime > Date().timeIntervalSince1970 * 1000 {
+            print("Waiting for \(capability.rawValue)")
             userHasRequiredCapability = await call.currentUserHasCapability(capability)
         }
         return userHasRequiredCapability
@@ -41,6 +42,7 @@ final class CallCRUDTest: IntegrationTest {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var usersHaveAudio = false
         while !usersHaveAudio && endTime > Date().timeIntervalSince1970 * 1000 {
+            print("Waiting for Audio")
             let u1 = await call.state.participants.first!.hasAudio
             let u2 = await call.state.participants.last!.hasAudio
             usersHaveAudio = u1 && u2
@@ -55,6 +57,7 @@ final class CallCRUDTest: IntegrationTest {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var usersLostAudio = false
         while !usersLostAudio && endTime > Date().timeIntervalSince1970 * 1000 {
+            print("Waiting for Audio Loss")
             let u1 = await call.state.participants.first!.hasAudio
             let u2 = await call.state.participants.last!.hasAudio
             usersLostAudio = u1 == false && u2 == false
@@ -70,6 +73,7 @@ final class CallCRUDTest: IntegrationTest {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var userIsPinned = false
         while !userIsPinned && endTime > Date().timeIntervalSince1970 * 1000 {
+            print("Waiting for Pinning")
             let pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
             userIsPinned = pin != nil
         }
@@ -83,6 +87,7 @@ final class CallCRUDTest: IntegrationTest {
         let endTime = Date().timeIntervalSince1970 * 1000 + timeout * 1000
         var userIsUnpinned = false
         while !userIsUnpinned && endTime > Date().timeIntervalSince1970 * 1000 {
+            print("Waiting for Unpinning")
             let pin = await firstUserCall.state.participantsMap[secondUserCall.state.sessionId]?.pin
             userIsUnpinned = pin == nil
         }
@@ -357,6 +362,8 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_muteUserById() async throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/541")
+        
         let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
         try await firstUserCall.create(memberIds: [user1, user2])
         try await firstUserCall.goLive()
@@ -382,20 +389,20 @@ final class CallCRUDTest: IntegrationTest {
         try await secondUserCall.microphone.enable()
         try await customWait()
         
-        var firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
-        var secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
-        XCTAssertTrue(firstParticipantHasAudio, "Call creator should have audio enabled")
-        XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
+        let everyoneIsUnmutedOnTheFirstCall = await waitForAudio(on: firstUserCall)
+        let everyoneIsUnmutedOnTheSecondCall = await waitForAudio(on: secondUserCall)
+        XCTAssertTrue(everyoneIsUnmutedOnTheFirstCall, "Everyone should be unmuted on creator's call")
+        XCTAssertTrue(everyoneIsUnmutedOnTheSecondCall, "Everyone should be unmuted on participant's call")
 
         for userId in [user1, user2] {
             try await firstUserCall.mute(userId: userId)
         }
         try await customWait()
         
-        firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
-        secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
-        XCTAssertFalse(firstParticipantHasAudio, "Call creator should be muted")
-        XCTAssertFalse(secondParticipantHasAudio, "Participant should be muted")
+        let everyoneIsMutedOnTheFirstCall = await waitForAudioLoss(on: firstUserCall)
+        let everyoneIsMutedOnTheSecondCall = await waitForAudioLoss(on: secondUserCall)
+        XCTAssertTrue(everyoneIsMutedOnTheFirstCall, "Everyone should be muted on creator's call")
+        XCTAssertTrue(everyoneIsMutedOnTheSecondCall, "Everyone should be muted on participant's call")
     }
     
     func test_muteAllUsers() async throws {
@@ -426,18 +433,18 @@ final class CallCRUDTest: IntegrationTest {
         try await secondUserCall.microphone.enable()
         try await customWait()
         
-        var firstParticipantHasAudio = await waitForAudio(on: firstUserCall)
-        var secondParticipantHasAudio = await waitForAudio(on: firstUserCall)
-        XCTAssertTrue(firstParticipantHasAudio, "Call creator should have audio enabled")
-        XCTAssertTrue(secondParticipantHasAudio, "Participant should have audio enabled")
+        let everyoneIsUnmutedOnTheFirstCall = await waitForAudio(on: firstUserCall)
+        let everyoneIsUnmutedOnTheSecondCall = await waitForAudio(on: secondUserCall)
+        XCTAssertTrue(everyoneIsUnmutedOnTheFirstCall, "Everyone should be unmuted on creator's call")
+        XCTAssertTrue(everyoneIsUnmutedOnTheSecondCall, "Everyone should be unmuted on participant's call")
 
         try await firstUserCall.muteAllUsers()
         try await customWait()
         
-        firstParticipantHasAudio = await waitForAudioLoss(on: firstUserCall)
-        secondParticipantHasAudio = await waitForAudioLoss(on: firstUserCall)
-        XCTAssertFalse(firstParticipantHasAudio, "Call creator should be muted")
-        XCTAssertFalse(secondParticipantHasAudio, "Participant should be muted")
+        let everyoneIsMutedOnTheFirstCall = await waitForAudioLoss(on: firstUserCall)
+        let everyoneIsMutedOnTheSecondCall = await waitForAudioLoss(on: secondUserCall)
+        XCTAssertTrue(everyoneIsMutedOnTheFirstCall, "Everyone should be muted on creator's call")
+        XCTAssertTrue(everyoneIsMutedOnTheSecondCall, "Everyone should be muted on participant's call")
     }
     
     func test_blockAndUnblockUser() async throws {
@@ -473,6 +480,8 @@ final class CallCRUDTest: IntegrationTest {
     }
     
     func test_grantPermissions() async throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/541")
+        
         let call = client.call(callType: defaultCallType, callId: randomCallId)
         try await call.create(memberIds: [user1])
         

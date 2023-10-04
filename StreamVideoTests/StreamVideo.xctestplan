@@ -10,9 +10,20 @@
   ],
   "defaultOptions" : {
     "codeCoverage" : false,
+    "defaultTestExecutionTimeAllowance" : 100,
     "environmentVariableEntries" : [
-
-    ]
+      {
+        "key" : "STREAM_VIDEO_SECRET",
+        "value" : "$(STREAM_VIDEO_SECRET)"
+      }
+    ],
+    "maximumTestExecutionTimeAllowance" : 100,
+    "targetForVariableExpansion" : {
+      "containerPath" : "container:StreamVideo.xcodeproj",
+      "identifier" : "84F737F3287C13AD00A363F4",
+      "name" : "StreamVideoTests"
+    },
+    "testTimeoutsEnabled" : true
   },
   "testTargets" : [
     {
