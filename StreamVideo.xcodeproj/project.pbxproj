@@ -84,6 +84,8 @@
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		40B713692A275F1400D1FE67 /* AppState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C5287EB55F004E180E /* AppState.swift */; };
 		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
+		40D6ADD92ACD9E5900EF5336 /* SerialActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADD82ACD9E5900EF5336 /* SerialActor.swift */; };
+		40D6ADDB2ACDA1BD00EF5336 /* SerialActor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDA2ACDA1BD00EF5336 /* SerialActor_Tests.swift */; };
 		40D7E7962AB1C9590017095E /* ThermalStateViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D7E7952AB1C9580017095E /* ThermalStateViewModifier.swift */; };
 		40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946402AA5ECEF00C8861B /* CodeScanner.swift */; };
 		40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
@@ -907,6 +909,8 @@
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
 		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
+		40D6ADD82ACD9E5900EF5336 /* SerialActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor.swift; sourceTree = "<group>"; };
+		40D6ADDA2ACDA1BD00EF5336 /* SerialActor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor_Tests.swift; sourceTree = "<group>"; };
 		40D7E7952AB1C9580017095E /* ThermalStateViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateViewModifier.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
 		40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoQRCodeScannerButton.swift; sourceTree = "<group>"; };
@@ -2230,6 +2234,7 @@
 				84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */,
 				845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */,
 				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
+				40D6ADDA2ACDA1BD00EF5336 /* SerialActor_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2684,6 +2689,7 @@
 				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
 				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
+				40D6ADD82ACD9E5900EF5336 /* SerialActor.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -4055,6 +4061,7 @@
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84BAD7822A6C013100733156 /* BroadcastScreenCapturer.swift in Sources */,
 				84DC38C529ADFCFD00946713 /* GetOrCreateCallRequest.swift in Sources */,
+				40D6ADD92ACD9E5900EF5336 /* SerialActor.swift in Sources */,
 				8479E74429EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift in Sources */,
 				84C4003F29E3F446007B69C2 /* WSCallEvent.swift in Sources */,
 				84DC38C429ADFCFD00946713 /* MemberResponse.swift in Sources */,
@@ -4208,6 +4215,7 @@
 				84F58B7A29EE972A00010C4C /* WebSocketPingController_Tests.swift in Sources */,
 				8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */,
 				84F58B8F29EEB32700010C4C /* WebSocketPingController_Mock.swift in Sources */,
+				40D6ADDB2ACDA1BD00EF5336 /* SerialActor_Tests.swift in Sources */,
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
