@@ -70,6 +70,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                                 customData: [:],
                                 call: call
                             )
+                            .visibilityObservation(in: geometry.frame(in: .global)) { onChangeTrackVisibility(participant, $0) }
                             .adjustVideoFrame(to: thumbnailSize, ratio: 1)
                             .cornerRadius(8)
                             .accessibility(identifier: "spotlightParticipantView")
