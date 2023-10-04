@@ -15,11 +15,27 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     actor State: ObservableObject {
+        enum Constants {
+            static let lowParticipantDelay: UInt64 = 250_000_000
+            static let mediumParticipantDelay: UInt64 = 500_000_000
+            static let highParticipantDelay: UInt64 = 1_000_000_000
+        }
+        private var scheduledUpdate = false
         private var cancellables = Set<AnyCancellable>()
+        private(set) var lastUpdate: TimeInterval = Date().timeIntervalSince1970
         var connectionState = ConnectionState.disconnected(reason: nil)
         @Published var callParticipants = [String: CallParticipant]() {
             didSet {
-                continuation?.yield([true])
+                if !scheduledUpdate {
+                    scheduledUpdate = true
+                    Task {
+                        try? await Task.sleep(nanoseconds: participantUpdatesDelay)
+                        lastUpdate = Date().timeIntervalSince1970
+                        continuation?.yield([true])
+                        scheduledUpdate = false
+                    }
+                }
+
             }
         }
         var tracks = [String: RTCVideoTrack]()
@@ -94,6 +110,19 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             screensharingTracks = [:]
             connectionState = .disconnected(reason: .user)
             continuation?.finish()
+        }
+        
+        private var participantUpdatesDelay: UInt64 {
+            let count = callParticipants.count
+            if count < 16 {
+                return 0
+            } else if count < 50 {
+                return Constants.lowParticipantDelay
+            } else if count < 100 {
+                return Constants.mediumParticipantDelay
+            } else {
+                return Constants.highParticipantDelay
+            }
         }
     }
     
@@ -912,9 +941,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let connectionState = await state.connectionState
         if connectionState == .connected && !tracks.isEmpty {
             request.tracks = tracks
-            let connectURL = signalChannel?.connectURL
+            let lastUpdate = await state.lastUpdate
             try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
-                self?.sfuChanged(connectURL) == false
+                let currentUpdate = await self?.state.lastUpdate
+                return currentUpdate == lastUpdate
             }) {
                 _ = try await signalService.updateSubscriptions(
                     updateSubscriptionsRequest: request

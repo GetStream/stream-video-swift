@@ -29,7 +29,7 @@ func executeTask<Output>(
         if retries < retryPolicy.maxRetries && shouldRetryError(error) {
             let delay = UInt64(retryPolicy.delay(retries) * 1_000_000_000)
             try await Task.sleep(nanoseconds: delay)
-            if retryPolicy.runPrecondition() {
+            if await retryPolicy.runPrecondition() {
                 return try await executeTask(
                     retryPolicy: retryPolicy,
                     task: task,
@@ -49,7 +49,7 @@ func executeTask<Output>(
 struct RetryPolicy {
     let maxRetries: Int
     let delay: (Int) -> TimeInterval
-    var runPrecondition: () -> Bool = { true }
+    var runPrecondition: () async -> Bool = { true }
 }
 
 extension RetryPolicy {
@@ -63,7 +63,7 @@ extension RetryPolicy {
         )
     }
     
-    static func neverGonnaGiveYouUp(_ condition: @escaping () -> Bool) -> RetryPolicy {
+    static func neverGonnaGiveYouUp(_ condition: @escaping () async -> Bool) -> RetryPolicy {
         RetryPolicy(
             maxRetries: 30,
             delay: { delay(retries: $0) },
