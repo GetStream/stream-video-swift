@@ -44,13 +44,11 @@ The video participants view slot presents the grid of users that are in the call
 public func makeVideoParticipantsView(
     participants: [CallParticipant],
     availableSize: CGSize,
-    onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
     onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
 ) -> some View {
     VideoParticipantsView(
         participants: participants,
         availableSize: availableSize,
-        onViewRendering: onViewRendering,
         onChangeTrackVisibility: onChangeTrackVisibility
     )
 }
@@ -60,7 +58,6 @@ In the method, the following parameters are provided:
 
 - `participants` - the list of participants.
 - `availableSize` - the available size for the participants view.
-- `onViewRendering` - called when the view is rendered. This callback should be used to attach a track to the view.
 - `onChangeTrackVisibility` - callback when the track changes its visibility.
 
 #### Video Participant View

@@ -43,7 +43,6 @@ public protocol ViewFactory: AnyObject {
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
     ///  - availableSize: the size available for rendering.
-    ///  - onViewRendering: called when the video view is rendered.
     ///  - onChangeTrackVisibility: called when a track changes its visibility.
     /// - Returns: view shown in the video participants slot.
     func makeVideoParticipantsView(

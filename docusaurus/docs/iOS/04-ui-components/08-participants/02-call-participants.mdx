@@ -24,7 +24,6 @@ VideoParticipantsView(
     viewFactory: DefaultViewFactory.shared,
     viewModel: viewModel,
     availableSize: availableSize,
-    onViewRendering: onViewRendering,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```
@@ -33,7 +32,6 @@ The parameters needed for this component are as follows:
 - `viewFactory` - the view factory used for creation of the views
 - `viewModel` - the `CallViewModel`
 - `availableSize` - the available size for the view
-- `onViewRendering` - called when the view is rendered or updated
 - `onChangeTrackVisibility` - called when the track changes its visibility
 
 If you are using our `ViewFactory`, you can swap this component with your implementation by implementing the following method:
@@ -42,14 +40,12 @@ If you are using our `ViewFactory`, you can swap this component with your implem
 public func makeVideoParticipantsView(
     viewModel: CallViewModel,
     availableSize: CGSize,
-    onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
     onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
 ) -> some View {
     CustomVideoParticipantsView(
         viewFactory: self,
         viewModel: viewModel,
         availableSize: availableSize,
-        onViewRendering: onViewRendering,
         onChangeTrackVisibility: onChangeTrackVisibility
     )
 }
@@ -68,7 +64,6 @@ ParticipantsGridLayout(
     pinnedParticipant: $viewModel.pinnedParticipant,
     availableSize: availableSize,
     orientation: orientation,
-    onViewRendering: onViewRendering,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```
@@ -84,7 +79,6 @@ ParticipantsSpotlightLayout(
     participants: Array(viewModel.participants.dropFirst()),
     size: availableSize,
     pinnedParticipant: $viewModel.pinnedParticipant,
-    onViewRendering: onViewRendering,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```
@@ -99,7 +93,6 @@ ParticipantsFullScreenLayout(
     participant: first,
     size: availableSize,
     pinnedParticipant: $viewModel.pinnedParticipant,
-    onViewRendering: onViewRendering,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```
