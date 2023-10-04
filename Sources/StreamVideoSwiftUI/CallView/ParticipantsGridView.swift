@@ -8,37 +8,40 @@ import WebRTC
 
 @MainActor
 struct ParticipantsGridView<Factory: ViewFactory>: View {
-    
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
     var availableSize: CGSize
     var isPortrait: Bool
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
-    
+
     var body: some View {
-        ScrollView {
-            if #available(iOS 14.0, *) {
-                LazyVGrid(
-                    columns: [
-                        .init(.adaptive(minimum: size.width, maximum: size.width), spacing: 0)
-                    ],
-                    spacing: 0
-                ) {
-                    participantsContent
-                }
-                .frame(width: availableSize.width)
-            } else {
-                VStack {
-                    participantsContent
+        GeometryReader { geometryProxy in
+            ScrollView {
+                if #available(iOS 14.0, *) {
+                    LazyVGrid(
+                        columns: [
+                            .init(.adaptive(minimum: size.width, maximum: size.width), spacing: 0)
+                        ],
+                        spacing: 0
+                    ) {
+                        participantsContent(geometryProxy.frame(in: .global))
+                    }
+                    .frame(width: availableSize.width)
+                } else {
+                    VStack {
+                        participantsContent(geometryProxy.frame(in: .global))
+                    }
                 }
             }
         }
         .edgesIgnoringSafeArea(.all)
         .accessibility(identifier: "gridScrollView")
     }
-    
-    private var participantsContent: some View {
+
+    @ViewBuilder
+    private func participantsContent(_ bounds: CGRect) -> some View {
         ForEach(participants) { participant in
             viewFactory.makeVideoParticipantView(
                 participant: participant,
@@ -57,17 +60,13 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                     showAllInfo: true
                 )
             )
-            .onAppear {
-                log.debug("Participant \(participant.name) is visible")
-                participantVisibilityChanged(participant, true)
-            }
-            .onDisappear {
-                log.debug("Participant \(participant.name) is not visible")
-                participantVisibilityChanged(participant, false)
+            .visibilityObservation(in: bounds) {
+                log.debug("Participant \(participant.name) is \($0 ? "visible" : "not visible.")")
+                participantVisibilityChanged(participant, $0)
             }
         }
     }
-        
+
     var ratio: CGFloat {
         if isPortrait {
             let width = availableSize.width / 2
@@ -79,7 +78,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             return width / height
         }
     }
-    
+
     private var size: CGSize {
         if #available(iOS 14.0, *) {
             let dividerWidth: CGFloat = isPortrait ? 2 : 3

@@ -49,7 +49,6 @@ public protocol ViewFactory: AnyObject {
     func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableSize: CGSize,
-        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
     
@@ -195,14 +194,12 @@ extension ViewFactory {
     public func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableSize: CGSize,
-        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,
             viewModel: viewModel,
             availableSize: availableSize,
-            onViewRendering: onViewRendering,
             onChangeTrackVisibility: onChangeTrackVisibility
         )
     }
@@ -333,7 +330,7 @@ extension ViewFactory {
 }
 
 public class DefaultViewFactory: ViewFactory {
-    
+
     private init() { /* Private init. */ }
     
     public static let shared = DefaultViewFactory()

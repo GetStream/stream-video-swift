@@ -11,7 +11,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
     var availableSize: CGSize
-    var onViewRendering: (VideoRenderer, CallParticipant) -> Void
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
@@ -20,13 +19,11 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
         viewFactory: Factory,
         viewModel: CallViewModel,
         availableSize: CGSize,
-        onViewRendering: @escaping (VideoRenderer, CallParticipant) -> Void,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
         self.availableSize = availableSize
-        self.onViewRendering = onViewRendering
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
     

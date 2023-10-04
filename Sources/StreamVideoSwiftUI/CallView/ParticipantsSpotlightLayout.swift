@@ -53,39 +53,31 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                     showAllInfo: true
                 )
             )
-            .onAppear {
-                log.debug("Participant \(participant.name) is visible")
-                onChangeTrackVisibility(participant, true)
-            }
             .modifier(ParticipantChangeModifier(
                 participant: participant,
                 onChangeTrackVisibility: onChangeTrackVisibility)
             )
             
             ScrollView(.horizontal) {
-                HorizontalContainer {
-                    ForEach(participants) { participant in
-                        viewFactory.makeVideoParticipantView(
-                            participant: participant,
-                            id: participant.id,
-                            availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                            contentMode: .scaleAspectFill,
-                            customData: [:],
-                            call: call
-                        )
-                        .onAppear {
-                            onChangeTrackVisibility(participant, true)
+                GeometryReader { geometry in
+                    HorizontalContainer {
+                        ForEach(participants) { participant in
+                            viewFactory.makeVideoParticipantView(
+                                participant: participant,
+                                id: participant.id,
+                                availableSize: .init(width: thumbnailSize, height: thumbnailSize),
+                                contentMode: .scaleAspectFill,
+                                customData: [:],
+                                call: call
+                            )
+                            .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                            .cornerRadius(8)
+                            .accessibility(identifier: "spotlightParticipantView")
                         }
-                        .onDisappear {
-                            onChangeTrackVisibility(participant, false)
-                        }
-                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
-                        .cornerRadius(8)
-                        .accessibility(identifier: "spotlightParticipantView")
                     }
+                    .frame(height: thumbnailSize)
+                    .cornerRadius(8)
                 }
-                .frame(height: thumbnailSize)
-                .cornerRadius(8)
             }
             .padding()
             .padding(.bottom)

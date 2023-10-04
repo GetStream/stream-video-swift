@@ -19,6 +19,7 @@
 		401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
 		401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
+		401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */; };
 		4029A6222AB068EC0065DAFB /* CallButtonView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DD2A9E22B9004BE3DA /* CallButtonView.swift */; };
 		4029A6232AB068FC0065DAFB /* DemoControls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EC2A9E2A24004BE3DA /* DemoControls.swift */; };
 		4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */; };
@@ -886,6 +887,7 @@
 		401A64B02A9DF83200534ED1 /* TokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenResponse.swift; sourceTree = "<group>"; };
 		401A64B22A9DF86200534ED1 /* URL+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Convenience.swift"; sourceTree = "<group>"; };
 		401A64B42A9DF88C00534ED1 /* String+Unique.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Unique.swift"; sourceTree = "<group>"; };
+		401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier.swift; sourceTree = "<group>"; };
 		402EE12F2AA8861B00312632 /* DemoChatViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatViewModel.swift; sourceTree = "<group>"; };
 		4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
@@ -2332,6 +2334,7 @@
 				846E4AFC29D1DDE8003733AB /* LayoutMenuView.swift */,
 				846BA2AC2A9F602C001AD0AF /* SampleBufferVideoCallView.swift */,
 				8430FD212AB1AB4C007AA3E6 /* ParticipantPopoverView.swift */,
+				401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -4256,6 +4259,7 @@
 				84366E7C29C9FB6600287D14 /* VideoRendererFactory.swift in Sources */,
 				848FE1EF2A9DEAD700B45AC2 /* PiPHandler.swift in Sources */,
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,
+				401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
 				401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */,

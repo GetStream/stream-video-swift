@@ -159,18 +159,11 @@ public struct CallView<Factory: ViewFactory>: View {
         viewFactory.makeVideoParticipantsView(
             viewModel: viewModel,
             availableSize: size,
-            onViewRendering: handleViewRendering(_:participant:),
             onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
         )
     }
     
     private var participants: [CallParticipant] {
         viewModel.participants
-    }
-    
-    private func handleViewRendering(_ view: VideoRenderer, participant: CallParticipant) {
-        view.handleViewRendering(for: participant) { size, participant in
-            viewModel.updateTrackSize(size, for: participant)
-        }
     }
 }
