@@ -173,3 +173,20 @@ protocol AudioSessionProtocol {
 }
 
 extension AVAudioSession: AudioSessionProtocol {}
+
+/// Provides the default value of the `ThermalStateObserving` protocol.
+public struct MicrophoneCheckerKey: InjectionKey {
+    public static var currentValue: MicrophoneChecker = MicrophoneChecker()
+}
+
+extension InjectedValues {
+
+    public var microphoneChecker: MicrophoneChecker {
+        get {
+            Self[MicrophoneCheckerKey.self]
+        }
+        set {
+            Self[MicrophoneCheckerKey.self] = newValue
+        }
+    }
+}

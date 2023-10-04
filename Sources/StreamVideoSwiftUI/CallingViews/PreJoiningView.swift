@@ -10,8 +10,8 @@ import SwiftUI
 public struct LobbyView: View {
     
     @StateObject var viewModel: LobbyViewModel
-    @StateObject var microphoneChecker = MicrophoneChecker()
-    
+    @Injected(\.microphoneChecker) var microphoneChecker
+
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
