@@ -107,6 +107,8 @@ public class VideoRenderer: RTCMTLVideoView {
     
     private var viewSize: CGSize?
     
+    private lazy var scale: CGFloat = UIScreen.main.scale
+    
     public func add(track: RTCVideoTrack) {
         queue.sync {
             if track.trackId == self.track?.trackId && track.readyState == .live {
@@ -124,7 +126,6 @@ public class VideoRenderer: RTCMTLVideoView {
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        let scale = UIScreen.main.scale
         self.viewSize = CGSize(
             width: self.bounds.size.width * scale,
             height: self.bounds.size.height * scale

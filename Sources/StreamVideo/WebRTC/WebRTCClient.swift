@@ -15,6 +15,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     actor State: ObservableObject {
+        enum Constants {
+            static let lowParticipantDelay: UInt64 = 250_000_000
+            static let mediumParticipantDelay: UInt64 = 500_000_000
+            static let highParticipantDelay: UInt64 = 1_000_000_000
+        }
         private var scheduledUpdate = false
         private var cancellables = Set<AnyCancellable>()
         private(set) var lastUpdate: TimeInterval = Date().timeIntervalSince1970
@@ -112,11 +117,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             if count < 16 {
                 return 0
             } else if count < 50 {
-                return 250_000_000
+                return Constants.lowParticipantDelay
             } else if count < 100 {
-                return 500_000_000
+                return Constants.mediumParticipantDelay
             } else {
-                return 1_000_000_000
+                return Constants.highParticipantDelay
             }
         }
     }
