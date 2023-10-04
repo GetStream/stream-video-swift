@@ -2233,6 +2233,7 @@
 				84A4DCBA2A41DC6E00B1D1BF /* AsyncAssert.swift */,
 				845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */,
 				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
+				40D6ADDA2ACDA1BD00EF5336 /* SerialActor_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -2687,6 +2688,7 @@
 				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
 				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
+				40D6ADD82ACD9E5900EF5336 /* SerialActor.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -4058,6 +4060,7 @@
 				84F73856287C1A3400A363F4 /* CallType.swift in Sources */,
 				84BAD7822A6C013100733156 /* BroadcastScreenCapturer.swift in Sources */,
 				84DC38C529ADFCFD00946713 /* GetOrCreateCallRequest.swift in Sources */,
+				40D6ADD92ACD9E5900EF5336 /* SerialActor.swift in Sources */,
 				8479E74429EE89FC00169EF5 /* CallBroadcastingStoppedEvent.swift in Sources */,
 				84C4003F29E3F446007B69C2 /* WSCallEvent.swift in Sources */,
 				84DC38C429ADFCFD00946713 /* MemberResponse.swift in Sources */,
@@ -4211,6 +4214,7 @@
 				84F58B7A29EE972A00010C4C /* WebSocketPingController_Tests.swift in Sources */,
 				8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */,
 				84F58B8F29EEB32700010C4C /* WebSocketPingController_Mock.swift in Sources */,
+				40D6ADDB2ACDA1BD00EF5336 /* SerialActor_Tests.swift in Sources */,
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
