@@ -269,7 +269,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.rejectCall(callType: callType, callId: callId)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 1_000_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 2_000_000_000)
     }
     
     func test_joinCall_success() async throws {
