@@ -3,10 +3,10 @@
 //
 
 import Foundation
-import WebRTC
+@preconcurrency import WebRTC
 
-class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
-    
+final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
+
     let source: RTCVideoSource
     let filters: [VideoFilter]
     let context: CIContext
@@ -15,8 +15,6 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var sceneOrientation: UIInterfaceOrientation = .unknown
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
-
-    private lazy var serialActor = SerialActor()
 
     init(source: RTCVideoSource, filters: [VideoFilter], handleRotation: Bool = true) {
         self.source = source
@@ -35,28 +33,26 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
     
     func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
-        Task { [serialActor] in
-            await serialActor.enqueue { [weak self] in
-                guard let self else { return }
+        Task { [weak self] in
+            guard let self else { return }
 
-                var _buffer: RTCCVPixelBuffer?
+            var _buffer: RTCCVPixelBuffer?
 
-                if selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                    _buffer = buffer
-                    let imageBuffer = buffer.pixelBuffer
-                    CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-                    let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
-                    let outputImage = await filter(image: inputImage)
-                    CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-                    self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
-                }
-
-                let updatedFrame = handleRotation
-                ? adjustRotation(capturer, for: _buffer, frame: frame)
-                : frame
-
-                self.source.capturer(capturer, didCapture: updatedFrame)
+            if selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                _buffer = buffer
+                let imageBuffer = buffer.pixelBuffer
+                CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+                let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
+                let outputImage = await filter(image: inputImage)
+                CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+                self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
             }
+
+            let updatedFrame = handleRotation
+            ? adjustRotation(capturer, for: _buffer, frame: frame)
+            : frame
+
+            self.source.capturer(capturer, didCapture: updatedFrame)
         }
     }
     
@@ -113,5 +109,3 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
 }
 
 extension StreamVideoCaptureHandler: @unchecked Sendable {}
-extension RTCVideoFrame: @unchecked Sendable {}
-extension RTCVideoCapturer: @unchecked Sendable {}

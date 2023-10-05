@@ -50,22 +50,8 @@ struct VisibilityThresholdModifier: ViewModifier {
                 GeometryReader { geometry -> Color in
                     /// Convert the local frame of the content to a global frame.
                     let geometryInGlobal = geometry.frame(in: .global)
-                    /// Calculate the global minY, maxY, minX, and maxX of the content view.
-                    let minY = geometryInGlobal.minY
-                    let maxY = geometryInGlobal.maxY
-                    let minX = geometryInGlobal.minX
-                    let maxX = geometryInGlobal.maxX
 
-                    /// Calculate required height and width based on visibility threshold.
-                    let requiredHeight = geometry.size.height * threshold
-                    let requiredWidth = geometry.size.width * threshold
-
-                    /// Check if the content view is vertically within the parent's bounds.
-                    let verticalVisible = (minY + requiredHeight < bounds.maxY && minY > bounds.minY) ||
-                                          (maxY - requiredHeight > bounds.minY && maxY < bounds.maxY)
-                    /// Check if the content view is horizontally within the parent's bounds.
-                    let horizontalVisible = (minX + requiredWidth < bounds.maxX && minX > bounds.minX) ||
-                                            (maxX - requiredWidth > bounds.minX && maxX < bounds.maxX)
+                    let (verticalVisible, horizontalVisible) = calculateVisibilityInBothAxis(in: geometryInGlobal)
 
                     /// Update the isOnScreen state based on visibility calculations.
                     DispatchQueue.main.async {
@@ -76,6 +62,27 @@ struct VisibilityThresholdModifier: ViewModifier {
                     return Color.clear
                 }
             )
+    }
+
+    func calculateVisibilityInBothAxis(in rect: CGRect) -> (verticalVisible: Bool, horizontalVisible: Bool) {
+        /// Calculate the global minY, maxY, minX, and maxX of the content view.
+        let minY = rect.minY
+        let maxY = rect.maxY
+        let minX = rect.minX
+        let maxX = rect.maxX
+
+        /// Calculate required height and width based on visibility threshold.
+        let requiredHeight = rect.size.height * threshold
+        let requiredWidth = rect.size.width * threshold
+
+        /// Check if the content view is vertically within the parent's bounds.
+        let verticalVisible = (minY + requiredHeight < bounds.maxY && minY > bounds.minY) ||
+                              (maxY - requiredHeight > bounds.minY && maxY < bounds.maxY)
+        /// Check if the content view is horizontally within the parent's bounds.
+        let horizontalVisible = (minX + requiredWidth < bounds.maxX && minX > bounds.minX) ||
+                                (maxX - requiredWidth > bounds.minX && maxX < bounds.maxX)
+        
+        return (verticalVisible, horizontalVisible)
     }
 }
 
