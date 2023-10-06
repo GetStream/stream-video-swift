@@ -43,7 +43,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     participant: first,
                     call: viewModel.call,
                     participants: Array(viewModel.participants.dropFirst()),
-                    size: availableFrame.size,
+                    frame: availableFrame,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {

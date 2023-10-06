@@ -14,7 +14,7 @@ To use the `VideoCallParticipantView` component, embed it anywhere in your custo
 VideoCallParticipantView(
     participant: participant,
     id: id,
-    availableSize: availableSize,
+    availableFrame: availableFrame,
     contentMode: contentMode,
     customData: customData,
     call: call
@@ -23,7 +23,7 @@ VideoCallParticipantView(
     VideoCallParticipantModifier(
         participant: participant,
         call: call,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         ratio: ratio,
         showAllInfo: true
     )
@@ -36,7 +36,7 @@ If you are using our `ViewFactory`, these parameters are provided in the factory
 public func makeVideoParticipantView(
     participant: CallParticipant,
     id: String,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     contentMode: UIView.ContentMode,
     customData: [String: RawJSON],
     call: Call?
@@ -44,7 +44,7 @@ public func makeVideoParticipantView(
     VideoCallParticipantView(
         participant: participant,
         id: id,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         contentMode: contentMode,
         customData: customData,
         call: call
@@ -54,14 +54,14 @@ public func makeVideoParticipantView(
 public func makeVideoCallParticipantModifier(
     participant: CallParticipant,
     call: Call?,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     ratio: CGFloat,
     showAllInfo: Bool
 ) -> some ViewModifier {
     VideoCallParticipantModifier(
         participant: participant,
         call: call,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         ratio: ratio,
         showAllInfo: showAllInfo
     )
@@ -71,7 +71,7 @@ public func makeVideoCallParticipantModifier(
 For the `VideoCallParticipantView`, the required parameters are:
 - `participant` - the `CallParticipant` object representing a user in a call
 - `id` - the SwiftUI id for the view (you can pass the id of the `participant` here)
-- `availableSize` - the available size for the view
+- `availableFrame` - the available frame for the view
 - `contentMode` - the content mode of the view
 - `customData` - any custom data that you can pass to the view
 - `call` - the current call
@@ -80,7 +80,7 @@ For the `VideoCallParticipantModifier` you should provide the following paramete
 - `participant` - the `CallParticipant` object representing a user in a call
 - `participantCount` - the number of participants in the call
 - `pinnedParticipant` - optional binding of the pinned participant (if any)
-- `availableSize` - the available size for the view
+- `availableFrame` - the available frame≈ for the view
 - `ratio` - the ratio for the view slot
 - `showAllInfo` - if all information should be shown in the card
 

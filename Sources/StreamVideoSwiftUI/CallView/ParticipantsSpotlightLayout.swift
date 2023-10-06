@@ -13,7 +13,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     var viewFactory: Factory
     var participant: CallParticipant
     var participants: [CallParticipant]
-    var size: CGSize
+    var frame: CGRect
     var call: Call?
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
@@ -22,13 +22,13 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         participant: CallParticipant,
         call: Call?,
         participants: [CallParticipant],
-        size: CGSize,
+        frame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
         self.participants = participants
-        self.size = size
+        self.frame = frame
         self.call = call
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
@@ -87,8 +87,8 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     
     private var availableFrame: CGRect {
         .init(
-            origin: .zero,
-            size: CGSize(width: size.width, height: size.height - thumbnailSize - 64)
+            origin: frame.origin,
+            size: CGSize(width: frame.size.width, height: frame.size.height - thumbnailSize - 64)
         )
     }
     

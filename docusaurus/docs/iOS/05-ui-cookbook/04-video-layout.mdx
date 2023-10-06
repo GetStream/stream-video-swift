@@ -115,7 +115,7 @@ var body: some View {
                 if let dominantSpeaker = participants.first {
                     VideoCallParticipantView(
                         participant: dominantSpeaker,
-                        availableSize: reader.size,
+                        availableFrame: reader.frame(in: .global),
                         contentMode: .scaleAspectFit,
                         call: call
                     )
