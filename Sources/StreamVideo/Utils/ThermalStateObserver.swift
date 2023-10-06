@@ -9,11 +9,36 @@ extension LogSubsystem {
     public static let thermalState = Self(rawValue: 1 << 6)
 }
 
-public final class ThermalStateObserver: ObservableObject {
-    public static let shared = ThermalStateObserver()
+/// A protocol representing an observer of a device's thermal state.
+///
+/// This protocol is designed to provide both the current thermal state of the device and a publisher
+/// for monitoring changes to that state. Additionally, it provides a scaling factor to adapt the behavior
+/// or appearance of certain features based on the device's thermal condition.
+public protocol ThermalStateObserving: ObservableObject {
+
+    /// The current thermal state of the device.
+    var state: ProcessInfo.ThermalState { get }
+
+    /// A publisher emitting updates when the thermal state changes.
+    var statePublisher: AnyPublisher<ProcessInfo.ThermalState, Never> { get }
+
+    /// A scaling factor derived from the device's thermal state.
+    ///
+    /// This scale can be used to adapt functionalities, such as adjusting the resolution of streaming content,
+    /// to ensure optimal performance under varying thermal conditions.
+    var scale: CGFloat { get }
+}
+
+/// A concrete implementation of `ThermalStateObserving` that observes and reacts to changes in the device's thermal state.
+///
+/// `ThermalStateObserver` monitors the device's thermal state and provides both immediate access to the current state
+/// and a publisher for tracking state changes over time. It also offers a derived scaling factor to help adapt app behavior
+/// or features based on the current thermal conditions.
+final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
+    static let shared = ThermalStateObserver()
 
     /// Published property to observe the thermal state
-    @Published public private(set) var state: ProcessInfo.ThermalState {
+    @Published private(set) var state: ProcessInfo.ThermalState {
         didSet {
             // Determine the appropriate log level based on the thermal state
             let logLevel: LogLevel
@@ -37,14 +62,16 @@ public final class ThermalStateObserver: ObservableObject {
         }
     }
 
+    var statePublisher: AnyPublisher<ProcessInfo.ThermalState, Never> { $state.eraseToAnyPublisher() }
+
     /// Cancellable object to manage notifications
     private var notificationCenterCancellable: AnyCancellable?
     private var thermalStateProvider: () -> ProcessInfo.ThermalState
 
-    convenience init() {
+    private convenience init() {
         self.init { ProcessInfo.processInfo.thermalState }
     }
-    
+
 
     init(thermalStateProvider: @escaping () -> ProcessInfo.ThermalState) {
         // Initialize the thermal state with the current process's thermal state
@@ -61,8 +88,11 @@ public final class ThermalStateObserver: ObservableObject {
             .assign(to: \.state, on: self)
     }
 
-    /// Depending on the Device's thermal state we adapt the request participants resolution.
-    public var scale: CGFloat {
+    /// Depending on the Device's thermal state, we adapt the request participants resolution.
+    ///
+    /// The scale factor is derived from the current thermal state and is designed to adjust the resolution
+    /// or other performance-related factors of certain features to ensure optimal performance and user experience.
+    var scale: CGFloat {
         // Determine the appropriate scaling factor based on the thermal state
         switch state {
         case .nominal:
@@ -75,6 +105,23 @@ public final class ThermalStateObserver: ObservableObject {
             return 4
         @unknown default:
             return 1
+        }
+    }
+}
+
+/// Provides the default value of the `Appearance` class.
+public struct ThermalStateObserverKey: InjectionKey {
+    public static var currentValue: any ThermalStateObserving = ThermalStateObserver.shared
+}
+
+extension InjectedValues {
+
+    public var thermalStateObserver: any ThermalStateObserving {
+        get {
+            Self[ThermalStateObserverKey.self]
+        }
+        set {
+            Self[ThermalStateObserverKey.self] = newValue
         }
     }
 }
