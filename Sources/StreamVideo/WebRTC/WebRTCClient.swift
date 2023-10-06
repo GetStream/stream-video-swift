@@ -964,10 +964,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 if value.hasVideo {
                     log.debug("updating video subscription for user \(value.id) with size \(value.trackSize)", subsystems: .webRTC)
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
-
-                    let scale = ThermalStateObserver.shared.scale
-                    dimension.height = UInt32(value.trackSize.height / scale)
-                    dimension.width = UInt32(value.trackSize.width / scale)
+                    dimension.height = UInt32(value.trackSize.height)
+                    dimension.width = UInt32(value.trackSize.width)
                     let trackSubscriptionDetails = trackSubscriptionDetails(
                         for: value.userId,
                         sessionId: value.sessionId,
