@@ -73,6 +73,7 @@ fastlane/xcresults
 fastlane/recordings
 *.coverage.txt
 vendor/bundle/
+.bundle/
 .swiftpm
 Example/Carthage/.env
 Example/Carthage/fastlane/report.xml
