@@ -2113,6 +2113,7 @@
 				82FF40B62A17C6CD00B4D95E /* ReconnectionView_Tests.swift */,
 				82FF40B82A17C6D600B4D95E /* RecordingView_Tests.swift */,
 				82FF40BA2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift */,
+				407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */,
 				40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */,
 				407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */,
 			);

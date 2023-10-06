@@ -23,7 +23,7 @@ The `VideoParticipantsView` is a stateful component that requires a `CallViewMod
 VideoParticipantsView(
     viewFactory: DefaultViewFactory.shared,
     viewModel: viewModel,
-    availableSize: availableSize,
+    availableFrame: availableFrame,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```
@@ -31,7 +31,7 @@ VideoParticipantsView(
 The parameters needed for this component are as follows:
 - `viewFactory` - the view factory used for creation of the views
 - `viewModel` - the `CallViewModel`
-- `availableSize` - the available size for the view
+- `availableFrame` - the available frame for the view
 - `onChangeTrackVisibility` - called when the track changes its visibility
 
 If you are using our `ViewFactory`, you can swap this component with your implementation by implementing the following method:
@@ -39,13 +39,13 @@ If you are using our `ViewFactory`, you can swap this component with your implem
 ```swift
 public func makeVideoParticipantsView(
     viewModel: CallViewModel,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
 ) -> some View {
     CustomVideoParticipantsView(
         viewFactory: self,
         viewModel: viewModel,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         onChangeTrackVisibility: onChangeTrackVisibility
     )
 }
@@ -62,7 +62,7 @@ ParticipantsGridLayout(
     viewFactory: viewFactory,
     participants: viewModel.participants,
     pinnedParticipant: $viewModel.pinnedParticipant,
-    availableSize: availableSize,
+    availableFrame: availableFrame,
     orientation: orientation,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
@@ -77,7 +77,7 @@ ParticipantsSpotlightLayout(
     viewFactory: viewFactory,
     participant: first,
     participants: Array(viewModel.participants.dropFirst()),
-    size: availableSize,
+    size: availableFrame.size,
     pinnedParticipant: $viewModel.pinnedParticipant,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
@@ -91,7 +91,7 @@ You can use the full screen layout with the code below:
 ParticipantsFullScreenLayout(
     viewFactory: viewFactory,
     participant: first,
-    size: availableSize,
+    frame: availableFrame,
     pinnedParticipant: $viewModel.pinnedParticipant,
     onChangeTrackVisibility: onChangeTrackVisibility
 )

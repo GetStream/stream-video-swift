@@ -14,7 +14,7 @@ func makeVideoCallParticipantModifier(
     participant: CallParticipant,
     participantCount: Int,
     pinnedParticipant: Binding<CallParticipant?>,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     ratio: CGFloat,
     showAllInfo: Bool
 ) -> some ViewModifier {
@@ -22,7 +22,7 @@ func makeVideoCallParticipantModifier(
         participant: participant,
         pinnedParticipant: pinnedParticipant,
         participantCount: participantCount,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         ratio: ratio,
         showAllInfo: showAllInfo
     )
@@ -37,26 +37,26 @@ struct CustomParticipantModifier: ViewModifier {
     var participant: CallParticipant
     @Binding var pinnedParticipant: CallParticipant?
     var participantCount: Int
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var ratio: CGFloat
     
     public init(
         participant: CallParticipant,
         pinnedParticipant: Binding<CallParticipant?>,
         participantCount: Int,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat
     ) {
         self.participant = participant
         _pinnedParticipant = pinnedParticipant
         self.participantCount = participantCount
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.ratio = ratio
     }
     
     public func body(content: Content) -> some View {
         content
-            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .adjustVideoFrame(to: availableFrame.size.width, ratio: ratio)
             .overlay(
                 ZStack {
                     VStack {

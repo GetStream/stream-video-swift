@@ -43,12 +43,12 @@ The video participants view slot presents the grid of users that are in the call
 ```swift
 public func makeVideoParticipantsView(
     participants: [CallParticipant],
-    availableSize: CGSize,
+    availableFrame: CGRect,
     onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
 ) -> some View {
     VideoParticipantsView(
         participants: participants,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         onChangeTrackVisibility: onChangeTrackVisibility
     )
 }
@@ -57,7 +57,7 @@ public func makeVideoParticipantsView(
 In the method, the following parameters are provided:
 
 - `participants` - the list of participants.
-- `availableSize` - the available size for the participants view.
+- `availableFrame` - the available frame for the participants view.
 - `onChangeTrackVisibility` - callback when the track changes its visibility.
 
 #### Video Participant View
@@ -68,7 +68,7 @@ If you want to customize one particular participant view, you can change it via 
 public func makeVideoParticipantView(
     participant: CallParticipant,
     id: String,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     contentMode: UIView.ContentMode,
     customData: [String: RawJSON],
     call: Call?
@@ -76,7 +76,7 @@ public func makeVideoParticipantView(
     VideoCallParticipantView(
         participant: participant,
         id: id,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         contentMode: contentMode,
         call: call
     )
@@ -89,14 +89,14 @@ Additionally, you can change the modifier applied to the view, by implementing t
 public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
 ) -> some ViewModifier {
     VideoCallParticipantModifier(
         participant: participant,
         call: call,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         ratio: ratio,
         showAllInfo: showAllInfo
     )

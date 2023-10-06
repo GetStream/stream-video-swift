@@ -38,7 +38,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 id: "\(streamVideo.user.id)-\(idSuffix)",
-                availableSize: reader.size,
+                availableFrame: reader.frame(in: .global),
                 contentMode: .scaleAspectFill,
                 customData: ["videoOn": .bool(callSettings.videoOn)],
                 call: call

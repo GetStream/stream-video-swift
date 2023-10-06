@@ -20,7 +20,7 @@ class TestViewFactory: ViewFactory {
     func makeVideoParticipantView(
         participant: CallParticipant,
         id: String,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         contentMode: UIView.ContentMode,
         customData: [String: RawJSON],
         call: Call?
@@ -48,7 +48,7 @@ class TestViewFactory: ViewFactory {
             }
         
         if isCustomGridFrame {
-            return zstack.frame(maxWidth: availableSize.width, maxHeight: availableSize.height)
+            return zstack.frame(maxWidth: availableFrame.width, maxHeight: availableFrame.height)
         } else {
             return zstack.frame(maxWidth: .infinity, maxHeight: .infinity)
         }
