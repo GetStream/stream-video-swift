@@ -181,7 +181,7 @@ public struct MicrophoneCheckerKey: InjectionKey {
 
 extension InjectedValues {
 
-    var microphoneChecker: MicrophoneChecker {
+    public var microphoneChecker: MicrophoneChecker {
         get {
             Self[MicrophoneCheckerKey.self]
         }
