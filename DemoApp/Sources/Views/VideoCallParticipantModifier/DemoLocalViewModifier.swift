@@ -24,7 +24,7 @@ struct DemoLocalViewModifier: ViewModifier {
             .modifier(
                 ReactionsViewModifier(
                     participant: localParticipant,
-                    availableSize: .zero
+                    availableFrame: .zero
                 )
             )
     }

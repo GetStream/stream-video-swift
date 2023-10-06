@@ -42,12 +42,12 @@ public protocol ViewFactory: AnyObject {
     /// Creates the video participants view, shown during a call.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
-    ///  - availableSize: the size available for rendering.
+    ///  - availableFrame: the frame available for rendering.
     ///  - onChangeTrackVisibility: called when a track changes its visibility.
     /// - Returns: view shown in the video participants slot.
     func makeVideoParticipantsView(
         viewModel: CallViewModel,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
     
@@ -56,7 +56,7 @@ public protocol ViewFactory: AnyObject {
     /// - Parameters:
     ///  - participant: The participant to display.
     ///  - id: id of the participant.
-    ///  - availableSize: The available size for the participant's video view.
+    ///  - availableFrame: The available frame for the participant's video view.
     ///  - contentMode: The content mode for the participant's video view.
     ///  - customData: Any custom data passed to the view.
     ///  - onViewUpdate: A closure to be called whenever the participant's video view is updated.
@@ -64,7 +64,7 @@ public protocol ViewFactory: AnyObject {
     func makeVideoParticipantView(
         participant: CallParticipant,
         id: String,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         contentMode: UIView.ContentMode,
         customData: [String: RawJSON],
         call: Call?
@@ -76,13 +76,13 @@ public protocol ViewFactory: AnyObject {
     ///  - participant: The participant to modify.
     ///  - participantCount: The total number of participants in the call.
     ///  - pinnedParticipant: A binding to the participant that is currently pinned in the call.
-    ///  - availableSize: The available size for the participant's video.
+    ///  - availableFrame: The available frame for the participant's video.
     ///  - ratio: The aspect ratio of the participant's video.
     /// - Returns: A view modifier that modifies the appearance of the video call participant.
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
     ) -> ParticipantViewModifierType
@@ -103,11 +103,11 @@ public protocol ViewFactory: AnyObject {
     /// Creates a view that shows a list of the participants in the call.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
-    ///  - availableSize: The size available to display the view.
+    ///  - availableFrame: The frame available to display the view.
     /// - Returns: view shown in the participants list slot.
     func makeParticipantsListView(
         viewModel: CallViewModel,
-        availableSize: CGSize
+        availableFrame: CGRect
     ) -> CallParticipantsListViewType
     
     associatedtype ScreenSharingViewType: View
@@ -115,12 +115,12 @@ public protocol ViewFactory: AnyObject {
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
     ///  - screensharingSession: The current screensharing session.
-    ///  - availableSize: The size available to display the view.
+    ///  - availableFrame: The frame available to display the view.
     /// - Returns: view shown in the screensharing slot.
     func makeScreenSharingView(
         viewModel: CallViewModel,
         screensharingSession: ScreenSharingSession,
-        availableSize: CGSize
+        availableFrame: CGRect
     ) -> ScreenSharingViewType
     
     associatedtype LobbyViewType: View
@@ -192,13 +192,13 @@ extension ViewFactory {
     
     public func makeVideoParticipantsView(
         viewModel: CallViewModel,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> some View {
         VideoParticipantsView(
             viewFactory: self,
             viewModel: viewModel,
-            availableSize: availableSize,
+            availableFrame: availableFrame,
             onChangeTrackVisibility: onChangeTrackVisibility
         )
     }
@@ -206,7 +206,7 @@ extension ViewFactory {
     public func makeVideoParticipantView(
         participant: CallParticipant,
         id: String,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         contentMode: UIView.ContentMode,
         customData: [String: RawJSON],
         call: Call?
@@ -214,7 +214,7 @@ extension ViewFactory {
         VideoCallParticipantView(
             participant: participant,
             id: id,
-            availableSize: availableSize,
+            availableFrame: availableFrame,
             contentMode: contentMode,
             customData: customData,
             call: call
@@ -224,14 +224,14 @@ extension ViewFactory {
     public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
     ) -> some ViewModifier {
         VideoCallParticipantModifier(
             participant: participant,
             call: call,
-            availableSize: availableSize,
+            availableFrame: availableFrame,
             ratio: ratio,
             showAllInfo: showAllInfo
         )
@@ -247,10 +247,10 @@ extension ViewFactory {
     
     public func makeParticipantsListView(
         viewModel: CallViewModel,
-        availableSize: CGSize
+        availableFrame: CGRect
     ) -> some View {
         if #available(iOS 14.0, *) {
-            return CallParticipantsInfoView(callViewModel: viewModel, availableSize: availableSize)
+            return CallParticipantsInfoView(callViewModel: viewModel, availableFrame: availableFrame)
         } else {
             return EmptyView()
         }
@@ -259,12 +259,12 @@ extension ViewFactory {
     public func makeScreenSharingView(
         viewModel: CallViewModel,
         screensharingSession: ScreenSharingSession,
-        availableSize: CGSize
+        availableFrame: CGRect
     ) -> some View {
         ScreenSharingView(
             viewModel: viewModel,
             screenSharing: screensharingSession,
-            availableSize: availableSize
+            availableFrame: availableFrame
         )
     }
     

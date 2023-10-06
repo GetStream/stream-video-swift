@@ -36,10 +36,10 @@ public struct CallView<Factory: ViewFactory>: View {
                             viewFactory.makeScreenSharingView(
                                 viewModel: viewModel,
                                 screensharingSession: screenSharingSession,
-                                availableSize: videoFeedProxy.size
+                                availableFrame: videoFeedProxy.frame(in: .global)
                             )
                         } else {
-                            participantsView(size: videoFeedProxy.size)
+                            participantsView(bounds: videoFeedProxy.frame(in: .global))
                         }
                     }
 
@@ -53,7 +53,7 @@ public struct CallView<Factory: ViewFactory>: View {
                     if (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true),
                        viewModel.participantsLayout == .grid, viewModel.participants.count <= 3 {
                         CornerDragableView(
-                            content: contentDragableView(size: reader.size),
+                            content: contentDragableView(bounds: reader.frame(in: .global)),
                             proxy: reader
                         ) {
                             withAnimation {
@@ -90,7 +90,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 if viewModel.participantsShown {
                     viewFactory.makeParticipantsListView(
                         viewModel: viewModel,
-                        availableSize: reader.size
+                        availableFrame: reader.frame(in: .global)
                     )
                     .opacity(viewModel.hideUIElements ? 0 : 1)
                     .accessibility(identifier: "trailingTopView")
@@ -108,22 +108,22 @@ public struct CallView<Factory: ViewFactory>: View {
     }
     
     @ViewBuilder
-    private func contentDragableView(size: CGSize) -> some View {
+    private func contentDragableView(bounds: CGRect) -> some View {
         if !viewModel.localVideoPrimary {
             localVideoView
                 .cornerRadius(16)
                 .padding(.horizontal)
         } else {
-            minimizedView(size: size)
+            minimizedView(bounds: bounds)
         }
     }
     
-    private func minimizedView(size: CGSize) -> some View {
+    private func minimizedView(bounds: CGRect) -> some View {
         Group {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
-                    availableSize: size,
+                    availableFrame: bounds,
                     contentMode: .scaleAspectFill,
                     customData: [:],
                     call: viewModel.call
@@ -155,10 +155,10 @@ public struct CallView<Factory: ViewFactory>: View {
         }
     }
     
-    private func participantsView(size: CGSize) -> some View {
+    private func participantsView(bounds: CGRect) -> some View {
         viewFactory.makeVideoParticipantsView(
             viewModel: viewModel,
-            availableSize: size,
+            availableFrame: bounds,
             onChangeTrackVisibility: viewModel.changeTrackVisibility(for:isVisible:)
         )
     }

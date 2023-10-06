@@ -47,7 +47,7 @@ public struct LivestreamPlayer: View {
                         if let participant = state.participants.first {
                             VideoCallParticipantView(
                                 participant: participant,
-                                availableSize: reader.size,
+                                availableFrame: reader.frame(in: .global),
                                 contentMode: .scaleAspectFit,
                                 customData: [:],
                                 call: viewModel.call

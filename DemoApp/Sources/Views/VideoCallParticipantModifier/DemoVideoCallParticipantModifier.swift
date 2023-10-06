@@ -14,27 +14,27 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
 
     var participant: CallParticipant
     var call: Call?
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
 
     init(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
     ) {
         self.participant = participant
         self.call = call
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
     }
 
     func body(content: Content) -> some View {
         content
-            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .adjustVideoFrame(to: availableFrame.width, ratio: ratio)
             .overlay(
                 ZStack {
                     BottomView(content: {
@@ -83,7 +83,7 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
                     }
                 }
             )
-            .modifier(ReactionsViewModifier(participant: participant, availableSize: availableSize))
+            .modifier(ReactionsViewModifier(participant: participant, availableFrame: availableFrame.size))
             .onTapGesture(count: 2, perform: {
                 popoverShown = true
             })

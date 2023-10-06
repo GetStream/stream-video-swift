@@ -39,7 +39,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 id: "\(participant.id)-spotlight",
-                availableSize: .init(width: thumbnailSize, height: thumbnailSize),
+                availableFrame: .init(origin: .zero, size: .init(width: thumbnailSize, height: thumbnailSize)),
                 contentMode: .scaleAspectFill,
                 customData: [:],
                 call: call
@@ -48,7 +48,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
                     call: call,
-                    availableSize: availableSize,
+                    availableFrame: availableFrame,
                     ratio: ratio,
                     showAllInfo: true
                 )
@@ -59,26 +59,24 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
             )
             
             ScrollView(.horizontal) {
-                GeometryReader { geometry in
-                    HorizontalContainer {
-                        ForEach(participants) { participant in
-                            viewFactory.makeVideoParticipantView(
-                                participant: participant,
-                                id: participant.id,
-                                availableSize: .init(width: thumbnailSize, height: thumbnailSize),
-                                contentMode: .scaleAspectFill,
-                                customData: [:],
-                                call: call
-                            )
-                            .visibilityObservation(in: geometry.frame(in: .global)) { onChangeTrackVisibility(participant, $0) }
-                            .adjustVideoFrame(to: thumbnailSize, ratio: 1)
-                            .cornerRadius(8)
-                            .accessibility(identifier: "spotlightParticipantView")
-                        }
+                HorizontalContainer {
+                    ForEach(participants) { participant in
+                        viewFactory.makeVideoParticipantView(
+                            participant: participant,
+                            id: participant.id,
+                            availableFrame: .init(origin: .zero, size: .init(width: thumbnailSize, height: thumbnailSize)),
+                            contentMode: .scaleAspectFill,
+                            customData: [:],
+                            call: call
+                        )
+                        .visibilityObservation(in: availableFrame) { onChangeTrackVisibility(participant, $0) }
+                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                        .cornerRadius(8)
+                        .accessibility(identifier: "spotlightParticipantView")
                     }
-                    .frame(height: thumbnailSize)
-                    .cornerRadius(8)
                 }
+                .frame(height: thumbnailSize)
+                .cornerRadius(8)
             }
             .padding()
             .padding(.bottom)
@@ -87,11 +85,14 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
 
     }
     
-    private var availableSize: CGSize {
-        CGSize(width: size.width, height: size.height - thumbnailSize - 64)
+    private var availableFrame: CGRect {
+        .init(
+            origin: .zero,
+            size: CGSize(width: size.width, height: size.height - thumbnailSize - 64)
+        )
     }
     
     private var ratio: CGFloat {
-        availableSize.width / availableSize.height
+        availableFrame.size.width / availableFrame.size.height
     }
 }

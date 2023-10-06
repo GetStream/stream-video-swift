@@ -9,22 +9,22 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var viewFactory: Factory
     
-    private var thumbnailSize: CGSize {
-        CGSize(width: 120, height: 120)
+    private var thumbnailBounds: CGRect {
+        CGRect(x: 0, y: 0, width: 120, height: 120)
     }
     
     public init(
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         viewFactory: Factory = DefaultViewFactory.shared
     ) {
         self.viewModel = viewModel
         self.screenSharing = screenSharing
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.viewFactory = viewFactory
     }
         
@@ -53,7 +53,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                             viewFactory.makeVideoParticipantView(
                                 participant: participant,
                                 id: "\(participant.id)-screenshare-participant",
-                                availableSize: thumbnailSize,
+                                availableFrame: thumbnailBounds,
                                 contentMode: .scaleAspectFill,
                                 customData: [:],
                                 call: viewModel.call
@@ -62,7 +62,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                                 viewFactory.makeVideoCallParticipantModifier(
                                     participant: participant,
                                     call: viewModel.call,
-                                    availableSize: thumbnailSize,
+                                    availableFrame: thumbnailBounds,
                                     ratio: 1,
                                     showAllInfo: false
                                 )
@@ -77,7 +77,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                             }
                         }
                     }
-                    .frame(height: thumbnailSize.height)
+                    .frame(height: thumbnailBounds.size.height)
                     .cornerRadius(8)
                 }
                 .padding()
@@ -86,8 +86,8 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             }
         }
         .frame(
-            width: viewModel.hideUIElements ? availableSize.width : nil,
-            height: viewModel.hideUIElements ? availableSize.height : nil
+            width: viewModel.hideUIElements ? availableFrame.size.width : nil,
+            height: viewModel.hideUIElements ? availableFrame.size.height : nil
         )
         .background(Color.black)
     }
@@ -111,9 +111,9 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     
     private var videoSize: CGSize {
         if viewModel.hideUIElements {
-            return .init(width: availableSize.height, height: availableSize.width)
+            return .init(width: availableFrame.size.height, height: availableFrame.size.width)
         } else {
-            return availableSize
+            return availableFrame.size
         }
     }
 }

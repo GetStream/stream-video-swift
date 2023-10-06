@@ -10,7 +10,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
@@ -18,12 +18,12 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     public init(
         viewFactory: Factory,
         viewModel: CallViewModel,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
     
@@ -34,7 +34,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     viewFactory: viewFactory,
                     participant: first,
                     call: viewModel.call,
-                    size: availableSize,
+                    frame: availableFrame,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else if viewModel.participantsLayout == .spotlight, let first = viewModel.participants.first {
@@ -43,7 +43,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     participant: first,
                     call: viewModel.call,
                     participants: Array(viewModel.participants.dropFirst()),
-                    size: availableSize,
+                    size: availableFrame.size,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
@@ -51,7 +51,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     viewFactory: viewFactory,
                     call: viewModel.call,
                     participants: viewModel.participants,
-                    availableSize: availableSize,
+                    availableFrame: availableFrame,
                     orientation: orientation,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
@@ -69,27 +69,27 @@ public struct VideoCallParticipantModifier: ViewModifier {
     
     var participant: CallParticipant
     var call: Call?
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
     
     public init(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
     ) {
         self.participant = participant
         self.call = call
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
     }
     
     public func body(content: Content) -> some View {
         content
-            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .adjustVideoFrame(to: availableFrame.size.width, ratio: ratio)
             .overlay(
                 ZStack {
                     BottomView(content: {
@@ -147,7 +147,7 @@ public struct VideoCallParticipantView: View {
         
     let participant: CallParticipant
     var id: String
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
     var customData: [String: RawJSON]
@@ -156,7 +156,7 @@ public struct VideoCallParticipantView: View {
     public init(
         participant: CallParticipant,
         id: String? = nil,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         contentMode: UIView.ContentMode,
         edgesIgnoringSafeArea: Edge.Set = .all,
         customData: [String: RawJSON],
@@ -164,7 +164,7 @@ public struct VideoCallParticipantView: View {
     ) {
         self.participant = participant
         self.id = id ?? participant.id
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.customData = customData
@@ -174,7 +174,7 @@ public struct VideoCallParticipantView: View {
     public var body: some View {
         VideoRendererView(
             id: id,
-            size: availableSize,
+            size: availableFrame.size,
             contentMode: contentMode,
             handleRendering: { [weak call] view in
                 guard call != nil else { return }
@@ -195,7 +195,7 @@ public struct VideoCallParticipantView: View {
                 name: participant.name,
                 imageURL: participant.profileImageURL
             )
-            .frame(width: availableSize.width)
+            .frame(width: availableFrame.size.width)
             .opacity(showVideo ? 0 : 1)
         )
     }

@@ -12,27 +12,25 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var isPortrait: Bool
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
 
     var body: some View {
-        GeometryReader { geometryProxy in
-            ScrollView {
-                if #available(iOS 14.0, *) {
-                    LazyVGrid(
-                        columns: [
-                            .init(.adaptive(minimum: size.width, maximum: size.width), spacing: 0)
-                        ],
-                        spacing: 0
-                    ) {
-                        participantsContent(geometryProxy.frame(in: .global))
-                    }
-                    .frame(width: availableSize.width)
-                } else {
-                    VStack {
-                        participantsContent(geometryProxy.frame(in: .global))
-                    }
+        ScrollView {
+            if #available(iOS 14.0, *) {
+                LazyVGrid(
+                    columns: [
+                        .init(.adaptive(minimum: size.width, maximum: size.width), spacing: 0)
+                    ],
+                    spacing: 0
+                ) {
+                    participantsContent(availableFrame)
+                }
+                .frame(width: availableFrame.width)
+            } else {
+                VStack {
+                    participantsContent(availableFrame)
                 }
             }
         }
@@ -46,7 +44,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 id: participant.id,
-                availableSize: size,
+                availableFrame: .init(origin: .zero, size: size),
                 contentMode: .scaleAspectFill,
                 customData: [:],
                 call: call
@@ -55,7 +53,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
                     call: call,
-                    availableSize: size,
+                    availableFrame: .init(origin: .zero, size: size),
                     ratio: ratio,
                     showAllInfo: true
                 )
@@ -69,12 +67,12 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
 
     var ratio: CGFloat {
         if isPortrait {
-            let width = availableSize.width / 2
-            let height = availableSize.height / 3
+            let width = availableFrame.width / 2
+            let height = availableFrame.height / 3
             return width / height
         } else {
-            let width = availableSize.width / 3
-            let height = availableSize.height / 2
+            let width = availableFrame.width / 3
+            let height = availableFrame.height / 2
             return width / height
         }
     }
@@ -83,9 +81,9 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
         if #available(iOS 14.0, *) {
             let dividerWidth: CGFloat = isPortrait ? 2 : 3
             let dividerHeight: CGFloat = isPortrait ? 3 : 2
-            return CGSize(width: availableSize.width / dividerWidth, height: availableSize.height / dividerHeight)
+            return CGSize(width: availableFrame.width / dividerWidth, height: availableFrame.height / dividerHeight)
         } else {
-            return CGSize(width: availableSize.width, height: availableSize.height / 2)
+            return CGSize(width: availableFrame.width, height: availableFrame.height / 2)
         }
     }
 }

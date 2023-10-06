@@ -13,11 +13,11 @@ public struct CallParticipantsInfoView: View {
     
     @StateObject var viewModel: CallParticipantsInfoViewModel
     @ObservedObject var callViewModel: CallViewModel
-    var availableSize: CGSize
-    
-    public init(callViewModel: CallViewModel, availableSize: CGSize) {
+    var availableFrame: CGRect
+
+    public init(callViewModel: CallViewModel, availableFrame: CGRect) {
         self.callViewModel = callViewModel
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         _viewModel = StateObject(
             wrappedValue: CallParticipantsInfoViewModel(
                 call: callViewModel.call
@@ -30,7 +30,7 @@ public struct CallParticipantsInfoView: View {
             CallParticipantsView(
                 viewModel: viewModel,
                 callViewModel: callViewModel,
-                maxHeight: availableSize.height - padding
+                maxHeight: availableFrame.size.height - padding
             )
             .padding()
             .padding(.vertical, padding / 2)

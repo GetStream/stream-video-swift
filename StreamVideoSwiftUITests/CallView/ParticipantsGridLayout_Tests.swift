@@ -33,9 +33,9 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
-    private func gridSize(for participantsCount: Int) -> CGSize {
+    private func gridSize(for participantsCount: Int) -> CGRect {
         let heightDivider = CGFloat((participantsCount == 2 || participantsCount == 3) ? participantsCount : 1)
-        return CGSize(width: defaultScreenSize.width, height: defaultScreenSize.height / heightDivider)
+        return .init(origin: .zero, size: CGSize(width: defaultScreenSize.width, height: defaultScreenSize.height / heightDivider))
     }
     
     func test_grid_participantWithAudio_snapshot() {
@@ -44,7 +44,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
                 call: call,
                 participants: ParticipantFactory.get(count, withAudio: true),
-                availableSize: gridSize(for: count),
+                availableFrame: gridSize(for: count),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -58,7 +58,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
                 call: call,
                 participants: ParticipantFactory.get(count, withAudio: false),
-                availableSize: gridSize(for: count),
+                availableFrame: gridSize(for: count),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -73,7 +73,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
                 call: call,
                 participants: ParticipantFactory.get(count, connectionQuality: quality),
-                availableSize: gridSize(for: count),
+                availableFrame: gridSize(for: count),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -93,7 +93,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
                 call: call,
                 participants: participants,
-                availableSize: gridSize(for: count),
+                availableFrame: gridSize(for: count),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
