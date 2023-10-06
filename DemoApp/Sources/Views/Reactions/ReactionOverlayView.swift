@@ -11,7 +11,7 @@ struct ReactionOverlayView: View {
     @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
 
     var participant: CallParticipant
-    var availableFrame: CGSize
+    var availableSize: CGSize
 
     var body: some View {
         if let firstReaction = reactionsHelper.activeReactions[participant.userId]?.last {
@@ -29,7 +29,7 @@ struct ReactionOverlayView: View {
                 ReactionIcon(iconName: reaction.iconName).padding()
             }
         }
-        .padding(.bottom, availableFrame.height > 100 ? 44 : 8)
+        .padding(.bottom, availableSize.height > 100 ? 44 : 8)
         .padding(.horizontal)
     }
 }
@@ -60,7 +60,7 @@ struct ReactionOverlayView_Previews: PreviewProvider {
                 audioLevels: [],
                 pin: nil
             ),
-            availableFrame: CGSize(width: 1024, height: 768)
+            availableSize: CGSize(width: 1024, height: 768)
         )
     }
 }
