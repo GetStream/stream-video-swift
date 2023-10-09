@@ -131,7 +131,7 @@ jobs:
       if: failure()
       run: |
         brew install chargepoint/xcparse/xcparse
-        xcparse screenshots fastlane/test_output/StreamChatUI.xcresult fastlane/test_output/snapshots --test
+        xcparse screenshots fastlane/test_output/DemoApp.xcresult fastlane/test_output/snapshots --test
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
