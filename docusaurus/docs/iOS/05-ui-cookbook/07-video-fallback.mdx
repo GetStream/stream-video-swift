@@ -17,7 +17,7 @@ In order to do this, we need to implement the `makeVideoParticipantView` in our 
 func makeVideoParticipantView(
     participant: CallParticipant,
     id: String,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     contentMode: UIView.ContentMode,
     customData: [String: RawJSON],
     call: Call?
@@ -25,7 +25,7 @@ func makeVideoParticipantView(
     CustomVideoCallParticipantView(
         participant: participant,
         id: id,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         contentMode: contentMode,
         call: call
     )
@@ -42,7 +42,7 @@ public struct CustomVideoCallParticipantView: View {
         
     let participant: CallParticipant
     var id: String
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
     var call: Call?
@@ -50,14 +50,14 @@ public struct CustomVideoCallParticipantView: View {
     public init(
         participant: CallParticipant,
         id: String? = nil,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         contentMode: UIView.ContentMode,
         edgesIgnoringSafeArea: Edge.Set = .all,
         call: Call?
     ) {
         self.participant = participant
         self.id = id ?? participant.id
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.call = call
@@ -66,7 +66,7 @@ public struct CustomVideoCallParticipantView: View {
     public var body: some View {
         VideoRendererView(
             id: id,
-            size: availableSize,
+            size: availableFrame.size,
             contentMode: contentMode,
             handleRendering: { view in
                 view.handleViewRendering(for: participant) { size, participant in
@@ -86,7 +86,7 @@ public struct CustomVideoCallParticipantView: View {
                 name: participant.name,
                 imageURL: participant.profileImageURL
             )
-            .frame(width: availableSize.width)
+            .frame(width: availableFrame.size.width)
             .opacity(showVideo ? 0 : 1)
         )
     }

@@ -214,11 +214,11 @@ struct ParticipantsView: View {
                 ScrollView {
                     LazyVStack {
                         if participants.count == 1, let participant = participants.first {
-                            makeCallParticipantView(participant, size: proxy.size)
+                            makeCallParticipantView(participant, frame: proxy.frame(in: .global))
                                 .frame(width: proxy.size.width, height: proxy.size.height)
                         } else {
                             ForEach(participants) { participant in
-                                makeCallParticipantView(participant, size: proxy.size)
+                                makeCallParticipantView(participant, frame: proxy.frame(in: .global))
                                     .frame(width: proxy.size.width, height: proxy.size.height / 2)
                             }
                         }
@@ -232,10 +232,10 @@ struct ParticipantsView: View {
     }
 
     @ViewBuilder
-    private func makeCallParticipantView(_ participant: CallParticipant, size: CGSize) -> some View {
+    private func makeCallParticipantView(_ participant: CallParticipant, frame: CGRect) -> some View {
         VideoCallParticipantView(
             participant: participant,
-            availableSize: size,
+            availableFrame: frame,
             contentMode: .scaleAspectFit,
             customData: [:],
             call: call
@@ -284,7 +284,7 @@ We added the `changeTrackVisibility` in our app and we propagate its call to the
 ```swift
 VideoCallParticipantView(
     participant: participant,
-    availableSize: size,
+    availableFrame: frame,
     contentMode: .scaleAspectFit,
     customData: [:],
     call: call

@@ -58,12 +58,12 @@ If you use our default UI components, this logic is already handled for you. In 
 public func makeScreenSharingView(
         viewModel: CallViewModel,
         screensharingSession: ScreenSharingSession,
-        availableSize: CGSize
+        availableFrame: CGRect
 ) -> some View {
     CustomScreenSharingView(
         viewModel: viewModel,
         screenSharing: screensharingSession,
-        availableSize: availableSize
+        availableFrame: availableFrame
     )
 }
 ```

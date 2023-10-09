@@ -72,27 +72,27 @@ public struct VideoCallParticipantModifier: ViewModifier {
     
     var participant: CallParticipant
     var call: Call?
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
     
     public init(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
     ) {
         self.participant = participant
         self.call = call
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
     }
     
     public func body(content: Content) -> some View {
         content
-            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .adjustVideoFrame(to: availableFrame.size.width, ratio: ratio)
             .overlay(
                 ZStack {
                     BottomView(content: {
@@ -206,7 +206,7 @@ ForEach(participants) { participant in
     viewFactory.makeVideoParticipantView(
         participant: participant,
         id: participant.id,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         contentMode: .scaleAspectFill,
         customData: [:],
         call: call
@@ -215,7 +215,7 @@ ForEach(participants) { participant in
     	viewFactory.makeVideoCallParticipantModifier(
             participant: participant,
             call: call,
-            availableSize: availableSize,
+            availableFrame: availableFrame,
             ratio: ratio,
             showAllInfo: true
         )

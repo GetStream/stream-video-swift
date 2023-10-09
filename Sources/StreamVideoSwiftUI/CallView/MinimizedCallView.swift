@@ -33,7 +33,7 @@ public struct MinimizedCallView: View {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
-                    availableSize: proxy.size,
+                    availableFrame: proxy.frame(in: .global),
                     contentMode: .scaleAspectFill,
                     customData: [:],
                     call: viewModel.call

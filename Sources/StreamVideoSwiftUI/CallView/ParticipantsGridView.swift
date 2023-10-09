@@ -8,14 +8,14 @@ import WebRTC
 
 @MainActor
 struct ParticipantsGridView<Factory: ViewFactory>: View {
-    
+
     var viewFactory: Factory
     var call: Call?
     var participants: [CallParticipant]
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var isPortrait: Bool
     var participantVisibilityChanged: (CallParticipant, Bool) -> Void
-    
+
     var body: some View {
         ScrollView {
             if #available(iOS 14.0, *) {
@@ -25,25 +25,26 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                     ],
                     spacing: 0
                 ) {
-                    participantsContent
+                    participantsContent(availableFrame)
                 }
-                .frame(width: availableSize.width)
+                .frame(width: availableFrame.width)
             } else {
                 VStack {
-                    participantsContent
+                    participantsContent(availableFrame)
                 }
             }
         }
         .edgesIgnoringSafeArea(.all)
         .accessibility(identifier: "gridScrollView")
     }
-    
-    private var participantsContent: some View {
+
+    @ViewBuilder
+    private func participantsContent(_ bounds: CGRect) -> some View {
         ForEach(participants) { participant in
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 id: participant.id,
-                availableSize: size,
+                availableFrame: .init(origin: .zero, size: size),
                 contentMode: .scaleAspectFill,
                 customData: [:],
                 call: call
@@ -52,41 +53,37 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
                     call: call,
-                    availableSize: size,
+                    availableFrame: .init(origin: .zero, size: size),
                     ratio: ratio,
                     showAllInfo: true
                 )
             )
-            .onAppear {
-                log.debug("Participant \(participant.name) is visible")
-                participantVisibilityChanged(participant, true)
-            }
-            .onDisappear {
-                log.debug("Participant \(participant.name) is not visible")
-                participantVisibilityChanged(participant, false)
+            .visibilityObservation(in: bounds) {
+                log.debug("Participant \(participant.name) is \($0 ? "visible" : "not visible.")")
+                participantVisibilityChanged(participant, $0)
             }
         }
     }
-        
+
     var ratio: CGFloat {
         if isPortrait {
-            let width = availableSize.width / 2
-            let height = availableSize.height / 3
+            let width = availableFrame.width / 2
+            let height = availableFrame.height / 3
             return width / height
         } else {
-            let width = availableSize.width / 3
-            let height = availableSize.height / 2
+            let width = availableFrame.width / 3
+            let height = availableFrame.height / 2
             return width / height
         }
     }
-    
+
     private var size: CGSize {
         if #available(iOS 14.0, *) {
             let dividerWidth: CGFloat = isPortrait ? 2 : 3
             let dividerHeight: CGFloat = isPortrait ? 3 : 2
-            return CGSize(width: availableSize.width / dividerWidth, height: availableSize.height / dividerHeight)
+            return CGSize(width: availableFrame.width / dividerWidth, height: availableFrame.height / dividerHeight)
         } else {
-            return CGSize(width: availableSize.width, height: availableSize.height / 2)
+            return CGSize(width: availableFrame.width, height: availableFrame.height / 2)
         }
     }
 }

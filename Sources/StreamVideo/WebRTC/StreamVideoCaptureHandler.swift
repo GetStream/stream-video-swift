@@ -3,10 +3,10 @@
 //
 
 import Foundation
-import WebRTC
+@preconcurrency import WebRTC
 
-class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
-    
+final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
+
     let source: RTCVideoSource
     let filters: [VideoFilter]
     let context: CIContext
@@ -107,3 +107,5 @@ class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
        )
     }
 }
+
+extension StreamVideoCaptureHandler: @unchecked Sendable {}

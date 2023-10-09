@@ -14,7 +14,7 @@ final class ScreenSharingView_Tests: StreamVideoUITestCase {
         let view = ScreenSharingView(
             viewModel: CallViewModel(),
             screenSharing: .init(track: .none, participant: ParticipantFactory.get(2).last!),
-            availableSize: defaultScreenSize
+            availableFrame: .init(origin: .zero, size: defaultScreenSize)
         )
         AssertSnapshot(view)
     }

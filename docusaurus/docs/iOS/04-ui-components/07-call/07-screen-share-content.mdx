@@ -16,7 +16,7 @@ Here's an example how to create a `ScreenSharingView`:
 ScreenSharingView(
     viewModel: viewModel,
     screenSharing: screensharingSession,
-    availableSize: availableSize
+    availableFrame: CGRect
 )
 ```
 
@@ -24,7 +24,7 @@ In this method, the following parameters are provided:
 
 - `viewModel` - the `CallViewModel` used in the call.
 - `screensharingSession` - The current screen sharing session, that contains information about the track, as well as the participant that is sharing.
-- `availableSize` - the available size to layout the rendering view.
+- `availableFrame` - the available frame to layout the rendering view.
 
 ## Customization
 
@@ -34,12 +34,12 @@ If you want to implement your own UI when there's screen sharing in progress, yo
 public func makeScreenSharingView(
     viewModel: CallViewModel,
     screensharingSession: ScreenSharingSession,
-    availableSize: CGSize
+    availableFrame: CGRect
 ) -> some View {
     CustomScreenSharingView(
         viewModel: viewModel,
         screenSharing: screensharingSession,
-        availableSize: availableSize
+        availableFrame: availableFrame
     )
 }
 ```
@@ -48,4 +48,4 @@ Similarly to above, the following parameters are provided:
 
 - `viewModel` - the `CallViewModel` used in the call.
 - `screensharingSession` - The current screen sharing session, that contains information about the track, as well as the participant that is sharing.
-- `availableSize` - the available size to layout the rendering view.
+- `availableFrame` - the available frame to layout the rendering view.

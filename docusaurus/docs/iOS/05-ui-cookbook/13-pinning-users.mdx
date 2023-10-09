@@ -47,14 +47,14 @@ If you want to change this behaviour, you should implement your own version of i
 func makeVideoCallParticipantModifier(
    	participant: CallParticipant,
     call: Call?,
-    availableSize: CGSize,
+    availableFrame: CGRect,
     ratio: CGFloat,
     showAllInfo: Bool
 ) -> some ViewModifier {
     CustomVideoCallParticipantModifier(
         participant: participant,
         call: call,
-        availableSize: availableSize,
+        availableFrame: availableFrame,
         ratio: ratio,
         showAllInfo: showAllInfo
     )

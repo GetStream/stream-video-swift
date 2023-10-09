@@ -64,14 +64,14 @@ final class DemoAppViewFactory: ViewFactory {
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat,
         showAllInfo: Bool
     ) -> some ViewModifier {
         DemoVideoCallParticipantModifier(
             participant: participant,
             call: call,
-            availableSize: availableSize,
+            availableFrame: availableFrame,
             ratio: ratio,
             showAllInfo: showAllInfo
         )

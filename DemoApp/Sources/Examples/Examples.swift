@@ -73,7 +73,7 @@ struct CustomVideoCallParticipantView: View {
         
     let participant: CallParticipant
     var id: String
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
     var onViewUpdate: (CallParticipant, VideoRenderer) -> Void
@@ -81,14 +81,14 @@ struct CustomVideoCallParticipantView: View {
     public init(
         participant: CallParticipant,
         id: String? = nil,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         contentMode: UIView.ContentMode,
         edgesIgnoringSafeArea: Edge.Set = .all,
         onViewUpdate: @escaping (CallParticipant, VideoRenderer) -> Void
     ) {
         self.participant = participant
         self.id = id ?? participant.id
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.contentMode = contentMode
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.onViewUpdate = onViewUpdate
@@ -97,7 +97,7 @@ struct CustomVideoCallParticipantView: View {
     public var body: some View {
         VideoRendererView(
             id: id,
-            size: availableSize,
+            size: availableFrame.size,
             contentMode: contentMode
         ) { view in
             onViewUpdate(participant, view)
@@ -113,7 +113,7 @@ struct CustomVideoCallParticipantView: View {
                     startPoint: .top,
                     endPoint: .bottom
                 )
-                .frame(width: availableSize.width)
+                .frame(width: availableFrame.width)
                 .opacity(showVideo ? 0 : 1)
 
                 ZStack {
@@ -142,26 +142,26 @@ struct CustomParticipantModifier: ViewModifier {
     var participant: CallParticipant
     @Binding var pinnedParticipant: CallParticipant?
     var participantCount: Int
-    var availableSize: CGSize
+    var availableFrame: CGRect
     var ratio: CGFloat
     
     public init(
         participant: CallParticipant,
         pinnedParticipant: Binding<CallParticipant?>,
         participantCount: Int,
-        availableSize: CGSize,
+        availableFrame: CGRect,
         ratio: CGFloat
     ) {
         self.participant = participant
         _pinnedParticipant = pinnedParticipant
         self.participantCount = participantCount
-        self.availableSize = availableSize
+        self.availableFrame = availableFrame
         self.ratio = ratio
     }
     
     public func body(content: Content) -> some View {
         content
-            .adjustVideoFrame(to: availableSize.width, ratio: ratio)
+            .adjustVideoFrame(to: availableFrame.width, ratio: ratio)
             .overlay(
                 ZStack {
                     VStack {
