@@ -7,9 +7,7 @@ import SwiftUI
 import SnapshotTesting
 import XCTest
 
-final class ToastView_Tests: XCTestCase {
-    
-    private let perceptualPrecision: Float = 0.96
+final class ToastView_Tests: StreamVideoTestCase {
 
     func test_toastView_errorSnapshot() {
         // Given
@@ -23,7 +21,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_successSnapshot() {
@@ -38,7 +36,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_warningSnapshot() {
@@ -53,7 +51,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_infoSnapshot() {
@@ -68,7 +66,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_errorSnapshotBottom() {
@@ -83,7 +81,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
 
 }

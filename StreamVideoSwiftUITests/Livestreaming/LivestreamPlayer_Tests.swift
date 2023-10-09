@@ -16,20 +16,18 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
     func test_livestreamPlayer_snapshot() async throws {
         // Given
         let player = LivestreamPlayer(type: callType, id: callId)
-            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        assertSnapshot(matching: player, as: .image(perceptualPrecision: 0.98))
+        AssertSnapshot(player)
     }
     
     @MainActor
     func test_livestreamPlayer_snapshotHideParticipantCount() async throws {
         // Given
         let player = LivestreamPlayer(type: callType, id: callId, showParticipantCount: false)
-            .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        assertSnapshot(matching: player, as: .image(perceptualPrecision: 0.98))
+        AssertSnapshot(player)
     }
     
     @MainActor
