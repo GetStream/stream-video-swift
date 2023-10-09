@@ -18,7 +18,7 @@ concurrency:
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
-  IOS_SIMULATOR_DEVICE: "iPhone 14 Pro (17.0)"
+  IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.0)"
 
 jobs:
   automated-code-review:
@@ -131,7 +131,7 @@ jobs:
       if: failure()
       run: |
         brew install chargepoint/xcparse/xcparse
-        xcparse screenshots fastlane/test_output/DemoApp.xcresult fastlane/test_output/snapshots --test
+        xcparse screenshots fastlane/test_output/StreamVideoSwiftUI.xcresult fastlane/test_output/snapshots --test
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
@@ -159,7 +159,7 @@ jobs:
       if: failure()
       run: |
         brew install chargepoint/xcparse/xcparse
-        xcparse screenshots fastlane/test_output/StreamChatUI.xcresult fastlane/test_output/snapshots --test
+        xcparse screenshots fastlane/test_output/StreamVideoUIKit.xcresult fastlane/test_output/snapshots --test
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
