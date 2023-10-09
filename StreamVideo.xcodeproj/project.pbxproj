@@ -81,6 +81,7 @@
 		40942B5F2AD4229D00CE4EDD /* CALayer+IntelWorkaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40942B5C2AD4110A00CE4EDD /* CALayer+IntelWorkaround.swift */; };
 		40942B672AD444BA00CE4EDD /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 40942B662AD444BA00CE4EDD /* SnapshotTesting */; };
 		40942B692AD444C200CE4EDD /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 40942B682AD444C200CE4EDD /* SnapshotTesting */; };
+		40942B6A2AD44FD300CE4EDD /* CALayer+IntelWorkaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40942B5C2AD4110A00CE4EDD /* CALayer+IntelWorkaround.swift */; };
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
@@ -4189,6 +4190,7 @@
 				84F58B8929EEAC4400010C4C /* MockFunc.swift in Sources */,
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
+				40942B6A2AD44FD300CE4EDD /* CALayer+IntelWorkaround.swift in Sources */,
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
