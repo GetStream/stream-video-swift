@@ -26,7 +26,7 @@ struct SimpleCallingView: View {
 
     var body: some View {
         VStack {
-            DemoCallingTopView()
+            DemoCallingTopView(callViewModel: viewModel)
 
             Spacer()
 
@@ -112,8 +112,12 @@ struct SimpleCallingView: View {
             }
         }
         .onAppear {
+            CallService.shared.registerForIncomingCalls()
             self.text = callId
             joinCallIfNeeded(with: callId)
+        }
+        .onReceive(appState.$activeCall) { call in
+            viewModel.setActiveCall(call)
         }
     }
 

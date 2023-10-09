@@ -30,15 +30,17 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>io.getstream.iOS.VideoDemoApp</string>
+			<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>streamvideo</string>
+				<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
 			</array>
 		</dict>
 	</array>
 	<key>CFBundleVersion</key>
 	<string>1</string>
+	<key>GIDClientID</key>
+	<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>

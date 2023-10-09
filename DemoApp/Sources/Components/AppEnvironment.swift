@@ -61,6 +61,10 @@ extension AppEnvironment {
             return .production
         }
     }()
+    
+    static var googleClientId: String = {
+        return "347024607410-48j4atipav0tcr4pesap4elr1u9t11uh.apps.googleusercontent.com"
+    }()
 }
 
 extension AppEnvironment {

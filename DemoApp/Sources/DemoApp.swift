@@ -6,6 +6,7 @@ import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
 import WebRTC
+import GoogleSignIn
 
 @main
 struct DemoApp: App {
@@ -16,6 +17,8 @@ struct DemoApp: App {
 
     @StateObject var appState: AppState
     private let router: Router
+    
+    lazy var signInConfig = GIDConfiguration(clientID: AppEnvironment.googleClientId)
 
     // MARK: - Lifecycle
 
@@ -32,7 +35,11 @@ struct DemoApp: App {
         WindowGroup {
             ZStack {
                 if appState.userState == .loggedIn {
-                    DemoCallContainerView(callId: appState.deeplinkInfo.callId)
+                    NavigationView {
+                        DemoCallContainerView(callId: appState.deeplinkInfo.callId)
+                            .navigationBarHidden(true)
+                    }
+                    .navigationViewStyle(.stack)
                 } else {
                     if AppEnvironment.configuration.isRelease {
                         LoadingView()
@@ -40,7 +47,7 @@ struct DemoApp: App {
                         NavigationView {
                             LoginView() { router.handleLoggedInUserCredentials($0, deeplinkInfo: .empty) }
                         }
-                        .navigationViewStyle(StackNavigationViewStyle())
+                        .navigationViewStyle(.stack)
                     }
                 }
             }
