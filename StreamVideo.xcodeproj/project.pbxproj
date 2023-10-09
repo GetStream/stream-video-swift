@@ -79,6 +79,8 @@
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		40942B5D2AD4110A00CE4EDD /* CALayer+IntelWorkaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40942B5C2AD4110A00CE4EDD /* CALayer+IntelWorkaround.swift */; };
 		40942B5F2AD4229D00CE4EDD /* CALayer+IntelWorkaround.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40942B5C2AD4110A00CE4EDD /* CALayer+IntelWorkaround.swift */; };
+		40942B672AD444BA00CE4EDD /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 40942B662AD444BA00CE4EDD /* SnapshotTesting */; };
+		40942B692AD444C200CE4EDD /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 40942B682AD444C200CE4EDD /* SnapshotTesting */; };
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
@@ -489,7 +491,6 @@
 		8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
 		8492B87A29081E6600006649 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
 		8493223B29082EDB0013C029 /* StreamVideoUITestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493223A29082EDB0013C029 /* StreamVideoUITestCase.swift */; };
-		84932240290830390013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493223F290830390013C029 /* SnapshotTesting */; };
 		8493224F2908378A0013C029 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493224E2908378A0013C029 /* AppDelegate.swift */; };
 		849322512908378A0013C029 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322502908378A0013C029 /* SceneDelegate.swift */; };
 		849322582908378B0013C029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 849322572908378B0013C029 /* Assets.xcassets */; };
@@ -504,7 +505,6 @@
 		8493227C290939590013C029 /* CallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8493226229083BF20013C029 /* CallViewController.swift */; };
 		8493227D29093A1A0013C029 /* HTTPClient_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87729081D1600006649 /* HTTPClient_Mock.swift */; };
 		8493227E29093A420013C029 /* StreamVideo_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B87929081E6600006649 /* StreamVideo_Mock.swift */; };
-		8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 8493227F29093A9E0013C029 /* SnapshotTesting */; };
 		8496A9A629CC500F00F15FF1 /* StreamVideoCaptureHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */; };
 		8498796828A15F0300D06F31 /* ViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8498796728A15F0300D06F31 /* ViewFactory.swift */; };
 		849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849EDA8A297AFCC80072A12D /* PreJoiningView.swift */; };
@@ -1582,9 +1582,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40942B672AD444BA00CE4EDD /* SnapshotTesting in Frameworks */,
 				84F7380F287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				820784EF29FA8123006DD4F7 /* WebRTC in Frameworks */,
-				84932240290830390013C029 /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1603,9 +1603,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40942B692AD444C200CE4EDD /* SnapshotTesting in Frameworks */,
 				84F73830287C146D00A363F4 /* StreamVideoUIKit.framework in Frameworks */,
 				8251E60D2A17838D00E7257A /* WebRTC in Frameworks */,
-				8493228029093A9E0013C029 /* SnapshotTesting in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -3387,8 +3387,8 @@
 			);
 			name = StreamVideoSwiftUITests;
 			packageProductDependencies = (
-				8493223F290830390013C029 /* SnapshotTesting */,
 				820784EE29FA8123006DD4F7 /* WebRTC */,
+				40942B662AD444BA00CE4EDD /* SnapshotTesting */,
 			);
 			productName = StreamVideoSwiftUITests;
 			productReference = 84F7380E287C141000A363F4 /* StreamVideoSwiftUITests.xctest */;
@@ -3433,8 +3433,8 @@
 			);
 			name = StreamVideoUIKitTests;
 			packageProductDependencies = (
-				8493227F29093A9E0013C029 /* SnapshotTesting */,
 				8251E60C2A17838D00E7257A /* WebRTC */,
+				40942B682AD444C200CE4EDD /* SnapshotTesting */,
 			);
 			productName = StreamVideoUIKitTests;
 			productReference = 84F7382F287C146D00A363F4 /* StreamVideoUIKitTests.xctest */;
@@ -3502,12 +3502,12 @@
 				84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */,
 				84BE8A5428BE314000B34D2F /* XCRemoteSwiftPackageReference "swift-protobuf" */,
 				8403BFCA28EB09D100CBE341 /* XCRemoteSwiftPackageReference "Nuke" */,
-				8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 				8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */,
 				401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
 				401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */,
 				40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */,
 				4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */,
+				40942B652AD444BA00CE4EDD /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -5930,6 +5930,14 @@
 				minimumVersion = 2.0.0;
 			};
 		};
+		40942B652AD444BA00CE4EDD /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Frameio/swift-snapshot-testing";
+			requirement = {
+				branch = "image-colorspace-coversions";
+				kind = branch;
+			};
+		};
 		40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/GetStream/stream-chat-swift-test-helpers";
@@ -5952,14 +5960,6 @@
 			requirement = {
 				branch = 8.0.0;
 				kind = branch;
-			};
-		};
-		8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
-			requirement = {
-				kind = exactVersion;
-				version = 1.11.0;
 			};
 		};
 		84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */ = {
@@ -6006,6 +6006,16 @@
 			package = 4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */;
 			productName = "GDPerformanceView-Swift";
 		};
+		40942B662AD444BA00CE4EDD /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40942B652AD444BA00CE4EDD /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
+		40942B682AD444C200CE4EDD /* SnapshotTesting */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40942B652AD444BA00CE4EDD /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
+			productName = SnapshotTesting;
+		};
 		40F445C42A9E1D91004BE3DA /* MockServer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */;
@@ -6040,16 +6050,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
 			productName = WebRTC;
-		};
-		8493223F290830390013C029 /* SnapshotTesting */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
-			productName = SnapshotTesting;
-		};
-		8493227F29093A9E0013C029 /* SnapshotTesting */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */;
-			productName = SnapshotTesting;
 		};
 		84A26C9829435F4100B29E53 /* NukeUI */ = {
 			isa = XCSwiftPackageProductDependency;
