@@ -42,6 +42,9 @@
 		404A5CF12AD5487A00EF1C62 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 404A5CF02AD5487A00EF1C62 /* SnapshotTesting */; };
 		404A5CF32AD5488F00EF1C62 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 404A5CF22AD5488F00EF1C62 /* SnapshotTesting */; };
 		404A5CF52AD5489500EF1C62 /* SnapshotTesting in Frameworks */ = {isa = PBXBuildFile; productRef = 404A5CF42AD5489500EF1C62 /* SnapshotTesting */; };
+		404A5CF72AD549F400EF1C62 /* CALayer+Swizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CF62AD549F400EF1C62 /* CALayer+Swizzle.swift */; };
+		404A5CF82AD549F400EF1C62 /* CALayer+Swizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CF62AD549F400EF1C62 /* CALayer+Swizzle.swift */; };
+		404A5CF92AD54A0B00EF1C62 /* CALayer+Swizzle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CF62AD549F400EF1C62 /* CALayer+Swizzle.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
@@ -901,6 +904,7 @@
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
 		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
+		404A5CF62AD549F400EF1C62 /* CALayer+Swizzle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CALayer+Swizzle.swift"; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
@@ -2092,6 +2096,7 @@
 			children = (
 				824DBAA229F93DBC005ACD09 /* SnapshotVariant.swift */,
 				824DBAA429F93E1F005ACD09 /* AssertSnapshot.swift */,
+				404A5CF62AD549F400EF1C62 /* CALayer+Swizzle.swift */,
 			);
 			path = SnapshotTesting;
 			sourceTree = "<group>";
@@ -4217,6 +4222,7 @@
 				84F58B7F29EE97C800010C4C /* VirtualTimer.swift in Sources */,
 				84F58B7A29EE972A00010C4C /* WebSocketPingController_Tests.swift in Sources */,
 				8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */,
+				404A5CF92AD54A0B00EF1C62 /* CALayer+Swizzle.swift in Sources */,
 				84F58B8F29EEB32700010C4C /* WebSocketPingController_Mock.swift in Sources */,
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
@@ -4376,6 +4382,7 @@
 				82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */,
 				82FF40BB2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift in Sources */,
 				84D425102AA72F3500473150 /* LivestreamPlayer_Tests.swift in Sources */,
+				404A5CF72AD549F400EF1C62 /* CALayer+Swizzle.swift in Sources */,
 				82FF40C02A17C73C00B4D95E /* CallingGroupView_Tests.swift in Sources */,
 				82E3BA3C2A0BADCA001AB93E /* MockResponseBuilder.swift in Sources */,
 				82E3BA502A0BAEAA001AB93E /* MockFunc.swift in Sources */,
@@ -4431,6 +4438,7 @@
 				8251E6312A17BEEF00E7257A /* ImageFactory.swift in Sources */,
 				82E3BA412A0BADFA001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				8493227B290938930013C029 /* StreamVideoUITestCase.swift in Sources */,
+				404A5CF82AD549F400EF1C62 /* CALayer+Swizzle.swift in Sources */,
 				82E3BA572A0BAF65001AB93E /* WebSocketEngine_Mock.swift in Sources */,
 				824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
 				8251E62D2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,

@@ -18,14 +18,16 @@ class StreamVideoUITestCase: XCTestCase {
     var callCid: String { "\(callType):\(callId)" }
     let sizeThatFits = CGSize(width: 100, height: 100)
     
-    override func setUpWithError() throws {
-        try super.setUpWithError()
+    override func setUp() {
+        super.setUp()
         
         let streamVideo = StreamVideo.mock(httpClient: httpClient)
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo)
+        CALayer.swizzleShadow()
+        animations(enabled: false)
     }
-    
-    override func tearDownWithError() throws {
-        try super.tearDownWithError()
+
+    func animations(enabled: Bool) {
+        UIView.setAnimationsEnabled(enabled)
     }
 }
