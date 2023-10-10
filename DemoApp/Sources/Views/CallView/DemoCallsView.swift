@@ -8,44 +8,66 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct DemoCallsView: View {
+            
+    @StateObject var viewModel: DemoCallsViewModel
     
-    @Environment(\.presentationMode) var presentationMode
-    
-    @Injected(\.streamVideo) var streamVideo
-    
-    @StateObject var viewModel = DemoCallsViewModel()
-    @ObservedObject var callViewModel: CallViewModel
+    init(callViewModel: CallViewModel) {
+        _viewModel = StateObject(wrappedValue: DemoCallsViewModel(callViewModel: callViewModel))
+    }
     
     var body: some View {
         ScrollView {
-            LazyVStack {
+            LazyVStack(alignment: .leading) {
+                if viewModel.favorites.count > 0 {
+                    Text("Favorites")
+                        .font(.headline)
+                    ForEach(viewModel.favorites) { employee in
+                        StreamEmployeeView(viewModel: viewModel, employee: employee)
+                    }
+                }
+                
+                Text("Stream employees")
+                    .font(.headline)
                 ForEach(viewModel.streamEmployees) { employee in
-                    Button(action: {
-                        presentationMode.wrappedValue.dismiss()
-                        callViewModel.startCall(
-                            callType: .default,
-                            callId: UUID().uuidString,
-                            members: [
-                                MemberRequest(userId: employee.id),
-                                MemberRequest(userId: streamVideo.user.id)
-                            ],
-                            ring: true
-                        )
-                    }, label: {
-                        HStack {
-                            LazyImage(imageURL: employee.imageURL)
-                                .frame(width: 60, height: 60)
-                                .clipShape(Circle())
-                            Text(employee.name)
-                            Spacer()
-                        }
-                    })
+                    StreamEmployeeView(viewModel: viewModel, employee: employee)
                 }
             }
             .padding()
         }
         .onAppear {
             viewModel.loadEmployees()
+        }
+        .navigationTitle("Stream Calls")
+    }
+}
+
+struct StreamEmployeeView: View {
+    
+    @Environment(\.presentationMode) var presentationMode
+    
+    @ObservedObject var viewModel: DemoCallsViewModel
+    var employee: StreamEmployee
+    
+    var body: some View {
+        HStack {
+            LazyImage(imageURL: employee.imageURL)
+                .frame(width: 60, height: 60)
+                .clipShape(Circle())
+            Text(employee.name)
+            Spacer()
+            
+            Button(action: {
+                viewModel.startCall(with: employee)
+                presentationMode.wrappedValue.dismiss()
+            }, label: {
+                Image(systemName: "phone.fill")
+            })
+            
+            Button(action: {
+                viewModel.favoriteTapped(for: employee)
+            }, label: {
+                Image(systemName: employee.isFavorite ? "star.fill" : "star")
+            })
         }
     }
 }

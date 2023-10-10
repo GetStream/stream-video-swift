@@ -55,9 +55,7 @@ enum GoogleHelper {
         
         var result = [StreamEmployee]()
         
-        //TODO: just for testing
-        let martin = StreamEmployee(email: "martin", id: "martin", name: "Martin", imageURL: nil)
-        result.append(martin)
+        let favoriteUserIds = AppState.shared.unsecureRepository.userFavorites()
         
         for person in people {
             if let emails = person["emailAddresses"] as? [[String: Any]],
@@ -73,7 +71,8 @@ enum GoogleHelper {
                 let employee = StreamEmployee(
                     email: email,
                     id: id,
-                    name: name,
+                    name: name, 
+                    isFavorite: favoriteUserIds.contains(id),
                     imageURL: URL(string: photo)
                 )
                 result.append(employee)
@@ -99,9 +98,10 @@ enum GoogleHelper {
     }
 }
 
-struct StreamEmployee: Identifiable {
+struct StreamEmployee: Identifiable, Equatable {
     let email: String
     let id: String
     let name: String
+    var isFavorite: Bool
     let imageURL: URL?
 }
