@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import GoogleSignIn
+import GoogleSignIn
 import GoogleSignInSwift
 import StreamVideo
 
