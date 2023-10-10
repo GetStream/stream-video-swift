@@ -21,7 +21,6 @@ struct AppControlsWithChat: View {
 
     @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
     @ObservedObject var viewModel: CallViewModel
-    @State private var isChatVisible = false
 
     init(viewModel: CallViewModel, canOpenChat: Bool = true) {
         self.viewModel = viewModel
@@ -61,22 +60,9 @@ struct AppControlsWithChat: View {
             }
             .offset(y: -15)
         )
-        .onReceive(chatViewModel?.$isChatVisible) { isChatVisible = canOpenChat && $0 }
         .onReceive(viewModel.$call, perform: { call in
             reactionsHelper.call = call
         })
-        .halfSheetIfAvailable(isPresented: $isChatVisible, onDismiss: { chatViewModel?.isChatVisible = false }) {
-            if let chatViewModel = chatViewModel, let channelController = chatViewModel.channelController {
-                VStack {
-                    ChatControlsHeader(viewModel: viewModel)
-                    ChatView(
-                        channelController: channelController,
-                        chatViewModel: chatViewModel,
-                        callViewModel: viewModel
-                    )
-                }
-            }
-        }
     }
 }
 

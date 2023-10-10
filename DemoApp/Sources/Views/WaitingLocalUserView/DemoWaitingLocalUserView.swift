@@ -14,11 +14,13 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
     @ObservedObject var viewModel: CallViewModel
 
     @State private var isSharePresented = false
-    @State private var isChatVisible = false
 
     private let viewFactory: Factory
 
-    internal init(viewFactory: Factory, viewModel: CallViewModel) {
+    internal init(
+        viewFactory: Factory,
+        viewModel: CallViewModel
+    ) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
@@ -28,7 +30,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
             viewFactory
                 .makeInnerWaitingLocalUserView(viewModel: viewModel)
 
-            if !isChatVisible {
+            if chatViewModel?.isChatVisible == true {
                 VStack {
                     Spacer()
                     VStack {
@@ -82,7 +84,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
                 }
             }
         }
-        .onReceive(chatViewModel?.$isChatVisible) { isChatVisible = $0 }
+        .chat(viewModel: viewModel, chatViewModel: chatViewModel)
     }
 
     private var callLink: String {

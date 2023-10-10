@@ -38,6 +38,7 @@
 		4046DEEE2A9F404300CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEED2A9F404300CA6D2F /* GDPerformanceView-Swift */; };
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
+		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
@@ -898,6 +899,7 @@
 		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
+		404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatModifier.swift; sourceTree = "<group>"; };
 		4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoChatViewModel+Injection.swift"; sourceTree = "<group>"; };
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
@@ -1925,6 +1927,7 @@
 				40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */,
 				40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */,
 				40F446012A9E2C23004BE3DA /* DemoCallView.swift */,
+				404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */,
 			);
 			path = CallView;
 			sourceTree = "<group>";
@@ -2113,7 +2116,6 @@
 				82FF40B62A17C6CD00B4D95E /* ReconnectionView_Tests.swift */,
 				82FF40B82A17C6D600B4D95E /* RecordingView_Tests.swift */,
 				82FF40BA2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift */,
-				407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */,
 				40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */,
 				407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */,
 			);
@@ -3801,6 +3803,7 @@
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */,
 				40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */,
+				404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */,
 				842D8BDA2865B37800801910 /* DemoApp.swift in Sources */,
 				40F445E82A9E2824004BE3DA /* Call+Identifiable.swift in Sources */,
 				40F445FE2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift in Sources */,
