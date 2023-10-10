@@ -30,6 +30,16 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
+			<string>io.getstream.iOS.VideoDemoApp</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>streamvideo</string>
+			</array>
+		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
 			<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
