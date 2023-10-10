@@ -14,7 +14,7 @@ extension CALayer {
         swizzle(original: #selector(getter: shadowPath), modified: #selector(_swizzled_shadowPath))
     }
 
-    static func reverSwizzleShadow() {
+    static func revertSwizzleShadow() {
         swizzle(original: #selector(_swizzled_shadowOpacity), modified: #selector(getter: shadowOpacity))
         swizzle(original: #selector(_swizzled_shadowRadius), modified: #selector(getter: shadowRadius))
         swizzle(original: #selector(_swizzled_shadowColor), modified: #selector(getter: shadowColor))

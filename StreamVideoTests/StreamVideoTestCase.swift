@@ -16,7 +16,13 @@ open class StreamVideoTestCase: XCTestCase {
         CALayer.swizzleShadow()
         animations(enabled: false)
     }
-    
+
+    open override func tearDown() {
+        CALayer.revertSwizzleShadow()
+        animations(enabled: true)
+        super.tearDown()
+    }
+
     // TODO: replace this with something a bit better
     func waitForCallEvent(nanoseconds: UInt64 = 500_000_000) async throws {
         try await Task.sleep(nanoseconds: nanoseconds)

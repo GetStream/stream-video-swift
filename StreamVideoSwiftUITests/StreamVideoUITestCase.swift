@@ -27,6 +27,12 @@ class StreamVideoUITestCase: XCTestCase {
         animations(enabled: false)
     }
 
+    open override func tearDown() {
+        CALayer.revertSwizzleShadow()
+        animations(enabled: true)
+        super.tearDown()
+    }
+
     func animations(enabled: Bool) {
         UIView.setAnimationsEnabled(enabled)
     }
