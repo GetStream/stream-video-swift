@@ -79,14 +79,10 @@ final class Router: ObservableObject {
         } else if let userCredentials = AppState.shared.unsecureRepository.loadCurrentUser() {
             if userCredentials.userInfo.id.contains("@getstream") {
                 GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _,_ in
-                    self?.appState.currentUser = userCredentials.userInfo
-                    self?.appState.userState = .loggedIn
-                    self?.handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
+                    self?.setupUser(with: userCredentials)
                 }
             } else {
-                appState.currentUser = userCredentials.userInfo
-                appState.userState = .loggedIn
-                handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
+                setupUser(with: userCredentials)
             }
         } else {
             try await handleGuestUser(deeplinkInfo: .empty)
@@ -112,6 +108,12 @@ final class Router: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func setupUser(with userCredentials: UserCredentials) {
+        appState.currentUser = userCredentials.userInfo
+        appState.userState = .loggedIn
+        handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
     }
 
     private func handleGuestUser(
