@@ -13,10 +13,13 @@ internal struct DemoCallContainerView: View {
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
     @StateObject var viewModel: CallViewModel
+    @StateObject var chatViewModel: DemoChatViewModel
     @ObservedObject var appState = AppState.shared
 
     internal init(callId: String) {
-        _viewModel = StateObject(wrappedValue: CallViewModel())
+        let callViewModel = CallViewModel()
+        _viewModel = StateObject(wrappedValue: callViewModel)
+        _chatViewModel = StateObject(wrappedValue: .init(callViewModel))
         self.callId = callId
     }
 
@@ -26,7 +29,7 @@ internal struct DemoCallContainerView: View {
                 DemoCallModifier(
                     viewFactory: DemoAppViewFactory.shared,
                     viewModel: viewModel,
-                    chatViewModel: .init(viewModel)
+                    chatViewModel: chatViewModel
                 )
             )
             .onContinueUserActivity(

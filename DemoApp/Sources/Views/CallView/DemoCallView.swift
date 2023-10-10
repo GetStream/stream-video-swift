@@ -10,6 +10,7 @@ import EffectsLibrary
 struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     @Injected(\.appearance) var appearance
+    @Injected(\.chatViewModel) var chatViewModel
 
     var microphoneChecker: MicrophoneChecker
 
@@ -74,6 +75,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             .onAppear {
                 updateMicrophoneChecker()
             }
+            .chat(viewModel: viewModel, chatViewModel: chatViewModel)
     }
 
     private func updateMicrophoneChecker() {
