@@ -39,6 +39,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantWithAudio_snapshot() {
+        callController.call = call
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
@@ -53,6 +54,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantWithoutAudio_snapshot() {
+        callController.call = call
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
                 viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
@@ -67,6 +69,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantsConnectionQuality_snapshot() throws {
+        callController.call = call
         for quality in connectionQuality {
             let count = gridParticipants.last!
             let layout = ParticipantsGridLayout(
@@ -82,6 +85,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantsSpeaking_snapshot() {
+        callController.call = call
         for count in gridParticipants {
             let participants = ParticipantFactory.get(count, speaking: true)
             var dict = [String: CallParticipant]()
