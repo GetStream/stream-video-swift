@@ -120,7 +120,11 @@ struct LobbyContentView: View {
         }
         .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear { viewModel.startCamera(front: true) }
+        .onAppear {
+            viewModel.startCamera(front: true)
+            if callSettings.audioOn { microphoneChecker.startListening() }
+            else { microphoneChecker.stopListening() }
+        }
         .onDisappear {
             viewModel.stopCamera()
             viewModel.cleanUp()
