@@ -12,6 +12,12 @@ class DemoCallsViewModel: ObservableObject {
 
     @Published var streamEmployees = [StreamEmployee]()
     @Published var favorites = [StreamEmployee]()
+    @Published var groupCall = false {
+        didSet {
+            groupCallParticipants = []
+        }
+    }
+    @Published var groupCallParticipants = [StreamEmployee]()
     
     let callViewModel: CallViewModel
     
@@ -45,14 +51,23 @@ class DemoCallsViewModel: ObservableObject {
         }
     }
     
-    func startCall(with employee: StreamEmployee) {
+    func groupSelectionTapped(for employee: StreamEmployee) {
+        if groupCallParticipants.contains(employee) {
+            groupCallParticipants.removeAll { $0.id == employee.id }
+        } else {
+            groupCallParticipants.append(employee)
+        }
+    }
+    
+    func startCall(with employees: [StreamEmployee]) {
+        var memberRequests = [MemberRequest]()
+        memberRequests.append(MemberRequest(userId: streamVideo.user.id))
+        let members = employees.map { MemberRequest(userId: $0.id) }
+        memberRequests.append(contentsOf: members)
         callViewModel.startCall(
             callType: .default,
             callId: UUID().uuidString,
-            members: [
-                MemberRequest(userId: employee.id),
-                MemberRequest(userId: streamVideo.user.id)
-            ],
+            members: memberRequests,
             ring: true
         )
     }

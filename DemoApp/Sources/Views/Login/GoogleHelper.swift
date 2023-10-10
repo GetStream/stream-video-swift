@@ -10,6 +10,12 @@ import StreamVideo
 @MainActor
 enum GoogleHelper {
     
+    private static let baseURL = "https://people.googleapis.com/v1/people:listDirectoryPeople"
+    private static let readMask = "readMask=emailAddresses,names,photos"
+    private static let sources = "sources=DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE"
+    private static let pageSize = "pageSize=1000"
+    private static let directoryScope = "https://www.googleapis.com/auth/directory.readonly"
+    
     static func signIn() async throws -> UserCredentials {
         guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
             throw ClientError.Unexpected("No view controller available")
@@ -24,7 +30,10 @@ enum GoogleHelper {
                     return
                 }
                 
-                GIDSignIn.sharedInstance.addScopes(["https://www.googleapis.com/auth/directory.readonly"], presenting: rootViewController) { result, error in
+                GIDSignIn.sharedInstance.addScopes(
+                    [directoryScope],
+                    presenting: rootViewController
+                ) { result, error in
                     Task {
                         do {
                             let credentials = try await userCredentials(for: userProfile)
@@ -42,7 +51,8 @@ enum GoogleHelper {
         guard let currentUser = GIDSignIn.sharedInstance.currentUser else {
             throw ClientError.InvalidToken()
         }
-        let urlString = ("https://people.googleapis.com/v1/people:listDirectoryPeople?access_token=\(currentUser.authentication.accessToken)&readMask=emailAddresses,names,photos&sources=DIRECTORY_SOURCE_TYPE_DOMAIN_PROFILE&pageSize=1000")
+        let token = currentUser.authentication.accessToken
+        let urlString = ("\(baseURL)?access_token=\(token)&\(readMask)&\(sources)&\(pageSize)")
         
         guard let url = URL(string: urlString) else { throw ClientError.InvalidURL() }
         let (data, _) = try await URLSession.shared.data(from: url)
@@ -61,7 +71,8 @@ enum GoogleHelper {
             if let emails = person["emailAddresses"] as? [[String: Any]],
                 let email = emails.first?["value"] as? String {
                 let id = email.replacingOccurrences(of: ".", with: "_")
-                let photo = ((person["photos"] as? [[String: Any]])?.first as? [String: Any])?["url"] as? String ?? ""
+                let firstPhoto = (person["photos"] as? [[String: Any]])?.first as? [String: Any]
+                let photoUrl = firstPhoto?["url"] as? String ?? ""
                 let name = email
                     .components(separatedBy: "@")
                     .first?
@@ -73,7 +84,7 @@ enum GoogleHelper {
                     id: id,
                     name: name, 
                     isFavorite: favoriteUserIds.contains(id),
-                    imageURL: URL(string: photo)
+                    imageURL: URL(string: photoUrl)
                 )
                 result.append(employee)
             }
