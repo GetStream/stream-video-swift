@@ -184,23 +184,23 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 ### 0.4 milestone
 
 - [x] Picture-in-picture support
+- [x] Enable SFU switching
 - [x] Address testing feedback
 - [x] Call Analytics / Stats
-- [ ] Thermal state improvements
-- [ ] Complete reconnection flows
-- [ ] Buttons to simulate ice-restart and SFU switching
-- [ ] Test with many participants
-- [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
-- [ ] Dynascale 2.0
+- [x] Thermal state improvements
+- [x] Test with many participants
+- [x] Testing on more devices
 
 ### 0.5.0 milestone
 
 - [ ] Video UIKit tutorial
 - [ ] Improve logging / Sentry integration
-- [ ] Testing on more devices
-- [ ] Enable SFU switching
 - [ ] Camera controls
 - [ ] Tap to focus
+- [ ] Complete reconnection flows
+- [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
+- [ ] Dynascale 2.0
+- [ ] Buttons to simulate ice-restart and SFU switching
 
 ### Dynascale 2.0
 
