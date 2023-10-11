@@ -4,6 +4,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [0.4.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.0)
+_October 11, 2023_
+
 ### ✅ Added
 - Picture-in-Picture support
 - Livestream Player
