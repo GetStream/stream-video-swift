@@ -301,32 +301,53 @@ public class CallState: ObservableObject {
         self.ownCapabilities = event.ownCapabilities
     }
 
-    private func didUpdate(_ participants: [CallParticipant]) {
-        self.participants = participants.sorted(using: defaultComparators)
+    private func didUpdate(_ newParticipants: [CallParticipant]) {
+        // Combine existing and newly added participants.
+        let currentParticipantIds = Set(self.participants.map(\.id))
+        let newlyAddedParticipants = Set(newParticipants.map(\.id))
+            .subtracting(currentParticipantIds)
+            .compactMap { participantsMap[$0] }
+
+        // Sort the updated participants.
+        let updatedCurrentParticipants: [CallParticipant] = (
+            self
+            .participants
+            .compactMap { participantsMap[$0.id] } + newlyAddedParticipants
+        )
+        .sorted(by: defaultComparators)
+
+        // Variables to hold segregated participants.
         var remoteParticipants: [CallParticipant] = []
         var activeSpeakers: [CallParticipant] = []
         var screenSharingSession: ScreenSharingSession?
 
-        for participant in participants {
+        // Segregate participants based on conditions.
+        for participant in updatedCurrentParticipants {
+            // Check if participant is local or remote.
             if participant.sessionId == sessionId {
                 localParticipant = participant
             } else {
                 remoteParticipants.append(participant)
             }
 
+            // Check if participant is speaking.
             if participant.isSpeaking {
                 activeSpeakers.append(participant)
             }
 
+            // Check if participant is a dominant speaker.
             if participant.isDominantSpeaker {
                 dominantSpeaker = participant
             }
 
+            // Check if participant is sharing their screen.
             if let screenshareTrack = participant.screenshareTrack, participant.isScreensharing {
                 screenSharingSession = .init(track: screenshareTrack, participant: participant)
             }
         }
 
+        // Update the respective class properties.
+        self.participants = updatedCurrentParticipants
         self.screenSharingSession = screenSharingSession
         self.remoteParticipants = remoteParticipants
         self.activeSpeakers = activeSpeakers
