@@ -40,17 +40,17 @@
 			<key>CFBundleTypeRole</key>
 			<string>Editor</string>
 			<key>CFBundleURLName</key>
-			<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
+			<string>$(GOOGLE_CLIENT_ID)</string>
 			<key>CFBundleURLSchemes</key>
 			<array>
-				<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
+				<string>$(GOOGLE_CLIENT_ID)</string>
 			</array>
 		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>$(GOOGLE_CLIENT_ID)</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
-	<key>GIDClientID</key>
-	<string>com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
 	<false/>
 	<key>NSAppTransportSecurity</key>

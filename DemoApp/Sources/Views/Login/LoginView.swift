@@ -54,15 +54,17 @@ struct LoginView: View {
                         Image(systemName: "person.crop.circle.badge.clock.fill")
                     }
                     
-                    LoginItemView {
-                        Task {
-                            let credentials = try await GoogleHelper.signIn()
-                            completion(credentials)
+                    if AppEnvironment.value(for: .GoogleSignIn)?.isEmpty == false {
+                        LoginItemView {
+                            Task {
+                                let credentials = try await GoogleHelper.signIn()
+                                completion(credentials)
+                            }
+                        } title: {
+                            Text("Login with Stream account")
+                        } icon: {
+                            Image(systemName: "person.crop.circle.badge.clock.fill")
                         }
-                    } title: {
-                        Text("Login with Stream account")
-                    } icon: {
-                        Image(systemName: "person.crop.circle.badge.clock.fill")
                     }
 
                     LoginItemView {

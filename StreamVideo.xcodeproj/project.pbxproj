@@ -3247,7 +3247,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 842D8BD12865B31D00801910 /* Build configuration list for PBXNativeTarget "DemoApp" */;
 			buildPhases = (
-				82DE10C72A827B010057BDA8 /* ShellScript */,
 				842D8BBF2865B31B00801910 /* Sources */,
 				842D8BC02865B31B00801910 /* Frameworks */,
 				842D8BC12865B31B00801910 /* Resources */,
@@ -3299,7 +3298,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8493225D2908378B0013C029 /* Build configuration list for PBXNativeTarget "DemoAppUIKit" */;
 			buildPhases = (
-				82010CAD2A851C06005C125D /* ShellScript */,
 				84932248290837890013C029 /* Sources */,
 				84932249290837890013C029 /* Frameworks */,
 				8493224A290837890013C029 /* Resources */,
@@ -3347,7 +3345,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 84F737FF287C13AD00A363F4 /* Build configuration list for PBXNativeTarget "StreamVideoTests" */;
 			buildPhases = (
-				827297E42A4585EA00774306 /* ShellScript */,
 				84F737F0287C13AD00A363F4 /* Sources */,
 				84F737F1287C13AD00A363F4 /* Frameworks */,
 				84F737F2287C13AD00A363F4 /* Resources */,
@@ -3664,61 +3661,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		82010CAD2A851C06005C125D /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
-		};
-		827297E42A4585EA00774306 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		82DE10C72A827B010057BDA8 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
-		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -5208,6 +5150,7 @@
 		};
 		842D8BD22865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
