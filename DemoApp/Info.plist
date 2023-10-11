@@ -36,7 +36,19 @@
 				<string>streamvideo</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>$(DEMOAPP_GOOGLE_CLIENT_ID)</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>>$(DEMOAPP_GOOGLE_CLIENT_ID)</string>
+			</array>
+		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>>$(DEMOAPP_GOOGLE_CLIENT_ID)</string>
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>ITSAppUsesNonExemptEncryption</key>
