@@ -17,8 +17,6 @@ struct DemoApp: App {
 
     @StateObject var appState: AppState
     private let router: Router
-    
-    lazy var signInConfig = GIDConfiguration(clientID: AppEnvironment.googleClientId)
 
     // MARK: - Lifecycle
 
