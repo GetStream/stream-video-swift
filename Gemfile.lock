@@ -33,6 +33,10 @@ GEM
     aws-sigv4 (1.6.0)
       aws-eventstream (~> 1, >= 1.0.2)
     babosa (1.0.4)
+    badge (0.13.0)
+      fastimage (>= 1.6)
+      fastlane (>= 2.0)
+      mini_magick (>= 4.9.4, < 5.0.0)
     claide (1.1.0)
     claide-plugins (0.9.2)
       cork
@@ -400,6 +404,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
+  badge
   cocoapods
   danger
   danger-commit_lint

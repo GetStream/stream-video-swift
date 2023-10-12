@@ -88,7 +88,10 @@ lane :match_me do |options|
 end
 
 lane :swiftui_testflight_build do |options|
-  xcargs = options[:configuration] == 'Debug' ? "GOOGLE_CLIENT_ID='#{gci}' REVERSED_GOOGLE_CLIENT_ID=#{reversed_gci}" : nil
+  beta = options[:configuration] == 'Debug'
+  badge(path: 'DemoApp/') if beta
+  xcargs = beta ? "GOOGLE_CLIENT_ID='#{gci}' REVERSED_GOOGLE_CLIENT_ID=#{reversed_gci}" : nil
+
   upload_beta(
     app_target: 'DemoApp',
     app_identifier: 'io.getstream.iOS.VideoDemoApp',
