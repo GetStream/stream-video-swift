@@ -16,7 +16,7 @@ app_secret = ENV.fetch('STREAM_VIDEO_SECRET', nil)
 derived_data_path = 'derived_data'
 source_packages_path = 'spm_cache'
 buildcache_xcargs = 'CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++'
-gci = 'com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh'
+gci = ENV['GOOGLE_CLIENT_ID'] || ''
 reversed_gci = gci.split('.').tap { |a| a.unshift(a.pop) }.join('.')
 is_localhost = !is_ci
 @force_check = false
