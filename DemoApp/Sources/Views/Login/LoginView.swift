@@ -54,7 +54,10 @@ struct LoginView: View {
                         Image(systemName: "person.crop.circle.badge.clock.fill")
                     }
                     
-                    if AppEnvironment.value(for: .GoogleSignIn)?.isEmpty == false {
+                    if 
+                        AppEnvironment.value(for: .googleClientId)?.isEmpty == false,
+                        AppEnvironment.value(for: .googleReversedClientId)?.isEmpty == false
+                    {
                         LoginItemView {
                             Task {
                                 let credentials = try await GoogleHelper.signIn()

@@ -61,10 +61,6 @@ extension AppEnvironment {
             return .production
         }
     }()
-    
-    static var googleClientId: String = {
-        return AppEnvironment.value(for: .GoogleSignIn)!
-    }()
 }
 
 extension AppEnvironment {
@@ -115,7 +111,8 @@ extension AppEnvironment {
 
     enum Variable: String {
         case JWTExpiration = "JWT_EXPIRATION"
-        case GoogleSignIn = "REVERSED_GOOGLE_CLIENT_ID"
+        case googleClientId = "GOOGLE_CLIENT_ID"
+        case googleReversedClientId = "REVERSED_GOOGLE_CLIENT_ID"
     }
 
     static func contains(_ argument: Argument) -> Bool {
