@@ -20,7 +20,9 @@ public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     dominantSpeaker,
     ifInvisible(isSpeaking),
     ifInvisible(publishingVideo),
-    ifInvisible(publishingAudio)
+    ifInvisible(publishingAudio),
+    joinedAt,
+    userId
 ]
 
 /// The set of comparators used for sorting `CallParticipant` objects during livestreams.
@@ -34,13 +36,15 @@ public let livestreamComparators: [StreamSortComparator<CallParticipant>] = [
     ifInvisible(isSpeaking),
     ifInvisible(publishingVideo),
     ifInvisible(publishingAudio),
-    roles()
+    roles(),
+    joinedAt,
+    userId
 ]
 
 // MARK: - Sort Sequence
 
 /// Represents the possible orders for sorting.
-public enum SortOrder { case ascending, descending }
+public enum StreamSortOrder { case ascending, descending }
 
 extension Sequence where Element == CallParticipant {
 
@@ -52,7 +56,7 @@ extension Sequence where Element == CallParticipant {
     /// - Returns: A sorted array of `CallParticipant`.
     public func sorted(
         by comparator: StreamSortComparator<Element>,
-        order: SortOrder = .ascending
+        order: StreamSortOrder = .ascending
     ) -> [Element] {
         sorted {
             switch order {
@@ -73,7 +77,7 @@ extension Sequence where Element == CallParticipant {
     /// - Returns: A sorted array of `CallParticipant`.
     public func sorted(
         by comparators: [StreamSortComparator<Element>],
-        order: SortOrder = .ascending
+        order: StreamSortOrder = .ascending
     ) -> [Element] { sorted(by: combineComparators(comparators), order: order) }
 }
 
@@ -149,9 +153,6 @@ public func combineComparators<T>(_ comparators: [StreamSortComparator<T>]) -> S
     }
 }
 
-/// Returns a comparator that sorts elements in descending order based on the provided comparator.
-public func descending<T>(_ comparator: @escaping StreamSortComparator<T>) -> StreamSortComparator<T> { { comparator($0, $1) } }
-
 /// Returns a new comparator that only applies the given comparator if the predicate returns true.
 /// If the predicate returns false, it deems the two elements "equal" (i.e., orderedSame).
 public func conditional<T>(_ predicate: @escaping (T, T) -> Bool) -> (@escaping StreamSortComparator<T>) -> StreamSortComparator<T> {
@@ -166,7 +167,7 @@ public func conditional<T>(_ predicate: @escaping (T, T) -> Bool) -> (@escaping 
 }
 
 /// Returns a comparator that always deems two elements "equal" regardless of their actual values.
-public func noopComparator<T>() -> StreamSortComparator<T> { { _, _ in .orderedSame } }
+public func noop<T>() -> StreamSortComparator<T> { { _, _ in .orderedSame } }
 
 /// A specific conditional comparator for CallParticipant that checks if either participant's track is not visible.
 public let ifInvisible = conditional { (rhs: CallParticipant, lhs: CallParticipant) -> Bool in
@@ -212,10 +213,10 @@ public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"]) -> S
         if p1.roles == p2.roles { return .orderedSame }
         for role in priorityRoles {
             if p1.roles.contains(role) && !p2.roles.contains(role) {
-                return .orderedDescending
+                return .orderedAscending
             }
             if p2.roles.contains(role) && !p1.roles.contains(role) {
-                return .orderedAscending
+                return .orderedDescending
             }
         }
         return .orderedSame
