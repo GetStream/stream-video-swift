@@ -17,11 +17,14 @@ enum GoogleHelper {
     private static let directoryScope = "https://www.googleapis.com/auth/directory.readonly"
     
     static func signIn() async throws -> UserCredentials {
-        guard let rootViewController = UIApplication.shared.windows.first?.rootViewController else {
+        guard 
+            let rootViewController = UIApplication.shared.windows.first?.rootViewController,
+            let clientId = AppEnvironment.value(for: .googleClientId)
+        else {
             throw ClientError.Unexpected("No view controller available")
         }
         
-        let config = GIDConfiguration(clientID: AppEnvironment.googleClientId)
+        let config = GIDConfiguration(clientID: clientId)
         return try await withCheckedThrowingContinuation { continuation in
             GIDSignIn.sharedInstance.signIn(with: config, presenting: rootViewController) { user, error in
                 guard let userProfile = user?.profile else {

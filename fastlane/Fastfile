@@ -16,6 +16,8 @@ app_secret = ENV.fetch('STREAM_VIDEO_SECRET', nil)
 derived_data_path = 'derived_data'
 source_packages_path = 'spm_cache'
 buildcache_xcargs = 'CC=clang CPLUSPLUS=clang++ LD=clang LDPLUSPLUS=clang++'
+gci = 'com.googleusercontent.apps.347024607410-48j4atipav0tcr4pesap4elr1u9t11uh'
+reversed_gci = gci.split('.').tap { |a| a.unshift(a.pop) }.join('.')
 is_localhost = !is_ci
 @force_check = false
 
@@ -85,11 +87,20 @@ lane :match_me do |options|
   )
 end
 
-lane :swiftui_testflight_build do
-  upload_beta(app_target: 'DemoApp', app_identifier: 'io.getstream.iOS.VideoDemoApp')
+lane :swiftui_testflight_build do |options|
+  beta = options[:configuration] == 'Debug'
+  badge(path: 'DemoApp/') if beta
+  xcargs = beta ? "GOOGLE_CLIENT_ID='#{gci}' REVERSED_GOOGLE_CLIENT_ID=#{reversed_gci}" : nil
+
+  upload_beta(
+    app_target: 'DemoApp',
+    app_identifier: 'io.getstream.iOS.VideoDemoApp',
+    configuration: options[:configuration],
+    xcargs: xcargs
+  )
 end
 
-lane :uikit_testflight_build do
+lane :uikit_testflight_build do |options|
   upload_beta(app_target: 'DemoAppUIKit', app_identifier: 'io.getstream.iOS.DemoAppUIKit')
 end
 
@@ -101,7 +112,9 @@ private_lane :upload_beta do |options|
     sdk_target: 'StreamVideo',
     app_target: options[:app_target],
     app_identifier: options[:app_identifier],
-    extensions: ['CallIntent', 'ScreenSharing']
+    configuration: options[:configuration] || 'Release',
+    extensions: ['CallIntent', 'ScreenSharing'],
+    xcargs: options[:xcargs]
   )
 end
 
