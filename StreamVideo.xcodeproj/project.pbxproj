@@ -40,6 +40,8 @@
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
+		406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 406303442AD942ED0091AE77 /* GoogleSignInSwift */; };
+		406303472AD943B60091AE77 /* GoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA682AD3F78F00769F6A /* GoogleHelper.swift */; };
 		406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
 		406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AF2A9DFC58004BE3DA /* CallKitState.swift */; };
@@ -375,7 +377,6 @@
 		8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993B294232360037232A /* IncomingCallView_iOS13.swift */; };
 		844299412942394C0037232A /* VideoView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299402942394C0037232A /* VideoView_iOS13.swift */; };
 		8446AF912A4D84F4002AB07B /* Retries_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8446AF902A4D84F4002AB07B /* Retries_Tests.swift */; };
-		844ADA632AD3F1AB00769F6A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 844ADA622AD3F1AB00769F6A /* GoogleSignIn */; };
 		844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */; };
 		844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */ = {isa = PBXBuildFile; fileRef = 844ADA662AD3F21000769F6A /* GoogleSignIn.plist */; };
 		844ADA692AD3F78F00769F6A /* GoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA682AD3F78F00769F6A /* GoogleHelper.swift */; };
@@ -1528,7 +1529,6 @@
 			files = (
 				844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
-				844ADA632AD3F1AB00769F6A /* GoogleSignIn in Frameworks */,
 				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
@@ -1551,6 +1551,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */,
 				4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */,
 				84A26C9929435F4100B29E53 /* NukeUI in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
@@ -3268,7 +3269,6 @@
 				401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */,
 				401A64A72A9DF7B400534ED1 /* EffectsLibrary */,
 				4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */,
-				844ADA622AD3F1AB00769F6A /* GoogleSignIn */,
 				844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */,
 			);
 			productName = StreamVideoSwiftUI;
@@ -3313,6 +3313,7 @@
 				84767501290A824B0015DC53 /* WebRTC */,
 				84A26C9829435F4100B29E53 /* NukeUI */,
 				4029A6292AB069600065DAFB /* StreamChatSwiftUI */,
+				406303442AD942ED0091AE77 /* GoogleSignInSwift */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -3838,6 +3839,7 @@
 				406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */,
 				4029A6262AB0692C0065DAFB /* DemoChatViewModel+Injection.swift in Sources */,
 				406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */,
+				406303472AD943B60091AE77 /* GoogleHelper.swift in Sources */,
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
 				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
 				406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */,
@@ -5978,6 +5980,11 @@
 			package = 4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */;
 			productName = "GDPerformanceView-Swift";
 		};
+		406303442AD942ED0091AE77 /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
+		};
 		40F445C42A9E1D91004BE3DA /* MockServer */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */;
@@ -6007,11 +6014,6 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
-		};
-		844ADA622AD3F1AB00769F6A /* GoogleSignIn */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
-			productName = GoogleSignIn;
 		};
 		844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */ = {
 			isa = XCSwiftPackageProductDependency;
