@@ -87,7 +87,7 @@ lane :match_me do |options|
   )
 end
 
-lane :update_google_plist do |options|
+private_lane :update_google_plist do |options|
   next if gci.nil?
 
   Dir.glob(File.join("../#{options[:app_target]}", '**', '*.plist')).each do |plist_file|
