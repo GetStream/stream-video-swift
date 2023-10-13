@@ -54,10 +54,7 @@ struct LoginView: View {
                         Image(systemName: "person.crop.circle.badge.clock.fill")
                     }
                     
-                    if 
-                        AppEnvironment.value(for: .googleClientId)?.isEmpty == false,
-                        AppEnvironment.value(for: .googleReversedClientId)?.isEmpty == false
-                    {
+                    if isGoogleSignInAvailable {
                         LoginItemView {
                             Task {
                                 let credentials = try await GoogleHelper.signIn()
@@ -101,6 +98,19 @@ struct LoginView: View {
                 DebugMenu()
             }
         }
+    }
+
+    private var isGoogleSignInAvailable: Bool {
+        guard
+            let clientId: String = AppEnvironment.value(for: .googleClientId),
+            let reversedClientId: String = AppEnvironment.value(for: .googleReversedClientId),
+            !clientId.isEmpty,
+            !reversedClientId.isEmpty
+        else{
+            return false
+        }
+
+        return true
     }
 }
 

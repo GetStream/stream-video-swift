@@ -19,7 +19,7 @@ enum GoogleHelper {
     static func signIn() async throws -> UserCredentials {
         guard 
             let rootViewController = UIApplication.shared.windows.first?.rootViewController,
-            let clientId = AppEnvironment.value(for: .googleClientId)
+            let clientId: String = AppEnvironment.value(for: .googleClientId)
         else {
             throw ClientError.Unexpected("No view controller available")
         }

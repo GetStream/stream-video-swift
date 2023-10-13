@@ -130,6 +130,21 @@ end
 lane :create_credentials_config do
   # Make sure xcconfig exists even though it won't be used on CI
   sh('touch ../TestTools/Credentials.xcconfig')
+  
+
+  directory_path = File.dirname(Dir.pwd)
+  file_types = "\\( -name '*.xcscheme' -o -name '*.plist' \\)"
+  base_command = "LC_ALL=C find #{directory_path} -type f #{file_types} -exec sed -i ''"
+
+  def perform_replacement(command, placeholder, replacement_value)
+    return if replacement_value.to_s.strip.empty?
+    
+    system("#{command} 's/#{placeholder}/#{replacement_value}/g' {} +")
+    puts "Replacement of #{placeholder} → #{replacement_value} ✅!"
+  end
+
+  perform_replacement(base_command, '\\$(GOOGLE_CLIENT_ID)', gci)
+  perform_replacement(base_command, '\\$(REVERSED_GOOGLE_CLIENT_ID)', reversed_gci)
 end
 
 lane :build_test_app_and_frameworks do
