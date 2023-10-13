@@ -161,43 +161,6 @@ class MockResponseBuilder {
         )
     }
     
-    func makeCallParticipant(
-        id: String,
-        name: String = "",
-        roles: [String] = [],
-        hasVideo: Bool = false,
-        hasAudio: Bool = false,
-        isScreenSharing: Bool = false,
-        isSpeaking: Bool = false,
-        isDominantSpeaker: Bool = false,
-        pin: PinInfo? = nil
-    ) -> CallParticipant {
-        let participant = CallParticipant(
-            id: id,
-            userId: id,
-            roles: roles,
-            name: name,
-            profileImageURL: nil,
-            trackLookupPrefix: nil,
-            hasVideo: hasVideo,
-            hasAudio: hasAudio,
-            isScreenSharing: isScreenSharing,
-            showTrack: true,
-            track: nil,
-            trackSize: .zero,
-            screenshareTrack: nil,
-            isSpeaking: isSpeaking,
-            isDominantSpeaker: isDominantSpeaker,
-            sessionId: id,
-            connectionQuality: .unknown,
-            joinedAt: Date(),
-            audioLevel: 0,
-            audioLevels: [],
-            pin: pin
-        )
-        return participant
-    }
-    
     func makeCallSessionResponse(
         acceptedBy: [String: Date] = [:],
         rejectedBy: [String: Date] = [:],

@@ -293,7 +293,7 @@ final class CallController_Tests: ControllerTestCase {
         // Given
         let sessionId = "test"
         webRTCClient = makeWebRTCClient()
-        let participant = MockResponseBuilder().makeCallParticipant(id: sessionId)
+        let participant = CallParticipant.dummy(id: sessionId)
         await webRTCClient.state.update(callParticipants: [sessionId: participant])
         let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
@@ -318,7 +318,7 @@ final class CallController_Tests: ControllerTestCase {
         let sessionId = "test"
         let size = CGSize(width: 100, height: 100)
         webRTCClient = makeWebRTCClient()
-        let participant = MockResponseBuilder().makeCallParticipant(id: sessionId)
+        let participant = CallParticipant.dummy(id: sessionId)
         await webRTCClient.state.update(callParticipants: [sessionId: participant])
         let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
@@ -342,7 +342,7 @@ final class CallController_Tests: ControllerTestCase {
         // Given
         let sessionId = "test"
         webRTCClient = makeWebRTCClient()
-        let participant = MockResponseBuilder().makeCallParticipant(id: sessionId)
+        let participant = CallParticipant.dummy(id: sessionId)
         await webRTCClient.state.update(callParticipants: [sessionId: participant])
         let callController = makeCallController()
         let call = streamVideo?.call(callType: callType, callId: callId)
