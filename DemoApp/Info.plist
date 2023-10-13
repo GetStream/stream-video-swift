@@ -101,5 +101,9 @@
 		<string>UIInterfaceOrientationPortrait</string>
 		<string>UIInterfaceOrientationPortraitUpsideDown</string>
 	</array>
+	<key>GOOGLE_CLIENT_ID</key>
+	<string>$(GOOGLE_CLIENT_ID)</string>
+	<key>REVERSED_GOOGLE_CLIENT_ID</key>
+	<string>$(REVERSED_GOOGLE_CLIENT_ID)</string>
 </dict>
 </plist>

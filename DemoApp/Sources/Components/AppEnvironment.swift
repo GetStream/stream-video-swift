@@ -105,14 +105,17 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
+    enum InfoPlistValue: String {
+        case googleClientId = "GOOGLE_CLIENT_ID"
+        case googleReversedClientId = "REVERSED_GOOGLE_CLIENT_ID"
+    }
+
     enum Argument: String {
         case mockJWT = "MOCK_JWT"
     }
 
     enum Variable: String {
         case JWTExpiration = "JWT_EXPIRATION"
-        case googleClientId = "GOOGLE_CLIENT_ID"
-        case googleReversedClientId = "REVERSED_GOOGLE_CLIENT_ID"
     }
 
     static func contains(_ argument: Argument) -> Bool {
@@ -126,6 +129,12 @@ extension AppEnvironment {
         ProcessInfo
             .processInfo
             .environment[variable.rawValue]
+    }
+
+    static func value<T>(for variable: InfoPlistValue) -> T? {
+        Bundle
+            .main
+            .infoDictionary?[variable.rawValue] as? T
     }
 }
 

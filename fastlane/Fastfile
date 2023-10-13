@@ -87,16 +87,28 @@ lane :match_me do |options|
   )
 end
 
+private_lane :update_google_plist do |options|
+  next if gci.nil?
+
+  Dir.glob(File.join("../#{options[:app_target]}", '**', '*.plist')).each do |plist_file|
+    old_content = File.read(plist_file)
+    new_content = old_content.gsub('$(GOOGLE_CLIENT_ID)', gci).gsub('$(REVERSED_GOOGLE_CLIENT_ID)', reversed_gci)
+    File.write(plist_file, new_content)
+  end
+end
+
 lane :swiftui_testflight_build do |options|
-  beta = options[:configuration] == 'Debug'
-  badge(path: 'DemoApp/') if beta
-  xcargs = beta ? "GOOGLE_CLIENT_ID='#{gci}' REVERSED_GOOGLE_CLIENT_ID='#{reversed_gci}'" : nil
+  app_target = 'DemoApp'
+
+  if options[:configuration] == 'Debug'
+    badge(path: app_target)
+    update_google_plist(app_target: app_target)
+  end
 
   upload_beta(
-    app_target: 'DemoApp',
+    app_target: app_target,
     app_identifier: 'io.getstream.iOS.VideoDemoApp',
-    configuration: options[:configuration],
-    xcargs: xcargs
+    configuration: options[:configuration]
   )
 end
 
@@ -113,8 +125,7 @@ private_lane :upload_beta do |options|
     app_target: options[:app_target],
     app_identifier: options[:app_identifier],
     configuration: options[:configuration] || 'Release',
-    extensions: ['CallIntent', 'ScreenSharing'],
-    xcargs: options[:xcargs]
+    extensions: ['CallIntent', 'ScreenSharing']
   )
 end
 
