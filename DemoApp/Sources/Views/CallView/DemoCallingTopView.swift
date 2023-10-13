@@ -6,11 +6,13 @@ import Foundation
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import GoogleSignIn
 
 struct DemoCallingTopView: View {
 
     @Injected(\.streamVideo) var streamVideo
 
+    @ObservedObject var callViewModel: CallViewModel
     @State var logoutAlertShown = false
 
     var body: some View {
@@ -40,6 +42,14 @@ struct DemoCallingTopView: View {
             }
 
             Spacer()
+            
+            if GIDSignIn.sharedInstance.currentUser != nil {
+                NavigationLink {
+                    DemoCallsView(callViewModel: callViewModel)
+                } label: {
+                    Text("Calls")
+                }
+            }
         }
         .alert(isPresented: $logoutAlertShown) {
             Alert(

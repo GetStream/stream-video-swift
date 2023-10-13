@@ -15,6 +15,11 @@ protocol UserRepository {
     
     func removeCurrentUser()
     
+    func userFavorites() -> [String]
+    
+    func addToFavorites(userId: String)
+    
+    func removeFromFavorites(userId: String)
 }
 
 protocol VoIPTokenHandler {
@@ -48,6 +53,7 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
         case pushToken = "stream.video.push.token"
         case lastRunConfiguration = "stream.video.last.run.configuration"
         case lastRunBaseURL = "stream.video.last.run.baseURL"
+        case userFavorites = "stream.video.favorites"
     }
 
     private let defaults: UserDefaults
@@ -112,6 +118,7 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
         defaults.set(nil, forKey: Key.token.rawValue)
         defaults.set(nil, forKey: Key.voIPPushToken.rawValue)
         defaults.set(nil, forKey: Key.pushToken.rawValue)
+        defaults.set(nil, forKey: Key.userFavorites.rawValue)
     }
 
     func save(configuration: AppEnvironment.Configuration) {
@@ -134,5 +141,25 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
             return nil
         }
         return .init(rawValue: lastBaseURLString)
+    }
+    
+    func userFavorites() -> [String] {
+        get(for: .userFavorites) ?? [String]()
+    }
+    
+    func addToFavorites(userId: String) {
+        var favorites = userFavorites()
+        if !favorites.contains(userId) {
+            favorites.append(userId)
+            set(favorites, for: .userFavorites)
+        }
+    }
+    
+    func removeFromFavorites(userId: String) {
+        var favorites = userFavorites()
+        favorites.removeAll { id in
+            id == userId
+        }
+        set(favorites, for: .userFavorites)
     }
 }

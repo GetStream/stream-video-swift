@@ -111,6 +111,8 @@ extension AppEnvironment {
 
     enum Variable: String {
         case JWTExpiration = "JWT_EXPIRATION"
+        case googleClientId = "GOOGLE_CLIENT_ID"
+        case googleReversedClientId = "REVERSED_GOOGLE_CLIENT_ID"
     }
 
     static func contains(_ argument: Argument) -> Bool {

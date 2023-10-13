@@ -375,6 +375,12 @@
 		8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8442993B294232360037232A /* IncomingCallView_iOS13.swift */; };
 		844299412942394C0037232A /* VideoView_iOS13.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844299402942394C0037232A /* VideoView_iOS13.swift */; };
 		8446AF912A4D84F4002AB07B /* Retries_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8446AF902A4D84F4002AB07B /* Retries_Tests.swift */; };
+		844ADA632AD3F1AB00769F6A /* GoogleSignIn in Frameworks */ = {isa = PBXBuildFile; productRef = 844ADA622AD3F1AB00769F6A /* GoogleSignIn */; };
+		844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */; };
+		844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */ = {isa = PBXBuildFile; fileRef = 844ADA662AD3F21000769F6A /* GoogleSignIn.plist */; };
+		844ADA692AD3F78F00769F6A /* GoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA682AD3F78F00769F6A /* GoogleHelper.swift */; };
+		844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */; };
+		844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */; };
 		844ECF4F2A33458A0023263C /* Member.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ECF4E2A33458A0023263C /* Member.swift */; };
 		84530C6C2A3C4E0700F2678E /* CallState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84530C6B2A3C4E0700F2678E /* CallState.swift */; };
 		8454A3192AAB374B00A012C6 /* CallStatsReport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8454A3182AAB374B00A012C6 /* CallStatsReport.swift */; };
@@ -1152,6 +1158,10 @@
 		8442993B294232360037232A /* IncomingCallView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IncomingCallView_iOS13.swift; sourceTree = "<group>"; };
 		844299402942394C0037232A /* VideoView_iOS13.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoView_iOS13.swift; sourceTree = "<group>"; };
 		8446AF902A4D84F4002AB07B /* Retries_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Retries_Tests.swift; sourceTree = "<group>"; };
+		844ADA662AD3F21000769F6A /* GoogleSignIn.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = GoogleSignIn.plist; sourceTree = "<group>"; };
+		844ADA682AD3F78F00769F6A /* GoogleHelper.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GoogleHelper.swift; sourceTree = "<group>"; };
+		844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallsView.swift; sourceTree = "<group>"; };
+		844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallsViewModel.swift; sourceTree = "<group>"; };
 		844ECF4E2A33458A0023263C /* Member.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Member.swift; sourceTree = "<group>"; };
 		84530C6B2A3C4E0700F2678E /* CallState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState.swift; sourceTree = "<group>"; };
 		8454A3182AAB374B00A012C6 /* CallStatsReport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsReport.swift; sourceTree = "<group>"; };
@@ -1516,7 +1526,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
+				844ADA632AD3F1AB00769F6A /* GoogleSignIn in Frameworks */,
 				84AF64BE287C34450012A503 /* WebRTC in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
@@ -1661,6 +1673,7 @@
 				4030E5932A9DF439003E8CBA /* Assets */,
 				4030E5922A9DF3ED003E8CBA /* Entitlements */,
 				4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */,
+				844ADA662AD3F21000769F6A /* GoogleSignIn.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -1766,6 +1779,7 @@
 				8456E6C1287EB405004E180E /* LoginView.swift */,
 				8456E6C3287EB43A004E180E /* LoginViewModel.swift */,
 				4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */,
+				844ADA682AD3F78F00769F6A /* GoogleHelper.swift */,
 			);
 			path = Login;
 			sourceTree = "<group>";
@@ -1927,6 +1941,8 @@
 				40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */,
 				40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */,
 				40F446012A9E2C23004BE3DA /* DemoCallView.swift */,
+				844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */,
+				844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */,
 				404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */,
 			);
 			path = CallView;
@@ -3231,7 +3247,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 842D8BD12865B31D00801910 /* Build configuration list for PBXNativeTarget "DemoApp" */;
 			buildPhases = (
-				82DE10C72A827B010057BDA8 /* ShellScript */,
 				842D8BBF2865B31B00801910 /* Sources */,
 				842D8BC02865B31B00801910 /* Frameworks */,
 				842D8BC12865B31B00801910 /* Resources */,
@@ -3253,6 +3268,8 @@
 				401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */,
 				401A64A72A9DF7B400534ED1 /* EffectsLibrary */,
 				4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */,
+				844ADA622AD3F1AB00769F6A /* GoogleSignIn */,
+				844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* StreamVideoCallApp-Debug.app */;
@@ -3281,7 +3298,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 8493225D2908378B0013C029 /* Build configuration list for PBXNativeTarget "DemoAppUIKit" */;
 			buildPhases = (
-				82010CAD2A851C06005C125D /* ShellScript */,
 				84932248290837890013C029 /* Sources */,
 				84932249290837890013C029 /* Frameworks */,
 				8493224A290837890013C029 /* Resources */,
@@ -3329,7 +3345,6 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 84F737FF287C13AD00A363F4 /* Build configuration list for PBXNativeTarget "StreamVideoTests" */;
 			buildPhases = (
-				827297E42A4585EA00774306 /* ShellScript */,
 				84F737F0287C13AD00A363F4 /* Sources */,
 				84F737F1287C13AD00A363F4 /* Frameworks */,
 				84F737F2287C13AD00A363F4 /* Resources */,
@@ -3507,6 +3522,7 @@
 				401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */,
 				40F445C32A9E1D91004BE3DA /* XCRemoteSwiftPackageReference "stream-chat-swift-test-helpers" */,
 				4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */,
+				844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */,
 			);
 			productRefGroup = 842D8BC42865B31B00801910 /* Products */;
 			projectDirPath = "";
@@ -3548,6 +3564,7 @@
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
+				844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */,
 				4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */,
 				842D8BDB2865B37800801910 /* Assets.xcassets in Resources */,
 			);
@@ -3644,61 +3661,6 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXShellScriptBuildPhase section */
-		82010CAD2A851C06005C125D /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
-		};
-		827297E42A4585EA00774306 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
-			showEnvVarsInLog = 0;
-		};
-		82DE10C72A827B010057BDA8 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			alwaysOutOfDate = 1;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-			);
-			outputFileListPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "if [ \"$CONFIGURATION\" == \"Test\" ]; then\n    touch \"$SRCROOT/TestTools/Credentials.xcconfig\"\nfi\n";
-		};
 		8434C53A289BBDF30001490A /* SwiftGen */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
@@ -3774,6 +3736,7 @@
 				40F445ED2A9E2A24004BE3DA /* DemoControls.swift in Sources */,
 				401A64AE2A9DF81200534ED1 /* UserProvider.swift in Sources */,
 				409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */,
+				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
 				40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
@@ -3791,6 +3754,7 @@
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
 				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
+				844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */,
 				40F445BE2A9E0823004BE3DA /* RobotVoiceFilter.swift in Sources */,
 				84093811288A90390089A35B /* DetailedCallingView.swift in Sources */,
 				84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */,
@@ -3811,6 +3775,7 @@
 				401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */,
 				40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */,
 				40F445BA2A9E0815004BE3DA /* AudioFilter.swift in Sources */,
+				844ADA692AD3F78F00769F6A /* GoogleHelper.swift in Sources */,
 				8430FD202AB0B0B6007AA3E6 /* RawStatsView.swift in Sources */,
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
@@ -5185,6 +5150,7 @@
 		};
 		842D8BD22865B31D00801910 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */;
 			buildSettings = {
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -5952,6 +5918,14 @@
 				kind = branch;
 			};
 		};
+		844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google/GoogleSignIn-iOS";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.0.0;
+			};
+		};
 		8493223E290830390013C029 /* XCRemoteSwiftPackageReference "swift-snapshot-testing" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/pointfreeco/swift-snapshot-testing";
@@ -6033,6 +6007,16 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
 			productName = Sentry;
+		};
+		844ADA622AD3F1AB00769F6A /* GoogleSignIn */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignIn;
+		};
+		844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 844ADA612AD3F1AB00769F6A /* XCRemoteSwiftPackageReference "GoogleSignIn-iOS" */;
+			productName = GoogleSignInSwift;
 		};
 		84767501290A824B0015DC53 /* WebRTC */ = {
 			isa = XCSwiftPackageProductDependency;

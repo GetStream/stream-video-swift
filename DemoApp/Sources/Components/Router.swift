@@ -7,6 +7,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 import WebRTC
+import GoogleSignIn
 
 @MainActor
 final class Router: ObservableObject {
@@ -76,9 +77,13 @@ final class Router: ObservableObject {
         if AppEnvironment.configuration == .test, AppEnvironment.contains(.mockJWT) {
             return
         } else if let userCredentials = AppState.shared.unsecureRepository.loadCurrentUser() {
-            appState.currentUser = userCredentials.userInfo
-            appState.userState = .loggedIn
-            handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
+            if userCredentials.userInfo.id.contains("@getstream") {
+                GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _,_ in
+                    self?.setupUser(with: userCredentials)
+                }
+            } else {
+                setupUser(with: userCredentials)
+            }
         } else {
             try await handleGuestUser(deeplinkInfo: .empty)
         }
@@ -103,6 +108,12 @@ final class Router: ObservableObject {
                 }
             }
         }
+    }
+    
+    private func setupUser(with userCredentials: UserCredentials) {
+        appState.currentUser = userCredentials.userInfo
+        appState.userState = .loggedIn
+        handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
     }
 
     private func handleGuestUser(
