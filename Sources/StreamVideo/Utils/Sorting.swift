@@ -166,9 +166,6 @@ public func conditional<T>(_ predicate: @escaping (T, T) -> Bool) -> (@escaping 
     }
 }
 
-/// Returns a comparator that always deems two elements "equal" regardless of their actual values.
-public func noop<T>() -> StreamSortComparator<T> { { _, _ in .orderedSame } }
-
 /// A specific conditional comparator for CallParticipant that checks if either participant's track is not visible.
 public let ifInvisible = conditional { (rhs: CallParticipant, lhs: CallParticipant) -> Bool in
     !rhs.showTrack || !lhs.showTrack
@@ -183,12 +180,13 @@ public var dominantSpeaker: StreamSortComparator<CallParticipant> = { comparison
 public var isSpeaking: StreamSortComparator<CallParticipant> = { comparison($0, $1, keyPath: \.isSpeaking) }
 
 /// Comparator which prioritizes participants who are pinned.
+/// - Note: Remote pins has higher priority than local.
 public var pinned: StreamSortComparator<CallParticipant> = { a, b in
     switch (a.pin, b.pin) {
     case (nil, _?): return .orderedDescending
     case (_?, nil): return .orderedAscending
-    case (let aPin?, let bPin?) where !aPin.isLocal && bPin.isLocal: return .orderedAscending
-    case (let aPin?, let bPin?) where aPin.isLocal && !bPin.isLocal: return .orderedDescending
+    case (let aPin?, let bPin?) where aPin.isLocal && !bPin.isLocal: return .orderedAscending
+    case (let aPin?, let bPin?) where !aPin.isLocal && bPin.isLocal: return .orderedDescending
     case (let aPin?, let bPin?) where aPin.pinnedAt > bPin.pinnedAt: return .orderedAscending
     case (let aPin?, let bPin?) where aPin.pinnedAt < bPin.pinnedAt: return .orderedDescending
     default: return .orderedSame

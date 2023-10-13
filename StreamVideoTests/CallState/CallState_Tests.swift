@@ -201,6 +201,29 @@ final class CallState_Tests: XCTestCase {
 
     }
 
+    /// Test the execution time of `didUpdate` with many merge/add/remove operations.
+    func test_didUpdate_performanceWithManyParticipants_timeExecutionIsLessThanMaxDuration() {
+        let subject = CallState()
+        let cycleCount = 250
+
+        assertDuration(maxDuration: 1) {
+            /// Add 2500 users
+            (0..<10).forEach {
+                add(count: cycleCount, namePrefix: $0, in: subject)
+                XCTAssertEqual(subject.participants.count, cycleCount * ($0 + 1))
+            }
+            XCTAssertEqual(subject.participants.count, 2500)
+
+            /// Remove half of them
+            dropFirst(count: 1250, from: subject)
+            XCTAssertEqual(subject.participants.count, 1250)
+
+            /// Add 1250 users
+            (0..<5).forEach { add(count: cycleCount, namePrefix: $0, in: subject) }
+            XCTAssertEqual(subject.participants.count, 2500)
+        }
+    }
+
     // MARK: - Private helpers
 
     private func assertParticipantsUpdate(
@@ -226,5 +249,43 @@ final class CallState_Tests: XCTestCase {
         }
 
         XCTAssertEqual(subject.participants, expected, file: file, line: line)
+    }
+
+    private func makeCallParticipants(count: Int, nameSuffix: Int = 0) -> [CallParticipant] {
+        (0..<count).map { _ in
+            CallParticipant.dummy(name: "CallParticipant_\(nameSuffix + count)")
+        }
+    }
+
+    private func add(count: Int, namePrefix: Int = 0, in subject: CallState) {
+        let existingParticipants = subject.participants
+        let newParticipants = makeCallParticipants(count: count, nameSuffix: namePrefix)
+
+        subject.participantsMap = (existingParticipants + newParticipants)
+            .reduce(into: [String: CallParticipant]()) { $0[$1.id] = $1 }
+    }
+
+    private func dropFirst(count: Int, from subject: CallState) {
+        subject.participantsMap = subject
+            .participants
+            .dropFirst(count)
+            .reduce(into: [String: CallParticipant]()) { $0[$1.id] = $1 }
+    }
+
+    private func assertDuration(
+        maxDuration: TimeInterval,
+        block: () -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let startDate = Date()
+        block()
+        let duration = Date().timeIntervalSince(startDate)
+        XCTAssertTrue(
+            duration <= maxDuration,
+            "Execution time was \(duration) with maximumDuration: \(maxDuration)",
+            file: file,
+            line: line
+        )
     }
 }

@@ -58,6 +58,18 @@ final class Sorting_Tests: XCTestCase {
         )
     }
 
+    /// Test with pinned participants having different pinnedAt dates.
+    func test_pinned_localAndRemote() {
+        assertSort(
+            [
+                .dummy(pin: PinInfo(isLocal: false, pinnedAt: Date(timeIntervalSince1970: 0))),
+                .dummy(pin: PinInfo(isLocal: true, pinnedAt: Date(timeIntervalSince1970: 0)))
+            ],
+            comparator: pinned,
+            expectedTransformer: { [$0[1], $0[0]] }
+        )
+    }
+
     // MARK: - screenSharing
 
     /// Test with all participants screen sharing.
@@ -587,44 +599,6 @@ final class Sorting_Tests: XCTestCase {
             ],
             comparator: condition(userId),
             expectedTransformer: { [$0[1], $0[0]] }  // UserId A should come before UserId B based on the condition.
-        )
-    }
-
-    // MARK: - noop
-
-    /// Test the `noop` with various `name` values.
-    func test_noop_name() {
-        assertSort(
-            [
-                .dummy(name: "Zane"),
-                .dummy(name: "Aaron")
-            ],
-            comparator: noop(),
-            expectedTransformer: { [$0[0], $0[1]] }  // The order should remain unchanged.
-        )
-    }
-
-    /// Test the `noop` with various `id` values.
-    func test_noop_id() {
-        assertSort(
-            [
-                .dummy(id: "2"),
-                .dummy(id: "1")
-            ],
-            comparator: noop(),
-            expectedTransformer: { [$0[0], $0[1]] }  // The order should remain unchanged.
-        )
-    }
-
-    /// Test the `noop` with mixed properties.
-    func test_noop_mixedProperties() {
-        assertSort(
-            [
-                .dummy(id: "2", userId: "B", name: "Aaron"),
-                .dummy(id: "1", userId: "A", name: "Zane")
-            ],
-            comparator: noop(),
-            expectedTransformer: { [$0[0], $0[1]] }  // The order should remain unchanged.
         )
     }
 
