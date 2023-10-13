@@ -174,7 +174,23 @@ open class CallViewModel: ObservableObject {
         )
     }
     
-    public var participants: [CallParticipant] { call?.state.participants ?? [] }
+    public var participants: [CallParticipant] {
+        let updateParticipants = call?.state.participants ?? []
+        return updateParticipants.filter {
+            // In Grid layout with less than 3 participants the local user
+            // will be presented on the floating video track view. For this
+            // reason we filter out the participant to avoid showing them twice.
+            if
+                participantsLayout == .grid,
+                updateParticipants.count <= 3,
+                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true)
+            {
+                return $0.id != call?.state.sessionId
+            } else {
+                return true
+            }
+        }
+    }
 
     private var automaticLayoutHandling = true
     

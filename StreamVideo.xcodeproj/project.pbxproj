@@ -40,10 +40,12 @@
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
-		406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 406303442AD942ED0091AE77 /* GoogleSignInSwift */; };
-		406303472AD943B60091AE77 /* GoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA682AD3F78F00769F6A /* GoogleHelper.swift */; };
 		4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4063033E2AD847EC0091AE77 /* CallState_Tests.swift */; };
 		406303422AD848000091AE77 /* CallParticipant_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406303412AD848000091AE77 /* CallParticipant_Mock.swift */; };
+		406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */ = {isa = PBXBuildFile; productRef = 406303442AD942ED0091AE77 /* GoogleSignInSwift */; };
+		406303472AD943B60091AE77 /* GoogleHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA682AD3F78F00769F6A /* GoogleHelper.swift */; };
+		4069A0042AD985D2009A3A06 /* CallParticipant_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406303412AD848000091AE77 /* CallParticipant_Mock.swift */; };
+		4069A0052AD985D3009A3A06 /* CallParticipant_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406303412AD848000091AE77 /* CallParticipant_Mock.swift */; };
 		406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
 		406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AF2A9DFC58004BE3DA /* CallKitState.swift */; };
@@ -4354,6 +4356,7 @@
 				84DCA2122A389167000C3411 /* AssertDelay.swift in Sources */,
 				82FF40C22A17C74600B4D95E /* CallingParticipantView_Tests.swift in Sources */,
 				82E3BA482A0BAE2A001AB93E /* AssertAsync.swift in Sources */,
+				4069A0042AD985D2009A3A06 /* CallParticipant_Mock.swift in Sources */,
 				82FF40BB2A17C6DF00B4D95E /* ScreenSharingView_Tests.swift in Sources */,
 				84D425102AA72F3500473150 /* LivestreamPlayer_Tests.swift in Sources */,
 				82FF40C02A17C73C00B4D95E /* CallingGroupView_Tests.swift in Sources */,
@@ -4415,6 +4418,7 @@
 				824DBAA629F93E1F005ACD09 /* AssertSnapshot.swift in Sources */,
 				8251E62D2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,
 				82E3BA492A0BAE2B001AB93E /* AssertAsync.swift in Sources */,
+				4069A0052AD985D3009A3A06 /* CallParticipant_Mock.swift in Sources */,
 				829F7BFB29FABC0E003EBACE /* ViewFactory.swift in Sources */,
 				82E3BA552A0BAF4B001AB93E /* WebSocketClientEnvironment_Mock.swift in Sources */,
 				82E3BA4D2A0BAE41001AB93E /* EquatableEvent.swift in Sources */,

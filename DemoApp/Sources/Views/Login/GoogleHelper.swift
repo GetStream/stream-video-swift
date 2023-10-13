@@ -37,6 +37,11 @@ enum GoogleHelper {
                     [directoryScope],
                     presenting: rootViewController
                 ) { result, error in
+                    guard result != nil else {
+                        struct NoGoogleUserFound: Error {}
+                        continuation.resume(throwing: NoGoogleUserFound())
+                        return
+                    }
                     Task {
                         do {
                             let credentials = try await userCredentials(for: userProfile)
