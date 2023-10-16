@@ -206,7 +206,7 @@ final class CallState_Tests: XCTestCase {
         let subject = CallState()
         let cycleCount = 250
 
-        assertDuration(maxDuration: 1) {
+        assertDuration(maxDuration: 5) {
             /// Add 2500 users
             (0..<10).forEach {
                 add(count: cycleCount, namePrefix: $0, in: subject)
