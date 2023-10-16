@@ -87,6 +87,8 @@ video-buddy-log.txt
 video-buddy-session.json
 derived_data/
 spm_cache/
+.buildcache
+buildcache
 
 # Ignore Products folder
 Products/
