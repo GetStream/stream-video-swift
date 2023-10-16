@@ -33,13 +33,12 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
 
-    
     public var body: some View {
         VStack {
             viewFactory.makeVideoParticipantView(
                 participant: participant,
                 id: "\(participant.id)-spotlight",
-                availableFrame: .init(origin: .zero, size: .init(width: thumbnailSize, height: thumbnailSize)),
+                availableFrame: topParticipantFrame,
                 contentMode: .scaleAspectFill,
                 customData: [:],
                 call: call
@@ -48,8 +47,8 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 viewFactory.makeVideoCallParticipantModifier(
                     participant: participant,
                     call: call,
-                    availableFrame: availableFrame,
-                    ratio: ratio,
+                    availableFrame: topParticipantFrame,
+                    ratio: topParticipantRatio,
                     showAllInfo: true
                 )
             )
@@ -57,42 +56,67 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 participant: participant,
                 onChangeTrackVisibility: onChangeTrackVisibility)
             )
-            
+            .visibilityObservation(in: topParticipantFrame) {
+                onChangeTrackVisibility(participant, $0)
+            }
+
             ScrollView(.horizontal) {
                 HorizontalContainer {
                     ForEach(participants) { participant in
                         viewFactory.makeVideoParticipantView(
                             participant: participant,
                             id: participant.id,
-                            availableFrame: .init(origin: .zero, size: .init(width: thumbnailSize, height: thumbnailSize)),
+                            availableFrame: participantStripItemFrame,
                             contentMode: .scaleAspectFill,
                             customData: [:],
                             call: call
                         )
-                        .visibilityObservation(in: availableFrame) { onChangeTrackVisibility(participant, $0) }
-                        .adjustVideoFrame(to: thumbnailSize, ratio: 1)
+                        .modifier(
+                            viewFactory.makeVideoCallParticipantModifier(
+                                participant: participant,
+                                call: call,
+                                availableFrame: participantStripItemFrame,
+                                ratio: participantsStripItemRatio,
+                                showAllInfo: true
+                            )
+                        )
+                        .visibilityObservation(in: participantsStripFrame) { onChangeTrackVisibility(participant, $0) }
                         .cornerRadius(8)
                         .accessibility(identifier: "spotlightParticipantView")
                     }
                 }
-                .frame(height: thumbnailSize)
+                .frame(height: participantStripItemFrame.height)
                 .cornerRadius(8)
             }
             .padding()
             .padding(.bottom)
             .accessibility(identifier: "spotlightScrollView")
         }
-
     }
     
-    private var availableFrame: CGRect {
+    private var topParticipantFrame: CGRect {
         .init(
             origin: frame.origin,
             size: CGSize(width: frame.size.width, height: frame.size.height - thumbnailSize - 64)
         )
     }
+
+    private var participantsStripFrame: CGRect {
+        .init(
+            origin: .init(x: frame.origin.x, y: frame.maxY - thumbnailSize),
+            size: CGSize(width: frame.size.width, height: thumbnailSize)
+        )
+    }
+
+    private var topParticipantRatio: CGFloat {
+        topParticipantFrame.size.width / topParticipantFrame.size.height
+    }
     
-    private var ratio: CGFloat {
-        availableFrame.size.width / availableFrame.size.height
+    private var participantsStripItemRatio: CGFloat {
+        participantsStripFrame.size.width / participantsStripFrame.size.height
+    }
+
+    private var participantStripItemFrame: CGRect {
+        .init(origin: .zero, size: .init(width: participantsStripFrame.height, height: participantsStripFrame.height))
     }
 }
