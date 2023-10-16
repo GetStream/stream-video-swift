@@ -76,12 +76,12 @@ struct VisibilityThresholdModifier: ViewModifier {
         let requiredWidth = rect.size.width * threshold
 
         /// Check if the content view is vertically within the parent's bounds.
-        let verticalVisible = (minY + requiredHeight < bounds.maxY && minY > bounds.minY) ||
-                              (maxY - requiredHeight > bounds.minY && maxY < bounds.maxY)
+        let verticalVisible = (minY + requiredHeight <= bounds.maxY && minY >= bounds.minY) ||
+                              (maxY - requiredHeight >= bounds.minY && maxY <= bounds.maxY)
         /// Check if the content view is horizontally within the parent's bounds.
-        let horizontalVisible = (minX + requiredWidth < bounds.maxX && minX > bounds.minX) ||
-                                (maxX - requiredWidth > bounds.minX && maxX < bounds.maxX)
-        
+        let horizontalVisible = (minX + requiredWidth <= bounds.maxX && minX >= bounds.minX) ||
+                                (maxX - requiredWidth >= bounds.minX && maxX <= bounds.maxX)
+
         return (verticalVisible, horizontalVisible)
     }
 }

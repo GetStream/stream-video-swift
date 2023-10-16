@@ -67,7 +67,7 @@ final class VisibilityThresholdModifier_Tests: XCTestCase {
             in: bounds,
             threshold: 0.5,
             viewRect: CGRect(x: -10, y: 0, width: 60, height: 100),
-            expected: (false, true)
+            expected: (true, true)
         )
     }
 
@@ -76,7 +76,7 @@ final class VisibilityThresholdModifier_Tests: XCTestCase {
             in: bounds,
             threshold: 0.5,
             viewRect: CGRect(x: 0, y: 110, width: 100, height: 60),
-            expected: (false, false)
+            expected: (false, true)
         )
     }
 
@@ -85,7 +85,7 @@ final class VisibilityThresholdModifier_Tests: XCTestCase {
             in: bounds,
             threshold: 0.5,
             viewRect: CGRect(x: 110, y: 0, width: 60, height: 100),
-            expected: (false, false)
+            expected: (true, false)
         )
     }
 
