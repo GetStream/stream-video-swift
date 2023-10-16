@@ -30,7 +30,8 @@ public struct CallIconView: View {
     public var body: some View {
         ZStack {
             Circle().fill(
-                iconStyle.backgroundColor.opacity(iconStyle.opacity)
+                //iconStyle.backgroundColor.opacity(iconStyle.opacity)
+                Color.blue
             )
             icon
                 .resizable()
