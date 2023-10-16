@@ -1,0 +1,6 @@
+BuildCache[8422] (INFO)  Local cache hit (5356a31f64ab05257bb99e58ed13323c): object => /Users/runner/work/stream-video-swift/stream-video-swift/derived_data/Build/Intermediates.noindex/StreamVideo.build/Test-iphonesimulator/StreamVideo.build/Objects-normal/x86_64/StreamVideo_vers.o
+BuildCache[8422] (INFO)  Cache hit (5356a31f64ab05257bb99e58ed13323c)
+BuildCache[8755] (INFO)  Local cache hit (4cc521294cba3daf706a853f1da1d48c): object => /Users/runner/work/stream-video-swift/stream-video-swift/derived_data/Build/Intermediates.noindex/StreamVideo.build/Test-iphonesimulator/StreamVideoSwiftUI.build/Objects-normal/x86_64/StreamVideoSwiftUI_vers.o
+BuildCache[8755] (INFO)  Cache hit (4cc521294cba3daf706a853f1da1d48c)
+BuildCache[8811] (INFO)  Local cache hit (82ad3fb9a65fd3374149dd514fb48dc0): object => /Users/runner/work/stream-video-swift/stream-video-swift/derived_data/Build/Intermediates.noindex/StreamVideo.build/Test-iphonesimulator/StreamVideoSwiftUITests.build/Objects-normal/x86_64/StreamVideoSwiftUITests_vers.o
+BuildCache[8811] (INFO)  Cache hit (82ad3fb9a65fd3374149dd514fb48dc0)
