@@ -219,6 +219,26 @@ private_lane :test_ui do |options|
     xcargs: buildcache_xcargs,
     fail_build: options[:record].to_s.empty?
   )
+
+  if options[:record] && is_ci
+    next unless sh('git status --porcelain').include?('__Snapshots__')
+
+    title = "[CI] #{options[:scheme]} Snapshots"
+    base = current_branch
+    head = "#{base}/snapshots"
+    sh("git checkout -b #{head}")
+    sh('git add -A')
+    sh("git commit -m '#{title}'")
+    push_to_git_remote(tags: false)
+    create_pull_request(
+      api_token: params[:github_token],
+      repo: params[:github_repo],
+      title: title,
+      head: head,
+      base: base,
+      body: 'This PR was created automatically by CI.'
+    )
+  end
 end
 
 desc 'Starts Sinatra web server'

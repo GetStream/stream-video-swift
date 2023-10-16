@@ -146,18 +146,11 @@ jobs:
         path: |
           ~/Library/Logs/scan
           fastlane/test_output/snapshots
-    - run: bundle exec fastlane remove_snapshots only_unchanged:true scheme:StreamVideoSwiftUI
-      if: ${{ github.event.inputs.record_snapshots == 'true' }}
-    - uses: actions/upload-artifact@v3
-      if: ${{ github.event.inputs.record_snapshots == 'true' }}
-      with:
-        name: SwiftUI Snapshots
-        path: StreamVideoSwiftUITests/**/__Snapshots__/**/*.png
 
   test-uikit-debug:
     name: Test UIKit (Debug)
     runs-on: macos-13
-    if: ${{ github.event_name != 'push' }}
+    if: ${{ github.event_name != 'push' && github.event.inputs.record_snapshots != 'true' }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.number }}
@@ -167,7 +160,7 @@ jobs:
       env:
         INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.record_snapshots }}
+      run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}"
       timeout-minutes: 40
     - name: Parse xcresult
       if: failure()
@@ -181,13 +174,6 @@ jobs:
         path: |
           ~/Library/Logs/scan
           fastlane/test_output/snapshots
-    - run: bundle exec fastlane remove_snapshots only_unchanged:true scheme:StreamVideoUIKit
-      if: ${{ github.event.inputs.record_snapshots == 'true' }}
-    - uses: actions/upload-artifact@v3
-      if: ${{ github.event.inputs.record_snapshots == 'true' }}
-      with:
-        name: UIKit Snapshots
-        path: StreamVideoUIKitTests/**/__Snapshots__/**/*.png
 
   build-apps:
     name: Build Demo Apps
