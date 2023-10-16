@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- Video tracks remain disabled when they become visible [#191](https://github.com/GetStream/stream-video-swift/pull/191)
 
 # [0.4.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.0)
 _October 11, 2023_
