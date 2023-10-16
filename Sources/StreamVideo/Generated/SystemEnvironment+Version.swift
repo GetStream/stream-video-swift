@@ -7,5 +7,5 @@ import Foundation
 
 extension SystemEnvironment {
   /// A Stream Video version.
-  public static let version: String = "0.4.1"
+  public static let version: String = "0.4.0"
 }
