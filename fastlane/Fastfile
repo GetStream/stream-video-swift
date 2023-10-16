@@ -231,8 +231,8 @@ private_lane :test_ui do |options|
     sh("git commit -m '#{title}'")
     push_to_git_remote(tags: false)
     create_pull_request(
-      api_token: params[:github_token],
-      repo: params[:github_repo],
+      api_token: ENV.fetch('GITHUB_TOKEN', nil),
+      repo: github_repo,
       title: title,
       head: head,
       base: base,
