@@ -221,13 +221,14 @@ private_lane :test_ui do |options|
   )
 
   if options[:record] && is_ci
-    next unless sh('git status --porcelain').include?('__Snapshots__')
+    png_files = git_status(ext: '.png').map { |_, png| png }.flatten
+    next if png_files.empty?
 
     title = "[CI] #{options[:scheme]} Snapshots"
     base = current_branch
     head = "#{base}-snapshots"
     sh("git checkout -b #{head}")
-    sh('git add -A')
+    png_files.each { |png| sh("git add #{png}") || true }
     sh("git commit -m '#{title}'")
     push_to_git_remote(tags: false)
     create_pull_request(
@@ -443,9 +444,9 @@ def select_files_from(files:, with_extension:, that_start_with:)
   files.select do |f|
     f.start_with?(*that_start_with)
   end.map do |f|
-    f.split.drop(1).join
+    f.split.drop(1).join(' ')
   end.select do |f|
-    f.end_with?(with_extension)
+    f.gsub(/['"]/, '').end_with?(with_extension)
   end
 end
 
@@ -482,8 +483,8 @@ desc 'Remove UI Snapshots'
 lane :remove_snapshots do |options|
   snapshots_path = "../#{options[:scheme]}Tests/**/__Snapshots__/**/*.png"
   if options[:only_unchanged]
-    pnf_files = git_status(ext: '.png')
-    changed_snapshots = (pnf_files[:a] + pnf_files[:m]).map { |f| File.expand_path(f) }
+    png_files = git_status(ext: '.png')
+    changed_snapshots = (png_files[:a] + png_files[:m]).map { |f| File.expand_path(f) }
     Dir.glob(snapshots_path).select { |f| File.delete(f) unless changed_snapshots.include?(File.expand_path(f)) }
   else
     Dir.glob(snapshots_path).select { |f| File.delete(f) }
