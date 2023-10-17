@@ -99,28 +99,6 @@ final class CallState_Tests: XCTestCase {
         )
     }
 
-    /// Test the `didUpdate(_:)` function by sorting participants using the `joinedAt` property.
-    func test_didUpdate_sortsParticipantsByJoinTime() {
-        let earlierTime = Date().addingTimeInterval(-600)
-        let laterTime = Date()
-
-        assertParticipantsUpdate(
-            initial: [
-                .dummy(id: "1", joinedAt: laterTime),
-                .dummy(id: "3", joinedAt: laterTime)
-            ],
-            update: { initial in
-                return initial + [
-                    .dummy(id: "2", joinedAt: earlierTime),
-                    .dummy(id: "4", joinedAt: earlierTime)
-                ]
-            },
-            expectedTransformer: { updated in
-                return [updated[2], updated[3], updated[0], updated[1]]
-            }
-        )
-    }
-
     /// Test the `didUpdate(_:)` function by sorting participants using the `userId` property.
     func test_didUpdate_sortsParticipantsByUserId() {
         assertParticipantsUpdate(
@@ -160,23 +138,20 @@ final class CallState_Tests: XCTestCase {
     }
 
     /// Test the `didUpdate(_:)` function by sorting participants based on joined time and audio properties.
-    func test_didUpdate_sortsParticipantsByJoinTimeAndAudio() {
-        let earlierTime = Date().addingTimeInterval(-600)
-        let laterTime = Date()
-
+    func test_didUpdate_sortsParticipantsByUserIdAndAudio() {
         assertParticipantsUpdate(
             initial: [
-                .dummy(id: "1", hasAudio: true, joinedAt: earlierTime),
-                .dummy(id: "3", hasAudio: false, joinedAt: laterTime)
+                .dummy(id: "1", hasAudio: true),
+                .dummy(id: "3", hasAudio: false)
             ],
             update: { initial in
                 return initial + [
-                    .dummy(id: "2", hasAudio: true, joinedAt: laterTime),
-                    .dummy(id: "4", hasAudio: false, joinedAt: earlierTime)
+                    .dummy(id: "2", hasAudio: true),
+                    .dummy(id: "4", hasAudio: false)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[0], updated[2], updated[3], updated[1]]
+                return [updated[0], updated[2], updated[1], updated[3]]
             }
         )
     }
@@ -247,8 +222,14 @@ final class CallState_Tests: XCTestCase {
             mutated[$1.id] = $1
             return mutated
         }
+        let actualIndexes = subject.participants.map { updated.firstIndex(of: $0) ?? -1 }
 
-        XCTAssertEqual(subject.participants, expected, file: file, line: line)
+        XCTAssertTrue(
+            subject.participants == expected,
+            "Sorting order error. Expected order [\(actualIndexes.map(\.description).joined(separator: ","))]",
+            file: file,
+            line: line
+        )
     }
 
     private func makeCallParticipants(count: Int, nameSuffix: Int = 0) -> [CallParticipant] {
