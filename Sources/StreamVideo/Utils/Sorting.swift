@@ -20,9 +20,7 @@ public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     dominantSpeaker,
     ifInvisible(isSpeaking),
     ifInvisible(publishingVideo),
-    ifInvisible(publishingAudio),
-    joinedAt,
-    userId
+    ifInvisible(publishingAudio)
 ]
 
 /// The set of comparators used for sorting `CallParticipant` objects during livestreams.
@@ -167,8 +165,8 @@ public func conditional<T>(_ predicate: @escaping (T, T) -> Bool) -> (@escaping 
 }
 
 /// A specific conditional comparator for CallParticipant that checks if either participant's track is not visible.
-public let ifInvisible = conditional { (rhs: CallParticipant, lhs: CallParticipant) -> Bool in
-    !rhs.showTrack || !lhs.showTrack
+public let ifInvisible = conditional { (lhs: CallParticipant, rhs: CallParticipant) -> Bool in
+    !lhs.showTrack || !rhs.showTrack
 }
 
 // MARK: Instance
