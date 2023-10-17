@@ -21,7 +21,7 @@ public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
     ifInvisible(isSpeaking),
     ifInvisible(publishingVideo),
     ifInvisible(publishingAudio),
-    userId
+    ifInvisible(userId)
 ]
 
 /// The set of comparators used for sorting `CallParticipant` objects during livestreams.

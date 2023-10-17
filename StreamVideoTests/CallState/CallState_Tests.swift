@@ -160,17 +160,17 @@ final class CallState_Tests: XCTestCase {
     func test_didUpdate_sortsParticipantsByUserIdAndSpeaking() {
         assertParticipantsUpdate(
             initial: [
-                .dummy(id: "1", userId: "A", isSpeaking: false),
-                .dummy(id: "3", userId: "D", isSpeaking: true)
+                .dummy(id: "1", userId: "A", showTrack: false, isSpeaking: false),
+                .dummy(id: "3", userId: "D", showTrack: true, isSpeaking: true)
             ],
             update: { initial in
                 return initial + [
-                    .dummy(id: "2", userId: "B", isSpeaking: true),
-                    .dummy(id: "4", userId: "C", isSpeaking: false)
+                    .dummy(id: "2", userId: "B", showTrack: true, isSpeaking: true),
+                    .dummy(id: "4", userId: "C", showTrack: false, isSpeaking: false)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[2], updated[1], updated[0], updated[3]]
+                return [updated[1], updated[2], updated[0], updated[3]]
             }
         )
 
