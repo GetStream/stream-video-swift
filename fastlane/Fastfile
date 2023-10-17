@@ -192,7 +192,7 @@ desc 'Runs UIKit tests'
 lane :test_uikit do |options|
   test_ui(
     scheme: 'StreamVideoUIKit',
-    source: :swiftui,
+    source: :uikit,
     device: options[:device],
     record: options[:record],
     skip_build: options[:skip_build]
