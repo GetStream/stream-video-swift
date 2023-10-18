@@ -18,6 +18,7 @@ struct AppControlsWithChat: View {
     private var canOpenChat: Bool
 
     private let size: CGFloat = 50
+    private let cornerRadius: CGFloat = 24
 
     @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
     @ObservedObject var viewModel: CallViewModel
@@ -28,41 +29,28 @@ struct AppControlsWithChat: View {
     }
 
     var body: some View {
-        VStack {
-            HStack(alignment: .center, spacing: 12) {
-                if let chatViewModel, chatViewModel.isChatEnabled {
-                    ChatIconView(viewModel: chatViewModel)
-                }
-                VideoIconView(viewModel: viewModel)
-                MicrophoneIconView(viewModel: viewModel)
-                ToggleCameraIconView(viewModel: viewModel)
-                if !ProcessInfo.processInfo.isiOSAppOnMac {
-                    BroadcastIconView(
-                        viewModel: viewModel,
-                        preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
-                    )
-                }
-                HangUpIconView(viewModel: viewModel)
+        HStack(alignment: .center, spacing: 12) {
+            if let chatViewModel, chatViewModel.isChatEnabled {
+                ChatIconView(viewModel: chatViewModel)
             }
-            .frame(height: 85)
+            VideoIconView(viewModel: viewModel)
+            MicrophoneIconView(viewModel: viewModel)
+            ToggleCameraIconView(viewModel: viewModel)
+            if !ProcessInfo.processInfo.isiOSAppOnMac {
+                BroadcastIconView(
+                    viewModel: viewModel,
+                    preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
+                )
+            }
+            HangUpIconView(viewModel: viewModel)
         }
-        .frame(maxWidth: .infinity)
-        .background(
-            colors.callControlsBackground
-                .edgesIgnoringSafeArea(.all)
+        .padding()
+        .clipCorners(
+            radius: cornerRadius,
+            corners: [.topLeft, .topRight],
+            backgroundColor: colors.callControlsBackground
         )
-        .overlay(
-            VStack {
-                colors.callControlsBackground
-                    .frame(height: 30)
-                    .cornerRadius(24)
-                Spacer()
-            }
-            .offset(y: -15)
-        )
-        .onReceive(viewModel.$call, perform: { call in
-            reactionsHelper.call = call
-        })
+        .onReceive(viewModel.$call) { reactionsHelper.call = $0 }
     }
 }
 
