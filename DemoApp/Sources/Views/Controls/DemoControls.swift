@@ -29,7 +29,7 @@ struct AppControlsWithChat: View {
     }
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        HStack(alignment: .center) {
             if let chatViewModel, chatViewModel.isChatEnabled {
                 ChatIconView(viewModel: chatViewModel)
             }
@@ -45,6 +45,7 @@ struct AppControlsWithChat: View {
             HangUpIconView(viewModel: viewModel)
         }
         .padding()
+        .frame(maxWidth: .infinity)
         .clipCorners(
             radius: cornerRadius,
             corners: [.topLeft, .topRight],
