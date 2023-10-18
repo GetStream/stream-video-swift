@@ -11,11 +11,12 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     var screenSharing: ScreenSharingSession
     var availableFrame: CGRect
     var viewFactory: Factory
-    
+
+    private let thumbnailSize: CGFloat = 120
     private var thumbnailBounds: CGRect {
-        CGRect(x: 0, y: 0, width: 120, height: 120)
+        CGRect(x: 0, y: 0, width: thumbnailSize, height: thumbnailSize)
     }
-    
+
     public init(
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
@@ -27,7 +28,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         self.availableFrame = availableFrame
         self.viewFactory = viewFactory
     }
-        
+
     public var body: some View {
         VStack(alignment: .leading) {
             if !viewModel.hideUIElements {
@@ -45,44 +46,19 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                     screensharingView.accessibility(identifier: "screenSharingView")
                 }
             }
-            
+
             if !viewModel.hideUIElements {
-                ScrollView(.horizontal) {
-                    HorizontalContainer {
-                        ForEach(viewModel.participants) { participant in
-                            viewFactory.makeVideoParticipantView(
-                                participant: participant,
-                                id: "\(participant.id)-screenshare-participant",
-                                availableFrame: thumbnailBounds,
-                                contentMode: .scaleAspectFill,
-                                customData: [:],
-                                call: viewModel.call
-                            )
-                            .modifier(
-                                viewFactory.makeVideoCallParticipantModifier(
-                                    participant: participant,
-                                    call: viewModel.call,
-                                    availableFrame: thumbnailBounds,
-                                    ratio: 1,
-                                    showAllInfo: false
-                                )
-                            )
-                            .cornerRadius(8)
-                            .accessibility(identifier: "screenSharingParticipantView")
-                            .onAppear {
-                                viewModel.changeTrackVisibility(for: participant, isVisible: true)
-                            }
-                            .onDisappear {
-                                viewModel.changeTrackVisibility(for: participant, isVisible: false)
-                            }
-                        }
+                viewFactory.makeBottomParticipantsBarLayoutComponent(
+                    participants: viewModel.participants,
+                    availableFrame: .init(
+                        origin: .init(x: availableFrame.origin.x, y: availableFrame.maxY - thumbnailSize),
+                        size: CGSize(width: availableFrame.size.width, height: thumbnailSize)
+                    ),
+                    call: viewModel.call,
+                    onChangeTrackVisibility: { [weak viewModel] in
+                        viewModel?.changeTrackVisibility(for: $0, isVisible: $1)
                     }
-                    .frame(height: thumbnailBounds.size.height)
-                    .cornerRadius(8)
-                }
-                .padding()
-                .padding(.bottom)
-                .accessibility(identifier: "screenSharingParticipantList")
+                )
             }
         }
         .frame(
@@ -91,7 +67,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         )
         .background(Color.black)
     }
-    
+
     private var screensharingView: some View {
         VideoRendererView(
             id: "\(screenSharing.participant.id)-screenshare",
@@ -108,7 +84,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             height: viewModel.hideUIElements ? videoSize.height : nil
         )
     }
-    
+
     private var videoSize: CGSize {
         if viewModel.hideUIElements {
             return .init(width: availableFrame.size.height, height: availableFrame.size.width)

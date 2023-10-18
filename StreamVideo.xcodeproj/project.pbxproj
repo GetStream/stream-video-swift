@@ -86,6 +86,8 @@
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		409BFA432A9F7BBB003341EF /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
+		40AA2EDC2ADFEB01000DCA5C /* BottomParticipantsBarLayoutComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EDB2ADFEB01000DCA5C /* BottomParticipantsBarLayoutComponent.swift */; };
+		40AA2EDE2ADFF5E8000DCA5C /* DominantSpeakerLayoutComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EDD2ADFF5E8000DCA5C /* DominantSpeakerLayoutComponent.swift */; };
 		40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AA2EE02AE00179000DCA5C /* ClipCorners.swift */; };
 		40AB31262A49838000C270E1 /* EventTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB31252A49838000C270E1 /* EventTests.swift */; };
 		40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */; };
@@ -921,6 +923,8 @@
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
 		409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReadableContentGuide.swift; sourceTree = "<group>"; };
+		40AA2EDB2ADFEB01000DCA5C /* BottomParticipantsBarLayoutComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BottomParticipantsBarLayoutComponent.swift; sourceTree = "<group>"; };
+		40AA2EDD2ADFF5E8000DCA5C /* DominantSpeakerLayoutComponent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DominantSpeakerLayoutComponent.swift; sourceTree = "<group>"; };
 		40AA2EE02AE00179000DCA5C /* ClipCorners.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ClipCorners.swift; sourceTree = "<group>"; };
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
@@ -1846,6 +1850,15 @@
 			path = CallingView;
 			sourceTree = "<group>";
 		};
+		40AA2EDF2ADFF61B000DCA5C /* LayoutComponents */ = {
+			isa = PBXGroup;
+			children = (
+				40AA2EDB2ADFEB01000DCA5C /* BottomParticipantsBarLayoutComponent.swift */,
+				40AA2EDD2ADFF5E8000DCA5C /* DominantSpeakerLayoutComponent.swift */,
+			);
+			path = LayoutComponents;
+			sourceTree = "<group>";
+		};
 		40AB31232A49836800C270E1 /* WebSockets */ = {
 			isa = PBXGroup;
 			children = (
@@ -2351,6 +2364,7 @@
 		8434C523289AA2B60001490A /* CallView */ = {
 			isa = PBXGroup;
 			children = (
+				40AA2EDF2ADFF61B000DCA5C /* LayoutComponents */,
 				84429930293FA4680037232A /* ScreenSharing */,
 				846FBE8728AAD81E00147F6E /* Participants */,
 				84F3B0DD28913E0E0088751D /* CallControlsView.swift */,
@@ -4254,6 +4268,7 @@
 				84366E7C29C9FB6600287D14 /* VideoRendererFactory.swift in Sources */,
 				848FE1EF2A9DEAD700B45AC2 /* PiPHandler.swift in Sources */,
 				843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */,
+				40AA2EDE2ADFF5E8000DCA5C /* DominantSpeakerLayoutComponent.swift in Sources */,
 				401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */,
 				8406269C2A37A653004B8748 /* CallEventsHandler.swift in Sources */,
 				8434C529289AA2FA0001490A /* Colors.swift in Sources */,
@@ -4317,6 +4332,7 @@
 				84EA5D3C28BFB890004D3531 /* CallParticipantImageView.swift in Sources */,
 				840425B628D0A96F0084C637 /* VideoParticipantsView.swift in Sources */,
 				840626722A37A431004B8748 /* IncomingCall.swift in Sources */,
+				40AA2EDC2ADFEB01000DCA5C /* BottomParticipantsBarLayoutComponent.swift in Sources */,
 				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
 				8490032D29D4774500AD9BB4 /* JoiningCallView.swift in Sources */,
 				847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */,
