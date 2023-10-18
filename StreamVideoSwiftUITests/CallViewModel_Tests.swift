@@ -488,6 +488,124 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         XCTAssert(callViewModel.participantsLayout == .fullScreen)
     }
     
+    // MARK: - Participants
+
+    func test_participants_layoutIsGrid_validateAllVariants() async throws {
+        try await assertParticipantScenarios([
+            .init(callParticipantsCount: 2, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 1),
+            .init(callParticipantsCount: 2, participantsLayout: .grid, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 1),
+            .init(callParticipantsCount: 2, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 1),
+
+            .init(callParticipantsCount: 3, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 2),
+            .init(callParticipantsCount: 3, participantsLayout: .grid, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 2),
+            .init(callParticipantsCount: 3, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 2),
+
+            .init(callParticipantsCount: 4, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 4),
+            .init(callParticipantsCount: 4, participantsLayout: .grid, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 4),
+            .init(callParticipantsCount: 4, participantsLayout: .grid, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 4),
+        ])
+    }
+
+    func test_participants_layoutIsSpotlight_validateAllVariants() async throws {
+        try await assertParticipantScenarios([
+            .init(callParticipantsCount: 2, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 2),
+            .init(callParticipantsCount: 2, participantsLayout: .spotlight, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 2),
+            .init(callParticipantsCount: 2, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 2),
+
+            .init(callParticipantsCount: 3, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 3),
+            .init(callParticipantsCount: 3, participantsLayout: .spotlight, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 3),
+            .init(callParticipantsCount: 3, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 3),
+
+            .init(callParticipantsCount: 4, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 4),
+            .init(callParticipantsCount: 4, participantsLayout: .spotlight, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 4),
+            .init(callParticipantsCount: 4, participantsLayout: .spotlight, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 4),
+        ])
+    }
+
+    func test_participants_layoutIsFullscreen_validateAllVariants() async throws {
+        try await assertParticipantScenarios([
+            .init(callParticipantsCount: 2, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 2),
+            .init(callParticipantsCount: 2, participantsLayout: .fullScreen, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 2),
+            .init(callParticipantsCount: 2, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 2),
+
+            .init(callParticipantsCount: 3, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 3),
+            .init(callParticipantsCount: 3, participantsLayout: .fullScreen, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 3),
+            .init(callParticipantsCount: 3, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 3),
+
+            .init(callParticipantsCount: 4, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: false, expectedCount: 4),
+            .init(callParticipantsCount: 4, participantsLayout: .fullScreen, isLocalScreenSharing: true, isRemoteScreenSharing: false, expectedCount: 4),
+            .init(callParticipantsCount: 4, participantsLayout: .fullScreen, isLocalScreenSharing: false, isRemoteScreenSharing: true, expectedCount: 4),
+        ])
+    }
+
+    private struct ParticipantsScenario {
+        var callParticipantsCount: Int
+        var participantsLayout: ParticipantsLayout
+        var isLocalScreenSharing: Bool
+        var isRemoteScreenSharing: Bool
+        var expectedCount: Int
+    }
+
+    private func assertParticipantScenarios(
+        _ scenarios: [ParticipantsScenario],
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws {
+        for scenario in scenarios {
+            try await assertParticipants(
+                callParticipantsCount: scenario.callParticipantsCount,
+                participantsLayout: scenario.participantsLayout,
+                isLocalScreenSharing:scenario.isLocalScreenSharing,
+                isRemoteScreenSharing: scenario.isRemoteScreenSharing,
+                expectedCount: scenario.expectedCount,
+                file: file,
+                line: line
+            )
+        }
+    }
+
+    private func assertParticipants(
+        callParticipantsCount: Int,
+        participantsLayout: ParticipantsLayout,
+        isLocalScreenSharing: Bool,
+        isRemoteScreenSharing: Bool,
+        expectedCount: Int,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws {
+        // Setup call
+        let callViewModel = CallViewModel()
+        callViewModel.startCall(callType: .default, callId: callId, members: [])
+        try await waitForCallEvent()
+        let call = try XCTUnwrap(callViewModel.call, file: file, line: line)
+
+        let localParticipant = CallParticipant.dummy(
+            id: call.state.sessionId,
+            isScreenSharing: isLocalScreenSharing
+        )
+
+        let remoteCallParticipants = (0..<(callParticipantsCount - 1))
+            .map { CallParticipant.dummy(id: "test-participant-\($0)") }
+
+        if isLocalScreenSharing {
+            callViewModel.call?.state.screenSharingSession = .init(
+                track: nil,
+                participant: localParticipant
+            )
+        } else if isRemoteScreenSharing, let firstRemoteCallParticipant = remoteCallParticipants.first {
+            callViewModel.call?.state.screenSharingSession = .init(
+                track: nil,
+                participant: firstRemoteCallParticipant
+            )
+        }
+
+        callViewModel.update(participantsLayout: participantsLayout)
+        callViewModel.call?.state.participantsMap = ([localParticipant] + remoteCallParticipants)
+            .reduce(into: [String: CallParticipant]()) { $0[$1.id] = $1 }
+
+        XCTAssertEqual(callViewModel.participants.count, expectedCount, file: file, line: line)
+    }
+
     //MARK: - private
     
     private func callViewModelWithRingingCall(participants: [MemberRequest]) -> CallViewModel {

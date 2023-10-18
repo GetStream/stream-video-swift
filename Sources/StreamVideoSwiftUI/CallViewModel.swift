@@ -146,10 +146,7 @@ open class CallViewModel: ObservableObject {
     
     /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
-        callParticipants.first(where: { (_, value) in
-            value.id == call?.state.sessionId
-        })
-            .map { $1 }
+        call?.state.localParticipant
     }
                 
     private var participantUpdates: AnyCancellable?
@@ -178,20 +175,23 @@ open class CallViewModel: ObservableObject {
     }
     
     public var participants: [CallParticipant] {
-        callParticipants
-            .filter {
-                if participantsLayout == .grid,
-                   callParticipants.count <= 3,
-                   (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true) {
-                    return $0.value.id != call?.state.sessionId
-                } else {
-                    return true
-                }
+        let updateParticipants = call?.state.participants ?? []
+        return updateParticipants.filter {
+            // In Grid layout with less than 3 participants the local user
+            // will be presented on the floating video track view. For this
+            // reason we filter out the participant to avoid showing them twice.
+            if
+                participantsLayout == .grid,
+                updateParticipants.count <= 3,
+                (call?.state.screenSharingSession == nil || call?.state.isCurrentUserScreensharing == true)
+            {
+                return $0.id != call?.state.sessionId
+            } else {
+                return true
             }
-            .map(\.value)
-            .sorted(using: participantsSortComparators)
+        }
     }
-        
+
     private var automaticLayoutHandling = true
     
     public init(
@@ -380,24 +380,6 @@ open class CallViewModel: ObservableObject {
     ///  - participant: the participant whose track visibility would be changed.
     ///  - isVisible: whether the track should be visible.
     public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) {
-        if !isVisible {
-            if participantsLayout == .fullScreen || participantsLayout == .spotlight {
-                if participant.id == participants.first?.id {
-                    log.debug("Skip hiding the track for the top participant")
-                    return
-                }
-            }
-            if participantsLayout == .grid && participants.count < 6 {
-                log.debug("Skip hiding tracks in small grids")
-                return
-            } else {
-                let diff = abs(lastLayoutChange.timeIntervalSinceNow)
-                if diff < 3 {
-                    log.debug("Ignore track changes because of recent layout change")
-                    return
-                }
-            }
-        }
         Task {
             await call?.changeTrackVisibility(for: participant, isVisible: isVisible)
         }
