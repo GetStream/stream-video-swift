@@ -23,13 +23,30 @@ public struct CornerClipper: ViewModifier {
     public func body(content: Content) -> some View {
         ZStack {
             backgroundColor
-                .cornerRadius(radius)
-                .edgesIgnoringSafeArea(.all)
+                .clipShape(RoundedCorners(radius: radius, corners: corners))
+
+            backgroundColorView
 
             content
-                .clipShape(RoundedCorners(radius: radius, corners: corners))
                 .layoutPriority(1)
         }
+    }
+
+    private var backgroundColorView: some View {
+        var edgeInsets = EdgeInsets()
+
+        if corners.contains(.topLeft) || corners.contains(.topRight) {
+            edgeInsets.top = radius
+        }
+
+        if corners.contains(.bottomLeft) || corners.contains(.bottomRight) {
+            edgeInsets.bottom = radius
+        }
+
+        return backgroundColor
+            .edgesIgnoringSafeArea(.all)
+            .padding(.top, edgeInsets.top)
+            .padding(.bottom, edgeInsets.bottom)
     }
 }
 
