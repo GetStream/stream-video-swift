@@ -1,0 +1,66 @@
+//
+// Copyright © 2023 Stream.io Inc. All rights reserved.
+//
+
+import StreamVideo
+@testable import StreamVideoSwiftUI
+import SnapshotTesting
+import XCTest
+
+@MainActor
+final class BottomParticipantsBarLayoutComponent_Tests: StreamVideoUITestCase {
+    
+    func test_layout_participantsWithAudio_withoutAllInfo_viewWasConfiguredCorrectly() {
+        assertLayout(participantsCount: 10, withAudio: true, showAllInfo: false)
+    }
+
+    func test_layout_participantsWithoutAudio_withoutAllInfo_viewWasConfiguredCorrectly() {
+        assertLayout(participantsCount: 10, withAudio: false, showAllInfo: false)
+    }
+
+    func test_layout_participantsWithAudio_withAllInfo_viewWasConfiguredCorrectly() {
+        assertLayout(participantsCount: 10, withAudio: true, showAllInfo: true)
+    }
+
+    func test_layout_participantsWithoutAudio_withAllInfo_viewWasConfiguredCorrectly() {
+        assertLayout(participantsCount: 10, withAudio: false, showAllInfo: true)
+    }
+
+    func test_layout_participantsWithAudio_withAllInfoAndSmallerSize_viewWasConfiguredCorrectly() {
+        assertLayout(participantsCount: 10, withAudio: true, showAllInfo: true, thumbnailSize: 120)
+    }
+
+    func test_layout_participantsWithoutAudio_withAllInfoAndSmallerSize_viewWasConfiguredCorrectly() {
+        assertLayout(participantsCount: 10, withAudio: false, showAllInfo: true, thumbnailSize: 120)
+    }
+
+    private func assertLayout(
+        participantsCount: Int,
+        withAudio: Bool = true,
+        showAllInfo: Bool = false,
+        thumbnailSize: CGFloat = 240,
+        file: StaticString = #file,
+        function: String = #function,
+        line: UInt = #line
+    ) {
+        let screenWidth: CGFloat = 375
+        let call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
+        let participants = ParticipantFactory.get(participantsCount, withAudio: true)
+
+        AssertSnapshot(
+            BottomParticipantsBarLayoutComponent(
+                viewFactory: DefaultViewFactory.shared,
+                participants: participants,
+                frame: .init(origin: .zero, size: .init(width: screenWidth, height: thumbnailSize)),
+                call: call,
+                thumbnailSize: thumbnailSize,
+                showAllInfo: showAllInfo,
+                onChangeTrackVisibility: { _,_ in}
+            ).frame(width: screenWidth),
+            size: .zero,
+            line: line,
+            file: file,
+            function: function
+        )
+    }
+}
