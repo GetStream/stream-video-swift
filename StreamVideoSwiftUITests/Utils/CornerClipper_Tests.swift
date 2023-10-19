@@ -74,6 +74,7 @@ final class CornerClipper_Tests: XCTestCase {
                    corners: corners,
                    backgroundColor: .red
                ),
+            size: .init(width: 100, height: 100),
             line: line,
             file: file,
             function: function
