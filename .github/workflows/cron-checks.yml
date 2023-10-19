@@ -51,10 +51,10 @@ jobs:
           #   os: macos-13
           #   device: "iPhone 14 Pro Max"
           #   setup_runtime: false
-          - ios: 16.4
-            xcode: 14.3.1
+          - ios: 16.2
+            xcode: 14.2
             os: macos-13
-            device: "iPhone 14 Pro Max"
+            device: "iPhone 11 Pro"
             setup_runtime: false
           - ios: 15.4
             xcode: 14.2
