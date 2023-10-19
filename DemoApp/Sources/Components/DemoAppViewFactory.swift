@@ -44,7 +44,6 @@ final class DemoAppViewFactory: ViewFactory {
     func makeCallView(viewModel: CallViewModel) -> DemoCallView<DemoAppViewFactory> {
         DemoCallView(
             viewFactory: self,
-            microphoneChecker: MicrophoneChecker(),
             viewModel: viewModel
         )
     }

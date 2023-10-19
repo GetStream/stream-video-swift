@@ -12,16 +12,18 @@ public class MicrophoneChecker: ObservableObject {
     
     /// Returns the last three decibel values.
     @Published public var audioLevels: [Float]
-    
-    private var timer: Timer?
-    
+
     private let valueLimit: Int
     private let audioSession: AudioSessionProtocol
     private let notificationCenter: NotificationCenter
 
+    private var isListening: Bool { audioRecorder != nil }
     private var audioRecorder: AVAudioRecorder?
-
+    private var timer: Timer?
     private var callEndedCancellable: AnyCancellable?
+    private var isAudioSessionActive = false {
+        didSet { try? audioSession.setActive(isAudioSessionActive, options: []) }
+    }
 
     private let audioFilename: URL = {
         let documentPath = FileManager.default.urls(for: .cachesDirectory, in: .userDomainMask)[0]
@@ -55,6 +57,17 @@ public class MicrophoneChecker: ObservableObject {
         subscribeToCallEnded()
     }
 
+    deinit {
+        stopTimer()
+        stopAudioRecorder()
+        do {
+            try FileManager.default.removeItem(at: audioFilename)
+            log.debug("Successfully deleted audio filename")
+        } catch {
+            log.error("Error deleting audio filename: \(error.localizedDescription)", error: error)
+        }
+    }
+
     /// Checks if there are audible values available.
     public var isSilent: Bool {
         for audioLevel in audioLevels {
@@ -67,11 +80,15 @@ public class MicrophoneChecker: ObservableObject {
     
     /// Starts listening to audio updates.
     public func startListening() {
+        guard !isListening else { return }
+        isAudioSessionActive = true
         captureAudio()
     }
     
     /// Stops listening to audio updates.
     public func stopListening() {
+        guard isListening else { return }
+        isAudioSessionActive = false
         stopTimer()
         stopAudioRecorder()
     }
@@ -81,24 +98,21 @@ public class MicrophoneChecker: ObservableObject {
     private func subscribeToCallEnded() {
         callEndedCancellable = notificationCenter
             .publisher(for: Notification.Name(CallNotification.callEnded))
-            .sink { [audioSession] _ in try? audioSession.setActive(false, options: []) }
+            .sink { [weak self] _ in self?.stopListening() }
     }
 
     private func setUpAudioCapture() {
         do {
             try audioSession.setCategory(.playAndRecord)
-            try audioSession.setActive(true, options: [])
             audioSession.requestRecordPermission { result in
                 guard result else { return }
             }
-            captureAudio()
         } catch {
             log.error("Failed to set up recording session", error: error)
         }
     }
     
     private func captureAudio() {
-        guard audioRecorder == nil else { return }
         // `kAudioFormatLinearPCM` is being used to be able to support multiple
         // instances of AVAudioRecorders. (useful when using MicrophoneChecker
         // during a Call).
@@ -147,16 +161,7 @@ public class MicrophoneChecker: ObservableObject {
         audioRecorder = nil
     }
 
-    deinit {
-        stopTimer()
-        stopAudioRecorder()
-        do {
-            try FileManager.default.removeItem(at: audioFilename)
-            log.debug("Successfully deleted audio filename")
-        } catch {
-            log.error("Error deleting audio filename: \(error.localizedDescription)", error: error)
-        }
-    }
+
 }
 
 /// A simple protocol that abstracts the usage of AVAudioSession.
@@ -173,3 +178,20 @@ protocol AudioSessionProtocol {
 }
 
 extension AVAudioSession: AudioSessionProtocol {}
+
+/// Provides the default value of the `ThermalStateObserving` protocol.
+public struct MicrophoneCheckerKey: InjectionKey {
+    public static var currentValue: MicrophoneChecker = MicrophoneChecker()
+}
+
+extension InjectedValues {
+
+    public var microphoneChecker: MicrophoneChecker {
+        get {
+            Self[MicrophoneCheckerKey.self]
+        }
+        set {
+            Self[MicrophoneCheckerKey.self] = newValue
+        }
+    }
+}

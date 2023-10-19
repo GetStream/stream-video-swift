@@ -10,16 +10,18 @@ import StreamVideo
 public struct LocalParticipantViewModifier: ViewModifier {
 
     private let localParticipant: CallParticipant
-    @StateObject private var microphoneChecker: MicrophoneChecker
+    @ObservedObject var microphoneChecker = InjectedValues[\.microphoneChecker]
     @Binding private var callSettings: CallSettings
+
+    @State private var audioLevels: [Float] = []
 
     public init(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>
     ) {
         self.localParticipant = localParticipant
-        _microphoneChecker = .init(wrappedValue: .init())
         self._callSettings = callSettings
+        self.audioLevels = microphoneChecker.audioLevels
     }
 
     public func body(content: Content) -> some View {
@@ -30,8 +32,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
                     microphoneOn: callSettings.audioOn,
                     isSilent: microphoneChecker.isSilent
                 )
-                .onAppear { microphoneChecker.startListening() }
-                .onDisappear { microphoneChecker.stopListening() }
+                .onReceive(microphoneChecker.$audioLevels) { audioLevels = $0 }
             )
     }
 }
@@ -41,7 +42,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
     private let localParticipant: CallParticipant
-    @BackportStateObject private var microphoneChecker: MicrophoneChecker
+    @ObservedObject private var microphoneChecker: MicrophoneChecker
     @Binding private var callSettings: CallSettings
 
     init(

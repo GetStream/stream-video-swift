@@ -10,9 +10,9 @@ import SwiftUI
 struct LobbyView_iOS13: View {
     
     @ObservedObject var callViewModel: CallViewModel
+    @ObservedObject var microphoneChecker = InjectedValues[\.microphoneChecker]
     @BackportStateObject var viewModel: LobbyViewModel
-    @BackportStateObject var microphoneChecker = MicrophoneChecker()
-    
+
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings

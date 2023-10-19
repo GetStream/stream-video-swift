@@ -10,8 +10,8 @@ import SwiftUI
 public struct LobbyView: View {
     
     @StateObject var viewModel: LobbyViewModel
-    @StateObject var microphoneChecker = MicrophoneChecker()
-    
+    @ObservedObject var microphoneChecker = InjectedValues[\.microphoneChecker]
+
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
@@ -120,7 +120,11 @@ struct LobbyContentView: View {
         }
         .background(colors.lobbyBackground.edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .onAppear { viewModel.startCamera(front: true) }
+        .onAppear {
+            viewModel.startCamera(front: true)
+            if callSettings.audioOn { microphoneChecker.startListening() }
+            else { microphoneChecker.stopListening() }
+        }
         .onDisappear {
             viewModel.stopCamera()
             viewModel.cleanUp()
