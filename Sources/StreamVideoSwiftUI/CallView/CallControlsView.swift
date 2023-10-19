@@ -43,8 +43,8 @@ public struct CallControlsView: View {
         }
         .padding()
         .frame(maxWidth: .infinity)
-        .clipCorners(
-            radius: cornerRadius,
+        .cornerRadius(
+            cornerRadius,
             corners: [.topLeft, .topRight],
             backgroundColor: colors.callControlsBackground
         )
