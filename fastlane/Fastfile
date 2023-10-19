@@ -226,7 +226,7 @@ private_lane :test_ui do |options|
 
     title = "[CI] #{options[:scheme]} Snapshots"
     base = current_branch
-    head = "#{base}-snapshots"
+    head = "#{base}-#{options[:scheme]}-snapshots"
     sh("git checkout -b #{head}")
     png_files.each { |png| sh("git add #{png}") || true }
     sh("git commit -m '#{title}'")
