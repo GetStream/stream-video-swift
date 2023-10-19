@@ -135,6 +135,8 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
+      env:
+        INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
       timeout-minutes: 40
