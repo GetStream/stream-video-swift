@@ -42,7 +42,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
     private let localParticipant: CallParticipant
-    @BackportStateObject private var microphoneChecker: MicrophoneChecker
+    @ObservedObject private var microphoneChecker: MicrophoneChecker
     @Binding private var callSettings: CallSettings
 
     init(
