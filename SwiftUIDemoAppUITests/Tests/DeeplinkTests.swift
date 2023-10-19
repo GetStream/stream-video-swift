@@ -21,7 +21,7 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     private enum MockDeeplink {
-        static let production: URL = .init(string: "https://getstream.io/video/demos?id=test-call")!
+        static let deeplinkUrl: URL = .init(string: "\(Sinatra().baseUrl)/deeplink?id=test-call")!
         static let customScheme: URL = .init(string: "streamvideo://video/demos?id=test-call")!
     }
 
@@ -44,8 +44,8 @@ final class DeeplinkTests: StreamTestCase {
         
         WHEN("user navigates to the app through deeplink") {
             Safari()
-                .open(MockDeeplink.production)
-                .alertHandler()
+                .open(MockDeeplink.deeplinkUrl)
+                .tapOnDeeplinkButton()
                 .tapOnOpenButton()
         }
         THEN("user joins the the specified call") {

@@ -227,7 +227,7 @@ extension UserRobot {
     
     @discardableResult
     func assertParticipantsAreVisible(count: Int) -> Self {
-        XCTAssertEqual(count, CallPage.participantView.waitCount(count, timeout: UserRobot.defaultTimeout).count)
+        XCTAssertEqual(count, CallPage.participantView.waitCount(count, timeout: UserRobot.defaultTimeout, exact: true).count)
         return self
     }
     

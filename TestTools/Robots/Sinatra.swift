@@ -5,7 +5,7 @@
 import Foundation
 
 public class Sinatra {
-    private let baseUrl = "http://localhost:4567"
+    let baseUrl = "http://localhost:4567"
     
     enum ConnectionState: String {
         case on
