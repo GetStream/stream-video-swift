@@ -12,10 +12,10 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     @Injected(\.appearance) var appearance
     @Injected(\.chatViewModel) var chatViewModel
 
-    var microphoneChecker: MicrophoneChecker
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var reactionsHelper: ReactionsHelper = AppState.shared.reactionsHelper
+    @ObservedObject var microphoneChecker = InjectedValues[\.microphoneChecker]
 
     @State var mutedIndicatorShown = false
 
@@ -23,11 +23,9 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     init(
         viewFactory: ViewFactory,
-        microphoneChecker: MicrophoneChecker,
         viewModel: CallViewModel
     ) {
         self.viewFactory = viewFactory
-        self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
     }
 

@@ -12,7 +12,6 @@ final class DemoAppViewFactory: ViewFactory {
     static let shared = DemoAppViewFactory()
 
     @Injected(\.colors) var colors
-    @Injected(\.microphoneChecker) var microphoneChecker
 
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
@@ -45,7 +44,6 @@ final class DemoAppViewFactory: ViewFactory {
     func makeCallView(viewModel: CallViewModel) -> DemoCallView<DemoAppViewFactory> {
         DemoCallView(
             viewFactory: self,
-            microphoneChecker: microphoneChecker,
             viewModel: viewModel
         )
     }
