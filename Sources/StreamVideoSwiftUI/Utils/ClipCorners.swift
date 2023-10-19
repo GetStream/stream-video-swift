@@ -36,7 +36,6 @@ struct CornerClipper: ViewModifier {
         }
     }
 
-    ///
     private var backgroundColorView: some View {
         var edgeInsets = EdgeInsets()
 
