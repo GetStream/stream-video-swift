@@ -10,7 +10,7 @@ import StreamVideo
 public struct LocalParticipantViewModifier: ViewModifier {
 
     private let localParticipant: CallParticipant
-    @Injected(\.microphoneChecker) var microphoneChecker
+    @StateObject var microphoneChecker = InjectedValues[\.microphoneChecker]
     @Binding private var callSettings: CallSettings
 
     @State private var audioLevels: [Float] = []

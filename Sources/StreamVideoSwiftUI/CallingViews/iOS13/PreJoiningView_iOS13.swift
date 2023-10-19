@@ -11,8 +11,8 @@ struct LobbyView_iOS13: View {
     
     @ObservedObject var callViewModel: CallViewModel
     @BackportStateObject var viewModel: LobbyViewModel
-    @Injected(\.microphoneChecker) var microphoneChecker: MicrophoneChecker
-    
+    @BackportStateObject var microphoneManager = InjectedValues[\.microphoneManager]
+
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
