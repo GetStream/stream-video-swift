@@ -12,8 +12,8 @@ struct CustomCallView<Factory: ViewFactory>: View {
 
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
+    @ObservedObject var microphoneChecker = InjectedValues[\.microphoneChecker]
 
-    @StateObject var microphoneChecker = InjectedValues[\.microphoneChecker]
     @State var mutedIndicatorShown = false
     
     var body: some View {
