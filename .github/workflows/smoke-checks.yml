@@ -56,7 +56,7 @@ jobs:
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
     runs-on: macos-13
-    if: ${{ github.event_name != 'push' }}
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/ruby-cache
@@ -128,7 +128,6 @@ jobs:
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
     runs-on: macos-13
-    needs: build-test-app-and-frameworks
     if: ${{ github.event_name != 'push' || github.event.inputs.swiftui_snapshots == 'true' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
@@ -136,8 +135,10 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
+      env:
+        INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
-      run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" skip_build:true record:${{ github.event.inputs.swiftui_snapshots }}
+      run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
       timeout-minutes: 40
     - name: Parse xcresult
       if: failure()
