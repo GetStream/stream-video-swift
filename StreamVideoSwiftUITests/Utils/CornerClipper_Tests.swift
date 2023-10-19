@@ -74,7 +74,6 @@ final class CornerClipper_Tests: XCTestCase {
                    corners: corners,
                    backgroundColor: .red
                ),
-            record: true,
             line: line,
             file: file,
             function: function
