@@ -10,7 +10,8 @@ public struct CallControlsView: View {
     @Injected(\.streamVideo) var streamVideo
         
     private let size: CGFloat = 50
-    
+    private let cornerRadius: CGFloat = 24
+
     @ObservedObject var viewModel: CallViewModel
     
     @Injected(\.images) var images
@@ -23,37 +24,29 @@ public struct CallControlsView: View {
     public var body: some View {
         HStack(alignment: .top) {
             Spacer()
-            
+
             VideoIconView(viewModel: viewModel)
-            
+
             Spacer()
-            
+
             MicrophoneIconView(viewModel: viewModel)
-            
+
             Spacer()
-            
+
             ToggleCameraIconView(viewModel: viewModel)
-            
+
             Spacer()
 
             HangUpIconView(viewModel: viewModel)
-            
+
             Spacer()
         }
+        .padding()
         .frame(maxWidth: .infinity)
-        .frame(height: 85)
-        .background(
-            colors.callControlsBackground
-                .edgesIgnoringSafeArea(.all)
-        )
-        .overlay(
-            VStack {
-                colors.callControlsBackground
-                    .frame(height: 30)
-                    .cornerRadius(24)
-                Spacer()
-            }
-            .offset(y: -15)
+        .cornerRadius(
+            cornerRadius,
+            corners: [.topLeft, .topRight],
+            backgroundColor: colors.callControlsBackground
         )
     }
 }
