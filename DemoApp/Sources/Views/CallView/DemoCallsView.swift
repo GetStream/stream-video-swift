@@ -39,12 +39,8 @@ struct DemoCallsView: View {
         .onAppear {
             viewModel.loadEmployees()
         }
+        .navigationTitle("Stream Calls")
         .toolbar(content: {
-            ToolbarItem(placement: .principal) {
-                Text("Stream calls")
-                    .bold()
-            }
-            
             ToolbarItem(placement: .topBarTrailing) {
                 if viewModel.groupCallParticipants.count > 0 {
                     Button(action: {

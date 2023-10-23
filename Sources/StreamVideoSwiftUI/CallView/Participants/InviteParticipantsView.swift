@@ -61,6 +61,7 @@ struct InviteParticipantsView: View {
             }
             .listStyle(.plain)
         }
+        .navigationTitle(L10n.Call.Participants.add)
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
@@ -68,11 +69,6 @@ struct InviteParticipantsView: View {
                 } label: {
                     Image(systemName: "chevron.left")
                 }
-            }
-            
-            ToolbarItem(placement: .principal) {
-                Text(L10n.Call.Participants.add)
-                    .bold()
             }
             
             ToolbarItem(placement: .navigationBarTrailing) {

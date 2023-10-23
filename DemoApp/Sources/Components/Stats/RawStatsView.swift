@@ -30,12 +30,7 @@ struct RawStatsView: View {
                     }
                     .padding()
                 }
-                .toolbar {
-                    ToolbarItem(placement: .principal) {
-                        Text("Call stats")
-                            .bold()
-                    }
-                }
+                .navigationTitle("Call stats")
                 .navigationBarTitleDisplayMode(.inline)
             } else {
                 Text("Stats not available")
