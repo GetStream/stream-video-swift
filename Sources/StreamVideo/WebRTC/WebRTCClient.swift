@@ -547,17 +547,29 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             datacenter: signalService.hostname
         )
     }
-    
+
+    /// Initiates a camera focus operation at the specified point.
+    ///
+    /// This method attempts to focus the camera at a specific point on the screen.
+    /// It requires the `videoCapturer` property to be properly cast to `VideoCapturer` type.
+    /// If the casting fails, it throws a `ClientError.Unexpected` error.
+    ///
+    /// - Parameter point: A `CGPoint` representing the location within the view where the camera
+    ///  should focus.
+    /// - Throws: A `ClientError.Unexpected` error if `videoCapturer` cannot be cast to 
+    /// `VideoCapturer`.
+    ///
+    /// - Note: The `point` parameter should be provided in the coordinate space of the view, where 
+    /// (0,0) is the top-left corner, and (1,1) is the bottom-right corner. Make sure the camera supports
+    /// tap-to-focus functionality before invoking this method.
     func tapToFocus(at point: CGPoint) throws {
         guard let videoCapturer = videoCapturer as? VideoCapturer else {
             throw ClientError.Unexpected()
         }
-        try videoCapturer.tapToFocus(
-            at: point,
-            cameraPosition: callSettings.cameraPosition == .front ? .front : .back
-        )
+
+        try videoCapturer.tapToFocus(at: point)
     }
-    
+
     // MARK: - private
     
     private func handleOnSocketConnected() {
