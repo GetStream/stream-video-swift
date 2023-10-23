@@ -26,7 +26,7 @@ before_all do |lane|
     setup_ci
     ENV['FASTLANE_XCODEBUILD_SETTINGS_TIMEOUT'] = '180'
     ENV['FASTLANE_XCODEBUILD_SETTINGS_RETRIES'] = '10'
-    xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload].include?(lane)
+    xcversion(version: xcode_version) unless [:publish_release, :allure_launch, :allure_upload, :pod_lint].include?(lane)
   elsif lane == :test_e2e
     clean_up_ports_for_e2e_test
   end
@@ -463,7 +463,7 @@ desc 'Run source code linting'
 lane :run_linter do
   Dir.chdir('..') do
     UI.error('SwiftFormat lint was skipped. Check out https://github.com/GetStream/ios-issues-tracking/issues/465 for more info')
-    # sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi')
+    # sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi, Sources/StreamChatSwiftUI/StreamNuke')
   end
 end
 

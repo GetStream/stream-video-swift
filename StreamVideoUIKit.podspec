@@ -21,5 +21,4 @@ Pod::Spec.new do |spec|
 
   spec.dependency('StreamVideo', "#{spec.version}")
   spec.dependency('StreamVideoSwiftUI', "#{spec.version}")
-  spec.dependency('NukeUI', '0.8.0')
 end
