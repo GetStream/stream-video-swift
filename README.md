@@ -196,7 +196,7 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] Video UIKit tutorial
 - [ ] Improve logging / Sentry integration
 - [ ] Camera controls
-- [ ] Tap to focus
+- [x] Tap to focus
 - [ ] Complete reconnection flows
 - [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
 - [ ] Dynascale 2.0

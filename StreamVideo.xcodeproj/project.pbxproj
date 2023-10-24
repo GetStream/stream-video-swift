@@ -82,6 +82,7 @@
 		407D5D3D2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */; };
 		407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
+		40901A612AE6A48C00B6831D /* LongPressToFocusViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */; };
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
@@ -918,6 +919,7 @@
 		406303412AD848000091AE77 /* CallParticipant_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_Mock.swift; sourceTree = "<group>"; };
 		4067A5D72AE1249400CFDEB1 /* CornerClipper_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerClipper_Tests.swift; sourceTree = "<group>"; };
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
+		40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPressToFocusViewModifier.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
@@ -1724,6 +1726,7 @@
 		4030E5952A9DF488003E8CBA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				40901A602AE6A44F00B6831D /* LongPressToFocusViewModifier */,
 				40D7E7942AB1C9470017095E /* ThermalStateViewModifier */,
 				409BFA412A9F7BAA003341EF /* ReadableContentGuide */,
 				40F445FC2A9E2B3A004BE3DA /* WaitingLocalUserView */,
@@ -1819,6 +1822,14 @@
 				4063033E2AD847EC0091AE77 /* CallState_Tests.swift */,
 			);
 			path = CallState;
+			sourceTree = "<group>";
+		};
+		40901A602AE6A44F00B6831D /* LongPressToFocusViewModifier */ = {
+			isa = PBXGroup;
+			children = (
+				40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */,
+			);
+			path = LongPressToFocusViewModifier;
 			sourceTree = "<group>";
 		};
 		409386182AA09E3900FF5AF4 /* MemoryLogDestination */ = {
@@ -3773,6 +3784,7 @@
 				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
 				842145112AB1B81A00D1A4E9 /* DemoLocalViewModifier.swift in Sources */,
 				8456E6C6287EB55F004E180E /* AppState.swift in Sources */,
+				40901A612AE6A48C00B6831D /* LongPressToFocusViewModifier.swift in Sources */,
 				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
 				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,

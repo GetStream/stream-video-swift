@@ -108,20 +108,22 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
     
     public var body: some View {
         ZStack {
-            if let localParticipant = viewModel.localParticipant {
-                LocalVideoView(
-                    viewFactory: viewFactory,
-                    participant: localParticipant,
-                    idSuffix: "waiting",
-                    callSettings: viewModel.callSettings,
-                    call: viewModel.call
-                )
-            } else {
-                DefaultBackgroundGradient()
-            }
-            
-            VStack {
-                Spacer()
+            DefaultBackgroundGradient()
+                .edgesIgnoringSafeArea(.all)
+
+            VStack() {
+                if let localParticipant = viewModel.localParticipant {
+                    LocalVideoView(
+                        viewFactory: viewFactory,
+                        participant: localParticipant,
+                        idSuffix: "waiting",
+                        callSettings: viewModel.callSettings,
+                        call: viewModel.call
+                    )
+                } else {
+                    Spacer()
+                }
+
                 viewFactory.makeCallControlsView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }

@@ -1,0 +1,131 @@
+---
+title: Long Press to Focus
+description: Documentation on implementing a long press gesture to focus on a particular user in a StreamVideo call.
+---
+
+# Long Press to Focus
+
+The StreamVideo SDK allows for interactive and intuitive user engagement during calls. Implementing a long press gesture to focus your local participant's video feed can significantly enhance the user experience.
+
+## Overview
+
+- **Focus Implementation**: Focus on the specified point on your video feed.
+- **Gesture Recognition**: Detect a long press or a tap on a participant's video feed.
+- **User Experience**: Intuitive interaction for a more immersive call experience.
+
+## Implementing Long Press to Focus
+
+### Focusing on a point in the Video Feed
+
+In order to focus the camera at the desired point, we need to forward the request to the WebRTC videoCapturer. Before we do that we need to create a call and then join it:
+```swift
+// Create the call with the callType and id
+let call = streamVideo.call(callType: "default", callId: "123")
+
+// Create the call on server side
+let creationResult = try await call.create()
+
+// Join the call
+let joinResult = try await call.join()
+```
+
+Once we are in the call, we can leverage the StreamVideo SDK to focus on a specific point on our **local video stream**:
+
+```swift
+// Retrieve the desired focus point(e.g using a tap or longPress gesture)
+let focusPoint: CGPoint = CGPoint(x: 50, y: 50)
+
+// and pass it to our call
+try call.focus(at: focusPoint)
+```
+
+:::note
+It's worth mentioning here that:
+1. The focus on a point depends on the device's capabilities as the camera needs to support it.
+2. We can only set the focus point for our local video stream and not for any of the other participants.
+:::
+
+### Detecting the Long Press Gesture
+
+You can find an implementation that we are using in our Demo app to focus on long press. To achieve that we are using the following ViewModifier:
+```swift
+struct LongPressToFocusViewModifier: ViewModifier {
+
+    var availableFrame: CGRect
+
+    var handler: (CGPoint) -> Void
+
+    func body(content: Content) -> some View {
+        content
+            .gesture(
+                LongPressGesture(minimumDuration: 0.5)
+                    .sequenced(before: DragGesture(minimumDistance: 0, coordinateSpace: .local))
+                    .onEnded { value in
+                        switch value {
+                        case .second(true, let drag):
+                            if let location = drag?.location {
+                                handler(convertToPointOfInterest(location))
+                            }
+                        default:
+                            break
+                        }
+                    }
+            )
+    }
+
+    func convertToPointOfInterest(_ point: CGPoint) -> CGPoint {
+        CGPoint(
+            x: point.y / availableFrame.height,
+            y: 1.0 - point.x / availableFrame.width
+        )
+    }
+}
+```
+
+We can then define a View extension to allow us easily use the ViewModifier:
+```swift
+extension View {
+    @ViewBuilder
+    func longPressToFocus(
+        availableFrame: CGRect,
+        handler: @escaping (CGPoint) -> Void
+    ) -> some View {
+        modifier(
+            LongPressToFocusViewModifier(
+                availableFrame: availableFrame,
+                handler: handler
+            )
+        )
+    }
+}
+```
+
+### Modifying the UI SDK
+
+In order to use our ViewModifier and we can leverage the ViewFactory that the SDK ships with. By subclassing it we can override the method that provides the `VideoCallParticipantModifier` like below:
+
+```swift
+override func makeVideoCallParticipantModifier(
+    participant: CallParticipant,
+    call: Call?,
+    availableFrame: CGRect,
+    ratio: CGFloat,
+    showAllInfo: Bool
+) -> some ViewModifier {
+    super.makeVideoCallParticipantModifier(
+        participant: participant,
+        call: call,
+        availableFrame: availableFrame,
+        ratio: ratio,
+        showAllInfo: showAllInfo
+    )
+    .longPressToFocus(availableFrame: availableFrame) {
+        guard call?.state.sessionId == participant.sessionId else { return } // We are using this to only allow long pressing on our local video feed
+        try? call?.focus(at: $0)
+    }
+}
+```
+
+## Conclusion
+
+Implementing a long press to focus feature enhances user interaction, allowing participants to easily highlight and engage in a StreamVideo call. With customization options available developers have the flexibility to create a tailored and intuitive user experience.

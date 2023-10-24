@@ -696,7 +696,25 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             unpinRequest: unpinRequest
         )
     }
-    
+
+    /// Tries to focus the camera at the specified point within the view.
+    ///
+    /// The method delegates the focus action to the `callController`'s `focus(at:)`
+    /// method, which is expected to handle the camera focus logic. If an error occurs during the process,
+    /// it throws an exception.
+    ///
+    /// - Parameter point: A `CGPoint` value representing the location within the view where the 
+    /// camera should focus. The point (0, 0) is at the top-left corner of the view, and the point (1, 1) is at
+    /// the bottom-right corner.
+    /// - Throws: An error if the focus operation cannot be completed. The type of error depends on 
+    /// the underlying implementation in the `callController`.
+    ///
+    /// - Note: Ensure that the device supports tap to focus and that it is enabled before calling this 
+    /// method. Otherwise, it might result in an error.
+    public func focus(at point: CGPoint) throws {
+        try callController.focus(at: point)
+    }
+
     //MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {

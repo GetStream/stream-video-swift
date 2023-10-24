@@ -34,66 +34,23 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .adjustVideoFrame(to: availableFrame.size.width, ratio: ratio)
-            .overlay(
-                ZStack {
-                    BottomView(content: {
-                        HStack {
-                            ParticipantInfoView(
-                                participant: participant,
-                                isPinned: participant.isPinned
-                            )
-                            
-                            if showAllInfo {
-                                Spacer()
-                                ConnectionQualityIndicator(
-                                    connectionQuality: participant.connectionQuality
-                                )
-                            }
-                        }
-                        .padding(.bottom, 2)
-                    })
-                    .padding(.all, showAllInfo ? 16 : 8)
-                    
-                    if participant.isSpeaking && participantCount > 1 {
-                        Rectangle()
-                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
-                    }
-                    
-                    if popoverShown {
-                        ParticipantPopoverView(
-                            participant: participant,
-                            call: call,
-                            popoverShown: $popoverShown
-                        ) {
-                            PopoverButton(
-                                title: "Show stats",
-                                popoverShown: $popoverShown) {
-                                    statsShown = true
-                                }
-                        }
-                    }
-                    
-                    VStack(alignment: .center) {
-                        Spacer()
-                        if statsShown, let call {
-                            ParticipantStatsView(call: call, participant: participant)
-                                .padding(.bottom)
-                        }
-                    }
-                }
+            .modifier(
+                VideoCallParticipantModifier(
+                    participant: participant,
+                    call: call,
+                    availableFrame: availableFrame,
+                    ratio: ratio,
+                    showAllInfo: showAllInfo)
             )
-            .modifier(ReactionsViewModifier(participant: participant, availableSize: availableFrame.size))
-            .onTapGesture(count: 2, perform: {
-                popoverShown = true
-            })
-            .onTapGesture(count: 1) {
-                if popoverShown {
-                    popoverShown = false
-                }
-                if statsShown {
-                    statsShown = false
-                }
+            .modifier(
+                ReactionsViewModifier(
+                    participant: participant,
+                    availableSize: availableFrame.size
+                )
+            )
+            .longPressToFocus(availableFrame: availableFrame) {
+                guard call?.state.sessionId == participant.sessionId else { return }
+                try? call?.focus(at: $0)
             }
     }
     

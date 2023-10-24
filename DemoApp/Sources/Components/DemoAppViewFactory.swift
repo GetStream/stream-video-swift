@@ -59,7 +59,7 @@ final class DemoAppViewFactory: ViewFactory {
     func makeCallTopView(viewModel: CallViewModel) -> DemoCallTopView {
         DemoCallTopView(viewModel: viewModel)
     }
-    
+
     func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
