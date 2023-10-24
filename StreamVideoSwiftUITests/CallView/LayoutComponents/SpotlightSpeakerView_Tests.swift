@@ -9,18 +9,18 @@ import XCTest
 import Foundation
 
 @MainActor
-final class DominantSpeakerLayoutComponent_Tests: StreamVideoUITestCase {
+final class SpotlightSpeakerView_Tests: StreamVideoUITestCase {
 
-    private lazy var subject: DominantSpeakerLayoutComponent! = DominantSpeakerLayoutComponent(
+    private lazy var subject: SpotlightSpeakerView! = SpotlightSpeakerView(
         viewFactory: TestViewFactory(),
         participant: .dummy(
             id: "test-user-1",
             name: "test-user-1",
-            profileImageURL: .init(string: "https://picsum.photos/id/237/200/200")!
+            profileImageURL: Bundle(for: type(of: self)).url(forResource: "mock-profile-image", withExtension: "jpg")!
         ),
         viewIdSuffix: "spotlight",
         call: nil,
-        availableFrame: .init(origin: .zero, size: .init(width: 200, height: 200)),
+        availableFrame: .init(origin: .zero, size: .init(width: 200, height: 300)),
         onChangeTrackVisibility: { _,_ in}
     )
 

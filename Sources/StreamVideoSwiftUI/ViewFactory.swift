@@ -350,7 +350,7 @@ extension ViewFactory {
         call: Call?,
         onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
     ) -> some View {
-        BottomParticipantsBarLayoutComponent(
+        HorizontalParticipantsBarView(
             viewFactory: self,
             participants: participants,
             frame: availableFrame,
@@ -366,7 +366,7 @@ extension ViewFactory {
         call: Call?,
         onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
     ) -> some View {
-        DominantSpeakerLayoutComponent(
+        SpotlightSpeakerView(
             viewFactory: self,
             participant: participant,
             viewIdSuffix: viewIdSuffix,

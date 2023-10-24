@@ -7,7 +7,7 @@ import SwiftUI
 
 /// `BottomParticipantsBarLayoutComponent` represents a horizontally scrollable view of participant thumbnails.
 /// This component lays out participant thumbnails in a bar at the bottom of the associated view.
-public struct BottomParticipantsBarLayoutComponent<Factory: ViewFactory>: View {
+public struct HorizontalParticipantsBarView<Factory: ViewFactory>: View {
 
     // MARK: - Properties
 

@@ -6,7 +6,7 @@ import StreamVideo
 import SwiftUI
 
 /// `DominantSpeakerLayoutComponent` represents a view for the dominant speaker's thumbnail.
-public struct DominantSpeakerLayoutComponent<Factory: ViewFactory>: View {
+public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
 
     // MARK: - Properties
 
@@ -33,7 +33,7 @@ public struct DominantSpeakerLayoutComponent<Factory: ViewFactory>: View {
 
     // MARK: - Initialization
 
-    /// Creates a new instance of `DominantSpeakerLayoutComponent`.
+    /// Creates a new instance of `SpotlightSpeakerView`.
     public init(
         viewFactory: Factory,
         participant: CallParticipant,
