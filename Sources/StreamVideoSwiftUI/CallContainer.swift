@@ -124,9 +124,8 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                     Spacer()
                 }
 
-                if viewModel.callingState != .reconnecting {
-                    viewFactory.makeCallControlsView(viewModel: viewModel)
-                }
+                viewFactory.makeCallControlsView(viewModel: viewModel)
+                    .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }
         }
     }
