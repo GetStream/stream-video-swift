@@ -20,8 +20,7 @@ final class SpotlightSpeakerView_Tests: StreamVideoUITestCase {
         ),
         viewIdSuffix: "spotlight",
         call: nil,
-        availableFrame: .init(origin: .zero, size: .init(width: 200, height: 300)),
-        onChangeTrackVisibility: { _,_ in}
+        availableFrame: .init(origin: .zero, size: .init(width: 200, height: 300))
     )
 
     override func tearDown() {

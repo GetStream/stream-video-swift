@@ -48,16 +48,14 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             }
 
             if !viewModel.hideUIElements {
-                viewFactory.makeBottomParticipantsBarLayoutComponent(
+                HorizontalParticipantsListView(
+                    viewFactory: viewFactory,
                     participants: viewModel.participants,
-                    availableFrame: .init(
+                    frame: .init(
                         origin: .init(x: availableFrame.origin.x, y: availableFrame.maxY - thumbnailSize),
                         size: CGSize(width: availableFrame.size.width, height: thumbnailSize)
                     ),
-                    call: viewModel.call,
-                    onChangeTrackVisibility: { [weak viewModel] in
-                        viewModel?.changeTrackVisibility(for: $0, isVisible: $1)
-                    }
+                    call: viewModel.call
                 )
             }
         }

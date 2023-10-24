@@ -34,20 +34,20 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     public var body: some View {
         VStack(spacing: 0) {
             GeometryReader { proxy in
-                viewFactory.makeDominantSpeakerLayoutComponent(
+                SpotlightSpeakerView(
+                    viewFactory: viewFactory,
                     participant: participant,
                     viewIdSuffix: "spotlight",
-                    availableFrame: proxy.frame(in: .global),
                     call: call,
-                    onChangeTrackVisibility: { onChangeTrackVisibility($0, $1) }
+                    availableFrame: proxy.frame(in: .global)
                 )
             }
 
-            viewFactory.makeBottomParticipantsBarLayoutComponent(
+            HorizontalParticipantsListView(
+                viewFactory: viewFactory,
                 participants: participants,
-                availableFrame: participantsStripFrame,
-                call: call,
-                onChangeTrackVisibility: { onChangeTrackVisibility($0, $1) }
+                frame: participantsStripFrame,
+                call: call
             )
         }
     }

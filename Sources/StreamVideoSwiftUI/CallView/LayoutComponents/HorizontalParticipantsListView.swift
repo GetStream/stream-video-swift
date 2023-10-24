@@ -5,9 +5,9 @@
 import StreamVideo
 import SwiftUI
 
-/// `BottomParticipantsBarLayoutComponent` represents a horizontally scrollable view of participant thumbnails.
+/// `HorizontalParticipantsListView` represents a horizontally scrollable view of participant thumbnails.
 /// This component lays out participant thumbnails in a bar at the bottom of the associated view.
-public struct HorizontalParticipantsBarView<Factory: ViewFactory>: View {
+public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
 
     // MARK: - Properties
 
@@ -29,10 +29,7 @@ public struct HorizontalParticipantsBarView<Factory: ViewFactory>: View {
     /// Flag to determine if all participant information should be shown.
     public var showAllInfo: Bool
 
-    /// Closure called to change visibility of a participant's track.
-    public var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-
-    // Private computed properties for laying out the view.
+    /// Private computed properties for laying out the view.
     private let barFrame: CGRect
     private let itemFrame: CGRect
 
@@ -45,8 +42,7 @@ public struct HorizontalParticipantsBarView<Factory: ViewFactory>: View {
         frame: CGRect,
         call: Call?,
         thumbnailSize: CGFloat = 120,
-        showAllInfo: Bool = false,
-        onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
+        showAllInfo: Bool = false
     ) {
         self.viewFactory = viewFactory
         self.participants = participants
@@ -54,7 +50,6 @@ public struct HorizontalParticipantsBarView<Factory: ViewFactory>: View {
         self.call = call
         self.thumbnailSize = thumbnailSize
         self.showAllInfo = showAllInfo
-        self.onChangeTrackVisibility = onChangeTrackVisibility
 
         // Calculate the frame for the bar at the bottom.
         self.barFrame = .init(
@@ -100,7 +95,14 @@ public struct HorizontalParticipantsBarView<Factory: ViewFactory>: View {
                         )
                     )
                     // Observe visibility changes.
-                    .visibilityObservation(in: barFrame) { onChangeTrackVisibility(participant, $0) }
+                    .visibilityObservation(in: barFrame) { isVisible in
+                        Task {
+                            await call?.changeTrackVisibility(
+                                for: participant,
+                                isVisible: isVisible
+                            )
+                        }
+                    }
                     .cornerRadius(8)
                     .accessibility(identifier: "bottomParticipantsBarParticipipant")
                 }

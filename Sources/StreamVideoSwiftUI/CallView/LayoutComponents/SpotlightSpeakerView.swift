@@ -5,7 +5,7 @@
 import StreamVideo
 import SwiftUI
 
-/// `DominantSpeakerLayoutComponent` represents a view for the dominant speaker's thumbnail.
+/// `SpotlightSpeakerView` represents a view for the dominant speaker's thumbnail.
 public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
 
     // MARK: - Properties
@@ -25,9 +25,6 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
     /// Frame in which the dominant speaker's thumbnail will be displayed.
     public var availableFrame: CGRect
 
-    /// Closure called to change visibility of the dominant speaker's track.
-    public var onChangeTrackVisibility: (CallParticipant, Bool) -> Void
-
     /// Computed property to generate a unique view ID for the dominant speaker.
     var viewId: String { participant.id + (!viewIdSuffix.isEmpty ? "-\(viewIdSuffix)" : "") }
 
@@ -39,15 +36,13 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
         participant: CallParticipant,
         viewIdSuffix: String,
         call: Call?,
-        availableFrame: CGRect,
-        onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
+        availableFrame: CGRect
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
         self.viewIdSuffix = viewIdSuffix
         self.call = call
         self.availableFrame = availableFrame
-        self.onChangeTrackVisibility = onChangeTrackVisibility
     }
 
     // MARK: - View Body
@@ -74,11 +69,27 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
             )
         )
         // Applies changes to the participant's video track.
-        .modifier(ParticipantChangeModifier(
-            participant: participant,
-            onChangeTrackVisibility: onChangeTrackVisibility)
+        .modifier(
+            ParticipantChangeModifier(
+                participant: participant,
+                onChangeTrackVisibility: { participant, isVisible in
+                    Task {
+                        await call?.changeTrackVisibility(
+                            for: participant,
+                            isVisible: isVisible
+                        )
+                    }
+                }
+            )
         )
         // Observes visibility changes of the dominant speaker's video track.
-        .visibilityObservation(in: availableFrame) { onChangeTrackVisibility(participant, $0) }
+        .visibilityObservation(in: availableFrame) { isVisible in
+            Task {
+                await call?.changeTrackVisibility(
+                    for: participant,
+                    isVisible: isVisible
+                )
+            }
+        }
     }
 }

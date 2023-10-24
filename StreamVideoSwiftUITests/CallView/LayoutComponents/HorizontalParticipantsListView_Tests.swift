@@ -8,8 +8,8 @@ import SnapshotTesting
 import XCTest
 
 @MainActor
-final class HorizontalParticipantsBarView_Tests: StreamVideoUITestCase {
-    
+final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase {
+
     func test_layout_participantsWithAudio_withoutAllInfo_viewWasConfiguredCorrectly() {
         assertLayout(participantsCount: 10, withAudio: true, showAllInfo: false)
     }
@@ -48,14 +48,13 @@ final class HorizontalParticipantsBarView_Tests: StreamVideoUITestCase {
         let participants = ParticipantFactory.get(participantsCount, withAudio: true)
 
         AssertSnapshot(
-            HorizontalParticipantsBarView(
+            HorizontalParticipantsListView(
                 viewFactory: DefaultViewFactory.shared,
                 participants: participants,
                 frame: .init(origin: .zero, size: .init(width: screenWidth, height: thumbnailSize)),
                 call: call,
                 thumbnailSize: thumbnailSize,
-                showAllInfo: showAllInfo,
-                onChangeTrackVisibility: { _,_ in}
+                showAllInfo: showAllInfo
             ).frame(width: screenWidth),
             size: .zero,
             line: line,

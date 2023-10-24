@@ -149,23 +149,6 @@ public protocol ViewFactory: AnyObject {
         callSettings: Binding<CallSettings>,
         call: Call?
     ) -> LocalParticipantViewModifierType
-
-    associatedtype BottomParticipantsBarLayoutComponentType: View
-    func makeBottomParticipantsBarLayoutComponent(
-        participants: [CallParticipant],
-        availableFrame: CGRect,
-        call: Call?,
-        onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
-    ) -> BottomParticipantsBarLayoutComponentType
-
-    associatedtype DominantSpeakerLayoutComponentType: View
-    func makeDominantSpeakerLayoutComponent(
-        participant: CallParticipant,
-        viewIdSuffix: String,
-        availableFrame: CGRect,
-        call: Call?,
-        onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
-    ) -> DominantSpeakerLayoutComponentType
 }
 
 extension ViewFactory {
@@ -342,38 +325,6 @@ extension ViewFactory {
                 callSettings: callSettings
             )
         }
-    }
-
-    public func makeBottomParticipantsBarLayoutComponent(
-        participants: [CallParticipant],
-        availableFrame: CGRect,
-        call: Call?,
-        onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
-    ) -> some View {
-        HorizontalParticipantsBarView(
-            viewFactory: self,
-            participants: participants,
-            frame: availableFrame,
-            call: call,
-            onChangeTrackVisibility: onChangeTrackVisibility
-        )
-    }
-
-    public func makeDominantSpeakerLayoutComponent(
-        participant: CallParticipant,
-        viewIdSuffix: String,
-        availableFrame: CGRect,
-        call: Call?,
-        onChangeTrackVisibility: @escaping (CallParticipant, Bool) -> Void
-    ) -> some View {
-        SpotlightSpeakerView(
-            viewFactory: self,
-            participant: participant,
-            viewIdSuffix: viewIdSuffix,
-            call: call,
-            availableFrame: availableFrame,
-            onChangeTrackVisibility: onChangeTrackVisibility
-        )
     }
 }
 
