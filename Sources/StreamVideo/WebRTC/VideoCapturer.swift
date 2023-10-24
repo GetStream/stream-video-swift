@@ -112,7 +112,7 @@ class VideoCapturer: CameraVideoCapturing {
     ///
     /// - Note: Ensure that the `point` is normalized to the camera's coordinate space, ranging 
     /// from (0,0) at the top-left to (1,1) at the bottom-right.
-    func tapToFocus(at point: CGPoint) throws {
+    func focus(at point: CGPoint) throws {
         guard
             let captureSession = (videoCapturer as? RTCCameraVideoCapturer)?.captureSession,
             let device = captureSession.inputs.first as? AVCaptureDeviceInput

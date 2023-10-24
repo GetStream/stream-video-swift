@@ -50,7 +50,7 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
             )
             .longPressToFocus(availableFrame: availableFrame) {
                 guard call?.state.sessionId == participant.sessionId else { return }
-                try? call?.tapToFocus(at: $0)
+                try? call?.focus(at: $0)
             }
     }
     

@@ -562,12 +562,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     /// - Note: The `point` parameter should be provided in the coordinate space of the view, where 
     /// (0,0) is the top-left corner, and (1,1) is the bottom-right corner. Make sure the camera supports
     /// tap-to-focus functionality before invoking this method.
-    func tapToFocus(at point: CGPoint) throws {
+    func focus(at point: CGPoint) throws {
         guard let videoCapturer = videoCapturer as? VideoCapturer else {
             throw ClientError.Unexpected()
         }
 
-        try videoCapturer.tapToFocus(at: point)
+        try videoCapturer.focus(at: point)
     }
 
     // MARK: - private

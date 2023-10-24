@@ -699,7 +699,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Tries to focus the camera at the specified point within the view.
     ///
-    /// The method delegates the focus action to the `callController`'s `tapToFocus(at:)`
+    /// The method delegates the focus action to the `callController`'s `focus(at:)`
     /// method, which is expected to handle the camera focus logic. If an error occurs during the process,
     /// it throws an exception.
     ///
@@ -711,8 +711,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// - Note: Ensure that the device supports tap to focus and that it is enabled before calling this 
     /// method. Otherwise, it might result in an error.
-    public func tapToFocus(at point: CGPoint) throws {
-        try callController.tapToFocus(at: point)
+    public func focus(at point: CGPoint) throws {
+        try callController.focus(at: point)
     }
 
     //MARK: - Internal

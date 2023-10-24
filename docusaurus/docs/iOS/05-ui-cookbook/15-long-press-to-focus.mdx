@@ -9,15 +9,45 @@ The StreamVideo SDK allows for interactive and intuitive user engagement during 
 
 ## Overview
 
-- **Gesture Recognition**: Detect a long press on a participant's video feed.
 - **Focus Implementation**: Focus on the specified point on your video feed.
+- **Gesture Recognition**: Detect a long press or a tap on a participant's video feed.
 - **User Experience**: Intuitive interaction for a more immersive call experience.
 
 ## Implementing Long Press to Focus
 
+### Focusing on a point in the Video Feed
+
+In order to focus the camera on the desired we need to forward the request the WebRTC videoCapturer. Before we do that we need to create a call and then join it:
+```swift
+// Create the call with the callType and id
+let call = streamVideo.call(callType: "default", callId: "123")
+
+// Create the call on server side
+let creationResult = try await call.create()
+
+// Join the call
+let joinResult = try await call.join()
+```
+
+Once we are in the call, we can leverage the StreamVideo SDK to focus on a specific point on our **local video stream**:
+
+```swift
+// Retrieve the desired focus point
+let focusPoint: CGPoint = ...
+
+// and pass it to our call
+try call.focus(at: focusPoint)
+```
+
+:::note
+It's worth mentioning here that:
+1. The focus on a point depends on the device's capabilities as the camera needs to support it.
+2. We can only set the focus point for our local video stream and not for any of the other participants.
+:::
+
 ### Detecting the Long Press Gesture
 
-You can find an implementation that we are using in our Demo app that focus on longPress. To achieve that we are using the following ViewModifier
+You can find an implementation that we are using in our Demo app to focus on long press. To achieve that we are using the following ViewModifier:
 ```swift
 struct LongPressToFocusViewModifier: ViewModifier {
 
@@ -52,7 +82,7 @@ struct LongPressToFocusViewModifier: ViewModifier {
 }
 ```
 
-We can then define a View extension to allow us easily use the ViewModifier
+We can then define a View extension to allow us easily use the ViewModifier:
 ```swift
 extension View {
     @ViewBuilder
@@ -68,14 +98,6 @@ extension View {
         )
     }
 }
-```
-
-### Focusing on a point in the Video Feed
-
-In order to focus the camera on the desired we need to forward the request the WebRTC videoCapturer. Luckily for is the StreamVideo SDK takes care of that by exposing the following API on the Call object
-
-```swift
-public func tapToFocus(at point: CGPoint) throws
 ```
 
 ### Modifying the UI SDK
@@ -99,7 +121,7 @@ override func makeVideoCallParticipantModifier(
     )
     .longPressToFocus(availableFrame: availableFrame) {
         guard call?.state.sessionId == participant.sessionId else { return } // We are using this to only allow long pressing on our local video feed
-        try? call?.tapToFocus(at: $0)
+        try? call?.focus(at: $0)
     }
 }
 ```

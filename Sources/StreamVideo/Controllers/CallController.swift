@@ -188,7 +188,7 @@ class CallController {
 
     /// Initiates a focus operation at a specific point on the camera's view.
     ///
-    /// This method attempts to focus the camera at the given point by calling the `tapToFocus(at:)` 
+    /// This method attempts to focus the camera at the given point by calling the `focus(at:)` 
     /// method on the current WebRTC client. The focus point is specified as a `CGPoint` within the
     /// coordinate space of the view.
     ///
@@ -203,9 +203,8 @@ class CallController {
     /// - Note: Before calling this method, ensure that the device's camera supports tap to focus 
     /// functionality and that the current WebRTC client is properly configured and connected. Otherwise,
     /// the method may throw an error.
-   func tapToFocus(at point: CGPoint) throws {
-       try currentWebRTCClient()
-           .tapToFocus(at: point)
+   func focus(at point: CGPoint) throws {
+       try currentWebRTCClient().focus(at: point)
    }
 
     /// Cleans up the call controller.
