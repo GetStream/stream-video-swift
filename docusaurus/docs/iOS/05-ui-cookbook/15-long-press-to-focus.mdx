@@ -17,7 +17,7 @@ The StreamVideo SDK allows for interactive and intuitive user engagement during 
 
 ### Focusing on a point in the Video Feed
 
-In order to focus the camera on the desired we need to forward the request the WebRTC videoCapturer. Before we do that we need to create a call and then join it:
+In order to focus the camera at the desired point, we need to forward the request to the WebRTC videoCapturer. Before we do that we need to create a call and then join it:
 ```swift
 // Create the call with the callType and id
 let call = streamVideo.call(callType: "default", callId: "123")
@@ -32,8 +32,8 @@ let joinResult = try await call.join()
 Once we are in the call, we can leverage the StreamVideo SDK to focus on a specific point on our **local video stream**:
 
 ```swift
-// Retrieve the desired focus point
-let focusPoint: CGPoint = ...
+// Retrieve the desired focus point(e.g using a tap or longPress gesture)
+let focusPoint: CGPoint = CGPoint(x: 50, y: 50)
 
 // and pass it to our call
 try call.focus(at: focusPoint)
@@ -102,7 +102,7 @@ extension View {
 
 ### Modifying the UI SDK
 
-In order to use our ViewModifier and we can leverage the ViewFactory that the SDK ships with. By subclassing it we can override the method that provides the `VideoCallParticipantModifier` like below
+In order to use our ViewModifier and we can leverage the ViewFactory that the SDK ships with. By subclassing it we can override the method that provides the `VideoCallParticipantModifier` like below:
 
 ```swift
 override func makeVideoCallParticipantModifier(
