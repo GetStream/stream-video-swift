@@ -5,6 +5,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 # Upcoming
 
 ### 🔄 Changed
+- You can now focus on a desired point in the local video stream. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
 
 # [0.4.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.1)
 _October 16, 2023_
