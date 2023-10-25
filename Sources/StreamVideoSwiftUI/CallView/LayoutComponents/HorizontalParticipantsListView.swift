@@ -35,7 +35,7 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
 
     // MARK: - Initialization
 
-    /// Creates a new instance of `BottomParticipantsBarLayoutComponent`.
+    /// Creates a new instance of `HorizontalParticipantsListView`.
     public init(
         viewFactory: Factory,
         participants: [CallParticipant],
@@ -104,13 +104,13 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
                         }
                     }
                     .cornerRadius(8)
-                    .accessibility(identifier: "bottomParticipantsBarParticipipant")
+                    .accessibility(identifier: "horizontalParticipantsListParticipant")
                 }
             }
             .frame(height: barFrame.height)
             .cornerRadius(8)
         }
         .padding()
-        .accessibility(identifier: "bottomParticipantsBar")
+        .accessibility(identifier: "horizontalParticipantsList")
     }
 }
