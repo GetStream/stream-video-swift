@@ -61,23 +61,25 @@ enum CallPage {
     }
     
     static var spotlightParticipantView: XCUIElementQuery {
-        app.otherElements.matching(NSPredicate(format: "identifier LIKE 'spotlightParticipantView' AND value != nil"))
+        app.otherElements.matching(NSPredicate(format: "identifier LIKE 'horizontalParticipantsListParticipant' AND value != nil"))
     }
     
     static var screenSharingLabel: XCUIElement { app.staticTexts["participantPresentingLabel"] }
     static var screenSharingView: XCUIElement { app.otherElements["screenSharingView"] }
     static var screenSharingParticipantView: XCUIElementQuery {
-        app.otherElements.matching(NSPredicate(format: "identifier LIKE 'screenSharingParticipantView' AND value != nil"))
+        spotlightParticipantView
     }
-    static var screenSharingParticipantList: XCUIElement { app.scrollViews["screenSharingParticipantList"] }
+    static var screenSharingParticipantList: XCUIElement {
+        spotlightViewParticipantList
+    }
     static var screenSharingParticipantListDetails: XCUIElement {
-        screenSharingParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Horizontal scroll bar'")).firstMatch
+        spotlightViewParticipantListDetails
     }
     static var gridViewParticipantList: XCUIElement { app.scrollViews["gridScrollView"] }
     static var gridViewParticipantListDetails: XCUIElement {
         gridViewParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Vertical scroll bar'")).firstMatch
     }
-    static var spotlightViewParticipantList: XCUIElement { app.scrollViews["spotlightScrollView"] }
+    static var spotlightViewParticipantList: XCUIElement { app.scrollViews["horizontalParticipantsList"] }
     static var spotlightViewParticipantListDetails: XCUIElement {
         spotlightViewParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Horizontal scroll bar'")).firstMatch
     }
