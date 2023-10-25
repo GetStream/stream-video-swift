@@ -7,37 +7,37 @@ import SwiftUI
 
 @MainActor
 public protocol ViewFactory: AnyObject {
-    
+
     associatedtype CallControlsViewType: View = CallControlsView
     /// Creates the call controls view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the call controls slot.
     func makeCallControlsView(viewModel: CallViewModel) -> CallControlsViewType
-    
+
     associatedtype OutgoingCallViewType: View
     /// Creates the outgoing call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the outgoing call slot.
     func makeOutgoingCallView(viewModel: CallViewModel) -> OutgoingCallViewType
-    
+
     associatedtype JoiningCallViewType: View
     /// Creates the joining call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the joining call slot.
     func makeJoiningCallView(viewModel: CallViewModel) -> JoiningCallViewType
-    
+
     associatedtype IncomingCallViewType: View
     /// Creates the incoming call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the incoming call slot.
     func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> IncomingCallViewType
-    
+
     associatedtype WaitingLocalUserViewType: View
     /// Creates the waiting local user view, shown when the local participant is the only one on the call.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the waiting local user view.
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> WaitingLocalUserViewType
-    
+
     associatedtype ParticipantsViewType: View = VideoParticipantsView<Self>
     /// Creates the video participants view, shown during a call.
     /// - Parameters:
@@ -50,7 +50,7 @@ public protocol ViewFactory: AnyObject {
         availableFrame: CGRect,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) -> ParticipantsViewType
-    
+
     associatedtype ParticipantViewType: View = VideoCallParticipantView
     /// Creates a view for a video call participant with the specified parameters.
     /// - Parameters:
@@ -69,7 +69,7 @@ public protocol ViewFactory: AnyObject {
         customData: [String: RawJSON],
         call: Call?
     ) -> ParticipantViewType
-    
+
     associatedtype ParticipantViewModifierType: ViewModifier = VideoCallParticipantModifier
     /// Creates a view modifier that can be used to modify the appearance of the video call participant view.
     /// - Parameters:
@@ -86,19 +86,19 @@ public protocol ViewFactory: AnyObject {
         ratio: CGFloat,
         showAllInfo: Bool
     ) -> ParticipantViewModifierType
-    
+
     associatedtype CallViewType: View = CallView<Self>
     /// Creates the call view, shown when a call is in progress.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in the call view slot.
     func makeCallView(viewModel: CallViewModel) -> CallViewType
-    
+
     associatedtype CallTopViewType: View = CallTopView
     /// Creates a view displayed at the top of the call view.
     /// - Parameter viewModel: The view model used for the call.
     /// - Returns: view shown in thetop  call view slot.
     func makeCallTopView(viewModel: CallViewModel) -> CallTopViewType
-        
+
     associatedtype CallParticipantsListViewType: View
     /// Creates a view that shows a list of the participants in the call.
     /// - Parameters:
@@ -109,7 +109,7 @@ public protocol ViewFactory: AnyObject {
         viewModel: CallViewModel,
         availableFrame: CGRect
     ) -> CallParticipantsListViewType
-    
+
     associatedtype ScreenSharingViewType: View
     /// Creates a view shown when there's screen sharing session.
     /// - Parameters:
@@ -122,7 +122,7 @@ public protocol ViewFactory: AnyObject {
         screensharingSession: ScreenSharingSession,
         availableFrame: CGRect
     ) -> ScreenSharingViewType
-    
+
     associatedtype LobbyViewType: View
     /// Creates the view that's displayed before the user joins the call.
     /// - Parameters:
@@ -135,7 +135,7 @@ public protocol ViewFactory: AnyObject {
         lobbyInfo: LobbyInfo,
         callSettings: Binding<CallSettings>
     ) -> LobbyViewType
-    
+
     associatedtype ReconnectionViewType: View
     /// Creates the view shown when the call is reconnecting.
     /// - Parameters:
@@ -152,24 +152,24 @@ public protocol ViewFactory: AnyObject {
 }
 
 extension ViewFactory {
-    
+
     public func makeCallControlsView(viewModel: CallViewModel) -> some View {
         CallControlsView(viewModel: viewModel)
     }
-    
+
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         OutgoingCallView(
             outgoingCallMembers: viewModel.outgoingCallMembers.map(\.toMember),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
     }
-    
+
     public func makeJoiningCallView(viewModel: CallViewModel) -> some View {
         JoiningCallView(
             callControls: makeCallControlsView(viewModel: viewModel)
         )
     }
-    
+
     public func makeIncomingCallView(viewModel: CallViewModel, callInfo: IncomingCall) -> some View {
         if #available(iOS 14.0, *) {
             return IncomingCallView(callInfo: callInfo, onCallAccepted: { _ in
@@ -185,11 +185,11 @@ extension ViewFactory {
             })
         }
     }
-    
+
     public func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         WaitingLocalUserView(viewModel: viewModel, viewFactory: self)
     }
-    
+
     public func makeVideoParticipantsView(
         viewModel: CallViewModel,
         availableFrame: CGRect,
@@ -202,7 +202,7 @@ extension ViewFactory {
             onChangeTrackVisibility: onChangeTrackVisibility
         )
     }
-    
+
     public func makeVideoParticipantView(
         participant: CallParticipant,
         id: String,
@@ -220,7 +220,7 @@ extension ViewFactory {
             call: call
         )
     }
-    
+
     public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
@@ -236,15 +236,15 @@ extension ViewFactory {
             showAllInfo: showAllInfo
         )
     }
-    
+
     public func makeCallView(viewModel: CallViewModel) -> some View {
         CallView(viewFactory: self, viewModel: viewModel)
     }
-    
+
     public func makeCallTopView(viewModel: CallViewModel) -> some View {
         CallTopView(viewModel: viewModel)
     }
-    
+
     public func makeParticipantsListView(
         viewModel: CallViewModel,
         availableFrame: CGRect
@@ -255,7 +255,7 @@ extension ViewFactory {
             return EmptyView()
         }
     }
-    
+
     public func makeScreenSharingView(
         viewModel: CallViewModel,
         screensharingSession: ScreenSharingSession,
@@ -267,7 +267,7 @@ extension ViewFactory {
             availableFrame: availableFrame
         )
     }
-    
+
     public func makeLobbyView(
         viewModel: CallViewModel,
         lobbyInfo: LobbyInfo,
@@ -304,7 +304,7 @@ extension ViewFactory {
             )
         }
     }
-    
+
     public func makeReconnectionView(viewModel: CallViewModel) -> some View {
         ReconnectionView(viewModel: viewModel, viewFactory: self)
     }
