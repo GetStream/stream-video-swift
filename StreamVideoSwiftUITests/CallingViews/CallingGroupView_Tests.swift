@@ -2,9 +2,10 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
+import SnapshotTesting
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
-import SnapshotTesting
+@testable import StreamSwiftTestHelpers
 import XCTest
 
 @MainActor
@@ -16,7 +17,6 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
             let view = CallingGroupView(participants: users, isCalling: true)
             AssertSnapshot(
                 view,
-                perceptualPrecision: 0.95,
                 suffix: "with_\(count)_participants"
             )
         }
@@ -28,7 +28,6 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
             let view = CallingGroupView(participants: users, isCalling: true)
             AssertSnapshot(
                 view,
-                perceptualPrecision: 0.95,
                 suffix: "with_\(count)_participants"
             )
         }

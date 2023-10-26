@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideoSwiftUI
+@testable import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
