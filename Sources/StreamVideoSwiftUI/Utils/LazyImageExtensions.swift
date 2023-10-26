@@ -39,7 +39,7 @@ struct StreamLazyImage: View {
         if let imageURL = imageURL,
            imageURL.isFileURL,
            let image = UIImage(contentsOfFile: imageURL.path)  {
-            Image(uiImage: image)
+            NukeImage(image)
                 .aspectRatio(contentMode: .fill)
         } else {
             LazyImage(imageURL: imageURL)
