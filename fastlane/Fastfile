@@ -9,6 +9,7 @@ import 'Allurefile'
 xcode_version = ENV['XCODE_VERSION'] || '15.0'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
+podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI', 'StreamVideoSwiftUI-XCFramework', 'StreamVideoUIKit', 'StreamVideoUIKit-XCFramework']
 github_repo = ENV['GITHUB_REPOSITORY'] || 'GetStream/stream-video-swift'
 sinatra_port = 4567
 video_buddy_port = 5678
@@ -40,8 +41,14 @@ end
 desc "Release a new version"
 lane :release do |options|
   previous_version_number = last_git_tag
+  artifacts_path = File.absolute_path('../StreamVideoArtifacts.json')
   swift_environment_path = File.absolute_path('../Sources/StreamVideo/Generated/SystemEnvironment+Version.swift')
   extra_changes = lambda do |release_version|
+    # Set the framework version on the artifacts
+    artifacts = JSON.parse(File.read(artifacts_path))
+    artifacts[release_version.to_s] = "https://github.com/#{github_repo}/releases/download/#{release_version}/StreamVideo-All.zip"
+    File.write(artifacts_path, JSON.dump(artifacts))
+
     # Set the framework version in SystemEnvironment+Version.swift
     new_content = File.read(swift_environment_path).gsub!(previous_version_number, release_version)
     File.open(swift_environment_path, 'w') { |f| f.puts(new_content) }
@@ -52,6 +59,7 @@ lane :release do |options|
     version: options[:version],
     bump_type: options[:type],
     sdk_names: sdk_names,
+    podspec_names: podspec_names,
     github_repo: github_repo,
     extra_changes: extra_changes,
     create_pull_request: false
@@ -61,11 +69,20 @@ end
 
 desc "Publish a new release to GitHub and CocoaPods"
 lane :publish_release do |options|
+  clean_products
+  build_xcframeworks
+  compress_frameworks
+  clean_products
+
   publish_ios_sdk(
     version: options[:version],
     sdk_names: sdk_names,
-    github_repo: github_repo
+    podspec_names: podspec_names,
+    github_repo: github_repo,
+    upload_assets: ['Products/StreamVideo.zip', 'Products/StreamVideoSwiftUI.zip', 'Products/StreamVideoUIKit.zip', 'Products/StreamVideo-All.zip']
   )
+
+  update_spm(version: options[:version])
 end
 
 lane :pod_lint do
@@ -263,6 +280,27 @@ lane :stop_video_buddy do
   sh("lsof -t -i:#{video_buddy_port} | xargs kill -9")
 end
 
+lane :build_xcframeworks do
+  match_me
+  output_directory = "#{Dir.pwd}/../Products"
+  team_id = File.read('Matchfile').match(/team_id\("(.*)"\)/)[1]
+  codesign = ["codesign --timestamp -v --sign 'Apple Distribution: Stream.io Inc (#{team_id})'"]
+  sdk_names.each do |sdk|
+    create_xcframework(
+      project: xcode_project,
+      scheme: sdk,
+      destinations: ['iOS'],
+      include_BCSymbolMaps: true,
+      include_debug_symbols: true,
+      xcframework_output_directory: output_directory,
+      remove_xcarchives: true
+    )
+    sh('../Scripts/removeUnneededSymbols.sh', sdk, output_directory)
+    codesign << lane_context[SharedValues::XCFRAMEWORK_OUTPUT_PATH]
+  end
+  sh(codesign.join(' ')) # We need to sign all frameworks at once
+end
+
 desc 'Runs e2e ui tests'
 lane :test_e2e do |options|
   next unless is_check_required(sources: sources_matrix[:e2e], force_check: @force_check)
@@ -379,6 +417,97 @@ private_lane :emerge_upload do |options|
     sha: ENV['GITHUB_COMMIT_SHA'] || last_git_commit[:commit_hash],
     base_sha: ENV['GITHUB_BASE_SHA'] || nil
   )
+end
+
+desc 'Compresses the XCFrameworks into zip files'
+lane :compress_frameworks do
+  Dir.chdir('..') do
+    FileUtils.cp('LICENSE', 'Products/LICENSE')
+    Dir.chdir('Products') do
+      sdk_names.each do |framework|
+        sh("zip -r #{framework} ./#{framework}.xcframework ./LICENSE")
+        sh("swift package compute-checksum #{framework}.zip")
+      end
+      sh('zip -r "StreamVideo-All" ./*.xcframework ./LICENSE') if sdk_names.size > 1
+    end
+  end
+end
+
+desc 'Cleans Products and DerivedData folders'
+lane :clean_products do
+  Dir.chdir('..') do
+    ['*.xcframework', '*.bundle', '*.BCSymbolMaps', '*.dSYMs', 'LICENSE'].each do |f|
+      sh("rm -rf Products/#{f}")
+    end
+  end
+end
+
+desc 'Update XCFrameworks and submit to the SPM repository'
+private_lane :update_spm do |options|
+  version = options[:version] || ''
+  UI.user_error!('You need to pass the version of the release you want to obtain the changelog from') unless version.length > 0
+
+  # Generate Checksums
+  stream_video_checksum = sh('swift package compute-checksum ../Products/StreamVideo.zip').strip
+  stream_video_swiftui_checksum = sh('swift package compute-checksum ../Products/StreamVideoSwiftUI.zip').strip
+  stream_video_uikit_checksum = sh('swift package compute-checksum ../Products/StreamVideoUIKit.zip').strip
+
+  # Update SPM Repo
+  spm_directory_name = 'StreamSPM'
+  spm_directory = "../../#{spm_directory_name}"
+  sh("git clone git@github.com:#{github_repo}-spm.git #{spm_directory}")
+
+  Dir.chdir(spm_directory) do
+    result = sh('basename `git rev-parse --show-toplevel`').strip
+    UI.error("Not using #{spm_directory_name} repo") unless result.to_s == spm_directory_name
+
+    file_lines = File.readlines('Package.swift')
+    file_data = ''
+    previous_module = ''
+
+    file_lines.each do |line|
+      formatted_line =
+        case previous_module
+        when 'StreamVideo'
+          line.gsub(/(checksum: ")[a-z0-9]+(")/, "\\1#{stream_video_checksum}\\2")
+        when 'StreamVideoSwiftUI'
+          line.gsub(/(checksum: ")[a-z0-9]+(")/, "\\1#{stream_video_swiftui_checksum}\\2")
+        when 'StreamVideoUIKit'
+          line.gsub(/(checksum: ")[a-z0-9]+(")/, "\\1#{stream_video_uikit_checksum}\\2")
+        else
+          line
+        end
+
+      url_pattern = %r{(releases/download/)[.0-9]+(/)}
+      if line.match(url_pattern)
+        formatted_line = line.gsub(url_pattern, "\\1#{version}\\2")
+        previous_module = line.match(/([a-zA-Z]+).zip/).to_s.gsub(/.zip/, '')
+      end
+
+      file_data << formatted_line
+    end
+
+    # Write the new changes
+    File.open('./Package.swift', 'w') { |file| file << file_data }
+
+    # Update the repo
+    sh('git add -A')
+    sh("git commit -m 'Bump #{version}'")
+    sh('git push')
+
+    github_release = set_github_release(
+      repository_name: "#{github_repo}-spm",
+      api_token: ENV.fetch('GITHUB_TOKEN', nil),
+      name: version,
+      tag_name: version,
+      commitish: 'main',
+      description: "https://github.com/#{github_repo}/releases/tag/#{version}"
+    )
+    UI.success("New SPM release available: #{github_release['html_url']}")
+  end
+
+  # Clean Up
+  sh("rm -rf #{spm_directory}")
 end
 
 lane :code_generation do
