@@ -4,6 +4,7 @@
 
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+@testable import StreamSwiftTestHelpers
 import XCTest
 import CoreMedia
 import SnapshotTesting
@@ -22,7 +23,7 @@ final class PiPUtils_Tests: XCTestCase {
         let converted = self.convert(cmage: ciimage)
         
         // Then
-        assertSnapshot(matching: converted, as: .image(precision: 0.98))
+        assertSnapshot(matching: converted, as: .image(precision: precision))
     }
     
     func buffer(from image: UIImage) -> CVPixelBuffer? {

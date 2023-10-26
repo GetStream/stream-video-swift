@@ -2,14 +2,13 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
-@testable import StreamVideoSwiftUI
 import SnapshotTesting
+@testable import StreamVideoSwiftUI
+@testable import StreamSwiftTestHelpers
+import SwiftUI
 import XCTest
 
 final class ToastView_Tests: XCTestCase {
-    
-    private let perceptualPrecision: Float = 0.96
 
     func test_toastView_errorSnapshot() {
         // Given
@@ -23,7 +22,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_successSnapshot() {
@@ -38,7 +37,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_warningSnapshot() {
@@ -53,7 +52,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_infoSnapshot() {
@@ -68,7 +67,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
     
     func test_toastView_errorSnapshotBottom() {
@@ -83,7 +82,7 @@ final class ToastView_Tests: XCTestCase {
 
         
         // Then
-        AssertSnapshot(view, perceptualPrecision: perceptualPrecision)
+        AssertSnapshot(view)
     }
 
 }
