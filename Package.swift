@@ -25,7 +25,6 @@ let package = Package(
     ],
     dependencies: [
         .package(name: "WebRTC", url: "https://github.com/webrtc-sdk/Specs.git", .exact("114.5735.8")),
-        .package(url: "https://github.com/kean/Nuke.git", .exact("11.3.1")),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0")
     ],
     targets: [
@@ -35,12 +34,12 @@ let package = Package(
         ),
         .target(
             name: "StreamVideoSwiftUI",
-            dependencies: ["StreamVideo", "Nuke", .product(name: "NukeUI", package: "Nuke")],
+            dependencies: ["StreamVideo"],
             resources: [.process("Resources")]
         ),
         .target(
             name: "StreamVideoUIKit",
-            dependencies: ["StreamVideo", "StreamVideoSwiftUI", "Nuke", .product(name: "NukeUI", package: "Nuke")],
+            dependencies: ["StreamVideo", "StreamVideoSwiftUI"],
             resources: [.process("Resources")]
         )
     ]

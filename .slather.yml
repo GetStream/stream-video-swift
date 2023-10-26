@@ -10,3 +10,4 @@ ignore:
   - "**/Generated/"
   - "**/protobuf/"
   - "**/OpenApi/"
+  - "Sources/StreamVideoSwiftUI/StreamNuke"

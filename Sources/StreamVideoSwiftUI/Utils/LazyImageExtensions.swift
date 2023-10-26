@@ -2,14 +2,12 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-import Nuke
-import NukeUI
 import SwiftUI
 
 @available(iOS 14.0, *)
 extension LazyImage {
 
-    public init(imageURL: URL?) where Content == NukeUI.Image {
+    public init(imageURL: URL?) where Content == NukeImage {
         #if COCOAPODS
         self.init(source: imageURL)
         #else
@@ -41,7 +39,7 @@ struct StreamLazyImage: View {
         if let imageURL = imageURL,
            imageURL.isFileURL,
            let image = UIImage(contentsOfFile: imageURL.path)  {
-            Image(image)
+            NukeImage(image)
                 .aspectRatio(contentMode: .fill)
         } else {
             LazyImage(imageURL: imageURL)

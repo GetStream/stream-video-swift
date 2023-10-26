@@ -21,5 +21,4 @@ Pod::Spec.new do |spec|
   spec.resource_bundles = { spec.name => ["Sources/#{spec.name}/Resources/**/*"] }
 
   spec.dependency('StreamVideo', "#{spec.version}")
-  spec.dependency('NukeUI', '0.8.0')
 end

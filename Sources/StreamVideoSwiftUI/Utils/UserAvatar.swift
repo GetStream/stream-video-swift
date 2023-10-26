@@ -3,7 +3,6 @@
 //
 
 import SwiftUI
-import NukeUI
 
 @available(iOS 14.0, *)
 public struct UserAvatar: View {
