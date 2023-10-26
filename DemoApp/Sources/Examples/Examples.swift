@@ -2,7 +2,6 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-import NukeUI
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
@@ -212,7 +211,7 @@ struct CustomIncomingCallView: View {
                 .foregroundColor(Color(colors.textLowEmphasis))
                 .padding()
             
-            LazyImage(imageURL: callInfo.caller.imageURL)
+            StreamLazyImage(imageURL: callInfo.caller.imageURL)
                 .frame(width: 80, height: 80)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .padding()
