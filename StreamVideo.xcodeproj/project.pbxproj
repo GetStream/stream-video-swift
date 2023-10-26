@@ -271,6 +271,7 @@
 		82C837E229A532C000CB6B0E /* LoginPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837E129A532C000CB6B0E /* LoginPage.swift */; };
 		82C837E429A5333700CB6B0E /* CallDetailsPage.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82C837E329A5333700CB6B0E /* CallDetailsPage.swift */; };
 		82D858B829EDAE0A00CF9F8B /* ParticipantActionsTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82D858B729EDAE0A00CF9F8B /* ParticipantActionsTests.swift */; };
+		82E1C14F2AEA7DD50076D7BE /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 82E1C14E2AEA7DD50076D7BE /* GDPerformanceView-Swift */; };
 		82E2F90F2A0559E60012C037 /* sky.png in Resources */ = {isa = PBXBuildFile; fileRef = 82E2F9052A0559E50012C037 /* sky.png */; };
 		82E2F9102A0559E60012C037 /* sky.png in Resources */ = {isa = PBXBuildFile; fileRef = 82E2F9052A0559E50012C037 /* sky.png */; };
 		82E2F9112A0559E60012C037 /* coffee.png in Resources */ = {isa = PBXBuildFile; fileRef = 82E2F9062A0559E50012C037 /* coffee.png */; };
@@ -1728,6 +1729,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */,
+				82E1C14F2AEA7DD50076D7BE /* GDPerformanceView-Swift in Frameworks */,
 				4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */,
 				84A26C9929435F4100B29E53 /* NukeUI in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
@@ -3742,6 +3744,7 @@
 				84A26C9829435F4100B29E53 /* NukeUI */,
 				4029A6292AB069600065DAFB /* StreamChatSwiftUI */,
 				406303442AD942ED0091AE77 /* GoogleSignInSwift */,
+				82E1C14E2AEA7DD50076D7BE /* GDPerformanceView-Swift */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -6519,6 +6522,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 84AF64BA287C34320012A503 /* XCRemoteSwiftPackageReference "Specs" */;
 			productName = WebRTC;
+		};
+		82E1C14E2AEA7DD50076D7BE /* GDPerformanceView-Swift */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 4046DEEC2A9F404300CA6D2F /* XCRemoteSwiftPackageReference "GDPerformanceView-Swift" */;
+			productName = "GDPerformanceView-Swift";
 		};
 		8423B7552950BB0B00012F8D /* Sentry */ = {
 			isa = XCSwiftPackageProductDependency;
