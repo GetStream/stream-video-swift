@@ -13,6 +13,6 @@ final class CallControlsView_Tests: StreamVideoUITestCase {
     
     func test_callControlsView_snapshot() throws {
         let view = CallControlsView(viewModel: CallViewModel())
-        AssertSnapshot(view, size: sizeThatFits)
+        AssertSnapshot(view, variants: snapshotVariants, size: sizeThatFits)
     }
 }

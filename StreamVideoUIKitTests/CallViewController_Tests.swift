@@ -22,7 +22,7 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         callViewController.startCall(callType: "default", callId: "1234", members: participants, ring: true)
         
         // Then
-        AssertSnapshot(callViewController.view)
+        AssertSnapshot(callViewController.view, variants: snapshotVariants)
     }
 
 }

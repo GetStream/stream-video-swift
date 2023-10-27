@@ -20,7 +20,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        AssertSnapshot(player)
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor
@@ -30,7 +30,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        AssertSnapshot(player)
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor

@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import XCTest
 
 class StreamVideoUITestCase: XCTestCase {
@@ -17,6 +18,7 @@ class StreamVideoUITestCase: XCTestCase {
     let callType: String = .default
     var callCid: String { "\(callType):\(callId)" }
     let sizeThatFits = CGSize(width: 100, height: 100)
+    let snapshotVariants: [SnapshotVariant] = [.defaultLight, .defaultDark]
     
     override func setUpWithError() throws {
         try super.setUpWithError()

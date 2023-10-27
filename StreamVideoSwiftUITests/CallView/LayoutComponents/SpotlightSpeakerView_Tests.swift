@@ -40,6 +40,7 @@ final class SpotlightSpeakerView_Tests: StreamVideoUITestCase {
     func test_appearance() {
         AssertSnapshot(
             subject.frame(width: 375),
+            variants: snapshotVariants,
             size: .zero
         )
     }

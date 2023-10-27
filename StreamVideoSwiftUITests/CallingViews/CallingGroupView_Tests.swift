@@ -17,6 +17,7 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
             let view = CallingGroupView(participants: users, isCalling: true)
             AssertSnapshot(
                 view,
+                variants: snapshotVariants,
                 suffix: "with_\(count)_participants"
             )
         }
@@ -28,6 +29,7 @@ final class CallingGroupView_Tests: StreamVideoUITestCase {
             let view = CallingGroupView(participants: users, isCalling: true)
             AssertSnapshot(
                 view,
+                variants: snapshotVariants,
                 suffix: "with_\(count)_participants"
             )
         }

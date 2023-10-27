@@ -13,6 +13,6 @@ final class CallingParticipantView_Tests: StreamVideoUITestCase {
     
     func test_callingParticipantView_snapshot() throws {
         let view = CallingParticipantView(participant: UserFactory.get(2).last, caller: "caller.123")
-        AssertSnapshot(view)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }

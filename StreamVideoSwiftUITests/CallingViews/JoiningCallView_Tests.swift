@@ -16,6 +16,6 @@ final class JoiningCallView_Tests: StreamVideoUITestCase {
         let view = JoiningCallView(
             callControls: DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
         )
-        AssertSnapshot(view)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }

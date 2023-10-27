@@ -57,6 +57,7 @@ final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase {
                 thumbnailSize: thumbnailSize,
                 showAllInfo: showAllInfo
             ).frame(width: screenWidth),
+            variants: snapshotVariants,
             size: .zero,
             line: line,
             file: file,

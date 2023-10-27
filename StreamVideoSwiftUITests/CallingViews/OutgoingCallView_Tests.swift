@@ -17,6 +17,6 @@ final class OutgoingCallView_Tests: StreamVideoUITestCase {
             outgoingCallMembers: viewModel.outgoingCallMembers.map(\.toMember),
             callControls: DefaultViewFactory.shared.makeCallControlsView(viewModel: viewModel)
         )
-        AssertSnapshot(view)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }

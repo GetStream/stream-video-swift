@@ -49,7 +49,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "with_\(count)_participants")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
     
@@ -63,7 +63,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "with_\(count)_participants")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
     
@@ -78,7 +78,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "\(quality)")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "\(quality)")
         }
     }
     
@@ -98,7 +98,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "with_\(count)_participants")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
 }
