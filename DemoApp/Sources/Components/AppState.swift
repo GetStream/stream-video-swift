@@ -5,10 +5,11 @@
 import StreamVideo
 import SwiftUI
 import StreamVideoSwiftUI
+import Combine
 
 @MainActor
 final class AppState: ObservableObject {
-    
+
     // MARK: - Properties
     // MARK: Published
 
@@ -28,7 +29,15 @@ final class AppState: ObservableObject {
 
     // MARK: Mutable
 
-    var streamVideo: StreamVideo? { didSet { didSet(pushToken: nil); didSet(voIPPushToken: nil); } }
+    var streamVideo: StreamVideo? {
+        didSet {
+            didSet(pushToken: nil)
+            didSet(voIPPushToken: nil)
+            didSet(streamVideo)
+        }
+    }
+
+    private var activeCallCancellable: AnyCancellable?
 
     // MARK: Immutable
 
@@ -50,7 +59,7 @@ final class AppState: ObservableObject {
             self.users = []
         }
     }
-    
+
     // MARK: - Actions
 
     func connectUser() {
@@ -64,7 +73,7 @@ final class AppState: ObservableObject {
             }
         }
     }
-    
+
     func logout() {
         Task {
             if let voipPushToken = unsecureRepository.currentVoIPPushToken() {
@@ -90,7 +99,7 @@ final class AppState: ObservableObject {
             }
         }
     }
-    
+
     private func didSet(pushToken: String?) {
         unsecureRepository.save(pushToken: pushToken)
         if let pushToken, let streamVideo {
@@ -102,6 +111,15 @@ final class AppState: ObservableObject {
 
     private func didSet(audioFilter: AudioFilter?) {
         voiceProcessor.setAudioFilter(audioFilter)
+    }
+
+    private func didSet(_ streamVideo: StreamVideo?) {
+        activeCallCancellable?.cancel()
+        activeCallCancellable = streamVideo?
+            .state
+            .$activeCall
+            .receive(on: DispatchQueue.main)
+            .assign(to: \.activeCall, on: self)
     }
 }
 

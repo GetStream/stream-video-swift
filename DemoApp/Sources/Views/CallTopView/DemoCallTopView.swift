@@ -18,6 +18,8 @@ struct DemoCallTopView: View {
     @ObservedObject var appState = AppState.shared
     @State var sharingPopupDismissed = false
 
+    @State private var isLogsViewerPresented = false
+
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
@@ -50,8 +52,6 @@ struct DemoCallTopView: View {
                         }
                     }
                 }
-
-
                 reactionsList()
             } label: {
                 Image(systemName: "ellipsis")
@@ -60,13 +60,17 @@ struct DemoCallTopView: View {
                     .padding()
             }
 
+            if AppEnvironment.configuration.isDebug {
+                DebugMenu()
+                    .foregroundColor(.white)
+            }
+
             if viewModel.recordingState == .recording {
                 RecordingView()
                     .accessibility(identifier: "recordingLabel")
             }
 
             Spacer()
-
 
             if #available(iOS 14, *) {
                 HStack(spacing: 16) {

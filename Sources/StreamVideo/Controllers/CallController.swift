@@ -49,6 +49,14 @@ class CallController {
         self.environment = environment
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
+
+        NotificationCenter.default.addObserver(
+            forName: .init("force-migration"),
+            object: nil,
+            queue: nil
+        ) { [weak self] notification in
+            self?.webRTCClient?.eventNotificationCenter.process(.sfuEvent(.goAway(Stream_Video_Sfu_Event_GoAway())))
+        }
     }
     
     /// Joins a call with the provided information.
@@ -98,7 +106,7 @@ class CallController {
         )
         
         setupStatsTimer()
-        
+
         return response
     }
     

@@ -56,7 +56,7 @@ extension AppEnvironment {
         case .test:
             return .staging
         case .debug:
-            return .staging
+            return .pronto
         case .release:
             return .production
         }
