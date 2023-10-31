@@ -128,7 +128,7 @@ jobs:
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
     runs-on: macos-13
-    if: ${{ github.event_name != 'push' || github.event.inputs.swiftui_snapshots == 'true' }}
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
       GITHUB_PR_NUM: ${{ github.event.number }}
@@ -156,7 +156,7 @@ jobs:
   test-uikit-debug:
     name: Test UIKit (Debug)
     runs-on: macos-13
-    if: ${{ github.event_name != 'push' || github.event.inputs.uikit_snapshots == 'true' }}
+    if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
       GITHUB_PR_NUM: ${{ github.event.number }}
