@@ -177,8 +177,9 @@ extension UserRobot {
             XCTAssertFalse(CallPage.cornerDragableView.waitForDisappearance().exists, "cornerDragableView should disappear")
             XCTAssertEqual(participantCount + 1, CallPage.participantView.count, "GridView")
         } else {
+            let user = 1
             XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
-            XCTAssertEqual(participantCount, CallPage.participantView.count, "GridView")
+            XCTAssertEqual(participantCount + user, CallPage.participantView.count, "GridView")
         }
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
         return self
