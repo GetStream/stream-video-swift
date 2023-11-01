@@ -67,6 +67,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         !publishedTracks.isEmpty
     }
     
+    func unpublishAllTracks() {
+        publishedTracks = []
+        pc.senders.forEach { pc.removeTrack($0) }
+        pc.transceivers.forEach { $0.stopInternal() }
+    }
+
     func createOffer(constraints: RTCMediaConstraints = .defaultConstraints) async throws -> RTCSessionDescription {
         try await withCheckedThrowingContinuation { continuation in
             pc.offer(for: constraints) { sdp, error in

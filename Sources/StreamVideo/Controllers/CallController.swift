@@ -102,7 +102,7 @@ class CallController {
             callId: callId,
             callSettings: settings,
             ring: ring,
-            migrating: migratingFrom != nil
+            migratingFrom: migratingFrom
         )
         
         setupStatsTimer()
@@ -236,9 +236,9 @@ class CallController {
         callId: String,
         callSettings: CallSettings,
         ring: Bool,
-        migrating: Bool
+        migratingFrom: String?
     ) async throws {
-        if !migrating {
+        if migratingFrom == nil {
             webRTCClient = environment.webRTCBuilder(
                 user,
                 apiKey,
@@ -265,24 +265,29 @@ class CallController {
             executeOnMain { [weak self] in
                 self?.call?.state.reconnectionStatus = .migrating
             }
-            webRTCClient?.prepareForMigration(
-                url: response.credentials.server.url,
-                token: response.credentials.token,
-                webSocketURL: response.credentials.server.wsEndpoint,
-                fromSfuName: response.credentials.server.edgeName
-            )
         }
         
         let videoOptions = VideoOptions(
             targetResolution: response.call.settings.video.targetResolution
         )
         let connectOptions = ConnectOptions(iceServers: response.credentials.iceServers)
-        try await webRTCClient?.connect(
-            callSettings: callSettings,
-            videoOptions: videoOptions,
-            connectOptions: connectOptions,
-            migrating: migrating
-        )
+        if let migratingFrom {
+            webRTCClient?._migrate(
+                signalServerHostname: response.credentials.server.url,
+                signalServerToken: response.credentials.token,
+                signalWSClientConnectURL: response.credentials.server.wsEndpoint,
+                fromSFU: migratingFrom,
+                connectOptions: connectOptions,
+                videoOptions: videoOptions
+            )
+        } else {
+            try await webRTCClient?.connect(
+                callSettings: callSettings,
+                videoOptions: videoOptions,
+                connectOptions: connectOptions,
+                migrating: migratingFrom != nil
+            )
+        }
         let sessionId = webRTCClient?.sessionID ?? ""
         executeOnMain { [weak self] in
             self?.call?.state.sessionId = sessionId

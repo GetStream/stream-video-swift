@@ -138,6 +138,7 @@
 		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
+		40F831192AF1B24400A56AFC /* SessionMigrationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F831182AF1B24400A56AFC /* SessionMigrationAdapter.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
@@ -1053,6 +1054,7 @@
 		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
+		40F831182AF1B24400A56AFC /* SessionMigrationAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionMigrationAdapter.swift; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
 		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
@@ -2214,6 +2216,14 @@
 				40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */,
 			);
 			path = WaitingLocalUserView;
+			sourceTree = "<group>";
+		};
+		40F831172AF1B22600A56AFC /* Adapters */ = {
+			isa = PBXGroup;
+			children = (
+				40F831182AF1B24400A56AFC /* SessionMigrationAdapter.swift */,
+			);
+			path = Adapters;
 			sourceTree = "<group>";
 		};
 		40FBEF472AC3030C007CFF17 /* UITests */ = {
@@ -3584,6 +3594,7 @@
 		84FC2C1C28ACF29300181490 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				40F831172AF1B22600A56AFC /* Adapters */,
 				84BAD7762A6BFE7200733156 /* Screensharing */,
 				84FC2C1D28ACF2AE00181490 /* WebRTCClient.swift */,
 				84FC2C2128ACF2E000181490 /* PeerConnection.swift */,
@@ -4401,6 +4412,7 @@
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,
 				84A737D128F4716E001A6769 /* events.pb.swift in Sources */,
 				84DC38C129ADFCFD00946713 /* CallRequest.swift in Sources */,
+				40F831192AF1B24400A56AFC /* SessionMigrationAdapter.swift in Sources */,
 				84DC38A829ADFCFD00946713 /* QueryCallsResponse.swift in Sources */,
 				840F59912A77FDCB00EF3EB2 /* HLSSettingsRequest.swift in Sources */,
 				842B8E1B2A2DFED900863A87 /* CallSessionStartedEvent.swift in Sources */,

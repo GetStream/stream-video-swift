@@ -7,13 +7,13 @@ import Foundation
 @preconcurrency import WebRTC
 
 class WebRTCClient: NSObject, @unchecked Sendable {
-    
+
     enum Constants {
         static let screenshareTrackType = "TRACK_TYPE_SCREEN_SHARE"
         static let videoTrackType = "TRACK_TYPE_VIDEO"
         static let audioTrackType = "TRACK_TYPE_AUDIO"
     }
-    
+
     actor State: ObservableObject {
         enum Constants {
             static let lowParticipantDelay: UInt64 = 250_000_000
@@ -43,66 +43,66 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         var audioTracks = [String: RTCAudioTrack]()
         var pausedTrackIds = [String]()
         private var continuation: AsyncStream<[Bool]>.Continuation?
-        
+
         func update(connectionState: ConnectionState) {
             self.connectionState = connectionState
         }
-        
+
         func update(callParticipants: [String: CallParticipant]) {
             self.callParticipants = callParticipants
         }
-        
+
         func update(callParticipant: CallParticipant) {
             self.callParticipants[callParticipant.id] = callParticipant
         }
-        
+
         func removeCallParticipant(with id: String) {
             self.callParticipants.removeValue(forKey: id)
         }
-        
+
         func add(track: RTCVideoTrack?, id: String) {
             self.tracks[id] = track
         }
-        
+
         func removeTrack(id: String) {
             self.tracks[id] = nil
         }
-        
+
         func add(screensharingTrack: RTCVideoTrack?, id: String) {
             self.screensharingTracks[id] = screensharingTrack
         }
-        
+
         func removeScreensharingTrack(id: String) {
             self.screensharingTracks[id] = nil
         }
-        
+
         func add(audioTrack: RTCAudioTrack?, id: String) {
             self.audioTracks[id] = audioTrack
         }
-        
+
         func removeAudioTrack(id: String) {
             self.audioTracks[id] = nil
         }
-        
+
         func update(tracks: [String: RTCVideoTrack]) {
             self.tracks = tracks
         }
-        
+
         func update(screensharingTracks: [String: RTCVideoTrack]) {
             self.screensharingTracks = screensharingTracks
         }
-        
+
         func callParticipantsUpdates() -> AsyncStream<[Bool]> {
             let updates = AsyncStream([Bool].self) { continuation in
                 self.continuation = continuation
             }
             return updates
         }
-        
+
         func update(pausedTrackIds: [String]) {
             self.pausedTrackIds = pausedTrackIds
         }
-        
+
         func cleanUp() {
             callParticipants = [:]
             tracks = [:]
@@ -111,7 +111,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             connectionState = .disconnected(reason: .user)
             continuation?.finish()
         }
-        
+
         private var participantUpdatesDelay: UInt64 {
             let count = callParticipants.count
             if count < 16 {
@@ -125,13 +125,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }
     }
-    
+
     let state: State
-    
+
     let httpClient: HTTPClient
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     let peerConnectionFactory: PeerConnectionFactory
-    
+
     private(set) var publisher: PeerConnection? {
         didSet {
             sfuMiddleware.update(publisher: publisher)
@@ -143,13 +143,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             sfuMiddleware.update(subscriber: subscriber)
         }
     }
-    
+
     private(set) var signalChannel: WebSocketClient?
-    
+
     private(set) var sessionID: String
     private var token: String
     private let timeoutInterval: TimeInterval = 15
-    
+
     private(set) var localVideoTrack: RTCVideoTrack?
     private(set) var localAudioTrack: RTCAudioTrack?
     private(set) var localScreenshareTrack: RTCVideoTrack?
@@ -167,12 +167,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var videoOptions = VideoOptions()
     private let environment: WebSocketClient.Environment
     private let apiKey: String
-    
-    private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
-    private var migratingWSClient: WebSocketClient?
-    private var migratingToken: String?
-    private var fromSfuName: String?
-    private var tempSubscriber: PeerConnection?
+
     private var currentScreenhsareType: ScreensharingType?
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
@@ -186,7 +181,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
     }
     var onSessionMigrationCompleted: (() -> ())?
-    
+
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
@@ -194,7 +189,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         center.add(middlewares: middlewares)
         return center
     }()
-    
+
     private(set) lazy var sfuMiddleware = SfuMiddleware(
         sessionID: sessionID,
         user: user,
@@ -204,7 +199,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         publisher: publisher,
         participantThreshold: participantsThreshold
     )
-    
+
     init(
         user: User,
         apiKey: String,
@@ -229,7 +224,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         self.environment = environment
         self.apiKey = apiKey
         httpClient = environment.httpClientBuilder()
-        
+
         signalService = Stream_Video_Sfu_Signal_SignalServer(
             httpClient: httpClient,
             apiKey: apiKey,
@@ -246,7 +241,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         addOnParticipantsChangeHandler()
         subscribeToAppLifecycleChanges()
     }
-    
+
     func connect(
         callSettings: CallSettings,
         videoOptions: VideoOptions,
@@ -264,17 +259,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         log.debug("Connecting to SFU", subsystems: .webRTC)
         await state.update(connectionState: .connecting)
         log.debug("Setting user media", subsystems: .webRTC)
-        if !migrating {
-            await setupUserMedia(callSettings: callSettings)
-            log.debug("Connecting WS channel", subsystems: .webRTC)
-            signalChannel?.connect()
-            sfuMiddleware.onSocketConnected = handleOnSocketConnected
-        } else {
-            log.debug("Performing session migration", subsystems: .webRTC)
-            migratingWSClient?.connect()
-            publisher?.update(configuration: connectOptions.rtcConfiguration)
-            sfuMiddleware.onSocketConnected = handleOnMigrationJoinResponse
-        }
+        
+        await setupUserMedia(callSettings: callSettings)
+        log.debug("Connecting WS channel", subsystems: .webRTC)
+        signalChannel?.connect()
+        sfuMiddleware.onSocketConnected = handleOnSocketConnected
+
         sfuMiddleware.onParticipantCountUpdated = { [weak self] participantCount in
             self?.onParticipantCountUpdated?(participantCount)
         }
@@ -282,31 +272,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             self?.handlePinsChanged(pins)
         }
     }
-    
-    func prepareForMigration(
-        url: String,
-        token: String,
-        webSocketURL: String,
-        fromSfuName: String
-    ) {
-        self.fromSfuName = fromSfuName
-        migratingToken = token
-        let signalServer = Stream_Video_Sfu_Signal_SignalServer(
-            httpClient: httpClient,
-            apiKey: apiKey,
-            hostname: url,
-            token: token
-        )
-        self.migratingSignalService = signalServer
-        if let url = URL(string: webSocketURL) {
-            migratingWSClient = makeWebSocketClient(
-                url: url,
-                apiKey: .init(apiKey),
-                isMigrating: true
-            )
-        }
-    }
-    
+
     func cleanUp() async {
         log.debug("Cleaning up WebRTCClient", subsystems: .webRTC)
         try? await videoCapturer?.stopCapture()
@@ -329,23 +295,23 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         onSignalConnectionStateChange = nil
         onParticipantCountUpdated = nil
     }
-    
+
     func changeCameraMode(position: CameraPosition) async throws {
         try await setCameraPosition(position == .front ? .front : .back)
     }
-    
+
     func setupUserMedia(callSettings: CallSettings) async {
         if hasCapability(.sendAudio), localAudioTrack == nil {
             await audioSession.configure(
                 audioOn: callSettings.audioOn,
                 speakerOn: callSettings.speakerOn
             )
-            
+
             // Audio
             let audioTrack = await makeAudioTrack()
             localAudioTrack = audioTrack
         }
-        
+
         if hasCapability(.sendVideo), localVideoTrack == nil {
             // Video
             let videoTrack = await makeVideoTrack()
@@ -353,23 +319,23 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             await state.add(track: localVideoTrack, id: sessionID)
         }
     }
-    
+
     func publishUserMedia(callSettings: CallSettings) {
         if hasCapability(.sendAudio),
-            let audioTrack = localAudioTrack, callSettings.audioOn,
-            publisher?.audioTrackPublished == false {
+           let audioTrack = localAudioTrack, callSettings.audioOn,
+           publisher?.audioTrackPublished == false {
             log.debug("publishing audio track", subsystems: .webRTC)
             publisher?.addTrack(audioTrack, streamIds: ["\(sessionID):audio"], trackType: .audio)
         }
         if hasCapability(.sendVideo),
-            callSettings.videoOn,
-            let videoTrack = localVideoTrack,
-            publisher?.videoTrackPublished == false {
+           callSettings.videoOn,
+           let videoTrack = localVideoTrack,
+           publisher?.videoTrackPublished == false {
             log.debug("publishing video track", subsystems: .webRTC)
             publisher?.addTransceiver(videoTrack, streamIds: ["\(sessionID):video"], trackType: .video)
         }
     }
-    
+
     func changeAudioState(isEnabled: Bool) async throws {
         if isEnabled && (publisher == nil || publisher?.audioTrackPublished == false),
            let configuration = connectOptions?.rtcConfiguration {
@@ -391,14 +357,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let connectURL = signalChannel?.connectURL
         try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
             self?.sfuChanged(connectURL) == false
-                && self?.callSettings.audioOn == !isEnabled
+            && self?.callSettings.audioOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             callSettings = callSettings.withUpdatedAudioState(isEnabled)
             localAudioTrack?.isEnabled = isEnabled
         }
     }
-    
+
     func changeScreensharingState(isEnabled: Bool) async throws {
         var request = Stream_Video_Sfu_Signal_UpdateMuteStatesRequest()
         var screenshare = Stream_Video_Sfu_Signal_TrackMuteState()
@@ -411,7 +377,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             localScreenshareTrack?.isEnabled = isEnabled
         }
     }
-    
+
     func changeVideoState(isEnabled: Bool) async throws {
         if isEnabled && (publisher == nil || publisher?.videoTrackPublished == false),
            let configuration = connectOptions?.rtcConfiguration {
@@ -433,14 +399,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let connectURL = signalChannel?.connectURL
         try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
             self?.sfuChanged(connectURL) == false
-                && self?.callSettings.videoOn == !isEnabled
+            && self?.callSettings.videoOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             callSettings = callSettings.withUpdatedVideoState(isEnabled)
             localVideoTrack?.isEnabled = isEnabled
         }
     }
-    
+
     func changeSoundState(isEnabled: Bool) async throws {
         await audioSession.setAudioSessionEnabled(isEnabled)
         let audioTracks = await state.audioTracks
@@ -449,12 +415,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         callSettings = callSettings.withUpdatedAudioOutputState(isEnabled)
     }
-    
+
     func changeSpeakerState(isEnabled: Bool) async throws {
         await audioSession.configure(audioOn: callSettings.audioOn, speakerOn: isEnabled)
         callSettings = callSettings.withUpdatedSpeakerState(isEnabled)
     }
-    
+
     func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
         guard let participant = await state.callParticipants[participant.id],
               participant.showTrack != isVisible else {
@@ -470,7 +436,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         await state.update(callParticipant: updated)
         await state.add(track: track, id: trackId)
     }
-    
+
     func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
         guard let participant = await state.callParticipants[participant.id] else {
             return
@@ -478,11 +444,11 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let updated = participant.withUpdated(trackSize: trackSize)
         await state.update(callParticipant: updated)
     }
-    
+
     func setVideoFilter(_ videoFilter: VideoFilter?) {
         videoCapturer?.setVideoFilter(videoFilter)
     }
-    
+
     func startScreensharing(type: ScreensharingType) async throws {
         if hasCapability(.screenshare) {
             if publisher == nil, let configuration = connectOptions?.rtcConfiguration {
@@ -511,7 +477,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         self.currentScreenhsareType = type
         try await screenshareCapturer?.startCapture(device: nil)
     }
-    
+
     func stopScreensharing() async throws {
         await state.removeScreensharingTrack(id: sessionID)
         localScreenshareTrack?.isEnabled = false
@@ -519,7 +485,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         try await changeScreensharingState(isEnabled: false)
         try? await screenshareCapturer?.stopCapture()
     }
-    
+
     func changePinState(
         isEnabled: Bool,
         sessionId: String
@@ -537,7 +503,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let updated = participant.withUpdated(pin: pin)
         await state.update(callParticipant: updated)
     }
-    
+
     func collectStats() async throws -> CallStatsReport {
         async let statsPublisher = publisher?.statsReport()
         async let statsSubscriber = subscriber?.statsReport()
@@ -556,10 +522,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     ///
     /// - Parameter point: A `CGPoint` representing the location within the view where the camera
     ///  should focus.
-    /// - Throws: A `ClientError.Unexpected` error if `videoCapturer` cannot be cast to 
+    /// - Throws: A `ClientError.Unexpected` error if `videoCapturer` cannot be cast to
     /// `VideoCapturer`.
     ///
-    /// - Note: The `point` parameter should be provided in the coordinate space of the view, where 
+    /// - Note: The `point` parameter should be provided in the coordinate space of the view, where
     /// (0,0) is the top-left corner, and (1,1) is the bottom-right corner. Make sure the camera supports
     /// tap-to-focus functionality before invoking this method.
     func focus(at point: CGPoint) throws {
@@ -571,7 +537,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
 
     // MARK: - private
-    
+
     private func handleOnSocketConnected() {
         Task {
             do {
@@ -582,45 +548,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }
     }
-        
-    private func handleOnMigrationJoinResponse() {
-        signalChannel?.connectionStateDelegate = nil
-        signalChannel?.onWSConnectionEstablished = nil
-        signalChannel?.disconnect {}
-        signalChannel = nil
-        signalChannel = migratingWSClient
-        if let migratingSignalService {
-            signalService = migratingSignalService
-            sfuMiddleware.signalService = migratingSignalService
-        }
-        cleanupMigrationData()
-        Task {
-            tempSubscriber = subscriber
-            tempSubscriber?.paused = true
-            try await setupPeerConnections()
-            if publisher?.shouldRestartIce == true {
-                try await negotiate(peerConnection: publisher, constraints: .iceRestartConstraints)
-            }
-            subscriber?.onConnected = { [weak self] _ in
-                guard let self else { return }
-                self.onSessionMigrationCompleted?()
-                self.tempSubscriber?.close()
-                self.tempSubscriber = nil
-                self.subscriber?.onConnected = nil
-            }
-        }
-    }
-    
-    private func sendMigrationJoinRequest() async {
-        do {
-            let sdp = try await tempOfferSdp()
-            await sendJoinRequest(with: sdp, migrating: true)
-        } catch {
-            log.error("Error migrating the session")
-            cleanupMigrationData()
-        }
-    }
-    
+
     private func setupPeerConnections() async throws {
         guard let connectOptions = connectOptions else {
             throw ClientError.Unexpected("Connect options not setup")
@@ -635,10 +563,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             signalService: signalService,
             videoOptions: videoOptions
         )
-        
+
         subscriber?.onStreamAdded = handleStreamAdded
         subscriber?.onStreamRemoved = handleStreamRemoved
-        
+
         log.debug("Updating connection status to connected", subsystems: .webRTC)
         await state.update(connectionState: .connected)
         signalChannel?.engine?.send(message: Stream_Video_Sfu_Event_HealthCheckRequest())
@@ -646,7 +574,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             try await publishLocalTracks(configuration: configuration)
         }
     }
-    
+
     private func publishLocalTracks(configuration: RTCConfiguration) async throws {
         if publisher == nil {
             publisher = try await peerConnectionFactory.makePeerConnection(
@@ -667,7 +595,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         await setupUserMedia(callSettings: callSettings)
         publishUserMedia(callSettings: callSettings)
     }
-    
+
     private func handleStreamAdded(_ stream: RTCMediaStream) {
         let idParts = stream.streamId.components(separatedBy: ":")
         let trackId = idParts.first ?? UUID().uuidString
@@ -686,21 +614,21 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             await assignTracksToParticipants()
         }
     }
-    
+
     private func handleStreamRemoved(_ stream: RTCMediaStream) {
         let trackId = stream.streamId.components(separatedBy: ":").first ?? UUID().uuidString
         Task {
             await state.removeCallParticipant(with: trackId)
         }
     }
-    
+
     private func setCameraPosition(_ cameraPosition: AVCaptureDevice.Position) async throws {
         guard let capturer = videoCapturer else {
             throw ClientError.Unexpected()
         }
         try await capturer.setCameraPosition(cameraPosition)
     }
-    
+
     private func handleParticipantsUpdated() async {
         await assignTracksToParticipants()
         let state = await self.state.connectionState
@@ -710,7 +638,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let participants = await self.state.callParticipants
         onParticipantsUpdated?(participants)
     }
-    
+
     private func handleNegotiationNeeded() -> ((PeerConnection, RTCMediaConstraints?) -> Void) {
         { [weak self] peerConnection, constraints in
             guard let self = self else { return }
@@ -722,7 +650,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }
     }
-        
+
     private func negotiate(
         peerConnection: PeerConnection?,
         constraints: RTCMediaConstraints? = nil
@@ -760,7 +688,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             try await peerConnection.setRemoteDescription(sdp, type: .answer)
         })
     }
-    
+
     private func loadTracks() -> [Stream_Video_Sfu_Models_TrackInfo] {
         var tracks = [Stream_Video_Sfu_Models_TrackInfo]()
         if callSettings.videoOn {
@@ -785,7 +713,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         return tracks
     }
-    
+
     private func loadLayers(
         fps: UInt32 = 30,
         supportedCodecs: [VideoCodec]
@@ -802,17 +730,17 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             layer.fps = fps
             layers.append(layer)
         }
-        
+
         return layers
     }
-    
+
     private func makeAudioTrack() async -> RTCAudioTrack {
         let audioConstrains = RTCMediaConstraints(mandatoryConstraints: nil, optionalConstraints: nil)
         let audioSource = await peerConnectionFactory.makeAudioSource(audioConstrains)
         let audioTrack = await peerConnectionFactory.makeAudioTrack(source: audioSource)
         return audioTrack
     }
-    
+
     private func makeVideoTrack(screenshareType: ScreensharingType? = nil) async -> RTCVideoTrack {
         let videoSource = await peerConnectionFactory.makeVideoSource(forScreenShare: screenshareType != nil)
         if let screenshareType {
@@ -842,7 +770,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let videoTrack = await peerConnectionFactory.makeVideoTrack(source: videoSource)
         return videoTrack
     }
-    
+
     private func makeJoinRequest(
         subscriberSdp: String,
         migrating: Bool = false
@@ -851,26 +779,17 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         var joinRequest = Stream_Video_Sfu_Event_JoinRequest()
         joinRequest.sessionID = sessionID
         joinRequest.subscriberSdp = subscriberSdp
-        if migrating {
-            joinRequest.token = migratingToken ?? token
-            var migration = Stream_Video_Sfu_Event_Migration()
-            migration.fromSfuID = fromSfuName ?? signalService.hostname
-            migration.announcedTracks = loadTracks()
-            migration.subscriptions = await loadTrackSubscriptionDetails()
-            joinRequest.migration = migration
-        } else {
-            joinRequest.token = token
-        }
+        joinRequest.token = token
         return joinRequest
     }
-    
+
     private func webSocketURL(from hostname: String) -> URL? {
         let host = URL(string: hostname)?.host ?? hostname
         let wsURLString = "wss://\(host)/ws"
         let wsURL = URL(string: wsURLString)
         return wsURL
     }
-    
+
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey,
@@ -878,7 +797,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     ) -> WebSocketClient {
         let config = URLSessionConfiguration.default
         config.waitsForConnectivity = false
-        
+
         // Create a WebSocketClient.
         let webSocketClient = WebSocketClient(
             sessionConfiguration: config,
@@ -889,42 +808,35 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             connectURL: url,
             requiresAuth: false
         )
-        
+
         webSocketClient.connectionStateDelegate = self
-        
+
         webSocketClient.onWSConnectionEstablished = { [weak self] in
-            guard let self = self else { return }
-            Task {
-                if isMigrating {
-                    await self.sendMigrationJoinRequest()
-                } else {
-                    try await self.handleSocketConnected()
-                }
-            }
+            Task { [weak self] in try await self?.handleSocketConnected() }
         }
 
         return webSocketClient
     }
-    
+
     private func handleSocketConnected() async throws {
         let sdp = try await tempOfferSdp()
         await sendJoinRequest(with: sdp)
     }
-    
+
     private func tempOfferSdp() async throws -> String {
         guard let connectOptions = connectOptions else {
             throw ClientError.Unexpected()
         }
-        
+
         let tempPeerConnection = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
             callCid: callCid,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
-            signalService: migratingSignalService ?? signalService,
+            signalService: signalService,
             videoOptions: videoOptions
         )
-        
+
         if let localAudioTrack {
             tempPeerConnection.addTrack(
                 localAudioTrack,
@@ -932,7 +844,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 trackType: .audio
             )
         }
-        
+
         if let localVideoTrack {
             tempPeerConnection.addTransceiver(
                 localVideoTrack,
@@ -946,18 +858,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         tempPeerConnection.close()
         return offer.sdp
     }
-    
+
     private func sendJoinRequest(with sdp: String, migrating: Bool = false) async {
         let payload = await makeJoinRequest(subscriberSdp: sdp, migrating: migrating)
         var event = Stream_Video_Sfu_Event_SfuRequest()
         event.requestPayload = .joinRequest(payload)
-        if migrating {
-            migratingWSClient?.engine?.send(message: event)
-        } else {
-            signalChannel?.engine?.send(message: event)
-        }
+        signalChannel?.engine?.send(message: event)
     }
-    
+
     private func updateParticipantsSubscriptions() async throws {
         var request = Stream_Video_Sfu_Signal_UpdateSubscriptionsRequest()
         request.sessionID = sessionID
@@ -976,12 +884,12 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func loadTrackSubscriptionDetails() async -> [Stream_Video_Sfu_Signal_TrackSubscriptionDetails] {
         var tracks = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
         let callParticipants = await state.callParticipants
 
-       
+
 
         for (_, value) in callParticipants {
             if value.id != sessionID {
@@ -1022,7 +930,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         return tracks
     }
-    
+
     private func trackSubscriptionDetails(
         for userId: String,
         sessionId: String,
@@ -1036,7 +944,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         trackSubscriptionDetails.trackType = type
         return trackSubscriptionDetails
     }
-    
+
     private func assignTracksToParticipants() async {
         let callParticipants = await state.callParticipants
         for (_, participant) in callParticipants {
@@ -1081,7 +989,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func addOnParticipantsChangeHandler() {
         Task {
             for await _ in await state.callParticipantsUpdates() {
@@ -1090,20 +998,15 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }
     }
-    
+
     private func hasCapability(_ ownCapability: OwnCapability) -> Bool {
         ownCapabilities.contains(ownCapability)
     }
-    
-    private func cleanupMigrationData() {
-        migratingWSClient = nil
-        migratingSignalService = nil
-    }
-    
+
     private func sfuChanged(_ connectURL: URL?) -> Bool {
         signalChannel?.connectURL != connectURL
     }
-    
+
     @objc private func pauseTracks() {
         Task {
             var pausedTrackIds = [String]()
@@ -1118,7 +1021,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
 
     }
-    
+
     @objc private func unpauseTracks() {
         Task {
             let tracks = await state.tracks
@@ -1131,7 +1034,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             await state.update(pausedTrackIds: [])
         }
     }
-        
+
     private func handlePinsChanged(_ pins: [Stream_Video_Sfu_Models_Pin]) {
         Task {
             let participants = await state.callParticipants
@@ -1155,7 +1058,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             await state.update(callParticipants: updatedParticipants)
         }
     }
-    
+
     private func subscribeToAppLifecycleChanges() {
         NotificationCenter.default.addObserver(
             self,
@@ -1170,7 +1073,101 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             object: nil
         )
     }
-    
+
+    func _migrate(
+        signalServerHostname: String,
+        signalServerToken: String,
+        signalWSClientConnectURL: String,
+        fromSFU: String,
+        connectOptions: ConnectOptions,
+        videoOptions: VideoOptions
+    ) {
+        self.connectOptions = connectOptions
+        self.videoOptions = videoOptions
+        let adapter = SessionMigrationAdapter(
+            fromSFU: fromSFU,
+            sessionID: sessionID,
+            callSettings: callSettings,
+            audioSettings: audioSettings,
+            publisher: publisher!,
+            httpClient: httpClient,
+            apiKey: apiKey,
+            eventNotificationCenter: eventNotificationCenter,
+            environment: environment,
+            signalServerHostname: signalServerHostname,
+            signalServerToken: signalServerToken,
+            signalWSClientConnectURL: signalWSClientConnectURL,
+            connectOptions: connectOptions,
+            audioTrack: localAudioTrack,
+            videoTrack: localVideoTrack,
+            sfu: sfuMiddleware,
+            connectionStateDelegate: self
+        ) { [peerConnectionFactory, sessionID, callCid, connectOptions] peerConnectionType, signalService in
+                try await peerConnectionFactory.makePeerConnection(
+                    sessionId: sessionID,
+                    callCid: callCid,
+                    configuration: connectOptions.rtcConfiguration,
+                    type: peerConnectionType,
+                    signalService: signalService,
+                    videoOptions: videoOptions
+                )
+            } joinRequestFactory: { [weak self, sessionID] sdp, token, fromSFU in
+                var joinRequest = Stream_Video_Sfu_Event_JoinRequest()
+                joinRequest.sessionID = sessionID
+                joinRequest.subscriberSdp = sdp
+                joinRequest.token = token
+                var migration = Stream_Video_Sfu_Event_Migration()
+                migration.fromSfuID = fromSFU
+                migration.announcedTracks = self?.loadTracks() ?? []
+                migration.subscriptions = await self?.loadTrackSubscriptionDetails() ?? []
+                joinRequest.migration = migration
+                return joinRequest
+            } disconnectSignalChannel: { [weak self] signalChannel, signalService in
+                self?.signalChannel?.connectionStateDelegate = nil
+                self?.signalChannel?.onWSConnectionEstablished = nil
+                self?.signalChannel?.disconnect {}
+                self?.signalChannel = nil
+                self?.signalChannel = signalChannel
+                self?.signalService = signalService
+                self?.subscriber?.signalService = signalService
+            } pauseSubscriber: { [weak self] in
+                self?.subscriber?.paused = true
+            } updateSubscriber: { [weak self] subscriber in
+                self?.subscriber = subscriber
+                subscriber.onStreamAdded = self?.handleStreamAdded
+                subscriber.onStreamRemoved = self?.handleStreamRemoved
+                await self?.state.update(connectionState: .connected)
+            } setUpUserMedia: { [weak self] in
+                guard let self else { return }
+                await setupUserMedia(callSettings: callSettings)
+            } publishUserMedia: { [weak self] in
+                guard let self else { return }
+                publishUserMedia(callSettings: callSettings)
+            } setPublisher: { [weak self, sessionID] sdp, signalChannel, signalService in
+                var request = Stream_Video_Sfu_Signal_SetPublisherRequest()
+                request.sdp = sdp
+                request.sessionID = sessionID
+                request.tracks = self?.loadTracks() ?? []
+                let connectURL = signalChannel.connectURL
+
+                return try await executeTask(retryPolicy: .fastCheckValue { [weak self] in
+                    self?.sfuChanged(connectURL) == false
+                }, task: {
+                    return try await signalService.setPublisher(setPublisherRequest: request).sdp
+                })
+            } setPublisherAnswer: { [weak self] sdp, signalChannel, signalService in
+                let connectURL = signalChannel.connectURL
+                try await executeTask(retryPolicy: .fastCheckValue{
+                    self?.sfuChanged(connectURL) == false
+                }, task: {
+                    try await self?.publisher?.setRemoteDescription(sdp, type: .answer)
+                })
+            } completed: { [weak self] in
+                self?.publisher?.onNegotiationNeeded = self?.handleNegotiationNeeded()
+            }
+
+        adapter.execute()
+    }
 }
 
 extension WebRTCClient: ConnectionStateDelegate {

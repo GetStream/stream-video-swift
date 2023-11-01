@@ -18,6 +18,14 @@ class EventNotificationCenter: NotificationCenter {
         middlewares.append(middleware)
     }
 
+    func remove<T: EventMiddleware>(middleware: T) where T: EventMiddleware & Equatable {
+        guard let index = middlewares.firstIndex(where: { $0 as? T == middleware }) else {
+            return
+        }
+
+        middlewares.remove(at: index)
+    }
+
     func process(_ events: [WrappedEvent], postNotifications: Bool = true, completion: (() -> Void)? = nil) {
         let processingEventsDebugMessage: () -> String = {
             let eventNames = events.map(\.name)
