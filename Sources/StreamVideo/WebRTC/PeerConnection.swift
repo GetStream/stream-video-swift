@@ -15,7 +15,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     private let pc: RTCPeerConnection
     private let eventDecoder: WebRTCEventDecoder
-    var signalService: Stream_Video_Sfu_Signal_SignalServer
+    var signalService: Stream_Video_Sfu_Signal_SignalServer {
+        didSet {
+            if signalService.hostname != oldValue.hostname {
+                pendingIceCandidates = []
+            }
+        }
+    }
     private let sessionId: String
     private let callCid: String
     private let type: PeerConnectionType
@@ -123,10 +129,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
                     continuation.resume(throwing: error)
                 } else {
                     Task {
-                        for candidate in self.pendingIceCandidates {
-                            _ = try? await self.add(iceCandidate: candidate)
-                        }
-                        self.pendingIceCandidates = []
                         continuation.resume(returning: ())
                     }
                 }
@@ -176,8 +178,24 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func close() {
         pc.close()
     }
-    
-    func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
+
+    func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {
+        switch stateChanged {
+        case .stable:
+            Task {
+                do {
+                    for candidate in pendingIceCandidates {
+                        try await add(candidate: candidate)
+                    }
+                    pendingIceCandidates = []
+                } catch {
+                    log.error(error)
+                }
+            }
+        default:
+            break
+        }
+    }
     
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
         log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue), sfu = \(signalService.hostname)", subsystems: .webRTC)
