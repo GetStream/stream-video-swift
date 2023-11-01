@@ -9,11 +9,11 @@ import SwiftUI
 struct CustomCallView<Factory: ViewFactory>: View {
     
     @Injected(\.colors) var colors
-
+    
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
-    @ObservedObject var microphoneChecker = InjectedValues[\.microphoneChecker]
-
+    
+    @StateObject var microphoneChecker = MicrophoneChecker()
     @State var mutedIndicatorShown = false
     
     var body: some View {

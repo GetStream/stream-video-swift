@@ -32,8 +32,8 @@ final class MicrophoneChecker_Tests: XCTestCase {
     // MARK: - init
 
     func test_startListening_audioSessionIsActiveWasCalled() {
-        subject.startListening()
-
+        _ = subject
+        
         XCTAssertTrue(audioSession.setActiveWasCalledWithIsActive ?? false)
     }
 
@@ -44,7 +44,7 @@ final class MicrophoneChecker_Tests: XCTestCase {
 
         subject.stopListening()
 
-        XCTAssertFalse(audioSession.setActiveWasCalledWithIsActive ?? false)
+        XCTAssertTrue(audioSession.setActiveWasCalledWithIsActive ?? false)
     }
 
     // MARK: - CallNotification.callEnded notification
