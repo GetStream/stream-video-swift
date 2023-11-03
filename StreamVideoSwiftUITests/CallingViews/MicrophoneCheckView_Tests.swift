@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -19,7 +20,12 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
                 microphoneOn: true,
                 isSilent: false
             )
-            AssertSnapshot(view, size: sizeThatFits, suffix: "with_\(count)_audioLevels")
+            AssertSnapshot(
+                view,
+                variants: snapshotVariants,
+                size: sizeThatFits,
+                suffix: "with_\(count)_audioLevels"
+            )
         }
     }
     
@@ -29,7 +35,11 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
             microphoneOn: true,
             isSilent: true
         )
-        AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits)
+        AssertSnapshot(
+            view,
+            variants: [.defaultLight],
+            size: sizeThatFits
+        )
     }
     
     func test_microphoneCheckView_micOff_snapshot() throws {
@@ -38,6 +48,10 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
             microphoneOn: false,
             isSilent: false
         )
-        AssertSnapshot(view, variants: [.defaultLight], size: sizeThatFits)
+        AssertSnapshot(
+            view,
+            variants: [.defaultLight],
+            size: sizeThatFits
+        )
     }
 }

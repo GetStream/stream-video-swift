@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -16,6 +17,6 @@ final class ScreenSharingView_Tests: StreamVideoUITestCase {
             screenSharing: .init(track: .none, participant: ParticipantFactory.get(2).last!),
             availableFrame: .init(origin: .zero, size: defaultScreenSize)
         )
-        AssertSnapshot(view)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }

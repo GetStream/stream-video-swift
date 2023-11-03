@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -25,7 +26,7 @@ final class IncomingCallView_Tests: StreamVideoUITestCase {
                 onCallAccepted: {_ in },
                 onCallRejected: {_ in }
             )
-            AssertSnapshot(view, suffix: "with_\(count)_participants")
+            AssertSnapshot(view, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
 }

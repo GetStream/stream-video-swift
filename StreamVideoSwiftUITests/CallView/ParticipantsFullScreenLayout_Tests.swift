@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideoSwiftUI
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -19,7 +20,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             frame: .init(origin: .zero, size: defaultScreenSize),
             onChangeTrackVisibility: {_,_ in }
         )
-        AssertSnapshot(layout)
+        AssertSnapshot(layout, variants: snapshotVariants)
     }
     
     func test_fullscreen_participantWithoutAudio_snapshot() throws {
@@ -30,7 +31,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             frame: .init(origin: .zero, size: defaultScreenSize),
             onChangeTrackVisibility: {_,_ in }
         )
-        AssertSnapshot(layout)
+        AssertSnapshot(layout, variants: snapshotVariants)
     }
     
     func test_fullscreen_participantConnectionQuality_snapshot() throws {
@@ -42,7 +43,7 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
                 frame: .init(origin: .zero, size: defaultScreenSize),
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "\(quality)")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "\(quality)")
         }
     }
     
@@ -54,6 +55,6 @@ final class ParticipantsFullScreenLayout_Tests: StreamVideoUITestCase {
             frame: .init(origin: .zero, size: defaultScreenSize),
             onChangeTrackVisibility: {_,_ in }
         )
-        AssertSnapshot(layout)
+        AssertSnapshot(layout, variants: snapshotVariants)
     }
 }

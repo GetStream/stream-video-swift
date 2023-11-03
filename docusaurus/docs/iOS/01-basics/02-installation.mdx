@@ -6,6 +6,8 @@ description: Install the SDK for video calling
 The Swift SDK can be installed using Swift Package Manager, if you are starting a new project we always recommend using the latest release.
 Releases and changes are published on the [Github releases page](https://github.com/GetStream/stream-video-swift/releases).
 
+We also provide pre-built XCFramework support, read more [here](#xcframeworks).
+
 ### Add the SDK to your project
 
 To add `StreamVideo` SDK, open Xcode and follow these steps:
@@ -33,3 +35,26 @@ Making a video call requires the usage of the camera and the microphone of the d
 ### Push notifications
 
 Stream video support both Remote Notifications and VoIP notifications. See the [Push Notification](../../advanced/push-notifications) section for more details.
+
+## XCFrameworks
+
+In an effort to have [**Module Stability**](https://www.swift.org/blog/library-evolution/), we distribute **pre-built XCFrameworks**.
+
+:::info
+Our XCFrameworks are built with Swift 5.7. In order to use them you need Xcode 14 or above.
+:::
+
+An **XCFramework** is a package that contains binaries for multiple architectures/platforms, but only the particular slice of that package required for your architecture/platform will be used.
+
+**Benefits of XCFrameworks:**
+- Conveniently import a single package
+- Supports all platforms and architectures
+- No more fat binaries. No more architectures stripping
+
+:::info
+In order to manually integrate StreamVideo XCFrameworks, you need to add an additional dependency to your project.
+
+```swift
+.package(name: "WebRTC", url: "https://github.com/webrtc-sdk/Specs.git", .exact("114.5735.8"))
+```
+:::

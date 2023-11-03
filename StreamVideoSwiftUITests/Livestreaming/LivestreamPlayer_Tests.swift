@@ -4,6 +4,7 @@
 
 @testable import StreamVideo
 @testable import StreamVideoSwiftUI
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -19,7 +20,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        assertSnapshot(matching: player, as: .image(perceptualPrecision: 0.98))
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor
@@ -29,7 +30,7 @@ final class LivestreamPlayer_Tests: StreamVideoTestCase {
             .frame(width: defaultScreenSize.width, height: defaultScreenSize.height)
         
         // Then
-        assertSnapshot(matching: player, as: .image(perceptualPrecision: 0.98))
+        AssertSnapshot(player, variants: [.defaultLight, .defaultDark])
     }
     
     @MainActor

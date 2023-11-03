@@ -7,7 +7,7 @@ import SwiftUI
 @available(iOS 14.0, *)
 extension LazyImage {
 
-    public init(imageURL: URL?) where Content == NukeImage {
+    init(imageURL: URL?) where Content == NukeImage {
         #if COCOAPODS
         self.init(source: imageURL)
         #else
@@ -15,7 +15,7 @@ extension LazyImage {
         #endif
     }
 
-    public init(imageURL: URL?, @ViewBuilder content: @escaping (LazyImageState) -> Content) {
+    init(imageURL: URL?, @ViewBuilder content: @escaping (LazyImageState) -> Content) {
         #if COCOAPODS
         self.init(source: imageURL, content: content)
         #else
@@ -26,7 +26,7 @@ extension LazyImage {
 }
 
 @available(iOS 14.0, *)
-struct StreamLazyImage: View {
+public struct StreamLazyImage: View {
     
     var imageURL: URL?
     
