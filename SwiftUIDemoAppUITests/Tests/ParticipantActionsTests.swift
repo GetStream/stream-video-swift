@@ -60,6 +60,7 @@ final class ParticipantActionsTests: StreamTestCase {
                 .login()
                 .startCall(callId)
                 .microphone(.disable)
+                .camera(.enable)
         }
         AND("participant joins the call and turns camera on") {
             participantRobot.joinCall(callId, options: [.withCamera, .withMicrophone])
@@ -83,6 +84,7 @@ final class ParticipantActionsTests: StreamTestCase {
                 .login()
                 .startCall(callId)
                 .microphone(.disable)
+                .camera(.disable)
         }
         AND("participant joins the call and turns camera off") {
             participantRobot.joinCall(callId, options: [.withMicrophone])

@@ -174,8 +174,9 @@ extension UserRobot {
     @discardableResult
     func assertGridView(with participantCount: Int) -> Self {
         if participantCount > 2 {
+            let user = 1
             XCTAssertFalse(CallPage.cornerDragableView.waitForDisappearance().exists, "cornerDragableView should disappear")
-            XCTAssertEqual(participantCount + 1, CallPage.participantView.count, "GridView")
+            XCTAssertEqual(participantCount + user, CallPage.participantView.count, "GridView")
         } else {
             XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
             XCTAssertEqual(participantCount, CallPage.participantView.count, "GridView")

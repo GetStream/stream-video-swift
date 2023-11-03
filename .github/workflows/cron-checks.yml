@@ -144,8 +144,8 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 17.0
-            xcode: 15.0
+          - ios: 17.0.1
+            xcode: 15.0.1
             os: macos-13
             device: "iPhone 14 Pro Max"
             setup_runtime: false

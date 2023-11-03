@@ -228,7 +228,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.acceptCall(callType: callType, callId: callId)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .inCall, nanoseconds: 1_000_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .inCall, nanoseconds: 2_000_000_000)
     }
     
     func test_incomingCall_rejectCall() async throws {

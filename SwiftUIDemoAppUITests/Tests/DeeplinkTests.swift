@@ -4,6 +4,7 @@
 
 import XCTest
 
+// Requires running a standalone Sinatra server
 final class DeeplinkTests: StreamTestCase {
 
     static override func setUp() {
