@@ -28,11 +28,12 @@ public final class CallSettings: ObservableObject, Sendable {
         self.speakerOn = speakerOn
         self.audioOutputOn = audioOutputOn
         self.cameraPosition = cameraPosition
-        #if targetEnvironment(simulator)
-        self.videoOn = false
-        #else
+//        #if targetEnvironment(simulator)
+//        self.videoOn = false
+//        #else
+//        self.videoOn = videoOn
+//        #endif
         self.videoOn = videoOn
-        #endif
     }
     
     public var shouldPublish: Bool {

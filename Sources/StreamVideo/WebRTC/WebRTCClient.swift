@@ -289,6 +289,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         webSocketURL: String,
         fromSfuName: String
     ) {
+        print("======= migrating to \(webSocketURL)")
         self.fromSfuName = fromSfuName
         migratingToken = token
         let signalServer = Stream_Video_Sfu_Signal_SignalServer(
@@ -766,6 +767,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         if callSettings.videoOn {
             var videoTrack = Stream_Video_Sfu_Models_TrackInfo()
             videoTrack.trackID = localVideoTrack?.trackId ?? ""
+            videoTrack.mid = publisher?.transceiver?.mid ?? ""
             videoTrack.layers = loadLayers(supportedCodecs: videoOptions.supportedCodecs)
             videoTrack.trackType = .video
             tracks.append(videoTrack)
@@ -850,6 +852,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         log.debug("Executing join request", subsystems: .webRTC)
         var joinRequest = Stream_Video_Sfu_Event_JoinRequest()
         joinRequest.sessionID = sessionID
+        print("========= session id is \(sessionID)")
         joinRequest.subscriberSdp = subscriberSdp
         if migrating {
             joinRequest.token = migratingToken ?? token
@@ -864,12 +867,17 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         return joinRequest
     }
     
-    private func webSocketURL(from hostname: String) -> URL? {
-        let host = URL(string: hostname)?.host ?? hostname
-        let wsURLString = "wss://\(host)/ws"
-        let wsURL = URL(string: wsURLString)
-        return wsURL
-    }
+//    private func webSocketURL(from hostname: String) -> URL? {
+//        let host = URL(string: hostname)?.host ?? hostname
+//        var wsURLString = "wss://\(host)/ws"
+//        if host.contains("localhost") {
+//            // Temporary for localhost testing.
+//            wsURLString = "ws://\(host):3033/ws"
+//            print("======== \(wsURLString)")
+//        }
+//        let wsURL = URL(string: wsURLString)
+//        return wsURL
+//    }
     
     private func makeWebSocketClient(
         url: URL,

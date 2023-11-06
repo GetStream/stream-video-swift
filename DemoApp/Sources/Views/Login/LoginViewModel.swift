@@ -11,7 +11,8 @@ final class LoginViewModel: ObservableObject {
     func login(user: User, callId: String = "", completion: @escaping (UserCredentials) -> ()) {
         AppState.shared.loading = true
         Task {
-            let token = try await TokenProvider.fetchToken(for: user.id, callIds: [callId])
+//            let token = try await TokenProvider.fetchToken(for: user.id, callIds: [callId])
+            let token = UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWFydGluIn0.-8mL49OqMdlvzXR_1IgYboVXXuXFc04r0EvYgko-X8I")
             let credentials = UserCredentials(userInfo: user, token: token)
             // Perform login
             completion(credentials)

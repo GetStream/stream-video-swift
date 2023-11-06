@@ -37,6 +37,7 @@ extension AppEnvironment {
         case staging = "https://staging.getstream.io"
         case pronto = "https://pronto.getstream.io"
         case production = "https://getstream.io"
+        case local = "http://localhost:3030"
 
         var url: URL { URL(string: rawValue)! }
         var title: String {
@@ -47,19 +48,22 @@ extension AppEnvironment {
                 return "Pronto"
             case .production:
                 return "Production"
+            case .local:
+                return "Local"
             }
         }
     }
 
     static var baseURL: BaseURL = {
-        switch configuration {
-        case .test:
-            return .staging
-        case .debug:
-            return .staging
-        case .release:
-            return .production
-        }
+//        switch configuration {
+//        case .test:
+//            return .staging
+//        case .debug:
+//            return .staging
+//        case .release:
+//            return .production
+//        }
+        return BaseURL.local
     }()
 }
 
@@ -68,17 +72,19 @@ extension AppEnvironment {
     enum APIKey: String {
         case staging = "hd8szvscpxvd"
         case production = "mmhfdzb5evj2"
+        case local = "892s22ypvt6m"
     }
 
     static var apiKey: APIKey = {
-        switch configuration {
-        case .test:
-            return APIKey.staging
-        case .debug:
-            return APIKey.staging
-        case .release:
-            return APIKey.production
-        }
+//        switch configuration {
+//        case .test:
+//            return APIKey.staging
+//        case .debug:
+//            return APIKey.staging
+//        case .release:
+//            return APIKey.production
+//        }
+        return APIKey.local
     }()
 }
 

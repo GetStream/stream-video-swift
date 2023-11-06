@@ -335,6 +335,7 @@ class CallController {
         source: WebSocketConnectionState.DisconnectionSource,
         isRetry: Bool = false
     ) {
+        return
         guard let call = call, call.state.reconnectionStatus != .migrating else {
             return
         }

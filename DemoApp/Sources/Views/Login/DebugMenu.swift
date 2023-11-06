@@ -19,17 +19,19 @@ struct DebugMenu: View {
 
     @State private var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL {
         didSet {
-            switch baseURL {
-            case .staging:
-                AppEnvironment.baseURL = .staging
-                AppEnvironment.apiKey = .staging
-            case .pronto:
-                AppEnvironment.baseURL = .pronto
-                AppEnvironment.apiKey = .staging
-            case .production:
-                AppEnvironment.baseURL = .production
-                AppEnvironment.apiKey = .production
-            }
+//            switch baseURL {
+//            case .staging:
+//                AppEnvironment.baseURL = .staging
+//                AppEnvironment.apiKey = .staging
+//            case .pronto:
+//                AppEnvironment.baseURL = .pronto
+//                AppEnvironment.apiKey = .staging
+//            case .production:
+//                AppEnvironment.baseURL = .production
+//                AppEnvironment.apiKey = .production
+//            }
+            AppEnvironment.baseURL = .local
+            AppEnvironment.apiKey = .local
             appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
         }
     }
