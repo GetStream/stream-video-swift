@@ -864,13 +864,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         return joinRequest
     }
     
-    private func webSocketURL(from hostname: String) -> URL? {
-        let host = URL(string: hostname)?.host ?? hostname
-        let wsURLString = "wss://\(host)/ws"
-        let wsURL = URL(string: wsURLString)
-        return wsURL
-    }
-    
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey,
