@@ -131,6 +131,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
         AND("participant joins the call and starts recording the call for 3 seconds") {
             participantRobot
+                .recordTestSession()
                 .setCallRecordingDuration(35)
                 .joinCall(callId, actions: [.recordCall])
             userRobot.waitForParticipantsToJoin()
