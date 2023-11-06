@@ -629,7 +629,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let configuration = connectOptions.rtcConfiguration
         subscriber = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
-            callCid: callCid,
             configuration: configuration,
             type: .subscriber,
             signalService: signalService,
@@ -651,7 +650,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         if publisher == nil {
             publisher = try await peerConnectionFactory.makePeerConnection(
                 sessionId: sessionID,
-                callCid: callCid,
                 configuration: configuration,
                 type: .publisher,
                 signalService: signalService,
@@ -767,6 +765,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             var videoTrack = Stream_Video_Sfu_Models_TrackInfo()
             videoTrack.trackID = localVideoTrack?.trackId ?? ""
             videoTrack.layers = loadLayers(supportedCodecs: videoOptions.supportedCodecs)
+            videoTrack.mid = publisher?.transceiver?.mid ?? ""
             videoTrack.trackType = .video
             tracks.append(videoTrack)
         }
@@ -781,6 +780,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             screenshareTrack.trackID = localScreenshareTrack.trackId
             screenshareTrack.trackType = .screenShare
             screenshareTrack.layers = loadLayers(fps: 15, supportedCodecs: [.screenshare])
+            screenshareTrack.mid = publisher?.transceiverScreenshare?.mid ?? ""
             tracks.append(screenshareTrack)
         }
         return tracks
@@ -911,7 +911,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         
         let tempPeerConnection = try await peerConnectionFactory.makePeerConnection(
             sessionId: sessionID,
-            callCid: callCid,
             configuration: connectOptions.rtcConfiguration,
             type: .subscriber,
             signalService: migratingSignalService ?? signalService,

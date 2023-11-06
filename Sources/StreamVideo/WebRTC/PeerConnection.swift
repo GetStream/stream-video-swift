@@ -17,16 +17,13 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     private let eventDecoder: WebRTCEventDecoder
     var signalService: Stream_Video_Sfu_Signal_SignalServer
     private let sessionId: String
-    private let callCid: String
     private let type: PeerConnectionType
     private let videoOptions: VideoOptions
-    private let syncQueue = DispatchQueue(label: "PeerConnectionQueue", qos: .userInitiated)
     private(set) var transceiver: RTCRtpTransceiver?
     private(set) var transceiverScreenshare: RTCRtpTransceiver?
     internal var pendingIceCandidates = [RTCIceCandidate]()
     private var publishedTracks = [TrackType]()
     private var screensharingStreams = [RTCMediaStream]()
-    private let badConnectionStates: [RTCIceConnectionState] = [.disconnected, .failed, .closed]
         
     var onNegotiationNeeded: ((PeerConnection, RTCMediaConstraints?) -> Void)?
     var onDisconnect: ((PeerConnection) -> Void)?
@@ -38,7 +35,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     
     init(
         sessionId: String,
-        callCid: String,
         pc: RTCPeerConnection,
         type: PeerConnectionType,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
@@ -49,7 +45,6 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
         self.signalService = signalService
         self.type = type
         self.videoOptions = videoOptions
-        self.callCid = callCid
         eventDecoder = WebRTCEventDecoder()
         super.init()
         self.pc.delegate = self
