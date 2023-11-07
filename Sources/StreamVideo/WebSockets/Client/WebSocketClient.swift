@@ -8,8 +8,11 @@ class WebSocketClient {
     /// The notification center `WebSocketClient` uses to send notifications about incoming events.
     let eventNotificationCenter: EventNotificationCenter
     
+    var isPaused: Bool = false
+
     /// The batch of events received via the web-socket that wait to be processed.
     private(set) lazy var eventsBatcher = environment.eventBatcherBuilder { [weak self] events, completion in
+        guard self?.isPaused == false else { return }
         self?.eventNotificationCenter.process(events, completion: completion)
     }
     
@@ -196,7 +199,7 @@ extension WebSocketClient: WebSocketEngineDelegate {
         
         switch event {
         case .coordinatorEvent(let event):
-            log.info("received WS \(event.type) event from coordinator", subsystems: .webSocket)
+            log.info("received WS \(event.type) event from coordinator \(connectURL)", subsystems: .webSocket)
         case .internalEvent(_):
             break
         case .sfuEvent(_):
