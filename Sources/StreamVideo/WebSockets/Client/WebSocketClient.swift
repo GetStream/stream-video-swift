@@ -7,51 +7,51 @@ import Foundation
 class WebSocketClient {
     /// The notification center `WebSocketClient` uses to send notifications about incoming events.
     let eventNotificationCenter: EventNotificationCenter
-    
-    var isPaused: Bool = false
+
+    private var isPaused: Bool = false
 
     /// The batch of events received via the web-socket that wait to be processed.
     private(set) lazy var eventsBatcher = environment.eventBatcherBuilder { [weak self] events, completion in
         guard self?.isPaused == false else { return }
         self?.eventNotificationCenter.process(events, completion: completion)
     }
-    
+
     /// The current state the web socket connection.
     @Atomic private(set) var connectionState: WebSocketConnectionState = .initialized {
         didSet {
             pingController.connectionStateDidChange(connectionState)
-            
+
             guard connectionState != oldValue else { return }
-            
+
             log.info("Web socket connection state changed: \(connectionState)", subsystems: .webSocket)
-                
+
             connectionStateDelegate?.webSocketClient(self, didUpdateConnectionState: connectionState)
         }
     }
-    
+
     weak var connectionStateDelegate: ConnectionStateDelegate?
-    
+
     var connectURL: URL
-    
+
     var requiresAuth: Bool
 
     /// The decoder used to decode incoming events
     private let eventDecoder: AnyEventDecoder
-    
+
     /// The web socket engine used to make the actual WS connection
     private(set) var engine: WebSocketEngine?
-    
+
     /// The queue on which web socket engine methods are called
     private let engineQueue: DispatchQueue = .init(label: "io.getStream.video.core.web_socket_engine_queue", qos: .userInitiated)
-        
+
     /// The session config used for the web socket engine
     private let sessionConfiguration: URLSessionConfiguration
-    
+
     /// An object containing external dependencies of `WebSocketClient`
     private let environment: Environment
-    
+
     private let webSocketClientType: WebSocketClientType
-    
+
     private(set) lazy var pingController: WebSocketPingController = {
         let pingController = environment.createPingController(
             environment.timerType,
@@ -61,7 +61,7 @@ class WebSocketClient {
         pingController.delegate = self
         return pingController
     }()
-    
+
     private func createEngineIfNeeded(for connectURL: URL) -> WebSocketEngine {
         let request = URLRequest(url: connectURL)
 
@@ -73,10 +73,10 @@ class WebSocketClient {
         engine.delegate = self
         return engine
     }
-        
+
     var onWSConnectionEstablished: (() -> Void)?
     var onConnected: (() -> Void)?
-    
+
     init(
         sessionConfiguration: URLSessionConfiguration,
         eventDecoder: AnyEventDecoder,
@@ -94,27 +94,27 @@ class WebSocketClient {
         self.eventNotificationCenter = eventNotificationCenter
         self.requiresAuth = requiresAuth
     }
-    
+
     /// Connects the web connect.
     ///
     /// Calling this method has no effect is the web socket is already connected, or is in the connecting phase.
     func connect() {
         switch connectionState {
-        // Calling connect in the following states has no effect
+            // Calling connect in the following states has no effect
         case .connecting, .authenticating, .connected(healthCheckInfo: _):
             return
         default: break
         }
-        
+
         engine = createEngineIfNeeded(for: connectURL)
-        
+
         connectionState = .connecting
-        
+
         engineQueue.async { [weak engine] in
             engine?.connect()
         }
     }
-    
+
     /// Disconnects the web socket.
     ///
     /// Calling this function has no effect, if the connection is in an inactive state.
@@ -126,9 +126,13 @@ class WebSocketClient {
         connectionState = .disconnecting(source: source)
         engineQueue.async { [engine, eventsBatcher] in
             engine?.disconnect()
-            
+
             eventsBatcher.processImmediately(completion: completion)
         }
+    }
+
+    func updatePaused(_ isPaused: Bool) {
+        self.isPaused = isPaused
     }
 }
 

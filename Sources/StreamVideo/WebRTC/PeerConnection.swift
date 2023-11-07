@@ -208,12 +208,12 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             logMessage(.error)
         case .disconnected:
             onDisconnect?(self)
-            logMessage(.info)
+            logMessage(.debug)
         case .connected:
             onConnected?(self)
-            logMessage(.info)
+            logMessage(.debug)
         default:
-            logMessage(.info)
+            logMessage(.debug)
         }
     }
 

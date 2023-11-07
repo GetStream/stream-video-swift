@@ -396,7 +396,8 @@ class CallController {
             // We don't want to process any events from the old SFU but as we
             // cannot disconnect the ws (as this will cause disconnections on
             // WebRTC connections) we are simply pausing the processing.
-            webRTCClient?.signalChannel?.isPaused = true
+            webRTCClient?.signalChannel?.updatePaused(true)
+            
             try await joinCall(
                 callType: callType,
                 callId: callId,
