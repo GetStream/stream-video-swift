@@ -25,7 +25,6 @@ actor PeerConnectionFactory {
     
     func makePeerConnection(
         sessionId: String,
-        callCid: String,
         configuration: RTCConfiguration,
         type: PeerConnectionType,
         signalService: Stream_Video_Sfu_Signal_SignalServer,
@@ -39,7 +38,6 @@ actor PeerConnectionFactory {
         )
         let peerConnection = PeerConnection(
             sessionId: sessionId,
-            callCid: callCid,
             pc: pc,
             type: type,
             signalService: signalService,

@@ -94,7 +94,7 @@ class CallController {
             callId: callId,
             callSettings: settings,
             ring: ring,
-            migrating: migratingFrom != nil
+            migratingFrom: migratingFrom
         )
         
         setupStatsTimer()
@@ -228,9 +228,19 @@ class CallController {
         callId: String,
         callSettings: CallSettings,
         ring: Bool,
-        migrating: Bool
+        migratingFrom: String?
     ) async throws {
-        if !migrating {
+        if let migratingFrom {
+            executeOnMain { [weak self] in
+                self?.call?.state.reconnectionStatus = .migrating
+            }
+            webRTCClient?.prepareForMigration(
+                url: response.credentials.server.url,
+                token: response.credentials.token,
+                webSocketURL: response.credentials.server.wsEndpoint,
+                fromSfuName: migratingFrom
+            )
+        } else {
             webRTCClient = environment.webRTCBuilder(
                 user,
                 apiKey,
@@ -253,16 +263,6 @@ class CallController {
             webRTCClient?.onSessionMigrationCompleted = { [weak self] in
                 self?.call?.update(reconnectionStatus: .connected)
             }
-        } else {
-            executeOnMain { [weak self] in
-                self?.call?.state.reconnectionStatus = .migrating
-            }
-            webRTCClient?.prepareForMigration(
-                url: response.credentials.server.url,
-                token: response.credentials.token,
-                webSocketURL: response.credentials.server.wsEndpoint,
-                fromSfuName: response.credentials.server.edgeName
-            )
         }
         
         let videoOptions = VideoOptions(
@@ -273,7 +273,7 @@ class CallController {
             callSettings: callSettings,
             videoOptions: videoOptions,
             connectOptions: connectOptions,
-            migrating: migrating
+            migrating: migratingFrom != nil
         )
         let sessionId = webRTCClient?.sessionID ?? ""
         executeOnMain { [weak self] in
@@ -393,6 +393,11 @@ class CallController {
                 log.debug("Migration already in progress")
                 return
             }
+            // We don't want to process any events from the old SFU but as we
+            // cannot disconnect the ws (as this will cause disconnections on
+            // WebRTC connections) we are simply pausing the processing.
+            webRTCClient?.signalChannel?.updatePaused(true)
+            
             try await joinCall(
                 callType: callType,
                 callId: callId,

@@ -144,11 +144,8 @@ public class VideoRenderer: RTCMTLVideoView {
     
     public func add(track: RTCVideoTrack) {
         queue.sync {
-            if track.trackId == self.track?.trackId && track.readyState == .live {
-                return
-            }
             let view = subviews.compactMap { $0 as? MTKView }.first
-            view?.preferredFramesPerSecond = 60
+            view?.preferredFramesPerSecond = preferredFramesPerSecond
             self.track?.remove(self)
             self.track = nil
             log.debug("Adding track to the view")
