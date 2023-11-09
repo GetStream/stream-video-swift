@@ -24,13 +24,16 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(name: "WebRTC", url: "https://github.com/webrtc-sdk/Specs.git", .exact("114.5735.8")),
+        .package(url: "https://github.com/webrtc-sdk/Specs.git", exact: "114.5735.8"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0")
     ],
     targets: [
         .target(
             name: "StreamVideo",
-            dependencies: ["WebRTC", .product(name: "SwiftProtobuf", package: "swift-protobuf")]
+            dependencies: [
+                .product(name: "WebRTC", package: "Specs"),
+                .product(name: "SwiftProtobuf", package: "swift-protobuf")
+            ]
         ),
         .target(
             name: "StreamVideoSwiftUI",
