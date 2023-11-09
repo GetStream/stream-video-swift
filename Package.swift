@@ -12,7 +12,7 @@ let package = Package(
     products: [
         .library(
             name: "StreamVideo",
-            targets: ["StreamVideo", "WebRTC"]
+            targets: ["StreamVideo", "StreamWebRTC"]
         ),
         .library(
             name: "StreamVideoSwiftUI",
