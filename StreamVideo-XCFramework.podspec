@@ -21,7 +21,6 @@ Pod::Spec.new do |spec|
   spec.preserve_paths = "#{spec.module_name}.xcframework/*"
 
   spec.dependency('SwiftProtobuf', '~> 1.18.0')
-  spec.dependency('WebRTC-SDK', '114.5735.8')
 
   spec.cocoapods_version = ">= 1.11.0"
 end

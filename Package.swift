@@ -12,7 +12,7 @@ let package = Package(
     products: [
         .library(
             name: "StreamVideo",
-            targets: ["StreamVideo"]
+            targets: ["StreamVideo", "WebRTC"]
         ),
         .library(
             name: "StreamVideoSwiftUI",
@@ -24,14 +24,12 @@ let package = Package(
         )
     ],
     dependencies: [
-        .package(url: "https://github.com/webrtc-sdk/Specs.git", exact: "114.5735.8"),
         .package(url: "https://github.com/apple/swift-protobuf.git", from: "1.18.0")
     ],
     targets: [
         .target(
             name: "StreamVideo",
             dependencies: [
-                .product(name: "WebRTC", package: "Specs"),
                 .product(name: "SwiftProtobuf", package: "swift-protobuf")
             ]
         ),
@@ -44,6 +42,10 @@ let package = Package(
             name: "StreamVideoUIKit",
             dependencies: ["StreamVideo", "StreamVideoSwiftUI"],
             resources: [.process("Resources")]
+        ),
+        .binaryTarget(
+            name: "StreamWebRTC",
+            path: "StreamWebRTC.xcframework"
         )
     ]
 )
