@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import WebRTC
+@preconcurrency import StreamWebRTC
 
 /// Configuration for the video options for a call.
 struct VideoOptions: Sendable {

@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import WebRTC
+@preconcurrency import StreamWebRTC
 
 public struct ConnectOptions: Sendable {
     let rtcConfiguration: RTCConfiguration

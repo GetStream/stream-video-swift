@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 
 enum VideoCapturingUtils {
     static func codecs(

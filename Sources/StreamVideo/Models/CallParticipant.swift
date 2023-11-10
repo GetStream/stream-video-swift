@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import WebRTC
+@preconcurrency import StreamWebRTC
 
 /// Represents a participant in the call.
 public struct CallParticipant: Identifiable, Sendable, Equatable {
