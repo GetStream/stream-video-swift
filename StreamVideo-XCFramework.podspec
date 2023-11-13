@@ -15,13 +15,17 @@ Pod::Spec.new do |spec|
 
   spec.framework = 'Foundation'
 
-  spec.module_name = "StreamVideo"
-  spec.source = { :http => "https://github.com/GetStream/stream-video-swift/releases/download/#{spec.version}/#{spec.module_name}.zip" }
-  spec.vendored_frameworks = "#{spec.module_name}.xcframework"
+  spec.module_name = 'StreamVideo'
+  spec.source = { http: "https://github.com/GetStream/stream-video-swift/releases/download/#{spec.version}/#{spec.module_name}.zip" }
   spec.preserve_paths = "#{spec.module_name}.xcframework/*"
 
   spec.dependency('SwiftProtobuf', '~> 1.18.0')
-  spec.dependency('WebRTC-SDK', '114.5735.8')
+  spec.vendored_frameworks = 'Frameworks/StreamWebRTC.xcframework'
 
-  spec.cocoapods_version = ">= 1.11.0"
+  spec.prepare_command = <<-CMD
+    mkdir -p Frameworks/
+    wget https://github.com/GetStream/stream-video-swift-webrtc/releases/download/114.5735.08/StreamWebRTC.zip -O Frameworks/StreamWebRTC.zip
+    unzip -o Frameworks/StreamWebRTC.zip -d Frameworks/
+    rm Frameworks/StreamWebRTC.zip
+  CMD
 end

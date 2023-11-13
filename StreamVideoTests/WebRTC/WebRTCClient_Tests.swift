@@ -3,7 +3,7 @@
 //
 
 @testable import StreamVideo
-@preconcurrency import WebRTC
+@preconcurrency import StreamWebRTC
 import XCTest
 
 final class WebRTCClient_Tests: StreamVideoTestCase {

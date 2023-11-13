@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 import AVKit
 import MetalKit
 import StreamVideo

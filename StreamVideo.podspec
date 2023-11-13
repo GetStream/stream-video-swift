@@ -14,11 +14,19 @@ Pod::Spec.new do |spec|
   spec.requires_arc = true
 
   spec.framework = 'Foundation'
+
   spec.module_name = spec.name
   spec.source = { git: 'https://github.com/GetStream/stream-video-swift.git', tag: spec.version }
   spec.source_files = ["Sources/#{spec.name}/**/*.swift"]
   spec.exclude_files = ["Sources/#{spec.name}/**/*_Tests.swift", "Sources/#{spec.name}/**/*_Mock.swift"]
 
   spec.dependency('SwiftProtobuf', '~> 1.18.0')
-  spec.dependency('WebRTC-SDK', '114.5735.8')
+  spec.vendored_frameworks = 'Frameworks/StreamWebRTC.xcframework'
+
+  spec.prepare_command = <<-CMD
+    mkdir -p Frameworks/
+    wget https://github.com/GetStream/stream-video-swift-webrtc/releases/download/114.5735.08/StreamWebRTC.zip -O Frameworks/StreamWebRTC.zip
+    unzip -o Frameworks/StreamWebRTC.zip -d Frameworks/
+    rm Frameworks/StreamWebRTC.zip
+  CMD
 end

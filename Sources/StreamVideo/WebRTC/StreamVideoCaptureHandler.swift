@@ -3,7 +3,7 @@
 //
 
 import Foundation
-@preconcurrency import WebRTC
+@preconcurrency import StreamWebRTC
 
 final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
 

@@ -6,7 +6,7 @@ import Foundation
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import WebRTC
+import StreamWebRTC
 import GoogleSignIn
 
 @MainActor

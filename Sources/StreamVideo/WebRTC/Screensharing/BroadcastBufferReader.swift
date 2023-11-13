@@ -5,7 +5,7 @@
 import Foundation
 import CoreVideo
 import CoreImage
-import WebRTC
+import StreamWebRTC
 
 private class Message {
     static let imageContextVar: CIContext? = {

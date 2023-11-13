@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 
 public final class VideoFilter: @unchecked Sendable {
     /// The ID of the video filter.

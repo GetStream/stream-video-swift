@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 
 class SfuMiddleware: EventMiddleware {
     private let recordingUserId = "recording-egress"

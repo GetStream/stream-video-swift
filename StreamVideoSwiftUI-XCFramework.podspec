@@ -15,12 +15,10 @@ Pod::Spec.new do |spec|
 
   spec.framework = 'Foundation', 'SwiftUI'
 
-  spec.module_name = "StreamVideoSwiftUI"
-  spec.source = { :http => "https://github.com/GetStream/stream-video-swift/releases/download/#{spec.version}/#{spec.module_name}.zip" }
+  spec.module_name = 'StreamVideoSwiftUI'
+  spec.source = { http: "https://github.com/GetStream/stream-video-swift/releases/download/#{spec.version}/#{spec.module_name}.zip" }
   spec.vendored_frameworks = "#{spec.module_name}.xcframework"
   spec.preserve_paths = "#{spec.module_name}.xcframework/*"
 
   spec.dependency('StreamVideo-XCFramework', "#{spec.version}")
-
-  spec.cocoapods_version = ">= 1.11.0"
 end

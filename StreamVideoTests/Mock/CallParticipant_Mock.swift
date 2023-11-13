@@ -4,7 +4,7 @@
 
 import Foundation
 import StreamVideo
-import WebRTC
+import StreamWebRTC
 
 extension CallParticipant {
 

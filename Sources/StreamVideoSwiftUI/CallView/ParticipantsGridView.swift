@@ -4,7 +4,7 @@
 
 import StreamVideo
 import SwiftUI
-import WebRTC
+import StreamWebRTC
 
 @MainActor
 struct ParticipantsGridView<Factory: ViewFactory>: View {
