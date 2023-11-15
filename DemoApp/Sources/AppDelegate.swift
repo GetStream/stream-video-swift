@@ -18,6 +18,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         UNUserNotificationCenter.current().delegate = self
         setUpRemoteNotifications()
         setUpPerformanceTracking()
+
+        // Setup a dummy video file to loop when working with from the simulator
+        InjectedValues[\.simulatorStreamFile] = Bundle.main.url(forResource: "test", withExtension: "mp4")
+
         return true
     }
 
