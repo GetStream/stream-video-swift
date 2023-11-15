@@ -1,8 +1,5 @@
 //
-//  SimulatorScreenCapturer.swift
-//  StreamVideo
-//
-//  Created by Ilias Pavlidakis on 2/11/23.
+// Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
@@ -25,7 +22,10 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
     func startCapturing() {
         queue.async {
             self.setupAssetReader()
-            self.displayLink = CADisplayLink(target: self, selector: #selector(self.readFrame))
+            self.displayLink = CADisplayLink(
+                target: self,
+                selector: #selector(self.readFrame)
+            )
             self.displayLink?.preferredFramesPerSecond = 30 // Assuming 30 fps video
             self.displayLink?.add(to: .current, forMode: .common)
             RunLoop.current.run()
@@ -41,7 +41,11 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
         let asset = AVAsset(url: videoURL)
         guard let track = asset.tracks(withMediaType: .video).first else { return }
 
-        let trackOutput = AVAssetReaderTrackOutput(track: track, outputSettings: [kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)])
+        let trackOutput = AVAssetReaderTrackOutput(
+            track: track,
+            outputSettings: [
+                kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
+            ])
         do {
             assetReader = try AVAssetReader(asset: asset)
             assetReader?.add(trackOutput)
