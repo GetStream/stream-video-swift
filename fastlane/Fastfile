@@ -68,7 +68,7 @@ end
 
 desc "Publish a new release to GitHub and CocoaPods"
 lane :publish_release do |options|
-  xcversion(version: '14.0.1')
+  xcversion(version: '15.0.1')
 
   clean_products
   build_xcframeworks
