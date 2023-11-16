@@ -80,6 +80,8 @@
 		406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		406A8EB72AA1D92D001F598A /* ReadableContentGuide.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA422A9F7BBB003341EF /* ReadableContentGuide.swift */; };
+		406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */; };
+		406AF2052AF3DE4300ED4D0C /* test.mp4 in Resources */ = {isa = PBXBuildFile; fileRef = 406AF2042AF3DE4000ED4D0C /* test.mp4 */; };
 		407D5D3D2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */; };
 		407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
@@ -1001,6 +1003,8 @@
 		4063033E2AD847EC0091AE77 /* CallState_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallState_Tests.swift; sourceTree = "<group>"; };
 		406303412AD848000091AE77 /* CallParticipant_Mock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant_Mock.swift; sourceTree = "<group>"; };
 		4067A5D72AE1249400CFDEB1 /* CornerClipper_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CornerClipper_Tests.swift; sourceTree = "<group>"; };
+		406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SimulatorScreenCapturer.swift; sourceTree = "<group>"; };
+		406AF2042AF3DE4000ED4D0C /* test.mp4 */ = {isa = PBXFileReference; lastKnownFileType = file; path = test.mp4; sourceTree = "<group>"; };
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
 		40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPressToFocusViewModifier.swift; sourceTree = "<group>"; };
 		40901A682AE8018900B6831D /* mock-profile-image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "mock-profile-image.jpg"; sourceTree = "<group>"; };
@@ -1855,6 +1859,7 @@
 		4030E5912A9DF3E6003E8CBA /* Resources */ = {
 			isa = PBXGroup;
 			children = (
+				406AF2042AF3DE4000ED4D0C /* test.mp4 */,
 				4030E5932A9DF439003E8CBA /* Assets */,
 				4030E5922A9DF3ED003E8CBA /* Entitlements */,
 				4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */,
@@ -3601,6 +3606,7 @@
 				84F0867A29632DA30099907A /* VideoFilters.swift */,
 				8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */,
 				8454A31A2AAB50C400A012C6 /* StatsReporter.swift */,
+				406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
@@ -3990,6 +3996,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				842D8BDC2865B37800801910 /* Preview Assets.xcassets in Resources */,
+				406AF2052AF3DE4300ED4D0C /* test.mp4 in Resources */,
 				842C7EBF28A2B3FA00C2AB7F /* Assets.xcassets in Resources */,
 				844ADA672AD3F21000769F6A /* GoogleSignIn.plist in Resources */,
 				4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */,
@@ -4396,6 +4403,7 @@
 				84B0091B2A4C521100CF1FA7 /* Retries.swift in Sources */,
 				84DC38CD29ADFCFD00946713 /* SendEventRequest.swift in Sources */,
 				84DC38B029ADFCFD00946713 /* MuteUsersRequest.swift in Sources */,
+				406AF2012AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift in Sources */,
 				84A7E18A2883638200526C98 /* URLSessionWebSocketEngine.swift in Sources */,
 				8456E6D2287EC343004E180E /* ConsoleLogDestination.swift in Sources */,
 				84DC38A529ADFCFD00946713 /* SFUResponse.swift in Sources */,

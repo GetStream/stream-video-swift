@@ -11,7 +11,9 @@ class VideoCapturer: CameraVideoCapturing {
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
     private var videoCaptureHandler: StreamVideoCaptureHandler?
-    
+
+    private var simulatorStreamFile: URL? = InjectedValues[\.simulatorStreamFile]
+
     init(
         videoSource: RTCVideoSource,
         videoOptions: VideoOptions,
@@ -20,7 +22,13 @@ class VideoCapturer: CameraVideoCapturing {
         self.videoOptions = videoOptions
         self.videoSource = videoSource
         #if targetEnvironment(simulator)
-        videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
+        if let url = simulatorStreamFile {
+            let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
+            videoCaptureHandler = handler
+            videoCapturer = SimulatorScreenCapturer(delegate: handler, videoURL: url)
+        } else {
+            videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
+        }
         #else
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters)
         videoCaptureHandler = handler
