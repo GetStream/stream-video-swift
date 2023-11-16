@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 import StreamVideo
 
 extension RTCDefaultAudioProcessingModule: AudioProcessingModule, @unchecked Sendable {}

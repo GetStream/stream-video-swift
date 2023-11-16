@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 import SwiftUI

@@ -4,7 +4,7 @@
 
 import Combine
 import Foundation
-import WebRTC
+import StreamWebRTC
 
 /// Class that handles a particular call.
 class CallController {

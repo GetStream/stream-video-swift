@@ -2,7 +2,6 @@
 // Copyright © 2023 Stream.io Inc. All rights reserved.
 //
 
-import NukeUI
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
@@ -71,7 +70,7 @@ struct StreamEmployeeView: View {
     
     var body: some View {
         HStack {
-            LazyImage(imageURL: employee.imageURL)
+            StreamLazyImage(imageURL: employee.imageURL)
                 .frame(width: 60, height: 60)
                 .clipShape(Circle())
             Text(employee.name)

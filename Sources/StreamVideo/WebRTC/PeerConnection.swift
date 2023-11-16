@@ -4,7 +4,7 @@
 
 import Foundation
 import SwiftProtobuf
-import WebRTC
+import StreamWebRTC
 
 enum PeerConnectionType: String {
     case subscriber

@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -16,6 +17,6 @@ final class CallConnectingView_Tests: StreamVideoUITestCase {
             title: "Test title 123",
             callControls: DefaultViewFactory.shared.makeCallControlsView(viewModel: CallViewModel())
         )
-        AssertSnapshot(view)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }

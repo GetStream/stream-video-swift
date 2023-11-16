@@ -4,7 +4,7 @@
 
 import Combine
 import Foundation
-@preconcurrency import WebRTC
+@preconcurrency import StreamWebRTC
 
 class WebRTCClient: NSObject, @unchecked Sendable {
     

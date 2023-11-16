@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -12,6 +13,6 @@ final class RecordingView_Tests: StreamVideoUITestCase {
     
     func test_recordingView_snapshot() throws {
         let view = RecordingView().background(.green)
-        AssertSnapshot(view)
+        AssertSnapshot(view, variants: snapshotVariants)
     }
 }

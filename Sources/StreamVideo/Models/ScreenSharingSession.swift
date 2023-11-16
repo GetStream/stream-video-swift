@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 
 public struct ScreenSharingSession {
     public let track: RTCVideoTrack?

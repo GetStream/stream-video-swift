@@ -5,7 +5,7 @@
 import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
-import WebRTC
+import StreamWebRTC
 import GoogleSignIn
 
 @main

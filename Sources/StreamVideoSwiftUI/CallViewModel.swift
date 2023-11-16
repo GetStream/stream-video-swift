@@ -5,7 +5,7 @@
 import Combine
 import StreamVideo
 import SwiftUI
-import WebRTC
+import StreamWebRTC
 
 // View model that provides methods for views that present a call.
 @MainActor

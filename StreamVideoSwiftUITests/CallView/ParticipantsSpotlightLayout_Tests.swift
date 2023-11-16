@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideoSwiftUI
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -22,7 +23,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 frame: .init(origin: .zero, size: defaultScreenSize),
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "with_\(count)_participants")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
     
@@ -37,7 +38,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 frame: .init(origin: .zero, size: defaultScreenSize),
                 onChangeTrackVisibility: {_,_ in }
             )
-            AssertSnapshot(layout, suffix: "with_\(count)_participants")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
     
@@ -53,7 +54,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
                 onChangeTrackVisibility: {_,_ in }
             )
             
-            AssertSnapshot(layout, suffix: "\(quality)")
+            AssertSnapshot(layout, variants: snapshotVariants, suffix: "\(quality)")
         }
     }
     
@@ -67,6 +68,6 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
             frame: .init(origin: .zero, size: defaultScreenSize),
             onChangeTrackVisibility: {_,_ in }
         )
-        AssertSnapshot(layout)
+        AssertSnapshot(layout, variants: snapshotVariants)
     }
 }

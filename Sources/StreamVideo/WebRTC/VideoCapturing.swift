@@ -3,7 +3,7 @@
 //
 
 import Foundation
-import WebRTC
+import StreamWebRTC
 
 protocol VideoCapturing {
     func startCapture(device: AVCaptureDevice?) async throws

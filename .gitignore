@@ -10,6 +10,7 @@ StreamVideo.xcodeproj/project.xcworkspace/xcshareddata/swiftpm/Package.resolved
 ## Build generated
 build/
 DerivedData/
+*.xcframework
 
 ## Various settings
 *.pbxuser

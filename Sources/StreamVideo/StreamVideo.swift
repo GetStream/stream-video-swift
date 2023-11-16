@@ -4,7 +4,7 @@
 
 import Foundation
 import SwiftProtobuf
-import WebRTC
+import StreamWebRTC
 
 public typealias UserTokenProvider = (@escaping (Result<UserToken, Error>) -> Void) -> Void
 public typealias UserTokenUpdater = (UserToken) -> Void

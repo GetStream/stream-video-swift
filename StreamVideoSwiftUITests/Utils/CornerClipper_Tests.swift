@@ -4,10 +4,11 @@
 
 import SwiftUI
 @testable import StreamVideoSwiftUI
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
-final class CornerClipper_Tests: XCTestCase {
+final class CornerClipper_Tests: StreamVideoUITestCase {
 
     // MARK: - Single Corner
 
@@ -74,6 +75,7 @@ final class CornerClipper_Tests: XCTestCase {
                    corners: corners,
                    backgroundColor: .red
                ),
+            variants: snapshotVariants,
             size: .init(width: 100, height: 100),
             line: line,
             file: file,

@@ -4,6 +4,7 @@
 
 @testable import StreamVideoSwiftUI
 @testable import StreamVideo
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -23,7 +24,7 @@ final class LobbyView_Tests: StreamVideoUITestCase {
                 onJoinCallTap: {},
                 onCloseLobby: {}
             )
-            AssertSnapshot(view, suffix: "with_\(count)_participants")
+            AssertSnapshot(view, variants: snapshotVariants, suffix: "with_\(count)_participants")
         }
     }
 }

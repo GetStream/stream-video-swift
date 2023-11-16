@@ -4,7 +4,7 @@
 
 @testable import StreamVideo
 import XCTest
-import WebRTC
+import StreamWebRTC
 
 final class Sorting_Tests: XCTestCase {
 

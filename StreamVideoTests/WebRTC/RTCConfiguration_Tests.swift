@@ -3,7 +3,7 @@
 //
 
 @testable import StreamVideo
-import WebRTC
+import StreamWebRTC
 import XCTest
 
 final class RTCConfiguration_Tests: XCTestCase {

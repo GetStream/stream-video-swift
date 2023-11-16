@@ -6,7 +6,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### ⚠️ Important
 
-- Nuke dependency is no longer exposed. If you were using this dependency we were exposing, you would need to import it manually. If you encounter any SPM-related problems, be sure to reset the package caches.
+- Nuke dependency is no longer exposed. If you were using this dependency we were exposing, you would need to import it manually. This is due to our newest addition supporting Module Stable XCFramework, see more below in the "Added" section. If you encounter any SPM-related problems, be sure to reset the package caches.
+
+### ✅ Added
+- Add support for pre-built XCFrameworks
 
 ### 🔄 Changed
 - You can now focus on a desired point in the local video stream. [#221](https://github.com/GetStream/stream-video-swift/pull/221)

@@ -4,6 +4,7 @@
 
 import StreamVideo
 @testable import StreamVideoSwiftUI
+import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
@@ -56,6 +57,7 @@ final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase {
                 thumbnailSize: thumbnailSize,
                 showAllInfo: showAllInfo
             ).frame(width: screenWidth),
+            variants: snapshotVariants,
             size: .zero,
             line: line,
             file: file,
