@@ -18,15 +18,13 @@ struct DemoLocalViewModifier: ViewModifier {
             .modifier(
                 LocalParticipantViewModifier(
                     localParticipant: localParticipant,
-                    callSettings: callSettings
+                    call: call,
+                    callSettings: callSettings,
+                    showAllInfo: true
                 )
             )
-            .modifier(
-                ReactionsViewModifier(
-                    participant: localParticipant,
-                    availableSize: .zero
-                )
-            )
+            .modifier(ReactionsViewModifier(participant: localParticipant))
+            .participantStats(call: call, participant: localParticipant)
     }
     
 }

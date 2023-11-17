@@ -7,6 +7,7 @@ import SwiftUI
 
 public struct MicrophoneCheckView: View {
     @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
@@ -28,13 +29,15 @@ public struct MicrophoneCheckView: View {
     }
     
     public var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
             Text(streamVideo.user.name)
-                .font(.caption)
                 .foregroundColor(.white)
-                .bold()
-                .padding(.trailing, 8)
-            
+                .multilineTextAlignment(.leading)
+                .lineLimit(1)
+                .font(fonts.caption1)
+                .minimumScaleFactor(0.7)
+                .accessibility(identifier: "participantName")
+
             if microphoneOn && !isSilent {
                 AudioVolumeIndicator(
                     audioLevels: audioLevels,

@@ -18,8 +18,8 @@ public struct MinimizedCallView: View {
     
     public var body: some View {
         GeometryReader { proxy in
-            CornerDragableView(
-                content: content(for: proxy),
+            CornerDraggableView(
+                content: { content(for: $0) },
                 proxy: proxy,
                 onTap: {
                     viewModel.isMinimized = false
@@ -28,12 +28,12 @@ public struct MinimizedCallView: View {
         }
     }
     
-    func content(for proxy: GeometryProxy) -> some View {
+    func content(for availableFrame: CGRect) -> some View {
         Group {
             if !viewModel.participants.isEmpty {
                 VideoCallParticipantView(
                     participant: viewModel.participants[0],
-                    availableFrame: proxy.frame(in: .global),
+                    availableFrame: availableFrame,
                     contentMode: .scaleAspectFill,
                     customData: [:],
                     call: viewModel.call
