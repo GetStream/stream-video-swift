@@ -16,7 +16,7 @@ struct CallParticipantImageView: View {
     var body: some View {
         ZStack {
             CallParticipantBackground(imageURL: imageURL) {
-                Color(colors.callBackground)
+                Color(colors.participantBackground)
             }
             CallParticipantImage(id: id, name: name, imageURL: imageURL)
         }

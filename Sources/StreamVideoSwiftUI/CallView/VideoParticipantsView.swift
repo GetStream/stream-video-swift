@@ -14,7 +14,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
-    
+
     public init(
         viewFactory: Factory,
         viewModel: CallViewModel,
@@ -64,9 +64,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
 }
 
 public struct VideoCallParticipantModifier: ViewModifier {
-            
-    @State var popoverShown = false
-    
+
     var participant: CallParticipant
     var call: Call?
     var availableFrame: CGRect
@@ -109,34 +107,153 @@ public struct VideoCallParticipantModifier: ViewModifier {
                         .padding(.bottom, 2)
                     })
                     .padding(.all, showAllInfo ? 16 : 8)
-                    
-                    if participant.isSpeaking && participantCount > 1 {
-                        Rectangle()
-                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
-                    }
-                    
-                    if popoverShown {
-                        ParticipantPopoverView(
-                            participant: participant,
-                            call: call,
-                            popoverShown: $popoverShown
-                        )
-                    }
                 }
             )
-            .onTapGesture(count: 2, perform: {
-                popoverShown = true
-            })
-            .onTapGesture(count: 1) {
-                if popoverShown {
-                    popoverShown = false
-                }
-            }
+            .modifier(VideoCallParticipantOptionsModifier(participant: participant, call: call))
+            .modifier(VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount))
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipped()
     }
     
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
+    }
+}
+
+@MainActor
+public struct VideoCallParticipantOptionsModifier: ViewModifier {
+
+    @Injected(\.appearance) var appearance
+
+    @State private var presentActionSheet: Bool = false
+
+    var participant: CallParticipant
+    var call: Call?
+
+    private var elements: [(title: String, action: () -> Void)] {
+        var result = [(title: String, action: () -> Void)]()
+
+        if participant.isPinned {
+            result.append((title: L10n.Call.Current.unpinUser, action: { unpin() }))
+        } else {
+            result.append((title: L10n.Call.Current.pinUser, action: { pin() }))
+        }
+
+        if call?.state.ownCapabilities.contains(.pinForEveryone) == true {
+            if participant.isPinnedRemotely {
+                result.append((title: L10n.Call.Current.unpinForEveryone, action: { unpinForEveryone() }))
+            } else {
+                result.append((title: L10n.Call.Current.pinForEveryone, action: { pinForEveryone() }))
+            }
+        }
+
+        return result
+    }
+
+    public func body(content: Content) -> some View {
+        content
+            .overlay(
+                TopView {
+                    HStack {
+                        contentView
+                        Spacer()
+                    }
+                }
+                .padding([.top], 8)
+            )
+    }
+
+    @ViewBuilder
+    private var optionsButtonView: some View {
+        Image(systemName: "ellipsis")
+            .foregroundColor(.white)
+            .padding(12)
+            .background(Color.black.opacity(0.6))
+            .clipShape(Circle())
+            .clipped()
+    }
+
+    @ViewBuilder
+    private var contentView: some View {
+        if #available(iOS 14.0, *) {
+            Menu {
+                ForEach(elements, id: \.title) { element in
+                    Button(
+                        action: element.action,
+                        label: { Text(element.title) }
+                    )
+                }
+            } label: { optionsButtonView }
+        } else {
+            Button {
+                presentActionSheet.toggle()
+            } label: {
+                optionsButtonView
+            }
+            .actionSheet(isPresented: $presentActionSheet) {
+                ActionSheet(
+                    title: Text("\(participant.name)"),
+                    buttons: elements.map { ActionSheet.Button.default(Text($0.title), action: $0.action) } + [ActionSheet.Button.cancel()]
+                )
+            }
+        }
+    }
+
+    private func unpin() {
+        Task {
+            try await call?.unpin(
+                sessionId: participant.sessionId
+            )
+        }
+    }
+
+    private func pin() {
+        Task {
+            try await call?.pin(
+                sessionId: participant.sessionId
+            )
+        }
+    }
+
+    private func unpinForEveryone() {
+        Task {
+            try await call?.unpinForEveryone(
+                userId: participant.userId,
+                sessionId: participant.id
+            )
+        }
+    }
+
+    private func pinForEveryone() {
+        Task {
+            try await call?.pinForEveryone(
+                userId: participant.userId,
+                sessionId: participant.id
+            )
+        }
+    }
+}
+
+public struct VideoCallParticipantSpeakingModifier: ViewModifier {
+
+    @Injected(\.colors) var colors
+
+    public var participant: CallParticipant
+    public var participantCount: Int
+
+    public func body(content: Content) -> some View {
+        content
+            .overlay(
+                Group {
+                    if participant.isSpeaking, participantCount > 1 {
+                        RoundedRectangle(cornerRadius: 16).strokeBorder(
+                            colors.participantSpeakingHighlightColor,
+                            lineWidth: 2
+                        )
+                    }
+                }
+            )
     }
 }
 
@@ -211,16 +328,25 @@ public struct ParticipantInfoView: View {
     
     var participant: CallParticipant
     var isPinned: Bool
-    
-    public init(participant: CallParticipant, isPinned: Bool) {
+    var maxHeight: CGFloat
+
+    public init(
+        participant: CallParticipant,
+        isPinned: Bool,
+        maxHeight: Float = 14
+    ) {
         self.participant = participant
         self.isPinned = isPinned
+        self.maxHeight = CGFloat(maxHeight)
     }
     
     public var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
             if isPinned {
                 Image(systemName: "pin.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: maxHeight)
                     .foregroundColor(.white)
                     .padding(.trailing, 4)
             }
@@ -229,9 +355,11 @@ public struct ParticipantInfoView: View {
                 .multilineTextAlignment(.leading)
                 .lineLimit(1)
                 .font(fonts.caption1)
+                .minimumScaleFactor(0.7)
                 .accessibility(identifier: "participantName")
                         
             SoundIndicator(participant: participant)
+                .frame(maxHeight: maxHeight)
         }
         .padding(.all, 2)
         .padding(.horizontal, 4)
@@ -254,8 +382,9 @@ public struct SoundIndicator: View {
     
     public var body: some View {
         (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
+            .resizable()
+            .aspectRatio(contentMode: .fit)
             .foregroundColor(participant.hasAudio ? .white : colors.accentRed)
-            .padding(.all, 4)
             .accessibility(identifier: "participantMic")
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
     }

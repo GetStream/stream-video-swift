@@ -9,41 +9,42 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
-    var availableFrame: CGRect
+    var frame: CGRect
+    var innerItemSpace: CGFloat
     var viewFactory: Factory
 
-    private let thumbnailSize: CGFloat = 120
-    private var thumbnailBounds: CGRect {
-        CGRect(x: 0, y: 0, width: thumbnailSize, height: thumbnailSize)
-    }
+    private let identifier = UUID()
 
     public init(
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
+        innerItemSpace: CGFloat = 8,
         viewFactory: Factory = DefaultViewFactory.shared
     ) {
         self.viewModel = viewModel
         self.screenSharing = screenSharing
-        self.availableFrame = availableFrame
+        self.frame = availableFrame
+        self.innerItemSpace = innerItemSpace
         self.viewFactory = viewFactory
     }
 
     public var body: some View {
-        VStack(alignment: .leading) {
+        VStack(spacing: innerItemSpace) {
             if !viewModel.hideUIElements {
                 Text("\(screenSharing.participant.name) presenting")
                     .foregroundColor(.white)
                     .padding()
-                    .padding(.top, 40)
                     .accessibility(identifier: "participantPresentingLabel")
             }
 
             if viewModel.hideUIElements {
-                screensharingView.accessibility(identifier: "screenSharingView")
+                screensharingView
+                    .accessibility(identifier: "screenSharingView")
             } else {
                 ZoomableScrollView {
-                    screensharingView.accessibility(identifier: "screenSharingView")
+                    screensharingView
+                        .accessibility(identifier: "screenSharingView")
                 }
             }
 
@@ -51,19 +52,13 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                 HorizontalParticipantsListView(
                     viewFactory: viewFactory,
                     participants: viewModel.participants,
-                    frame: .init(
-                        origin: .init(x: availableFrame.origin.x, y: availableFrame.maxY - thumbnailSize),
-                        size: CGSize(width: availableFrame.size.width, height: thumbnailSize)
-                    ),
-                    call: viewModel.call
+                    frame: participantsStripFrame,
+                    call: viewModel.call,
+                    itemsOnScreen: itemsVisibleOnScreen,
+                    showAllInfo: true
                 )
             }
         }
-        .frame(
-            width: viewModel.hideUIElements ? availableFrame.size.width : nil,
-            height: viewModel.hideUIElements ? availableFrame.size.height : nil
-        )
-        .background(Color.black)
     }
 
     private var screensharingView: some View {
@@ -73,7 +68,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             contentMode: .scaleAspectFit
         ) { view in
             if let track = screenSharing.participant.screenshareTrack {
-                log.debug("adding screensharing track to a view \(view)")
+                log.info("Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)):\(identifier))", subsystems: .webRTC)
                 view.add(track: track)
             }
         }
@@ -81,14 +76,39 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             width: viewModel.hideUIElements ? videoSize.width : nil,
             height: viewModel.hideUIElements ? videoSize.height : nil
         )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     private var videoSize: CGSize {
         if viewModel.hideUIElements {
-            return .init(width: availableFrame.size.height, height: availableFrame.size.width)
+            return .init(
+                width: frame.size.height,
+                height: frame.size.width
+            )
         } else {
-            return availableFrame.size
+            return frame.size
         }
+    }
+
+    private var itemsVisibleOnScreen: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return UIDevice.current.orientation == .portrait ? 3 : 4
+        } else {
+            return 2
+        }
+    }
+
+    private var participantsStripFrame: CGRect {
+        /// Each video tile has an aspect ratio of 3:4 with width as base. Given that each tile has the
+        /// half width of the screen, the calculation below applies the aspect ratio to the expected width.
+        let aspectRatio: CGFloat = UIDevice.current.userInterfaceIdiom == .pad 
+        ? 9 / 16
+        : 3 / 4
+        let barHeight = (frame.width / itemsVisibleOnScreen) * aspectRatio
+        return .init(
+            origin: .init(x: frame.origin.x, y: frame.maxY - barHeight),
+            size: CGSize(width: frame.width, height: barHeight)
+        )
     }
 }
 

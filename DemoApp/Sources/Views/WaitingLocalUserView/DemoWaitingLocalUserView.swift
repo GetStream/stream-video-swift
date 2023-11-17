@@ -28,65 +28,75 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
     var body: some View {
         ZStack {
-            viewFactory
-                .makeInnerWaitingLocalUserView(viewModel: viewModel)
+            DefaultBackgroundGradient()
+                .edgesIgnoringSafeArea(.all)
 
-            if !isChatVisible {
+            VStack(spacing: 16) {
                 VStack {
-                    Spacer()
-                    VStack {
-                        LinkInfoView()
+                    if let localParticipant = viewModel.localParticipant {
+                        GeometryReader { proxy in
+                            LocalVideoView(
+                                viewFactory: viewFactory,
+                                participant: localParticipant,
+                                idSuffix: "waiting",
+                                callSettings: viewModel.callSettings,
+                                call: viewModel.call,
+                                availableFrame: proxy.frame(in: .local)
+                            )
+                            .modifier(viewFactory.makeLocalParticipantViewModifier(
+                                localParticipant: localParticipant,
+                                callSettings: .init(get: { viewModel.callSettings }, set: { _ in }),
+                                call: viewModel.call
+                            ))
+                        }
+                    } else {
+                        Spacer()
+                    }
 
-                        Button {
-                            let pasteboard = UIPasteboard.general
-                            pasteboard.string = callLink
-                        } label: {
-                            HStack {
-                                Text(callLink)
-                                    .font(.subheadline)
-                                    .fontWeight(.bold)
-                                    .foregroundColor(appearance.colors.text)
-                                Spacer()
-                                Image(systemName: "doc.on.doc")
+                    ZStack {
+                        Color(appearance.colors.participantBackground)
+
+                        VStack {
+                            ZStack {
+                                Circle()
+                                    .fill(appearance.colors.lightGray)
+
+                                Image(systemName: "person.fill.badge.plus")
                             }
-                            .padding(.all, 12)
-                            .background(Color(appearance.colors.background))
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
-                            .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
-                            .padding(.vertical)
-                        }
+                            .frame(maxHeight: 50)
 
-                        Button {
-                            isSharePresented = true
-                        } label: {
-                            Text("Share")
-                                .bold()
-                                .padding()
-                                .frame(maxWidth: .infinity)
-                                .foregroundColor(.white)
-                        }
-                        .background(appearance.colors.primaryButtonBackground)
-                        .cornerRadius(8)
-                        .padding(.vertical)
-                        .sheet(isPresented: $isSharePresented) {
-                            if let url = URL(string: callLink) {
-                                ShareActivityView(activityItems: [url])
-                            } else {
-                                EmptyView()
+                            Text("Share link to add participants")
+                                .font(appearance.fonts.body.weight(.medium))
+
+                            Button {
+                                isSharePresented = true
+                            } label: {
+                                Image(systemName: "square.and.arrow.up")
+                                Text("Share")
+                            }
+                            .padding([.leading, .trailing])
+                            .padding([.top, .bottom], 4)
+                            .background(appearance.colors.primaryButtonBackground)
+                            .clipShape(Capsule())
+                            .sheet(isPresented: $isSharePresented) {
+                                if let url = URL(string: callLink) {
+                                    ShareActivityView(activityItems: [url])
+                                } else {
+                                    EmptyView()
+                                }
                             }
                         }
                     }
-                    .padding()
-                    .background(appearance.colors.callControlsBackground.opacity(0.95))
                     .cornerRadius(16)
-                    .frame(height: 200)
-                    .padding()
-                    .offset(y: -125)
+                    .foregroundColor(Color.white)
                 }
+                .padding([.leading, .trailing], 8)
+
+                viewFactory.makeCallControlsView(viewModel: viewModel)
+                    .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }
         }
         .chat(viewModel: viewModel, chatViewModel: chatViewModel)
-        .onReceive(chatViewModel?.$isChatVisible) { isChatVisible = $0 }
     }
 
     private var callLink: String {

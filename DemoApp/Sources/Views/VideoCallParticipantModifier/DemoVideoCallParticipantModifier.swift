@@ -33,29 +33,37 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        content
-            .modifier(
-                VideoCallParticipantModifier(
-                    participant: participant,
-                    call: call,
-                    availableFrame: availableFrame,
-                    ratio: ratio,
-                    showAllInfo: showAllInfo)
-            )
-            .modifier(
-                ReactionsViewModifier(
-                    participant: participant,
-                    availableSize: availableFrame.size
+        withLongPress {
+            content
+                .modifier(
+                    VideoCallParticipantModifier(
+                        participant: participant,
+                        call: call,
+                        availableFrame: availableFrame,
+                        ratio: ratio,
+                        showAllInfo: showAllInfo)
                 )
-            )
-            .longPressToFocus(availableFrame: availableFrame) {
-                guard call?.state.sessionId == participant.sessionId else { return }
-                try? call?.focus(at: $0)
-            }
+                .modifier(ReactionsViewModifier(participant: participant))
+                .participantStats(call: call, participant: participant)
+        }
     }
     
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
+    }
+
+    @MainActor 
+    @ViewBuilder
+    private func withLongPress<Content: View>(
+        @ViewBuilder _ content: () -> Content
+    ) -> some View {
+        if call?.state.sessionId == participant.sessionId {
+            content().longPressToFocus(
+                availableFrame: availableFrame
+            ) { try? call?.focus(at: $0) }
+        } else {
+            content()
+        }
     }
 }

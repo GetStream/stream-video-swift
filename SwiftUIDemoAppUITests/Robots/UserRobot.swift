@@ -191,8 +191,8 @@ extension UserRobot {
     }
     
     @discardableResult
-    func moveCornerDragableViewToTheBottom() -> Self {
-        CallPage.cornerDragableView.dragAndDrop(dropElement: CallPage.hangUpButton, duration: 0.5)
+    func moveCornerDraggableViewToTheBottom() -> Self {
+        CallPage.cornerDraggableView.dragAndDrop(dropElement: CallPage.hangUpButton, duration: 0.5)
         return self
     }
     
