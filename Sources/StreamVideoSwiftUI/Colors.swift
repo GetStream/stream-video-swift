@@ -23,6 +23,7 @@ public struct Colors {
     public var background1: UIColor = .streamWhiteSmoke
     public var textLowEmphasis: UIColor = .streamGrayDisabledText
     public var callBackground: UIColor = .streamDarkBackground
+    public var participantBackground: UIColor = .streamParticipantBackground
     public var lobbyBackground: Color = Color(.streamWaitingRoomBackground)
     public var lobbySecondaryBackground: Color = Color(.streamWaitingRoomSecondaryBackground)
     public var primaryButtonBackground: Color = Color(.streamBlue)
@@ -30,6 +31,7 @@ public struct Colors {
     public var callControlsBackground = Color(.streamCallControlsBackground)
     public var livestreamBackground = Color.black.opacity(0.4)
     public var livestreamCallControlsColor = Color.white
+    public var participantSpeakingHighlightColor = Color(.streamBlue).opacity(0.7)
 }
 
 // Those colors are default defined stream constants, which are fallback values if you don't implement your color theme.
@@ -55,13 +57,14 @@ private extension UIColor {
     static let streamInnerBorder = mode(0xdbdde1, 0x272a30)
     static let streamHighlight = mode(0xfbf4dd, 0x333024)
     static let streamDisabled = mode(0xb4b7bb, 0x4c525c)
-    static let streamDarkBackground = mode(0x272a30, 0x272a30)
+    static let streamDarkBackground = mode(0x101213, 0x101213)
     static let streamPulsingColor = mode(0x005fff, 0x005fff)
     static let streamCallControlsBackground = mode(0xffffff, 0x1c1e22)
     static let streamWaitingRoomBackground = mode(0xffffff, 0x2c2c2e)
     static let streamWaitingRoomSecondaryBackground = mode(0xf2f2f2, 0x1c1c1e)
     static let streamBlue = mode(0x005fff, 0x005fff)
-    
+    static let streamParticipantBackground = mode(0x19232D, 0x19232D)
+
     // Currently we are not using the correct shadow color from figma's color palette. This is to avoid
     // an issue with snapshots inconsistency between Intel vs M1. We can't use shadows with transparency.
     // So we apply a light gray color to fake the transparency.

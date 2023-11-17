@@ -175,10 +175,10 @@ extension UserRobot {
     func assertGridView(with participantCount: Int) -> Self {
         if participantCount > 2 {
             let user = 1
-            XCTAssertFalse(CallPage.cornerDragableView.waitForDisappearance().exists, "cornerDragableView should disappear")
+            XCTAssertFalse(CallPage.cornerDraggableView.waitForDisappearance().exists, "cornerDraggableView should disappear")
             XCTAssertEqual(participantCount + user, CallPage.participantView.count, "GridView")
         } else {
-            XCTAssertTrue(CallPage.cornerDragableView.wait().exists, "cornerDragableView should appear")
+            XCTAssertTrue(CallPage.cornerDraggableView.wait().exists, "cornerDraggableView should appear")
             XCTAssertEqual(participantCount, CallPage.participantView.count, "GridView")
         }
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
@@ -189,8 +189,8 @@ extension UserRobot {
     func assertSpotlightView(with participantCount: Int) -> Self {
         XCTAssertTrue(CallPage.spotlightViewParticipantList.wait().exists, "spotlightViewParticipantList should appear")
         XCTAssertEqual(1, CallPage.participantView.count, "SpotlightView")
-        XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
-        
+        XCTAssertFalse(CallPage.cornerDraggableView.exists, "cornerDraggableView should disappear")
+
         let maxVisibleCount = 6
         let actualCount = CallPage.spotlightParticipantView.count
         if participantCount > maxVisibleCount {
@@ -206,7 +206,7 @@ extension UserRobot {
         XCTAssertEqual(1, CallPage.participantView.count, "FullscreenView")
         XCTAssertEqual(0, CallPage.spotlightParticipantView.count, "FullscreenView")
         XCTAssertFalse(CallPage.spotlightViewParticipantList.exists, "spotlightViewParticipantList should disappear")
-        XCTAssertFalse(CallPage.cornerDragableView.exists, "cornerDragableView should disappear")
+        XCTAssertFalse(CallPage.cornerDraggableView.exists, "cornerDraggableView should disappear")
         return self
     }
     

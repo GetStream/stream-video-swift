@@ -6,13 +6,12 @@ import StreamVideo
 import SwiftUI
 
 public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
-    private let thumbnailSize: CGFloat = 120
-
     var viewFactory: Factory
     var participant: CallParticipant
     var participants: [CallParticipant]
     var frame: CGRect
     var call: Call?
+    var innerItemSpace: CGFloat
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
@@ -21,6 +20,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         call: Call?,
         participants: [CallParticipant],
         frame: CGRect,
+        innerItemSpace: CGFloat = 8,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
@@ -28,11 +28,12 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.participants = participants
         self.frame = frame
         self.call = call
+        self.innerItemSpace = innerItemSpace
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
 
     public var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: innerItemSpace) {
             GeometryReader { proxy in
                 SpotlightSpeakerView(
                     viewFactory: viewFactory,
@@ -47,22 +48,37 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 viewFactory: viewFactory,
                 participants: participants,
                 frame: participantsStripFrame,
-                call: call
+                call: call,
+                itemsOnScreen: itemsVisibleOnScreen,
+                showAllInfo: true
             )
         }
     }
     
     private var topParticipantFrame: CGRect {
+        /// Top 
         .init(
             origin: frame.origin,
-            size: CGSize(width: frame.size.width, height: frame.size.height - thumbnailSize)
+            size: CGSize(width: frame.size.width, height: frame.height - participantsStripFrame.height - innerItemSpace)
         )
     }
 
+    private var itemsVisibleOnScreen: CGFloat {
+        if UIDevice.current.userInterfaceIdiom == .pad {
+            return UIDevice.current.orientation == .portrait ? 3 : 4
+        } else {
+            return 2
+        }
+    }
+
     private var participantsStripFrame: CGRect {
-        .init(
-            origin: .init(x: frame.origin.x, y: frame.maxY - thumbnailSize),
-            size: CGSize(width: frame.size.width, height: thumbnailSize)
+        /// Each video tile has an aspect ratio of 3:4 with width as base. Given that each tile has the
+        /// half width of the screen, the calculation below applies the aspect ratio to the expected width.
+        let aspectRatio: CGFloat = UIDevice.current.userInterfaceIdiom == .pad ? 9 / 16 : 3 / 4
+        let barHeight = (frame.width / itemsVisibleOnScreen) * aspectRatio
+        return .init(
+            origin: .init(x: frame.origin.x, y: frame.maxY - barHeight),
+            size: CGSize(width: frame.width, height: barHeight)
         )
     }
 

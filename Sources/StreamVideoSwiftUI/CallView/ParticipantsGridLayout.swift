@@ -86,8 +86,8 @@ struct VideoParticipantsViewPortrait<Factory: ViewFactory>: View {
                 TwoColumnParticipantsView(
                     viewFactory: viewFactory,
                     call: call,
-                    leftColumnParticipants: [participants[0], participants[2]],
-                    rightColumnParticipants: [participants[1], participants[3], participants[4]],
+                    leftColumnParticipants: [participants[0], participants[2], participants[4]],
+                    rightColumnParticipants: [participants[1], participants[3]],
                     availableFrame: availableFrame,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
@@ -168,10 +168,11 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
     var leftColumnParticipants: [CallParticipant]
     var rightColumnParticipants: [CallParticipant]
     var availableFrame: CGRect
+    var innerItemSpace: CGFloat = 8
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: innerItemSpace) {
             VerticalParticipantsView(
                 viewFactory: viewFactory,
                 call: call,
@@ -179,25 +180,29 @@ struct TwoColumnParticipantsView<Factory: ViewFactory>: View {
                 availableFrame: bounds,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
-            .adjustVideoFrame(to: bounds.size.width)
+            .adjustVideoFrame(to: bounds.width)
 
             VerticalParticipantsView(
                 viewFactory: viewFactory,
                 call: call,
                 participants: rightColumnParticipants,
                 availableFrame: bounds,
+                includeSpacer: leftColumnParticipants.count > rightColumnParticipants.count,
                 onChangeTrackVisibility: onChangeTrackVisibility
             )
-            .adjustVideoFrame(to: bounds.size.width)
+            .adjustVideoFrame(to: bounds.width)
         }
-        .frame(maxWidth: availableFrame.size.width, maxHeight: .infinity)
+        .frame(maxWidth: availableFrame.width, maxHeight: .infinity)
         .edgesIgnoringSafeArea(.all)
     }
-    
+
     private var bounds: CGRect {
         CGRect(
             origin: .zero,
-            size: CGSize(width: availableFrame.size.width / 2, height: availableFrame.size.height)
+            size: CGSize(
+                width: (availableFrame.size.width - innerItemSpace) / 2,
+                height: availableFrame.size.height
+            )
         )
     }
 }
@@ -214,7 +219,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 8) {
             HorizontalParticipantsView(
                 viewFactory: viewFactory,
                 call: call,
@@ -249,15 +254,17 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
+    var innerItemSpace: CGFloat = 8
+    var includeSpacer: Bool = false
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
     var body: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: innerItemSpace) {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
                     participant: participant,
                     id: participant.id,
-                    availableFrame: availableFrame,
+                    availableFrame: itemFrame,
                     contentMode: .scaleAspectFill,
                     customData: [:],
                     call: call
@@ -266,7 +273,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                     viewFactory.makeVideoCallParticipantModifier(
                         participant: participant,
                         call: call,
-                        availableFrame: availableFrame,
+                        availableFrame: itemFrame,
                         ratio: ratio,
                         showAllInfo: true
                     )
@@ -275,15 +282,27 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
                     onChangeTrackVisibility(participant, true)
                 }
             }
+
+            if includeSpacer {
+                Spacer()
+                    .frame(width: itemFrame.width, height: itemFrame.height)
+            }
         }
     }
     
     private var ratio: CGFloat {
-        availableFrame.width / availableHeight
+        itemFrame.width / itemFrame.height
     }
     
-    private var availableHeight: CGFloat {
-        availableFrame.height / CGFloat(participants.count)
+    private var itemFrame: CGRect {
+        let itemsCount = CGFloat(includeSpacer ? participants.count + 1 : participants.count)
+        return .init(
+            origin: availableFrame.origin,
+            size: .init(
+                width: availableFrame.width,
+                height: (availableFrame.height - ((itemsCount - 1) * innerItemSpace)) / itemsCount
+            )
+        )
     }
 }
 
@@ -297,7 +316,7 @@ struct HorizontalParticipantsView<Factory: ViewFactory>: View {
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
-        HStack(spacing: 0) {
+        HStack(spacing: 8) {
             ForEach(participants) { participant in
                 viewFactory.makeVideoParticipantView(
                     participant: participant,

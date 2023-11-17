@@ -34,6 +34,7 @@ struct CornerClipper: ViewModifier {
             content
                 .layoutPriority(1)
         }
+        .edgesIgnoringSafeArea(.all)
     }
 
     private var backgroundColorView: some View {
@@ -55,7 +56,7 @@ struct CornerClipper: ViewModifier {
 }
 
 /// `RoundedCorners` is a Shape used to create a rounded cornered rectangle
-/// on the specified sides using a given radius.
+/// on the specified sides using a given radius.
 struct RoundedCorners: Shape {
 
     /// The radius of the rounded corners.

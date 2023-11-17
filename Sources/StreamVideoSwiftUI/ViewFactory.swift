@@ -264,7 +264,8 @@ extension ViewFactory {
         ScreenSharingView(
             viewModel: viewModel,
             screenSharing: screensharingSession,
-            availableFrame: availableFrame
+            availableFrame: availableFrame,
+            viewFactory: self
         )
     }
 
@@ -317,12 +318,16 @@ extension ViewFactory {
         if #available(iOS 14.0, *) {
             return LocalParticipantViewModifier(
                 localParticipant: localParticipant,
-                callSettings: callSettings
+                call: call,
+                callSettings: callSettings,
+                showAllInfo: true
             )
         } else {
             return LocalParticipantViewModifier_iOS13(
                 localParticipant: localParticipant,
-                callSettings: callSettings
+                call: call,
+                callSettings: callSettings,
+                showAllInfo: true
             )
         }
     }
