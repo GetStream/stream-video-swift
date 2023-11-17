@@ -21,7 +21,6 @@ struct VisibilityThresholdModifier: ViewModifier {
     /// State to track if the content view is on screen.
     @State private var isOnScreen = false {
         didSet {
-            // Check if the visibility state has changed.
             guard isOnScreen != oldValue else { return }
             // Notify the caller about the visibility state change.
             changeHandler(isOnScreen)
@@ -54,7 +53,7 @@ struct VisibilityThresholdModifier: ViewModifier {
                     let (verticalVisible, horizontalVisible) = calculateVisibilityInBothAxis(in: geometryInGlobal)
 
                     /// Update the isOnScreen state based on visibility calculations.
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         self.isOnScreen = verticalVisible && horizontalVisible
                     }
 

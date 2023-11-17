@@ -68,6 +68,7 @@ private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresenta
             super.init(nibName: nil, bundle: nil)
             view = scrollView
             
+            scrollView.backgroundColor = .clear
             scrollView.delegate = self
             scrollView.maximumZoomScale = 10
             scrollView.minimumZoomScale = 1
@@ -78,7 +79,7 @@ private struct ZoomableScrollViewImpl<Content: View>: UIViewControllerRepresenta
             
             let hostedView = coordinator.hostingController.view!
             hostedView.translatesAutoresizingMaskIntoConstraints = false
-            hostedView.backgroundColor = colors.background1
+            hostedView.backgroundColor = .clear
             scrollView.addSubview(hostedView)
             NSLayoutConstraint.activate([
                 hostedView.leadingAnchor.constraint(equalTo: scrollView.contentLayoutGuide.leadingAnchor),

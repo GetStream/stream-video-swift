@@ -150,7 +150,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserMovesCornerDragableView() {
+    func testUserMovesCornerDraggableView() {
         linkToScenario(withId: 1771)
         
         let participants = 1
@@ -168,13 +168,13 @@ final class CallViewsTests: StreamTestCase {
             userRobot.setView(mode: .grid)
         }
         
-        let initialCoordinates = CallPage.cornerDragableView.centralCoordinates
-        AND("user moves corner dragable view to the bottom right corner") {
-            userRobot.moveCornerDragableViewToTheBottom()
+        let initialCoordinates = CallPage.cornerDraggableView.centralCoordinates
+        AND("user moves corner draggable view to the bottom right corner") {
+            userRobot.moveCornerDraggableViewToTheBottom()
         }
         
         sleep(1) // wait for the view to settle
-        let newCoordinates = CallPage.cornerDragableView.centralCoordinates
+        let newCoordinates = CallPage.cornerDraggableView.centralCoordinates
         THEN("video view is in the bottom right corner") {
             XCTAssertEqual(initialCoordinates.x, newCoordinates.x)
             XCTAssertLessThan(initialCoordinates.y, newCoordinates.y)

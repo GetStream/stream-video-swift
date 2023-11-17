@@ -13,7 +13,7 @@ enum CallPage {
     
     static var recordingLabel: XCUIElement { app.staticTexts["recordingLabel"] }
     static var participantMenu: XCUIElement { app.buttons["participantMenu"] }
-    static var cornerDragableView: XCUIElement { app.otherElements["cornerDragableView"].otherElements.firstMatch }
+    static var cornerDraggableView: XCUIElement { app.otherElements["cornerDraggableView"].otherElements.firstMatch }
     static var minimizedCallView: XCUIElement { participantView.firstMatch }
     static var viewMenu: XCUIElement { app.buttons["viewMenu"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
