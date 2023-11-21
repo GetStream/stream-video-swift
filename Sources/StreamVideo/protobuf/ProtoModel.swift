@@ -19,3 +19,4 @@ extension Stream_Video_Sfu_Signal_SendAnswerResponse: ErrorProviding {}
 extension Stream_Video_Sfu_Signal_ICETrickleResponse: ErrorProviding {}
 extension Stream_Video_Sfu_Signal_UpdateSubscriptionsResponse: ErrorProviding {}
 extension Stream_Video_Sfu_Signal_UpdateMuteStatesResponse: ErrorProviding {}
+extension Stream_Video_Sfu_Signal_ICERestartResponse: ErrorProviding {}

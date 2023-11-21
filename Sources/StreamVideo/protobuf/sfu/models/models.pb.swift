@@ -231,6 +231,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
   case tooManyRequests // = 429
   case internalServerError // = 500
   case sfuShuttingDown // = 600
+  case sfuFull // = 700
   case UNRECOGNIZED(Int)
 
   init() {
@@ -258,6 +259,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case 429: self = .tooManyRequests
     case 500: self = .internalServerError
     case 600: self = .sfuShuttingDown
+    case 700: self = .sfuFull
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -283,6 +285,7 @@ enum Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf.Enum {
     case .tooManyRequests: return 429
     case .internalServerError: return 500
     case .sfuShuttingDown: return 600
+    case .sfuFull: return 700
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -313,6 +316,7 @@ extension Stream_Video_Sfu_Models_ErrorCode: CaseIterable {
     .tooManyRequests,
     .internalServerError,
     .sfuShuttingDown,
+    .sfuFull,
   ]
 }
 
@@ -327,6 +331,7 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
   case ios // = 4
   case flutter // = 5
   case reactNative // = 6
+  case unity // = 7
   case UNRECOGNIZED(Int)
 
   init() {
@@ -342,6 +347,7 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
     case 4: self = .ios
     case 5: self = .flutter
     case 6: self = .reactNative
+    case 7: self = .unity
     default: self = .UNRECOGNIZED(rawValue)
     }
   }
@@ -355,6 +361,7 @@ enum Stream_Video_Sfu_Models_SdkType: SwiftProtobuf.Enum {
     case .ios: return 4
     case .flutter: return 5
     case .reactNative: return 6
+    case .unity: return 7
     case .UNRECOGNIZED(let i): return i
     }
   }
@@ -373,6 +380,7 @@ extension Stream_Video_Sfu_Models_SdkType: CaseIterable {
     .ios,
     .flutter,
     .reactNative,
+    .unity,
   ]
 }
 
@@ -1030,6 +1038,7 @@ extension Stream_Video_Sfu_Models_ErrorCode: SwiftProtobuf._ProtoNameProviding {
     429: .same(proto: "ERROR_CODE_TOO_MANY_REQUESTS"),
     500: .same(proto: "ERROR_CODE_INTERNAL_SERVER_ERROR"),
     600: .same(proto: "ERROR_CODE_SFU_SHUTTING_DOWN"),
+    700: .same(proto: "ERROR_CODE_SFU_FULL"),
   ]
 }
 
@@ -1042,6 +1051,7 @@ extension Stream_Video_Sfu_Models_SdkType: SwiftProtobuf._ProtoNameProviding {
     4: .same(proto: "SDK_TYPE_IOS"),
     5: .same(proto: "SDK_TYPE_FLUTTER"),
     6: .same(proto: "SDK_TYPE_REACT_NATIVE"),
+    7: .same(proto: "SDK_TYPE_UNITY"),
   ]
 }
 

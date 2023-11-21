@@ -903,6 +903,9 @@ struct Stream_Video_Sfu_Event_VideoMediaRequest {
   init() {}
 }
 
+/// VideoLayerSetting is used to specify various parameters of a particular encoding in simulcast.
+/// The parameters are specified here - https://developer.mozilla.org/en-US/docs/Web/API/RTCRtpEncodingParameters
+/// SDKs use these parameters sent from the server to dynamically adjust these parameters to save CPU, bandwidth
 struct Stream_Video_Sfu_Event_VideoLayerSetting {
   // SwiftProtobuf.Message conformance is added in an extension below. See the
   // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
@@ -926,6 +929,8 @@ struct Stream_Video_Sfu_Event_VideoLayerSetting {
   var hasCodec: Bool {return self._codec != nil}
   /// Clears the value of `codec`. Subsequent reads from it will return its default value.
   mutating func clearCodec() {self._codec = nil}
+
+  var maxFramerate: UInt32 = 0
 
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
@@ -2607,6 +2612,7 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     4: .standard(proto: "scale_resolution_down_by"),
     5: .same(proto: "priority"),
     6: .same(proto: "codec"),
+    7: .standard(proto: "max_framerate"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -2621,6 +2627,7 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
       case 4: try { try decoder.decodeSingularFloatField(value: &self.scaleResolutionDownBy) }()
       case 5: try { try decoder.decodeSingularEnumField(value: &self.priority) }()
       case 6: try { try decoder.decodeSingularMessageField(value: &self._codec) }()
+      case 7: try { try decoder.decodeSingularUInt32Field(value: &self.maxFramerate) }()
       default: break
       }
     }
@@ -2649,6 +2656,9 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     try { if let v = self._codec {
       try visitor.visitSingularMessageField(value: v, fieldNumber: 6)
     } }()
+    if self.maxFramerate != 0 {
+      try visitor.visitSingularUInt32Field(value: self.maxFramerate, fieldNumber: 7)
+    }
     try unknownFields.traverse(visitor: &visitor)
   }
 
@@ -2659,6 +2669,7 @@ extension Stream_Video_Sfu_Event_VideoLayerSetting: SwiftProtobuf.Message, Swift
     if lhs.scaleResolutionDownBy != rhs.scaleResolutionDownBy {return false}
     if lhs.priority != rhs.priority {return false}
     if lhs._codec != rhs._codec {return false}
+    if lhs.maxFramerate != rhs.maxFramerate {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true
   }
