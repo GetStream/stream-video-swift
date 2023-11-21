@@ -176,6 +176,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var tempSubscriber: PeerConnection?
     private var currentScreenhsareType: ScreensharingType?
     private var isFastReconnecting = false
+    private var disconnectTime: Date?
     
     @Injected(\.thermalStateObserver) private var thermalStateObserver
 
@@ -1216,12 +1217,23 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         }
         
         if status == .unavailable {
-            if !isFastReconnecting {
-                isFastReconnecting = true
-            }
+            disconnectTime = Date()
             return
         }
-        if status.isAvailable && isFastReconnecting, let url = signalChannel?.connectURL {
+        
+        guard status.isAvailable else { return }
+        
+        if let disconnectTime {
+            let offlineInterval = Date().timeIntervalSince(disconnectTime)
+            log.debug("offline interval is \(offlineInterval) seconds")
+            if offlineInterval <= fastReconnectTimeout && !isFastReconnecting {
+                isFastReconnecting = true
+            }
+        }
+        
+        disconnectTime = nil
+        
+        if isFastReconnecting, let url = signalChannel?.connectURL {
             signalChannel = makeWebSocketClient(
                 url: url,
                 apiKey: .init(apiKey),
@@ -1282,7 +1294,7 @@ extension WebRTCClient: ConnectionStateDelegate {
         case .disconnected(source: _), .disconnecting(source: _):
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: { [weak self] in
                 guard let self else { return }
-                if !self.isFastReconnecting {
+                if !self.isFastReconnecting && disconnectTime == nil {
                     onSignalConnectionStateChange?(state)
                 }
             })
