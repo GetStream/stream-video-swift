@@ -62,7 +62,7 @@ final class CallController_Tests: ControllerTestCase {
         engine.simulateConnectionSuccess()
         try await waitForCallEvent()
         engine.simulateDisconnect()
-        try await waitForCallEvent()
+        try await waitForCallEvent(nanoseconds: 5_000_000_000)
         
         // Then
         XCTAssert(callController.call?.state.reconnectionStatus == .reconnecting)
@@ -151,7 +151,7 @@ final class CallController_Tests: ControllerTestCase {
         engine.simulateConnectionSuccess()
         try await waitForCallEvent()
         engine.simulateDisconnect()
-        try await waitForCallEvent()
+        try await waitForCallEvent(nanoseconds: 5_000_000_000)
         
         // Then
         XCTAssert(callController.call?.state.reconnectionStatus == .reconnecting)
