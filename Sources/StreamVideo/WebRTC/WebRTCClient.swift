@@ -655,6 +655,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         
         subscriber?.onStreamAdded = handleStreamAdded
         subscriber?.onStreamRemoved = handleStreamRemoved
+        subscriber?.onDisconnect = { [weak self] _ in
+            log.debug("subscriber disconnected")
+            if self?.isFastReconnecting == false {
+                log.debug("notifying of publisher disconnection")
+                self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+            }
+        }
         
         log.debug("Updating connection status to connected", subsystems: .webRTC)
         await state.update(connectionState: .connected)
@@ -1262,8 +1269,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                 return
             }
             self.isFastReconnecting = false
-            let reconnectPublisher = publisher != nil ? publisher?.connectionState != .connected : false
-            let reconnectSubscriber = subscriber != nil ? subscriber?.connectionState != .connected : false
+            let reconnectPublisher = isPeerConnectionDisconnected(publisher)
+            let reconnectSubscriber = isPeerConnectionDisconnected(subscriber)
             let shouldFullyReconnect = reconnectPublisher || reconnectSubscriber
             if shouldFullyReconnect {
                 log.debug("Fast reconnect failed, doing full reconnect")
@@ -1271,6 +1278,19 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             } else {
                 log.debug("Fast reconnect successfull")
             }
+        }
+    }
+    
+    private func isPeerConnectionDisconnected(_ peerConnection: PeerConnection?) -> Bool {
+        guard let peerConnection else {
+            return false
+        }
+        
+        switch peerConnection.connectionState {
+        case .disconnected, .failed:
+            return true
+        default:
+            return false
         }
     }
     
@@ -1292,6 +1312,8 @@ extension WebRTCClient: ConnectionStateDelegate {
         log.debug("WS connection state changed to \(state)")
         switch state {
         case .disconnected(source: _), .disconnecting(source: _):
+            // Sometimes this method is called before the internet connection monitor.
+            // This makes sure that we always do the checks there before taking action here.
             DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: { [weak self] in
                 guard let self else { return }
                 if !self.isFastReconnecting && disconnectTime == nil {
