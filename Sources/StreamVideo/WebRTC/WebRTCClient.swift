@@ -15,7 +15,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         static let timeoutInterval: TimeInterval = 15
         static let participantsThreshold = 10
         static let fastReconnectTimeout: TimeInterval = 4.0
-        static let shortDelay: TimeInterval = 0.3
     }
     
     actor State: ObservableObject {
@@ -1224,17 +1223,21 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             return
         }
         
-        if status == .unavailable {
+        handleConnectionState(isAvailable: status.isAvailable)
+    }
+    
+    private func handleConnectionState(isAvailable: Bool) {
+        if !isAvailable {
             disconnectTime = Date()
             return
         }
         
-        guard status.isAvailable else { return }
+        guard isAvailable, !isFastReconnecting else { return }
         
         if let disconnectTime {
             let offlineInterval = Date().timeIntervalSince(disconnectTime)
             log.debug("offline interval is \(offlineInterval) seconds")
-            if offlineInterval <= Constants.fastReconnectTimeout && !isFastReconnecting {
+            if offlineInterval <= Constants.fastReconnectTimeout {
                 isFastReconnecting = true
             }
         }
@@ -1313,14 +1316,10 @@ extension WebRTCClient: ConnectionStateDelegate {
         log.debug("WS connection state changed to \(state)")
         switch state {
         case .disconnected(source: _), .disconnecting(source: _):
-            // Sometimes this method is called before the internet connection monitor.
-            // This makes sure that we always do the checks there before taking action here.
-            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.shortDelay, execute: { [weak self] in
-                guard let self else { return }
-                if !self.isFastReconnecting && disconnectTime == nil {
-                    onSignalConnectionStateChange?(state)
-                }
-            })
+            handleConnectionState(isAvailable: false)
+            if !isFastReconnecting && disconnectTime == nil {
+                onSignalConnectionStateChange?(state)
+            }
         default:
             onSignalConnectionStateChange?(state)
         }
