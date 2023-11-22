@@ -12,6 +12,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         static let screenshareTrackType = "TRACK_TYPE_SCREEN_SHARE"
         static let videoTrackType = "TRACK_TYPE_VIDEO"
         static let audioTrackType = "TRACK_TYPE_AUDIO"
+        static let timeoutInterval: TimeInterval = 15
+        static let participantsThreshold = 10
+        static let fastReconnectTimeout: TimeInterval = 4.0
+        static let shortDelay: TimeInterval = 0.3
     }
     
     actor State: ObservableObject {
@@ -148,7 +152,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     
     private(set) var sessionID: String
     private var token: String
-    private let timeoutInterval: TimeInterval = 15
     
     private(set) var localVideoTrack: RTCVideoTrack?
     private(set) var localAudioTrack: RTCAudioTrack?
@@ -158,7 +161,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private let user: User
     private let callCid: String
     private let audioSession = AudioSession()
-    private let participantsThreshold = 10
     private var connectOptions: ConnectOptions?
     internal var ownCapabilities: [OwnCapability]
     private let videoConfig: VideoConfig
@@ -167,7 +169,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var videoOptions = VideoOptions()
     private let environment: WebSocketClient.Environment
     private let apiKey: String
-    private let fastReconnectTimeout: TimeInterval = 4.0
     
     private var migratingSignalService: Stream_Video_Sfu_Signal_SignalServer?
     private var migratingWSClient: WebSocketClient?
@@ -205,7 +206,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         signalService: signalService,
         subscriber: subscriber,
         publisher: publisher,
-        participantThreshold: participantsThreshold
+        participantThreshold: Constants.participantsThreshold
     )
     
     init(
@@ -658,7 +659,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         subscriber?.onDisconnect = { [weak self] _ in
             log.debug("subscriber disconnected")
             if self?.isFastReconnecting == false {
-                log.debug("notifying of publisher disconnection")
+                log.debug("notifying of subscriber disconnection")
                 self?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
             }
         }
@@ -1233,7 +1234,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         if let disconnectTime {
             let offlineInterval = Date().timeIntervalSince(disconnectTime)
             log.debug("offline interval is \(offlineInterval) seconds")
-            if offlineInterval <= fastReconnectTimeout && !isFastReconnecting {
+            if offlineInterval <= Constants.fastReconnectTimeout && !isFastReconnecting {
                 isFastReconnecting = true
             }
         }
@@ -1259,7 +1260,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     private func checkFastReconnectionStatus(retries: Int = 0) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + fastReconnectTimeout) { [weak self] in
+        DispatchQueue.main.asyncAfter(deadline: .now() + Constants.fastReconnectTimeout) { [weak self] in
             guard let self else { return }
             if (isPeerConnectionConnecting(publisher, otherNotDisconnected: subscriber)
                 || isPeerConnectionConnecting(subscriber, otherNotDisconnected: publisher))
@@ -1314,7 +1315,7 @@ extension WebRTCClient: ConnectionStateDelegate {
         case .disconnected(source: _), .disconnecting(source: _):
             // Sometimes this method is called before the internet connection monitor.
             // This makes sure that we always do the checks there before taking action here.
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: { [weak self] in
+            DispatchQueue.main.asyncAfter(deadline: .now() + Constants.shortDelay, execute: { [weak self] in
                 guard let self else { return }
                 if !self.isFastReconnecting && disconnectTime == nil {
                     onSignalConnectionStateChange?(state)
