@@ -32,6 +32,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     var onStreamRemoved: ((RTCMediaStream) -> Void)?
 
     var paused = false
+    
+    var connectionState: RTCPeerConnectionState {
+        pc.connectionState
+    }
 
     init(
         sessionId: String,
@@ -166,6 +170,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
             return
         }
         try await add(candidate: iceCandidate)
+    }
+    
+    func restartIce() {
+        pc.restartIce()
     }
 
     func close() {

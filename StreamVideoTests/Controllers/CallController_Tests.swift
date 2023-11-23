@@ -62,6 +62,8 @@ final class CallController_Tests: ControllerTestCase {
         engine.simulateConnectionSuccess()
         try await waitForCallEvent()
         engine.simulateDisconnect()
+        try await waitForCallEvent(nanoseconds: 5_000_000_000)
+        webRTCClient?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
         try await waitForCallEvent()
         
         // Then
@@ -151,6 +153,8 @@ final class CallController_Tests: ControllerTestCase {
         engine.simulateConnectionSuccess()
         try await waitForCallEvent()
         engine.simulateDisconnect()
+        try await waitForCallEvent(nanoseconds: 5_000_000_000)
+        webRTCClient?.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
         try await waitForCallEvent()
         
         // Then

@@ -193,11 +193,11 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 ### 0.5.0 milestone
 
+- [x] Tap to focus
+- [x] Complete reconnection flows
 - [ ] Video UIKit tutorial
 - [ ] Improve logging / Sentry integration
 - [ ] Camera controls
-- [x] Tap to focus
-- [ ] Complete reconnection flows
 - [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
 - [ ] Dynascale 2.0
 - [ ] Buttons to simulate ice-restart and SFU switching
