@@ -1265,20 +1265,20 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private func checkFastReconnectionStatus(retries: Int = 0) {
         DispatchQueue.main.asyncAfter(deadline: .now() + Constants.fastReconnectTimeout) { [weak self] in
             guard let self else { return }
-            if (isPeerConnectionConnecting(publisher, otherNotDisconnected: subscriber)
-                || isPeerConnectionConnecting(subscriber, otherNotDisconnected: publisher))
+            if (self.isPeerConnectionConnecting(self.publisher, otherNotDisconnected: self.subscriber)
+                || self.isPeerConnectionConnecting(self.subscriber, otherNotDisconnected: self.publisher))
                 && retries == 0 {
                 log.debug("Still connecting, check again after the interval")
-                checkFastReconnectionStatus(retries: 1)
+                self.checkFastReconnectionStatus(retries: 1)
                 return
             }
             self.isFastReconnecting = false
-            let reconnectPublisher = isPeerConnectionDisconnected(publisher)
-            let reconnectSubscriber = isPeerConnectionDisconnected(subscriber)
+            let reconnectPublisher = self.isPeerConnectionDisconnected(self.publisher)
+            let reconnectSubscriber = self.isPeerConnectionDisconnected(self.subscriber)
             let shouldFullyReconnect = reconnectPublisher || reconnectSubscriber
             if shouldFullyReconnect {
                 log.debug("Fast reconnect failed, doing full reconnect")
-                onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
+                self.onSignalConnectionStateChange?(.disconnected(source: .noPongReceived))
             } else {
                 log.debug("Fast reconnect successfull")
             }
