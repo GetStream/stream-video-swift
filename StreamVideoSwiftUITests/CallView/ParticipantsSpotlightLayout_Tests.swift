@@ -16,7 +16,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         for count in spotlightParticipants {
             let participants = ParticipantFactory.get(count, withAudio: true)
             let layout = ParticipantsSpotlightLayout(
-                viewFactory: TestViewFactory(),
+                viewFactory: DefaultViewFactory.shared,
                 participant: participants.first!,
                 call: call,
                 participants: participants,
@@ -31,7 +31,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         for count in spotlightParticipants {
             let participants = ParticipantFactory.get(count, withAudio: false)
             let layout = ParticipantsSpotlightLayout(
-                viewFactory: TestViewFactory(),
+                viewFactory: DefaultViewFactory.shared,
                 participant: participants.first!,
                 call: call,
                 participants: participants,
@@ -46,7 +46,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         for quality in connectionQuality {
             let participants = ParticipantFactory.get(spotlightParticipants.last!, connectionQuality: quality)
             let layout = ParticipantsSpotlightLayout(
-                viewFactory: TestViewFactory(),
+                viewFactory: DefaultViewFactory.shared,
                 participant: participants.first!,
                 call: call,
                 participants: participants,
@@ -61,7 +61,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
     func test_spotlight_participantsSpeaking_snapshot() {
         let participants = ParticipantFactory.get(spotlightParticipants.last!, speaking: true)
         let layout = ParticipantsSpotlightLayout(
-            viewFactory: TestViewFactory(),
+            viewFactory: DefaultViewFactory.shared,
             participant: participants.first!,
             call: call,
             participants: participants,
