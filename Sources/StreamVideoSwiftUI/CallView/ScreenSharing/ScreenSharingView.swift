@@ -7,11 +7,14 @@ import SwiftUI
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
+    @Injected(\.colors) var colors
+
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
     var frame: CGRect
     var innerItemSpace: CGFloat
     var viewFactory: Factory
+    var isZoomEnabled: Bool
 
     private let identifier = UUID()
 
@@ -20,33 +23,35 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
         innerItemSpace: CGFloat = 8,
-        viewFactory: Factory = DefaultViewFactory.shared
+        viewFactory: Factory = DefaultViewFactory.shared,
+        isZoomEnabled: Bool = true
     ) {
         self.viewModel = viewModel
         self.screenSharing = screenSharing
         self.frame = availableFrame
         self.innerItemSpace = innerItemSpace
         self.viewFactory = viewFactory
+        self.isZoomEnabled = isZoomEnabled
     }
 
     public var body: some View {
         VStack(spacing: innerItemSpace) {
             if !viewModel.hideUIElements {
                 Text("\(screenSharing.participant.name) presenting")
-                    .foregroundColor(.white)
+                    .foregroundColor(colors.text)
                     .padding()
                     .accessibility(identifier: "participantPresentingLabel")
             }
 
-            if viewModel.hideUIElements {
-                screensharingView
-                    .accessibility(identifier: "screenSharingView")
-            } else {
-                ZoomableScrollView {
+            Group {
+                if isZoomEnabled, !viewModel.hideUIElements {
+                    ZoomableScrollView { screensharingView }
+                } else {
                     screensharingView
-                        .accessibility(identifier: "screenSharingView")
                 }
             }
+            .accessibility(identifier: "screenSharingView")
+
 
             if !viewModel.hideUIElements {
                 HorizontalParticipantsListView(
@@ -72,21 +77,20 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                 view.add(track: track)
             }
         }
-        .frame(
-            width: viewModel.hideUIElements ? videoSize.width : nil,
-            height: viewModel.hideUIElements ? videoSize.height : nil
-        )
         .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 
     private var videoSize: CGSize {
         if viewModel.hideUIElements {
             return .init(
-                width: frame.size.height,
-                height: frame.size.width
+                width: frame.width,
+                height: frame.height - participantsStripFrame.height - innerItemSpace
             )
         } else {
-            return frame.size
+            return .init(
+                width: frame.width,
+                height: frame.height - innerItemSpace
+            )
         }
     }
 
