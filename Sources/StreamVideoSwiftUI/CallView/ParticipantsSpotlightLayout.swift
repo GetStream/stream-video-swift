@@ -64,7 +64,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     }
 
     private var itemsVisibleOnScreen: CGFloat {
-        if UIDevice.current.userInterfaceIdiom == .pad {
+        if UIDevice.current.isIpad {
             return UIDevice.current.orientation == .portrait ? 3 : 4
         } else {
             return 2
@@ -74,7 +74,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     private var participantsStripFrame: CGRect {
         /// Each video tile has an aspect ratio of 3:4 with width as base. Given that each tile has the
         /// half width of the screen, the calculation below applies the aspect ratio to the expected width.
-        let aspectRatio: CGFloat = UIDevice.current.userInterfaceIdiom == .pad ? 9 / 16 : 3 / 4
+        let aspectRatio: CGFloat = UIDevice.current.isIpad ? 9 / 16 : 3 / 4
         let barHeight = (frame.width / itemsVisibleOnScreen) * aspectRatio
         return .init(
             origin: .init(x: frame.origin.x, y: frame.maxY - barHeight),

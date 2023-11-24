@@ -12,7 +12,7 @@ struct ParticipantStatsView: View {
     @Injected(\.colors) var colors
     @Injected(\.fonts) var fonts
 
-    private var presentationBinding: Binding<Bool>
+    @Binding private var presentationBinding: Bool
     private var availableFrame: CGRect
     private var spacing: CGFloat = 8
 
@@ -28,43 +28,48 @@ struct ParticipantStatsView: View {
                 participant: participant
             )
         )
-        self.presentationBinding = presentationBinding
+        self._presentationBinding = presentationBinding
         self.availableFrame = availableFrame
-        log.debug("[Stats]availableSize:\(availableFrame.size)")
     }
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(columns: [.init(.adaptive(minimum: itemSize.width))], spacing: spacing) {
-                if viewModel.statsEntries.isEmpty {
-                    tileView {
-                        VStack {
-                            Text("Fetching stats...")
-                                .font(valueFont)
-                            ProgressView()
-                        }
-                    }
-                } else {
-                    ForEach(viewModel.statsEntries) { entry in
-                        tileView {
-                            VStack(alignment: .center, spacing: spacing) {
-                                Spacer()
-                                Text(entry.title)
-                                    .font(fonts.caption1)
-                                    .lineLimit(1)
-                                Text(entry.value)
-                                    .font(valueFont)
-                                Spacer()
+        Group {
+            if availableFrame == .zero {
+                Text("Loading ...")
+            } else {
+                ScrollView {
+                    LazyVGrid(columns: [.init(.adaptive(minimum: itemSize.width))], spacing: spacing) {
+                        if viewModel.statsEntries.isEmpty {
+                            tileView {
+                                VStack {
+                                    Text("Fetching stats...")
+                                        .font(valueFont)
+                                    ProgressView()
+                                }
                             }
-                        }
-                    }
+                        } else {
+                            ForEach(viewModel.statsEntries) { entry in
+                                tileView {
+                                    VStack(alignment: .center, spacing: spacing) {
+                                        Spacer()
+                                        Text(entry.title)
+                                            .font(fonts.caption1)
+                                            .lineLimit(1)
+                                        Text(entry.value)
+                                            .font(valueFont)
+                                        Spacer()
+                                    }
+                                }
+                            }
 
-                    tileView {
-                        Button {
-                            viewModel.allStatsShown = true
-                        } label: {
-                            Text("All stats")
-                                .font(valueFont)
+                            tileView {
+                                Button {
+                                    viewModel.allStatsShown = true
+                                } label: {
+                                    Text("All stats")
+                                        .font(valueFont)
+                                }
+                            }
                         }
                     }
                 }
@@ -81,7 +86,7 @@ struct ParticipantStatsView: View {
         .toolbar(content: {
             ToolbarItem(placement: .navigationBarLeading) {
                 Button {
-                    presentationBinding.wrappedValue = false
+                    presentationBinding = false
                 } label: {
                     Text("Close")
                         .foregroundColor(colors.text)
@@ -93,7 +98,7 @@ struct ParticipantStatsView: View {
     @ViewBuilder
     private func tileView(@ViewBuilder _ content: () -> some View) -> some View {
         content()
-            .frame(height: max(floor(itemSize.height), 50))
+            .frame(height: floor(itemSize.height))
             .frame(maxWidth: .infinity)
             .background(Color(colors.background1))
             .cornerRadius(8)

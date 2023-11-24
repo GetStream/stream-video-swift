@@ -139,6 +139,7 @@
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
 		40FAF3D12B0F8305003F8029 /* ParticipantStatsModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D02B0F8305003F8029 /* ParticipantStatsModifier.swift */; };
+		40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
 		43217A0C2A44A28B002B5857 /* ConnectionErrorEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */; };
@@ -1064,6 +1065,7 @@
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
 		40FAF3D02B0F8305003F8029 /* ParticipantStatsModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantStatsModifier.swift; sourceTree = "<group>"; };
+		40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Convenience.swift"; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
 		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
 		43217A0B2A44A28B002B5857 /* ConnectionErrorEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ConnectionErrorEvent.swift; sourceTree = "<group>"; };
@@ -3413,6 +3415,7 @@
 				848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */,
 				848FE1ED2A9DEA2600B45AC2 /* PiPHandler.swift */,
 				843FF37D2AA08C0400753E80 /* PiPTrackSelectionUtils.swift */,
+				40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -4736,6 +4739,7 @@
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
 				8277D16A2AE81CC800BC4ECF /* ImageDecoders+Video.swift in Sources */,
 				840A5A5629054F69006A1E4B /* UserListProvider.swift in Sources */,
+				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
 				8277D1432AE81CC800BC4ECF /* TaskFetchDecodedImage.swift in Sources */,
 				848FE1E72A9CBC1800B45AC2 /* PiPUtils.swift in Sources */,
