@@ -285,7 +285,7 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
 
             if includeSpacer {
                 Spacer()
-                    .frame(width: itemFrame.width, height: itemFrame.height)
+                    .frame(maxHeight: .infinity)
             }
         }
     }

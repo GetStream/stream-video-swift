@@ -34,18 +34,13 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
-    private func gridSize(for participantsCount: Int) -> CGRect {
-        let heightDivider = CGFloat((participantsCount == 2 || participantsCount == 3) ? participantsCount : 1)
-        return .init(origin: .zero, size: CGSize(width: defaultScreenSize.width, height: defaultScreenSize.height / heightDivider))
-    }
-    
     func test_grid_participantWithAudio_snapshot() {
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
-                viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                viewFactory: DefaultViewFactory.shared,
                 call: call,
                 participants: ParticipantFactory.get(count, withAudio: true),
-                availableFrame: gridSize(for: count),
+                availableFrame: .init(origin: .zero, size: defaultScreenSize),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -56,10 +51,10 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     func test_grid_participantWithoutAudio_snapshot() {
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
-                viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                viewFactory: DefaultViewFactory.shared,
                 call: call,
                 participants: ParticipantFactory.get(count, withAudio: false),
-                availableFrame: gridSize(for: count),
+                availableFrame: .init(origin: .zero, size: defaultScreenSize),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -71,10 +66,10 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         for quality in connectionQuality {
             let count = gridParticipants.last!
             let layout = ParticipantsGridLayout(
-                viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                viewFactory: DefaultViewFactory.shared,
                 call: call,
                 participants: ParticipantFactory.get(count, connectionQuality: quality),
-                availableFrame: gridSize(for: count),
+                availableFrame: .init(origin: .zero, size: defaultScreenSize),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )
@@ -91,10 +86,10 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
             }
             callController.update(participants: dict)
             let layout = ParticipantsGridLayout(
-                viewFactory: TestViewFactory(participantLayout: .grid, participantsCount: count),
+                viewFactory: DefaultViewFactory.shared,
                 call: call,
                 participants: participants,
-                availableFrame: gridSize(for: count),
+                availableFrame: .init(origin: .zero, size: defaultScreenSize),
                 orientation: .portrait,
                 onChangeTrackVisibility: {_,_ in }
             )

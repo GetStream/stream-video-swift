@@ -102,7 +102,7 @@ public struct AudioVolumeIndicator: View {
     
     private func height(for value: Float) -> CGFloat {
         let height: CGFloat = value > 0 ? CGFloat(value * maxHeight) : 0
-        return max(height, 0.5)
+        return max(height, 1)
     }
 }
 
