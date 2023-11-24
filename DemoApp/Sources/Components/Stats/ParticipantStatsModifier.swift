@@ -4,6 +4,7 @@
 
 import SwiftUI
 import StreamVideo
+import StreamVideoSwiftUI
 
 struct ParticipantStatsModifier: ViewModifier {
 
@@ -15,50 +16,41 @@ struct ParticipantStatsModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .overlay(
-                VStack {
-                    HStack {
-                        Spacer()
-                        contentView
-                    }
-
-                    Spacer()
+                TopRightView {
+                    contentView
                 }
-                .padding(6)
+                .padding(8)
             )
     }
 
     @ViewBuilder
     private var contentView: some View {
-        if call != nil {
+        if let call {
             Button {
                 presentStats = true
             } label: {
                 Image(systemName: "info")
                     .foregroundColor(.white)
-                    .padding(9)
+                    .padding(8)
                     .background(Color.black.opacity(0.6))
                     .clipShape(Circle())
                     .clipped()
             }
             .popover(isPresented: $presentStats) {
-                if let call {
-                    NavigationView {
-                        Group {
-                            GeometryReader { proxy in
-                                if proxy.frame(in: .global) != .zero {
-                                    ParticipantStatsView(
-                                        call: call,
-                                        participant: participant,
-                                        presentationBinding: $presentStats,
-                                        availableFrame: proxy.frame(in: .global)
-                                    )
-                                }
-                            }
+                NavigationView {
+                    Group {
+                        GeometryReader { proxy in
+                            ParticipantStatsView(
+                                call: call,
+                                participant: participant,
+                                presentationBinding: $presentStats,
+                                availableFrame: proxy.frame(in: .global)
+                            )
                         }
-                        .padding()
                     }
-                    .frame(minWidth: 300, minHeight: 400)
+                    .padding()
                 }
+                .frame(minWidth: 300, minHeight: 400)
             }
         } else {
             EmptyView()

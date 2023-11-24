@@ -135,7 +135,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                         Spacer()
                     }
                 }
-                .padding([.leading, .trailing], 8)
+                .padding(.horizontal, 8)
 
                 viewFactory.makeCallControlsView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)

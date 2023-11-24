@@ -17,7 +17,7 @@ public struct LogSubsystem: OptionSet {
     }
     
     /// All subsystems within the SDK.
-    public static let all: LogSubsystem = [.database, .httpRequests, .webSocket, .webRTC, .other, .offlineSupport, .webRTC]
+    public static let all: LogSubsystem = [.database, .httpRequests, .webSocket, .webRTC, .other, .offlineSupport]
     
     /// The subsystem responsible for any other part of the SDK.
     /// This is the default subsystem value for logging, to be used when `subsystem` is not specified.
