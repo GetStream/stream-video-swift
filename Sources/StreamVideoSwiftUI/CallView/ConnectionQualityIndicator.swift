@@ -33,8 +33,11 @@ public struct ConnectionQualityIndicator: View {
             }
         }
         .frame(width: size, height: size)
-        .background(connectionQuality == .unknown ? Color.clear : Color.black.opacity(0.6))
-        .cornerRadius(6)
+        .cornerRadius(
+            8,
+            corners: [.topLeft],
+            backgroundColor: connectionQuality == .unknown ? Color.clear : Color.black.opacity(0.6)
+        )
         .accessibility(identifier: "connectionQualityIndicator")
     }
     

@@ -23,8 +23,6 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
     /// Information about the call (if available).
     public var call: Call?
 
-    public var itemsOnScreen: CGFloat
-
     /// The space between items
     public var innerItemSpace: CGFloat
 
@@ -44,7 +42,6 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         participants: [CallParticipant],
         frame: CGRect,
         call: Call?,
-        itemsOnScreen: CGFloat,
         innerItemSpace: CGFloat = 8,
         showAllInfo: Bool = false
     ) {
@@ -52,7 +49,6 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         self.participants = participants
         self.frame = frame
         self.call = call
-        self.itemsOnScreen = itemsOnScreen
         self.innerItemSpace = innerItemSpace
         self.showAllInfo = showAllInfo
 
@@ -63,10 +59,11 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         )
         self.barFrame = barFrame
 
+        let aspectRatioWidth = min(barFrame.width, barFrame.height * 16/9)
         self.itemFrame = .init(
             origin: .zero,
             size: .init(
-                width: (barFrame.width / CGFloat(itemsOnScreen)) - innerItemSpace / 2,
+                width: aspectRatioWidth - innerItemSpace / 2,
                 height: barFrame.height
             )
         )

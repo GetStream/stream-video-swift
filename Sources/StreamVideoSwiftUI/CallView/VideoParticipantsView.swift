@@ -44,6 +44,7 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     call: viewModel.call,
                     participants: Array(viewModel.participants.dropFirst()),
                     frame: availableFrame,
+                    orientation: orientation,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
@@ -63,6 +64,11 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     }
 }
 
+public enum VideoCallParticipantDecoration: Hashable, CaseIterable {
+    case options
+    case speaking
+}
+
 public struct VideoCallParticipantModifier: ViewModifier {
 
     var participant: CallParticipant
@@ -70,19 +76,22 @@ public struct VideoCallParticipantModifier: ViewModifier {
     var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
-    
+    var decorations: Set<VideoCallParticipantDecoration>
+
     public init(
         participant: CallParticipant,
         call: Call?,
         availableFrame: CGRect,
         ratio: CGFloat,
-        showAllInfo: Bool
+        showAllInfo: Bool,
+        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
     ) {
         self.participant = participant
         self.call = call
         self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
+        self.decorations = .init(decorations)
     }
     
     public func body(content: Content) -> some View {
@@ -104,20 +113,42 @@ public struct VideoCallParticipantModifier: ViewModifier {
                                 )
                             }
                         }
-                        .padding(.bottom, 2)
                     })
-                    .padding(.all, showAllInfo ? 16 : 8)
                 }
             )
-            .modifier(VideoCallParticipantOptionsModifier(participant: participant, call: call))
-            .modifier(VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount))
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantOptionsModifier(participant: participant, call: call),
+                decoration: .options,
+                availableDecorations: decorations
+            )
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),
+                decoration: .speaking,
+                availableDecorations: decorations
+            )
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .clipped()
     }
-    
+
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
+    }
+}
+
+extension View {
+
+    @ViewBuilder
+    public func applyDecorationModifierIfRequired<Modifier: ViewModifier>(
+        _ modifier: @autoclosure () -> Modifier,
+        decoration: VideoCallParticipantDecoration,
+        availableDecorations: Set<VideoCallParticipantDecoration>
+    ) -> some View {
+        if availableDecorations.contains(decoration) {
+            self.modifier(modifier())
+        } else {
+            self
+        }
     }
 }
 
@@ -154,13 +185,10 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
     public func body(content: Content) -> some View {
         content
             .overlay(
-                TopView {
-                    HStack {
-                        contentView
-                        Spacer()
-                    }
+                TopLeftView {
+                    contentView
                 }
-                .padding([.top], 8)
+                .padding(4)
             )
     }
 
@@ -168,10 +196,9 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
     private var optionsButtonView: some View {
         Image(systemName: "ellipsis")
             .foregroundColor(.white)
-            .padding(12)
+            .padding(8)
             .background(Color.black.opacity(0.6))
             .clipShape(Circle())
-            .clipped()
     }
 
     @ViewBuilder
@@ -364,8 +391,11 @@ public struct ParticipantInfoView: View {
         .padding(.all, 2)
         .padding(.horizontal, 4)
         .frame(height: 28)
-        .background(Color.black.opacity(0.6))
-        .cornerRadius(8)
+        .cornerRadius(
+            8,
+            corners: [.topRight],
+            backgroundColor: Color.black.opacity(0.6)
+        )
     }
 }
 

@@ -20,7 +20,8 @@ struct DemoLocalViewModifier: ViewModifier {
                     localParticipant: localParticipant,
                     call: call,
                     callSettings: callSettings,
-                    showAllInfo: true
+                    showAllInfo: true,
+                    decorations: [.speaking]
                 )
             )
             .modifier(ReactionsViewModifier(participant: localParticipant))

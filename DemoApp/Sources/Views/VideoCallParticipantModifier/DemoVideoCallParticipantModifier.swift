@@ -41,7 +41,9 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
                         call: call,
                         availableFrame: availableFrame,
                         ratio: ratio,
-                        showAllInfo: showAllInfo)
+                        showAllInfo: showAllInfo,
+                        decorations: [.speaking]
+                    )
                 )
                 .modifier(ReactionsViewModifier(participant: participant))
                 .participantStats(call: call, participant: participant)
@@ -58,7 +60,7 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
     private func withLongPress<Content: View>(
         @ViewBuilder _ content: () -> Content
     ) -> some View {
-        if call?.state.sessionId == participant.sessionId {
+        if call?.state.sessionId == participant.sessionId, participant.hasVideo {
             content().longPressToFocus(
                 availableFrame: availableFrame
             ) { try? call?.focus(at: $0) }

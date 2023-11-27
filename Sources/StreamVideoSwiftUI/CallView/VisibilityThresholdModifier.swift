@@ -20,11 +20,7 @@ import SwiftUI
 struct VisibilityThresholdModifier: ViewModifier {
     /// State to track if the content view is on screen.
     @State private var isOnScreen = false {
-        didSet {
-            guard isOnScreen != oldValue else { return }
-            // Notify the caller about the visibility state change.
-            changeHandler(isOnScreen)
-        }
+        didSet { changeHandler(isOnScreen) }
     }
 
     /// The bounds of the parent view or viewport.
