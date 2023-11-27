@@ -3,7 +3,7 @@ title: Broadcasting
 description: Broadcasting to HLS & RTMP
 ---
 
-The StreamVideo SDK has support for broadcasting calls. You can find a tutorial on how to implement broadcasting calls in our [livestreaming tutorial](../../tutorials/livestream).
+The StreamVideo SDK has support for broadcasting calls. You can find a tutorial on how to implement broadcasting calls in our [livestreaming tutorial](https://getstream.io/video/sdk/ios/tutorial/livestreaming/).
 
 ### Creating a call
 
@@ -19,7 +19,7 @@ Task {
 The code above will create and join the call. If you just want to create it (and not join it), you can use the method `create`:
 
 ```swift
-let call = try await call.create(members: members, startsAt: Date(), custom: [:], ring: false)    
+let call = try await call.create(members: members, startsAt: Date(), custom: [:], ring: false)
 ```
 
 ### Start HLS
