@@ -18,6 +18,8 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     private let identifier = UUID()
 
+    @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+
     public init(
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
@@ -36,9 +38,9 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     public var body: some View {
         VStack(spacing: innerItemSpace) {
-            if !viewModel.hideUIElements {
+            if !viewModel.hideUIElements, orientation.isPortrait || UIDevice.current.isIpad {
                 Text("\(screenSharing.participant.name) presenting")
-                    .foregroundColor(colors.text)
+                    .foregroundColor(.white)
                     .padding()
                     .accessibility(identifier: "participantPresentingLabel")
             }
@@ -59,10 +61,12 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                     participants: viewModel.participants,
                     frame: participantsStripFrame,
                     call: viewModel.call,
-                    itemsOnScreen: itemsVisibleOnScreen,
                     showAllInfo: true
                 )
             }
+        }
+        .onRotate { newOrientation in
+            orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
 
@@ -81,35 +85,29 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     }
 
     private var videoSize: CGSize {
+        let height = frame.width * 9 / 16
+
         if viewModel.hideUIElements {
             return .init(
                 width: frame.width,
-                height: frame.height - participantsStripFrame.height - innerItemSpace
+                height: height - participantsStripFrame.height - innerItemSpace
             )
         } else {
             return .init(
                 width: frame.width,
-                height: frame.height - innerItemSpace
+                height: height - innerItemSpace
             )
-        }
-    }
-
-    private var itemsVisibleOnScreen: CGFloat {
-        if UIDevice.current.isIpad {
-            return UIDevice.current.orientation == .portrait ? 3 : 4
-        } else {
-            return 2
         }
     }
 
     private var participantsStripFrame: CGRect {
-        /// Each video tile has an aspect ratio of 3:4 with width as base. Given that each tile has the
-        /// half width of the screen, the calculation below applies the aspect ratio to the expected width.
-        let aspectRatio: CGFloat = UIDevice.current.isIpad ? 9 / 16 : 3 / 4
-        let barHeight = (frame.width / itemsVisibleOnScreen) * aspectRatio
-        return .init(
-            origin: .init(x: frame.origin.x, y: frame.maxY - barHeight),
-            size: CGSize(width: frame.width, height: barHeight)
+        let barHeight = frame.height / 4
+        let barY = frame.maxY - barHeight
+        return CGRect(
+            x: frame.origin.x,
+            y: barY,
+            width: frame.width,
+            height: barHeight
         )
     }
 }

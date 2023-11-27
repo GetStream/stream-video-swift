@@ -54,7 +54,8 @@ struct ParticipantStatsView: View {
                                         Spacer()
                                         Text(entry.title)
                                             .font(fonts.caption1)
-                                            .lineLimit(1)
+                                            .lineLimit(3)
+                                            .minimumScaleFactor(0.7)
                                         Text(entry.value)
                                             .font(valueFont)
                                         Spacer()
@@ -98,17 +99,16 @@ struct ParticipantStatsView: View {
     @ViewBuilder
     private func tileView(@ViewBuilder _ content: () -> some View) -> some View {
         content()
-            .frame(height: floor(itemSize.height))
-            .frame(maxWidth: .infinity)
+            .frame(maxWidth: .infinity, minHeight: floor(itemSize.height), maxHeight: .infinity)
             .background(Color(colors.background1))
-            .cornerRadius(8)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
     }
 
     private var valueFont: Font {
         if #available(iOS 16.0, *) {
             return .system(.caption, weight: .bold)
         } else {
-            return fonts.caption1
+            return fonts.caption1.bold()
         }
     }
 

@@ -12,6 +12,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     var frame: CGRect
     var call: Call?
     var innerItemSpace: CGFloat
+    var orientation: UIInterfaceOrientation
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
@@ -20,6 +21,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         call: Call?,
         participants: [CallParticipant],
         frame: CGRect,
+        orientation: UIInterfaceOrientation,
         innerItemSpace: CGFloat = 8,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
@@ -28,6 +30,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.participants = participants
         self.frame = frame
         self.call = call
+        self.orientation = orientation
         self.innerItemSpace = innerItemSpace
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }
@@ -49,7 +52,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
                 participants: participants,
                 frame: participantsStripFrame,
                 call: call,
-                itemsOnScreen: itemsVisibleOnScreen,
                 showAllInfo: true
             )
         }
@@ -63,22 +65,14 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         )
     }
 
-    private var itemsVisibleOnScreen: CGFloat {
-        if UIDevice.current.isIpad {
-            return UIDevice.current.orientation == .portrait ? 3 : 4
-        } else {
-            return 2
-        }
-    }
-
     private var participantsStripFrame: CGRect {
-        /// Each video tile has an aspect ratio of 3:4 with width as base. Given that each tile has the
-        /// half width of the screen, the calculation below applies the aspect ratio to the expected width.
-        let aspectRatio: CGFloat = UIDevice.current.isIpad ? 9 / 16 : 3 / 4
-        let barHeight = (frame.width / itemsVisibleOnScreen) * aspectRatio
-        return .init(
-            origin: .init(x: frame.origin.x, y: frame.maxY - barHeight),
-            size: CGSize(width: frame.width, height: barHeight)
+        let barHeight = frame.height / 4
+        let barY = frame.maxY - barHeight
+        return CGRect(
+            x: frame.origin.x,
+            y: barY,
+            width: frame.width,
+            height: barHeight
         )
     }
 
