@@ -49,9 +49,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
                             )
                         }
                     }
-                    .padding(.bottom, 2)
                 }
-                .padding(.all, showAllInfo ? 16 : 8)
                 .onAppear { microphoneChecker.startListening() }
                 .onDisappear { microphoneChecker.stopListening() }
             )

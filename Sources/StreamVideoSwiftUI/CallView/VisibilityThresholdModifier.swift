@@ -93,17 +93,23 @@ extension View {
     ///   state of the view whenever it changes.
     ///
     /// - Returns: A modified view that observes its visibility status within the specified bounds.
+    @ViewBuilder
     func visibilityObservation(
         in bounds: CGRect,
+        hasVideo: Bool,
         threshold: CGFloat = 0.3,
         changeHandler: @escaping (Bool) -> Void
     ) -> some View {
-        modifier(
-            VisibilityThresholdModifier(
-                in: bounds,
-                threshold: threshold,
-                changeHandler: changeHandler
+        if hasVideo {
+            modifier(
+                VisibilityThresholdModifier(
+                    in: bounds,
+                    threshold: threshold,
+                    changeHandler: changeHandler
+                )
             )
-        )
+        } else {
+            self
+        }
     }
 }

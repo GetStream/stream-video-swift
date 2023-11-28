@@ -59,7 +59,21 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
             }
         }
         .onRotate { newOrientation in
-            orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+            switch newOrientation {
+            case .unknown:
+                orientation = .unknown
+            case .portrait:
+                orientation = .portrait
+            case .portraitUpsideDown:
+                orientation = .portraitUpsideDown
+            case .landscapeLeft:
+                orientation = .landscapeLeft
+            case .landscapeRight:
+                orientation = .landscapeRight
+            default:
+                orientation = .unknown
+                break
+            }
         }
     }
 }
