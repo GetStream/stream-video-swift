@@ -94,7 +94,7 @@ struct ParticipantsGridView<Factory: ViewFactory>: View {
                     showAllInfo: true
                 )
             )
-            .visibilityObservation(in: bounds) {
+            .visibilityObservation(in: bounds, hasVideo: participant.hasVideo) {
                 log.debug("Participant \(participant.name) is \($0 ? "visible" : "not visible.")")
                 participantVisibilityChanged(participant, $0)
             }

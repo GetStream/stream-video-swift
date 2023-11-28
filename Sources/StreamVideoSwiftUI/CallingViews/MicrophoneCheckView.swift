@@ -53,8 +53,14 @@ public struct MicrophoneCheckView: View {
                     .foregroundColor(colors.accentRed)
             }
         }
-        .padding(.all, 8)
-        .background(Color.black.opacity(0.6).cornerRadius(8))
+        .padding(.all, 2)
+        .padding(.horizontal, 4)
+        .frame(height: 28)
+        .cornerRadius(
+            8,
+            corners: [.topRight],
+            backgroundColor: Color.black.opacity(0.6)
+        )
     }
 }
 
