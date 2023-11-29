@@ -37,24 +37,30 @@ enum GoogleHelper {
                     [directoryScope],
                     presenting: rootViewController
                 ) { result, error in
-                    guard result != nil else {
-                        struct NoGoogleUserFound: Error {}
-                        continuation.resume(throwing: NoGoogleUserFound())
+                    // According to docs error code - 8 means that the user has
+                    // already added the scopes, so it's safe to continue with
+                    // sign in.
+                    // https://developers.google.com/identity/sign-in/ios/reference/Enums/GIDSignInErrorCode#declaration_5
+                    if let error = error as? NSError, error.code != -8 {
+                        continuation.resume(throwing: error)
                         return
-                    }
-                    Task {
-                        do {
-                            let credentials = try await userCredentials(for: userProfile)
-                            continuation.resume(returning: credentials)
-                        } catch {
-                            continuation.resume(throwing: error)
+                    } else {
+                        Task {
+                            do {
+                                let credentials = try await userCredentials(for: userProfile)
+                                continuation.resume(returning: credentials)
+                            } catch {
+                                continuation.resume(throwing: error)
+                            }
                         }
                     }
                 }
             }
         }
     }
-    
+
+    private static func signIn(addScopes: Bool) {}
+
     static func loadUsers() async throws -> [StreamEmployee] {
         guard let currentUser = GIDSignIn.sharedInstance.currentUser else {
             throw ClientError.InvalidToken()

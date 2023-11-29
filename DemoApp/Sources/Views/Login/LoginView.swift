@@ -15,7 +15,8 @@ struct LoginView: View {
     @State var addUserShown = false
     @State private var appState: AppState = .shared
     @State private var showJoinCallPopup = false
-    
+    @State private var error: Error?
+
     init(completion: @escaping (UserCredentials) -> ()) {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
         self.completion = completion
@@ -56,9 +57,15 @@ struct LoginView: View {
                     
                     if isGoogleSignInAvailable {
                         LoginItemView {
-                            Task {
-                                let credentials = try await GoogleHelper.signIn()
-                                completion(credentials)
+                            viewModel.ssoLogin { result in
+                                switch result {
+                                case .success(let credentials):
+                                    completion(credentials)
+                                case .failure(let failure):
+                                    log.error(failure)
+                                    error = failure
+                                }
+                                AppState.shared.loading = false
                             }
                         } title: {
                             Text("Login with Stream account")
@@ -98,6 +105,13 @@ struct LoginView: View {
                 DebugMenu()
             }
         }
+        .alert(isPresented: .constant(error != nil), content: {
+            Alert(
+                title: Text("Error"),
+                message: Text(error!.localizedDescription),
+                dismissButton: .cancel { error = nil }
+            )
+        })
     }
 
     private var isGoogleSignInAvailable: Bool {
