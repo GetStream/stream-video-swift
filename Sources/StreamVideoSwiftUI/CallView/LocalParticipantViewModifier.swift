@@ -82,18 +82,21 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
     private var showAllInfo: Bool
     @BackportStateObject private var microphoneChecker: MicrophoneChecker
     @Binding private var callSettings: CallSettings
+    private var decorations: Set<VideoCallParticipantDecoration>
 
     init(
         localParticipant: CallParticipant,
         call: Call?,
         callSettings: Binding<CallSettings>,
-        showAllInfo: Bool = false
+        showAllInfo: Bool = false,
+        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
     ) {
         self.localParticipant = localParticipant
         self.call = call
         _microphoneChecker = .init(wrappedValue: .init())
         self._callSettings = callSettings
         self.showAllInfo = showAllInfo
+        self.decorations = .init(decorations)
     }
 
     public func body(content: Content) -> some View {
@@ -120,8 +123,16 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                 .onAppear { microphoneChecker.startListening() }
                 .onDisappear { microphoneChecker.stopListening() }
             )
-            .modifier(VideoCallParticipantOptionsModifier(participant: localParticipant, call: call))
-            .modifier(VideoCallParticipantSpeakingModifier(participant: localParticipant, participantCount: participantCount))
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantOptionsModifier(participant: localParticipant, call: call),
+                decoration: .options,
+                availableDecorations: decorations
+            )
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantSpeakingModifier(participant: localParticipant, participantCount: participantCount),
+                decoration: .speaking,
+                availableDecorations: decorations
+            )
             .clipShape(RoundedRectangle(cornerRadius: 16))
             .clipped()
     }
