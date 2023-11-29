@@ -49,7 +49,8 @@ struct AppControlsWithChat: View {
         .cornerRadius(
             cornerRadius,
             corners: [.topLeft, .topRight],
-            backgroundColor: colors.callControlsBackground
+            backgroundColor: colors.callControlsBackground,
+            extendToSafeArea: true
         )
         .onReceive(viewModel.$call) { reactionsHelper.call = $0 }
     }

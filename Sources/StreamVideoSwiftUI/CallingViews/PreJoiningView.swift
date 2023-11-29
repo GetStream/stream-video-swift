@@ -161,8 +161,6 @@ struct CameraCheckView: View {
                 }
             }
             .frame(width: proxy.size.width, height: proxy.size.height)
-            .clipped()
-            .clipShape(RoundedRectangle(cornerRadius: 16))
             .overlay(
                 VStack {
                     Spacer()
@@ -175,9 +173,10 @@ struct CameraCheckView: View {
                         .accessibility(identifier: "microphoneCheckView")
                         Spacer()
                     }
-                    .padding()
                 }
             )
+            .clipped()
+            .clipShape(RoundedRectangle(cornerRadius: 16))
         }
     }
 }
