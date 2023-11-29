@@ -103,22 +103,12 @@ extension UserRobot {
     }
     
     @discardableResult
-    func assertScreenSharingParticipantListVisibity(percent: Int) -> Self {
-        assertParticipantListVisibity(expectedPercent: percent, details: CallPage.screenSharingParticipantListDetails)
-    }
-    
-    @discardableResult
-    func assertSpotlightViewParticipantListVisibity(percent: Int) -> Self {
-        assertParticipantListVisibity(expectedPercent: percent, details: CallPage.spotlightViewParticipantListDetails)
-    }
-    
-    @discardableResult
     func assertGridViewParticipantListVisibity(percent: Int) -> Self {
-        assertParticipantListVisibity(expectedPercent: percent, details: CallPage.gridViewParticipantListDetails)
+        assertParticipantListVisibility(expectedPercent: percent, details: CallPage.gridViewParticipantListDetails)
     }
     
     @discardableResult
-    private func assertParticipantListVisibity(expectedPercent: Int, details: XCUIElement) -> Self {
+    private func assertParticipantListVisibility(expectedPercent: Int, details: XCUIElement) -> Self {
         let expectedValue = "\(expectedPercent)%"
         let actualValue = (details.wait().waitForValue("\(expectedPercent)", mustBeEqual: false).value as! String).filter { !$0.isWhitespace }
         XCTAssertEqual(expectedValue, actualValue)

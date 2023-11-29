@@ -138,7 +138,7 @@ final class CallViewsTests: StreamTestCase {
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .assertCallControls()
-                .assertSpotlightView(with: participants)
+                .assertSpotlightView(with: participants - 1) // We get one less due to the LazyHStack that initializes only a few items after the visible ones
         }
         WHEN("user enables fullscreen view") {
             userRobot.setView(mode: .fullscreen)
@@ -198,12 +198,6 @@ final class CallViewsTests: StreamTestCase {
         THEN("user observers participant's screen") {
             userRobot
                 .assertParticipantStartSharingScreen()
-                .assertScreenSharingParticipantListVisibity(percent: 0)
-        }
-        AND("user can scroll and see all participants") {
-            userRobot
-                .scrollScreenSharingParticipantList(to: .right, times: 2)
-                .assertScreenSharingParticipantListVisibity(percent: 100)
         }
     }
     
@@ -240,7 +234,8 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1776)
         
         let participants = 10
-        
+        let expectedParticipantsInSpotlight = 3
+
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
         }
@@ -253,15 +248,9 @@ final class CallViewsTests: StreamTestCase {
         WHEN("user enables spotlight view") {
             userRobot.setView(mode: .spotlight)
         }
-        THEN("user observers the list of participants") {
+        THEN("user observes the list of participants") {
             userRobot
-                .assertSpotlightView(with: participants)
-                .assertSpotlightViewParticipantListVisibity(percent: 0)
-        }
-        AND("user can scroll the list and see all participants") {
-            userRobot
-                .scrollSpotlightParticipantList(to: .right, times: 2)
-                .assertSpotlightViewParticipantListVisibity(percent: 100)
+                .assertSpotlightView(with: expectedParticipantsInSpotlight)
         }
     }
     

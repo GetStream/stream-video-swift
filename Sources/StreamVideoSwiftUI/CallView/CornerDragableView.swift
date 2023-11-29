@@ -85,13 +85,35 @@ public struct CornerDraggableView<Content: View>: View {
             .bottomTrailing,
             .bottomLeading
         ]
+
+        var closestPlacement: CallViewPlacement?
+        var minDistance: CGFloat?
+
         for placement in availablePlacements {
             let frame = placement.matchingFrame(in: rect)
             if frame.contains(location) {
                 return placement
             }
+
+            // Calculate the center of the frame
+            let centerX = frame.origin.x + frame.size.width / 2
+            let centerY = frame.origin.y + frame.size.height / 2
+            let centerPoint = CGPoint(x: centerX, y: centerY)
+
+            // Calculate the Euclidean distance to the location
+            let distance = sqrt(pow(centerPoint.x - location.x, 2) + pow(centerPoint.y - location.y, 2))
+
+            // Check if this is the closest placement so far
+            if minDistance == nil {
+                minDistance = distance
+                closestPlacement = placement
+            } else if let _minDistance = minDistance, distance < _minDistance {
+                minDistance = distance
+                closestPlacement = placement
+            }
         }
-        return .topTrailing
+
+        return closestPlacement ?? .topTrailing // default to .topTrailing if for some reason no placement was closer
     }
 }
 

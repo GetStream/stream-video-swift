@@ -45,16 +45,12 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                     .accessibility(identifier: "participantPresentingLabel")
             }
 
-            Group {
-                if isZoomEnabled, !viewModel.hideUIElements {
-                    ZoomableScrollView { screensharingView }
-                } else {
-                    screensharingView
-                }
+            if isZoomEnabled, !viewModel.hideUIElements {
+                ZoomableScrollView { screensharingView }
+            } else {
+                screensharingView
             }
-            .accessibility(identifier: "screenSharingView")
-
-
+            
             if !viewModel.hideUIElements {
                 HorizontalParticipantsListView(
                     viewFactory: viewFactory,
@@ -82,6 +78,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             }
         }
         .clipShape(RoundedRectangle(cornerRadius: 16))
+        .accessibility(identifier: "screenSharingView")
     }
 
     private var videoSize: CGSize {
