@@ -18,6 +18,18 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
+    func ssoLogin(_ completion: @escaping (Result<UserCredentials, Error>) -> ()) {
+        AppState.shared.loading = true
+        Task {
+            do {
+                let credentials = try await GoogleHelper.signIn()
+                completion(.success(credentials))
+            } catch {
+                completion(.failure(error))
+            }
+        }
+    }
+
     func joinCallAnonymously(callId: String, completion: @escaping (UserCredentials) -> ()) {
         AppState.shared.loading = true
         Task {
