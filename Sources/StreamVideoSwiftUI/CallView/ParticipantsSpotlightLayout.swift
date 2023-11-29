@@ -12,7 +12,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     var frame: CGRect
     var call: Call?
     var innerItemSpace: CGFloat
-    var orientation: UIInterfaceOrientation
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     public init(
@@ -21,7 +20,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         call: Call?,
         participants: [CallParticipant],
         frame: CGRect,
-        orientation: UIInterfaceOrientation,
         innerItemSpace: CGFloat = 8,
         onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
     ) {
@@ -30,7 +28,6 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         self.participants = participants
         self.frame = frame
         self.call = call
-        self.orientation = orientation
         self.innerItemSpace = innerItemSpace
         self.onChangeTrackVisibility = onChangeTrackVisibility
     }

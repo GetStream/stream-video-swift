@@ -44,7 +44,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     call: viewModel.call,
                     participants: Array(viewModel.participants.dropFirst()),
                     frame: availableFrame,
-                    orientation: orientation,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
             } else {
