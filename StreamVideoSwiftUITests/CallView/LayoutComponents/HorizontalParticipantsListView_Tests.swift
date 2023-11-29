@@ -54,7 +54,6 @@ final class HorizontalParticipantsListView_Tests: StreamVideoUITestCase {
                 participants: participants,
                 frame: .init(origin: .zero, size: .init(width: screenWidth, height: thumbnailSize)),
                 call: call, 
-                itemsOnScreen: 2,
                 showAllInfo: showAllInfo
             ).frame(width: screenWidth),
             variants: snapshotVariants,

@@ -119,8 +119,9 @@ public struct VideoCallParticipantModifier: ViewModifier {
                                 isPinned: participant.isPinned
                             )
                             
+                            Spacer()
+
                             if showAllInfo {
-                                Spacer()
                                 ConnectionQualityIndicator(
                                     connectionQuality: participant.connectionQuality
                                 )
