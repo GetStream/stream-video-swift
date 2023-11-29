@@ -34,15 +34,8 @@ let streamWrapper = StreamWrapper(
     apiKey: "YOUR_API_KEY",
     userCredentials: user,
     tokenProvider: { result in
-        Task {
-            do {
-                let token = try await TokenService.shared.fetchToken(for: user.id)
-                userRepository.save(token: token.rawValue)
-                result(.success(token.rawValue))
-            } catch {
-                result(.failure(error))
-            }
-        }
+        let token = \\ Fetch the token from your backend
+        result(.success(token))
     }
 )
 ```
