@@ -12,16 +12,14 @@ You can change this default UI by implementing the `makeVideoCallParticipantModi
 ```swift
 func makeVideoCallParticipantModifier(
     participant: CallParticipant,
-    participantCount: Int,
-    pinnedParticipant: Binding<CallParticipant?>,
+    call: Call?,
     availableFrame: CGRect,
     ratio: CGFloat,
     showAllInfo: Bool
 ) -> some ViewModifier {
     CustomParticipantModifier(
         participant: participant,
-        pinnedParticipant: pinnedParticipant,
-        participantCount: participantCount,
+        call: call,
         availableFrame: availableFrame,
         ratio: ratio,
         showAllInfo: showAllInfo
@@ -35,21 +33,18 @@ The implementation of the `CustomParticipantModifier` looks like this:
 struct CustomParticipantModifier: ViewModifier {
             
     var participant: CallParticipant
-    @Binding var pinnedParticipant: CallParticipant?
-    var participantCount: Int
+    var call: Call?
     var availableFrame: CGRect
     var ratio: CGFloat
     
     public init(
         participant: CallParticipant,
-        pinnedParticipant: Binding<CallParticipant?>,
-        participantCount: Int,
+        call: Call?,
         availableFrame: CGRect,
         ratio: CGFloat
     ) {
         self.participant = participant
-        _pinnedParticipant = pinnedParticipant
-        self.participantCount = participantCount
+        self.call = call
         self.availableFrame = availableFrame
         self.ratio = ratio
     }
@@ -73,12 +68,8 @@ struct CustomParticipantModifier: ViewModifier {
                         .padding(.bottom, 2)
                     }
                     .padding()
-                    
-                    if participant.isSpeaking && participantCount > 1 {
-                        Rectangle()
-                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
-                    }
                 }
+                .modifier(VideoCallParticipantSpeakingModifier(participant: participant, call: call))
             )
     }
 }

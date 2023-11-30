@@ -17,36 +17,38 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     private var participant: CallParticipant
     private var idSuffix: String
     private var call: Call?
-    
+    private var availableFrame: CGRect
+
     public init(
         viewFactory: Factory,
         participant: CallParticipant,
         idSuffix: String = "local",
         callSettings: CallSettings,
-        call: Call?
+        call: Call?,
+        availableFrame: CGRect
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
         self.idSuffix = idSuffix
         self.callSettings = callSettings
         self.call = call
+        self.availableFrame = availableFrame
     }
             
     public var body: some View {
-        GeometryReader { reader in
-            viewFactory.makeVideoParticipantView(
-                participant: participant,
-                id: "\(streamVideo.user.id)-\(idSuffix)",
-                availableFrame: reader.frame(in: .global),
-                contentMode: .scaleAspectFill,
-                customData: ["videoOn": .bool(callSettings.videoOn)],
-                call: call
-            )
-            .rotation3DEffect(
-                .degrees(shouldRotate ? 180 : 0),
-                axis: (x: 0, y: 1, z: 0)
-            )
-        }
+        viewFactory.makeVideoParticipantView(
+            participant: participant,
+            id: "\(streamVideo.user.id)-\(idSuffix)",
+            availableFrame: availableFrame,
+            contentMode: .scaleAspectFill,
+            customData: ["videoOn": .bool(callSettings.videoOn)],
+            call: call
+        )
+        .adjustVideoFrame(to: availableFrame.width, ratio: availableFrame.width / availableFrame.height)
+        .rotation3DEffect(
+            .degrees(shouldRotate ? 180 : 0),
+            axis: (x: 0, y: 1, z: 0)
+        )
     }
     
     private var shouldRotate: Bool {
@@ -60,6 +62,7 @@ public struct VideoRendererView: UIViewRepresentable {
     public typealias UIViewType = VideoRenderer
     
     @Injected(\.utils) var utils
+    @Injected(\.colors) var colors
 
     var id: String
     var size: CGSize
@@ -81,7 +84,7 @@ public struct VideoRendererView: UIViewRepresentable {
     public func makeUIView(context: Context) -> VideoRenderer {
         let view = utils.videoRendererFactory.view(for: id, size: size)
         view.videoContentMode = contentMode
-        view.backgroundColor = UIColor.black
+        view.backgroundColor = colors.participantBackground
         handleRendering(view)
         return view
     }
@@ -92,7 +95,7 @@ public struct VideoRendererView: UIViewRepresentable {
 }
 
 public class VideoRenderer: RTCMTLVideoView {
-    
+
     @Injected(\.thermalStateObserver) private var thermalStateObserver
 
     let queue = DispatchQueue(label: "video-track")
@@ -101,6 +104,7 @@ public class VideoRenderer: RTCMTLVideoView {
     
     var feedFrames: ((CMSampleBuffer) -> ())?
     
+    private let identifier = UUID()
     private var skipNextFrameRendering = true
     private var cancellable: AnyCancellable?
 
@@ -113,7 +117,6 @@ public class VideoRenderer: RTCMTLVideoView {
     private lazy var metalView: MTKView? = { subviews.compactMap { $0 as? MTKView }.first }()
     var trackId: String? { self.track?.trackId }
     private var viewSize: CGSize?
-    private var scale: CGFloat { thermalStateObserver.scale }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
@@ -138,28 +141,25 @@ public class VideoRenderer: RTCMTLVideoView {
 
     deinit {
         cancellable?.cancel()
-        log.debug("Deinit of video view")
+        log.debug("\(type(of: self)):\(identifier) deallocating", subsystems: .webRTC)
         track?.remove(self)
     }
-    
+
+    public override var hash: Int { identifier.hashValue }
+
     public func add(track: RTCVideoTrack) {
         queue.sync {
-            let view = subviews.compactMap { $0 as? MTKView }.first
-            view?.preferredFramesPerSecond = preferredFramesPerSecond
             self.track?.remove(self)
             self.track = nil
-            log.debug("Adding track to the view")
             self.track = track
             track.add(self)
+            log.info("\(type(of: self)):\(identifier) was added on track:\(track.trackId)", subsystems: .webRTC)
         }
     }
     
     public override func layoutSubviews() {
         super.layoutSubviews()
-        self.viewSize = CGSize(
-            width: self.bounds.size.width * scale,
-            height: self.bounds.size.height * scale
-        )
+        self.viewSize = bounds.size
     }
     
     public override func renderFrame(_ frame: RTCVideoFrame?) {
@@ -187,7 +187,7 @@ public class VideoRenderer: RTCMTLVideoView {
             } else if let i420buffer = frame.buffer as? RTCI420Buffer {
                 // We reduce the track resolution, since it's displayed in a smaller place.
                 // Values are picked depending on how much the PiP view takes in an average iPhone or iPad.
-                let reductionFactor = UIDevice.current.userInterfaceIdiom == .pad ? 4 : 6
+                let reductionFactor = UIDevice.current.isIpad ? 4 : 6
                 guard let buffer = convertI420BufferToPixelBuffer(i420buffer, reductionFactor: reductionFactor),
                         let sampleBuffer = CMSampleBuffer.from(buffer) else {
                     return
@@ -206,16 +206,16 @@ extension VideoRenderer {
         onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> ()
     ) {
         if let track = participant.track {
-            log.debug("adding track to a view \(self)")
+            log.info("Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier))", subsystems: .webRTC)
             self.add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
                 guard let self else { return }
                 let prev = participant.trackSize
                 if let viewSize, prev != viewSize {
+                    log.debug("Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)", subsystems: .webRTC)
                     onTrackSizeUpdate(viewSize, participant)
                 }
             }
         }
     }
-    
 }

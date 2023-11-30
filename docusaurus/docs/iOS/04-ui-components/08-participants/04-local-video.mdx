@@ -13,32 +13,32 @@ LocalVideoView(
     viewFactory: viewFactory,
     participant: localParticipant,
     callSettings: viewModel.callSettings,
-) { view in
-    if let track = viewModel.localParticipant?.track {
-        view.add(track: track)
-    }
-}
+    call: viewModel.call,
+    availableFrame: availableFrame
+)
 ```
 
 The parameters for this view are as follows:
 - `viewFactory` - the view factory used for creating the views
 - `participant` - the local participant. Could be accessed from the `CallViewModel`
-- `callSettings` - the local participant's call settings 
-- `onLocalVideoUpdate` - called when the view is updated. Should be used to attach a track.
+- `callSettings` - the local participant's call settings
+- `call` - the current call
+- `availableFrame` - the available frame for the view.
 
-If you want to use the floating version of the component, you need to create a `CornerDragableView` and provide the `LocalVideoView` as a `content`:
+
+If you want to use the floating version of the component, you need to create a `CornerDraggableView` and provide the `LocalVideoView` as a `content`:
 
 ```swift
-CornerDragableView(
-    content: LocalVideoView(
-                viewFactory: viewFactory,
-                participant: localParticipant,
-                callSettings: viewModel.callSettings,
-            ) { view in
-                if let track = viewModel.localParticipant?.track {
-                    view.add(track: track)
-                }
-            },
+CornerDraggableView(
+    content: { availableFrame in
+        LocalVideoView(
+            viewFactory: viewFactory,
+            participant: localParticipant,
+            callSettings: viewModel.callSettings,
+            call: viewModel.call,
+            availableFrame: availableFrame
+        )
+    },
     proxy: reader
 ) {
     withAnimation {

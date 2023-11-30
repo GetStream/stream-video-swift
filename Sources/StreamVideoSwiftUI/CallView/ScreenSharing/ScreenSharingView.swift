@@ -7,63 +7,63 @@ import SwiftUI
 
 public struct ScreenSharingView<Factory: ViewFactory>: View {
 
+    @Injected(\.colors) var colors
+
     @ObservedObject var viewModel: CallViewModel
     var screenSharing: ScreenSharingSession
-    var availableFrame: CGRect
+    var frame: CGRect
+    var innerItemSpace: CGFloat
     var viewFactory: Factory
+    var isZoomEnabled: Bool
 
-    private let thumbnailSize: CGFloat = 120
-    private var thumbnailBounds: CGRect {
-        CGRect(x: 0, y: 0, width: thumbnailSize, height: thumbnailSize)
-    }
+    private let identifier = UUID()
+
+    @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
 
     public init(
         viewModel: CallViewModel,
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
-        viewFactory: Factory = DefaultViewFactory.shared
+        innerItemSpace: CGFloat = 8,
+        viewFactory: Factory = DefaultViewFactory.shared,
+        isZoomEnabled: Bool = true
     ) {
         self.viewModel = viewModel
         self.screenSharing = screenSharing
-        self.availableFrame = availableFrame
+        self.frame = availableFrame
+        self.innerItemSpace = innerItemSpace
         self.viewFactory = viewFactory
+        self.isZoomEnabled = isZoomEnabled
     }
 
     public var body: some View {
-        VStack(alignment: .leading) {
-            if !viewModel.hideUIElements {
+        VStack(spacing: innerItemSpace) {
+            if !viewModel.hideUIElements, orientation.isPortrait || UIDevice.current.isIpad {
                 Text("\(screenSharing.participant.name) presenting")
                     .foregroundColor(.white)
                     .padding()
-                    .padding(.top, 40)
                     .accessibility(identifier: "participantPresentingLabel")
             }
 
-            if viewModel.hideUIElements {
-                screensharingView.accessibility(identifier: "screenSharingView")
+            if isZoomEnabled, !viewModel.hideUIElements {
+                ZoomableScrollView { screensharingView }
             } else {
-                ZoomableScrollView {
-                    screensharingView.accessibility(identifier: "screenSharingView")
-                }
+                screensharingView
             }
-
+            
             if !viewModel.hideUIElements {
                 HorizontalParticipantsListView(
                     viewFactory: viewFactory,
                     participants: viewModel.participants,
-                    frame: .init(
-                        origin: .init(x: availableFrame.origin.x, y: availableFrame.maxY - thumbnailSize),
-                        size: CGSize(width: availableFrame.size.width, height: thumbnailSize)
-                    ),
-                    call: viewModel.call
+                    frame: participantsStripFrame,
+                    call: viewModel.call,
+                    showAllInfo: true
                 )
             }
         }
-        .frame(
-            width: viewModel.hideUIElements ? availableFrame.size.width : nil,
-            height: viewModel.hideUIElements ? availableFrame.size.height : nil
-        )
-        .background(Color.black)
+        .onRotate { newOrientation in
+            orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+        }
     }
 
     private var screensharingView: some View {
@@ -73,22 +73,39 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             contentMode: .scaleAspectFit
         ) { view in
             if let track = screenSharing.participant.screenshareTrack {
-                log.debug("adding screensharing track to a view \(view)")
+                log.info("Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)):\(identifier))", subsystems: .webRTC)
                 view.add(track: track)
             }
         }
-        .frame(
-            width: viewModel.hideUIElements ? videoSize.width : nil,
-            height: viewModel.hideUIElements ? videoSize.height : nil
-        )
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+        .accessibility(identifier: "screenSharingView")
     }
 
     private var videoSize: CGSize {
+        let height = frame.width * 9 / 16
+
         if viewModel.hideUIElements {
-            return .init(width: availableFrame.size.height, height: availableFrame.size.width)
+            return .init(
+                width: frame.width,
+                height: height - participantsStripFrame.height - innerItemSpace
+            )
         } else {
-            return availableFrame.size
+            return .init(
+                width: frame.width,
+                height: height - innerItemSpace
+            )
         }
+    }
+
+    private var participantsStripFrame: CGRect {
+        let barHeight = frame.height / 4
+        let barY = frame.maxY - barHeight
+        return CGRect(
+            x: frame.origin.x,
+            y: barY,
+            width: frame.width,
+            height: barHeight
+        )
     }
 }
 

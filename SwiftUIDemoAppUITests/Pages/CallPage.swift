@@ -13,7 +13,7 @@ enum CallPage {
     
     static var recordingLabel: XCUIElement { app.staticTexts["recordingLabel"] }
     static var participantMenu: XCUIElement { app.buttons["participantMenu"] }
-    static var cornerDragableView: XCUIElement { app.otherElements["cornerDragableView"].otherElements.firstMatch }
+    static var cornerDraggableView: XCUIElement { app.otherElements["cornerDraggableView"].otherElements.firstMatch }
     static var minimizedCallView: XCUIElement { participantView.firstMatch }
     static var viewMenu: XCUIElement { app.buttons["viewMenu"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
@@ -72,16 +72,10 @@ enum CallPage {
     static var screenSharingParticipantList: XCUIElement {
         spotlightViewParticipantList
     }
-    static var screenSharingParticipantListDetails: XCUIElement {
-        spotlightViewParticipantListDetails
-    }
     static var gridViewParticipantList: XCUIElement { app.scrollViews["gridScrollView"] }
     static var gridViewParticipantListDetails: XCUIElement {
         gridViewParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Vertical scroll bar'")).firstMatch
     }
     static var spotlightViewParticipantList: XCUIElement { app.scrollViews["horizontalParticipantsList"] }
-    static var spotlightViewParticipantListDetails: XCUIElement {
-        spotlightViewParticipantList.otherElements.matching(NSPredicate(format: "label CONTAINS 'Horizontal scroll bar'")).firstMatch
-    }
     static var reconnectingMessage: XCUIElement { app.staticTexts["reconnectingMessage"] }
 }

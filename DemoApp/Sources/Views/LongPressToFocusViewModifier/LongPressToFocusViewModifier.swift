@@ -21,6 +21,11 @@ struct LongPressToFocusViewModifier: ViewModifier {
     /// - Returns: The modified content with the long press to focus gesture added.
     func body(content: Content) -> some View {
         content
+            // https://developer.apple.com/forums/thread/127277
+            // When scrolling the participants list, the swipe gesture is being
+            // overridden from the LonPress gesture below. The TapGesture is added
+            // here to give priority on scrolling over LongPress.
+            .onTapGesture { }
             .gesture(
                 // A long press gesture requiring a minimum of 0.5 seconds to be recognized.
                 LongPressGesture(minimumDuration: 0.5)

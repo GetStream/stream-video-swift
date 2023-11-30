@@ -18,6 +18,8 @@ struct CornerClipper: ViewModifier {
     /// The background color that should extend below/above safeArea.
     var backgroundColor: Color
 
+    var extendToSafeArea = false
+
     /// Modifies the provided content by clipping it to the shape with rounded corners.
     /// The structure in the Z axis will be:
     /// 1. backgroundColor with roundedCorners.
@@ -29,11 +31,14 @@ struct CornerClipper: ViewModifier {
             backgroundColor
                 .clipShape(RoundedCorners(radius: radius, corners: corners))
 
-            backgroundColorView
+            if extendToSafeArea {
+                backgroundColorView
+            }
 
             content
                 .layoutPriority(1)
         }
+        .edgesIgnoringSafeArea(.all)
     }
 
     private var backgroundColorView: some View {
@@ -55,7 +60,7 @@ struct CornerClipper: ViewModifier {
 }
 
 /// `RoundedCorners` is a Shape used to create a rounded cornered rectangle
-/// on the specified sides using a given radius.
+/// on the specified sides using a given radius.
 struct RoundedCorners: Shape {
 
     /// The radius of the rounded corners.
@@ -87,13 +92,15 @@ extension View {
     public func cornerRadius(
         _ radius: CGFloat,
         corners: UIRectCorner,
-        backgroundColor: Color = .clear
+        backgroundColor: Color = .clear,
+        extendToSafeArea: Bool = false
     ) -> some View {
         modifier(
             CornerClipper(
                 radius: radius,
                 corners: corners,
-                backgroundColor: backgroundColor
+                backgroundColor: backgroundColor,
+                extendToSafeArea: extendToSafeArea
             )
         )
     }

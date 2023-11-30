@@ -50,6 +50,13 @@ final class ParticipantStatsViewModel: ObservableObject {
               let participantStats = report.participantsStats.report[trackId] else {
             return
         }
+
+        let isLocalUser = participant.sessionId == call.state.sessionId
+        let datacenter = StatsEntry(
+            title: "Region",
+            value: report.datacenter
+        )
+
         let resolution = StatsEntry(
             title: "Resolution",
             value: "\(participantStats.frameWidth) x \(participantStats.frameHeight)"
@@ -75,8 +82,13 @@ final class ParticipantStatsViewModel: ObservableObject {
             title: "Jitter",
             value: "\(participantStats.jitter)"
         )
-        var entries = [resolution, codec, fps, bytes, jitter]
-        
+        var entries = isLocalUser ? [datacenter] : []
+        entries.append(contentsOf: [
+            resolution,
+            codec, fps,
+            bytes, jitter
+        ])
+
         if !participantStats.rid.isEmpty {
             let rid = StatsEntry(title: "rid", value: participantStats.rid)
             entries.append(rid)

@@ -97,7 +97,9 @@ public struct CallContainer<Factory: ViewFactory>: View {
 }
 
 public struct WaitingLocalUserView<Factory: ViewFactory>: View {
-            
+
+    @Injected(\.appearance) var appearance
+
     @ObservedObject var viewModel: CallViewModel
     var viewFactory: Factory
     
@@ -111,18 +113,29 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
             DefaultBackgroundGradient()
                 .edgesIgnoringSafeArea(.all)
 
-            VStack() {
-                if let localParticipant = viewModel.localParticipant {
-                    LocalVideoView(
-                        viewFactory: viewFactory,
-                        participant: localParticipant,
-                        idSuffix: "waiting",
-                        callSettings: viewModel.callSettings,
-                        call: viewModel.call
-                    )
-                } else {
-                    Spacer()
+            VStack(spacing: 16) {
+                Group {
+                    if let localParticipant = viewModel.localParticipant {
+                        GeometryReader { proxy in
+                            LocalVideoView(
+                                viewFactory: viewFactory,
+                                participant: localParticipant,
+                                idSuffix: "waiting",
+                                callSettings: viewModel.callSettings,
+                                call: viewModel.call,
+                                availableFrame: proxy.frame(in: .global)
+                            )
+                            .modifier(viewFactory.makeLocalParticipantViewModifier(
+                                localParticipant: localParticipant,
+                                callSettings: $viewModel.callSettings,
+                                call: viewModel.call
+                            ))
+                        }
+                    } else {
+                        Spacer()
+                    }
                 }
+                .padding(.horizontal, 8)
 
                 viewFactory.makeCallControlsView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)

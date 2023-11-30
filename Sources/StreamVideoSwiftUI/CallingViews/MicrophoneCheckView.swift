@@ -7,6 +7,7 @@ import SwiftUI
 
 public struct MicrophoneCheckView: View {
     @Injected(\.colors) var colors
+    @Injected(\.fonts) var fonts
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
     
@@ -28,13 +29,15 @@ public struct MicrophoneCheckView: View {
     }
     
     public var body: some View {
-        HStack(spacing: 2) {
+        HStack(spacing: 4) {
             Text(streamVideo.user.name)
-                .font(.caption)
                 .foregroundColor(.white)
-                .bold()
-                .padding(.trailing, 8)
-            
+                .multilineTextAlignment(.leading)
+                .lineLimit(1)
+                .font(fonts.caption1)
+                .minimumScaleFactor(0.7)
+                .accessibility(identifier: "participantName")
+
             if microphoneOn && !isSilent {
                 AudioVolumeIndicator(
                     audioLevels: audioLevels,
@@ -50,8 +53,14 @@ public struct MicrophoneCheckView: View {
                     .foregroundColor(colors.accentRed)
             }
         }
-        .padding(.all, 8)
-        .background(Color.black.opacity(0.6).cornerRadius(8))
+        .padding(.all, 2)
+        .padding(.horizontal, 4)
+        .frame(height: 28)
+        .cornerRadius(
+            8,
+            corners: [.topRight],
+            backgroundColor: Color.black.opacity(0.6)
+        )
     }
 }
 
@@ -99,7 +108,7 @@ public struct AudioVolumeIndicator: View {
     
     private func height(for value: Float) -> CGFloat {
         let height: CGFloat = value > 0 ? CGFloat(value * maxHeight) : 0
-        return max(height, 0.5)
+        return max(height, 1)
     }
 }
 

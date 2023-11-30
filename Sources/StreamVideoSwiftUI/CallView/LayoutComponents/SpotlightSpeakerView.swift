@@ -83,7 +83,10 @@ public struct SpotlightSpeakerView<Factory: ViewFactory>: View {
             )
         )
         // Observes visibility changes of the dominant speaker's video track.
-        .visibilityObservation(in: availableFrame) { isVisible in
+        .visibilityObservation(
+            in: availableFrame,
+            hasVideo: participant.hasVideo
+        ) { isVisible in
             Task {
                 await call?.changeTrackVisibility(
                     for: participant,

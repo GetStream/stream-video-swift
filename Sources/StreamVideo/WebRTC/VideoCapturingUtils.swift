@@ -59,7 +59,9 @@ enum VideoCapturingUtils {
     ) -> (format: AVCaptureDevice.Format?, dimensions: CMVideoDimensions?, fps: Int) {
         let formats = RTCCameraVideoCapturer.supportedFormats(for: device)
         let sortedFormats = formats.map {
-            (format: $0, dimensions: CMVideoFormatDescriptionGetDimensions($0.formatDescription))
+            let dimensions = CMVideoFormatDescriptionGetDimensions($0.formatDescription)
+            let diff = abs(dimensions.area - preferredDimensions.area)
+            return (format: $0, dimensions: dimensions, diff: diff)
         }
         .sorted { $0.dimensions.area < $1.dimensions.area }
 
@@ -76,12 +78,19 @@ enum VideoCapturingUtils {
             if selectedFormat == nil {
                 selectedFormat = sortedFormats.first(where: { $0.dimensions.area >= preferredDimensions.area })
             }
+
+            // In case we cannot find a matching format based on the preferredDimensions
+            // we will choose the closest one.
+            if selectedFormat == nil {
+                selectedFormat = sortedFormats.min(by: { $0.diff < $1.diff })
+            }
         }
 
         guard let selectedFormat = selectedFormat else {
-            log.warning("Unable to resolve format")
+            log.warning("Unable to resolve format with preferredDimensions:\(preferredDimensions.width)x\(preferredDimensions.height) preferredFormat:\(String(describing: preferredFormat)) preferredFPS:\(preferredFps)")
             return (format: nil, dimensions: nil, fps: 0)
         }
+        log.debug("SelectedFormat dimensions:\(selectedFormat.dimensions.width)x\(selectedFormat.dimensions.height) format:\(selectedFormat.format) diff:\(selectedFormat.diff)")
 
         var selectedFps = preferredFps
         let fpsRange = selectedFormat.format.fpsRange()

@@ -60,8 +60,8 @@ Here's an example how to use the grid layout in your views:
 ```swift
 ParticipantsGridLayout(
     viewFactory: viewFactory,
+    call: viewModel.call,
     participants: viewModel.participants,
-    pinnedParticipant: $viewModel.pinnedParticipant,
     availableFrame: availableFrame,
     orientation: orientation,
     onChangeTrackVisibility: onChangeTrackVisibility
@@ -76,9 +76,9 @@ This example shows the usage of the spotlight layout:
 ParticipantsSpotlightLayout(
     viewFactory: viewFactory,
     participant: first,
+    call: viewModel.call,
     participants: Array(viewModel.participants.dropFirst()),
-    size: availableFrame.size,
-    pinnedParticipant: $viewModel.pinnedParticipant,
+    frame: availableFrame,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```
@@ -91,8 +91,8 @@ You can use the full screen layout with the code below:
 ParticipantsFullScreenLayout(
     viewFactory: viewFactory,
     participant: first,
+    call: viewModel.call,
     frame: availableFrame,
-    pinnedParticipant: $viewModel.pinnedParticipant,
     onChangeTrackVisibility: onChangeTrackVisibility
 )
 ```

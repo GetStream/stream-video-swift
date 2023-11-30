@@ -67,27 +67,28 @@ For reference, here's the default `VideoCallParticipantModifier` implementation,
 
 ```swift
 public struct VideoCallParticipantModifier: ViewModifier {
-            
-    @State var popoverShown = false
-    
+
     var participant: CallParticipant
     var call: Call?
     var availableFrame: CGRect
     var ratio: CGFloat
     var showAllInfo: Bool
-    
+    var decorations: Set<VideoCallParticipantDecoration>
+
     public init(
         participant: CallParticipant,
         call: Call?,
         availableFrame: CGRect,
         ratio: CGFloat,
-        showAllInfo: Bool
+        showAllInfo: Bool,
+        decorations: [VideoCallParticipantDecoration] = VideoCallParticipantDecoration.allCases
     ) {
         self.participant = participant
         self.call = call
         self.availableFrame = availableFrame
         self.ratio = ratio
         self.showAllInfo = showAllInfo
+        self.decorations = .init(decorations)
     }
     
     public func body(content: Content) -> some View {
@@ -102,100 +103,35 @@ public struct VideoCallParticipantModifier: ViewModifier {
                                 isPinned: participant.isPinned
                             )
                             
+                            Spacer()
+
                             if showAllInfo {
-                                Spacer()
                                 ConnectionQualityIndicator(
                                     connectionQuality: participant.connectionQuality
                                 )
                             }
                         }
-                        .padding(.bottom, 2)
                     })
-                    .padding(.all, showAllInfo ? 16 : 8)
-                    
-                    if participant.isSpeaking && participantCount > 1 {
-                        Rectangle()
-                            .strokeBorder(Color.blue.opacity(0.7), lineWidth: 2)
-                    }
-                    
-                    if popoverShown {
-                        VStack(spacing: 16) {
-                            if !participant.isPinnedRemotely {
-                                PopoverButton(
-                                    title: pinTitle,
-                                    popoverShown: $popoverShown
-                                ) {
-                                    if participant.isPinned {
-                                        Task {
-                                            try await call?.unpin(
-                                                sessionId: participant.sessionId
-                                            )
-                                        }
-                                    } else {
-                                        Task {
-                                            try await call?.pin(
-                                                sessionId: participant.sessionId
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                            
-                            if call?.state.ownCapabilities.contains(.pinForEveryone) == true {
-                                PopoverButton(
-                                    title: pinForEveryoneTitle,
-                                    popoverShown: $popoverShown
-                                ) {
-                                    if participant.isPinnedRemotely {
-                                        Task {
-                                            try await call?.unpinForEveryone(
-                                                userId: participant.userId,
-                                                sessionId: participant.id
-                                            )
-                                        }
-                                    } else {
-                                        Task {
-                                            try await call?.pinForEveryone(
-                                                userId: participant.userId,
-                                                sessionId: participant.id
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                        .padding()
-                        .modifier(ShadowViewModifier())
-                    }
                 }
             )
-            .onTapGesture(count: 2, perform: {
-                popoverShown = true
-            })
-            .onTapGesture(count: 1) {
-                if popoverShown {
-                    popoverShown = false
-                }
-            }
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantOptionsModifier(participant: participant, call: call),
+                decoration: .options,
+                availableDecorations: decorations
+            )
+            .applyDecorationModifierIfRequired(
+                VideoCallParticipantSpeakingModifier(participant: participant, participantCount: participantCount),
+                decoration: .speaking,
+                availableDecorations: decorations
+            )
+            .clipShape(RoundedRectangle(cornerRadius: 16))
+            .clipped()
     }
-    
+
     @MainActor
     private var participantCount: Int {
         call?.state.participants.count ?? 0
     }
-    
-    private var pinTitle: String {
-        participant.isPinned
-            ? L10n.Call.Current.unpinUser
-            : L10n.Call.Current.pinUser
-    }
-    
-    private var pinForEveryoneTitle: String {
-        participant.isPinnedRemotely
-            ? L10n.Call.Current.unpinForEveryone
-            : L10n.Call.Current.pinForEveryone
-    }
-    
 }
 ```
 

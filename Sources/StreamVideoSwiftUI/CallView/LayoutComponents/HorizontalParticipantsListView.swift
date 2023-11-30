@@ -23,14 +23,15 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
     /// Information about the call (if available).
     public var call: Call?
 
-    /// Size of each participant thumbnail.
-    public var thumbnailSize: CGFloat
+    /// The space between items
+    public var innerItemSpace: CGFloat
 
     /// Flag to determine if all participant information should be shown.
     public var showAllInfo: Bool
 
     /// Private computed properties for laying out the view.
     private let barFrame: CGRect
+    
     private let itemFrame: CGRect
 
     // MARK: - Initialization
@@ -41,27 +42,28 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         participants: [CallParticipant],
         frame: CGRect,
         call: Call?,
-        thumbnailSize: CGFloat = 120,
+        innerItemSpace: CGFloat = 8,
         showAllInfo: Bool = false
     ) {
         self.viewFactory = viewFactory
         self.participants = participants
         self.frame = frame
         self.call = call
-        self.thumbnailSize = thumbnailSize
+        self.innerItemSpace = innerItemSpace
         self.showAllInfo = showAllInfo
 
         // Calculate the frame for the bar at the bottom.
-        self.barFrame = .init(
-            origin: .init(x: frame.origin.x, y: frame.maxY - thumbnailSize),
-            size: CGSize(width: frame.size.width, height: thumbnailSize)
+        let barFrame = CGRect(
+            origin: .init(x: frame.origin.x, y: frame.maxY - frame.height),
+            size: CGSize(width: frame.size.width, height: frame.height)
         )
+        self.barFrame = barFrame
 
-        // Calculate the frame for each item in the bar.
+        let aspectRatioWidth = min(barFrame.width, barFrame.height * 16/9)
         self.itemFrame = .init(
             origin: .zero,
             size: .init(
-                width: barFrame.height,
+                width: aspectRatioWidth - innerItemSpace / 2,
                 height: barFrame.height
             )
         )
@@ -72,7 +74,7 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
     /// Defines the structure and layout of the view.
     public var body: some View {
         // Scroll view to accommodate multiple participant thumbnails.
-        ScrollView(.horizontal) {
+        ScrollView(.horizontal, showsIndicators: false) {
             // Container for horizontal alignment.
             HorizontalContainer {
                 // Loop through each participant and display their thumbnail.
@@ -95,7 +97,10 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
                         )
                     )
                     // Observe visibility changes.
-                    .visibilityObservation(in: barFrame) { isVisible in
+                    .visibilityObservation(
+                        in: barFrame,
+                        hasVideo: participant.hasVideo
+                    ) { isVisible in
                         Task {
                             await call?.changeTrackVisibility(
                                 for: participant,
@@ -110,7 +115,6 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
             .frame(height: barFrame.height)
             .cornerRadius(8)
         }
-        .padding()
         .accessibility(identifier: "horizontalParticipantsList")
     }
 }

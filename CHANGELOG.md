@@ -11,9 +11,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### ✅ Added
 - Add support for pre-built XCFrameworks
 - Fast reconnection
+- New redesigned UI components. [#236](https://github.com/GetStream/stream-video-swift/pull/236)
 
 ### 🔄 Changed
 - You can now focus on a desired point in the local video stream. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
+- The following API changes occurred as part of the redesign. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
+    - `CornerDragableView` has been renamed to `CornerDraggableView` and initializer changed.
+    - `LocalParticipantViewModifier` & `VideoCallParticipantModifier` now accept a few parameters that allow you to further control their presentation.
+    - `ScreenSharingView` now accepts a `isZoomEnabled` parameter to control if the the view will be zoom-able.
+    - `LocalVideoView` now accepts a `availableFrame` parameter.
 
 # [0.4.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.1)
 _October 16, 2023_

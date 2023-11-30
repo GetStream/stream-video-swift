@@ -10,12 +10,14 @@ struct ReactionsViewModifier: ViewModifier {
     @ObservedObject var reactionsHelper = AppState.shared.reactionsHelper
 
     var participant: CallParticipant
-    var availableSize: CGSize
 
     func body(content: Content) -> some View {
         content
             .overlay(
-                ReactionOverlayView(participant: participant, availableSize: availableSize)
+                ReactionOverlayView(
+                    participant: participant
+                )
+                .padding(.top)
             )
             .onChange(of: participant.isSpeaking) { newValue in
                 if newValue {
@@ -24,7 +26,6 @@ struct ReactionsViewModifier: ViewModifier {
             }
     }
 }
-
 
 struct ReactionsViewModifier_Previews: PreviewProvider {
     static var previews: some View {
@@ -51,8 +52,7 @@ struct ReactionsViewModifier_Previews: PreviewProvider {
                     audioLevel: 0,
                     audioLevels: [],
                     pin: nil
-                ),
-                availableSize: .init(width: 1024, height: 768)
+                )
             )
         )
     }

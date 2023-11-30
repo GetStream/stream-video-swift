@@ -20,12 +20,7 @@ import SwiftUI
 struct VisibilityThresholdModifier: ViewModifier {
     /// State to track if the content view is on screen.
     @State private var isOnScreen = false {
-        didSet {
-            // Check if the visibility state has changed.
-            guard isOnScreen != oldValue else { return }
-            // Notify the caller about the visibility state change.
-            changeHandler(isOnScreen)
-        }
+        didSet { changeHandler(isOnScreen) }
     }
 
     /// The bounds of the parent view or viewport.
@@ -54,7 +49,7 @@ struct VisibilityThresholdModifier: ViewModifier {
                     let (verticalVisible, horizontalVisible) = calculateVisibilityInBothAxis(in: geometryInGlobal)
 
                     /// Update the isOnScreen state based on visibility calculations.
-                    DispatchQueue.main.async {
+                    Task { @MainActor in
                         self.isOnScreen = verticalVisible && horizontalVisible
                     }
 
@@ -98,17 +93,23 @@ extension View {
     ///   state of the view whenever it changes.
     ///
     /// - Returns: A modified view that observes its visibility status within the specified bounds.
+    @ViewBuilder
     func visibilityObservation(
         in bounds: CGRect,
+        hasVideo: Bool,
         threshold: CGFloat = 0.3,
         changeHandler: @escaping (Bool) -> Void
     ) -> some View {
-        modifier(
-            VisibilityThresholdModifier(
-                in: bounds,
-                threshold: threshold,
-                changeHandler: changeHandler
+        if hasVideo {
+            modifier(
+                VisibilityThresholdModifier(
+                    in: bounds,
+                    threshold: threshold,
+                    changeHandler: changeHandler
+                )
             )
-        )
+        } else {
+            self
+        }
     }
 }

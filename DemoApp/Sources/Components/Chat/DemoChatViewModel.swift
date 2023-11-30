@@ -24,7 +24,7 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
     @Published var unreadCount = 0
 
     private var channelId: ChannelId?
-    var isChatEnabled: Bool { chatWrapper != nil }
+    var isChatEnabled: Bool { AppEnvironment.chatIntegration == .enabled && chatWrapper != nil  }
 
     init(_ callViewModel: CallViewModel) {
         self.callUpdateCancellable = callViewModel.$call.sink { [weak self] newCall in
