@@ -11,6 +11,7 @@ import GoogleSignIn
 struct DemoCallingTopView: View {
 
     @Injected(\.streamVideo) var streamVideo
+    @Injected(\.colors) var colors
 
     @ObservedObject var callViewModel: CallViewModel
     @State var logoutAlertShown = false
@@ -23,8 +24,7 @@ struct DemoCallingTopView: View {
                         .bold()
                         .foregroundColor(.primary)
                 } icon: {
-                    UserAvatar(imageURL: streamVideo.user.imageURL, size: 32)
-                        .accessibilityIdentifier("userAvatar")
+                    AppUserView(user: streamVideo.user)
                 }
             } else {
                 Button {
@@ -35,14 +35,13 @@ struct DemoCallingTopView: View {
                             .bold()
                             .foregroundColor(.primary)
                     } icon: {
-                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 32)
-                            .accessibilityIdentifier("userAvatar")
+                        AppUserView(user: streamVideo.user)
                     }
                 }
             }
 
             Spacer()
-            
+
             if GIDSignIn.sharedInstance.currentUser != nil {
                 NavigationLink {
                     DemoCallsView(callViewModel: callViewModel)

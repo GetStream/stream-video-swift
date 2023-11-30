@@ -32,15 +32,14 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
     
     private func login(_ user: UserCredentials) {
         let streamVideo = StreamVideo(
-            apiKey: AppEnvironment.apiKey.rawValue,
+            apiKey: AppState.shared.apiKey,
             user: user.userInfo,
             token: user.token,
             videoConfig: VideoConfig(),
             tokenProvider: { result in
                 Task {
                     do {
-                        let token = try await TokenProvider.fetchToken(for: user.id)
-                        AppState.shared.unsecureRepository.save(token: token.rawValue)
+                        let token = try await AuthenticationProvider.fetchToken(for: user.id)
                         result(.success(token))
                     } catch {
                         result(.failure(error))
@@ -53,5 +52,4 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
             try await streamVideo.connect()
         }
     }
-
 }

@@ -79,10 +79,12 @@ final class Router: ObservableObject {
         } else if let userCredentials = AppState.shared.unsecureRepository.loadCurrentUser() {
             if userCredentials.userInfo.id.contains("@getstream") {
                 GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _,_ in
-                    self?.setupUser(with: userCredentials)
+                    Task {
+                        try await self?.setupUser(with: userCredentials)
+                    }
                 }
             } else {
-                setupUser(with: userCredentials)
+                try await setupUser(with: userCredentials)
             }
         } else {
             try await handleGuestUser(deeplinkInfo: .empty)
@@ -92,16 +94,24 @@ final class Router: ObservableObject {
     func handleLoggedInUserCredentials(
         _ credentials: UserCredentials,
         deeplinkInfo: DeeplinkInfo
-    ) {
+    ) async throws {
+        let updatedCredentials = try await {
+            guard credentials.token.rawValue.isEmpty else {
+                return credentials
+            }
+
+            let token = try await AuthenticationProvider.fetchToken(for: credentials.id)
+            return .init(userInfo: credentials.userInfo, token: token)
+        }()
+
         handle(
-            user: credentials.userInfo,
-            token: credentials.token.rawValue,
+            user: updatedCredentials.userInfo,
+            token: updatedCredentials.token.rawValue,
             deeplinkInfo: deeplinkInfo
         ) { result in
             Task {
                 do {
-                    let token = try await TokenProvider.fetchToken(for: credentials.id)
-                    AppState.shared.unsecureRepository.save(token: token.rawValue)
+                    let token = try await AuthenticationProvider.fetchToken(for: updatedCredentials.id)
                     result(.success(token))
                 } catch {
                     result(.failure(error))
@@ -110,10 +120,11 @@ final class Router: ObservableObject {
         }
     }
     
-    private func setupUser(with userCredentials: UserCredentials) {
+    private func setupUser(with userCredentials: UserCredentials) async throws {
         appState.currentUser = userCredentials.userInfo
+        // First we sign in and then update the loggedIn state and the UI
+        try await handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
         appState.userState = .loggedIn
-        handleLoggedInUserCredentials(userCredentials, deeplinkInfo: .empty)
     }
 
     private func handleGuestUser(
@@ -123,7 +134,7 @@ final class Router: ObservableObject {
             if let currentUser = appState.currentUser {
                 return (currentUser, "")
             } else {
-                return try await UserProvider.createUser()
+                return try await AuthenticationProvider.createUser()
             }
         }()
 
@@ -143,7 +154,7 @@ final class Router: ObservableObject {
         )
 
         let streamVideo = StreamVideo(
-            apiKey: AppEnvironment.apiKey.rawValue,
+            apiKey: AppState.shared.apiKey,
             user: user,
             token: .init(stringLiteral: token),
             videoConfig: VideoConfig(audioProcessingModule: audioProcessingModule),
@@ -155,11 +166,13 @@ final class Router: ObservableObject {
         }
         setUp(streamVideo: streamVideo, deeplinkInfo: deeplinkInfo, user: user)
 
-        appState.unsecureRepository.save(
-            user: .init(
-                userInfo: user,
-                token: .init(stringLiteral: token)
-            ))
+        if user.type != .anonymous {
+            appState.unsecureRepository.save(
+                user: .init(
+                    userInfo: user,
+                    token: .init(stringLiteral: token)
+                ))
+        }
     }
 
     private func setUp(

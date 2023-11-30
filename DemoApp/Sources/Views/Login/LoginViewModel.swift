@@ -11,7 +11,7 @@ final class LoginViewModel: ObservableObject {
     func login(user: User, callId: String = "", completion: @escaping (UserCredentials) -> ()) {
         AppState.shared.loading = true
         Task {
-            let token = try await TokenProvider.fetchToken(for: user.id, callIds: [callId])
+            let token = try await AuthenticationProvider.fetchToken(for: user.id, callIds: [callId])
             let credentials = UserCredentials(userInfo: user, token: token)
             // Perform login
             completion(credentials)
@@ -33,7 +33,7 @@ final class LoginViewModel: ObservableObject {
     func joinCallAnonymously(callId: String, completion: @escaping (UserCredentials) -> ()) {
         AppState.shared.loading = true
         Task {
-            let token = try await TokenProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
+            let token = try await AuthenticationProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
             let credentials = UserCredentials(userInfo: User.anonymous, token: token)
             // Perform login
             completion(credentials)

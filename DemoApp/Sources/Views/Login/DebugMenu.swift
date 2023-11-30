@@ -20,15 +20,10 @@ struct DebugMenu: View {
     @State private var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL {
         didSet {
             switch baseURL {
-            case .staging:
-                AppEnvironment.baseURL = .staging
-                AppEnvironment.apiKey = .staging
             case .pronto:
                 AppEnvironment.baseURL = .pronto
-                AppEnvironment.apiKey = .staging
-            case .production:
-                AppEnvironment.baseURL = .production
-                AppEnvironment.apiKey = .production
+            case .demo:
+                AppEnvironment.baseURL = .demo
             }
             appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
         }
@@ -61,13 +56,13 @@ struct DebugMenu: View {
     var body: some View {
         Menu {
             makeMenu(
-                for: [.production, .pronto, .staging],
+                for: [.demo, .pronto],
                 currentValue: baseURL,
                 label: "Environment"
             ) { self.baseURL = $0 }
 
             makeMultipleSelectMenu(
-                for: [AppEnvironment.SupportedDeeplink.production, .staging],
+                for: [AppEnvironment.SupportedDeeplink.demo, .pronto],
                 currentValues: .init(supportedDeeplinks),
                 label: "Supported Deeplinks"
             ) { item, isSelected in

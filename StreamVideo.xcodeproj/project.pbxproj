@@ -15,7 +15,6 @@
 		401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */; };
 		401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A72A9DF7B400534ED1 /* EffectsLibrary */; };
 		401A64AB2A9DF7EC00534ED1 /* DemoChatAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */; };
-		401A64AE2A9DF81200534ED1 /* UserProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AD2A9DF81200534ED1 /* UserProvider.swift */; };
 		401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
 		401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
@@ -70,12 +69,11 @@
 		406A8EAA2AA1D80C001F598A /* DemoVoiceProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */; };
 		406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */; };
 		406A8EAC2AA1D80C001F598A /* CallService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8434C5212899572F0001490A /* CallService.swift */; };
-		406A8EAD2AA1D80C001F598A /* UserProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64AD2A9DF81200534ED1 /* UserProvider.swift */; };
 		406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AC2897CF4D0092BD43 /* CallKitService.swift */; };
 		406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
 		406A8EB22AA1D80C001F598A /* VoIPPushService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8403C0AE2897D9940092BD43 /* VoIPPushService.swift */; };
-		406A8EB32AA1D80C001F598A /* TokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B32A9E01B2004BE3DA /* TokenProvider.swift */; };
+		406A8EB32AA1D80C001F598A /* AuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B32A9E01B2004BE3DA /* AuthenticationProvider.swift */; };
 		406A8EB42AA1D8F5001F598A /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8456E6C1287EB405004E180E /* LoginView.swift */; };
 		406A8EB52AA1D91E001F598A /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		406A8EB62AA1D922001F598A /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
@@ -111,7 +109,7 @@
 		40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
 		40F445B02A9DFC58004BE3DA /* CallKitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AF2A9DFC58004BE3DA /* CallKitState.swift */; };
 		40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B12A9DFFBB004BE3DA /* User+Demo.swift */; };
-		40F445B42A9E01B2004BE3DA /* TokenProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B32A9E01B2004BE3DA /* TokenProvider.swift */; };
+		40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B32A9E01B2004BE3DA /* AuthenticationProvider.swift */; };
 		40F445BA2A9E0815004BE3DA /* AudioFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B92A9E0815004BE3DA /* AudioFilter.swift */; };
 		40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */; };
 		40F445BE2A9E0823004BE3DA /* RobotVoiceFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */; };
@@ -990,7 +988,6 @@
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
 		401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserver.swift; sourceTree = "<group>"; };
 		401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatAdapter.swift; sourceTree = "<group>"; };
-		401A64AD2A9DF81200534ED1 /* UserProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserProvider.swift; sourceTree = "<group>"; };
 		401A64B02A9DF83200534ED1 /* TokenResponse.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenResponse.swift; sourceTree = "<group>"; };
 		401A64B22A9DF86200534ED1 /* URL+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "URL+Convenience.swift"; sourceTree = "<group>"; };
 		401A64B42A9DF88C00534ED1 /* String+Unique.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "String+Unique.swift"; sourceTree = "<group>"; };
@@ -1038,7 +1035,7 @@
 		40F445AD2A9DFC34004BE3DA /* UserState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserState.swift; sourceTree = "<group>"; };
 		40F445AF2A9DFC58004BE3DA /* CallKitState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitState.swift; sourceTree = "<group>"; };
 		40F445B12A9DFFBB004BE3DA /* User+Demo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "User+Demo.swift"; sourceTree = "<group>"; };
-		40F445B32A9E01B2004BE3DA /* TokenProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenProvider.swift; sourceTree = "<group>"; };
+		40F445B32A9E01B2004BE3DA /* AuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationProvider.swift; sourceTree = "<group>"; };
 		40F445B92A9E0815004BE3DA /* AudioFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioFilter.swift; sourceTree = "<group>"; };
 		40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVoiceProcessor.swift; sourceTree = "<group>"; };
 		40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotVoiceFilter.swift; sourceTree = "<group>"; };
@@ -1836,8 +1833,7 @@
 		401A64AC2A9DF80900534ED1 /* Authentication */ = {
 			isa = PBXGroup;
 			children = (
-				401A64AD2A9DF81200534ED1 /* UserProvider.swift */,
-				40F445B32A9E01B2004BE3DA /* TokenProvider.swift */,
+				40F445B32A9E01B2004BE3DA /* AuthenticationProvider.swift */,
 			);
 			path = Authentication;
 			sourceTree = "<group>";
@@ -4165,11 +4161,10 @@
 				40D7E7962AB1C9590017095E /* ThermalStateViewModifier.swift in Sources */,
 				40F445D82A9E21BB004BE3DA /* DemoCallModifier.swift in Sources */,
 				4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */,
-				40F445B42A9E01B2004BE3DA /* TokenProvider.swift in Sources */,
+				40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */,
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				848C469D2A6A9A3D00E5AC09 /* DemoAppCallControlsView.swift in Sources */,
 				40F445ED2A9E2A24004BE3DA /* DemoControls.swift in Sources */,
-				401A64AE2A9DF81200534ED1 /* UserProvider.swift in Sources */,
 				409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
 				40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */,
@@ -4260,9 +4255,8 @@
 			files = (
 				4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */,
 				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
-				406A8EB32AA1D80C001F598A /* TokenProvider.swift in Sources */,
+				406A8EB32AA1D80C001F598A /* AuthenticationProvider.swift in Sources */,
 				4029A6282AB0693C0065DAFB /* DemoReactionsOverlayView.swift in Sources */,
-				406A8EAD2AA1D80C001F598A /* UserProvider.swift in Sources */,
 				406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */,
 				406A8E9A2AA1D7E9001F598A /* Call+Identifiable.swift in Sources */,
 				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,

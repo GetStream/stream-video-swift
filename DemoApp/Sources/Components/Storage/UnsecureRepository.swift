@@ -9,8 +9,6 @@ protocol UserRepository {
     
     func save(user: UserCredentials)
     
-    func save(token: String)
-    
     func loadCurrentUser() -> UserCredentials?
     
     func removeCurrentUser()
@@ -74,22 +72,15 @@ final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandl
         let encoder = JSONEncoder()
         if let encoded = try? encoder.encode(user.userInfo) {
             set(encoded, for: .user)
-            save(token: user.token.rawValue)
         }
     }
-
-    func save(token: String) { set(token, for: .token) }
 
     func loadCurrentUser() -> UserCredentials? {
         if let savedUser: Data = get(for: .user) {
             let decoder = JSONDecoder()
             do {
                 let loadedUser = try decoder.decode(User.self, from: savedUser)
-                guard let tokenValue: String = get(for: .token) else {
-                    throw ClientError.Unexpected()
-                }
-                let token = UserToken(rawValue: tokenValue)
-                return UserCredentials(userInfo: loadedUser, token: token)
+                return UserCredentials(userInfo: loadedUser, token: "") // The token will always get updated
             } catch {
                 log.error("Error while decoding user", error: error)
             }
