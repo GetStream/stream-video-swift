@@ -34,19 +34,16 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     enum BaseURL: String, Debuggable, CaseIterable {
-        case staging = "https://staging.getstream.io"
         case pronto = "https://pronto.getstream.io"
-        case production = "https://getstream.io"
+        case demo = "https://getstream.io"
 
         var url: URL { URL(string: rawValue)! }
         var title: String {
             switch self {
-            case .staging:
-                return "Staging"
             case .pronto:
                 return "Pronto"
-            case .production:
-                return "Production"
+            case .demo:
+                return "Demo"
             }
         }
     }
@@ -54,30 +51,11 @@ extension AppEnvironment {
     static var baseURL: BaseURL = {
         switch configuration {
         case .test:
-            return .staging
+            return .pronto
         case .debug:
-            return .staging
+            return .pronto
         case .release:
-            return .production
-        }
-    }()
-}
-
-extension AppEnvironment {
-
-    enum APIKey: String {
-        case staging = "hd8szvscpxvd"
-        case production = "mmhfdzb5evj2"
-    }
-
-    static var apiKey: APIKey = {
-        switch configuration {
-        case .test:
-            return APIKey.staging
-        case .debug:
-            return APIKey.staging
-        case .release:
-            return APIKey.production
+            return .demo
         }
     }()
 }
@@ -95,7 +73,7 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     enum AuthBaseURL: String {
-        case universal = "https://stream-calls-dogfood.vercel.app"
+        case universal = "https://pronto.getstream.io/api/auth/create-token"
 
         var url: URL { URL(string: rawValue)! }
     }
@@ -208,29 +186,24 @@ extension AppEnvironment {
 extension AppEnvironment {
 
     enum SupportedDeeplink: Debuggable {
-        case staging
         case pronto
-        case production
+        case demo
 
         var deeplinkURL: URL {
             switch self {
-            case .staging:
-                return BaseURL.staging.url
             case .pronto:
                 return BaseURL.pronto.url
-            case .production:
-                return BaseURL.production.url
+            case .demo:
+                return BaseURL.demo.url
             }
         }
 
         var title: String {
             switch self {
-            case .staging:
-                return "Staging"
             case .pronto:
                 return "Pronto"
-            case .production:
-                return "Production"
+            case .demo:
+                return "Demo"
             }
         }
     }
@@ -238,11 +211,11 @@ extension AppEnvironment {
     static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
-            return [.staging, .pronto, .production]
+            return [.pronto, .demo]
         case .test:
-            return [.staging, .pronto, .production]
+            return [.pronto, .demo]
         case .release:
-            return [.production]
+            return [.demo]
         }
     }()
 }

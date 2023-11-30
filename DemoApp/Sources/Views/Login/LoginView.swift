@@ -131,17 +131,28 @@ struct LoginView: View {
 struct LoginItemView<Title: View, Icon: View>: View {
 
     var action: () -> ()
-    var title: () -> Title
-    var icon: () -> Icon
+    var title: Title
+    var icon: Icon
+
+    init(
+        action: @escaping () -> (),
+        @ViewBuilder title: @escaping () -> Title,
+        @ViewBuilder icon: @escaping () -> Icon
+    ) {
+        self.action = action
+        self.title = title()
+        self.icon = icon()
+    }
+
 
     var body: some View {
         Button {
             action()
         } label: {
             Label {
-                title()
+                title
             } icon: {
-                icon()
+                icon
             }
         }
         .padding(8)
@@ -149,6 +160,8 @@ struct LoginItemView<Title: View, Icon: View>: View {
 }
 
 struct BuiltInUserView: View {
+
+    @Injected(\.colors) var colors
 
     var user: User
     var viewModel: LoginViewModel
@@ -161,7 +174,28 @@ struct BuiltInUserView: View {
             Text(user.name)
                 .accessibility(identifier: "userName")
         } icon: {
-            UserAvatar(imageURL: user.imageURL, size: 32)
+            AppUserView(user: user)
+        }
+    }
+}
+
+struct AppUserView: View {
+
+    @Injected(\.colors) var colors
+    var user: User
+    var size: CGFloat = 32
+
+    var body: some View {
+        if let imageURL = user.imageURL {
+            UserAvatar(imageURL: imageURL, size: size)
+                .accessibilityIdentifier("userAvatar")
+        } else if let firstCharacter = user.name.first {
+            Text(String(firstCharacter))
+                .fontWeight(.medium)
+                .foregroundColor(colors.text)
+                .frame(width: size, height: size)
+                .background(Color(.secondarySystemBackground))
+                .clipShape(Circle())
                 .accessibilityIdentifier("userAvatar")
         }
     }

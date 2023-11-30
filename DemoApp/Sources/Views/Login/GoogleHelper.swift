@@ -114,7 +114,7 @@ enum GoogleHelper {
             imageURL: profile.imageURL(withDimension: 80),
             customData: [:]
         )
-        let token = try await TokenProvider.fetchToken(for: id)
+        let token = try await AuthenticationProvider.fetchToken(for: id)
         let credentials = UserCredentials(
             userInfo: userInfo,
             token: token

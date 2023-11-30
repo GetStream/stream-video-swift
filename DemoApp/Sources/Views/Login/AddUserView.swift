@@ -12,7 +12,6 @@ struct AddUserView: View {
     
     @State var name = ""
     @State var id = ""
-    @State var token = ""
     
     var body: some View {
         NavigationView {
@@ -22,8 +21,6 @@ struct AddUserView: View {
                         TextField("User id", text: $id)
 
                         TextField("Name", text: $name)
-
-                        TextField("Token", text: $token)
                     }
 
                     Button {
@@ -51,7 +48,7 @@ struct AddUserView: View {
     }
     
     private var buttonDisabled: Bool {
-        name.isEmpty || id.isEmpty || token.isEmpty
+        name.isEmpty || id.isEmpty
     }
 }
 

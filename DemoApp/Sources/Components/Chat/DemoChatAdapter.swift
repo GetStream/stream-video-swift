@@ -19,8 +19,9 @@ struct DemoChatAdapter {
     let chatClient: ChatClient
     let streamChatUI: StreamChat
 
+    @MainActor
     init(_ user: User, token: String) {
-        let chatClient = ChatClient(config: .init(apiKeyString: AppEnvironment.apiKey.rawValue))
+        let chatClient = ChatClient(config: .init(apiKeyString: AppState.shared.apiKey))
 
         self.chatClient = chatClient
         self.streamChatUI = .init(chatClient: chatClient)

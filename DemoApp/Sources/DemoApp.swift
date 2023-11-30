@@ -43,7 +43,11 @@ struct DemoApp: App {
                         LoadingView()
                     } else {
                         NavigationView {
-                            LoginView() { router.handleLoggedInUserCredentials($0, deeplinkInfo: .empty) }
+                            LoginView() { credentials in
+                                Task {
+                                    try await router.handleLoggedInUserCredentials(credentials, deeplinkInfo: .empty)
+                                }
+                            }
                         }
                         .navigationViewStyle(.stack)
                     }
