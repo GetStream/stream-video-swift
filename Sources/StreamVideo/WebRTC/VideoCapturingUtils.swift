@@ -87,7 +87,7 @@ enum VideoCapturingUtils {
         }
 
         guard let selectedFormat = selectedFormat else {
-            log.warning("Unable to resolve format with preferredDimensions:\(preferredDimensions.width)x\(preferredDimensions.height) preferredForma t:\(String(describing: preferredFormat)) preferredFPS:\(preferredFps)")
+            log.warning("Unable to resolve format with preferredDimensions:\(preferredDimensions.width)x\(preferredDimensions.height) preferredFormat:\(String(describing: preferredFormat)) preferredFPS:\(preferredFps)")
             return (format: nil, dimensions: nil, fps: 0)
         }
         log.debug("SelectedFormat dimensions:\(selectedFormat.dimensions.width)x\(selectedFormat.dimensions.height) format:\(selectedFormat.format) diff:\(selectedFormat.diff)")

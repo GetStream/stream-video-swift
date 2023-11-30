@@ -173,8 +173,16 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
 
     @State private var presentActionSheet: Bool = false
 
-    var participant: CallParticipant
-    var call: Call?
+    public var participant: CallParticipant
+    public var call: Call?
+
+    public init(
+        participant: CallParticipant,
+        call: Call?
+    ) {
+        self.participant = participant
+        self.call = call
+    }
 
     private var elements: [(title: String, action: () -> Void)] {
         var result = [(title: String, action: () -> Void)]()
@@ -282,6 +290,14 @@ public struct VideoCallParticipantSpeakingModifier: ViewModifier {
 
     public var participant: CallParticipant
     public var participantCount: Int
+
+    public init(
+        participant: CallParticipant,
+        participantCount: Int
+    ) {
+        self.participant = participant
+        self.participantCount = participantCount
+    }
 
     public func body(content: Content) -> some View {
         content

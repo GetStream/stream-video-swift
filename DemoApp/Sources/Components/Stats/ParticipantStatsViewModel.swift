@@ -51,7 +51,7 @@ final class ParticipantStatsViewModel: ObservableObject {
             return
         }
 
-        let isLocalUser = participant == call.state.localParticipant
+        let isLocalUser = participant.sessionId == call.state.sessionId
         let datacenter = StatsEntry(
             title: "Region",
             value: report.datacenter
