@@ -135,8 +135,7 @@ jobs:
         name: Test Data
         path: |
           fastlane/recordings
-          fastlane/sinatra-log.txt
-          fastlane/video-buddy-log.txt
+          fastlane/*.log
           fastlane/test_output/logs/*/Diagnostics/SwiftUIDemoAppUITests-*/*/*.txt
 
   build-and-test-debug:

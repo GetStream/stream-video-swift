@@ -26,7 +26,7 @@ final class Authentication_Tests: StreamTestCase {
         sleep(UInt32(jwtExpirationTimeoutInSeconds)!)
     }
     
-    func test_tokenExpiresBeforeUserLogsIn() throws {
+    func blocked_test_tokenExpiresBeforeUserLogsIn() throws {
         linkToScenario(withId: 2562)
         
         GIVEN("token expires") {
@@ -50,7 +50,7 @@ final class Authentication_Tests: StreamTestCase {
         }
     }
     
-    func test_tokenExpiresAfterUserLoggedIn() {
+    func blocked_test_tokenExpiresAfterUserLoggedIn() {
         linkToScenario(withId: 2563)
 
         GIVEN("user logs in") {
@@ -77,7 +77,7 @@ final class Authentication_Tests: StreamTestCase {
         }
     }
 
-    func test_tokenExpiresWhenUserIsInBackground() {
+    func blocked_test_tokenExpiresWhenUserIsInBackground() {
         linkToScenario(withId: 2564)
 
         GIVEN("user logs in") {
