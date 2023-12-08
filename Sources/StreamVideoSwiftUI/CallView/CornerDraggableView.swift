@@ -44,7 +44,18 @@ public struct CornerDraggableView<Content: View>: View {
 
     public var body: some View {
         content(availableFrame)
-            .onTapGesture { onTap() }
+            .overlay(
+                // SwiftUI seems to remove any interaction of views that not
+                // getting rendered (e.g. an empty GeometryReader, a VStack
+                // with a Spacer, an EmptyView, a Color.clear or a Shape
+                // with clear fill). If we use a simple button here then the
+                // interaction happening is slower because than what we have now.
+                Color.black.opacity(0.01)
+                    // This is to avoid conflicts with buttons on the top and bottom
+                    // part of the participant view.
+                    .padding(.vertical, 30)
+                    .onTapGesture { onTap() }
+            )
             .gesture(
                 DragGesture(coordinateSpace: .global)
                     .onChanged {

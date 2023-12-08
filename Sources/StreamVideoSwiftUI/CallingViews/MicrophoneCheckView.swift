@@ -14,22 +14,34 @@ public struct MicrophoneCheckView: View {
     var audioLevels: [Float]
     var microphoneOn: Bool
     var isSilent: Bool
+    var isPinned: Bool
     var maxHeight: Float = 14
     
     public init(
         audioLevels: [Float],
         microphoneOn: Bool,
         isSilent: Bool,
+        isPinned: Bool,
         maxHeight: Float = 14
     ) {
         self.audioLevels = audioLevels
         self.microphoneOn = microphoneOn
         self.isSilent = isSilent
+        self.isPinned = isPinned
         self.maxHeight = maxHeight
     }
     
     public var body: some View {
         HStack(spacing: 4) {
+            if isPinned {
+                Image(systemName: "pin.fill")
+                    .resizable()
+                    .aspectRatio(contentMode: .fit)
+                    .frame(maxHeight: CGFloat(maxHeight))
+                    .foregroundColor(.white)
+                    .padding(.trailing, 4)
+            }
+
             Text(streamVideo.user.name)
                 .foregroundColor(.white)
                 .multilineTextAlignment(.leading)

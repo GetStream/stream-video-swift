@@ -137,7 +137,7 @@
 		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
-		40FAF3D12B0F8305003F8029 /* ParticipantStatsModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D02B0F8305003F8029 /* ParticipantStatsModifier.swift */; };
+		40FAF3D12B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D02B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift */; };
 		40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
 		40FBEF4B2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */; };
@@ -1063,7 +1063,7 @@
 		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
-		40FAF3D02B0F8305003F8029 /* ParticipantStatsModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantStatsModifier.swift; sourceTree = "<group>"; };
+		40FAF3D02B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoCallParticipantOptionsModifier.swift; sourceTree = "<group>"; };
 		40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Convenience.swift"; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
 		40FBEF4A2AC30371007CFF17 /* XCUIApplication+KeyboardIntroduction.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "XCUIApplication+KeyboardIntroduction.swift"; sourceTree = "<group>"; };
@@ -2754,7 +2754,7 @@
 				8430FD1B2AB07FAA007AA3E6 /* ParticipantStatsView.swift */,
 				8430FD1D2AB085D9007AA3E6 /* ParticipantStatsViewModel.swift */,
 				8430FD1F2AB0B0B6007AA3E6 /* RawStatsView.swift */,
-				40FAF3D02B0F8305003F8029 /* ParticipantStatsModifier.swift */,
+				40FAF3D02B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift */,
 			);
 			path = Stats;
 			sourceTree = "<group>";
@@ -4212,7 +4212,7 @@
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
 				820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */,
 				40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */,
-				40FAF3D12B0F8305003F8029 /* ParticipantStatsModifier.swift in Sources */,
+				40FAF3D12B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift in Sources */,
 				4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */,
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
 				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
