@@ -3,25 +3,19 @@ title: Migration Guide from Dolby.io to Stream SDK
 ---
 
 ## Summary
-This migration guide is designed to assist developers in transitioning their Audioroom applications from the Dolby.io Conference SDK to the Stream SDK. Our aim is to provide a comprehensive, step-by-step walkthrough that not only highlights the differences between the two SDKs but also showcases the unique features and enhancements offered by Stream. Whether you are looking to leverage advanced functionalities, improve performance, or simply explore new avenues with Stream, this guide will equip you with all the necessary tools and knowledge for a seamless migration.
+This migration guide is designed to assist developers in transitioning their Audio room applications from the Dolby.io Conference SDK to the Stream SDK. Our aim is to provide a comprehensive, step-by-step walkthrough that not only highlights the differences between the two SDKs but also showcases the unique features and enhancements offered by Stream. Whether you are looking to leverage advanced functionalities, improve performance, or simply explore new avenues with Stream, this guide will equip you with all the necessary tools and knowledge for a seamless migration.
 
 ## Introduction
-Welcome to the definitive guide for migrating your AudioRoom app from Dolby.io Conference SDK to Stream SDK. In the dynamic world of digital audio communication, staying at the forefront with the most efficient and feature-rich tools is key to delivering outstanding user experiences. This guide is meticulously crafted to support developers who have been utilizing Dolby.io for their audio conferencing solutions and are now poised to embrace the innovative features and advanced capabilities of the Stream SDK.
-
-Dolby.io has established itself as a formidable solution in the realm of audio conferencing, celebrated for its superior sound quality and reliable streaming performance. However, as the requirements for digital audio communication continue to evolve, the need for more adaptable, scalable, and feature-intensive platforms becomes apparent. Stream SDK emerges as an ideal choice in this scenario, offering a modern, scalable, and comprehensive toolkit tailored for contemporary audio communication applications.
-
-Stream SDK distinguishes itself through its state-of-the-art architecture, enhanced scalability, and a broad spectrum of features specifically designed for modern audio communication needs. It promises not just an improvement in audio quality but also introduces advanced functionalities like better data security, a more intuitive API, and innovative features that cater to the diverse demands of today's users.
+Dolby.io is renowned for its superior sound quality and reliable streaming in audio conferencing, but faces challenges in adaptability and scalability to meet evolving digital communication needs. In contrast, Stream SDK offers a modern, scalable solution with advanced features like enhanced data security and an intuitive API, designed to meet the diverse demands of contemporary audio communication.
 
 Through this guide, you will:
-- Discover the fundamental differences and similarities between Dolby.io and Stream SDKs, particularly in the context of AudioRoom applications.
+- Discover the fundamental differences and similarities between Dolby.io and Stream SDKs, particularly in the context of Audio room applications.
 - Receive detailed, step-by-step instructions to ensure a smooth and efficient migration process.
 - Learn about the additional capabilities and benefits that Stream SDK brings to your audio conferencing solutions.
 - Find solutions to common challenges and answers to frequently asked questions during the transition.
 
-By the end of this guide, you will be equipped with a thorough understanding of how Stream SDK can enhance your audio conferencing applications, providing a clear rationale for its adoption as a superior alternative to Dolby.io in your technology stack. Let's dive into this journey toward achieving more advanced, efficient, and feature-rich audio conferencing experiences with Stream SDK.
-
 ## Prerequisites
-Before diving into the migration process, it's essential to establish a clear starting point and outline the capabilities of the existing SwiftUI AudioRoom application using Dolby.io SDK. This guide assumes that you are already familiar with the basics of SwiftUI and have an existing AudioRoom application built with Dolby.io SDK. If you don't you can use our demo that can be found [here](add-link) The application currently includes the following features:
+Before diving into the migration process, it's essential to establish a clear starting point and outline the capabilities of the existing SwiftUI Audio room application using Dolby.io SDK. The application currently includes the following features:
 
 - **Join/Leave a Call**: Users can join or leave audio calls, facilitating easy participation in audio conferences.
 - **View Participants**: The app displays a list or grid of participants currently in the call, making it easy to see who is involved in the conference.
@@ -32,23 +26,22 @@ As we migrate to Stream SDK, we will not only replicate these existing features 
 
 1. **Improved Audio Quality**: Leveraging Stream's superior audio processing to provide clearer and more reliable audio communication.
 2. **Enhanced User Interface**: A more intuitive and user-friendly interface, taking advantage of SwiftUI's capabilities.
-3. **Simpler code**: Implementing an Audioroom app with the Stream SDK should be easy and the code should be clear. 
+3. **Simpler code**: Implementing an Audio room app with the Stream SDK should be easy and the code should be clear. 
 4. **Request to speak**: We will implement a simple permission system, where a participants can request to talk and a host can approve or reject their request.
 
 This guide assumes that you have the following setup and knowledge:
 
-- A working SwiftUI AudioRoom application built with Dolby.io SDK.
+- A working SwiftUI Audio room application built with Dolby.io SDK (We have built demo that can be found [here](https://github.com/GetStream/audio-room-migration-from-dolby-to-stream)).
 - Basic knowledge of audio streaming concepts and audio room functionalities.
 - Familiarity with Swift and SwiftUI for iOS app development.
-- Understanding of Dolby.io SDK's core features and implementation within your existing app.
 - Access to both Dolby.io and Stream SDKs, along with necessary developer accounts and permissions.
 
 With these prerequisites in place, you'll be well-prepared to embark on the migration process, transforming your app with enhanced features and capabilities offered by the Stream SDK.
 
 ## Key Differences
-Understanding the core differences between Dolby.io SDK and Stream SDK is essential for a smooth migration process. This section highlights the significant distinctions that impact how you will adapt your existing AudioRoom application when transitioning to Stream SDK.
+Grasping the core differences between Dolby.io SDK and Stream SDK greatly aids in ensuring a smooth migration process. This section emphasizes the significant distinctions that will influence the adaptation of your existing AudioRoom application as you transition to the Stream SDK.
 
-1. **Swift Concurrency and SwiftUI Optimization**: 
+1. **Latest technologies**: 
    - **Dolby.io SDK**: This SDK does not natively support Swift concurrency, and its APIs are not fully optimized for SwiftUI. This can result in more complex integration with SwiftUI-based applications and may require additional workarounds to manage asynchronous operations.
    - **Stream SDK**: In contrast, Stream SDK is designed with native support for Swift concurrency, offering a more seamless integration with SwiftUI. This results in a more straightforward, efficient coding experience, particularly for developers working with modern Swift development practices.
 
@@ -60,21 +53,19 @@ Understanding the core differences between Dolby.io SDK and Stream SDK is essent
    - **Dolby.io SDK**: While Dolby.io SDK offers a range of features for audio conferencing, it may not provide as much flexibility when it comes to extending the SDK's capabilities, particularly regarding building a custom permission system.
    - **Stream SDK**: Stream SDK stands out with its extensibility, especially in implementing advanced features like a permission system. This flexibility allows for more granular control over user roles and permissions, which is particularly beneficial for creating more sophisticated or customized audio room experiences.
 
-In summary, the Stream SDK offers a more modern and streamlined approach, especially for developers working with SwiftUI and Swift concurrency. Its terminology and extensible nature also make it a more versatile choice for building advanced audio conferencing applications. These key differences should be kept in mind as you proceed with the migration to ensure a smooth transition and take full advantage of the Stream SDK's capabilities.
+In summary, the Stream SDK offers a more modern and streamlined approach, focusing ease of integration and stability. Its terminology and extensible nature also make it a more versatile choice for building advanced audio and video applications.
 
 ## Step-by-Step Migration
-The migration from Dolby.io SDK to Stream SDK involves a series of structured steps designed to ensure a seamless transition of your AudioRoom application. This section breaks down the migration process into manageable phases, guiding you through each critical aspect of the transition. Follow these steps closely to adapt your existing SwiftUI application to leverage the capabilities of Stream SDK effectively.
+The migration from Dolby.io SDK to Stream SDK involves a series of structured steps designed to ensure a seamless transition of your Audio room application. This section breaks down the migration process into manageable phases, guiding you through each critical aspect of the transition. Follow these steps closely to adapt your existing SwiftUI application to leverage the capabilities of Stream SDK effectively.
 
 ### 5.1 Setup and Initialization
 Both SDKs are readily accessible through all major package managers, simplifying their integration into your project. The setup and initialization process for both SDKs involves similar steps, ensuring a smooth transition. You need to make sure that you have updated your `Info.plist` with the required Microphone access key:
-- `Privacy - Microphone Usage Description` - "AudioRooms requires microphone access in order to capture and transmit audio
+- `Privacy - Microphone Usage Description` - "Audio rooms requires microphone access in order to capture and transmit audio
 
 ![Screenshot shows permissions in the .plist file](../assets/permissions.png)
 
 ### 5.2 User Authentication
-User authentication is a critical component of both Dolby.io and Stream SDKs. Although both provide demo tokens (from [Dolby.io dasboard](https://dashboard.dolby.io/dashboard/applications/) or the [AudioRoom tutorial page](https://getstream.io/video/sdk/ios/tutorial/audio-room/#step-3---create--join-a-call)), they require slightly different configurations. Below, we present the configuration steps for each SDK side by side, allowing for an easy comparison and understanding of the differences and similarities.
-
-### Dolby.io SDK Authentication:
+User authentication is a critical component of both Dolby.io and Stream SDKs. Although both provide demo tokens (from [Dolby.io dasboard](https://dashboard.dolby.io/dashboard/applications/) or the [Audio room tutorial page](https://getstream.io/video/sdk/ios/tutorial/audio-room/#step-3---create--join-a-call)), they require slightly different configurations. Below, we present the configuration steps for each SDK side by side, allowing for an easy comparison and understanding of the differences and similarities.
 
 Dolby.io SDK utilizes a specific method for user authentication. Follow these steps to configure authentication in your Dolby.io SDK implementation. Here's the code block for setting up user authentication with Dolby.io SDK:
 
@@ -86,8 +77,8 @@ VoxeetSDK.shared.initialize(accessToken: token) { closure, isExpired in
 
 let user = VTParticipantInfo(
       externalID: UUID().uuidString,
-      name: "Marting",
-      avatarURL: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/a3911/martin-mitrevski.webp"
+      name: "Obi-Wan Kenobi",
+      avatarURL: "https://picsum.photos/120"
 )
 
 VoxeetSDK.shared.session.open(info: user) { error in
@@ -108,8 +99,8 @@ private let token: String = "" // The Token can be found in the Credentials sect
 
 let user = User(
    id: userId,
-   name: "Martin", // name and imageURL are used in the UI
-   imageURL: .init(string: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/a3911/martin-mitrevski.webp")
+   name: "Obi-Wan Kenobi", // name and imageURL are used in the UI
+   imageURL: .init(string: "https://picsum.photos/120")
 )
 
  // Initialize Stream Video client
@@ -123,14 +114,12 @@ self.client = StreamVideo(
 ### 5.3 Conference/Call Management
 Managing conferences in Dolby.io SDK and calls in Stream SDK involves different approaches, particularly in how the primary object that manages the conference or call is handled and interacted with.
 
-#### Dolby.io Conference Management:
-
 In the Dolby.io SDK, the management of a conference is centered around the SDK's singleton, which houses a `ConferenceService`. This service is the key to interacting with the currently active conference. Here's a brief overview:
 
-- **Singleton Pattern**: Dolby.io SDK uses a singleton pattern to manage conferences.
+- **Singleton Pattern**: Dolby.io SDK uses a singleton pattern to manage conferences which handles the Global shared state. Unfortunately, this pattern greatly reduces testability.
 - **Conference Service**: The `ConferenceService` within the singleton is responsible for all conference-related operations.
 - **Active Conference Interaction**: The `ConferenceService` allows for interaction with the active conference, handling tasks like joining, leaving, or managing the conference.
-- **Not Swift Concurrency**: The API relies on completionHandlers to inform calling points about the result of each call.
+- **Outdated API**: The API relies on completionHandlers to inform calling points about the result of each call.
 
 ```swift
 // Create a new conference
@@ -154,10 +143,10 @@ VoxeetSDK.shared
 
 Conversely, the Stream SDK adopts a different approach. It creates Call objects from the StreamVideo client, and these call objects are then used throughout the lifecycle of the call for various operations.
 
-1. **Direct Object Creation**: Stream SDK allows for the creation of call objects directly from the StreamVideoClient.
-2. **Lifecycle Management**: The Call object in Stream SDK manages all aspects of the call's lifecycle.
-3. **Operation Handling**: This object is used for performing operations during the call, including joining, leaving, and managing call features.
-4. **Swift Concurrency**: Call's API is built with Swift Concurrency in mind, providing full support on all operations using the conveninent `try await ...`.
+- **Direct Object Creation**: Stream SDK allows the creation of call objects directly from the StreamVideo client.
+- **Lifecycle Management**: The Call object in Stream SDK manages all aspects of the call's lifecycle.
+- **Operation Handling**: This object is used for performing operations during the call, including joining, leaving, and managing call features.
+- **Swift Concurrency**: Call's API is built with Swift Concurrency in mind, providing full support on all operations using the convenient `try await` syntax.
 
 ```swift
 private let callId: String = "" // The CallId can be found in the Credentials section
@@ -166,7 +155,7 @@ private let callId: String = "" // The CallId can be found in the Credentials se
 self.call = client.call(callType: "audio_room", callId: callId)
 
 // Join the call
-// - Allows you to define the members of this audioRoom.
+// - Allows you to define the members of this Audio room.
 // - Allows you to define custom fields that will be appended on the call object.
 try await call.join(
     create: true,
@@ -183,6 +172,8 @@ try await call.join(
 )
 ```
 
+For details on joining or creating a call you can visit our docs [here](../../guides/joining-creating-calls).
+
 ### 5.4 Advanced Features
 The Stream SDK comes with a built-in permission system, providing a foundational layer for implementing custom user interaction features in your application. This system is particularly useful for managing user roles and permissions dynamically during an audio call.
 
@@ -191,7 +182,7 @@ The Stream SDK comes with a built-in permission system, providing a foundational
 
 #### Implementing "Request to Speak" Feature:
 
-With the Stream SDK's permission system, you can implement a "Request to Speak" feature, where participants can request permission to speak, and the host or moderator can grant or deny this request. This feature enhances the interactivity and orderliness of your AudioRoom, especially in scenarios with multiple participants.
+With the Stream SDK's permission system, you can implement a "Request to Speak" feature, where participants can request permission to speak, and the host or moderator can grant or deny this request. This feature enhances the interactivity and orderliness of your Audio room, especially in scenarios with multiple participants.
 
 - **User Request Handling**: Participants can send a request to speak, which is managed by the SDK's permission system.
 - **Moderator Control**: The host or moderator can easily review and respond to these requests, maintaining a smooth flow of conversation.
@@ -213,18 +204,18 @@ if let request = call.state.permissionRequests.first {
 }
 ```
 
-By integrating these advanced features, your AudioRoom application not only gains enhanced functionality but also provides a more engaging and controlled environment for users. This makes the Stream SDK a powerful tool for developing sophisticated audio conferencing applications.
+By integrating these advanced features, your Audio room application not only gains enhanced functionality but also provides a more engaging and controlled environment for users. This makes the Stream SDK a powerful tool for developing sophisticated audio conferencing applications. You can find more details about the permissions in the Stream SDK [here](../../guides/permissions-and-moderation).
 
 ## Sample Code Comparison
 
-The end result for the app built with Stream SDK is 220 lines (for a fully working AudioRoom app)
+The end result for the app built with Stream SDK is 220 lines (for a fully working Audio room app)
 ```swift
 import StreamVideoSwiftUI
 import SwiftUI
 import StreamVideo
 
 @main
-struct AudioRoomsApp: App {
+struct Audio roomsApp: App {
     @State var call: Call
     @ObservedObject var state: CallState
     @State private var callCreated: Bool = false
@@ -238,8 +229,8 @@ struct AudioRoomsApp: App {
     init() {
         let user = User(
             id: userId,
-            name: "Martin", // name and imageURL are used in the UI
-            imageURL: .init(string: "https://getstream.io/static/2796a305dd07651fcceb4721a94f4505/a3911/martin-mitrevski.webp")
+            name: "Obi-Wan Kenobi", // name and imageURL are used in the UI
+            imageURL: .init(string: "https://picsum.photos/120")
         )
 
         // Initialize Stream Video client
@@ -441,18 +432,18 @@ struct PermissionRequestsView: View {
     }
 }
 ```
-while for the one built with Dolby SDK it's close to 400 lines:
+
+While for the one built with Dolby SDK it's close to 400 lines:
+
 ```swift
 import SwiftUI
 import VoxeetSDK
 import Combine
 
 @main
-struct DolbyAudioRoomApp: App {
-    private static let token: String = """
-    eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzUxMiJ9.eyJpc3MiOiJkb2xieS5pbyIsImlhdCI6MTcwMTk1ODQ0NSwic3ViIjoid18xOEYwcFNvcVp4eFcxb2tFVGJBZz09IiwiYXV0aG9yaXRpZXMiOlsiUk9MRV9DVVNUT01FUiJdLCJ0YXJnZXQiOiJzZXNzaW9uIiwib2lkIjoiNzNkOTdhODgtZjg3Mi00ZTBjLTg2ZjItZDRjY2ZhZDRhODlmIiwiYWlkIjoiZTRmYTg2YjgtOTFmMS00YjQ5LWFkYzUtZjQ4ZTE5M2U2YWQ1IiwiYmlkIjoiOGEzNjllNDU4YzEwMDlmOTAxOGMyNTBlMDNkYTRiMjciLCJleHAiOjE3MDIwNDQ4NDV9.40cAEHUF0E7dUEqqQRFwdPo-a8GhEz_ZrhgGVL2ycbtgEYHC06302J0GQwrJghT1UnuJvdI4bH5vK8lQIIfaKg
-    """
-    private static let callId: String = "qSYrSp5SnCHX"
+struct DolbyAudio roomApp: App {
+    private static let token: String = "YOUR_DOLBY_TOKEN"
+    private static let callId: String = "A_CALL_ID"
 
     @State private var callCreated = false
     @StateObject private var viewModel: VoxeetSDKViewModel
@@ -723,7 +714,7 @@ struct LiveButtonView: View {
                 Task {
                     do {
                         try await viewModel.connectUser(
-                            name: NameGenerator.getRandomName(),
+                            name: "Obi-Wan Kenobi",
                             avatarURL: "https://picsum.photos/120"
                         )
                         try await viewModel.joinCall()
@@ -793,11 +784,11 @@ struct ParticipantsView: View {
 ```
 
 ## Support and Resources
-For comprehensive guidance on working with the Stream SDK, we recommend exploring the following tutorials provided by Stream. These resources offer in-depth insights into building various types of applications, including AudioRoom, Livestream, and Video Calling, using the Stream SDK.
+For comprehensive guidance on working with the Stream SDK, we recommend exploring the following tutorials provided by Stream. These resources offer in-depth insights into building various types of applications, including Audio room, Livestream, and Video Calling, using the Stream SDK.
 
-1. **AudioRoom Tutorial**:
-   - **Link**: [Stream AudioRoom Tutorial](https://getstream.io/video/sdk/ios/tutorial/audio-room/)
-   - **Overview**: This tutorial focuses on building an AudioRoom application. It covers everything from setup and configuration to implementing key features specific to audio conferencing.
+1. **Audio room Tutorial**:
+   - **Link**: [Stream Audio room Tutorial](https://getstream.io/video/sdk/ios/tutorial/audio-room/)
+   - **Overview**: This tutorial focuses on building an Audio room application. It covers everything from setup and configuration to implementing key features specific to audio conferencing.
    - **Useful For**: Developers looking to build or migrate audio conferencing applications.
 
 2. **Livestream Tutorial**:
@@ -810,17 +801,15 @@ For comprehensive guidance on working with the Stream SDK, we recommend explorin
    - **Overview**: This tutorial provides insights into developing a video calling feature using Stream SDK. It details the implementation of video calls, handling call states, and UI integration.
    - **Useful For**: Developers aiming to add or enhance video calling capabilities in their apps.
 
-Leveraging these tutorials will not only assist you in the migration process but also expand your understanding and skills in building diverse applications with the Stream SDK. Each tutorial is designed to address specific use cases and functionalities, making them valuable resources for developers at any skill level. Additionally, for any specific queries or support, the Stream developer community and their support team are available to assist you.
+Leveraging these tutorials will not only assist you in the migration process but also expand your understanding and skills in building diverse applications with the Stream SDK. Each tutorial is designed to address specific use cases and functionalities, making them valuable resources for developers at any skill level. Additionally, for any specific queries or support, the Stream developer community and our support team are available to assist you.
 
 
 ## Conclusion
 
 As we reach the end of this migration guide, it's clear that the Stream SDK stands out as a more feature-rich and user-friendly option compared to Dolby.io SDK, especially for developers working in the modern iOS ecosystem. Stream's commitment to leveraging the latest technologies in Swift and SwiftUI makes it not only a future-proof choice but also ensures a smoother and more efficient development experience.
 
-The Stream SDK's extensive feature set, including its built-in permission system, advanced call management capabilities, and optimized support for SwiftUI, offers a comprehensive toolkit for building sophisticated Voice and Video applications. These features not only enhance the functionality of your app but also provide a more engaging user experience.
+Stream SDK's rich features, including a built-in permission system and advanced call management, along with SwiftUI optimization, offer a comprehensive toolkit for sophisticated voice and video applications, enhancing functionality and user engagement. Its use of modern Swift technologies like concurrency streamlines coding, reduces development time, and boosts app performance, making it a highly beneficial choice for developers.
 
-Furthermore, Stream's utilization of modern Swift technologies, like concurrency, makes it a more appealing option for developers looking to harness the full potential of the latest iOS development trends. This modern approach simplifies the coding process, reduces development time, and improves overall app performance.
-
-In summary, by migrating to the Stream SDK, you're not just updating your tech stack; you're taking a significant step forward in delivering a superior audio conferencing experience to your users. Stream SDK empowers you to build more dynamic, scalable, and feature-rich applications with ease and efficiency. Embrace this migration as an opportunity to elevate your AudioRoom app to new heights, leveraging the best of what modern technology has to offer.
+In summary, migrating to the Stream SDK complements your existing tech stack, seamlessly integrating to enhance your audio conferencing experience. This SDK empowers you to develop more dynamic, scalable, and feature-rich applications with ease, blending effortlessly with both modern and traditional technologies. This transition represents an opportunity to elevate the experience of you Audio room app.
 
 We hope this guide has been a valuable resource in your migration journey and look forward to seeing the innovative applications you will create with the Stream SDK.
