@@ -1,6 +1,7 @@
 ---
 title: Migration Guide from Dolby.io to Stream SDK
 ---
+import { TokenSnippet } from '../../../shared/_tokenSnippet.jsx';
 
 ## Summary
 This migration guide is designed to assist developers in transitioning their Audio room applications from the Dolby.io Conference SDK to the Stream SDK. Our aim is to provide a comprehensive, step-by-step walkthrough that not only highlights the differences between the two SDKs but also showcases the unique features and enhancements offered by Stream. Whether you are looking to leverage advanced functionalities, improve performance, or simply explore new avenues with Stream, this guide will equip you with all the necessary tools and knowledge for a seamless migration.
@@ -67,7 +68,7 @@ Both SDKs are readily accessible through all major package managers, simplifying
 ### 5.2 User Authentication
 User authentication is a critical component of both Dolby.io and Stream SDKs. Although both provide demo tokens (from [Dolby.io dasboard](https://dashboard.dolby.io/dashboard/applications/) or the [Audio room tutorial page](https://getstream.io/video/sdk/ios/tutorial/audio-room/#step-3---create--join-a-call)), they require slightly different configurations. Below, we present the configuration steps for each SDK side by side, allowing for an easy comparison and understanding of the differences and similarities.
 
-Dolby.io SDK utilizes a specific method for user authentication. Follow these steps to configure authentication in your Dolby.io SDK implementation. Here's the code block for setting up user authentication with Dolby.io SDK:
+Dolby.io SDK utilizes a specific method for user authentication. Follow these steps to configure authentication in your implementation. Here's the code block for setting up user authentication with Dolby.io SDK:
 
 ```swift
 let token = "THE_YOU_GOT_TOKEN_FROM_DASHBOARD"
@@ -91,11 +92,13 @@ VoxeetSDK.shared.session.open(info: user) { error in
 ```
 
 While Stream's SDK does that with the following code:
+
 ```swift
 private var client: StreamVideo
 private let apiKey: String = "" // The API key can be found in the Credentials section
-private let userId: String = "" // The User Id can be found in the Credentials section
 private let token: String = "" // The Token can be found in the Credentials section
+private let userId: String = "" // The User Id can be found in the Credentials section
+private let callId: String = "" // The CallId can be found in the Credentials section
 
 let user = User(
    id: userId,
@@ -110,6 +113,8 @@ self.client = StreamVideo(
    token: .init(stringLiteral: token)
 )
 ```
+
+<TokenSnippet sampleApp='audio-rooms'/>
 
 ### 5.3 Conference/Call Management
 Managing conferences in Dolby.io SDK and calls in Stream SDK involves different approaches, particularly in how the primary object that manages the conference or call is handled and interacted with.
@@ -149,7 +154,6 @@ Conversely, the Stream SDK adopts a different approach. It creates Call objects 
 - **Swift Concurrency**: Call's API is built with Swift Concurrency in mind, providing full support on all operations using the convenient `try await` syntax.
 
 ```swift
-private let callId: String = "" // The CallId can be found in the Credentials section
 
 // Create the call object
 self.call = client.call(callType: "audio_room", callId: callId)
