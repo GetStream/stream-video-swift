@@ -16,7 +16,8 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
             let view = MicrophoneCheckView(
                 audioLevels: (0..<count).map { 0.2 * Float($0) },
                 microphoneOn: true,
-                isSilent: false
+                isSilent: false, 
+                isPinned: false
             )
             .frame(width: 100, height: 50)
             AssertSnapshot(
@@ -32,7 +33,8 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
         let view = MicrophoneCheckView(
             audioLevels: [],
             microphoneOn: true,
-            isSilent: true
+            isSilent: true,
+            isPinned: false
         )
         .frame(width: 100, height: 50)
         AssertSnapshot(
@@ -46,7 +48,23 @@ final class MicrophoneCheckView_Tests: StreamVideoUITestCase {
         let view = MicrophoneCheckView(
             audioLevels: [],
             microphoneOn: false,
-            isSilent: false
+            isSilent: false,
+            isPinned: false
+        )
+        .frame(width: 100, height: 50)
+        AssertSnapshot(
+            view,
+            variants: [.defaultLight],
+            size: sizeThatFits
+        )
+    }
+
+    func test_microphoneCheckView_pinned_snapshot() throws {
+        let view = MicrophoneCheckView(
+            audioLevels: [],
+            microphoneOn: false,
+            isSilent: false,
+            isPinned: true
         )
         .frame(width: 100, height: 50)
         AssertSnapshot(

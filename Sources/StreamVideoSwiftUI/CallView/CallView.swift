@@ -83,7 +83,7 @@ public struct CallView<Factory: ViewFactory>: View {
 
     @ViewBuilder
     private func contentView(_ availableFrame: CGRect) -> some View {
-        if viewModel.localVideoPrimary {
+        if viewModel.localVideoPrimary, viewModel.participantsLayout == .grid {
             localVideoView(bounds: availableFrame)
                 .accessibility(identifier: "localVideoView")
         } else if

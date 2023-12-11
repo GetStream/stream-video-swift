@@ -39,7 +39,8 @@ public struct LocalParticipantViewModifier: ViewModifier {
                         ParticipantMicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
-                            isSilent: microphoneChecker.isSilent
+                            isSilent: microphoneChecker.isSilent,
+                            isPinned: localParticipant.isPinned
                         )
 
                         if showAllInfo {
@@ -107,7 +108,8 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
                         ParticipantMicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
-                            isSilent: microphoneChecker.isSilent
+                            isSilent: microphoneChecker.isSilent,
+                            isPinned: localParticipant.isPinned
                         )
 
                         if showAllInfo {
@@ -148,12 +150,14 @@ internal struct ParticipantMicrophoneCheckView: View {
     var audioLevels: [Float]
     var microphoneOn: Bool
     var isSilent: Bool
+    var isPinned: Bool
 
     var body: some View {
         MicrophoneCheckView(
             audioLevels: audioLevels,
             microphoneOn: microphoneOn,
-            isSilent: isSilent
+            isSilent: isSilent,
+            isPinned: isPinned
         )
         .accessibility(identifier: "microphoneCheckView")
     }

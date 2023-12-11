@@ -168,7 +168,8 @@ struct CameraCheckView: View {
                         MicrophoneCheckView(
                             audioLevels: microphoneChecker.audioLevels,
                             microphoneOn: callSettings.audioOn,
-                            isSilent: microphoneChecker.isSilent
+                            isSilent: microphoneChecker.isSilent,
+                            isPinned: false
                         )
                         .accessibility(identifier: "microphoneCheckView")
                         Spacer()
