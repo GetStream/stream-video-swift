@@ -58,39 +58,55 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
 }
 
 public struct VideoRendererView: UIViewRepresentable {
-            
+
     public typealias UIViewType = VideoRenderer
-    
+
     @Injected(\.utils) var utils
     @Injected(\.colors) var colors
 
     var id: String
-    var size: CGSize
-    var contentMode: UIView.ContentMode
-    var handleRendering: (VideoRenderer) -> Void
     
+    var size: CGSize
+
+    var contentMode: UIView.ContentMode
+    
+    /// The parameter is used as an optimisation that works with the ViewRenderer Cache that's in place.
+    /// In cases where there is no video available, we will render a dummy VideoRenderer that won't try
+    /// to get a handle on the cached VideoRenderer, resolving the issue where video tracks may get dark.
+    var showVideo: Bool
+
+    var handleRendering: (VideoRenderer) -> Void
+
     public init(
         id: String,
         size: CGSize,
         contentMode: UIView.ContentMode = .scaleAspectFill,
+        showVideo: Bool = true,
         handleRendering: @escaping (VideoRenderer) -> Void
     ) {
         self.id = id
         self.size = size
         self.handleRendering = handleRendering
+        self.showVideo = showVideo
         self.contentMode = contentMode
     }
 
     public func makeUIView(context: Context) -> VideoRenderer {
-        let view = utils.videoRendererFactory.view(for: id, size: size)
+        let view = showVideo
+        ? utils.videoRendererFactory.view(for: id, size: size)
+        : VideoRenderer()
         view.videoContentMode = contentMode
         view.backgroundColor = colors.participantBackground
-        handleRendering(view)
+        if showVideo {
+            handleRendering(view)
+        }
         return view
     }
     
     public func updateUIView(_ uiView: VideoRenderer, context: Context) {
-        handleRendering(uiView)
+        if showVideo {
+            handleRendering(uiView)
+        }
     }
 }
 
