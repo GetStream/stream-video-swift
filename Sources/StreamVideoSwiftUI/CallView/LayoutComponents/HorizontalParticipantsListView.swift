@@ -98,8 +98,7 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
                     )
                     // Observe visibility changes.
                     .visibilityObservation(
-                        in: barFrame,
-                        hasVideo: participant.hasVideo
+                        in: barFrame
                     ) { isVisible in
                         Task {
                             await call?.changeTrackVisibility(
