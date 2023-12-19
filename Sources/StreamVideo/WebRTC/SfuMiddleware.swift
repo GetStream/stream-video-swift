@@ -238,17 +238,23 @@ class SfuMiddleware: EventMiddleware {
         guard let participant = await state.callParticipants[userId] else { return }
         if event.type == .audio {
             let updated = participant.withUpdated(audio: false)
+            if event.cause != .userMuted {
+                await state.removeAudioTrack(id: userId)
+            }
             await state.update(callParticipant: updated)
-            await state.removeAudioTrack(id: userId)
         } else if event.type == .video {
             let updated = participant.withUpdated(video: false)
-            await state.removeTrack(id: updated.trackLookupPrefix ?? updated.id)
+            if event.cause != .userMuted {
+                await state.removeTrack(id: updated.trackLookupPrefix ?? updated.id)
+            }
             await state.update(callParticipant: updated)
         } else if event.type == .screenShare {
             let updated = participant
                 .withUpdated(screensharing: false)
                 .withUpdated(screensharingTrack: nil)
-            await state.removeScreensharingTrack(id: updated.trackLookupPrefix ?? updated.id)
+            if event.cause != .userMuted {
+                await state.removeScreensharingTrack(id: updated.trackLookupPrefix ?? updated.id)
+            }
             await state.update(callParticipant: updated)
         }
     }

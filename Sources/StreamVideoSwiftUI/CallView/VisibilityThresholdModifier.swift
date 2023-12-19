@@ -11,7 +11,7 @@ import SwiftUI
 /// "on screen".
 ///
 /// When the visibility state of the view changes (i.e., it transitions between being "on screen" and "off screen"),
-/// a callback is triggered to notify the user of this change. This can be particularly useful in scenarios where 
+/// a callback is triggered to notify the user of this change. This can be particularly useful in scenarios where
 /// resource management is crucial, such as video playback or dynamic content loading, where actions might
 /// be triggered based on whether a view is currently visible to the user.
 ///
@@ -72,10 +72,10 @@ struct VisibilityThresholdModifier: ViewModifier {
 
         /// Check if the content view is vertically within the parent's bounds.
         let verticalVisible = (minY + requiredHeight <= bounds.maxY && minY >= bounds.minY) ||
-                              (maxY - requiredHeight >= bounds.minY && maxY <= bounds.maxY)
+        (maxY - requiredHeight >= bounds.minY && maxY <= bounds.maxY)
         /// Check if the content view is horizontally within the parent's bounds.
         let horizontalVisible = (minX + requiredWidth <= bounds.maxX && minX >= bounds.minX) ||
-                                (maxX - requiredWidth >= bounds.minX && maxX <= bounds.maxX)
+        (maxX - requiredWidth >= bounds.minX && maxX <= bounds.maxX)
 
         return (verticalVisible, horizontalVisible)
     }
@@ -85,31 +85,26 @@ extension View {
     /// Attaches a visibility observation modifier to the view.
     ///
     /// - Parameters:
-    ///   - bounds: The bounds of the parent view or viewport within which the visibility of the view will 
+    ///   - bounds: The bounds of the parent view or viewport within which the visibility of the view will
     ///   be tracked.
     ///   - threshold: A percentage value (defaulted to 0.3 or 30%) representing how much of the view
     ///   should be visible within the `bounds` before it's considered "on screen".
-    ///   - changeHandler: A closure that gets triggered with a Boolean value indicating the visibility 
+    ///   - changeHandler: A closure that gets triggered with a Boolean value indicating the visibility
     ///   state of the view whenever it changes.
     ///
     /// - Returns: A modified view that observes its visibility status within the specified bounds.
     @ViewBuilder
     func visibilityObservation(
         in bounds: CGRect,
-        hasVideo: Bool,
         threshold: CGFloat = 0.3,
         changeHandler: @escaping (Bool) -> Void
     ) -> some View {
-        if hasVideo {
-            modifier(
-                VisibilityThresholdModifier(
-                    in: bounds,
-                    threshold: threshold,
-                    changeHandler: changeHandler
-                )
+        modifier(
+            VisibilityThresholdModifier(
+                in: bounds,
+                threshold: threshold,
+                changeHandler: changeHandler
             )
-        } else {
-            self
-        }
+        )
     }
 }

@@ -483,7 +483,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
-        guard let participant = await state.callParticipants[participant.id] else {
+        guard
+            let participant = await state.callParticipants[participant.id],
+            participant.trackSize != trackSize
+        else {
             return
         }
         let updated = participant.withUpdated(trackSize: trackSize)
