@@ -28,8 +28,27 @@ struct DeeplinkAdapter {
         guard canHandle(url: url) else {
             return (.empty, nil)
         }
+        
+        // Fetch the callId from the path components
+        // e.g https://getstream.io/video/demos/join/path-call-id
+        let callPathId: String? = {
+            guard
+                url.pathComponents.count == 5,
+                let callId = url.pathComponents.last
+            else {
+                return nil
+            }
+            return callId
+        }()
 
-        guard let callId = url.queryParameters["id"] else {
+        // Fetch the callId from the query parameters
+        // e.g https://getstream.io/video/demos?id=parameter-call-id
+        let callParameterId = url.queryParameters["id"]
+
+        guard 
+            // Use the the callPathId with higher priority if it's available.
+            let callId = callPathId ?? callParameterId
+         else {
             log.warning("Unable to handle deeplink because id was missing.")
             return (.empty, nil)
         }

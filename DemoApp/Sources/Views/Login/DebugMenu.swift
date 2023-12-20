@@ -20,6 +20,8 @@ struct DebugMenu: View {
     @State private var baseURL: AppEnvironment.BaseURL = AppEnvironment.baseURL {
         didSet {
             switch baseURL {
+            case .staging:
+                AppEnvironment.baseURL = .staging
             case .pronto:
                 AppEnvironment.baseURL = .pronto
             case .demo:
