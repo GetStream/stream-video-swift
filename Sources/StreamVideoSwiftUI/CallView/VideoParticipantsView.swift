@@ -350,6 +350,7 @@ public struct VideoCallParticipantView: View {
             id: id,
             size: availableFrame.size,
             contentMode: contentMode,
+            showVideo: showVideo,
             handleRendering: { [weak call] view in
                 guard call != nil else { return }
                 view.handleViewRendering(for: participant) { size, participant in
