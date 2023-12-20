@@ -29,11 +29,14 @@ struct DeeplinkAdapter {
             return (.empty, nil)
         }
         
+        let pathComponentsCount = url.pathComponents.endIndex
+
         // Fetch the callId from the path components
-        // e.g https://getstream.io/video/demos/join/path-call-id
+        // e.g https://getstream.io/join/path-call-id
         let callPathId: String? = {
             guard
-                url.pathComponents.count == 5,
+                pathComponentsCount >= 2,
+                url.pathComponents[pathComponentsCount - 2] == "join",
                 let callId = url.pathComponents.last
             else {
                 return nil
