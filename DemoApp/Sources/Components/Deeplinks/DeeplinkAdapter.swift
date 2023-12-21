@@ -6,10 +6,17 @@ import Foundation
 import StreamVideo
 
 struct DeeplinkInfo: Equatable {
+    var url: URL?
     var callId: String
     var callType: String
+    var baseURL: AppEnvironment.BaseURL
 
-    static let empty = DeeplinkInfo(callId: "", callType: "")
+    static let empty = DeeplinkInfo(
+        url: nil,
+        callId: "",
+        callType: "",
+        baseURL: AppEnvironment.baseURL
+    )
 }
 
 struct DeeplinkAdapter {
@@ -18,10 +25,12 @@ struct DeeplinkAdapter {
             return true
         }
 
-        return AppEnvironment
+        let result = AppEnvironment
             .supportedDeeplinks
             .compactMap(\.deeplinkURL.host)
             .first { url.host == $0 } != nil
+
+        return result
     }
 
     func handle(url: URL) -> (deeplinkInfo: DeeplinkInfo, user: User?) {
@@ -59,6 +68,20 @@ struct DeeplinkAdapter {
         let callType = url.queryParameters["type"] ?? "default"
 
         log.debug("Deeplink handled was: \(url)")
-        return (DeeplinkInfo(callId: callId, callType: callType), nil)
+        let host = url.host
+        let baseURL: AppEnvironment.BaseURL = AppEnvironment
+            .BaseURL
+            .allCases
+            .first { $0.url.host == host } ?? AppEnvironment.baseURL
+
+        return (
+            DeeplinkInfo(
+                url: url,
+                callId: callId,
+                callType: callType,
+                baseURL: baseURL
+            ),
+            nil
+        )
     }
 }

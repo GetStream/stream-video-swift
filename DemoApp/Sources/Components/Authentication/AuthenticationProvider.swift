@@ -38,6 +38,8 @@ enum AuthenticationProvider {
                     return "pronto"
                 case .pronto:
                     return "pronto"
+                case .legacy:
+                    return "pronto"
                 case .demo:
                     return "demo"
                 }

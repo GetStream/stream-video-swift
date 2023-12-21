@@ -13,6 +13,8 @@ struct SimpleCallingView: View {
     @Injected(\.appearance) var appearance
 
     @State var text = ""
+    @State private var changeEnvironmentPromptForURL: URL?
+    @State private var showChangeEnvironmentPrompt: Bool = false
 
     private var callId: String
     @ObservedObject var appState = AppState.shared
@@ -57,7 +59,7 @@ struct SimpleCallingView: View {
                         .foregroundColor(appearance.colors.text)
                         .padding(.all, 12)
 
-                    DemoQRCodeScannerButton(viewModel: viewModel) { self.text = $0 ?? self.text }
+                    DemoQRCodeScannerButton(viewModel: viewModel) { handleDeeplink($0) }
                 }
                 .background(Color(appearance.colors.background))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -73,6 +75,22 @@ struct SimpleCallingView: View {
                     .disabled(appState.loading || text.isEmpty)
                 }
                 .disabled(appState.loading || text.isEmpty)
+            }
+            .alert(isPresented: $showChangeEnvironmentPrompt) {
+                if let url = changeEnvironmentPromptForURL {
+                    return Alert(
+                        title: Text("Change environment"),
+                        message: Text("In order to access the call you scanned, we will need to change the environment you are logged in. Would you like to proceed?"),
+                        primaryButton: .default(Text("OK")) { Router.shared.handle(url: url) },
+                        secondaryButton: .cancel()
+                    )
+                } else {
+                    return Alert(
+                        title: Text("Invalid URL"),
+                        message: Text("The URL contained in the QR you scanned was invalid. Please try again."),
+                        dismissButton: .cancel()
+                    )
+                }
             }
 
             HStack {
@@ -131,5 +149,27 @@ struct SimpleCallingView: View {
                 viewModel.joinCall(callType: callType, callId: callId)
             }
         }
+    }
+
+    private func handleDeeplink(_ deeplinkInfo: DeeplinkInfo?) {
+        guard let deeplinkInfo else {
+            self.text = ""
+            return
+        }
+
+        if deeplinkInfo.baseURL == AppEnvironment.baseURL {
+            self.text = deeplinkInfo.callId
+        } else if let url = deeplinkInfo.url {
+            self.changeEnvironmentPromptForURL = url
+            Task { @MainActor in
+                self.showChangeEnvironmentPrompt = true
+            }
+        }
+    }
+}
+
+extension URL: Identifiable {
+    public var id: ObjectIdentifier {
+        .init(self.absoluteString as NSString)
     }
 }

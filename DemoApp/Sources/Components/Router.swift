@@ -61,12 +61,23 @@ final class Router: ObservableObject {
             return
         }
 
-        log.debug("Request to handle deeplink \(url) accepted ✅")
-        if streamVideoUI != nil {
-            appState.deeplinkInfo = deeplinkInfo
-        } else {
+        if 
+            deeplinkInfo.baseURL != AppEnvironment.baseURL,
+            let currentUser = appState.currentUser
+        {
             Task {
-                try await handleGuestUser(deeplinkInfo: deeplinkInfo)
+                await appState.logout()
+                AppEnvironment.baseURL = deeplinkInfo.baseURL
+                try await handleLoggedInUserCredentials(.init(userInfo: currentUser, token: .empty), deeplinkInfo: deeplinkInfo)
+            }
+        } else {
+            log.debug("Request to handle deeplink \(url) accepted ✅")
+            if streamVideoUI != nil {
+                appState.deeplinkInfo = deeplinkInfo
+            } else {
+                Task {
+                    try await handleGuestUser(deeplinkInfo: deeplinkInfo)
+                }
             }
         }
     }
