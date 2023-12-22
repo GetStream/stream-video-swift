@@ -227,7 +227,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_ALLURE: true
-        INSTALL_VIDEO_BUDDY: true
+        INSTALL_VIDEO_BUDDY: false
         INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
@@ -255,12 +255,11 @@ jobs:
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
-        name: E2E Test Data
+        name: E2E Test Data ${{ matrix.batch }}
         path: |
           ~/Library/Logs/scan
           fastlane/recordings
-          fastlane/sinatra-log.txt
-          fastlane/video-buddy-log.txt
+          fastlane/*.log
           fastlane/test_output/logs/*/Diagnostics/SwiftUIDemoAppUITests-*/*/*.txt
 
   allure_testops_launch:

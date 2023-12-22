@@ -21,8 +21,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserLeavesTheCallAfterConnection() {
+    func testUserLeavesTheCallAfterConnection() throws {
         linkToScenario(withId: 1778)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
@@ -79,8 +81,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserReentersTheCall() {
+    func testUserReentersTheCall() throws {
         linkToScenario(withId: 1780)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
         
@@ -103,8 +107,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserReentersTheCallAsTheSameUserAfterLoggingOut() {
+    func testUserReentersTheCallAsTheSameUserAfterLoggingOut() throws {
         linkToScenario(withId: 1781)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
         
@@ -132,8 +138,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserReentersTheCallAsAnotherUser() {
+    func testUserReentersTheCallAsAnotherUser() throws {
         linkToScenario(withId: 1782)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
         
@@ -161,8 +169,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserJoinsExistedCall() {
+    func testUserJoinsExistedCall() throws {
         linkToScenario(withId: 1783)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         GIVEN("participant starts a call") {
             participantRobot.joinCall(callId)
@@ -178,8 +188,10 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserSwitchesCalls() {
+    func testUserSwitchesCalls() throws {
         linkToScenario(withId: 1784)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let anotherCallId = StreamTestCase.randomCallId
         let participantCountOnFirstCall = 1

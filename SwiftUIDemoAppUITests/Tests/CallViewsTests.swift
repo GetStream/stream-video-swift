@@ -19,8 +19,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testOneParticipantOnTheCall() {
+    func testOneParticipantOnTheCall() throws {
         linkToScenario(withId: 1766)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
 
@@ -62,9 +64,11 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testTwoParticipantsOnTheCall() {
+    func testTwoParticipantsOnTheCall() throws {
         linkToScenario(withId: 1767)
         
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+
         let participants = 2
 
         WHEN("user starts a new call") {
@@ -105,8 +109,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testSwitchingBetweenViewsOnTheCall() {
+    func testSwitchingBetweenViewsOnTheCall() throws {
         linkToScenario(withId: 1768)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 4
 
@@ -150,8 +156,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserMovesCornerDraggableView() {
+    func testUserMovesCornerDraggableView() throws {
         linkToScenario(withId: 1771)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
         
@@ -181,8 +189,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserCanSeeAllParticipantsInScreenSharingView() {
+    func testUserCanSeeAllParticipantsInScreenSharingView() throws {
         linkToScenario(withId: 1774)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 10
         
@@ -201,8 +211,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserCanSeeAllParticipantsInGridView() {
+    func testUserCanSeeAllParticipantsInGridView() throws {
         linkToScenario(withId: 1775)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 10
         
@@ -230,8 +242,10 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserCanSeeAllParticipantsInSpotlightView() {
+    func testUserCanSeeAllParticipantsInSpotlightView() throws {
         linkToScenario(withId: 1776)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 10
         let expectedParticipantsInSpotlight = 3

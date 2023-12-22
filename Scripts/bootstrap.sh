@@ -43,24 +43,29 @@ puts "Bootstrap Mint dependencies"
 mint bootstrap --link
 
 if [[ ${INSTALL_ALLURE-default} == true ]]; then
-  puts "Install allurectl"
+  puts "Install allurectl v${ALLURECTL_VERSION}"
   DOWNLOAD_URL="https://github.com/allure-framework/allurectl/releases/download/${ALLURECTL_VERSION}/allurectl_darwin_amd64"
   curl -sL "${DOWNLOAD_URL}" -o ./fastlane/allurectl
   chmod +x ./fastlane/allurectl
 
-  puts "Install xcresults"
+  puts "Install xcresults v${XCRESULTS_VERSION}"
   DOWNLOAD_URL="https://github.com/eroshenkoam/xcresults/releases/download/${XCRESULTS_VERSION}/xcresults"
   curl -sL "${DOWNLOAD_URL}" -o ./fastlane/xcresults
   chmod +x ./fastlane/xcresults
 fi
 
 if [[ ${INSTALL_VIDEO_BUDDY-default} == true ]]; then
+  puts "Install playwright v${PLAYWRIGHT_VERSION}"
+  npm install -g "playwright@${PLAYWRIGHT_VERSION}"
+  npx playwright install chromium
+
+  puts "Install stream-video-buddy v${STREAM_VIDEO_BUDDY_VERSION}"
   npm install -g "https://github.com/GetStream/stream-video-buddy#${STREAM_VIDEO_BUDDY_VERSION}"
-  npx playwright install
 fi
 
 if [[ ${INSTALL_YEETD-default} == true ]]; then
   PACKAGE="yeetd-normal.pkg"
+  puts "Install yeetd v${YEETD_VERSION}"
   wget "https://github.com/biscuitehh/yeetd/releases/download/${YEETD_VERSION}/${PACKAGE}"
   sudo installer -pkg ${PACKAGE} -target /
   puts "Running yeetd daemon"

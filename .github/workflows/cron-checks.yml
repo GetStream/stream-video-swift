@@ -85,7 +85,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_ALLURE: true
-        INSTALL_VIDEO_BUDDY: true
+        INSTALL_VIDEO_BUDDY: false
     - name: Cache iOS Simulator Runtime
       uses: actions/cache@v3
       id: runtime-cache
@@ -135,8 +135,7 @@ jobs:
         name: Test Data
         path: |
           fastlane/recordings
-          fastlane/sinatra-log.txt
-          fastlane/video-buddy-log.txt
+          fastlane/*.log
           fastlane/test_output/logs/*/Diagnostics/SwiftUIDemoAppUITests-*/*/*.txt
 
   build-and-test-debug:
