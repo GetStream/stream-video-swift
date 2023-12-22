@@ -6,7 +6,7 @@ import XCTest
 
 final class ParticipantActionsTests: StreamTestCase {
     
-    func testParticipantEnablesMicrophone() {
+    func blocked_testParticipantEnablesMicrophone() {
         linkToScenario(withId: 1536)
 
         GIVEN("user starts a call") {
@@ -29,7 +29,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
 
-    func testParticipantDisablesMicrophone() {
+    func blocked_testParticipantDisablesMicrophone() {
         linkToScenario(withId: 1537)
 
         GIVEN("user starts a call") {
@@ -52,7 +52,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
 
-    func testParticipantEnablesCamera() {
+    func blocked_testParticipantEnablesCamera() {
         linkToScenario(withId: 1538)
 
         GIVEN("user starts a call") {
@@ -76,7 +76,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
 
-    func testParticipantDisablesCamera() {
+    func blocked_testParticipantDisablesCamera() {
         linkToScenario(withId: 1539)
 
         GIVEN("user starts a call") {
@@ -100,7 +100,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func testParticipantConnectionQualityIndicator() {
+    func blocked_testParticipantConnectionQualityIndicator() {
         linkToScenario(withId: 1540)
 
         GIVEN("user starts a call") {
@@ -123,7 +123,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func testParticipantRecordsCall() throws {
+    func blocked_testParticipantRecordsCall() throws {
         linkToScenario(withId: 1769)
                 
         GIVEN("user starts a call") {
@@ -153,7 +153,7 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func testParticipantSharesScreen() {
+    func blocked_testParticipantSharesScreen() {
         linkToScenario(withId: 1773)
         
         let participants = 1

@@ -30,6 +30,7 @@ enum AuthenticationProvider {
         if 
             AppEnvironment.configuration.isTest,
             AppEnvironment.contains(.mockJWT) {
+            AppState.shared.apiKey = "hd8szvscpxvd"
             return fetchTestToken(for: userId)
         } else {
             let environment = {

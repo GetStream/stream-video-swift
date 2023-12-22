@@ -83,13 +83,16 @@ docusaurus/.env
 reports/
 .scannerwork/
 push_payload.json
-sinatra-log.txt
-video-buddy-log.txt
-video-buddy-session.json
+sinatra.log
 derived_data/
 spm_cache/
 .buildcache
 buildcache
+
+# Stream Video Buddy
+video-buddy-server.log
+video-buddy-console.log
+video-buddy-session.json
 
 # Ignore Products folder
 Products/

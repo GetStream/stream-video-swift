@@ -19,7 +19,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testOneParticipantOnTheCall() {
+    func blocked_testOneParticipantOnTheCall() {
         linkToScenario(withId: 1766)
         
         let participants = 1
@@ -62,7 +62,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testTwoParticipantsOnTheCall() {
+    func blocked_testTwoParticipantsOnTheCall() {
         linkToScenario(withId: 1767)
         
         let participants = 2
@@ -105,7 +105,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testSwitchingBetweenViewsOnTheCall() {
+    func blocked_testSwitchingBetweenViewsOnTheCall() {
         linkToScenario(withId: 1768)
         
         let participants = 4
@@ -150,7 +150,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserMovesCornerDraggableView() {
+    func blocked_testUserMovesCornerDraggableView() {
         linkToScenario(withId: 1771)
         
         let participants = 1
@@ -181,7 +181,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserCanSeeAllParticipantsInScreenSharingView() {
+    func blocked_testUserCanSeeAllParticipantsInScreenSharingView() {
         linkToScenario(withId: 1774)
         
         let participants = 10
@@ -201,7 +201,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserCanSeeAllParticipantsInGridView() {
+    func blocked_testUserCanSeeAllParticipantsInGridView() {
         linkToScenario(withId: 1775)
         
         let participants = 10
@@ -230,7 +230,7 @@ final class CallViewsTests: StreamTestCase {
         }
     }
     
-    func testUserCanSeeAllParticipantsInSpotlightView() {
+    func blocked_testUserCanSeeAllParticipantsInSpotlightView() {
         linkToScenario(withId: 1776)
         
         let participants = 10

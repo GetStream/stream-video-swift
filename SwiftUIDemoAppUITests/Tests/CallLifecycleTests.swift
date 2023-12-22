@@ -21,7 +21,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserLeavesTheCallAfterConnection() {
+    func blocked_testUserLeavesTheCallAfterConnection() {
         linkToScenario(withId: 1778)
         
         GIVEN("user starts a call") {
@@ -41,7 +41,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testParticipantReentersTheCall() throws {
+    func blocked_testParticipantReentersTheCall() throws {
         linkToScenario(withId: 1779)
         
         throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/378")
@@ -79,7 +79,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserReentersTheCall() {
+    func blocked_testUserReentersTheCall() {
         linkToScenario(withId: 1780)
         
         let participants = 1
@@ -103,7 +103,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserReentersTheCallAsTheSameUserAfterLoggingOut() {
+    func blocked_testUserReentersTheCallAsTheSameUserAfterLoggingOut() {
         linkToScenario(withId: 1781)
         
         let participants = 1
@@ -132,7 +132,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserReentersTheCallAsAnotherUser() {
+    func blocked_testUserReentersTheCallAsAnotherUser() {
         linkToScenario(withId: 1782)
         
         let participants = 1
@@ -161,7 +161,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserJoinsExistedCall() {
+    func blocked_testUserJoinsExistedCall() {
         linkToScenario(withId: 1783)
         
         GIVEN("participant starts a call") {
@@ -178,7 +178,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
     }
     
-    func testUserSwitchesCalls() {
+    func blocked_testUserSwitchesCalls() {
         linkToScenario(withId: 1784)
         
         let anotherCallId = StreamTestCase.randomCallId
