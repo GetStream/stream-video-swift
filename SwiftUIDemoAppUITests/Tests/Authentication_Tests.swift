@@ -26,8 +26,10 @@ final class Authentication_Tests: StreamTestCase {
         sleep(UInt32(jwtExpirationTimeoutInSeconds)!)
     }
     
-    func blocked_test_tokenExpiresBeforeUserLogsIn() throws {
+    func test_tokenExpiresBeforeUserLogsIn() throws {
         linkToScenario(withId: 2562)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         GIVEN("token expires") {
             app.setLaunchArguments(.invalidateJwt)
@@ -50,8 +52,10 @@ final class Authentication_Tests: StreamTestCase {
         }
     }
     
-    func blocked_test_tokenExpiresAfterUserLoggedIn() {
+    func test_tokenExpiresAfterUserLoggedIn() throws {
         linkToScenario(withId: 2563)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user logs in") {
             app.setEnvironmentVariables([.jwtExpiration: jwtExpirationTimeoutInSeconds])
@@ -77,8 +81,10 @@ final class Authentication_Tests: StreamTestCase {
         }
     }
 
-    func blocked_test_tokenExpiresWhenUserIsInBackground() {
+    func test_tokenExpiresWhenUserIsInBackground() throws {
         linkToScenario(withId: 2564)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user logs in") {
             app.setEnvironmentVariables([.jwtExpiration: jwtExpirationTimeoutInSeconds])

@@ -6,8 +6,10 @@ import XCTest
 
 final class ParticipantActionsTests: StreamTestCase {
     
-    func blocked_testParticipantEnablesMicrophone() {
+    func testParticipantEnablesMicrophone() throws {
         linkToScenario(withId: 1536)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -29,8 +31,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
 
-    func blocked_testParticipantDisablesMicrophone() {
+    func testParticipantDisablesMicrophone() throws {
         linkToScenario(withId: 1537)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -52,8 +56,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
 
-    func blocked_testParticipantEnablesCamera() {
+    func testParticipantEnablesCamera() throws {
         linkToScenario(withId: 1538)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -76,8 +82,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
 
-    func blocked_testParticipantDisablesCamera() {
+    func testParticipantDisablesCamera() throws {
         linkToScenario(withId: 1539)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -100,8 +108,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func blocked_testParticipantConnectionQualityIndicator() {
+    func testParticipantConnectionQualityIndicator() throws {
         linkToScenario(withId: 1540)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -123,8 +133,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func blocked_testParticipantRecordsCall() throws {
+    func testParticipantRecordsCall() throws {
         linkToScenario(withId: 1769)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
                 
         GIVEN("user starts a call") {
             userRobot.login().startCall(callId)
@@ -153,8 +165,10 @@ final class ParticipantActionsTests: StreamTestCase {
         }
     }
     
-    func blocked_testParticipantSharesScreen() {
+    func testParticipantSharesScreen() throws {
         linkToScenario(withId: 1773)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
 

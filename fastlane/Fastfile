@@ -310,7 +310,7 @@ lane :test_e2e do |options|
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
   start_sinatra
-  # start_video_buddy TODO: https://github.com/GetStream/ios-issues-tracking/issues/688
+  start_video_buddy if is_localhost # TODO: https://github.com/GetStream/ios-issues-tracking/issues/688
 
   prepare_simulator(device: options[:device]) if is_ci
 

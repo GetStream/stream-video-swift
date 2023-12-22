@@ -227,7 +227,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_ALLURE: true
-        INSTALL_VIDEO_BUDDY: true
+        INSTALL_VIDEO_BUDDY: false
         INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true

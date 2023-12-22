@@ -6,7 +6,7 @@ import XCTest
 
 final class LobbyTests: StreamTestCase {
     
-    func blocked_testLobbyWithTwoParticipants() throws {
+    func testLobbyWithTwoParticipants() throws {
         linkToScenario(withId: 1785)
         
         throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/379")
