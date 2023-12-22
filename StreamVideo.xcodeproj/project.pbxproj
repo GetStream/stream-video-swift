@@ -137,6 +137,7 @@
 		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
+		40F874522B35A74E00574F5D /* ChangeEnvironmentViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F874512B35A74E00574F5D /* ChangeEnvironmentViewModifier.swift */; };
 		40FAF3D12B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D02B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift */; };
 		40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
@@ -1063,6 +1064,7 @@
 		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
+		40F874512B35A74E00574F5D /* ChangeEnvironmentViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChangeEnvironmentViewModifier.swift; sourceTree = "<group>"; };
 		40FAF3D02B0F8305003F8029 /* DemoVideoCallParticipantOptionsModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVideoCallParticipantOptionsModifier.swift; sourceTree = "<group>"; };
 		40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Convenience.swift"; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
@@ -1907,6 +1909,7 @@
 		4030E5952A9DF488003E8CBA /* Views */ = {
 			isa = PBXGroup;
 			children = (
+				40F874502B35A73C00574F5D /* ChangeEnvironmentViewModifier */,
 				40901A602AE6A44F00B6831D /* LongPressToFocusViewModifier */,
 				40D7E7942AB1C9470017095E /* ThermalStateViewModifier */,
 				409BFA412A9F7BAA003341EF /* ReadableContentGuide */,
@@ -2224,6 +2227,14 @@
 				40F445FD2A9E2B46004BE3DA /* DemoWaitingLocalUserView.swift */,
 			);
 			path = WaitingLocalUserView;
+			sourceTree = "<group>";
+		};
+		40F874502B35A73C00574F5D /* ChangeEnvironmentViewModifier */ = {
+			isa = PBXGroup;
+			children = (
+				40F874512B35A74E00574F5D /* ChangeEnvironmentViewModifier.swift */,
+			);
+			path = ChangeEnvironmentViewModifier;
 			sourceTree = "<group>";
 		};
 		40FBEF472AC3030C007CFF17 /* UITests */ = {
@@ -4230,6 +4241,7 @@
 				8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */,
 				8430FD1C2AB07FAA007AA3E6 /* ParticipantStatsView.swift in Sources */,
 				4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */,
+				40F874522B35A74E00574F5D /* ChangeEnvironmentViewModifier.swift in Sources */,
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
 				402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */,
 				40F445DE2A9E22B9004BE3DA /* CallButtonView.swift in Sources */,

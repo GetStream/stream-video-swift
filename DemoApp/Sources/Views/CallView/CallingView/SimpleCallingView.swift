@@ -64,6 +64,10 @@ struct SimpleCallingView: View {
                 .background(Color(appearance.colors.background))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                .changeEnvironmentIfRequired(
+                    showPrompt: $showChangeEnvironmentPrompt,
+                    environmentURL: $changeEnvironmentPromptForURL
+                )
 
                 Button {
                     resignFirstResponder()
@@ -75,22 +79,7 @@ struct SimpleCallingView: View {
                     .disabled(appState.loading || text.isEmpty)
                 }
                 .disabled(appState.loading || text.isEmpty)
-                .alert(isPresented: $showChangeEnvironmentPrompt) {
-                    if let url = changeEnvironmentPromptForURL {
-                        return Alert(
-                            title: Text("Change environment"),
-                            message: Text("In order to access the call you scanned, we will need to change the environment you are logged in. Would you like to proceed?"),
-                            primaryButton: .default(Text("OK")) { Router.shared.handle(url: url) },
-                            secondaryButton: .cancel()
-                        )
-                    } else {
-                        return Alert(
-                            title: Text("Invalid URL"),
-                            message: Text("The URL contained in the QR you scanned was invalid. Please try again."),
-                            dismissButton: .cancel()
-                        )
-                    }
-                }
+
             }
 
             HStack {
@@ -161,9 +150,11 @@ struct SimpleCallingView: View {
             self.text = deeplinkInfo.callId
         } else if let url = deeplinkInfo.url {
             self.changeEnvironmentPromptForURL = url
-            Task { @MainActor in
-                self.showChangeEnvironmentPrompt = true
-            }
+            DispatchQueue
+                .main
+                .asyncAfter(deadline: .now() + 0.1) {
+                    self.showChangeEnvironmentPrompt = true
+                }
         }
     }
 }
