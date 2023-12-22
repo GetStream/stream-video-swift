@@ -5,19 +5,31 @@
 import SwiftUI
 
 @available(iOS 14.0, *)
-public struct UserAvatar: View {
-    
+public struct UserAvatar<Failback: View>: View {
+
+    public typealias FailbackProvider = () -> Failback
+
     public var imageURL: URL?
     public var size: CGFloat
-    
-    public init(imageURL: URL?, size: CGFloat) {
+    public var failbackProvider: FailbackProvider?
+
+    public init(imageURL: URL?, size: CGFloat, failbackProvider: FailbackProvider?) {
         self.imageURL = imageURL
         self.size = size
+        self.failbackProvider = failbackProvider
     }
     
     public var body: some View {
-        StreamLazyImage(imageURL: imageURL)
+        StreamLazyImage(imageURL: imageURL, failback: failbackProvider)
             .frame(width: size, height: size)
             .clipShape(Circle())
+    }
+}
+
+@available(iOS 14.0, *)
+extension UserAvatar where Failback == EmptyView {
+
+    public init(imageURL: URL?, size: CGFloat) {
+        self.init(imageURL: imageURL, size: size, failbackProvider: nil)
     }
 }

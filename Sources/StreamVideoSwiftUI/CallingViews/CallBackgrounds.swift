@@ -51,10 +51,12 @@ struct CallParticipantBackground<Background: View>: View {
     var body: some View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = imageURL {
-                StreamLazyImage(imageURL: imageURL)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity)
-                    .blur(radius: 8)
-                    .clipped()
+                StreamLazyImage(imageURL: imageURL) {
+                    fallbackBackground()
+                }
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                .blur(radius: 8)
+                .clipped()
             } else {
                 fallbackBackground()
             }
