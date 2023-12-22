@@ -13,12 +13,12 @@ struct DemoQRCodeScannerButton: View {
 
     @State private var isQRScannerPresented = false
     @ObservedObject var viewModel: CallViewModel
-    private let completion: (String?) -> Void
+    private let completion: (DeeplinkInfo?) -> Void
     private let deeplinkAdapter: DeeplinkAdapter
 
     init(
         viewModel: CallViewModel,
-        completion: @escaping (String?) -> Void
+        completion: @escaping (DeeplinkInfo?) -> Void
     ) {
         self.viewModel = viewModel
         self.completion = completion
@@ -40,14 +40,18 @@ struct DemoQRCodeScannerButton: View {
                 case .success(let scanResult):
                     if let url = URL(string: scanResult.string), url.isWeb {
                         if deeplinkAdapter.canHandle(url: url) {
-                            let callId = deeplinkAdapter.handle(url: url).deeplinkInfo.callId
-                            completion(callId)
+                            let deeplinkInfo = deeplinkAdapter.handle(url: url).deeplinkInfo
+                            completion(deeplinkInfo)
                         } else {
                             viewModel.toast = Toast(style: .error, message: "The recognised URL from the QR code isn't supported.")
                             completion(nil)
                         }
                     } else {
-                        completion(scanResult.string)
+                        completion(.init(
+                            callId: scanResult.string,
+                            callType: .default,
+                            baseURL: AppEnvironment.baseURL
+                        ))
                     }
                 case .failure(let error):
                     log.error(error)

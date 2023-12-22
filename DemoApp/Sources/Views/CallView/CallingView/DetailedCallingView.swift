@@ -115,7 +115,7 @@ struct DetailedCallingView: View {
                 message: Text("Are you sure you want to sign out?"),
                 primaryButton: .destructive(Text("Sign out")) {
                     withAnimation {
-                        AppState.shared.logout()
+                        AppState.shared.dispatchLogout()
                     }
                 },
                 secondaryButton: .cancel()
@@ -127,7 +127,7 @@ struct DetailedCallingView: View {
         .onChange(of: viewModel.call?.callId, perform: { [callId = viewModel.call?.callId] newValue in
             if newValue == nil, callId != nil, !appState.activeAnonymousCallId.isEmpty {
                 appState.activeAnonymousCallId = ""
-                appState.logout()
+                appState.dispatchLogout()
             }
         })
         .onReceive(appState.$activeCall) { call in

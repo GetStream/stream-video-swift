@@ -13,6 +13,8 @@ struct SimpleCallingView: View {
     @Injected(\.appearance) var appearance
 
     @State var text = ""
+    @State private var changeEnvironmentPromptForURL: URL?
+    @State private var showChangeEnvironmentPrompt: Bool = false
 
     private var callId: String
     @ObservedObject var appState = AppState.shared
@@ -57,11 +59,15 @@ struct SimpleCallingView: View {
                         .foregroundColor(appearance.colors.text)
                         .padding(.all, 12)
 
-                    DemoQRCodeScannerButton(viewModel: viewModel) { self.text = $0 ?? self.text }
+                    DemoQRCodeScannerButton(viewModel: viewModel) { handleDeeplink($0) }
                 }
                 .background(Color(appearance.colors.background))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
                 .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                .changeEnvironmentIfRequired(
+                    showPrompt: $showChangeEnvironmentPrompt,
+                    environmentURL: $changeEnvironmentPromptForURL
+                )
 
                 Button {
                     resignFirstResponder()
@@ -73,6 +79,7 @@ struct SimpleCallingView: View {
                     .disabled(appState.loading || text.isEmpty)
                 }
                 .disabled(appState.loading || text.isEmpty)
+
             }
 
             HStack {
@@ -131,5 +138,29 @@ struct SimpleCallingView: View {
                 viewModel.joinCall(callType: callType, callId: callId)
             }
         }
+    }
+
+    private func handleDeeplink(_ deeplinkInfo: DeeplinkInfo?) {
+        guard let deeplinkInfo else {
+            self.text = ""
+            return
+        }
+
+        if deeplinkInfo.baseURL == AppEnvironment.baseURL {
+            self.text = deeplinkInfo.callId
+        } else if let url = deeplinkInfo.url {
+            self.changeEnvironmentPromptForURL = url
+            DispatchQueue
+                .main
+                .asyncAfter(deadline: .now() + 0.1) {
+                    self.showChangeEnvironmentPrompt = true
+                }
+        }
+    }
+}
+
+extension URL: Identifiable {
+    public var id: ObjectIdentifier {
+        .init(self.absoluteString as NSString)
     }
 }

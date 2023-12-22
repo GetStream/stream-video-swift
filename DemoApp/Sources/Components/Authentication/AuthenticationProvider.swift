@@ -35,7 +35,11 @@ enum AuthenticationProvider {
         } else {
             let environment = {
                 switch AppEnvironment.baseURL {
+                case .staging:
+                    return "pronto"
                 case .pronto:
+                    return "pronto"
+                case .legacy:
                     return "pronto"
                 case .demo:
                     return "demo"

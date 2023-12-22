@@ -28,6 +28,21 @@ get '/deeplink' do
   HTML
 end
 
+get '/deeplink/join/:id' do
+  deeplink = "streamvideo://getstream.io/video/demos/join/#{params['id']}"
+
+  <<-HTML
+    <!DOCTYPE html>
+    <html>
+      <body style="text-align: center;">
+        <div style="margin-top: 50%;">
+          <button style="font-size: 50px; padding: 20px 40px;" onclick="window.location.href = '#{deeplink}'">Open deeplink</button>
+        </div>
+      </body>
+    </html>
+  HTML
+end
+
 post '/record_video/:udid/:test_name' do
   recordings_dir = 'recordings'
   video_base_name = "#{recordings_dir}/#{params['test_name']}"

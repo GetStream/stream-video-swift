@@ -24,6 +24,8 @@ struct DebugMenu: View {
                 AppEnvironment.baseURL = .pronto
             case .demo:
                 AppEnvironment.baseURL = .demo
+            default:
+                break
             }
             appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
         }
@@ -62,7 +64,7 @@ struct DebugMenu: View {
             ) { self.baseURL = $0 }
 
             makeMultipleSelectMenu(
-                for: [AppEnvironment.SupportedDeeplink.demo, .pronto],
+                for: AppEnvironment.SupportedDeeplink.allCases,
                 currentValues: .init(supportedDeeplinks),
                 label: "Supported Deeplinks"
             ) { item, isSelected in

@@ -53,6 +53,7 @@ struct DemoApp: App {
                     }
                 }
             }
+            .preferredColorScheme(.dark)
             .onOpenURL { router.handle(url: $0) }
             .onContinueUserActivity(
                 NSUserActivityTypeBrowsingWeb
