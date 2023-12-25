@@ -35,13 +35,19 @@ extension AppEnvironment {
 
     enum BaseURL: String, Debuggable, CaseIterable {
         case pronto = "https://pronto.getstream.io"
+        case staging = "https://staging.getstream.io"
         case demo = "https://getstream.io"
+        case legacy = "https://stream-calls-dogfood.vercel.app"
 
         var url: URL { URL(string: rawValue)! }
         var title: String {
             switch self {
             case .pronto:
                 return "Pronto"
+            case .staging:
+                return "Staging"
+            case .legacy:
+                return "Legacy"
             case .demo:
                 return "Demo"
             }
@@ -185,16 +191,22 @@ extension AppEnvironment {
 
 extension AppEnvironment {
 
-    enum SupportedDeeplink: Debuggable {
+    enum SupportedDeeplink: Debuggable, CaseIterable {
         case pronto
+        case staging
         case demo
+        case legacy
 
         var deeplinkURL: URL {
             switch self {
             case .pronto:
                 return BaseURL.pronto.url
+            case .staging:
+                return BaseURL.staging.url
             case .demo:
                 return BaseURL.demo.url
+            case .legacy:
+                return BaseURL.legacy.url
             }
         }
 
@@ -202,8 +214,12 @@ extension AppEnvironment {
             switch self {
             case .pronto:
                 return "Pronto"
+            case .staging:
+                return "Staging"
             case .demo:
                 return "Demo"
+            case .legacy:
+                return "Legacy"
             }
         }
     }
@@ -211,9 +227,9 @@ extension AppEnvironment {
     static var supportedDeeplinks: [SupportedDeeplink] = {
         switch configuration {
         case .debug:
-            return [.pronto, .demo]
+            return [.pronto, .demo, .staging, .legacy]
         case .test:
-            return [.pronto, .demo]
+            return [.pronto, .demo, .staging, .legacy]
         case .release:
             return [.demo]
         }

@@ -66,19 +66,21 @@ final class AppState: ObservableObject {
         }
     }
     
-    func logout() {
-        Task {
-            if let voipPushToken = unsecureRepository.currentVoIPPushToken() {
-                _ = try? await streamVideo?.deleteDevice(id: voipPushToken)
-            }
-            if let pushToken = unsecureRepository.currentPushToken() {
-                _ = try? await streamVideo?.deleteDevice(id: pushToken)
-            }
-            await streamVideo?.disconnect()
-            unsecureRepository.removeCurrentUser()
-            streamVideo = nil
-            userState = .notLoggedIn
+    func logout() async {
+        if let voipPushToken = unsecureRepository.currentVoIPPushToken() {
+            _ = try? await streamVideo?.deleteDevice(id: voipPushToken)
         }
+        if let pushToken = unsecureRepository.currentPushToken() {
+            _ = try? await streamVideo?.deleteDevice(id: pushToken)
+        }
+        await streamVideo?.disconnect()
+        unsecureRepository.removeCurrentUser()
+        streamVideo = nil
+        userState = .notLoggedIn
+    }
+
+    func dispatchLogout() {
+        Task { await logout() }
     }
 
     // MARK: - Private API

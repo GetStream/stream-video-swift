@@ -56,7 +56,7 @@ struct DemoCallingTopView: View {
                 message: Text("Are you sure you want to sign out?"),
                 primaryButton: .destructive(Text("Sign out")) {
                     withAnimation {
-                        AppState.shared.logout()
+                        AppState.shared.dispatchLogout()
                     }
                 },
                 secondaryButton: .cancel()
