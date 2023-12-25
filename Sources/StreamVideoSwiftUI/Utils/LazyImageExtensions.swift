@@ -26,26 +26,46 @@ extension LazyImage {
 }
 
 @available(iOS 14.0, *)
-public struct StreamLazyImage: View {
+public struct StreamLazyImage<Failback: View>: View {
     
+    public typealias FailbackProvider = () -> Failback
+
     var imageURL: URL?
-    
-    public init(imageURL: URL?) {
+    var failback: FailbackProvider?
+
+    @State private var failedToLoadContent = false
+
+    public init(imageURL: URL?, failback: FailbackProvider? = nil) {
         self.imageURL = imageURL
+        self.failback = failback
     }
     
     public var body: some View {
-        #if STREAM_SNAPSHOT_TESTS
-        if let imageURL = imageURL,
-           imageURL.isFileURL,
-           let image = UIImage(contentsOfFile: imageURL.path)  {
-            NukeImage(image)
-                .aspectRatio(contentMode: .fill)
+        if failedToLoadContent, let failback {
+            failback()
         } else {
+#if STREAM_SNAPSHOT_TESTS
+            if let imageURL = imageURL,
+               imageURL.isFileURL,
+               let image = UIImage(contentsOfFile: imageURL.path)  {
+                NukeImage(image)
+                    .aspectRatio(contentMode: .fill)
+            } else {
+                LazyImage(imageURL: imageURL)
+                    .onFailure { _ in self.failedToLoadContent = true }
+            }
+#else
             LazyImage(imageURL: imageURL)
+                .onFailure { _ in self.failedToLoadContent = true }
+#endif
         }
-        #else
-        LazyImage(imageURL: imageURL)
-        #endif
+    }
+}
+
+@available(iOS 14.0, *)
+extension StreamLazyImage where Failback == EmptyView {
+
+    public init(imageURL: URL?) {
+        self.init(imageURL: imageURL, failback: { EmptyView() })
     }
 }

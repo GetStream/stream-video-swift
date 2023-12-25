@@ -37,7 +37,12 @@ struct CallParticipantImage: View {
     var body: some View {
         ZStack {
             if #available(iOS 14.0, *), let imageURL = imageURL {
-                UserAvatar(imageURL: imageURL, size: size)
+                UserAvatar(imageURL: imageURL, size: size) {
+                    CircledTitleView(
+                        title: name.isEmpty ? id : String(name.uppercased().first!),
+                        size: size
+                    )
+                }
             } else {
                 CircledTitleView(
                     title: name.isEmpty ? id : String(name.uppercased().first!),

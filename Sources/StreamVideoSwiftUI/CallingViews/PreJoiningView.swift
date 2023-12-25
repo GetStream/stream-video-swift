@@ -314,7 +314,12 @@ struct ParticipantsInCallView: View {
                 ForEach(participantsInCall) { participant in
                     VStack {
                         if let imageURL = participant.user.imageURL {
-                            UserAvatar(imageURL: imageURL, size: 40)
+                            UserAvatar(imageURL: imageURL, size: 40) {
+                                CircledTitleView(
+                                    title: participant.user.name.isEmpty ? participant.user.id : String(participant.user.name.uppercased().first!),
+                                    size: 40
+                                )
+                            }
                         } else {
                             CircledTitleView(
                                 title: participant.user.name.isEmpty ? participant.user.id : String(participant.user.name.uppercased().first!),
