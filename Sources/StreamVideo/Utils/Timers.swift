@@ -82,39 +82,46 @@ private class RepeatingTimer: RepeatingTimerControl {
         case suspended
         case resumed
     }
-    
+
+    private let queue = DispatchQueue(label: "io.getstream.repeating-timer")
     private var state: State = .suspended
     private let timer: DispatchSourceTimer
-    
+
     init(timeInterval: TimeInterval, queue: DispatchQueue, onFire: @escaping () -> Void) {
         timer = DispatchSource.makeTimerSource(queue: queue)
         timer.schedule(deadline: .now() + .milliseconds(Int(timeInterval)), repeating: timeInterval, leeway: .seconds(1))
         timer.setEventHandler(handler: onFire)
     }
-    
+
     deinit {
         timer.setEventHandler {}
         timer.cancel()
         // If the timer is suspended, calling cancel without resuming
         // triggers a crash. This is documented here https://forums.developer.apple.com/thread/15902
-        resume()
-    }
-    
-    func resume() {
-        if state == .resumed {
-            return
-        }
-        
-        state = .resumed
-        timer.resume()
-    }
-    
-    func suspend() {
         if state == .suspended {
-            return
+            timer.resume()
         }
-        
-        state = .suspended
-        timer.suspend()
+    }
+
+    func resume() {
+        queue.async {
+            if self.state == .resumed {
+                return
+            }
+
+            self.state = .resumed
+            self.timer.resume()
+        }
+    }
+
+    func suspend() {
+        queue.async {
+            if self.state == .suspended {
+                return
+            }
+
+            self.state = .suspended
+            self.timer.suspend()
+        }
     }
 }
