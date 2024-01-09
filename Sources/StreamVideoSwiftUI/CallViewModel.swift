@@ -17,15 +17,14 @@ open class CallViewModel: ObservableObject {
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
         didSet {
+            if #available(iOS 15.0, *), let pictureInPictureAdapter = _pictureInPictureAdapter as? StreamPictureInPictureAdapter {
+                pictureInPictureAdapter.call = call
+            }
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] participants in
-                    if let pipVideoRenderer = self?.pipVideoRenderer {
-                        self?.pipHandler.setupPictureInPicture(with: pipVideoRenderer)
-                    }
-                    self?.callParticipants = participants
-            })
+                .sink(receiveValue: { [weak self] in self?.callParticipants = $0 })
+            
             blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] blockedUserIds in
@@ -140,6 +139,15 @@ open class CallViewModel: ObservableObject {
         didSet {
             if participantsLayout != oldValue {
                 lastLayoutChange = Date()
+
+                let participants = call?.state.participants ?? []
+
+                guard
+                    participantsLayout == .grid,
+                    participants.count < 6,
+                    call?.state.screenSharingSession == nil
+                else { return }
+                participants.forEach { changeTrackVisibility(for: $0, isVisible: true) }
             }
         }
     }
@@ -164,15 +172,8 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
-    private lazy var pipHandler = PiPHandler()
-    private lazy var pipTrackSelectionUtils = PiPTrackSelectionUtils()
-    
-    private var pipVideoRenderer: VideoRenderer? {
-        pipTrackSelectionUtils.pipVideoRenderer(
-            from: callParticipants,
-            currentSessionId: call?.state.sessionId
-        )
-    }
+
+    private var _pictureInPictureAdapter: Any?
     
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
@@ -202,7 +203,15 @@ open class CallViewModel: ObservableObject {
         self.callSettings = callSettings ?? CallSettings()
         self.localCallSettingsChange = callSettings != nil
         self.subscribeToCallEvents()
-        self.subscribeForAppLifecycleEvents()
+//        self.subscribeForAppLifecycleEvents()
+
+        if #available(iOS 15.0, *) {
+            let adapter = StreamPictureInPictureAdapter.shared
+            adapter.onSizeUpdate = { [weak self] in
+                self?.updateTrackSize($0, for: $1)
+            }
+            _pictureInPictureAdapter = adapter
+        }
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -668,31 +677,4 @@ public enum ParticipantsLayout {
     case grid
     case spotlight
     case fullScreen
-}
-
-extension CallViewModel {
-    
-    func subscribeForAppLifecycleEvents() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(startPiP),
-            name: UIScene.didEnterBackgroundNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(stopPiP),
-            name: UIScene.willEnterForegroundNotification,
-            object: nil
-        )
-    }
-        
-    @objc func startPiP() {
-        utils.videoRendererFactory.prepareForPictureInPicture()
-        pipHandler.startPiP()
-    }
-    
-    @objc func stopPiP() {
-        pipHandler.stopPiP()
-    }
 }
