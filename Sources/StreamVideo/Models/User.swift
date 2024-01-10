@@ -10,6 +10,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
     public let name: String
     public let imageURL: URL?
     public let role: String
+    public let language: String
     public let type: UserAuthType
     public let customData: [String: RawJSON]
     
@@ -18,6 +19,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
         name: String? = nil,
         imageURL: URL? = nil,
         role: String = "user",
+        language: String = "en",
         customData: [String: RawJSON] = [:]
     ) {
         self.init(
@@ -25,6 +27,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
             name: name,
             imageURL: imageURL,
             role: role,
+            language: language,
             type: .regular,
             customData: customData
         )
@@ -35,6 +38,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
         name: String? = nil,
         imageURL: URL? = nil,
         role: String = "user",
+        language: String = "en",
         type: UserAuthType = .regular,
         customData: [String: RawJSON] = [:]
     ) {
@@ -44,6 +48,7 @@ public struct User: Identifiable, Equatable, Sendable, Codable {
         self.role = role
         self.type = type
         self.customData = customData
+        self.language = language
     }
 }
 
@@ -68,6 +73,7 @@ public extension UserResponse {
             createdAt: Date(),
             custom: [:],
             id: id,
+            language: "en", 
             role: "user",
             teams: [],
             updatedAt: Date()

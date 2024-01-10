@@ -6,7 +6,7 @@
 //
 
 import Foundation
-
+/** CallRecording represents a recording of a call. */
 
 public struct CallRecording: Codable, JSONEncodable, Hashable {
     public var endTime: Date

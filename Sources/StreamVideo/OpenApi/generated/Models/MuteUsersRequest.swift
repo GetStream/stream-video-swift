@@ -12,13 +12,15 @@ public struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
     public var audio: Bool?
     public var muteAllUsers: Bool?
     public var screenshare: Bool?
+    public var screenshareAudio: Bool?
     public var userIds: [String]?
     public var video: Bool?
 
-    public init(audio: Bool? = nil, muteAllUsers: Bool? = nil, screenshare: Bool? = nil, userIds: [String]? = nil, video: Bool? = nil) {
+    public init(audio: Bool? = nil, muteAllUsers: Bool? = nil, screenshare: Bool? = nil, screenshareAudio: Bool? = nil, userIds: [String]? = nil, video: Bool? = nil) {
         self.audio = audio
         self.muteAllUsers = muteAllUsers
         self.screenshare = screenshare
+        self.screenshareAudio = screenshareAudio
         self.userIds = userIds
         self.video = video
     }
@@ -27,6 +29,7 @@ public struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
         case audio
         case muteAllUsers = "mute_all_users"
         case screenshare
+        case screenshareAudio = "screenshare_audio"
         case userIds = "user_ids"
         case video
     }
@@ -38,6 +41,7 @@ public struct MuteUsersRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(audio, forKey: .audio)
         try container.encodeIfPresent(muteAllUsers, forKey: .muteAllUsers)
         try container.encodeIfPresent(screenshare, forKey: .screenshare)
+        try container.encodeIfPresent(screenshareAudio, forKey: .screenshareAudio)
         try container.encodeIfPresent(userIds, forKey: .userIds)
         try container.encodeIfPresent(video, forKey: .video)
     }

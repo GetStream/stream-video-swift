@@ -15,18 +15,20 @@ public struct OwnUserResponse: Codable, JSONEncodable, Hashable {
     public var devices: [Device]
     public var id: String
     public var image: String?
+    public var language: String?
     public var name: String?
     public var role: String
     public var teams: [String]
     public var updatedAt: Date
 
-    public init(createdAt: Date, custom: [String: RawJSON], deletedAt: Date? = nil, devices: [Device], id: String, image: String? = nil, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
+    public init(createdAt: Date, custom: [String: RawJSON], deletedAt: Date? = nil, devices: [Device], id: String, image: String? = nil, language: String, name: String? = nil, role: String, teams: [String], updatedAt: Date) {
         self.createdAt = createdAt
         self.custom = custom
         self.deletedAt = deletedAt
         self.devices = devices
         self.id = id
         self.image = image
+        self.language = language
         self.name = name
         self.role = role
         self.teams = teams
@@ -40,6 +42,7 @@ public struct OwnUserResponse: Codable, JSONEncodable, Hashable {
         case devices
         case id
         case image
+        case language
         case name
         case role
         case teams
@@ -56,6 +59,7 @@ public struct OwnUserResponse: Codable, JSONEncodable, Hashable {
         try container.encode(devices, forKey: .devices)
         try container.encode(id, forKey: .id)
         try container.encodeIfPresent(image, forKey: .image)
+        try container.encode(language, forKey: .language)
         try container.encodeIfPresent(name, forKey: .name)
         try container.encode(role, forKey: .role)
         try container.encode(teams, forKey: .teams)

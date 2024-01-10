@@ -383,6 +383,7 @@ public class StreamVideo: ObservableObject {
                 custom: self.user.customData,
                 id: self.user.id,
                 image: self.user.imageURL?.absoluteString,
+                language: self.user.language,
                 name: self.user.name
             )
             
@@ -470,8 +471,6 @@ public class StreamVideo: ObservableObject {
             id: id,
             pushProvider: .init(rawValue: pushProvider.rawValue),
             pushProviderName: name,
-            user: UserRequest(id: user.id),
-            userId: user.id,
             voipToken: isVoip
         )
         

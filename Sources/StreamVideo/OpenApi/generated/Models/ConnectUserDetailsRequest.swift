@@ -12,12 +12,14 @@ public struct ConnectUserDetailsRequest: Codable, JSONEncodable, Hashable {
     public var custom: [String: RawJSON]?
     public var id: String
     public var image: String?
+    public var language: String?
     public var name: String?
 
-    public init(custom: [String: RawJSON]? = nil, id: String, image: String? = nil, name: String? = nil) {
+    public init(custom: [String: RawJSON]? = nil, id: String, image: String? = nil, language: String? = nil, name: String? = nil) {
         self.custom = custom
         self.id = id
         self.image = image
+        self.language = language
         self.name = name
     }
 
@@ -25,6 +27,7 @@ public struct ConnectUserDetailsRequest: Codable, JSONEncodable, Hashable {
         case custom
         case id
         case image
+        case language
         case name
     }
 
@@ -35,6 +38,7 @@ public struct ConnectUserDetailsRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(custom, forKey: .custom)
         try container.encode(id, forKey: .id)
         try container.encodeIfPresent(image, forKey: .image)
+        try container.encodeIfPresent(language, forKey: .language)
         try container.encodeIfPresent(name, forKey: .name)
     }
 }

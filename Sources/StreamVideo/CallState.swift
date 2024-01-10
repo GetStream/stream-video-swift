@@ -155,13 +155,15 @@ public class CallState: ObservableObject {
         case .typeConnectionErrorEvent(_):
             // note: connection events are not relevant for call state sync'ing
             break
-        case .typeCustomVideoEvent(_):
-            // note: custom events are exposed via event subscriptions
-            break
-        case .typeHealthCheckEvent(_):
-            // note: health checks are not relevant for call state sync'ing
-            break
         case .typeCallUserMuted(_):
+            break
+        case .typeCallDeletedEvent(_):
+            break
+        case .typeCallHLSBroadcastingFailedEvent(_):
+            break
+        case .typeCallRecordingFailedEvent(_):
+            break
+        case .typeCallRecordingReadyEvent(_):
             break
         }
     }
