@@ -1,4 +1,4 @@
 gem 'fastlane-plugin-versioning'
 gem 'fastlane-plugin-emerge'
-gem 'fastlane-plugin-stream_actions', '0.3.24'
+gem 'fastlane-plugin-stream_actions', '0.3.28'
 gem 'fastlane-plugin-create_xcframework'
