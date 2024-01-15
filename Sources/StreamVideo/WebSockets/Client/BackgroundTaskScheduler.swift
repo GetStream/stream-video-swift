@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import Combine
 
 /// Object responsible for platform specific handling of background tasks
 protocol BackgroundTaskScheduler {
@@ -31,7 +32,15 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler {
     }()
 
     /// The identifier of the currently running background task. `nil` if no background task is running.
-    private var activeBackgroundTask: UIBackgroundTaskIdentifier?
+    private var activeBackgroundTask: UIBackgroundTaskIdentifier? {
+        didSet {
+            if let oldBackgroundTask = oldValue {
+                app?.endBackgroundTask(oldBackgroundTask)
+            }
+        }
+    }
+
+    private var backgroundTaskExpirationCancellable: AnyCancellable?
 
     var isAppActive: Bool {
         let app = self.app
@@ -51,11 +60,29 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler {
     }
     
     func beginTask(expirationHandler: (() -> Void)?) -> Bool {
-        activeBackgroundTask = app?.beginBackgroundTask { [weak self] in
+        let expirationHandler = { [weak self] in
             expirationHandler?()
             self?.endTask()
+            self?.backgroundTaskExpirationCancellable?.cancel()
+            self?.backgroundTaskExpirationCancellable = nil
         }
-        return activeBackgroundTask != .invalid
+
+        backgroundTaskExpirationCancellable?.cancel()
+
+        activeBackgroundTask = app?.beginBackgroundTask(
+            expirationHandler: expirationHandler
+        )
+
+        guard activeBackgroundTask != .invalid else {
+            return false
+        }
+
+        backgroundTaskExpirationCancellable = Foundation.Timer
+            .publish(every: 25, on: .main, in: .default)
+            .autoconnect()
+            .sink { _ in expirationHandler() }
+
+        return true
     }
 
     func endTask() {
