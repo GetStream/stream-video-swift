@@ -36,12 +36,14 @@ struct AppControlsWithChat: View {
             VideoIconView(viewModel: viewModel)
             MicrophoneIconView(viewModel: viewModel)
             ToggleCameraIconView(viewModel: viewModel)
+            #if !targetEnvironment(simulator)
             if !ProcessInfo.processInfo.isiOSAppOnMac {
                 BroadcastIconView(
                     viewModel: viewModel,
                     preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
                 )
             }
+            #endif
             HangUpIconView(viewModel: viewModel)
         }
         .padding()
