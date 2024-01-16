@@ -327,6 +327,8 @@ public struct VideoCallParticipantView: View {
     var customData: [String: RawJSON]
     var call: Call?
     
+    @State private var isVisible = false
+
     public init(
         participant: CallParticipant,
         id: String? = nil,
@@ -350,7 +352,7 @@ public struct VideoCallParticipantView: View {
             id: id,
             size: availableFrame.size,
             contentMode: contentMode,
-            showVideo: showVideo,
+            showVideo: showVideo && isVisible,
             handleRendering: { [weak call] view in
                 guard call != nil else { return }
                 view.handleViewRendering(for: participant) { size, participant in
@@ -360,6 +362,8 @@ public struct VideoCallParticipantView: View {
                 }
             }
         )
+        .onAppear { isVisible = true }
+        .onDisappear { isVisible = false }
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
