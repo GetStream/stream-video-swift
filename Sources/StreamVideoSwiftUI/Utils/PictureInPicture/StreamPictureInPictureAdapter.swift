@@ -7,8 +7,12 @@ import Combine
 import StreamVideo
 import UIKit
 
+/// This class encapsulates the logic for managing picture-in-picture functionality during a video call. It tracks
+/// changes in the call, updates related to call participants, and changes in the source view for Picture in
+/// Picture display.
 final class StreamPictureInPictureAdapter {
 
+    /// The active call.
     var call: Call? {
         didSet {
             Task { @MainActor [weak self] in
@@ -18,6 +22,7 @@ final class StreamPictureInPictureAdapter {
         }
     }
 
+    /// The sourceView that will be used as an anchor/trigger for Picture in Picture (as required by AVKit).
     var sourceView: UIView? {
         didSet {
             guard sourceView !== oldValue else { return }
@@ -25,6 +30,7 @@ final class StreamPictureInPictureAdapter {
         }
     }
 
+    /// The closure to call whenever the Picture in Picture rendering window changes size.
     var onSizeUpdate: ((CGSize, CallParticipant) -> Void)? {
         didSet {
             pictureInPictureController?.onSizeUpdate = { [weak self] size in
@@ -35,14 +41,17 @@ final class StreamPictureInPictureAdapter {
         }
     }
 
+    /// The participant to use in order to access the track to render on Picture in Picture.
     private var activeParticipant: CallParticipant?
 
     private var participantUpdatesCancellable: AnyCancellable?
 
+    /// The actual Picture in Picture controller.
     private lazy var pictureInPictureController = StreamPictureInPictureController()
 
     // MARK: - Private Helpers
 
+    /// Whenever the call changes, we reset the participant updates observer.
     @MainActor
     private func didUpdate(_ call: Call?) {
         participantUpdatesCancellable?.cancel()
@@ -56,6 +65,8 @@ final class StreamPictureInPictureAdapter {
             .sink { [weak self] in self?.didUpdate($0) }
     }
 
+    /// Whenever participants change we update our internal state in order to always have the correct track
+    /// on Picture in Picture.
     @MainActor
     private func didUpdate(_ participants: [CallParticipant]) {
         let sessionId = call?.state.sessionId
