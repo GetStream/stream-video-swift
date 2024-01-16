@@ -137,15 +137,6 @@ open class CallViewModel: ObservableObject {
         didSet {
             if participantsLayout != oldValue {
                 lastLayoutChange = Date()
-
-                let participants = call?.state.participants ?? []
-
-                guard
-                    participantsLayout == .grid,
-                    participants.count < 6,
-                    call?.state.screenSharingSession == nil
-                else { return }
-                participants.forEach { changeTrackVisibility(for: $0, isVisible: true) }
             }
         }
     }
