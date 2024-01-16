@@ -67,6 +67,7 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler {
             self?.backgroundTaskExpirationCancellable = nil
         }
 
+        // Cancel any existing task before starting a new one.
         backgroundTaskExpirationCancellable?.cancel()
 
         activeBackgroundTask = app?.beginBackgroundTask(
@@ -77,8 +78,11 @@ class IOSBackgroundTaskScheduler: BackgroundTaskScheduler {
             return false
         }
 
+        // Set a timer for 30 seconds(which is the max the OS will give us anyway)
+        // to stop our task if we end up not getting the call from OS. In that
+        // way we avoid getting killed by the OS.
         backgroundTaskExpirationCancellable = Foundation.Timer
-            .publish(every: 25, on: .main, in: .default)
+            .publish(every: 30, on: .main, in: .default)
             .autoconnect()
             .sink { _ in expirationHandler() }
 
