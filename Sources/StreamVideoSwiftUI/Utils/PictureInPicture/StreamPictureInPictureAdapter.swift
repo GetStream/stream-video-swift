@@ -7,13 +7,15 @@ import Combine
 import StreamVideo
 import UIKit
 
-@MainActor
 final class StreamPictureInPictureAdapter {
 
-    static let shared = StreamPictureInPictureAdapter()
-
     var call: Call? {
-        didSet { didUpdate(call) }
+        didSet {
+            Task { @MainActor [weak self] in
+                guard let self else { return }
+                didUpdate(call)
+            }
+        }
     }
 
     var sourceView: UIView? {
@@ -39,10 +41,9 @@ final class StreamPictureInPictureAdapter {
 
     private lazy var pictureInPictureController = StreamPictureInPictureController()
 
-    private init() {}
-
     // MARK: - Private Helpers
 
+    @MainActor
     private func didUpdate(_ call: Call?) {
         participantUpdatesCancellable?.cancel()
 
@@ -55,6 +56,7 @@ final class StreamPictureInPictureAdapter {
             .sink { [weak self] in self?.didUpdate($0) }
     }
 
+    @MainActor
     private func didUpdate(_ participants: [CallParticipant]) {
         let sessionId = call?.state.sessionId
         let otherParticipants = participants.filter { $0.sessionId != sessionId }

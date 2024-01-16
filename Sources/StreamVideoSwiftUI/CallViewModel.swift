@@ -17,7 +17,7 @@ open class CallViewModel: ObservableObject {
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
         didSet {
-            pictureInPictureAdapter.call = call
+            utils.pictureInPictureAdapter.call = call
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
@@ -162,8 +162,6 @@ open class CallViewModel: ObservableObject {
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
 
-    private var pictureInPictureAdapter: StreamPictureInPictureAdapter
-
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
         return updateParticipants.filter {
@@ -191,11 +189,9 @@ open class CallViewModel: ObservableObject {
         self.participantsLayout = participantsLayout
         self.callSettings = callSettings ?? CallSettings()
         self.localCallSettingsChange = callSettings != nil
-        let adapter = StreamPictureInPictureAdapter.shared
-        self.pictureInPictureAdapter = adapter
 
         self.subscribeToCallEvents()
-        adapter.onSizeUpdate = { [weak self] in
+        utils.pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
     }

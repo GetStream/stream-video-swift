@@ -9,6 +9,7 @@ public class Utils {
     public var userListProvider: UserListProvider
     public var callSoundsPlayer = CallSoundsPlayer()
     internal var videoRendererFactory = VideoRendererFactory()
+    internal let pictureInPictureAdapter = StreamPictureInPictureAdapter()
 
     public init(userListProvider: UserListProvider = StreamUserListProvider()) {
         self.userListProvider = userListProvider
@@ -17,13 +18,9 @@ public class Utils {
 
 // MARK: - Utils + Default
 
-public extension Utils {
-    static var `default`: Utils = .init()
-}
-
 /// Provides the default value of the `Utils` class.
 public struct UtilsKey: InjectionKey {
-    public static var currentValue: Utils = .default
+    public static var currentValue: Utils = .init()
 }
 
 extension InjectedValues {
