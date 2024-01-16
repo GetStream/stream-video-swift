@@ -26,7 +26,7 @@ public class StreamVideoUI {
         videoConfig: VideoConfig = VideoConfig(),
         tokenProvider: @escaping UserTokenProvider,
         appearance: Appearance = Appearance(),
-        utils: Utils = Utils()
+        utils: Utils = UtilsKey.currentValue
     ) {
         let streamVideo = StreamVideo(
             apiKey: apiKey,
@@ -51,7 +51,7 @@ public class StreamVideoUI {
     public init(
         streamVideo: StreamVideo,
         appearance: Appearance = Appearance(),
-        utils: Utils = Utils()
+        utils: Utils = UtilsKey.currentValue
     ) {
         self.streamVideo = streamVideo
         self.appearance = appearance

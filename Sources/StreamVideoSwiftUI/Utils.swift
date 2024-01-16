@@ -23,7 +23,7 @@ public extension Utils {
 
 /// Provides the default value of the `Utils` class.
 public struct UtilsKey: InjectionKey {
-    public static var currentValue: Utils = Utils()
+    public static var currentValue: Utils = .default
 }
 
 extension InjectedValues {

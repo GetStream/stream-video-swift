@@ -15,14 +15,13 @@ struct DemoApp: App {
 
     // MARK: - State properties
 
-    @StateObject var appState: AppState
+    @State private var userState: UserState = .notLoggedIn
     private let router: Router
 
     // MARK: - Lifecycle
 
     init() {
         let router = Router.shared
-        self._appState = .init(wrappedValue: router.appState)
         self.router = router
 
         LogConfig.level = .debug
@@ -32,9 +31,9 @@ struct DemoApp: App {
     var body: some Scene {
         WindowGroup {
             ZStack {
-                if appState.userState == .loggedIn {
+                if userState == .loggedIn {
                     NavigationView {
-                        DemoCallContainerView(callId: appState.deeplinkInfo.callId)
+                        DemoCallContainerView(callId: router.appState.deeplinkInfo.callId)
                             .navigationBarHidden(true)
                     }
                     .navigationViewStyle(.stack)
@@ -53,6 +52,7 @@ struct DemoApp: App {
                     }
                 }
             }
+            .onReceive(router.appState.$userState) { self.userState = $0 }
             .preferredColorScheme(.dark)
             .onOpenURL { router.handle(url: $0) }
             .onContinueUserActivity(
