@@ -85,6 +85,9 @@
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		40901A612AE6A48C00B6831D /* LongPressToFocusViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */; };
 		40901A692AE8018900B6831D /* mock-profile-image.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 40901A682AE8018900B6831D /* mock-profile-image.jpg */; };
+		40914C982B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */; };
+		40914C9A2B56A85B00F6A13E /* StreamBufferTransformer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */; };
+		40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */; };
 		4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */; };
 		4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
 		4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
@@ -1018,6 +1021,9 @@
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
 		40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPressToFocusViewModifier.swift; sourceTree = "<group>"; };
 		40901A682AE8018900B6831D /* mock-profile-image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "mock-profile-image.jpg"; sourceTree = "<group>"; };
+		40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureTrackStateAdapterTests.swift; sourceTree = "<group>"; };
+		40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformer.swift; sourceTree = "<group>"; };
+		40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamBufferTransformerTests.swift; sourceTree = "<group>"; };
 		409386192AA09E4A00FF5AF4 /* MemoryLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogDestination.swift; sourceTree = "<group>"; };
 		4093861B2AA0A11500FF5AF4 /* LogQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LogQueue.swift; sourceTree = "<group>"; };
 		4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MemoryLogViewer.swift; sourceTree = "<group>"; };
@@ -1819,6 +1825,7 @@
 		401480332A5423C70029166A /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				40914C962B567B6B00F6A13E /* PictureInPicture */,
 				401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */,
 				8457BF7F2A5C18A7000AE567 /* ToastView_Tests.swift */,
 				841FF5142A5E99B400809BBB /* CallEventsHandler_Tests.swift */,
@@ -2023,6 +2030,15 @@
 			path = LongPressToFocusViewModifier;
 			sourceTree = "<group>";
 		};
+		40914C962B567B6B00F6A13E /* PictureInPicture */ = {
+			isa = PBXGroup;
+			children = (
+				40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */,
+				40914C9B2B56AA6600F6A13E /* StreamBufferTransformerTests.swift */,
+			);
+			path = PictureInPicture;
+			sourceTree = "<group>";
+		};
 		409386182AA09E3900FF5AF4 /* MemoryLogDestination */ = {
 			isa = PBXGroup;
 			children = (
@@ -2060,6 +2076,7 @@
 				40A941732B4D97A1006D6965 /* StreamPictureInPictureVideoRenderer.swift */,
 				40A941752B4D9F16006D6965 /* StreamPictureInPIctureView.swift */,
 				40A941772B4DC576006D6965 /* StreamPictureInPictureTrackStateAdapter.swift */,
+				40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */,
 			);
 			path = PictureInPicture;
 			sourceTree = "<group>";
@@ -4704,6 +4721,7 @@
 				8277D16D2AE81CC800BC4ECF /* ImageDecoders+Empty.swift in Sources */,
 				8277D1402AE81CC800BC4ECF /* ImagePipelineCache.swift in Sources */,
 				8277D1742AE81CC800BC4ECF /* NukeCache.swift in Sources */,
+				40914C9A2B56A85B00F6A13E /* StreamBufferTransformer.swift in Sources */,
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
 				8277D13A2AE81CC800BC4ECF /* LazyImage.swift in Sources */,
 				8430FD222AB1AB4C007AA3E6 /* ParticipantPopoverView.swift in Sources */,
@@ -4882,6 +4900,7 @@
 				82E3BA372A0BAD59001AB93E /* StreamVideo_Mock.swift in Sources */,
 				82E3BA442A0BAE0F001AB93E /* EventDecoder_Mock.swift in Sources */,
 				82FF40B52A17C6C200B4D95E /* CallControlsView_Tests.swift in Sources */,
+				40914C982B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift in Sources */,
 				843BD8FB2AA0E660002B3DAC /* PiPUtils_Tests.swift in Sources */,
 				82E3BA402A0BADF9001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
@@ -4913,6 +4932,7 @@
 				82FF40C62A17C75400B4D95E /* JoiningCallView_Tests.swift in Sources */,
 				407D5D3D2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift in Sources */,
 				82E3BA4C2A0BAE40001AB93E /* EquatableEvent.swift in Sources */,
+				40914C9C2B56AA6600F6A13E /* StreamBufferTransformerTests.swift in Sources */,
 				82FF40C42A17C74D00B4D95E /* IncomingCallView_Tests.swift in Sources */,
 				829F7BFA29FABC0E003EBACE /* ViewFactory.swift in Sources */,
 				8457BF802A5C18A7000AE567 /* ToastView_Tests.swift in Sources */,

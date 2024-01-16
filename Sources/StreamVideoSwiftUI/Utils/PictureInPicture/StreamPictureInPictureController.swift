@@ -8,7 +8,6 @@ import StreamWebRTC
 import StreamVideo
 import Combine
 
-@available(iOS 15.0, *)
 final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
 
     var track: RTCVideoTrack? {
@@ -31,7 +30,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     let canStartPictureInPictureAutomaticallyFromInline: Bool
 
     private var pictureInPictureController: AVPictureInPictureController?
-    private let contentViewController: StreamAVPictureInPictureVideoCallViewController
+    private var contentViewController: StreamAVPictureInPictureViewControlling
     private var cancellableBag: Set<AnyCancellable> = .init()
     private var ensureActiveTrackIsEnabledCancellable: AnyCancellable?
     private let trackStateAdapter: StreamPictureInPictureTrackStateAdapter = .init()
@@ -41,7 +40,13 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
             return nil
         }
 
-        let contentViewController = StreamAVPictureInPictureVideoCallViewController()
+        var contentViewController: StreamAVPictureInPictureViewControlling = {
+            if #available(iOS 15.0, *) {
+                return StreamAVPictureInPictureVideoCallViewController()
+            } else {
+                return StreamAVPictureInPictureViewController()
+            }
+        }()
         contentViewController.preferredContentSize = .init(width: 640, height: 480)
         self.contentViewController = contentViewController
         self.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
@@ -57,24 +62,35 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         completionHandler(true)
     }
 
-    public func pictureInPictureControllerWillStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        log.debug("picture in picture will start called")
+    public func pictureInPictureControllerWillStartPictureInPicture(
+        _ pictureInPictureController: AVPictureInPictureController
+    ) {
+        log.debug("Will start with trackId:\(track?.trackId ?? "n/a")")
     }
 
-    public func pictureInPictureControllerDidStartPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        log.debug("picture in picture did start called with track:\(track?.trackId)")
+    public func pictureInPictureControllerDidStartPictureInPicture(
+        _ pictureInPictureController: AVPictureInPictureController
+    ) {
+        log.debug("Did start with trackId:\(track?.trackId ?? "n/a")")
     }
 
-    public func pictureInPictureController(_ pictureInPictureController: AVPictureInPictureController, failedToStartPictureInPictureWithError error: Error) {
-        log.debug("picture in picture failed to start called \(error)")
+    public func pictureInPictureController(
+        _ pictureInPictureController: AVPictureInPictureController,
+        failedToStartPictureInPictureWithError error: Error
+    ) {
+        log.error("Failed for trackId:\(track?.trackId ?? "na/a") with error:\(error)")
     }
 
-    public func pictureInPictureControllerWillStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        log.debug("picture in picture will stop called")
+    public func pictureInPictureControllerWillStopPictureInPicture(
+        _ pictureInPictureController: AVPictureInPictureController
+    ) {
+        log.debug("Will stop for trackId:\(track?.trackId ?? "n/a")")
     }
 
-    public func pictureInPictureControllerDidStopPictureInPicture(_ pictureInPictureController: AVPictureInPictureController) {
-        log.debug("picture in picture did stop called")
+    public func pictureInPictureControllerDidStopPictureInPicture(
+        _ pictureInPictureController: AVPictureInPictureController
+    ) {
+        log.debug("Did stop for trackId:\(track?.trackId ?? "n/a")")
     }
 
     // MARK: - Private helpers
@@ -87,13 +103,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     private func didUpdate(_ sourceView: UIView?) {
         if let sourceView {
             if pictureInPictureController?.isPictureInPictureActive != false {
-                pictureInPictureController = .init(
-                    contentSource: .init(
-                        activeVideoCallSourceView: sourceView,
-                        contentViewController: contentViewController
-                    ))
-                pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
-                pictureInPictureController?.delegate = self
+                makePictureInPictureController(with: sourceView)
 
                 pictureInPictureController?
                     .publisher(for: \.isPictureInPicturePossible)
@@ -107,14 +117,36 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
                     .sink { [weak self] in self?.didUpdatePictureInPictureActiveState($0)  }
                     .store(in: &cancellableBag)
             } else {
-                pictureInPictureController?.contentSource = .init(
-                    activeVideoCallSourceView: sourceView,
-                    contentViewController: contentViewController
-                )
+                if #available(iOS 15.0, *), let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
+                    pictureInPictureController?.contentSource = .init(
+                        activeVideoCallSourceView: sourceView,
+                        contentViewController: contentViewController
+                    )
+                }
             }
         } else {
-            pictureInPictureController?.contentSource = nil
+            if #available(iOS 15.0, *) {
+                pictureInPictureController?.contentSource = nil
+            }
         }
+    }
+
+    private func makePictureInPictureController(with sourceView: UIView) {
+        if #available(iOS 15.0, *), let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
+            pictureInPictureController = .init(
+                contentSource: .init(
+                    activeVideoCallSourceView: sourceView,
+                    contentViewController: contentViewController
+                ))
+        } else {
+            pictureInPictureController = .init(playerLayer: .init(layer: contentViewController.displayLayer))
+        }
+
+        if #available(iOS 14.2, *) {
+            pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
+        }
+
+        pictureInPictureController?.delegate = self
     }
 
     private func didUpdatePictureInPictureActiveState(_ isActive: Bool) {

@@ -51,9 +51,9 @@ extension CMSampleBuffer {
     }
 }
 
-func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer, reductionFactor: Int = 8) -> CVPixelBuffer? {
-    let width = Int(i420Buffer.width) / reductionFactor
-    let height = Int(i420Buffer.height) / reductionFactor
+func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer) -> CVPixelBuffer? {
+    let width = Int(i420Buffer.width)
+    let height = Int(i420Buffer.height)
 
     // Create a BGRA pixel buffer
     var pixelBuffer: CVPixelBuffer?
@@ -85,7 +85,7 @@ func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer, reductionFactor
         return nil
     }
 
-    // Perform YUV to RGB conversion with proper chroma upsampling and resolution reduction
+    // Perform YUV to RGB conversion with proper chroma upsampling
     let yPlane = i420Buffer.dataY
     let uPlane = i420Buffer.dataU
     let vPlane = i420Buffer.dataV
@@ -96,11 +96,11 @@ func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer, reductionFactor
 
     let bgraBytesPerRow = CVPixelBufferGetBytesPerRow(outputPixelBuffer)
 
-    for y in 0..<height {
-        for x in 0..<width {
-            let yOffset = (y * reductionFactor) * yBytesPerRow + (x * reductionFactor)
-            let uOffset = ((y / 2) * reductionFactor) * uBytesPerRow + ((x / 2) * reductionFactor)
-            let vOffset = ((y / 2) * reductionFactor) * vBytesPerRow + ((x / 2) * reductionFactor)
+    for y in stride(from: 0, to: height, by: 1) {
+        for x in stride(from: 0, to: width, by: 1) {
+            let yOffset = y * yBytesPerRow + x
+            let uOffset = (y / 2) * uBytesPerRow + (x / 2)
+            let vOffset = (y / 2) * vBytesPerRow + (x / 2)
 
             let yValue = Int(yPlane[yOffset])
             let uValue = Int(uPlane[uOffset]) - 128
@@ -132,6 +132,7 @@ func convertI420BufferToPixelBuffer(_ i420Buffer: RTCI420Buffer, reductionFactor
 
     return outputPixelBuffer
 }
+
 
 // Helper function to clamp a value to the 0-255 range
 func clamp(_ value: Int) -> UInt8 {
