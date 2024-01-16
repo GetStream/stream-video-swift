@@ -207,4 +207,8 @@ struct StreamBufferTransformer {
 
         return outputPixelBuffer
     }
+
+    private func clamp(_ value: Int) -> UInt8 {
+        return UInt8(max(0, min(255, value)))
+    }
 }

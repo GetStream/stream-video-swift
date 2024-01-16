@@ -469,7 +469,6 @@
 		843697CF28C7898A00839D99 /* VideoOptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697CE28C7898A00839D99 /* VideoOptions.swift */; };
 		843697D228C7A25F00839D99 /* ParticipantsGridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843697D028C7A23300839D99 /* ParticipantsGridView.swift */; };
 		843B707529C270C300AB0573 /* ReconnectionView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843B707429C270C300AB0573 /* ReconnectionView.swift */; };
-		843BD8FB2AA0E660002B3DAC /* PiPUtils_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843BD8FA2AA0E660002B3DAC /* PiPUtils_Tests.swift */; };
 		843DAB9929E695CF00E0EB63 /* CreateGuestResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9729E695CF00E0EB63 /* CreateGuestResponse.swift */; };
 		843DAB9A29E695CF00E0EB63 /* CreateGuestRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */; };
 		843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */; };
@@ -577,7 +576,6 @@
 		848CCCED2AB8ED8F002E83A2 /* CallHLSBroadcastingStartedEvent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848CCCE22AB8ED8F002E83A2 /* CallHLSBroadcastingStartedEvent.swift */; };
 		848CCCEE2AB8ED8F002E83A2 /* CallUserMuted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848CCCE32AB8ED8F002E83A2 /* CallUserMuted.swift */; };
 		848CCCEF2AB8ED8F002E83A2 /* ThumbnailsSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848CCCE42AB8ED8F002E83A2 /* ThumbnailsSettings.swift */; };
-		848FE1E72A9CBC1800B45AC2 /* PiPUtils.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */; };
 		8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */; };
 		8490032129D308A000AD9BB4 /* RingSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031A29D308A000AD9BB4 /* RingSettingsRequest.swift */; };
 		8490032229D308A000AD9BB4 /* AudioSettingsRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8490031B29D308A000AD9BB4 /* AudioSettingsRequest.swift */; };
@@ -1350,7 +1348,6 @@
 		843697CE28C7898A00839D99 /* VideoOptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoOptions.swift; sourceTree = "<group>"; };
 		843697D028C7A23300839D99 /* ParticipantsGridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsGridView.swift; sourceTree = "<group>"; };
 		843B707429C270C300AB0573 /* ReconnectionView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ReconnectionView.swift; sourceTree = "<group>"; };
-		843BD8FA2AA0E660002B3DAC /* PiPUtils_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPUtils_Tests.swift; sourceTree = "<group>"; };
 		843DAB9729E695CF00E0EB63 /* CreateGuestResponse.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateGuestResponse.swift; sourceTree = "<group>"; };
 		843DAB9829E695CF00E0EB63 /* CreateGuestRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CreateGuestRequest.swift; sourceTree = "<group>"; };
 		843DAB9B29E6FFCD00E0EB63 /* StreamVideo_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamVideo_Tests.swift; sourceTree = "<group>"; };
@@ -1454,7 +1451,6 @@
 		848CCCE22AB8ED8F002E83A2 /* CallHLSBroadcastingStartedEvent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallHLSBroadcastingStartedEvent.swift; sourceTree = "<group>"; };
 		848CCCE32AB8ED8F002E83A2 /* CallUserMuted.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallUserMuted.swift; sourceTree = "<group>"; };
 		848CCCE42AB8ED8F002E83A2 /* ThumbnailsSettings.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThumbnailsSettings.swift; sourceTree = "<group>"; };
-		848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PiPUtils.swift; sourceTree = "<group>"; };
 		8490031829D2E0DF00AD9BB4 /* Sorting_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Sorting_Tests.swift; sourceTree = "<group>"; };
 		8490031A29D308A000AD9BB4 /* RingSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RingSettingsRequest.swift; sourceTree = "<group>"; };
 		8490031B29D308A000AD9BB4 /* AudioSettingsRequest.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = AudioSettingsRequest.swift; sourceTree = "<group>"; };
@@ -1829,7 +1825,6 @@
 				401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */,
 				8457BF7F2A5C18A7000AE567 /* ToastView_Tests.swift */,
 				841FF5142A5E99B400809BBB /* CallEventsHandler_Tests.swift */,
-				843BD8FA2AA0E660002B3DAC /* PiPUtils_Tests.swift */,
 				4067A5D72AE1249400CFDEB1 /* CornerClipper_Tests.swift */,
 			);
 			path = Utils;
@@ -3461,7 +3456,6 @@
 				827D893D2A16369300838B1A /* LazyImageExtensions.swift */,
 				4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */,
 				8457BF7B2A5BF9E0000AE567 /* ToastView.swift */,
-				848FE1E62A9CBC1800B45AC2 /* PiPUtils.swift */,
 				40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */,
 			);
 			path = Utils;
@@ -4792,7 +4786,6 @@
 				40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */,
 				8458872A28A3F935002A81BF /* OutgoingCallView.swift in Sources */,
 				8277D1432AE81CC800BC4ECF /* TaskFetchDecodedImage.swift in Sources */,
-				848FE1E72A9CBC1800B45AC2 /* PiPUtils.swift in Sources */,
 				8457CF9128BB835F00E8CF50 /* CallView.swift in Sources */,
 				846E4AFD29D1DDE8003733AB /* LayoutMenuView.swift in Sources */,
 				8277D1702AE81CC800BC4ECF /* ImageContainer.swift in Sources */,
@@ -4901,7 +4894,6 @@
 				82E3BA442A0BAE0F001AB93E /* EventDecoder_Mock.swift in Sources */,
 				82FF40B52A17C6C200B4D95E /* CallControlsView_Tests.swift in Sources */,
 				40914C982B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift in Sources */,
-				843BD8FB2AA0E660002B3DAC /* PiPUtils_Tests.swift in Sources */,
 				82E3BA402A0BADF9001AB93E /* WebSocketPingController_Mock.swift in Sources */,
 				820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */,
 				403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */,
