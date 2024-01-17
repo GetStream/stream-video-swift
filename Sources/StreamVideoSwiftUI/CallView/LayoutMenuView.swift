@@ -8,10 +8,14 @@ import SwiftUI
 @available(iOS 14.0, *)
 public struct LayoutMenuView: View {
     
+    @Injected(\.images) var images
+
     @ObservedObject var viewModel: CallViewModel
-    
-    public init(viewModel: CallViewModel) {
+    var size: CGFloat
+
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         _viewModel = ObservedObject(initialValue: viewModel)
+        self.size = size
     }
     
     public var body: some View {
@@ -38,8 +42,11 @@ public struct LayoutMenuView: View {
                 viewModel.update(participantsLayout: layout)
             }
         } label: {
-            Label(L10n.Call.Current.layoutView, systemImage: "circle.grid.2x2.fill")
-                .foregroundColor(.white)
+            CallIconView(
+                icon: images.layoutSelectorIcon,
+                size: size,
+                iconStyle: .secondary
+            )
         }
     }
 }

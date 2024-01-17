@@ -8,47 +8,28 @@ import SwiftUI
 public struct CallControlsView: View {
     
     @Injected(\.streamVideo) var streamVideo
-        
-    private let size: CGFloat = 50
-    private let cornerRadius: CGFloat = 24
+    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
-    
-    @Injected(\.images) var images
-    @Injected(\.colors) var colors
-    
+
     public init(viewModel: CallViewModel) {
         self.viewModel = viewModel
     }
     
     public var body: some View {
-        HStack(alignment: .top) {
-            Spacer()
-
+        HStack {
             VideoIconView(viewModel: viewModel)
-
-            Spacer()
-
             MicrophoneIconView(viewModel: viewModel)
 
             Spacer()
 
-            ToggleCameraIconView(viewModel: viewModel)
-
-            Spacer()
-
-            HangUpIconView(viewModel: viewModel)
-
-            Spacer()
+            if viewModel.callingState == .inCall {
+                ParticipantsListButton(viewModel: viewModel)
+            }
         }
-        .padding()
+        .padding(.horizontal, 16)
+        .padding(.vertical)
         .frame(maxWidth: .infinity)
-        .cornerRadius(
-            cornerRadius,
-            corners: [.topLeft, .topRight],
-            backgroundColor: colors.callControlsBackground,
-            extendToSafeArea: true
-        )
     }
 }
 
@@ -59,7 +40,7 @@ public struct VideoIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -73,7 +54,7 @@ public struct VideoIconView: View {
                 CallIconView(
                     icon: (viewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
                     size: size,
-                    iconStyle: (viewModel.callSettings.videoOn ? .primary : .transparent)
+                    iconStyle: (viewModel.callSettings.videoOn ? .transparent : .disabled)
                 )
             }
         )
@@ -89,7 +70,7 @@ public struct MicrophoneIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -103,7 +84,7 @@ public struct MicrophoneIconView: View {
                 CallIconView(
                     icon: (viewModel.callSettings.audioOn ? images.micTurnOn : images.micTurnOff),
                     size: size,
-                    iconStyle: (viewModel.callSettings.audioOn ? .primary : .transparent)
+                    iconStyle: (viewModel.callSettings.audioOn ? .transparent : .disabled)
                 )
             }
         )
@@ -119,7 +100,7 @@ public struct ToggleCameraIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -133,7 +114,7 @@ public struct ToggleCameraIconView: View {
                 CallIconView(
                     icon: images.toggleCamera,
                     size: size,
-                    iconStyle: .primary
+                    iconStyle: .secondary
                 )
             }
         )
@@ -150,7 +131,7 @@ public struct HangUpIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -159,11 +140,11 @@ public struct HangUpIconView: View {
         Button {
             viewModel.hangUp()
         } label: {
-            images.hangup
-                .applyCallButtonStyle(
-                    color: colors.hangUpIconColor,
-                    size: size
-                )
+            CallIconView(
+                icon: images.hangup,
+                size: size,
+                iconStyle: .destructive
+            )
         }
         .accessibility(identifier: "hangUp")
     }
@@ -176,7 +157,7 @@ public struct AudioOutputIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -195,7 +176,6 @@ public struct AudioOutputIconView: View {
             }
         )
     }
-    
 }
 
 public struct SpeakerIconView: View {
@@ -205,7 +185,7 @@ public struct SpeakerIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }

@@ -113,7 +113,10 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
             DefaultBackgroundGradient()
                 .edgesIgnoringSafeArea(.all)
 
-            VStack(spacing: 16) {
+            VStack {
+                viewFactory.makeCallTopView(viewModel: viewModel)
+                    .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
+
                 Group {
                     if let localParticipant = viewModel.localParticipant {
                         GeometryReader { proxy in
@@ -136,6 +139,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                     }
                 }
                 .padding(.horizontal, 8)
+                .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
 
                 viewFactory.makeCallControlsView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)

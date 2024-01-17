@@ -6,7 +6,9 @@ import StreamVideo
 import SwiftUI
 
 public struct ConnectionQualityIndicator: View {
-    
+
+    @Injected(\.colors) var colors
+
     private var size: CGFloat = 28
     private var width: CGFloat = 3
     
@@ -36,18 +38,18 @@ public struct ConnectionQualityIndicator: View {
         .cornerRadius(
             8,
             corners: [.topLeft],
-            backgroundColor: connectionQuality == .unknown ? Color.clear : Color.black.opacity(0.6)
+            backgroundColor: connectionQuality == .unknown ? .clear : colors.participantInfoBackgroundColor
         )
         .accessibility(identifier: "connectionQualityIndicator")
     }
     
     private func color(for index: Int) -> Color {
         if connectionQuality == .excellent {
-            return .blue
+            return colors.accentGreen
         } else if connectionQuality == .good {
-            return index == 3 ? .white : .blue
+            return index == 3 ? colors.white : colors.accentGreen
         } else if connectionQuality == .poor {
-            return index == 1 ? .red : .white
+            return index == 1 ? colors.accentRed : colors.white
         } else {
             return .clear
         }
