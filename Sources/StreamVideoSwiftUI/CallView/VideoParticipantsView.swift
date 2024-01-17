@@ -219,7 +219,7 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
         Image(systemName: "ellipsis")
             .foregroundColor(.white)
             .padding(8)
-            .background(Color.black.opacity(0.6))
+            .background(appearance.colors.participantInfoBackgroundColor)
             .clipShape(Circle())
     }
 
@@ -387,6 +387,7 @@ public struct VideoCallParticipantView: View {
 public struct ParticipantInfoView: View {
     @Injected(\.images) var images
     @Injected(\.fonts) var fonts
+    @Injected(\.colors) var colors
     
     var participant: CallParticipant
     var isPinned: Bool
@@ -429,7 +430,7 @@ public struct ParticipantInfoView: View {
         .cornerRadius(
             8,
             corners: [.topRight],
-            backgroundColor: Color.black.opacity(0.6)
+            backgroundColor: colors.participantInfoBackgroundColor
         )
     }
 }

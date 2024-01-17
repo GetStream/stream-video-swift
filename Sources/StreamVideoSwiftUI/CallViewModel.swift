@@ -94,7 +94,10 @@ open class CallViewModel: ObservableObject {
     
     /// Whether the list of participants is shown during the call.
     @Published public var participantsShown = false
-        
+
+    /// Whether the list of participants is shown during the call.
+    @Published public var moreControlsShown = false
+
     /// List of the outgoing call members.
     @Published public var outgoingCallMembers = [MemberRequest]()
         

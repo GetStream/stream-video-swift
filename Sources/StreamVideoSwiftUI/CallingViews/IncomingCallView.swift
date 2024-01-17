@@ -97,7 +97,7 @@ struct IncomingCallViewContent: View {
                 Button {
                     onCallRejected(callInfo.id)
                 } label: {
-                    images.hangup
+                    Image(systemName: "phone.down.circle.fill")
                         .applyCallButtonStyle(
                             color: Color.red,
                             backgroundType: .circle,

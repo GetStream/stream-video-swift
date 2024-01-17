@@ -5,11 +5,16 @@
 import StreamVideo
 import SwiftUI
 
-public struct JoiningCallView<CallControls: View>: View {
-    
+public struct JoiningCallView<CallControls: View, CallTopView: View>: View {
+
+    var callTopView: CallTopView
     var callControls: CallControls
     
-    public init(callControls: CallControls) {
+    public init(
+        callTopView: CallTopView,
+        callControls: CallControls
+    ) {
+        self.callTopView = callTopView
         self.callControls = callControls
     }
     
@@ -17,7 +22,8 @@ public struct JoiningCallView<CallControls: View>: View {
         CallConnectingView(
             outgoingCallMembers: [],
             title: L10n.Call.Joining.title,
-            callControls: callControls
+            callControls: callControls,
+            callTopView: callTopView
         )
     }
 }

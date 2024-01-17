@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 
+@available(iOS 14.0, *)
 struct ReadableContentGuideViewModifier: ViewModifier {
 
     let isEnabled: Bool
@@ -43,7 +44,11 @@ struct ReadableContentGuideViewModifier: ViewModifier {
 extension View {
 
     @ViewBuilder
-    func alignedToReadableContentGuide() -> some View {
-        self.modifier(ReadableContentGuideViewModifier(isEnabled: true))
+    public func alignedToReadableContentGuide() -> some View {
+        if #available(iOS 14.0, *) {
+            self.modifier(ReadableContentGuideViewModifier(isEnabled: true))
+        } else {
+            self
+        }
     }
 }

@@ -5,8 +5,8 @@
 import StreamVideo
 import SwiftUI
 
-public struct OutgoingCallView<CallControls: View>: View {
-    
+public struct OutgoingCallView<CallControls: View, CallTopView: View>: View {
+
     @Injected(\.streamVideo) var streamVideo
     
     @Injected(\.colors) var colors
@@ -15,10 +15,16 @@ public struct OutgoingCallView<CallControls: View>: View {
     @Injected(\.utils) var utils
     
     var outgoingCallMembers: [Member]
+    var callTopView: CallTopView
     var callControls: CallControls
     
-    public init(outgoingCallMembers: [Member], callControls: CallControls) {
+    public init(
+        outgoingCallMembers: [Member],
+        callTopView: CallTopView,
+        callControls: CallControls
+    ) {
         self.outgoingCallMembers = outgoingCallMembers
+        self.callTopView = callTopView
         self.callControls = callControls
     }
     
@@ -26,7 +32,8 @@ public struct OutgoingCallView<CallControls: View>: View {
         CallConnectingView(
             outgoingCallMembers: outgoingCallMembers,
             title: L10n.Call.Outgoing.title,
-            callControls: callControls
+            callControls: callControls,
+            callTopView: callTopView
         )
         .onAppear {
             utils.callSoundsPlayer.playOutgoingCallSound()

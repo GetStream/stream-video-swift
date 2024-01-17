@@ -6,13 +6,13 @@ import StreamVideo
 import SwiftUI
 
 @available(iOS 14.0, *)
-struct InviteParticipantsView: View {
-    
+public struct InviteParticipantsView: View {
+
     @StateObject var viewModel: InviteParticipantsViewModel
     
     @Binding var inviteParticipantsShown: Bool
     
-    init(
+    public init(
         inviteParticipantsShown: Binding<Bool>,
         currentParticipants: [CallParticipant],
         call: Call?
@@ -26,7 +26,7 @@ struct InviteParticipantsView: View {
         _inviteParticipantsShown = inviteParticipantsShown
     }
     
-    var body: some View {
+    public var body: some View {
         VStack(spacing: 0) {
             SearchBar(text: $viewModel.searchText)
                 .padding(.vertical, !viewModel.selectedUsers.isEmpty ? 0 : 16)

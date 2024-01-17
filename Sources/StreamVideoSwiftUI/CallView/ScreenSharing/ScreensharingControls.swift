@@ -13,7 +13,7 @@ public struct ScreenshareIconView: View {
     @ObservedObject var viewModel: CallViewModel
     let size: CGFloat
     
-    public init(viewModel: CallViewModel, size: CGFloat = 50) {
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -23,9 +23,9 @@ public struct ScreenshareIconView: View {
             viewModel.startScreensharing(type: .inApp)
         } label: {
             CallIconView(
-                icon: Image(systemName: "square.and.arrow.up.circle.fill"),
+                icon: images.screenshareIcon,
                 size: size,
-                iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .primary : .transparent)
+                iconStyle: (viewModel.call?.state.isCurrentUserScreensharing == false ? .transparent : .primary)
             )
         }
     }
@@ -40,18 +40,26 @@ public struct BroadcastIconView: View {
     @ObservedObject var viewModel: CallViewModel
     @StateObject var broadcastObserver = BroadcastObserver()
     let size: CGFloat
-    let iconStyle = CallIconStyle.primary
+    let iconStyle = CallIconStyle.transparent
     let preferredExtension: String
-    let iconSize: CGFloat = 50
-    
+    let iconSize: CGFloat = 44
+    let offset: CGPoint
+
     public init(
         viewModel: CallViewModel,
         preferredExtension: String,
-        size: CGFloat = 50
+        size: CGFloat = 44
     ) {
         self.viewModel = viewModel
         self.preferredExtension = preferredExtension
         self.size = size
+        self.offset = {
+            if #available(iOS 16.0, *) {
+                return .init(x: -5, y: -4)
+            } else {
+                return .zero
+            }
+        }()
     }
     
     public var body: some View {
@@ -64,7 +72,7 @@ public struct BroadcastIconView: View {
                 size: iconSize
             )
             .frame(width: iconSize, height: iconSize)
-            .offset(x: -5, y: -4)
+            .offset(x: offset.x, y: offset.y)
             .foregroundColor(iconStyle.foregroundColor)
         }
         .frame(width: size, height: size)

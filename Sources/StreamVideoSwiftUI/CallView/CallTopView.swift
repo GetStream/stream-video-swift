@@ -18,41 +18,43 @@ public struct CallTopView: View {
     }
     
     public var body: some View {
-        HStack {
-            Button {
-                withAnimation {
-                    viewModel.isMinimized = true
-                }
-            } label: {
-                Image(systemName: "chevron.left")
-                    .foregroundColor(colors.textInverted)
-                    .padding()
-            }
-            .accessibility(identifier: "minimizeCallViewButton")
-            
-            if viewModel.recordingState == .recording {
-                RecordingView()
-                    .accessibility(identifier: "recordingLabel")
-            }
+        Group {
+            HStack(spacing: 0) {
+                HStack {
+                    if 
+                        #available(iOS 14.0, *),
+                        viewModel.callParticipants.count > 1 
+                    {
+                        LayoutMenuView(viewModel: viewModel)
+                            .opacity(hideLayoutMenu ? 0 : 1)
+                            .accessibility(identifier: "viewMenu")
+                    }
 
-            Spacer()
-            
-            
-            if #available(iOS 14, *) {
-                LayoutMenuView(viewModel: viewModel)
-                    .opacity(hideLayoutMenu ? 0 : 1)
-                    .accessibility(identifier: "viewMenu")
-                
-                Button {
-                    viewModel.participantsShown.toggle()
-                } label: {
-                    images.participants
-                        .padding(.horizontal)
-                        .padding(.horizontal, 2)
-                        .foregroundColor(.white)
+                    ToggleCameraIconView(viewModel: viewModel)
+
+                    Spacer()
                 }
-                .accessibility(identifier: "participantMenu")
+                .frame(maxWidth: .infinity)
+
+                HStack(alignment: .center) {
+                    if #available(iOS 14.0, *) {
+                        CallDurationView(viewModel)
+                    } else {
+                        EmptyView()
+                    }
+                }
+                .frame(height: 44)
+                .frame(maxWidth: .infinity)
+
+                HStack {
+                    Spacer()
+                    HangUpIconView(viewModel: viewModel)
+                }
+                .frame(maxWidth: .infinity)
             }
+            .padding(.horizontal, 16)
+            .padding(.vertical)
+            .frame(maxWidth: .infinity)
         }
         .overlay(
             viewModel.call?.state.isCurrentUserScreensharing == true ?
