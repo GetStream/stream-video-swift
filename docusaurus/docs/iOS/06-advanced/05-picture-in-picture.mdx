@@ -11,6 +11,28 @@ If you use our view components, as soon as you enter background, the native iOS 
 
 You have control over when the Picture-in-Picture is enabled by accessing the `isPictureInPictureEnabled` property on the `CallViewModel`. By default, the value is set to `true`.
 
+### Picture-in-Picture on custom Views
+
+In case where you implement your own `CallView` but still want StreamVideo SDK to manage Picture in Picture, you can use the `enablePictureInPicture` `ViewModifier` on your `CallView`. Internally that will hool StreamVideo's PictureInPicture logic on your View. Below you can see an example usage of the `ViewModifier` from our DemoApp:
+
+```swift
+public struct CallView<Factory: ViewFactory>: View {
+
+    ...
+
+    @ObservedObject var viewModel: CallViewModel
+
+    ...
+
+    public var body: some View {
+        ...
+        .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
+    }
+    
+    ...
+}
+```
+
 ### Current user camera
 
 By default, iOS does not allow access to the user's camera, while in background. There are two possibilities to display the user's camera in video calls and PiP in this state:

@@ -88,3 +88,20 @@ final class StreamPictureInPictureAdapter {
         pictureInPictureController?.sourceView = sourceView
     }
 }
+
+/// Provides the default value of the `StreamPictureInPictureAdapter` class.
+struct StreamPictureInPictureAdapterKey: InjectionKey {
+    static var currentValue: StreamPictureInPictureAdapter = .init()
+}
+
+extension InjectedValues {
+    /// Provides access to the `StreamPictureInPictureAdapter` class to the views and view models.
+    var pictureInPictureAdapter: StreamPictureInPictureAdapter {
+        get {
+            Self[StreamPictureInPictureAdapterKey.self]
+        }
+        set {
+            Self[StreamPictureInPictureAdapterKey.self] = newValue
+        }
+    }
+}

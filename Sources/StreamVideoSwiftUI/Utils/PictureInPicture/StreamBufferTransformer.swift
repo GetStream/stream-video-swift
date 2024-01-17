@@ -7,7 +7,7 @@ import StreamVideo
 import StreamWebRTC
 
 /// `StreamBufferTransformer` is a struct that provides methods for transforming RTCI420Buffer to
-/// CVPixelBuffer. while performing downsampling when necessary.
+/// CVPixelBuffer, while performing downsampling when necessary.
 struct StreamBufferTransformer {
 
     var requiresResize = false

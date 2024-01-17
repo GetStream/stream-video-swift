@@ -12,12 +12,12 @@ import StreamWebRTC
 open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.utils) var utils
-    
+    @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
+
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
         didSet {
-            utils.pictureInPictureAdapter.call = call
+            pictureInPictureAdapter.call = call
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
@@ -194,7 +194,7 @@ open class CallViewModel: ObservableObject {
         self.localCallSettingsChange = callSettings != nil
 
         self.subscribeToCallEvents()
-        utils.pictureInPictureAdapter.onSizeUpdate = { [weak self] in
+        pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
     }

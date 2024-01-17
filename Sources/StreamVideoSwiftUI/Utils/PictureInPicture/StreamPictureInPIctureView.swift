@@ -10,7 +10,7 @@ import StreamVideo
 /// very weird if the sourceView isn't in the ViewHierarchy or doesn't have an appropriate size.
 struct StreamPictureInPictureView: UIViewRepresentable {
 
-    @Injected(\.utils) private var utils
+    @Injected(\.pictureInPictureAdapter) private var pictureInPictureAdapter
 
     var isActive: Bool
 
@@ -22,10 +22,10 @@ struct StreamPictureInPictureView: UIViewRepresentable {
             // the `StreamPictureInPictureAdapter` in order to allow usage for
             // picture-in-picture.
             DispatchQueue.main.asyncAfter(deadline: .now() + 1) {
-                utils.pictureInPictureAdapter.sourceView = view
+                pictureInPictureAdapter.sourceView = view
             }
         } else {
-            utils.pictureInPictureAdapter.sourceView = nil
+            pictureInPictureAdapter.sourceView = nil
         }
         return view
     }
@@ -36,10 +36,10 @@ struct StreamPictureInPictureView: UIViewRepresentable {
                 // Once the view has been created/updated make sure to assign it to
                 // the `StreamPictureInPictureAdapter` in order to allow usage for
                 // picture-in-picture.
-                utils.pictureInPictureAdapter.sourceView = uiView
+                pictureInPictureAdapter.sourceView = uiView
             }
         } else {
-            utils.pictureInPictureAdapter.sourceView = nil
+            pictureInPictureAdapter.sourceView = nil
         }
     }
 }
