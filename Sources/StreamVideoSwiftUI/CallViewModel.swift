@@ -17,15 +17,12 @@ open class CallViewModel: ObservableObject {
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
         didSet {
+            utils.pictureInPictureAdapter.call = call
             lastLayoutChange = Date()
             participantUpdates = call?.state.$participantsMap
                 .receive(on: RunLoop.main)
-                .sink(receiveValue: { [weak self] participants in
-                    if let pipVideoRenderer = self?.pipVideoRenderer {
-                        self?.pipHandler.setupPictureInPicture(with: pipVideoRenderer)
-                    }
-                    self?.callParticipants = participants
-            })
+                .sink(receiveValue: { [weak self] in self?.callParticipants = $0 })
+            
             blockedUserUpdates = call?.state.$blockedUserIds
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] blockedUserIds in
@@ -164,16 +161,7 @@ open class CallViewModel: ObservableObject {
     private var participantsSortComparators = defaultComparators
     private let callEventsHandler = CallEventsHandler()
     private var localCallSettingsChange = false
-    private lazy var pipHandler = PiPHandler()
-    private lazy var pipTrackSelectionUtils = PiPTrackSelectionUtils()
-    
-    private var pipVideoRenderer: VideoRenderer? {
-        pipTrackSelectionUtils.pipVideoRenderer(
-            from: callParticipants,
-            currentSessionId: call?.state.sessionId
-        )
-    }
-    
+
     public var participants: [CallParticipant] {
         let updateParticipants = call?.state.participants ?? []
         return updateParticipants.filter {
@@ -201,8 +189,11 @@ open class CallViewModel: ObservableObject {
         self.participantsLayout = participantsLayout
         self.callSettings = callSettings ?? CallSettings()
         self.localCallSettingsChange = callSettings != nil
+
         self.subscribeToCallEvents()
-        self.subscribeForAppLifecycleEvents()
+        utils.pictureInPictureAdapter.onSizeUpdate = { [weak self] in
+            self?.updateTrackSize($0, for: $1)
+        }
     }
 
     /// Toggles the state of the camera (visible vs non-visible).
@@ -668,31 +659,4 @@ public enum ParticipantsLayout {
     case grid
     case spotlight
     case fullScreen
-}
-
-extension CallViewModel {
-    
-    func subscribeForAppLifecycleEvents() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(startPiP),
-            name: UIScene.didEnterBackgroundNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(stopPiP),
-            name: UIScene.willEnterForegroundNotification,
-            object: nil
-        )
-    }
-        
-    @objc func startPiP() {
-        utils.videoRendererFactory.prepareForPictureInPicture()
-        pipHandler.startPiP()
-    }
-    
-    @objc func stopPiP() {
-        pipHandler.stopPiP()
-    }
 }

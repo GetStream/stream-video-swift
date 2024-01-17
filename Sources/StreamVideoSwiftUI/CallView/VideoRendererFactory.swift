@@ -9,7 +9,6 @@ import SwiftUI
 class VideoRendererFactory {
     private let queue = DispatchQueue(label: "io.getstream.videoRendererFactory")
     private(set) var views = [String: VideoRenderer]()
-    private var pipRendererId: String?
     
     init() {
         NotificationCenter.default.addObserver(
@@ -48,7 +47,6 @@ class VideoRendererFactory {
             viewId = "\(id)-screenshare"
         }
         let view = views[viewId]
-        self.pipRendererId = viewId
         return view
     }
     
@@ -64,18 +62,5 @@ class VideoRendererFactory {
     
     @objc func clearViews() {
         views = [String: VideoRenderer]()
-    }
-    
-    func prepareForPictureInPicture() {
-        var pipRenderer: VideoRenderer?
-        var updated = [String: VideoRenderer]()
-        if let pipRendererId {
-            pipRenderer = views[pipRendererId]
-            updated[pipRendererId] = pipRenderer
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3, execute: {
-                pipRenderer?.track?.isEnabled = true
-            })
-        }
-        views = updated
     }
 }
