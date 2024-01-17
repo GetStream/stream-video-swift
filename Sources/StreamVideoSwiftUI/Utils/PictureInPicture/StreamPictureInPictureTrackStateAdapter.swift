@@ -7,7 +7,7 @@ import StreamWebRTC
 import Combine
 import StreamVideo
 
-/// StreamPictureInPictureTrackStateAdapter  serves as an adapter for managing the state of a video track
+/// StreamPictureInPictureTrackStateAdapter serves as an adapter for managing the state of a video track
 /// used for picture-in-picture functionality. It can enable or disable observers based on its isEnabled property
 /// and ensures that the active track is always enabled when necessary.
 final class StreamPictureInPictureTrackStateAdapter {
@@ -65,7 +65,7 @@ final class StreamPictureInPictureTrackStateAdapter {
     /// This private function checks the state of the active track and enables it if it's not already enabled.
     private func checkTracksState() {
         if let activeTrack, !activeTrack.isEnabled {
-            log.debug("⚙️Active track:\(activeTrack.trackId) for Picture in Picture will be enabled now.")
+            log.info("⚙️Active track:\(activeTrack.trackId) for picture-in-picture will be enabled now.")
             self.activeTrack?.isEnabled = true
         }
     }

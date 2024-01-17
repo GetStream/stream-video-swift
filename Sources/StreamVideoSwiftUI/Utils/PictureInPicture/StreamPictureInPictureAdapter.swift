@@ -22,7 +22,7 @@ final class StreamPictureInPictureAdapter {
         }
     }
 
-    /// The sourceView that will be used as an anchor/trigger for Picture in Picture (as required by AVKit).
+    /// The sourceView that will be used as an anchor/trigger for picture-in-picture (as required by AVKit).
     var sourceView: UIView? {
         didSet {
             guard sourceView !== oldValue else { return }
@@ -30,7 +30,7 @@ final class StreamPictureInPictureAdapter {
         }
     }
 
-    /// The closure to call whenever the Picture in Picture rendering window changes size.
+    /// The closure to call whenever the picture-in-picture rendering window changes size.
     var onSizeUpdate: ((CGSize, CallParticipant) -> Void)? {
         didSet {
             pictureInPictureController?.onSizeUpdate = { [weak self] size in
@@ -41,12 +41,12 @@ final class StreamPictureInPictureAdapter {
         }
     }
 
-    /// The participant to use in order to access the track to render on Picture in Picture.
+    /// The participant to use in order to access the track to render on picture-in-picture.
     private var activeParticipant: CallParticipant?
 
     private var participantUpdatesCancellable: AnyCancellable?
 
-    /// The actual Picture in Picture controller.
+    /// The actual picture-in-picture controller.
     private lazy var pictureInPictureController = StreamPictureInPictureController()
 
     // MARK: - Private Helpers
@@ -66,7 +66,7 @@ final class StreamPictureInPictureAdapter {
     }
 
     /// Whenever participants change we update our internal state in order to always have the correct track
-    /// on Picture in Picture.
+    /// on picture-in-picture.
     @MainActor
     private func didUpdate(_ participants: [CallParticipant]) {
         let sessionId = call?.state.sessionId

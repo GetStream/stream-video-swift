@@ -16,7 +16,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             // Whenever the track changes we perform the following operations if possible:
             // - stopFrameStreaming for the old track
             // - startFrameStreaming for the new track and only if we are already
-            // in Picture in Picture.
+            // in picture-in-picture.
             guard oldValue != track else { return }
             prepareForTrackRendering(oldValue)
         }
@@ -184,7 +184,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// A method used to start consuming frames from the track.
     /// - Note: In order to avoid unnecessary processing, we only start consuming track's frames when
-    /// the view has been added on a window (which means that Picture in Picture view is visible).
+    /// the view has been added on a window (which means that picture-in-picture view is visible).
     private func startFrameStreaming(
         for track: RTCVideoTrack?,
         on window: UIWindow?

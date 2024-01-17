@@ -141,6 +141,9 @@ open class CallViewModel: ObservableObject {
         }
     }
     
+    /// A flag controlling whether picture-in-picture should be enabled for the call. Default value is `true`.
+    @Published public var isPictureInPictureEnabled = true
+
     /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
         call?.state.localParticipant
