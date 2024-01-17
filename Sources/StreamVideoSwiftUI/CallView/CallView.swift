@@ -79,6 +79,7 @@ public struct CallView<Factory: ViewFactory>: View {
         .onDisappear {
             UIApplication.shared.isIdleTimerDisabled = false
         }
+        .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
     }
 
     @ViewBuilder

@@ -17,13 +17,9 @@ public class Utils {
 
 // MARK: - Utils + Default
 
-public extension Utils {
-    static var `default`: Utils = .init()
-}
-
 /// Provides the default value of the `Utils` class.
 public struct UtilsKey: InjectionKey {
-    public static var currentValue: Utils = .default
+    public static var currentValue: Utils = .init()
 }
 
 extension InjectedValues {

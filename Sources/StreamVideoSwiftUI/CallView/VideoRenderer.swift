@@ -118,10 +118,7 @@ public class VideoRenderer: RTCMTLVideoView {
     
     weak var track: RTCVideoTrack?
     
-    var feedFrames: ((CMSampleBuffer) -> ())?
-    
     private let identifier = UUID()
-    private var skipNextFrameRendering = true
     private var cancellable: AnyCancellable?
 
     private(set) var preferredFramesPerSecond: Int = UIScreen.main.maximumFramesPerSecond {
@@ -176,42 +173,6 @@ public class VideoRenderer: RTCMTLVideoView {
     public override func layoutSubviews() {
         super.layoutSubviews()
         self.viewSize = bounds.size
-    }
-    
-    public override func renderFrame(_ frame: RTCVideoFrame?) {
-        super.renderFrame(frame)
-        
-        guard let feedFrames else { return }
-        
-        skipNextFrameRendering.toggle()
-        if skipNextFrameRendering {
-           return
-        }
-        
-        DispatchQueue.global(qos: .userInteractive).async {
-            guard let frame = frame else {
-                return
-            }
-
-            if let pixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                guard let sampleBuffer = CMSampleBuffer.from(pixelBuffer.pixelBuffer) else {
-                    log.warning("Failed to convert CVPixelBuffer to CMSampleBuffer")
-                    return
-                }
-
-                feedFrames(sampleBuffer)
-            } else if let i420buffer = frame.buffer as? RTCI420Buffer {
-                // We reduce the track resolution, since it's displayed in a smaller place.
-                // Values are picked depending on how much the PiP view takes in an average iPhone or iPad.
-                let reductionFactor = UIDevice.current.isIpad ? 4 : 6
-                guard let buffer = convertI420BufferToPixelBuffer(i420buffer, reductionFactor: reductionFactor),
-                        let sampleBuffer = CMSampleBuffer.from(buffer) else {
-                    return
-                }
-                
-                feedFrames(sampleBuffer)
-            }
-        }
     }
 }
 
