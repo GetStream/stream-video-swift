@@ -1197,7 +1197,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     private func subscribeToAppLifecycleChanges() {
-        let isiOSAppOnIpad = {
+        let isiOSAppOnMac = {
             if #available(iOS 14.0, *) {
                 return ProcessInfo.processInfo.isiOSAppOnMac
             } else {
@@ -1205,7 +1205,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
         }()
 
-        if !isiOSAppOnIpad {
+        if !isiOSAppOnMac {
             NotificationCenter.default.addObserver(
                 self,
                 selector: #selector(pauseTracks),
