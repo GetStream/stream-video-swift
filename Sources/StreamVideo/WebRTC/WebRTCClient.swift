@@ -1197,18 +1197,28 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
     
     private func subscribeToAppLifecycleChanges() {
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(pauseTracks),
-            name: UIScene.didEnterBackgroundNotification,
-            object: nil
-        )
-        NotificationCenter.default.addObserver(
-            self,
-            selector: #selector(unpauseTracks),
-            name: UIScene.willEnterForegroundNotification,
-            object: nil
-        )
+        let isiOSAppOnIpad = {
+            if #available(iOS 14.0, *) {
+                return ProcessInfo.processInfo.isiOSAppOnMac
+            } else {
+                return false
+            }
+        }()
+
+        if !isiOSAppOnIpad {
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(pauseTracks),
+                name: UIScene.didEnterBackgroundNotification,
+                object: nil
+            )
+            NotificationCenter.default.addObserver(
+                self,
+                selector: #selector(unpauseTracks),
+                name: UIScene.willEnterForegroundNotification,
+                object: nil
+            )
+        }
     }
     
     private func subscribeToInternetConnectionUpdates() {
