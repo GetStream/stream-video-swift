@@ -52,6 +52,10 @@ struct DebugMenu: View {
     @State private var chatIntegration: AppEnvironment.ChatIntegration = AppEnvironment.chatIntegration {
         didSet { AppEnvironment.chatIntegration = chatIntegration }
     }
+    
+    @State private var pictureInPictureIntegration: AppEnvironment.PictureInPictureIntegration = AppEnvironment.pictureInPictureIntegration {
+        didSet { AppEnvironment.pictureInPictureIntegration = pictureInPictureIntegration }
+    }
 
     @State private var isLogsViewerVisible: Bool = false
 
@@ -86,6 +90,12 @@ struct DebugMenu: View {
                 currentValue: chatIntegration,
                 label: "Chat Integration"
             ) { self.chatIntegration = $0 }
+
+            makeMenu(
+                for: [.enabled, .disabled],
+                currentValue: pictureInPictureIntegration,
+                label: "Picture in Picture Integration"
+            ) { self.pictureInPictureIntegration = $0 }
 
             makeMenu(
                 for: [.visible, .hidden],

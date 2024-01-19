@@ -235,3 +235,23 @@ extension AppEnvironment {
         }
     }()
 }
+
+extension AppEnvironment {
+
+    enum PictureInPictureIntegration: Hashable, Debuggable {
+        case enabled, disabled
+
+        var title: String {
+            switch self {
+            case .enabled:
+                return "Enabled"
+            case .disabled:
+                return "Disabled"
+            }
+        }
+    }
+
+    static var pictureInPictureIntegration: PictureInPictureIntegration = {
+        .enabled
+    }()
+}
