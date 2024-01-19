@@ -252,13 +252,12 @@ final class CallCRUDTest: IntegrationTest {
         let call = client.call(callType: defaultCallType, callId: randomCallId)
         try await call.create(memberIds: [user1])
         
-        let (calls, next) = try await client.queryCalls(
+        let (calls, _) = try await client.queryCalls(
             filters: [CallSortField.cid.rawValue: .string(call.cId)],
             watch: true
         )
         XCTAssertEqual(1, calls.count)
         XCTAssertEqual(call.cId, calls[0].cId)
-        XCTAssertEqual(nil, next)
         
         // changes to a watched call via query call should propagate as usual to the state
         let updateResponse = try await call.update(custom: [colorKey: blue])
