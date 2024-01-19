@@ -196,7 +196,7 @@ final class Router: ObservableObject {
         appState.userState = .loggedIn
 
         appState.streamVideo = streamVideo
-        var utils = UtilsKey.currentValue
+        let utils = UtilsKey.currentValue
         utils.userListProvider = appState
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
 
