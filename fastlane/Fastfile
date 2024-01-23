@@ -381,39 +381,6 @@ private_lane :build_example_app do |options|
   )
 end
 
-lane :emerge_swiftui do
-  next unless is_check_required(sources: sources_matrix[:emerge_swiftui], force_check: @force_check)
-
-  emerge_upload(scheme: 'DemoApp')
-end
-
-lane :emerge_uikit do
-  next unless is_check_required(sources: sources_matrix[:emerge_uikit], force_check: @force_check)
-
-  emerge_upload(scheme: 'DemoApp')
-end
-
-desc 'Build and upload DemoApp to Emerge'
-private_lane :emerge_upload do |options|
-  gym(
-    export_method: 'ad-hoc',
-    project: xcode_project,
-    scheme: options[:scheme],
-    skip_package_ipa: true,
-    skip_archive: false,
-    clean: is_localhost,
-    xcargs: buildcache_xcargs
-  )
-
-  emerge(
-    build_type: 'release',
-    repo_name: github_repo,
-    pr_number: ENV['GITHUB_PR_NUM'] || nil, # If `nil` then local run or merge to develop/main
-    sha: ENV['GITHUB_COMMIT_SHA'] || last_git_commit[:commit_hash],
-    base_sha: ENV['GITHUB_BASE_SHA'] || nil
-  )
-end
-
 lane :merge_release_to_main do
   ensure_git_status_clean
   sh('git checkout main')
@@ -639,8 +606,6 @@ lane :sources_matrix do
     e2e: ['Sources', 'DemoApp', 'SwiftUIDemoAppUITests', xcode_project],
     unit: ['Sources', 'StreamVideoTests', xcode_project],
     swiftui: ['Sources', 'StreamVideoSwiftUITests', xcode_project],
-    emerge_swiftui: ['Sources/StreamVideoSwiftUI', 'Sources/StreamVideo', xcode_project],
-    emerge_uikit: ['Sources/StreamVideoUIKit'],
     uikit: ['Sources', 'StreamVideoUIKitTests', xcode_project],
     swiftui_sample_apps: ['Sources', 'DemoApp', xcode_project],
     uikit_sample_apps: ['Sources', 'DemoAppUIKit', xcode_project],
