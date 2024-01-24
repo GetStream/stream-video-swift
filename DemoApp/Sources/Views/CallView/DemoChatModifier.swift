@@ -4,22 +4,45 @@
 
 import Foundation
 import SwiftUI
+import StreamVideo
 import StreamVideoSwiftUI
 
 struct ChatModifier: ViewModifier {
+
+    @Injected(\.images) var images
+    @Injected(\.fonts) var fonts
+    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var chatViewModel: DemoChatViewModel
 
     func body(content: Content) -> some View {
         content
-            .halfSheetIfAvailable(
-                isPresented: $chatViewModel.isChatVisible,
-                onDismiss: {}
+            .sheet(
+                isPresented: $chatViewModel.isChatVisible
             ) {
                 if let channelController = chatViewModel.channelController {
-                    VStack {
-                        ChatControlsHeader(viewModel: viewModel)
+                    VStack(spacing: 0) {
+                        VStack(alignment: .center) {
+                            DragHandleView()
+                                .padding(.top)
+                        }.frame(maxWidth: .infinity)
+
+                        HStack {
+                            Text("Chat")
+                                .font(fonts.title3)
+                                .fontWeight(.medium)
+
+                            Spacer()
+
+                            ModalButton(image: images.xmark) {
+                                chatViewModel.isChatVisible = false
+                            }
+                        }
+                        .foregroundColor(.white)
+                        .padding(.bottom, 24)
+                        .padding(.top)
+                        .padding(.horizontal)
                         ChatView(
                             channelController: channelController,
                             chatViewModel: chatViewModel,

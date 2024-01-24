@@ -96,7 +96,7 @@ struct LoginView: View {
         .sheet(isPresented: $addUserShown, onDismiss: {}) {
             AddUserView()
         }
-        .halfSheetIfAvailable(isPresented: $showJoinCallPopup) {
+        .halfSheet(isPresented: $showJoinCallPopup) {
             JoinCallView(viewModel: viewModel, completion: completion)
         }
         .navigationTitle("Select a user")

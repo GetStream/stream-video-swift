@@ -56,7 +56,7 @@ public struct DemoVideoCallParticipantOptionsModifier: ViewModifier {
         Image(systemName: "ellipsis")
             .foregroundColor(.white)
             .padding(8)
-            .background(Color.black.opacity(0.6))
+            .background(appearance.colors.participantInfoBackgroundColor)
             .clipShape(Circle())
     }
 
