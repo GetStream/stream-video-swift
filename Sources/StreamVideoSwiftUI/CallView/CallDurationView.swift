@@ -6,7 +6,7 @@ import Foundation
 import SwiftUI
 import StreamVideo
 
-@available(iOS 14.0, *)
+/// A view that presents the call's duration and recording state.
 public struct CallDurationView: View {
 
     @Injected(\.colors) private var colors: Colors
@@ -49,7 +49,7 @@ public struct CallDurationView: View {
             }
         }
         .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
-        .accessibilityLabel(accessibilityLabel)
+        .accessibility(identifier: accessibilityLabel)
     }
 
     // MARK - Private Helpers

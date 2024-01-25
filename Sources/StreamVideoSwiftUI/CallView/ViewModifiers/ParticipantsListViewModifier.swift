@@ -22,6 +22,7 @@ struct ParticipantsListViewModifier<EmbeddedView: View>: ViewModifier {
 
 extension View {
 
+    /// Will use the provided Binding to present the Participants List.
     @ViewBuilder
     public func presentParticipantListView(
         isPresented: Binding<Bool>,

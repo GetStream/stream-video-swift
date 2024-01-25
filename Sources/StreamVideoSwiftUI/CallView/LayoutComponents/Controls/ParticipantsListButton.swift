@@ -6,6 +6,8 @@ import Foundation
 import SwiftUI
 import StreamVideo
 
+/// A button that can be used to present toggle the Participants List's presentation. Additionally, it will
+/// display a badge with the number of the total participants in the call.
 public struct ParticipantsListButton: View {
 
     @Injected(\.images) var images
@@ -13,8 +15,8 @@ public struct ParticipantsListButton: View {
     @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
+    @State private var count: Int = 0
     let size: CGFloat
-
 
     public init(
         viewModel: CallViewModel,
@@ -38,9 +40,14 @@ public struct ParticipantsListButton: View {
             }
         )
         .overlay(
-            ControlBadgeView("\(viewModel.callParticipants.count)")
-                .opacity(viewModel.callParticipants.count > 1 ? 1 : 0)
+            ControlBadgeView("\(count)")
+                .opacity(count > 1 ? 1 : 0)
         )
         .accessibility(identifier: "participantMenu")
+        .onReceive(viewModel.call?.state.$participants) {
+            // We use the participants array in order to access the count of
+            // Participants in an O(1) operation.
+            count = $0.endIndex
+        }
     }
 }

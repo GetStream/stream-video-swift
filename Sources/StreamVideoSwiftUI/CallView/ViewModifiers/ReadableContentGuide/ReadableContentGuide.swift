@@ -43,6 +43,9 @@ struct ReadableContentGuideViewModifier: ViewModifier {
 
 extension View {
 
+    /// A modifier that wraps the content in the ReadableContentGuide ensuring that the content will
+    /// wrap when in bigger screens.
+    /// - Note: Available on iOS 14.0+
     @ViewBuilder
     public func alignedToReadableContentGuide() -> some View {
         if #available(iOS 14.0, *) {

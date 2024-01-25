@@ -92,6 +92,8 @@ public struct DragHandleView: View {
 
 extension View {
 
+    /// Presents the content in a sheet that will occupy the half of the screen.
+    /// - Note: On iOS16.0+ it will use the presentationDetents provided by the system.
     @ViewBuilder
     public func halfSheet<Content>(
         isPresented: Binding<Bool>,
