@@ -36,6 +36,7 @@ public struct Colors {
     public var livestreamCallControlsColor = Color(.streamWhiteStatic)
     public var participantSpeakingHighlightColor = Color(.streamAccentBlue).opacity(0.7)
     public var participantInfoBackgroundColor = Color(.streamOverlayDarkStatic)
+    public var callDurationColor: UIColor = .streamWhiteStatic
 }
 
 // Those colors are default defined stream constants, which are fallback values if you don't implement your color theme.

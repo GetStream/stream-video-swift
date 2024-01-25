@@ -73,14 +73,15 @@ public struct CallDurationView: View {
 fileprivate struct TimeView: View {
 
     @Injected(\.fonts) private var fonts: Fonts
+    @Injected(\.colors) private var colors: Colors
 
     var value: NSMutableAttributedString
 
     fileprivate init(_ value: String) {
         let attributed = NSMutableAttributedString(string: value)
         self.value = attributed
-        self.value.addAttribute(.foregroundColor, value: UIColor.white.withAlphaComponent(0.6), range: .init(location: 0, length: attributed.length - 3))
-        self.value.addAttribute(.foregroundColor, value: UIColor.white, range: .init(location: attributed.length - 3, length: 3))
+        self.value.addAttribute(.foregroundColor, value: colors.callDurationColor.withAlphaComponent(0.6), range: .init(location: 0, length: attributed.length - 3))
+        self.value.addAttribute(.foregroundColor, value: colors.callDurationColor, range: .init(location: attributed.length - 3, length: 3))
     }
 
     fileprivate var body: some View {

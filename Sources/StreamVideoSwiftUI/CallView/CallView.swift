@@ -63,11 +63,7 @@ public struct CallView<Factory: ViewFactory>: View {
             UIApplication.shared.isIdleTimerDisabled = false
         }
         .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
-        .presentParticipantListView(isPresented: $viewModel.participantsShown) {
-            viewFactory.makeParticipantsListView(viewModel: viewModel)
-            .opacity(viewModel.hideUIElements ? 0 : 1)
-            .accessibility(identifier: "trailingTopView")
-        }
+        .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
     }
 
     @ViewBuilder
