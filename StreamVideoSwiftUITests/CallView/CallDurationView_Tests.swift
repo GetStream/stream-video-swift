@@ -46,6 +46,12 @@ final class CallDurationView_Tests: StreamVideoUITestCase {
         assertSubject(makeSubject)
     }
 
+    func test_callDurationView_durationIsGreaterThanZeroAndCallIsRecording_viewWasConfiguredCorrectly() throws {
+        viewModel.call?.state.duration = 100
+        viewModel.recordingState = .recording
+        assertSubject(makeSubject)
+    }
+
     // MARK: - Private Helpers
 
     @ViewBuilder
