@@ -4,18 +4,19 @@ The `OutgoingCallView` lets you easily build UI when you're calling or ringing o
 
 ## Usage
 
-In order to create the `OutgoingCallView`, you need to instantiate it with the `outgoingCallMembers` and the `callControls`.
+In order to create the `OutgoingCallView`, you need to instantiate it with the `outgoingCallMembers`, `callTopView` and the `callControls`.
 
 ```swift
 public var body: some View {
     OutgoingCallView(
         outgoingCallMembers: outgoingCallMembers,
+        callTopView: callTopView,
         callControls: callControls
     )
 }
 ```
 
-The `callControls` parameter is a SwiftUI view that is showing the actions you can do during a call.
+The `callTopView` and `callControls` parameter is a SwiftUI view that is showing the actions you can do during a call.
 
 If you are using our `CallContainer` to add calling support to your views, this view is automatically shown when the `callingState` in the `CallViewModel` is `.outgoing`.
 
@@ -24,7 +25,7 @@ If you want to customize (or completely replace) the `OutgoingCallView`, you sho
 ```swift
 public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
     CustomOutgoingCallView(viewModel: viewModel)
-}
+}   
 ```
 
 ## Sounds
