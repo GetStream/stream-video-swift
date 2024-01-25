@@ -37,10 +37,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
     }
 
     func test_subject_withParticipants_viewWasConfiguredCorrectly() async throws {
-        viewModel.call?.state.participantsMap = (0..<5).reduce(into: [String: CallParticipant]()) { partialResult, _ in
-            let participant = CallParticipant.dummy()
-            partialResult[participant.id] = participant
-        }
+        viewModel.call?.state.participants = (0..<5).map { _ in CallParticipant.dummy() }
 
         try await Task.sleep(nanoseconds: 1_000_000_000)
 
