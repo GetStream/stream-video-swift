@@ -27,6 +27,7 @@ public class Sinatra {
     private func invokeSinatra(url: URL, body: [String: Any] = [:]) {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
         URLSession.shared.dataTask(with: request).resume()
     }
