@@ -42,12 +42,13 @@ The video participants view slot presents the grid of users that are in the call
 
 ```swift
 public func makeVideoParticipantsView(
-    participants: [CallParticipant],
+    viewModel: CallViewModel,
     availableFrame: CGRect,
     onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
 ) -> some View {
     VideoParticipantsView(
-        participants: participants,
+        viewFactory: self,
+        viewModel: viewModel,
         availableFrame: availableFrame,
         onChangeTrackVisibility: onChangeTrackVisibility
     )
@@ -78,6 +79,7 @@ public func makeVideoParticipantView(
         id: id,
         availableFrame: availableFrame,
         contentMode: contentMode,
+        customData: customData,
         call: call
     )
 }

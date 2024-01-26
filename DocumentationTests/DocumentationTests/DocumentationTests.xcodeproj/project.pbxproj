@@ -8,8 +8,6 @@
 
 /* Begin PBXBuildFile section */
 		400D91B62B63D88100EBA47D /* DocumentationTests.h in Headers */ = {isa = PBXBuildFile; fileRef = 400D91B52B63D88100EBA47D /* DocumentationTests.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		400D91C32B63D95200EBA47D /* StreamVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 400D91C22B63D95200EBA47D /* StreamVideo */; };
-		400D91C52B63D95200EBA47D /* StreamVideoSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 400D91C42B63D95200EBA47D /* StreamVideoSwiftUI */; };
 		400D91C72B63D96800EBA47D /* 03-quickstart.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91C62B63D96800EBA47D /* 03-quickstart.swift */; };
 		400D91C92B63DB3700EBA47D /* 01-client-auth.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91C82B63DB3700EBA47D /* 01-client-auth.swift */; };
 		400D91CB2B63DB5F00EBA47D /* GloballyUsedVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91CA2B63DB5F00EBA47D /* GloballyUsedVariables.swift */; };
@@ -18,6 +16,57 @@
 		400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */; };
 		400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */; };
 		400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */; };
+		40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */; };
+		40FFDC392B63E459004DA7A2 /* 09-reactions-and-custom-events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */; };
+		40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */; };
+		40FFDC3D2B63E6EC004DA7A2 /* 11-call-lifecycle.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */; };
+		40FFDC3F2B63E734004DA7A2 /* 12-call-state.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */; };
+		40FFDC442B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */; };
+		40FFDC462B63EA54004DA7A2 /* 15-migration-from-dolby.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC452B63EA54004DA7A2 /* 15-migration-from-dolby.swift */; };
+		40FFDC492B63EB92004DA7A2 /* 01-call-container.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC482B63EB92004DA7A2 /* 01-call-container.swift */; };
+		40FFDC4B2B63EC3D004DA7A2 /* 02-outgoing-call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC4A2B63EC3D004DA7A2 /* 02-outgoing-call.swift */; };
+		40FFDC4D2B63ED16004DA7A2 /* 03-incoming-call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC4C2B63ED16004DA7A2 /* 03-incoming-call.swift */; };
+		40FFDC4F2B63EE50004DA7A2 /* 04-active-call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC4E2B63EE50004DA7A2 /* 04-active-call.swift */; };
+		40FFDC512B63EF58004DA7A2 /* 05-call-controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC502B63EF58004DA7A2 /* 05-call-controls.swift */; };
+		40FFDC532B63EFA2004DA7A2 /* 06-call-app-bar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC522B63EFA2004DA7A2 /* 06-call-app-bar.swift */; };
+		40FFDC552B63EFD3004DA7A2 /* 07-screen-share-content.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC542B63EFD3004DA7A2 /* 07-screen-share-content.swift */; };
+		40FFDC5A2B63F08D004DA7A2 /* 01-call-participant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC592B63F08D004DA7A2 /* 01-call-participant.swift */; };
+		40FFDC5C2B63F137004DA7A2 /* 02-call-participants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC5B2B63F137004DA7A2 /* 02-call-participants.swift */; };
+		40FFDC5E2B63F236004DA7A2 /* 03-call-participants-info-menu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC5D2B63F236004DA7A2 /* 03-call-participants-info-menu.swift */; };
+		40FFDC602B63F2EC004DA7A2 /* 04-local-video.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC5F2B63F2EC004DA7A2 /* 04-local-video.swift */; };
+		40FFDC632B63F370004DA7A2 /* 02-sound-indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC622B63F370004DA7A2 /* 02-sound-indicator.swift */; };
+		40FFDC652B63F395004DA7A2 /* 03-avatars.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC642B63F395004DA7A2 /* 03-avatars.swift */; };
+		40FFDC672B63F430004DA7A2 /* 04-connection-quality-indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC662B63F430004DA7A2 /* 04-connection-quality-indicator.swift */; };
+		40FFDC692B63F474004DA7A2 /* 05-call-background.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC682B63F474004DA7A2 /* 05-call-background.swift */; };
+		40FFDC6B2B63F4AB004DA7A2 /* 02-video-renderer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC6A2B63F4AB004DA7A2 /* 02-video-renderer.swift */; };
+		40FFDC6D2B63F556004DA7A2 /* 03-video-theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC6C2B63F556004DA7A2 /* 03-video-theme.swift */; };
+		40FFDC6F2B63F58B004DA7A2 /* 04-customizing-views.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC6E2B63F58B004DA7A2 /* 04-customizing-views.swift */; };
+		40FFDC712B63F5C1004DA7A2 /* 05-uikit-customizations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC702B63F5C1004DA7A2 /* 05-uikit-customizations.swift */; };
+		40FFDC742B63F767004DA7A2 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC732B63F767004DA7A2 /* StreamChatSwiftUI */; };
+		40FFDC762B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC752B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift */; };
+		40FFDC782B63FA2E004DA7A2 /* 06-view-model.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC772B63FA2E004DA7A2 /* 06-view-model.swift */; };
+		40FFDC7A2B63FA96004DA7A2 /* 02-replacing-call-controls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC792B63FA96004DA7A2 /* 02-replacing-call-controls.swift */; };
+		40FFDC7C2B63FB76004DA7A2 /* 03-custom-label.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC7B2B63FB76004DA7A2 /* 03-custom-label.swift */; };
+		40FFDC7E2B63FC10004DA7A2 /* 04-video-layout.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC7D2B63FC10004DA7A2 /* 04-video-layout.swift */; };
+		40FFDC812B63FD92004DA7A2 /* StreamVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC802B63FD92004DA7A2 /* StreamVideo */; };
+		40FFDC832B63FD92004DA7A2 /* StreamVideoSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC822B63FD92004DA7A2 /* StreamVideoSwiftUI */; };
+		40FFDC852B63FD92004DA7A2 /* StreamVideoUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */; };
+		40FFDC872B63FEAE004DA7A2 /* 05-incoming-call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC862B63FEAE004DA7A2 /* 05-incoming-call.swift */; };
+		40FFDC8A2B63FEFD004DA7A2 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC892B63FEFD004DA7A2 /* Nuke */; };
+		40FFDC8C2B63FEFD004DA7A2 /* NukeExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC8B2B63FEFD004DA7A2 /* NukeExtensions */; };
+		40FFDC8E2B63FEFD004DA7A2 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC8D2B63FEFD004DA7A2 /* NukeUI */; };
+		40FFDC902B63FEFD004DA7A2 /* NukeVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC8F2B63FEFD004DA7A2 /* NukeVideo */; };
+		40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC912B63FF70004DA7A2 /* 06-lobby-preview.swift */; };
+		40FFDC942B6401CC004DA7A2 /* 07-video-fallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC932B6401CC004DA7A2 /* 07-video-fallback.swift */; };
+		40FFDC962B64023A004DA7A2 /* 08-permission-requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC952B64023A004DA7A2 /* 08-permission-requests.swift */; };
+		40FFDC982B640566004DA7A2 /* 09-audio-volume-indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC972B640566004DA7A2 /* 09-audio-volume-indicator.swift */; };
+		40FFDC9A2B6405C7004DA7A2 /* 10-network-quality-indicator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC992B6405C7004DA7A2 /* 10-network-quality-indicator.swift */; };
+		40FFDC9C2B6405EA004DA7A2 /* 11-speaking-while-muted.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC9B2B6405EA004DA7A2 /* 11-speaking-while-muted.swift */; };
+		40FFDC9E2B64063D004DA7A2 /* 12-connection-unstable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC9D2B64063D004DA7A2 /* 12-connection-unstable.swift */; };
+		40FFDCA02B640676004DA7A2 /* 13-pinning-users.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC9F2B640676004DA7A2 /* 13-pinning-users.swift */; };
+		40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */; };
+		40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */; };
+		40FFDCA62B6408DE004DA7A2 /* 00-ringing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -31,6 +80,50 @@
 		400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-camera-and-microphone.swift"; sourceTree = "<group>"; };
 		400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-querying-calls.swift"; sourceTree = "<group>"; };
 		400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-dependency-injection.swift"; sourceTree = "<group>"; };
+		40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permissions-and-moderation.swift"; sourceTree = "<group>"; };
+		40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-reactions-and-custom-events.swift"; sourceTree = "<group>"; };
+		40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-view-slots.swift"; sourceTree = "<group>"; };
+		40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "11-call-lifecycle.swift"; sourceTree = "<group>"; };
+		40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "12-call-state.swift"; sourceTree = "<group>"; };
+		40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "14-swiftui-vs-uikit.swift"; sourceTree = "<group>"; };
+		40FFDC452B63EA54004DA7A2 /* 15-migration-from-dolby.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "15-migration-from-dolby.swift"; sourceTree = "<group>"; };
+		40FFDC482B63EB92004DA7A2 /* 01-call-container.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "01-call-container.swift"; sourceTree = "<group>"; };
+		40FFDC4A2B63EC3D004DA7A2 /* 02-outgoing-call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-outgoing-call.swift"; sourceTree = "<group>"; };
+		40FFDC4C2B63ED16004DA7A2 /* 03-incoming-call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-incoming-call.swift"; sourceTree = "<group>"; };
+		40FFDC4E2B63EE50004DA7A2 /* 04-active-call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-active-call.swift"; sourceTree = "<group>"; };
+		40FFDC502B63EF58004DA7A2 /* 05-call-controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-call-controls.swift"; sourceTree = "<group>"; };
+		40FFDC522B63EFA2004DA7A2 /* 06-call-app-bar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-call-app-bar.swift"; sourceTree = "<group>"; };
+		40FFDC542B63EFD3004DA7A2 /* 07-screen-share-content.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-screen-share-content.swift"; sourceTree = "<group>"; };
+		40FFDC592B63F08D004DA7A2 /* 01-call-participant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "01-call-participant.swift"; sourceTree = "<group>"; };
+		40FFDC5B2B63F137004DA7A2 /* 02-call-participants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-call-participants.swift"; sourceTree = "<group>"; };
+		40FFDC5D2B63F236004DA7A2 /* 03-call-participants-info-menu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-call-participants-info-menu.swift"; sourceTree = "<group>"; };
+		40FFDC5F2B63F2EC004DA7A2 /* 04-local-video.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-local-video.swift"; sourceTree = "<group>"; };
+		40FFDC622B63F370004DA7A2 /* 02-sound-indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-sound-indicator.swift"; sourceTree = "<group>"; };
+		40FFDC642B63F395004DA7A2 /* 03-avatars.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-avatars.swift"; sourceTree = "<group>"; };
+		40FFDC662B63F430004DA7A2 /* 04-connection-quality-indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-connection-quality-indicator.swift"; sourceTree = "<group>"; };
+		40FFDC682B63F474004DA7A2 /* 05-call-background.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-call-background.swift"; sourceTree = "<group>"; };
+		40FFDC6A2B63F4AB004DA7A2 /* 02-video-renderer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-video-renderer.swift"; sourceTree = "<group>"; };
+		40FFDC6C2B63F556004DA7A2 /* 03-video-theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-video-theme.swift"; sourceTree = "<group>"; };
+		40FFDC6E2B63F58B004DA7A2 /* 04-customizing-views.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-customizing-views.swift"; sourceTree = "<group>"; };
+		40FFDC702B63F5C1004DA7A2 /* 05-uikit-customizations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-uikit-customizations.swift"; sourceTree = "<group>"; };
+		40FFDC752B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatGloballyUsedVariables.swift; sourceTree = "<group>"; };
+		40FFDC772B63FA2E004DA7A2 /* 06-view-model.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-view-model.swift"; sourceTree = "<group>"; };
+		40FFDC792B63FA96004DA7A2 /* 02-replacing-call-controls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-replacing-call-controls.swift"; sourceTree = "<group>"; };
+		40FFDC7B2B63FB76004DA7A2 /* 03-custom-label.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-custom-label.swift"; sourceTree = "<group>"; };
+		40FFDC7D2B63FC10004DA7A2 /* 04-video-layout.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-video-layout.swift"; sourceTree = "<group>"; };
+		40FFDC7F2B63FD7A004DA7A2 /* stream-video-swift */ = {isa = PBXFileReference; lastKnownFileType = wrapper; name = "stream-video-swift"; path = ../..; sourceTree = "<group>"; };
+		40FFDC862B63FEAE004DA7A2 /* 05-incoming-call.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-incoming-call.swift"; sourceTree = "<group>"; };
+		40FFDC912B63FF70004DA7A2 /* 06-lobby-preview.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-lobby-preview.swift"; sourceTree = "<group>"; };
+		40FFDC932B6401CC004DA7A2 /* 07-video-fallback.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-video-fallback.swift"; sourceTree = "<group>"; };
+		40FFDC952B64023A004DA7A2 /* 08-permission-requests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permission-requests.swift"; sourceTree = "<group>"; };
+		40FFDC972B640566004DA7A2 /* 09-audio-volume-indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-audio-volume-indicator.swift"; sourceTree = "<group>"; };
+		40FFDC992B6405C7004DA7A2 /* 10-network-quality-indicator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-network-quality-indicator.swift"; sourceTree = "<group>"; };
+		40FFDC9B2B6405EA004DA7A2 /* 11-speaking-while-muted.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "11-speaking-while-muted.swift"; sourceTree = "<group>"; };
+		40FFDC9D2B64063D004DA7A2 /* 12-connection-unstable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "12-connection-unstable.swift"; sourceTree = "<group>"; };
+		40FFDC9F2B640676004DA7A2 /* 13-pinning-users.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "13-pinning-users.swift"; sourceTree = "<group>"; };
+		40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "14-livestream-player.swift"; sourceTree = "<group>"; };
+		40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "15-long-press-to-focus.swift"; sourceTree = "<group>"; };
+		40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "00-ringing.swift"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -38,8 +131,14 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				400D91C52B63D95200EBA47D /* StreamVideoSwiftUI in Frameworks */,
-				400D91C32B63D95200EBA47D /* StreamVideo in Frameworks */,
+				40FFDC832B63FD92004DA7A2 /* StreamVideoSwiftUI in Frameworks */,
+				40FFDC8E2B63FEFD004DA7A2 /* NukeUI in Frameworks */,
+				40FFDC852B63FD92004DA7A2 /* StreamVideoUIKit in Frameworks */,
+				40FFDC902B63FEFD004DA7A2 /* NukeVideo in Frameworks */,
+				40FFDC812B63FD92004DA7A2 /* StreamVideo in Frameworks */,
+				40FFDC742B63F767004DA7A2 /* StreamChatSwiftUI in Frameworks */,
+				40FFDC8A2B63FEFD004DA7A2 /* Nuke in Frameworks */,
+				40FFDC8C2B63FEFD004DA7A2 /* NukeExtensions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -49,8 +148,10 @@
 		400D91A82B63D88100EBA47D = {
 			isa = PBXGroup;
 			children = (
+				40FFDC7F2B63FD7A004DA7A2 /* stream-video-swift */,
 				400D91B42B63D88100EBA47D /* DocumentationTests */,
 				400D91B32B63D88100EBA47D /* Products */,
+				40FFDC402B63E8A9004DA7A2 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -72,6 +173,7 @@
 				400D91C02B63D8FB00EBA47D /* 06-advanced */,
 				400D91B52B63D88100EBA47D /* DocumentationTests.h */,
 				400D91CA2B63DB5F00EBA47D /* GloballyUsedVariables.swift */,
+				40FFDC752B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift */,
 			);
 			path = DocumentationTests;
 			sourceTree = "<group>";
@@ -93,6 +195,13 @@
 				400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */,
 				400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */,
 				400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */,
+				40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */,
+				40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */,
+				40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */,
+				40FFDC3C2B63E6EC004DA7A2 /* 11-call-lifecycle.swift */,
+				40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */,
+				40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */,
+				40FFDC452B63EA54004DA7A2 /* 15-migration-from-dolby.swift */,
 			);
 			path = "03-guides";
 			sourceTree = "<group>";
@@ -100,6 +209,14 @@
 		400D91BE2B63D8EB00EBA47D /* 04-ui-components */ = {
 			isa = PBXGroup;
 			children = (
+				40FFDC612B63F363004DA7A2 /* 09-utility */,
+				40FFDC582B63F085004DA7A2 /* 08-participants */,
+				40FFDC472B63EB89004DA7A2 /* 07-call */,
+				40FFDC6A2B63F4AB004DA7A2 /* 02-video-renderer.swift */,
+				40FFDC6C2B63F556004DA7A2 /* 03-video-theme.swift */,
+				40FFDC6E2B63F58B004DA7A2 /* 04-customizing-views.swift */,
+				40FFDC702B63F5C1004DA7A2 /* 05-uikit-customizations.swift */,
+				40FFDC772B63FA2E004DA7A2 /* 06-view-model.swift */,
 			);
 			path = "04-ui-components";
 			sourceTree = "<group>";
@@ -107,6 +224,20 @@
 		400D91BF2B63D8F200EBA47D /* 05-ui-cookbook */ = {
 			isa = PBXGroup;
 			children = (
+				40FFDC792B63FA96004DA7A2 /* 02-replacing-call-controls.swift */,
+				40FFDC7B2B63FB76004DA7A2 /* 03-custom-label.swift */,
+				40FFDC7D2B63FC10004DA7A2 /* 04-video-layout.swift */,
+				40FFDC862B63FEAE004DA7A2 /* 05-incoming-call.swift */,
+				40FFDC912B63FF70004DA7A2 /* 06-lobby-preview.swift */,
+				40FFDC932B6401CC004DA7A2 /* 07-video-fallback.swift */,
+				40FFDC952B64023A004DA7A2 /* 08-permission-requests.swift */,
+				40FFDC972B640566004DA7A2 /* 09-audio-volume-indicator.swift */,
+				40FFDC992B6405C7004DA7A2 /* 10-network-quality-indicator.swift */,
+				40FFDC9B2B6405EA004DA7A2 /* 11-speaking-while-muted.swift */,
+				40FFDC9D2B64063D004DA7A2 /* 12-connection-unstable.swift */,
+				40FFDC9F2B640676004DA7A2 /* 13-pinning-users.swift */,
+				40FFDCA12B640741004DA7A2 /* 14-livestream-player.swift */,
+				40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */,
 			);
 			path = "05-ui-cookbook";
 			sourceTree = "<group>";
@@ -114,8 +245,52 @@
 		400D91C02B63D8FB00EBA47D /* 06-advanced */ = {
 			isa = PBXGroup;
 			children = (
+				40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */,
 			);
 			path = "06-advanced";
+			sourceTree = "<group>";
+		};
+		40FFDC402B63E8A9004DA7A2 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		40FFDC472B63EB89004DA7A2 /* 07-call */ = {
+			isa = PBXGroup;
+			children = (
+				40FFDC482B63EB92004DA7A2 /* 01-call-container.swift */,
+				40FFDC4A2B63EC3D004DA7A2 /* 02-outgoing-call.swift */,
+				40FFDC4C2B63ED16004DA7A2 /* 03-incoming-call.swift */,
+				40FFDC4E2B63EE50004DA7A2 /* 04-active-call.swift */,
+				40FFDC502B63EF58004DA7A2 /* 05-call-controls.swift */,
+				40FFDC522B63EFA2004DA7A2 /* 06-call-app-bar.swift */,
+				40FFDC542B63EFD3004DA7A2 /* 07-screen-share-content.swift */,
+			);
+			path = "07-call";
+			sourceTree = "<group>";
+		};
+		40FFDC582B63F085004DA7A2 /* 08-participants */ = {
+			isa = PBXGroup;
+			children = (
+				40FFDC592B63F08D004DA7A2 /* 01-call-participant.swift */,
+				40FFDC5B2B63F137004DA7A2 /* 02-call-participants.swift */,
+				40FFDC5D2B63F236004DA7A2 /* 03-call-participants-info-menu.swift */,
+				40FFDC5F2B63F2EC004DA7A2 /* 04-local-video.swift */,
+			);
+			path = "08-participants";
+			sourceTree = "<group>";
+		};
+		40FFDC612B63F363004DA7A2 /* 09-utility */ = {
+			isa = PBXGroup;
+			children = (
+				40FFDC622B63F370004DA7A2 /* 02-sound-indicator.swift */,
+				40FFDC642B63F395004DA7A2 /* 03-avatars.swift */,
+				40FFDC662B63F430004DA7A2 /* 04-connection-quality-indicator.swift */,
+				40FFDC682B63F474004DA7A2 /* 05-call-background.swift */,
+			);
+			path = "09-utility";
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -147,8 +322,14 @@
 			);
 			name = DocumentationTests;
 			packageProductDependencies = (
-				400D91C22B63D95200EBA47D /* StreamVideo */,
-				400D91C42B63D95200EBA47D /* StreamVideoSwiftUI */,
+				40FFDC732B63F767004DA7A2 /* StreamChatSwiftUI */,
+				40FFDC802B63FD92004DA7A2 /* StreamVideo */,
+				40FFDC822B63FD92004DA7A2 /* StreamVideoSwiftUI */,
+				40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */,
+				40FFDC892B63FEFD004DA7A2 /* Nuke */,
+				40FFDC8B2B63FEFD004DA7A2 /* NukeExtensions */,
+				40FFDC8D2B63FEFD004DA7A2 /* NukeUI */,
+				40FFDC8F2B63FEFD004DA7A2 /* NukeVideo */,
 			);
 			productName = DocumentationTests;
 			productReference = 400D91B22B63D88100EBA47D /* DocumentationTests.framework */;
@@ -179,7 +360,8 @@
 			);
 			mainGroup = 400D91A82B63D88100EBA47D;
 			packageReferences = (
-				400D91C12B63D95200EBA47D /* XCRemoteSwiftPackageReference "stream-video-swift" */,
+				40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
+				40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */,
 			);
 			productRefGroup = 400D91B32B63D88100EBA47D /* Products */;
 			projectDirPath = "";
@@ -205,14 +387,57 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				40FFDC5A2B63F08D004DA7A2 /* 01-call-participant.swift in Sources */,
+				40FFDC9A2B6405C7004DA7A2 /* 10-network-quality-indicator.swift in Sources */,
 				400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */,
+				40FFDC4F2B63EE50004DA7A2 /* 04-active-call.swift in Sources */,
+				40FFDCA02B640676004DA7A2 /* 13-pinning-users.swift in Sources */,
+				40FFDC602B63F2EC004DA7A2 /* 04-local-video.swift in Sources */,
+				40FFDC632B63F370004DA7A2 /* 02-sound-indicator.swift in Sources */,
+				40FFDC5E2B63F236004DA7A2 /* 03-call-participants-info-menu.swift in Sources */,
+				40FFDC3F2B63E734004DA7A2 /* 12-call-state.swift in Sources */,
+				40FFDC712B63F5C1004DA7A2 /* 05-uikit-customizations.swift in Sources */,
+				40FFDC462B63EA54004DA7A2 /* 15-migration-from-dolby.swift in Sources */,
+				40FFDC532B63EFA2004DA7A2 /* 06-call-app-bar.swift in Sources */,
+				40FFDC782B63FA2E004DA7A2 /* 06-view-model.swift in Sources */,
+				40FFDC6F2B63F58B004DA7A2 /* 04-customizing-views.swift in Sources */,
 				400D91CB2B63DB5F00EBA47D /* GloballyUsedVariables.swift in Sources */,
+				40FFDC982B640566004DA7A2 /* 09-audio-volume-indicator.swift in Sources */,
+				40FFDC7E2B63FC10004DA7A2 /* 04-video-layout.swift in Sources */,
+				40FFDC552B63EFD3004DA7A2 /* 07-screen-share-content.swift in Sources */,
+				40FFDC9C2B6405EA004DA7A2 /* 11-speaking-while-muted.swift in Sources */,
+				40FFDC3D2B63E6EC004DA7A2 /* 11-call-lifecycle.swift in Sources */,
 				400D91CD2B63DC2600EBA47D /* 02-joining-creating-calls.swift in Sources */,
 				400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */,
+				40FFDC512B63EF58004DA7A2 /* 05-call-controls.swift in Sources */,
 				400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */,
+				40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */,
+				40FFDC762B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift in Sources */,
+				40FFDC672B63F430004DA7A2 /* 04-connection-quality-indicator.swift in Sources */,
+				40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */,
+				40FFDC442B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift in Sources */,
+				40FFDC872B63FEAE004DA7A2 /* 05-incoming-call.swift in Sources */,
+				40FFDC942B6401CC004DA7A2 /* 07-video-fallback.swift in Sources */,
 				400D91C72B63D96800EBA47D /* 03-quickstart.swift in Sources */,
+				40FFDC9E2B64063D004DA7A2 /* 12-connection-unstable.swift in Sources */,
+				40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */,
+				40FFDC4B2B63EC3D004DA7A2 /* 02-outgoing-call.swift in Sources */,
+				40FFDC6D2B63F556004DA7A2 /* 03-video-theme.swift in Sources */,
+				40FFDC492B63EB92004DA7A2 /* 01-call-container.swift in Sources */,
+				40FFDC4D2B63ED16004DA7A2 /* 03-incoming-call.swift in Sources */,
+				40FFDC692B63F474004DA7A2 /* 05-call-background.swift in Sources */,
+				40FFDCA62B6408DE004DA7A2 /* 00-ringing.swift in Sources */,
 				400D91C92B63DB3700EBA47D /* 01-client-auth.swift in Sources */,
+				40FFDC962B64023A004DA7A2 /* 08-permission-requests.swift in Sources */,
 				400D91CF2B63DE0100EBA47D /* 03-call-and-participant-state.swift in Sources */,
+				40FFDC652B63F395004DA7A2 /* 03-avatars.swift in Sources */,
+				40FFDC392B63E459004DA7A2 /* 09-reactions-and-custom-events.swift in Sources */,
+				40FFDC7C2B63FB76004DA7A2 /* 03-custom-label.swift in Sources */,
+				40FFDC5C2B63F137004DA7A2 /* 02-call-participants.swift in Sources */,
+				40FFDC7A2B63FA96004DA7A2 /* 02-replacing-call-controls.swift in Sources */,
+				40FFDC6B2B63F4AB004DA7A2 /* 02-video-renderer.swift in Sources */,
+				40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */,
+				40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -447,26 +672,61 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		400D91C12B63D95200EBA47D /* XCRemoteSwiftPackageReference "stream-video-swift" */ = {
+		40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */ = {
 			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/GetStream/stream-video-swift";
+			repositoryURL = "https://github.com/GetStream/stream-chat-swiftui";
 			requirement = {
-				branch = main;
-				kind = branch;
+				kind = upToNextMajorVersion;
+				minimumVersion = 4.47.0;
+			};
+		};
+		40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/kean/Nuke";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 12.3.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		400D91C22B63D95200EBA47D /* StreamVideo */ = {
+		40FFDC732B63F767004DA7A2 /* StreamChatSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 400D91C12B63D95200EBA47D /* XCRemoteSwiftPackageReference "stream-video-swift" */;
+			package = 40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;
+			productName = StreamChatSwiftUI;
+		};
+		40FFDC802B63FD92004DA7A2 /* StreamVideo */ = {
+			isa = XCSwiftPackageProductDependency;
 			productName = StreamVideo;
 		};
-		400D91C42B63D95200EBA47D /* StreamVideoSwiftUI */ = {
+		40FFDC822B63FD92004DA7A2 /* StreamVideoSwiftUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 400D91C12B63D95200EBA47D /* XCRemoteSwiftPackageReference "stream-video-swift" */;
 			productName = StreamVideoSwiftUI;
+		};
+		40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamVideoUIKit;
+		};
+		40FFDC892B63FEFD004DA7A2 /* Nuke */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = Nuke;
+		};
+		40FFDC8B2B63FEFD004DA7A2 /* NukeExtensions */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeExtensions;
+		};
+		40FFDC8D2B63FEFD004DA7A2 /* NukeUI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeUI;
+		};
+		40FFDC8F2B63FEFD004DA7A2 /* NukeVideo */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
+			productName = NukeVideo;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

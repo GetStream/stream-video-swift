@@ -35,18 +35,18 @@ func makeVideoParticipantView(
 The implementation of the `CustomVideoCallParticipantView` looks like this:
 
 ```swift
-public struct CustomVideoCallParticipantView: View {
-    
+struct CustomVideoCallParticipantView: View {
+
     @Injected(\.images) var images
     @Injected(\.streamVideo) var streamVideo
-        
+
     let participant: CallParticipant
     var id: String
     var availableFrame: CGRect
     var contentMode: UIView.ContentMode
     var edgesIgnoringSafeArea: Edge.Set
     var call: Call?
-    
+
     public init(
         participant: CallParticipant,
         id: String? = nil,
@@ -62,7 +62,7 @@ public struct CustomVideoCallParticipantView: View {
         self.edgesIgnoringSafeArea = edgesIgnoringSafeArea
         self.call = call
     }
-    
+
     public var body: some View {
         VideoRendererView(
             id: id,
@@ -90,7 +90,7 @@ public struct CustomVideoCallParticipantView: View {
             .opacity(showVideo ? 0 : 1)
         )
     }
-    
+
     private var showVideo: Bool {
         participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
     }

@@ -54,55 +54,56 @@ public struct CustomLobbyView: View {
             onCloseLobby: onCloseLobby
         )
     }
+}
 ```
 
 Next, let's define the `CustomLobbyContentView`:
 
 ```swift
 struct CustomLobbyContentView: View {
-    
+
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.streamVideo) var streamVideo
-    
+
     @ObservedObject var viewModel: LobbyViewModel
     @ObservedObject var microphoneChecker: MicrophoneChecker
-    
+
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
     var onJoinCallTap: () -> ()
     var onCloseLobby: () -> ()
-    
+
     var body: some View {
         GeometryReader { reader in
             ZStack {
                 VStack {
                     Spacer()
-                    Text(L10n.WaitingRoom.title)
+                    Text("Before Joining")
                         .font(.title)
                         .foregroundColor(colors.text)
                         .bold()
-                    
-                    Text(L10n.WaitingRoom.subtitle)
+
+                    Text("Setup your audio and video")
                         .font(.body)
                         .foregroundColor(Color(colors.textLowEmphasis))
-                    
+
                     CameraCheckView(
                         viewModel: viewModel,
                         microphoneChecker: microphoneChecker,
                         callSettings: callSettings,
                         availableSize: reader.size
                     )
-                    
+
                     if microphoneChecker.isSilent {
-                        Text(L10n.WaitingRoom.Mic.notWorking)
+                        Text("Your microphone doesn't seem to be working. Make sure you have all permissions accepted.")
                             .font(.caption)
                             .foregroundColor(colors.text)
                     }
-                                        
+
                     CallSettingsView(callSettings: $callSettings)
-                    
+
                     JoinCallView(
                         callId: callId,
                         callType: callType,
@@ -111,7 +112,7 @@ struct CustomLobbyContentView: View {
                     )
                 }
                 .padding()
-                
+
                 TopRightView {
                     Button {
                         onCloseLobby()
@@ -183,7 +184,8 @@ struct CameraCheckView: View {
                     MicrophoneCheckView(
                         audioLevels: microphoneChecker.audioLevels,
                         microphoneOn: callSettings.audioOn,
-                        isSilent: microphoneChecker.isSilent
+                        isSilent: microphoneChecker.isSilent, 
+                        isPinned: false
                     )
                     .accessibility(identifier: "microphoneCheckView")
                     Spacer()
@@ -260,20 +262,22 @@ In this view, we are using the `CallIconView` component from the SwiftUI SDK, fo
 Next, we need the `JoinCallView`, which displays the button that allows users to join the call:
 
 ```swift
+struct JoinCallView: View {
+
     @Injected(\.colors) var colors
-    
+
     var callId: String
     var callType: String
     var callParticipants: [User]
     var onJoinCallTap: () -> ()
-    
+
     var body: some View {
         VStack(spacing: 16) {
-            Text("\(L10n.WaitingRoom.description)")
+            Text("You are about to join a call.")
                 .font(.headline)
                 .accessibility(identifier: "otherParticipantsCount")
                 .streamAccessibility(value: "\(otherParticipantsCount)")
-            
+
             if #available(iOS 14, *) {
                 if callParticipants.count > 0 {
                     ParticipantsInCallView(
@@ -281,11 +285,11 @@ Next, we need the `JoinCallView`, which displays the button that allows users to
                     )
                 }
             }
-            
+
             Button {
                 onJoinCallTap()
             } label: {
-                Text(L10n.WaitingRoom.join)
+                Text("Join Call")
                     .bold()
                     .frame(maxWidth: .infinity)
                     .accessibility(identifier: "joinCall")
@@ -299,7 +303,7 @@ Next, we need the `JoinCallView`, which displays the button that allows users to
         .background(colors.lobbySecondaryBackground)
         .cornerRadius(16)
     }
-    
+
     private var otherParticipantsCount: Int {
         let count = callParticipants.count - 1
         if count > 0 {
@@ -308,6 +312,7 @@ Next, we need the `JoinCallView`, which displays the button that allows users to
             return 0
         }
     }
+}
 ``` 
 
 Finally, let's see the view that displays the users that are already in the call:
@@ -315,14 +320,14 @@ Finally, let's see the view that displays the users that are already in the call
 ```swift
 @available(iOS 14.0, *)
 struct ParticipantsInCallView: View {
-    
+
     struct ParticipantInCall: Identifiable {
         let id: String
         let user: User
     }
-    
+
     var callParticipants: [User]
-    
+
     var participantsInCall: [ParticipantInCall] {
         var result = [ParticipantInCall]()
         for (index, participant) in callParticipants.enumerated() {
@@ -332,14 +337,14 @@ struct ParticipantsInCallView: View {
         }
         return result
     }
-    
+
     private let viewSize: CGFloat = 64
-    
+
     var body: some View {
         VStack(spacing: 4) {
-            Text("\(L10n.WaitingRoom.numberOfParticipants) (\(callParticipants.count)):")
+            Text("There are \(callParticipants.count) more people in the call.")
                 .font(.headline)
-            
+
             ScrollView(.horizontal) {
                 LazyHStack {
                     ForEach(participantsInCall) { participant in

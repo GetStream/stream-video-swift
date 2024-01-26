@@ -105,19 +105,21 @@ extension View {
 In order to use our ViewModifier and we can leverage the ViewFactory that the SDK ships with. By subclassing it we can override the method that provides the `VideoCallParticipantModifier` like below:
 
 ```swift
-override func makeVideoCallParticipantModifier(
+func makeVideoParticipantView(
     participant: CallParticipant,
-    call: Call?,
+    id: String,
     availableFrame: CGRect,
-    ratio: CGFloat,
-    showAllInfo: Bool
-) -> some ViewModifier {
-    super.makeVideoCallParticipantModifier(
+    contentMode: UIView.ContentMode,
+    customData: [String : RawJSON],
+    call: Call?
+) -> some View {
+    DefaultViewFactory.shared.makeVideoParticipantView(
         participant: participant,
-        call: call,
+        id: id,
         availableFrame: availableFrame,
-        ratio: ratio,
-        showAllInfo: showAllInfo
+        contentMode: contentMode,
+        customData: customData,
+        call: call
     )
     .longPressToFocus(availableFrame: availableFrame) {
         guard call?.state.sessionId == participant.sessionId else { return } // We are using this to only allow long pressing on our local video feed

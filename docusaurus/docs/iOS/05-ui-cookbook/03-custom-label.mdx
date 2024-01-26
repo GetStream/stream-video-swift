@@ -36,17 +36,20 @@ struct CustomParticipantModifier: ViewModifier {
     var call: Call?
     var availableFrame: CGRect
     var ratio: CGFloat
-    
+    var showAllInfo: Bool
+
     public init(
         participant: CallParticipant,
         call: Call?,
         availableFrame: CGRect,
-        ratio: CGFloat
+        ratio: CGFloat,
+        showAllInfo: Bool
     ) {
         self.participant = participant
         self.call = call
         self.availableFrame = availableFrame
         self.ratio = ratio
+        self.showAllInfo = showAllInfo
     }
     
     public func body(content: Content) -> some View {
@@ -69,7 +72,7 @@ struct CustomParticipantModifier: ViewModifier {
                     }
                     .padding()
                 }
-                .modifier(VideoCallParticipantSpeakingModifier(participant: participant, call: call))
+                .modifier(VideoCallParticipantSpeakingModifier(participant: participant, participantCount: 1))
             )
     }
 }

@@ -48,6 +48,7 @@ One option is to use the standard navigation patterns, such as pushing or presen
 Here's one example implementation that adds the view in the application window (this is needed in case you want to also navigate throughout your app while in a call):
 
 ```swift
+@MainActor
 class CallViewHelper {
 
     static let shared = CallViewHelper()
@@ -79,7 +80,7 @@ Finally, in your app, you can add the `CallViewController` with the following co
 ```swift
 @objc private func didTapStartButton() {
     let next = CallChatViewController.makeCallChatController(with: self.callViewModel)
-    next.startCall(callId: text, type: "default", members: selectedParticipants)
+    next.startCall(callType: "default", callId: text, members: selectedParticipants)
     CallViewHelper.shared.add(callView: next.view)
 }
 ```
@@ -133,43 +134,44 @@ struct ChatCallControls: View {
 
     public var body: some View {
         VStack {
-            EqualSpacingHStack(views: [
-                AnyView(
-                    Button(
-                        action: {
-                            withAnimation {
-                                chatHelper.chatShown.toggle()
-                            }
-                        },
-                        label: {
-                            CallIconView(
-                                icon: Image(systemName: "message"),
-                                size: size,
-                                iconStyle: chatHelper.chatShown ? .primary : .transparent
-                            )
-                            .overlay(
-                                chatHelper.unreadCount > 0 ?
-                                    TopRightView(content: {
-                                        UnreadIndicatorView(unreadCount: chatHelper.unreadCount)
-                                    })
-                                : nil
-                            )
+            HStack {
+                Button(
+                    action: {
+                        withAnimation {
+                            chatHelper.chatShown.toggle()
                         }
-                    )),
-                AnyView(
-                    Button(
-                        action: {
-                            viewModel.toggleCameraEnabled()
-                        },
-                        label: {
-                            CallIconView(
-                                icon: (viewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
-                                size: size,
-                                iconStyle: (viewModel.callSettings.videoOn ? .primary : .transparent)
-                            )
-                        }
-                    )),
-                AnyView(Button(
+                    },
+                    label: {
+                        CallIconView(
+                            icon: Image(systemName: "message"),
+                            size: size,
+                            iconStyle: chatHelper.chatShown ? .primary : .transparent
+                        )
+                        .overlay(
+                            chatHelper.unreadCount > 0 ?
+                            TopRightView(content: {
+                                UnreadIndicatorView(unreadCount: chatHelper.unreadCount)
+                            })
+                            : nil
+                        )
+                    })
+                .frame(maxWidth: .infinity)
+
+                Button(
+                    action: {
+                        viewModel.toggleCameraEnabled()
+                    },
+                    label: {
+                        CallIconView(
+                            icon: (viewModel.callSettings.videoOn ? images.videoTurnOn : images.videoTurnOff),
+                            size: size,
+                            iconStyle: (viewModel.callSettings.videoOn ? .primary : .transparent)
+                        )
+                    }
+                )
+                .frame(maxWidth: .infinity)
+
+                Button(
                     action: {
                         viewModel.toggleMicrophoneEnabled()
                     },
@@ -180,8 +182,10 @@ struct ChatCallControls: View {
                             iconStyle: (viewModel.callSettings.audioOn ? .primary : .transparent)
                         )
                     }
-                )),
-                AnyView(Button(
+                )
+                .frame(maxWidth: .infinity)
+
+                Button(
                     action: {
                         viewModel.toggleCameraPosition()
                     },
@@ -192,8 +196,10 @@ struct ChatCallControls: View {
                             iconStyle: .primary
                         )
                     }
-                )),
-                AnyView(Button {
+                )
+                .frame(maxWidth: .infinity)
+
+                Button {
                     viewModel.hangUp()
                 } label: {
                     images.hangup
@@ -201,8 +207,9 @@ struct ChatCallControls: View {
                             color: colors.hangUpIconColor,
                             size: size
                         )
-                })
-            ])
+                }
+                .frame(maxWidth: .infinity)
+            }
 
             if chatHelper.chatShown {
                 if let channelController = chatHelper.channelController {
@@ -255,6 +262,17 @@ struct EqualSpacingHStack: View {
             }
         }
     }
+}
 
+final class ChatHelper: ObservableObject {
+    @Published var chatShown: Bool = false
+    @Published var unreadCount: Int = 0
+    @Published var channelController: ChatChannelController?
+
+    init() {}
+
+    func markAsRead() { /* Your implementation here */ }
+
+    func update(memberIds: Set<String>) { /* Your implementation here */ }
 }
 ```

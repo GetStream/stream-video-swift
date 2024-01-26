@@ -5,31 +5,63 @@ description: Permission Requests
 
 Different call participants can have different capabilities and permissions. Depending on your app's requirements, some users might be able to request additional permissions during a call. More details about permissions [here](../../guides/permissions-and-moderation).
 
+Consider the following custom implementation of CallViewModel that manages permision requests:
+```swift
+final class CustomCallViewModel: CallViewModel {
+	var permissionRequest: PermissionRequestEvent?
+	@Published var permissionPopupShown = false
+
+	func subscribeForPermissionsRequests() {
+		Task {
+			for await request in call!.subscribe(for: PermissionRequestEvent.self) {
+				self.permissionRequest = request
+			}
+		}
+	}
+
+	func grantUserPermissions() async throws {
+		guard let request = permissionRequest else { return }
+		let permissionRequests = request.permissions.map { PermissionRequest(permission: $0, user: request.user.toUser, requestedAt: request.createdAt) }
+		for permissionRequest in permissionRequests {
+			try await call?.grant(request: permissionRequest)
+		}
+	}
+}
+```
+
 When a user asks for additional capabilities, the hosts of the call receive an event that they can react to (approve or deny the request). You can listen to these events by subscribing to the `subscribe(for:)` async stream:
 
 ```swift
 func subscribeForPermissionsRequests() {
-    Task {
-        for await request in call.subscribe(for: PermissionRequestEvent.self) {
-            self.permissionRequest = request
-        }
-    }
+	Task {
+		for await request in call!.subscribe(for: PermissionRequestEvent.self) {
+			self.permissionRequest = request
+		}
+	}
 }
 ```
 
 The simplest way to present these is via alerts in SwiftUI, with two buttons for approving or denying the permission request.
 
 ```swift
-YourHostView()
-	.alert(isPresented: $viewModel.permissionPopupShown) {
-    	Alert(
-        	title: Text("Permission request"),
-        	message: Text("\(viewModel.permissionRequest?.user.name ?? "Someone") raised their hand to speak."),
-        	primaryButton: .default(Text("Allow")) {
-            	viewModel.grantUserPermissions()
-        	},
-        	secondaryButton: .cancel()
-    	)
+struct CustomView: View {
+	@ObservedObject var viewModel: CustomCallViewModel
+
+	var body: some View {
+		YourHostView()
+			.alert(isPresented: $viewModel.permissionPopupShown) {
+				Alert(
+					title: Text("Permission request"),
+					message: Text("\(viewModel.permissionRequest?.user.name ?? "Someone") raised their hand to speak."),
+					primaryButton: .default(Text("Allow")) {
+						Task {
+							try await viewModel.grantUserPermissions()
+						}
+					},
+					secondaryButton: .cancel()
+				)
+		}
+	}
 }
 ```
 

@@ -28,7 +28,7 @@ public enum ConnectionQuality: Sendable {
 You can build your own UI to display this value, or use our default `ConnectionQualityIndicator` view. The `ConnectionQualityIndicator` view expects the `connectionQuality` parameter, and changes its UI depending on the value. Here's an example usage:
 
 ```swift
-ConnectionQualityIndicator(connectionQuality: viewModel.connectionQuality)
+ConnectionQualityIndicator(connectionQuality: participant.connectionQuality)
 ```
 
 Additionally, you can change the size and the width of the connection quality ticks, by passing the `size` and `width` parameters to the `ConnectionQualityIndicator` view.

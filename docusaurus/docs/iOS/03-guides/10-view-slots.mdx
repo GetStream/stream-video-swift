@@ -11,6 +11,7 @@ In most of these slots, the whole `CallViewModel` is provided, allowing you to u
 In order to swap the outgoing call view, we will need to implement the `makeOutgoingCallView(viewModel: CallViewModel) -> some View` in the `ViewFactory`:
 
 ```swift
+
 class CustomViewFactory: ViewFactory {
 
 	func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
@@ -60,12 +61,13 @@ The video participants view slot presents the grid of users that are in the call
 
 ```swift
 public func makeVideoParticipantsView(
-    participants: [CallParticipant],
+    viewModel: CallViewModel,
     availableFrame: CGRect,
     onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
 ) -> some View {
     VideoParticipantsView(
-        participants: participants,
+        viewFactory: self,
+        viewModel: viewModel,
         availableFrame: availableFrame,
         onChangeTrackVisibility: onChangeTrackVisibility
     )
@@ -74,7 +76,7 @@ public func makeVideoParticipantsView(
 
 In the method, the following parameters are provided:
 
-- `participants` - the list of participants.
+- `viewModel` - the viewModel that manages the call.
 - `availableFrame` - the available frame for the participants view.
 - `onChangeTrackVisibility` - callback when the track changes its visibility.
 
@@ -96,6 +98,7 @@ func makeVideoParticipantView(
         id: id,
         availableFrame: availableFrame,
         contentMode: contentMode,
+        customData: customData, 
         call: call
     )
 }
@@ -104,7 +107,7 @@ func makeVideoParticipantView(
 Additionally, you can change the modifier applied to the view, by implementing the `makeVideoCallParticipantModifier`:
 
 ```swift
-public makeVideoCallParticipantModifier(
+public func makeVideoCallParticipantModifier(
         participant: CallParticipant,
         call: Call?,
         availableFrame: CGRect,
