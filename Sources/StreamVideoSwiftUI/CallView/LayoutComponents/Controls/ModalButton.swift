@@ -26,7 +26,7 @@ public struct ModalButton: View {
                 .resizable()
                 .foregroundColor(colors.text)
                 .aspectRatio(contentMode: .fit)
-                .padding(10)
+                .padding(8)
         }
         .buttonStyle(.modal)
     }
