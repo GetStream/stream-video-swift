@@ -45,11 +45,11 @@ public struct ConnectionQualityIndicator: View {
     
     private func color(for index: Int) -> Color {
         if connectionQuality == .excellent {
-            return colors.accentGreen
+            return colors.goodConnectionQualityIndicatorColor
         } else if connectionQuality == .good {
-            return index == 3 ? colors.white : colors.accentGreen
+            return index == 3 ? colors.white : colors.goodConnectionQualityIndicatorColor
         } else if connectionQuality == .poor {
-            return index == 1 ? colors.accentRed : colors.white
+            return index == 1 ? colors.badConnectionQualityIndicatorColor : colors.white
         } else {
             return .clear
         }

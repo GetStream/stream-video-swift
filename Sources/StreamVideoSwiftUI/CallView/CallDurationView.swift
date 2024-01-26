@@ -33,7 +33,7 @@ public struct CallDurationView: View {
                     .frame(width: 12)
                     .foregroundColor(
                         viewModel.recordingState == .recording
-                        ? colors.accentRed
+                        ? colors.inactiveCallControl
                         : colors.onlineIndicatorColor
                     )
 

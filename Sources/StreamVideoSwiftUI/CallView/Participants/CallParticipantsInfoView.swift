@@ -242,10 +242,10 @@ struct CallParticipantView: View {
                     .font(fonts.bodyBold)
                 Spacer()
                 (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-                    .foregroundColor(participant.hasAudio ? colors.text : colors.accentRed)
+                    .foregroundColor(participant.hasAudio ? colors.text : colors.inactiveCallControl)
 
                 (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
-                    .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
+                    .foregroundColor(participant.hasVideo ? colors.text : colors.inactiveCallControl)
             }
             .padding(.all, 4)
 

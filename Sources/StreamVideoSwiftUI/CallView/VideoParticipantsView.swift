@@ -450,7 +450,7 @@ public struct SoundIndicator: View {
         (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
             .resizable()
             .aspectRatio(contentMode: .fit)
-            .foregroundColor(participant.hasAudio ? .white : colors.accentRed)
+            .foregroundColor(participant.hasAudio ? .white : colors.inactiveCallControl)
             .accessibility(identifier: "participantMic")
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
     }

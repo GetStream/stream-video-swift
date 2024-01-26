@@ -63,7 +63,7 @@ extension CallIconStyle {
     )
 
     public static let secondaryActive = CallIconStyle(
-        backgroundColor: InjectedValues[\.colors].accentBlue,
+        backgroundColor: InjectedValues[\.colors].activeSecondaryCallControl,
         foregroundColor: .white,
         opacity: 1
     )
@@ -74,12 +74,12 @@ extension CallIconStyle {
         opacity: 1
     )
     public static let disabled = CallIconStyle(
-        backgroundColor: InjectedValues[\.colors].accentRed,
+        backgroundColor: InjectedValues[\.colors].inactiveCallControl,
         foregroundColor: .white,
         opacity: 1
     )
     public static let destructive = CallIconStyle(
-        backgroundColor: InjectedValues[\.colors].accentRed,
+        backgroundColor: InjectedValues[\.colors].inactiveCallControl,
         foregroundColor: .white,
         opacity: 1
     )

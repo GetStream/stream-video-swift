@@ -37,6 +37,10 @@ public struct Colors {
     public var participantSpeakingHighlightColor = Color(.streamAccentBlue).opacity(0.7)
     public var participantInfoBackgroundColor = Color(.streamOverlayDarkStatic)
     public var callDurationColor: UIColor = .streamWhiteStatic
+    public var goodConnectionQualityIndicatorColor = Color(.streamAccentGreen)
+    public var badConnectionQualityIndicatorColor = Color(.streamAccentRed)
+    public var activeSecondaryCallControl = Color(.streamAccentBlue)
+    public var inactiveCallControl = Color(.streamAccentRed)
 }
 
 // Those colors are default defined stream constants, which are fallback values if you don't implement your color theme.
