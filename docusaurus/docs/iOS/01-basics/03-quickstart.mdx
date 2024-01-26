@@ -141,8 +141,8 @@ struct ContentView: View {
             Button {
                 resignFirstResponder()
                 callViewModel.startCall(
+                    callType: "default",
                     callId: callId,
-                    type: "default",
                     members: [/* Your list of participants goes here. */]
                 )
             } label: {
@@ -216,9 +216,7 @@ Next, when you attach the `CallModifier` to your hosting view, you need to injec
 In order to inject the `ViewFactory`, you will need to update the `CallModifier` initializer.
 
 ```swift
-struct ContentView: View {
-
-    @StateObject var callViewModel = CallViewModel()
+@StateObject var callViewModel = CallViewModel()
     @State var callId = ""
 
     var body: some View {
@@ -230,8 +228,8 @@ struct ContentView: View {
             Button {
                 resignFirstResponder()
                 callViewModel.startCall(
+                    callType: "default",
                     callId: callId,
-                    type: "default",
                     members: [/* Your list of participants goes here. */]
                 )
             } label: {
@@ -241,7 +239,6 @@ struct ContentView: View {
         .padding()
         .modifier(CallModifier(viewFactory: CustomViewFactory(), viewModel: callViewModel))
     }
-}
 ```
 
 For the full list of supported view slots that can be swapped, please refer to this [page](../../guides/view-slots).

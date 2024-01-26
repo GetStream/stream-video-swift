@@ -17,14 +17,14 @@ let sort = [SortParamRequest.descending("created_at")]
 let limit = 10
 
 // Fetch the first page of calls 
-let (firstPageCalls, secondPageCursor) = try await client.queryCalls(
+let (firstPageCalls, secondPageCursor) = try await streamVideo.queryCalls(
     filters: filters, 
     sort: sort, 
     limit: limit
 )
 
 // Use the cursor we received from the previous call to fetch the second page
-let (secondPageCalls, _) = try await client.queryCalls(next: secondPageCursor)
+let (secondPageCalls, _) = try await streamVideo.queryCalls(next: secondPageCursor)
 ```
 
 ### CallsController
@@ -77,19 +77,71 @@ You can find the supported operators [here](https://getstream.io/chat/docs/ios-s
 
 #### Pagination
 
-You can fetch the next calls from the specified query, by calling the `loadNextCalls` method. For example, if you are doing pagination in SwiftUI, you can use the `onAppear` modifier on each entry, and based on its index fetch the next calls.
+You can encapsulae the querying calls login into an object `CallsViewModel` for simplicity and state management.
+```swift
+@MainActor
+final class CallsViewModel: ObservableObject {
+
+    @Injected(\.streamVideo) internal var streamVideo
+
+    @Published internal var calls = [Call]()
+
+    private var cancellables = Set<AnyCancellable>()
+
+    private lazy var callsController: CallsController = {
+        let sortParam = CallSortParam(direction: .descending, field: .createdAt)
+        let filters: [String: RawJSON] = ["type": .dictionary(["$eq": .string("audio_room")])]
+        let callsQuery = CallsQuery(sortParams: [sortParam], filters: filters, watch: true)
+        return streamVideo.makeCallsController(callsQuery: callsQuery)
+    }()
+
+    init() {
+        subscribeToCallsUpdates()
+        loadCalls()
+    }
+
+    func onCallAppear(_ call: Call) {
+        let index = calls.firstIndex { callData in
+            callData.cId == call.cId
+        }
+        guard let index else { return }
+
+        if index < calls.count - 10 {
+            return
+        }
+
+        loadCalls()
+    }
+
+    func loadCalls() {
+        Task {
+            try await callsController.loadNextCalls()
+        }
+    }
+
+    func subscribeToCallsUpdates() {
+        callsController.$calls.sink { calls in
+            DispatchQueue.main.async {
+                self.calls = calls
+            }
+        }
+        .store(in: &cancellables)
+    }
+}
+```
+
+You can then fetch the next calls from the specified query, by calling the `loadNextCalls` method. For example, if you are doing pagination in SwiftUI, you can use the `onAppear` modifier on each entry, and based on its index fetch the next calls.
 
 First, in your SwiftUI view, you can call a method from your presentation layer (for example a view model), on the view item appearance:
 
 ```swift
+let callsViewModel = CallsViewModel()
+
 ScrollView {
     LazyVStack {
-        ForEach(viewModel.calls) { call in
-        	CallView(call: call)
-            	.padding(.vertical, 4)
-            	.onAppear {
-                	viewModel.onCallAppear(call)
-            	}
+        ForEach(callsViewModel.calls, id: \.callId) { call in
+            CallView(viewFactory: viewFactory, viewModel: viewModel)
+                .padding(.vertical, 4)
         }
     }
 }
