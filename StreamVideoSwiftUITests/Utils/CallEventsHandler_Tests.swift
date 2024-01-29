@@ -136,7 +136,7 @@ final class CallEventsHandler_Tests: XCTestCase {
         
         // Then
         if case .sessionStarted(let info) = callEvent {
-            XCTAssert(info.id == "test")
+            XCTAssert(info.id == callCid)
         } else {
             XCTFail("Wrong event type")
         }
