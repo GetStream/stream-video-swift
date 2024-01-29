@@ -17,6 +17,10 @@
 		400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */; };
 		400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */; };
 		4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */; };
+		409C39692B67CC5C0090044C /* 04-screensharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C39682B67CC5C0090044C /* 04-screensharing.swift */; };
+		409C396B2B67CD0B0090044C /* 05-picture-in-picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */; };
+		409C396D2B67CD780090044C /* 08-recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396C2B67CD780090044C /* 08-recording.swift */; };
+		409C396F2B67CDF30090044C /* 09-broadcasting.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396E2B67CDF30090044C /* 09-broadcasting.swift */; };
 		40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */; };
 		40E23B9B2B67BA4100D11FC1 /* 02-push-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */; };
 		40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */; };
@@ -84,6 +88,10 @@
 		400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-querying-calls.swift"; sourceTree = "<group>"; };
 		400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-dependency-injection.swift"; sourceTree = "<group>"; };
 		4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-callkit-integration.swift"; sourceTree = "<group>"; };
+		409C39682B67CC5C0090044C /* 04-screensharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-screensharing.swift"; sourceTree = "<group>"; };
+		409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-picture-in-picture.swift"; sourceTree = "<group>"; };
+		409C396C2B67CD780090044C /* 08-recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-recording.swift"; sourceTree = "<group>"; };
+		409C396E2B67CDF30090044C /* 09-broadcasting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-broadcasting.swift"; sourceTree = "<group>"; };
 		40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "01-deeplinking.swift"; sourceTree = "<group>"; };
 		40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-push-notifications.swift"; sourceTree = "<group>"; };
 		40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permissions-and-moderation.swift"; sourceTree = "<group>"; };
@@ -255,6 +263,10 @@
 				40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */,
 				40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */,
 				4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */,
+				409C39682B67CC5C0090044C /* 04-screensharing.swift */,
+				409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */,
+				409C396C2B67CD780090044C /* 08-recording.swift */,
+				409C396E2B67CDF30090044C /* 09-broadcasting.swift */,
 			);
 			path = "06-advanced";
 			sourceTree = "<group>";
@@ -401,6 +413,7 @@
 				400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */,
 				40FFDC4F2B63EE50004DA7A2 /* 04-active-call.swift in Sources */,
 				40FFDCA02B640676004DA7A2 /* 13-pinning-users.swift in Sources */,
+				409C396D2B67CD780090044C /* 08-recording.swift in Sources */,
 				40FFDC602B63F2EC004DA7A2 /* 04-local-video.swift in Sources */,
 				40FFDC632B63F370004DA7A2 /* 02-sound-indicator.swift in Sources */,
 				40FFDC5E2B63F236004DA7A2 /* 03-call-participants-info-menu.swift in Sources */,
@@ -413,6 +426,7 @@
 				400D91CB2B63DB5F00EBA47D /* GloballyUsedVariables.swift in Sources */,
 				40FFDC982B640566004DA7A2 /* 09-audio-volume-indicator.swift in Sources */,
 				40FFDC7E2B63FC10004DA7A2 /* 04-video-layout.swift in Sources */,
+				409C396B2B67CD0B0090044C /* 05-picture-in-picture.swift in Sources */,
 				40FFDC552B63EFD3004DA7A2 /* 07-screen-share-content.swift in Sources */,
 				40FFDC9C2B6405EA004DA7A2 /* 11-speaking-while-muted.swift in Sources */,
 				40FFDC3D2B63E6EC004DA7A2 /* 11-call-lifecycle.swift in Sources */,
@@ -437,6 +451,7 @@
 				40FFDC6D2B63F556004DA7A2 /* 03-video-theme.swift in Sources */,
 				40FFDC492B63EB92004DA7A2 /* 01-call-container.swift in Sources */,
 				40FFDC4D2B63ED16004DA7A2 /* 03-incoming-call.swift in Sources */,
+				409C396F2B67CDF30090044C /* 09-broadcasting.swift in Sources */,
 				40FFDC692B63F474004DA7A2 /* 05-call-background.swift in Sources */,
 				40FFDCA62B6408DE004DA7A2 /* 00-ringing.swift in Sources */,
 				400D91C92B63DB3700EBA47D /* 01-client-auth.swift in Sources */,
@@ -448,6 +463,7 @@
 				40FFDC5C2B63F137004DA7A2 /* 02-call-participants.swift in Sources */,
 				40FFDC7A2B63FA96004DA7A2 /* 02-replacing-call-controls.swift in Sources */,
 				40FFDC6B2B63F4AB004DA7A2 /* 02-video-renderer.swift in Sources */,
+				409C39692B67CC5C0090044C /* 04-screensharing.swift in Sources */,
 				40FFDCA22B640741004DA7A2 /* 14-livestream-player.swift in Sources */,
 				40FFDCA42B640772004DA7A2 /* 15-long-press-to-focus.swift in Sources */,
 			);

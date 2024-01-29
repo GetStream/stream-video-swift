@@ -15,6 +15,7 @@ var utils = Utils()
 @MainActor var viewFactory = DefaultViewFactory.shared
 var availableFrame = CGRect.zero
 var availableSize = CGSize.zero
+var videoSize = CGSize.zero
 var participant = CallParticipant(
     id: "",
     userId: "",
@@ -228,7 +229,19 @@ final class AppState: ObservableObject {
     var voIPPushToken: String?
     var pushToken: String?
 
+    let unsecureRepository = UnsecureRepository()
+
     static var shared = AppState()
+}
+
+final class UnsecureRepository: VoIPTokenHandler {
+    func save(voIPPushToken: String?) {
+
+    }
+    
+    func currentVoIPPushToken() -> String? {
+        nil
+    }
 }
 
 var appState = AppState()
@@ -251,4 +264,14 @@ protocol VoIPTokenHandler {
 
     func currentVoIPPushToken() -> String?
 
+}
+
+final class CallKitService {
+    
+    func reportIncomingCall(
+        callCid: String,
+        displayName: String,
+        callerId: String,
+        completion: @escaping (Error?) -> Void
+    ) {}
 }
