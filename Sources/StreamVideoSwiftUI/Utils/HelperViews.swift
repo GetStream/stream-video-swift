@@ -55,10 +55,33 @@ extension CallIconStyle {
         foregroundColor: .black,
         opacity: 1
     )
-    public static let transparent = CallIconStyle(
-        backgroundColor: .black,
+
+    public static let secondary = CallIconStyle(
+        backgroundColor: Color(InjectedValues[\.colors].participantBackground),
         foregroundColor: .white,
-        opacity: 0.4
+        opacity: 1
+    )
+
+    public static let secondaryActive = CallIconStyle(
+        backgroundColor: InjectedValues[\.colors].activeSecondaryCallControl,
+        foregroundColor: .white,
+        opacity: 1
+    )
+
+    public static let transparent = CallIconStyle(
+        backgroundColor: Color(InjectedValues[\.colors].participantBackground),
+        foregroundColor: .white,
+        opacity: 1
+    )
+    public static let disabled = CallIconStyle(
+        backgroundColor: InjectedValues[\.colors].inactiveCallControl,
+        foregroundColor: .white,
+        opacity: 1
+    )
+    public static let destructive = CallIconStyle(
+        backgroundColor: InjectedValues[\.colors].inactiveCallControl,
+        foregroundColor: .white,
+        opacity: 1
     )
 }
 

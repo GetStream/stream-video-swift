@@ -94,7 +94,10 @@ open class CallViewModel: ObservableObject {
     
     /// Whether the list of participants is shown during the call.
     @Published public var participantsShown = false
-        
+
+    /// Whether the list of participants is shown during the call.
+    @Published public var moreControlsShown = false
+
     /// List of the outgoing call members.
     @Published public var outgoingCallMembers = [MemberRequest]()
         
@@ -587,7 +590,7 @@ open class CallViewModel: ObservableObject {
             let rejections = call?.state.session?.rejectedBy.count ?? 0
             let accepted = call?.state.session?.acceptedBy.count ?? 0
                         
-            if rejections >= outgoingMembersCount && accepted == 0 {
+            if accepted == 0, rejections >= outgoingMembersCount  {
                 Task {
                     _ = try? await call?.reject()
                     leaveCall()

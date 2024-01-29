@@ -20,11 +20,13 @@ _December 08, 2023_
 
 ### 🔄 Changed
 - You can now focus on a desired point in the local video stream. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
-- The following API changes occurred as part of the redesign. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
+- The following API changes occurred as part of the redesign. [#221](https://github.com/GetStream/stream-video-swift/pull/221) & [#269](https://github.com/GetStream/stream-video-swift/pull/269)
     - `CornerDragableView` has been renamed to `CornerDraggableView` and initializer changed.
     - `LocalParticipantViewModifier` & `VideoCallParticipantModifier` now accept a few parameters that allow you to further control their presentation.
     - `ScreenSharingView` now accepts a `isZoomEnabled` parameter to control if the the view will be zoom-able.
     - `LocalVideoView` now accepts a `availableFrame` parameter.
+    - `OutgoingCallView` now accepts an additional `callTopView` parameter to align with the updated design.
+    - `CallParticipantsInfoView` and the `ViewFactory.makeParticipantsListView` method aren't accept the `availableFrame` anymore.
 
 # [0.4.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.1)
 _October 16, 2023_

@@ -62,7 +62,7 @@ public struct MicrophoneCheckView: View {
                     .resizable()
                     .aspectRatio(contentMode: .fit)
                     .frame(height: CGFloat(maxHeight))
-                    .foregroundColor(colors.accentRed)
+                    .foregroundColor(colors.inactiveCallControl)
             }
         }
         .padding(.all, 2)
@@ -71,7 +71,7 @@ public struct MicrophoneCheckView: View {
         .cornerRadius(
             8,
             corners: [.topRight],
-            backgroundColor: Color.black.opacity(0.6)
+            backgroundColor: colors.participantInfoBackgroundColor
         )
     }
 }
@@ -102,7 +102,7 @@ public struct AudioVolumeIndicator: View {
             ForEach(levels) { level in
                 VStack {
                     RoundedRectangle(cornerRadius: 4)
-                        .fill(colors.primaryButtonBackground)
+                        .fill(colors.goodConnectionQualityIndicatorColor)
                         .frame(width: 2, height: height(for: level.value))
                 }
                 .frame(height: CGFloat(maxHeight))

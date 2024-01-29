@@ -103,11 +103,9 @@ public protocol ViewFactory: AnyObject {
     /// Creates a view that shows a list of the participants in the call.
     /// - Parameters:
     ///  - viewModel: The view model used for the call.
-    ///  - availableFrame: The frame available to display the view.
     /// - Returns: view shown in the participants list slot.
     func makeParticipantsListView(
-        viewModel: CallViewModel,
-        availableFrame: CGRect
+        viewModel: CallViewModel
     ) -> CallParticipantsListViewType
 
     associatedtype ScreenSharingViewType: View
@@ -160,12 +158,14 @@ extension ViewFactory {
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         OutgoingCallView(
             outgoingCallMembers: viewModel.outgoingCallMembers.map(\.toMember),
+            callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
     }
 
     public func makeJoiningCallView(viewModel: CallViewModel) -> some View {
         JoiningCallView(
+            callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
     }
@@ -246,11 +246,10 @@ extension ViewFactory {
     }
 
     public func makeParticipantsListView(
-        viewModel: CallViewModel,
-        availableFrame: CGRect
+        viewModel: CallViewModel
     ) -> some View {
         if #available(iOS 14.0, *) {
-            return CallParticipantsInfoView(callViewModel: viewModel, availableFrame: availableFrame)
+            return CallParticipantsInfoView(callViewModel: viewModel)
         } else {
             return EmptyView()
         }

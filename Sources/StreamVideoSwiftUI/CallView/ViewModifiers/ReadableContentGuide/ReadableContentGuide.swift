@@ -5,6 +5,7 @@
 import Foundation
 import SwiftUI
 
+@available(iOS 14.0, *)
 struct ReadableContentGuideViewModifier: ViewModifier {
 
     let isEnabled: Bool
@@ -42,8 +43,15 @@ struct ReadableContentGuideViewModifier: ViewModifier {
 
 extension View {
 
+    /// A modifier that wraps the content in the ReadableContentGuide ensuring that the content will
+    /// wrap when in bigger screens.
+    /// - Note: Available on iOS 14.0+
     @ViewBuilder
-    func alignedToReadableContentGuide() -> some View {
-        self.modifier(ReadableContentGuideViewModifier(isEnabled: true))
+    public func alignedToReadableContentGuide() -> some View {
+        if #available(iOS 14.0, *) {
+            modifier(ReadableContentGuideViewModifier(isEnabled: true))
+        } else {
+            self
+        }
     }
 }

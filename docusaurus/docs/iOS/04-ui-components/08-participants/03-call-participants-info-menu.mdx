@@ -11,23 +11,20 @@ Let's see how to use the component.
 If you want to use the componant as a standalone, you can create it like this:
 
 ```swift
-let view = CallParticipantsInfoView(callViewModel: viewModel, availableFrame: availableFrame)
+let view = CallParticipantsInfoView(callViewModel: viewModel)
 ```
 
 The required parameters for this method are:
 - `callViewModel` - the call view model used for the call.
-- `availableFrame` - the available frame for the view.
 
 Additionally, if you are using our `ViewFactory` and the default view, you can customize or swap this view with your own implementation. In order to do that, you should implement the method `makeParticipantsListView`:
 
 ```swift
 func makeParticipantsListView(
-    viewModel: CallViewModel,
-    availableFrame: CGRect
+    viewModel: CallViewModel
 ) -> some View {
     CustomCallParticipantsInfoView(
-        callViewModel: viewModel, 
-        availableFrame: availableFrame
+        callViewModel: viewModel,
     )
 }
 ```

@@ -7,16 +7,12 @@ import SwiftUI
 
 @available(iOS 14.0, *)
 public struct CallParticipantsInfoView: View {
-    
-    private let padding: CGFloat = 16
-    
+
     @StateObject var viewModel: CallParticipantsInfoViewModel
     @ObservedObject var callViewModel: CallViewModel
-    var availableFrame: CGRect
 
-    public init(callViewModel: CallViewModel, availableFrame: CGRect) {
+    public init(callViewModel: CallViewModel) {
         self.callViewModel = callViewModel
-        self.availableFrame = availableFrame
         _viewModel = StateObject(
             wrappedValue: CallParticipantsInfoViewModel(
                 call: callViewModel.call
@@ -25,17 +21,10 @@ public struct CallParticipantsInfoView: View {
     }
     
     public var body: some View {
-        VStack {
-            CallParticipantsView(
-                viewModel: viewModel,
-                callViewModel: callViewModel,
-                maxHeight: availableFrame.size.height - padding
-            )
-            .padding()
-            .padding(.vertical, padding / 2)
-            
-            Spacer()
-        }
+        CallParticipantsView(
+            viewModel: viewModel,
+            callViewModel: callViewModel
+        )
     }
 }
 
@@ -44,8 +33,6 @@ struct CallParticipantsView: View {
     
     @ObservedObject var viewModel: CallParticipantsInfoViewModel
     @ObservedObject var callViewModel: CallViewModel
-
-    var maxHeight: CGFloat
         
     var body: some View {
         CallParticipantsViewContainer(
@@ -54,7 +41,6 @@ struct CallParticipantsView: View {
             call: callViewModel.call,
             blockedUsers: callViewModel.blockedUsers,
             callSettings: callViewModel.callSettings,
-            maxHeight: maxHeight,
             inviteParticipantsShown: $viewModel.inviteParticipantsShown,
             inviteTapped: {
                 viewModel.inviteParticipantsShown = true
@@ -87,7 +73,6 @@ struct CallParticipantsViewContainer: View {
     var call: Call?
     var blockedUsers: [User]
     var callSettings: CallSettings
-    var maxHeight: CGFloat
     @Binding var inviteParticipantsShown: Bool
     var inviteTapped: () -> Void
     var muteTapped: () -> Void
@@ -114,25 +99,14 @@ struct CallParticipantsViewContainer: View {
                             )
                         }
                     }
-                    .padding()
-                    .overlay(
-                        GeometryReader { geo in
-                            Color.clear.preference(key: HeightPreferenceKey.self, value: geo.size.height)
-                        }
-                    )
-                    .onPreferenceChange(HeightPreferenceKey.self) { value in
-                        if let value = value {
-                            listHeight = value
-                        }
-                    }
-                    .frame(maxWidth: .infinity, maxHeight: listHeight)
+                        .padding(.horizontal)
                 }
-                
+
                 HStack(spacing: 16) {
                     if viewModel.inviteParticipantsButtonShown {
                         ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
                     }
-                    
+
                     ParticipantsButton(
                         title: callSettings.audioOn ? L10n.Call.Participants.muteme : L10n.Call.Participants.unmuteme,
                         primaryStyle: false,
@@ -140,7 +114,7 @@ struct CallParticipantsViewContainer: View {
                     )
                 }
                 .padding()
-                
+
                 NavigationLink(isActive: $inviteParticipantsShown) {
                     InviteParticipantsView(
                         inviteParticipantsShown: $inviteParticipantsShown,
@@ -151,42 +125,27 @@ struct CallParticipantsViewContainer: View {
                     EmptyView()
                 }
             }
-            .navigationTitle("\(L10n.Call.Participants.title) (\(participants.count))")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar(content: {
+            .toolbar{
                 ToolbarItem(placement: .navigationBarTrailing) {
-                    Button {
-                        closeTapped()
-                    } label: {
-                        images.xmark
-                            .foregroundColor(colors.tintColor)
-                    }
-                    .accessibility(identifier: "Close")
+                    ModalButton(image: images.xmark, action: closeTapped)
+                        .accessibility(identifier: "Close")
                 }
-            })
+            }
+            .navigationTitle(navigationTitle)
+            .navigationBarTitleDisplayMode(.inline)
             .accessibility(identifier: "participantsScrollView")
             .streamAccessibility(value: "\(participants.count)")
         }
-        .frame(height: inviteParticipantsShown ? maxHeight : popupHeight)
         .navigationViewStyle(.stack)
-        .modifier(ShadowViewModifier())
     }
-    
-    private var popupHeight: CGFloat {
-        let height = 44 + listHeight + 80
-        if height > maxHeight {
-            return maxHeight
-        } else {
-            return height
-        }
-    }
-}
 
-struct HeightPreferenceKey: PreferenceKey {
-    static var defaultValue: CGFloat? = nil
-    
-    static func reduce(value: inout CGFloat?, nextValue: () -> CGFloat?) {
-        value = value ?? nextValue()
+    private var navigationTitle: String {
+        let participantsCount = call?.state.participants.count ?? 0
+        if participantsCount > 1 {
+            return "\(L10n.Call.Participants.title) (\(participantsCount))"
+        } else {
+            return L10n.Call.Participants.title
+        }
     }
 }
 
@@ -283,10 +242,10 @@ struct CallParticipantView: View {
                     .font(fonts.bodyBold)
                 Spacer()
                 (participant.hasAudio ? images.micTurnOn : images.micTurnOff)
-                    .foregroundColor(participant.hasAudio ? colors.text : colors.accentRed)
+                    .foregroundColor(participant.hasAudio ? colors.text : colors.inactiveCallControl)
 
                 (participant.hasVideo ? images.videoTurnOn : images.videoTurnOff)
-                    .foregroundColor(participant.hasVideo ? colors.text : colors.accentRed)
+                    .foregroundColor(participant.hasVideo ? colors.text : colors.inactiveCallControl)
             }
             .padding(.all, 4)
 

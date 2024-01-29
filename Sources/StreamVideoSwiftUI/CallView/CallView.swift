@@ -12,8 +12,6 @@ public struct CallView<Factory: ViewFactory>: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
 
-    private let padding: CGFloat = 16
-
     var viewFactory: Factory
     @ObservedObject var viewModel: CallViewModel
 
@@ -23,7 +21,7 @@ public struct CallView<Factory: ViewFactory>: View {
     }
 
     public var body: some View {
-        VStack(spacing: 16) {
+        VStack {
             viewFactory.makeCallTopView(viewModel: viewModel)
 
             GeometryReader { videoFeedProxy in
@@ -55,21 +53,6 @@ public struct CallView<Factory: ViewFactory>: View {
 
                 Spacer()
             }
-        ).overlay(
-            Group {
-                if viewModel.participantsShown {
-                    GeometryReader { reader in
-                        viewFactory.makeParticipantsListView(
-                            viewModel: viewModel,
-                            availableFrame: reader.frame(in: .global)
-                        )
-                        .opacity(viewModel.hideUIElements ? 0 : 1)
-                        .accessibility(identifier: "trailingTopView")
-                    }
-                } else {
-                    EmptyView()
-                }
-            }
         )
         .background(Color(colors.callBackground).edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -80,6 +63,7 @@ public struct CallView<Factory: ViewFactory>: View {
             UIApplication.shared.isIdleTimerDisabled = false
         }
         .enablePictureInPicture(viewModel.isPictureInPictureEnabled)
+        .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
     }
 
     @ViewBuilder
@@ -125,8 +109,8 @@ public struct CallView<Factory: ViewFactory>: View {
 
     private var shouldShowDraggableView: Bool {
         (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true)
-           && viewModel.participantsLayout == .grid
-            && viewModel.participants.count <= 3
+        && viewModel.participantsLayout == .grid
+        && viewModel.participants.count <= 3
     }
 
     @ViewBuilder

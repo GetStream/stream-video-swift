@@ -194,6 +194,8 @@ struct LivestreamDurationView: View {
 
 struct LivestreamButton: View {
     
+    @Injected(\.colors) var colors
+
     private let buttonSize: CGFloat = 32
     
     var imageName: String
@@ -208,7 +210,7 @@ struct LivestreamButton: View {
             Image(systemName: imageName)
                 .padding(.all, 4)
                 .frame(width: buttonSize, height: buttonSize)
-                .background(Color.black.opacity(0.6))
+                .background(colors.participantInfoBackgroundColor)
                 .cornerRadius(8)
         }
         .padding(.horizontal, 2)        

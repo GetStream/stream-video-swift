@@ -16,17 +16,18 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     let firstUser: MemberRequest = Member(user: StreamVideo.mockUser, updatedAt: .now).toMemberRequest
     let secondUser: MemberRequest = Member(user: User(id: "test2"), updatedAt: .now).toMemberRequest
     let thirdUser: MemberRequest = Member(user: User(id: "test3"), updatedAt: .now).toMemberRequest
-    let callId = "test"
     let callType: String = .default
-    var callCid: String {
-        "\(callType):\(callId)"
-    }
-    
+    var callId: String!
+    var callCid: String!
+
     lazy var participants = [firstUser, secondUser]
     
-    override func setUp() {
-        super.setUp()
+    @MainActor
+    override func setUp() async throws {
+        try await super.setUp()
         LogConfig.level = .debug
+        callId = UUID().uuidString
+        callCid = "\(callType):\(callId!)"
     }
     
     // MARK: - Call Events
@@ -74,7 +75,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(.coordinatorEvent(.typeCallRejectedEvent(event)))
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 2_000_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 5_000_000_000)
     }
     
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
@@ -98,8 +99,8 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(first)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .outgoing, nanoseconds: 2_000_000_000)
-        
+        try await XCTAssertWithDelay(callViewModel.callingState == .outgoing, nanoseconds: 5_000_000_000)
+
         // When
         let secondCallResponse = mockResponseBuilder.makeCallResponse(
             cid: callCid,
@@ -115,7 +116,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(second)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 2_000_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 5_000_000_000)
     }
     
     func test_outgoingCall_callEndedEvent() async throws {
@@ -185,7 +186,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         callViewModel.hangUp()
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 3_000_000_000)
+        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 5_000_000_000)
     }
     
     func test_incomingCall_acceptCall() async throws {

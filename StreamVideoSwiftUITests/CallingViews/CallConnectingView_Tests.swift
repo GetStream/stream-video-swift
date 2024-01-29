@@ -11,11 +11,21 @@ import XCTest
 @MainActor
 final class CallConnectingView_Tests: StreamVideoUITestCase {
     
+    private lazy var viewModel: CallViewModel! = .init()
+    private lazy var factory: DefaultViewFactory! = DefaultViewFactory.shared
+
+    override func tearDown() {
+        viewModel = nil
+        factory = nil
+        super.tearDown()
+    }
+
     func test_callConnectingView_snapshot() throws {
         let view = CallConnectingView(
             outgoingCallMembers: [],
             title: "Test title 123",
-            callControls: DefaultViewFactory.shared.makeCallControlsView(viewModel: CallViewModel())
+            callControls: factory.makeCallControlsView(viewModel: viewModel),
+            callTopView: factory.makeCallTopView(viewModel: viewModel)
         )
         AssertSnapshot(view, variants: snapshotVariants)
     }

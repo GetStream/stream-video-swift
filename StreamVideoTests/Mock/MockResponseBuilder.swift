@@ -38,6 +38,7 @@ class MockResponseBuilder {
             rtmp: RTMPIngress(address: "test")
         )
         let session = makeCallSessionResponse(
+            cid: cid,
             acceptedBy: acceptedBy,
             rejectedBy: rejectedBy,
             liveStartedAt: liveStartedAt,
@@ -162,6 +163,7 @@ class MockResponseBuilder {
     }
     
     func makeCallSessionResponse(
+        cid: String,
         acceptedBy: [String: Date] = [:],
         rejectedBy: [String: Date] = [:],
         liveStartedAt: Date? = nil,
@@ -170,7 +172,7 @@ class MockResponseBuilder {
         CallSessionResponse(
             acceptedBy: acceptedBy,
             endedAt: liveEndedAt,
-            id: "test",
+            id: cid,
             liveEndedAt: liveEndedAt,
             liveStartedAt: liveStartedAt,
             participants: [],
