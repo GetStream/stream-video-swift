@@ -22,7 +22,7 @@ extension XCTestCase {
     /// the timeout.
     @MainActor
     func XCTAssertContinuously(
-        _ expression: @autoclosure @escaping () throws -> Bool,
+        _ expression: @escaping () throws -> Bool,
         _ message: @autoclosure @escaping () -> String = "",
         timeout: TimeInterval = defaultTimeout,
         file: StaticString = #file,
@@ -31,7 +31,7 @@ extension XCTestCase {
         let expectation = XCTNSPredicateExpectation(
             predicate: NSPredicate(block: { _, _ in
                 (try? expression()) ?? false
-            }), object: nil)
+            }), object: message())
 
         await fulfillment(
             of: [expectation],
