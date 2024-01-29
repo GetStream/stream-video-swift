@@ -16,17 +16,18 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     let firstUser: MemberRequest = Member(user: StreamVideo.mockUser, updatedAt: .now).toMemberRequest
     let secondUser: MemberRequest = Member(user: User(id: "test2"), updatedAt: .now).toMemberRequest
     let thirdUser: MemberRequest = Member(user: User(id: "test3"), updatedAt: .now).toMemberRequest
-    let callId = "test"
     let callType: String = .default
-    var callCid: String {
-        "\(callType):\(callId)"
-    }
-    
+    var callId: String!
+    var callCid: String!
+
     lazy var participants = [firstUser, secondUser]
     
-    override func setUp() {
-        super.setUp()
+    @MainActor
+    override func setUp() async throws {
+        try await super.setUp()
         LogConfig.level = .debug
+        callId = UUID().uuidString
+        callCid = "\(callType):\(callId!)"
     }
     
     // MARK: - Call Events
@@ -76,7 +77,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // Then
         try await XCTAssertContinuously(
             { callViewModel.callingState == .idle },
-            "expected:\(CallingState.idle), actual:\(callViewModel.callingState), location:\(#file):\(#line)"
+            { "expected:\(CallingState.idle), actual:\(callViewModel.callingState), location:\(#file):\(#line)" }
         )
     }
     
@@ -103,7 +104,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // Then
         try await XCTAssertContinuously(
             { callViewModel.callingState == .outgoing },
-            "expected:\(CallingState.outgoing), actual:\(callViewModel.callingState), location:\(#file):\(#line)"
+            { "expected:\(CallingState.outgoing), actual:\(callViewModel.callingState), location:\(#file):\(#line)" }
         )
 
         // When
@@ -123,7 +124,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         // Then
         try await XCTAssertContinuously(
             { callViewModel.callingState == .idle },
-            "expected:\(CallingState.idle), actual:\(callViewModel.callingState), location:\(#file):\(#line)"
+            { "expected:\(CallingState.idle), actual:\(callViewModel.callingState), location:\(#file):\(#line)" }
         )
     }
     

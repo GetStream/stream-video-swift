@@ -590,7 +590,7 @@ open class CallViewModel: ObservableObject {
             let rejections = call?.state.session?.rejectedBy.count ?? 0
             let accepted = call?.state.session?.acceptedBy.count ?? 0
                         
-            if rejections >= outgoingMembersCount && accepted == 0 {
+            if accepted == 0, rejections >= outgoingMembersCount  {
                 Task {
                     _ = try? await call?.reject()
                     leaveCall()
