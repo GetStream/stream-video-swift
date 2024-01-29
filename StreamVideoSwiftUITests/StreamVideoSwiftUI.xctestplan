@@ -4,7 +4,7 @@
       "id" : "7CCDCF41-AF57-4E40-9F72-95CC8A036F82",
       "name" : "Configuration 1",
       "options" : {
-
+        "testRepetitionMode" : "fixedIterations"
       }
     }
   ],
