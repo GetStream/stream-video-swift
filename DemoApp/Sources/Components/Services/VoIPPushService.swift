@@ -6,7 +6,7 @@ import Foundation
 import PushKit
 import StreamVideo
 
-typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> ()
+public typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> ()
 
 final class VoIPPushService: NSObject, PKPushRegistryDelegate {
 

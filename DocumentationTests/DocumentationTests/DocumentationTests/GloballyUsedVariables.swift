@@ -157,7 +157,7 @@ struct SomeOtherView: View { var body: some View { EmptyView() } }
 struct YourView: View { var body: some View { EmptyView() } }
 struct YourHostingView: View { var body: some View { EmptyView() } }
 struct YourHostView: View { var body: some View { EmptyView() } }
-final class AppState: ObservableObject {}
+struct ViewThatHostsCall: View { var body: some View { EmptyView() } }
 
 struct LongPressToFocusViewModifier: ViewModifier {
 
@@ -204,4 +204,51 @@ extension View {
             )
         )
     }
+}
+
+struct DeeplinkInfo: Equatable {
+    var url: URL?
+    var callId: String
+    var callType: String
+
+    static let empty = DeeplinkInfo(callId: "", callType: "")
+}
+
+final class AppState: ObservableObject {
+
+    enum UserState { case notLoggedIn, loggedIn }
+
+    var apiKey: String = ""
+    var userState: UserState = .notLoggedIn
+    @Published var deeplinkInfo: DeeplinkInfo = .empty
+    var currentUser: User?
+    var loading = false
+    var activeCall: Call?
+    var activeAnonymousCallId: String = ""
+    var voIPPushToken: String?
+    var pushToken: String?
+
+    static var shared = AppState()
+}
+
+var appState = AppState()
+
+extension URL {
+
+    var queryParameters: [String: String] {
+        guard
+            let components = URLComponents(url: self, resolvingAgainstBaseURL: true),
+            let queryItems = components.queryItems else { return [:] }
+        return queryItems.reduce(into: [String: String]()) { (result, item) in
+            result[item.name] = item.value
+        }
+    }
+}
+
+protocol VoIPTokenHandler {
+
+    func save(voIPPushToken: String?)
+
+    func currentVoIPPushToken() -> String?
+
 }

@@ -39,4 +39,9 @@ public extension PushNotificationsConfig {
 public struct PushProviderInfo: Sendable {
     public let name: String
     public let pushProvider: PushNotificationsProvider
+
+    public init(name: String, pushProvider: PushNotificationsProvider) {
+        self.name = name
+        self.pushProvider = pushProvider
+    }
 }

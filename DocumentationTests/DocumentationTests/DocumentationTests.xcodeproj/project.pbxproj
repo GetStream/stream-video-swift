@@ -16,6 +16,9 @@
 		400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */; };
 		400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */; };
 		400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */; };
+		4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */; };
+		40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */; };
+		40E23B9B2B67BA4100D11FC1 /* 02-push-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */; };
 		40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */; };
 		40FFDC392B63E459004DA7A2 /* 09-reactions-and-custom-events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */; };
 		40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */; };
@@ -80,6 +83,9 @@
 		400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-camera-and-microphone.swift"; sourceTree = "<group>"; };
 		400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-querying-calls.swift"; sourceTree = "<group>"; };
 		400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-dependency-injection.swift"; sourceTree = "<group>"; };
+		4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-callkit-integration.swift"; sourceTree = "<group>"; };
+		40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "01-deeplinking.swift"; sourceTree = "<group>"; };
+		40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-push-notifications.swift"; sourceTree = "<group>"; };
 		40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permissions-and-moderation.swift"; sourceTree = "<group>"; };
 		40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-reactions-and-custom-events.swift"; sourceTree = "<group>"; };
 		40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-view-slots.swift"; sourceTree = "<group>"; };
@@ -246,6 +252,9 @@
 			isa = PBXGroup;
 			children = (
 				40FFDCA52B6408DE004DA7A2 /* 00-ringing.swift */,
+				40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */,
+				40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */,
+				4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */,
 			);
 			path = "06-advanced";
 			sourceTree = "<group>";
@@ -408,12 +417,15 @@
 				40FFDC9C2B6405EA004DA7A2 /* 11-speaking-while-muted.swift in Sources */,
 				40FFDC3D2B63E6EC004DA7A2 /* 11-call-lifecycle.swift in Sources */,
 				400D91CD2B63DC2600EBA47D /* 02-joining-creating-calls.swift in Sources */,
+				40E23B9B2B67BA4100D11FC1 /* 02-push-notifications.swift in Sources */,
 				400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */,
 				40FFDC512B63EF58004DA7A2 /* 05-call-controls.swift in Sources */,
 				400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */,
 				40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */,
+				4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */,
 				40FFDC762B63F7D6004DA7A2 /* ChatGloballyUsedVariables.swift in Sources */,
 				40FFDC672B63F430004DA7A2 /* 04-connection-quality-indicator.swift in Sources */,
+				40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */,
 				40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */,
 				40FFDC442B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift in Sources */,
 				40FFDC872B63FEAE004DA7A2 /* 05-incoming-call.swift in Sources */,

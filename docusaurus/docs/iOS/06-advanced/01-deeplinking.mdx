@@ -67,10 +67,10 @@ Next, your SwiftUI view that hosts the calling functionality, can react to chang
 ```swift
 ViewThatHostsCall()
     .onReceive(appState.$deeplinkInfo, perform: { deeplinkInfo in
-        if let deeplinkInfo {
-            callViewModel.joinCall(callId: deeplinkInfo.callId, type: deeplinkInfo.callType)
-            appState.deeplinkInfo = nil
-        }
+        if deeplinkInfo != .empty {
+              callViewModel.joinCall(callType: deeplinkInfo.callType, callId: deeplinkInfo.callId)
+              appState.deeplinkInfo = .empty
+          }
     })
 ``` 
 
