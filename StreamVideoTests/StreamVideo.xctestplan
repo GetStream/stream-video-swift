@@ -18,11 +18,13 @@
       }
     ],
     "maximumTestExecutionTimeAllowance" : 100,
+    "maximumTestRepetitions" : 3,
     "targetForVariableExpansion" : {
       "containerPath" : "container:StreamVideo.xcodeproj",
       "identifier" : "84F737F3287C13AD00A363F4",
       "name" : "StreamVideoTests"
     },
+    "testRepetitionMode" : "fixedIterations",
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
