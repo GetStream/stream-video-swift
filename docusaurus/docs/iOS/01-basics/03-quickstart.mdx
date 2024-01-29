@@ -216,7 +216,7 @@ Next, when you attach the `CallModifier` to your hosting view, you need to injec
 In order to inject the `ViewFactory`, you will need to update the `CallModifier` initializer.
 
 ```swift
-@StateObject var callViewModel = CallViewModel()
+    @StateObject var callViewModel = CallViewModel()
     @State var callId = ""
 
     var body: some View {

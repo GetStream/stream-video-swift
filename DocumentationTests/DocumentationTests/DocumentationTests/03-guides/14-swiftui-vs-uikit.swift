@@ -17,7 +17,7 @@ fileprivate func content() {
             }
 
             var body: some View {
-                Color.clear // You can use any of your views.
+                HomeView(viewModel: viewModel)
                     .modifier(CallModifier(viewModel: viewModel))
             }
         }
