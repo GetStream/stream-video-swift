@@ -15,6 +15,22 @@ extension SystemEnvironment {
         "stream-video-swift-client-v\(version)|app=\(appName)|app_version=\(appVersion)|os=\(os) \(osVersion)|device_model=\(model)|device_screen_ratio=\(scale)"
     }()
 
+    static let clientDetails: Stream_Video_Sfu_Models_ClientDetails = {
+        var result = Stream_Video_Sfu_Models_ClientDetails()
+        result.sdk.type = .ios
+        var versionComponents = version.split(separator: ".")
+        result.sdk.major = versionComponents[safe: 0].map { String($0) } ?? ""
+        result.sdk.minor = versionComponents[safe: 1].map { String($0) } ?? ""
+        result.sdk.patch = versionComponents[safe: 2].map { String($0) } ?? ""
+
+        result.device.name = model
+
+        result.os.name = os
+        result.os.version = osVersion
+
+        return result
+    }()
+
     private static var info: [String: Any] {
         Bundle.main.infoDictionary ?? [:]
     }
@@ -74,4 +90,10 @@ extension SystemEnvironment {
         return "1.00"
         #endif
     }
+}
+
+extension Array {
+  private subscript(safe index: Int) -> Element? {
+    return indices ~= index ? self[index] : nil
+  }
 }
