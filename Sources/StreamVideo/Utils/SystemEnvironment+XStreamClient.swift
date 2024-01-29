@@ -77,7 +77,7 @@ extension SystemEnvironment {
 
     private static var os: String {
         #if os(iOS)
-        return isSimulator ? "iOS-simulator" : "iOS"
+        return "iOS"
         #elseif os(macOS)
         return "MacOS"
         #endif
