@@ -6,7 +6,7 @@ import Combine
 @MainActor
 fileprivate func content() {
     container {
-        let view = CallParticipantsInfoView(callViewModel: viewModel, availableFrame: availableFrame)
+        let view = CallParticipantsInfoView(callViewModel: viewModel)
     }
 
     container {

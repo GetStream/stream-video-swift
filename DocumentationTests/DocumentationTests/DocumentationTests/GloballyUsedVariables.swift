@@ -164,7 +164,6 @@ struct YourView: View { var body: some View { EmptyView() } }
 struct YourHostingView: View { var body: some View { EmptyView() } }
 struct YourHostView: View { var body: some View { EmptyView() } }
 struct ViewThatHostsCall: View { var body: some View { EmptyView() } }
-struct ViewThatHostsCall: View { var body: some View { EmptyView() } }
 
 struct LongPressToFocusViewModifier: ViewModifier {
 

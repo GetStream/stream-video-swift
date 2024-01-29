@@ -10,7 +10,8 @@ fileprivate func content() {
         struct CustomView: View {
             public var body: some View {
                 OutgoingCallView(
-                    outgoingCallMembers: outgoingCallMembers,
+                    outgoingCallMembers: outgoingCallMembers, 
+                    callTopView: callTopView,
                     callControls: callControls
                 )
             }
