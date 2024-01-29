@@ -39,8 +39,6 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
     func test_subject_withParticipants_viewWasConfiguredCorrectly() async throws {
         viewModel.call?.state.participants = (0..<5).map { _ in CallParticipant.dummy() }
 
-        try await Task.sleep(nanoseconds: 1_000_000_000)
-
         assertSubject(makeSubject)
     }
 

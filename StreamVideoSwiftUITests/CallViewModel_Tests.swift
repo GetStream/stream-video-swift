@@ -74,7 +74,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(.coordinatorEvent(.typeCallRejectedEvent(event)))
         
         // Then
-        try await XCTAssertContinuously(callViewModel.callingState == .idle, timeout: 20)
+        try await XCTAssertContinuously(callViewModel.callingState == .idle)
     }
     
     func test_outgoingCall_rejectedEventThreeParticipants() async throws {
@@ -98,7 +98,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(first)
         
         // Then
-        try await XCTAssertContinuously(callViewModel.callingState == .outgoing, timeout: 20)
+        try await XCTAssertContinuously(callViewModel.callingState == .outgoing)
         
         // When
         let secondCallResponse = mockResponseBuilder.makeCallResponse(
@@ -115,7 +115,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
         eventNotificationCenter?.process(second)
         
         // Then
-        try await XCTAssertWithDelay(callViewModel.callingState == .idle, nanoseconds: 2_000_000_000)
+        try await XCTAssertContinuously(callViewModel.callingState == .idle)
     }
     
     func test_outgoingCall_callEndedEvent() async throws {

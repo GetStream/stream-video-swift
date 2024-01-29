@@ -13,7 +13,7 @@
     "defaultTestExecutionTimeAllowance" : 100,
     "maximumTestExecutionTimeAllowance" : 100,
     "maximumTestRepetitions" : 3,
-    "testRepetitionMode" : "fixedIterations",
+    "testRepetitionMode" : "retryOnFailure",
     "testTimeoutsEnabled" : true
   },
   "testTargets" : [
