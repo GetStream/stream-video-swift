@@ -16,7 +16,7 @@ Here's an example how to do that:
 ```swift
 AudioVolumeIndicator(
 	audioLevels: [0.8, 0.9, 0.7],
-	maxHeight: 14
+	maxHeight: 14,
     minValue: 0,
     maxValue: 1
 )
@@ -50,6 +50,7 @@ Then, in the `MicrophoneCheckView`, you pass the audioLevels array, as well as t
 MicrophoneCheckView(
 	audioLevels: microphoneChecker.audioLevels,
 	microphoneOn: callViewModel.callSettings.audioOn,
-    isSilent: microphoneChecker.isSilent                    
+    isSilent: microphoneChecker.isSilent, 
+	isPinned: false                    
 )
 ```

@@ -26,9 +26,9 @@ When you initialize the SDK, you should provide the notifications config as a pa
 
 ```swift
 let streamVideo = StreamVideo(
-    apiKey: Config.apiKey,
-    user: user.userInfo,
-    token: user.token,
+    apiKey: apiKey,
+    user: user,
+    token: token,
     videoConfig: VideoConfig(),
     pushNotificationsConfig: notificationsConfig,
     tokenProvider: tokenProvider

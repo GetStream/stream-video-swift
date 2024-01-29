@@ -11,6 +11,18 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
     public let requestedAt: Date
     let onReject: (PermissionRequest) -> Void
     
+    public init(
+        permission: String,
+        user: User,
+        requestedAt: Date,
+        onReject: @escaping (PermissionRequest) -> Void = { _ in }
+    ) {
+        self.permission = permission
+        self.user = user
+        self.requestedAt = requestedAt
+        self.onReject = onReject
+    }
+
     public func reject() -> Void {
         onReject(self)
     }

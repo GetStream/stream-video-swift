@@ -5,15 +5,21 @@
 import StreamVideo
 import SwiftUI
 
-struct CallParticipantImageView: View {
-    
+public struct CallParticipantImageView: View {
+
     @Injected(\.colors) var colors
     
     var id: String
     var name: String
     var imageURL: URL?
-    
-    var body: some View {
+
+    public init(id: String, name: String, imageURL: URL? = nil) {
+        self.id = id
+        self.name = name
+        self.imageURL = imageURL
+    }
+
+    public var body: some View {
         ZStack {
             CallParticipantBackground(imageURL: imageURL) {
                 Color(colors.participantBackground)

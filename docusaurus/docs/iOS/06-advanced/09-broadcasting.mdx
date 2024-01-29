@@ -19,7 +19,7 @@ Task {
 The code above will create and join the call. If you just want to create it (and not join it), you can use the method `create`:
 
 ```swift
-let call = try await call.create(members: members, startsAt: Date(), custom: [:], ring: false)
+let call = try await call.create(members: members, custom: [:], startsAt: Date(), ring: false)
 ```
 
 ### Start HLS
@@ -37,10 +37,10 @@ You can listen to the broadcasting events on the call by subscribing to its `Asy
 ```swift
 for await event in call.subscribe() {
     switch event {
-        case .typeCallBroadcastingStartedEvent(let broadcastingStartedEvent):
+        case .typeCallHLSBroadcastingStartedEvent(let broadcastingStartedEvent):
             log.debug("received an event \(broadcastingStartedEvent)")
             /* handle recording event */
-        case .typeCallBroadcastingStoppedEvent(let broadcastingStoppedEvent):
+        case .typeCallHLSBroadcastingStoppedEvent(let broadcastingStoppedEvent):
             log.debug("received an event \(broadcastingStoppedEvent)")
             /* handle recording event */
         default:

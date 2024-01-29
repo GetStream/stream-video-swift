@@ -36,7 +36,7 @@ if let request = call.state.permissionRequests.first {
 You can also grant permissions directly using call.grantPermissions() method like the example below:
 
 ```swift
-call.grant(permissions: [.sendAudio] for: "thrierry")
+try await call.grant(permissions: [.sendAudio], for: "thrierry")
 ```
 
 You can request the following 3 permissions: `send-audio`, `send-video`, and `screenshare`.

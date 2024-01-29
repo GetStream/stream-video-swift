@@ -62,7 +62,7 @@ let result = try await call.create(
     startsAt: Calendar.current.date(byAdding: .day, value: 1, to: Date()),
     team: "stream",
     ring: true,
-    notify: false,
+    notify: false
 )
 ```
 
@@ -88,7 +88,7 @@ The following options are supported when creating a call:
 You can query the members of the call. This is helpful if you have thousands of members in a call and want to paginate.
 
 ```swift
-let filters = ["user_id": .string("jaewoong")]
+let filters: [String: RawJSON] = ["user_id": .string("jaewoong")]
 let response = try await call.queryMembers(
     filters: filters,
     sort: [SortParamRequest.descending("created_at")],

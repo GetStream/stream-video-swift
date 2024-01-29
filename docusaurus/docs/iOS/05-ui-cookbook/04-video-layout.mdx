@@ -34,7 +34,7 @@ struct JoinCallView: View {
             TextField("Insert call id", text: $callId)
             Button {
                 resignFirstResponder()
-                viewModel.startCall(callId: callId, type: .default, members: [])
+                viewModel.startCall(callType: .default, callId: callId, members: [])
             } label: {
                 Text("Join call")
             }
@@ -53,10 +53,11 @@ Note the `viewModel.startCall` method, which is called on a tap of the "Join cal
 Next, let's use this view in a container view, called `HomeView`, that will also present our calling screen.
 
 ```swift
-struct HomeView: View {
+struct HomeView<Factory: ViewFactory>: View {
 
     @ObservedObject var appState: AppState
 
+    var viewFactory: Factory
     @StateObject var viewModel = CallViewModel()
 
     var body: some View {
@@ -66,7 +67,7 @@ struct HomeView: View {
             if viewModel.callingState == .joining {
                 ProgressView()
             } else if viewModel.callingState == .inCall {
-                CallView(viewModel: viewModel)
+                CallView(viewFactory: viewFactory, viewModel: viewModel)
             }
         }
     }
@@ -85,9 +86,9 @@ First, let's see how we can access the participants.
 
 ```swift
 var participants: [CallParticipant] {
-    viewModel
-        .callParticipants.map(\.value)
-        .sorted(using: defaultComparators)
+    viewModel.callParticipants
+        .map(\.value)
+        .sorted(by: defaultComparators)
 }
 ```
 
@@ -96,8 +97,14 @@ The call participants are exposed via the `CallViewModel`'s `callParticipants` d
 There are default sort comparators, that you can use to sort the participants. The default comparators prioritize the pinned user, then the dominant speaker etc:
 
 ```swift
-public let defaultComparators: [Comparator<CallParticipant>] = [
-    pinned, screensharing, dominantSpeaker, publishingVideo, publishingAudio, userId
+public let defaultComparators: [StreamSortComparator<CallParticipant>] = [
+    pinned,
+    screensharing,
+    dominantSpeaker,
+    ifInvisible(isSpeaking),
+    ifInvisible(publishingVideo),
+    ifInvisible(publishingAudio),
+    ifInvisible(userId)
 ]
 ```
 
@@ -117,6 +124,7 @@ var body: some View {
                         participant: dominantSpeaker,
                         availableFrame: reader.frame(in: .global),
                         contentMode: .scaleAspectFit,
+                        customData: customData,
                         call: call
                     )
                 }

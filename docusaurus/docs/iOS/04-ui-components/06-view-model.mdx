@@ -28,7 +28,7 @@ Here's an example usage:
 
 ```swift
 Button {
-    viewModel.startCall(callId: callId, type: "default", members: members, ring: false)
+    viewModel.startCall(callType: "default", callId: callId, members: members, ring: false)
 } label: {
     Text("Start a call")
 }
@@ -47,7 +47,7 @@ Here's an example usage:
 
 ```swift
 Button {
-    viewModel.joinCall(callId: callId, type: "default")
+    viewModel.joinCall(callType: "default", callId: callId)
 } label: {
     Text("Join a call")
 }

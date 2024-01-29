@@ -30,7 +30,6 @@ struct CallView: View {
             .modifier(CallModifier(viewModel: viewModel))
     }
 }
-
 ```
 
 With this setup, the `CallViewModel` will listen to incoming call events and present the appropriate UI, based on the state.
@@ -49,7 +48,7 @@ The UIKit SDK provides UIKit wrappers around the SwiftUI views. Its main integra
 private func didTapStartButton() {
     let next = CallViewController.make(with: callViewModel)
     next.modalPresentationStyle = .fullScreen
-    next.startCall(callId: text, type: "default", members: selectedParticipants)
+    next.startCall(callType: "default", callId: text, members: selectedParticipants)
     self.navigationController?.present(next, animated: true)
 }
 ```

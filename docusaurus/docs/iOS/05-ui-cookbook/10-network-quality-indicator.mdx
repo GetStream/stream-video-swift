@@ -21,7 +21,7 @@ public enum ConnectionQuality: Sendable {
 By default, the SwiftUI SDK displays this information in the `VideoCallParticipantModifier`, via the `ConnectionQualityIndicator` view.
 
 ```swift
-ConnectionQualityIndicator(connectionQuality: viewModel.connectionQuality)
+ConnectionQualityIndicator(connectionQuality: participant.connectionQuality)
 ```
 
 Additionally, you can change the size and the width of the connection quality ticks, by passing the `size` and `width` parameters to the `ConnectionQualityIndicator` view.
