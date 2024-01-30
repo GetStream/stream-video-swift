@@ -34,7 +34,7 @@ struct DemoQRCodeScannerButton: View {
                 .foregroundColor(.init(appearance.colors.textLowEmphasis))
         }
         .padding(.trailing)
-        .halfSheetIfAvailable(isPresented: $isQRScannerPresented) {
+        .sheet(isPresented: $isQRScannerPresented) {
             CodeScannerView(codeTypes: [.qr]) { result in
                 switch result {
                 case let .success(scanResult):

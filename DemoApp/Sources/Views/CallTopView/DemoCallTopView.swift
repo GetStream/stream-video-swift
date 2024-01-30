@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import StreamVideoSwiftUI
 import SwiftUI
+import StreamVideoSwiftUI
 
 struct DemoCallTopView: View {
 
@@ -23,74 +23,43 @@ struct DemoCallTopView: View {
     }
 
     var body: some View {
-        HStack {
-            Menu {
-                Button {
-                    viewModel.toggleSpeaker()
-                } label: {
-                    HStack {
-                        Text("Speaker")
-                        if viewModel.callSettings.speakerOn {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-
-                Button {
-                    if appState.audioFilter == nil {
-                        appState.audioFilter = RobotVoiceFilter(pitchShift: 0.8)
-                    } else {
-                        appState.audioFilter = nil
-                    }
-                } label: {
-                    HStack {
-                        Text("Robot voice")
-                        if appState.audioFilter != nil {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-
-                reactionsList()
-            } label: {
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.white)
-                    .font(fonts.bodyBold)
-                    .padding()
-            }
-
-            if viewModel.recordingState == .recording {
-                RecordingView()
-                    .accessibility(identifier: "recordingLabel")
-            }
-
-            Spacer()
-
-            if #available(iOS 14, *) {
-                HStack(spacing: 16) {
+        HStack(spacing: 0) {
+            HStack {
+                if viewModel.callParticipants.count > 1 {
                     LayoutMenuView(viewModel: viewModel)
                         .opacity(hideLayoutMenu ? 0 : 1)
                         .accessibility(identifier: "viewMenu")
-
-                    Button {
-                        viewModel.participantsShown.toggle()
-                    } label: {
-                        images.participants
-                            .foregroundColor(.white)
-                    }
-                    .accessibility(identifier: "participantMenu")
                 }
-                .padding(.horizontal)
+
+                ToggleCameraIconView(viewModel: viewModel)
+
+                Spacer()
             }
+            .frame(maxWidth: .infinity)
+
+            HStack(alignment: .center) {
+                CallDurationView(viewModel)
+            }
+            .frame(height: 44)
+            .frame(maxWidth: .infinity)
+
+            HStack {
+                Spacer()
+                HangUpIconView(viewModel: viewModel)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .padding(.horizontal, 16)
+        .padding(.top)
+        .frame(maxWidth: .infinity)
         .overlay(
             viewModel.call?.state.isCurrentUserScreensharing == true ?
-                SharingIndicator(
-                    viewModel: viewModel,
-                    sharingPopupDismissed: $sharingPopupDismissed
-                )
-                .opacity(sharingPopupDismissed ? 0 : 1)
-                : nil
+            SharingIndicator(
+                viewModel: viewModel,
+                sharingPopupDismissed: $sharingPopupDismissed
+            )
+            .opacity(sharingPopupDismissed ? 0 : 1)
+            : nil
         )
     }
 
@@ -160,6 +129,7 @@ struct SharingIndicator: View {
                     .frame(height: 14)
             }
             .padding(.leading, 4)
+
         }
         .padding(.all, 8)
         .modifier(ShadowViewModifier())
@@ -167,7 +137,7 @@ struct SharingIndicator: View {
 }
 
 /// Modifier for adding shadow and corner radius to a view.
-private struct ShadowViewModifier: ViewModifier {
+fileprivate struct ShadowViewModifier: ViewModifier {
 
     var cornerRadius: CGFloat = 16
     var borderColor: Color = Color.gray
@@ -188,10 +158,11 @@ private struct ShadowViewModifier: ViewModifier {
 }
 
 /// Modifier for adding shadow to a view.
-private struct ShadowModifier: ViewModifier {
+fileprivate struct ShadowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 12)
             .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
     }
 }
+

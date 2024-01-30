@@ -25,6 +25,5 @@ struct DemoLocalViewModifier: ViewModifier {
                 )
             )
             .modifier(ReactionsViewModifier(participant: localParticipant))
-            .participantStats(call: call, participant: localParticipant)
     }
 }

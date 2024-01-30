@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import class StreamChat.ChatChannelController
-import struct StreamChatSwiftUI.ChatChannelView
 import StreamVideo
 import StreamVideoSwiftUI
+import struct StreamChatSwiftUI.ChatChannelView
 import SwiftUI
+import class StreamChat.ChatChannelController
 
 struct AppControlsWithChat: View {
 
@@ -29,32 +29,61 @@ struct AppControlsWithChat: View {
     }
 
     var body: some View {
-        HStack(alignment: .center) {
-            if let chatViewModel, chatViewModel.isChatEnabled {
-                ChatIconView(viewModel: chatViewModel)
+        HStack {
+            if viewModel.callParticipants.count > 1 {
+                MoreControlsIconView(viewModel: viewModel)
             }
-            VideoIconView(viewModel: viewModel)
-            MicrophoneIconView(viewModel: viewModel)
-            ToggleCameraIconView(viewModel: viewModel)
-            #if !targetEnvironment(simulator)
+
+#if !targetEnvironment(simulator)
             if !ProcessInfo.processInfo.isiOSAppOnMac {
                 BroadcastIconView(
                     viewModel: viewModel,
                     preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
                 )
             }
-            #endif
-            HangUpIconView(viewModel: viewModel)
+#endif
+            VideoIconView(viewModel: viewModel)
+            MicrophoneIconView(viewModel: viewModel)
+
+            Spacer()
+
+            ParticipantsListButton(viewModel: viewModel)
+            
+            if let chatViewModel, chatViewModel.isChatEnabled {
+                ChatIconView(viewModel: chatViewModel)
+            }
         }
-        .padding()
-        .frame(maxWidth: .infinity)
-        .cornerRadius(
-            cornerRadius,
-            corners: [.topLeft, .topRight],
-            backgroundColor: colors.callControlsBackground,
-            extendToSafeArea: true
-        )
+        .padding(.horizontal, 16)
+        .padding(.bottom)
         .onReceive(viewModel.$call) { reactionsHelper.call = $0 }
+    }
+}
+
+struct MoreControlsIconView: View {
+
+    @ObservedObject var viewModel: CallViewModel
+    let size: CGFloat
+
+    init(viewModel: CallViewModel, size: CGFloat = 44) {
+        self.viewModel = viewModel
+        self.size = size
+    }
+
+    var body: some View {
+        Button(
+            action: {
+                viewModel.moreControlsShown.toggle()
+            },
+            label: {
+                CallIconView(
+                    icon: Image(systemName: "ellipsis"),
+                    size: size,
+                    iconStyle: viewModel.moreControlsShown ? .secondaryActive : .secondary
+                )
+                .rotationEffect(.degrees(90))
+            }
+        )
+        .accessibility(identifier: "moreControlsToggle")
     }
 }
 
@@ -64,6 +93,7 @@ struct ChatControlsHeader: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.chatViewModel) var chatViewModel
+
 
     private let size: CGFloat = 50
 
@@ -86,7 +116,7 @@ struct ChatIconView: View {
     @ObservedObject var viewModel: DemoChatViewModel
     let size: CGFloat
 
-    init(viewModel: DemoChatViewModel, size: CGFloat = 50) {
+    init(viewModel: DemoChatViewModel, size: CGFloat = 44) {
         self.viewModel = viewModel
         self.size = size
     }
@@ -98,26 +128,12 @@ struct ChatIconView: View {
             },
             label: {
                 CallIconView(
-                    icon: viewModel.isChatVisible ? .init(systemName: "message.fill") : .init(systemName: "message"),
+                    icon: .init(systemName: "bubble.left.and.bubble.right.fill"),
                     size: size,
-                    iconStyle: viewModel.isChatVisible ? .primary : .transparent
+                    iconStyle: viewModel.isChatVisible ? .secondaryActive : .secondary
                 ).overlay(
-                    VStack {
-                        HStack {
-                            Spacer()
-                            if viewModel.unreadCount > 0 {
-                                Text("\(viewModel.unreadCount)")
-                                    .font(.caption.monospacedDigit())
-                                    .foregroundColor(colors.text)
-                                    .padding([.leading, .trailing], 4)
-                                    .padding([.top, .bottom], 2)
-                                    .background(Color.red)
-                                    .clipShape(Capsule())
-                                    .clipped()
-                            }
-                        }
-                        Spacer()
-                    }
+                    ControlBadgeView("\(viewModel.unreadCount)")
+                        .opacity(viewModel.unreadCount > 0 ? 1 : 0)
                 )
             }
         )
@@ -140,26 +156,6 @@ struct ChatView: View {
             .onAppear { chatViewModel.markAsRead() }
             .onDisappear { chatViewModel.channelDisappeared() }
             .navigationBarHidden(true)
-        }
-    }
-}
-
-extension View {
-
-    @ViewBuilder
-    func halfSheetIfAvailable<Content>(
-        isPresented: Binding<Bool>,
-        onDismiss: (() -> Void)? = nil,
-        @ViewBuilder content: @escaping () -> Content
-    ) -> some View where Content: View {
-        if #available(iOS 16.0, *) {
-            sheet(isPresented: isPresented, onDismiss: onDismiss) {
-                content()
-                    .presentationDetents([.large])
-                    .presentationDragIndicator(.visible)
-            }
-        } else {
-            sheet(isPresented: isPresented, onDismiss: onDismiss) { content() }
         }
     }
 }
