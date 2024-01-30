@@ -49,6 +49,8 @@ Layout/FirstHashElementIndentation:
   Enabled: false
 Layout/HashAlignment:
   Enabled: false
+Style/HashLikeCase:
+  Enabled: false
 Layout/DotPosition:
   Enabled: false
 Style/DoubleNegation:
