@@ -37,13 +37,11 @@ let package = Package(
         ),
         .target(
             name: "StreamVideoSwiftUI",
-            dependencies: ["StreamVideo"],
-            resources: [.process("Resources")]
+            dependencies: ["StreamVideo"]
         ),
         .target(
             name: "StreamVideoUIKit",
-            dependencies: ["StreamVideo", "StreamVideoSwiftUI"],
-            resources: [.process("Resources")]
+            dependencies: ["StreamVideo", "StreamVideoSwiftUI"]
         )
     ]
 )
