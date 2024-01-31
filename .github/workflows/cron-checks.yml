@@ -193,6 +193,25 @@ jobs:
         MATRIX_CONTEXT: ${{ toJson(matrix) }}
       if: failure() && github.event_name == 'schedule'
 
+  build-apps:
+    name: Build Demo Apps
+    runs-on: macos-13
+    needs: build-test-app-and-frameworks
+    steps:
+    - uses: actions/checkout@v3.1.0
+    - uses: actions/download-artifact@v3
+      with:
+        name: cache-derived-data
+        path: derived_data/Build/
+    - uses: ./.github/actions/ruby-cache
+    - uses: ./.github/actions/xcode-cache
+    - name: Build SwiftUI Demo App
+      run: bundle exec fastlane build_swiftui_demo
+    - name: Build UIKit Demo App
+      run: bundle exec fastlane build_uikit_demo
+    - name: Build Docs Test Project
+      run: bundle exec fastlane build_docs_test
+
   automated-code-review:
     name: Automated Code Review
     runs-on: macos-13

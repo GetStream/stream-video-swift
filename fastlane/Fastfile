@@ -362,21 +362,32 @@ lane :build_uikit_demo do
   build_example_app(scheme: 'DemoAppUIKit')
 end
 
+desc 'Builds Tests for Docs'
+lane :build_docs_test do
+  build_example_app(scheme: 'DocumentationTests', project: 'DocumentationTests/DocumentationTests/DocumentationTests.xcodeproj')
+end
+
 private_lane :build_example_app do |options|
+  options[:project] ||= xcode_project
   app_sources =
     case options[:scheme]
     when 'DemoApp'
       :swiftui_sample_apps
     when 'DemoAppUIKit'
       :uikit_sample_apps
+    when 'DocumentationTests'
+      options[:derived_data_path] = derived_data_path
+      :documentation_tests
     end
+
   next unless is_check_required(sources: sources_matrix[app_sources], force_check: @force_check)
 
   scan(
-    project: xcode_project,
+    project: options[:project],
     scheme: options[:scheme],
     clean: is_localhost,
-    derived_data_path: derived_data_path,
+    configuration: 'Debug',
+    derived_data_path: options[:derived_data_path],
     cloned_source_packages_path: source_packages_path,
     xcargs: buildcache_xcargs,
     build_for_testing: true
@@ -611,6 +622,7 @@ lane :sources_matrix do
     uikit: ['Sources', 'StreamVideoUIKitTests', xcode_project],
     swiftui_sample_apps: ['Sources', 'DemoApp', xcode_project],
     uikit_sample_apps: ['Sources', 'DemoAppUIKit', xcode_project],
+    documentation_tests: ['Sources', 'DocumentationTests', 'docusaurus', xcode_project],
     ruby: ['fastlane']
   }
 end

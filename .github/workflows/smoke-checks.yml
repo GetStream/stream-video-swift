@@ -201,6 +201,8 @@ jobs:
       run: bundle exec fastlane build_swiftui_demo
     - name: Build UIKit Demo App
       run: bundle exec fastlane build_uikit_demo
+    - name: Build Docs Test Project
+      run: bundle exec fastlane build_docs_test
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
