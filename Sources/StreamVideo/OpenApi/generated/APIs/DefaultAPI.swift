@@ -66,12 +66,20 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     internal var middlewares: [DefaultAPIClientMiddleware]
     internal var basePath: String
     internal var jsonDecoder: JSONDecoder
+    internal var jsonEncoder: JSONEncoder
 
-    init(basePath: String, transport: DefaultAPITransport, middlewares: [DefaultAPIClientMiddleware], jsonDecoder: JSONDecoder = JSONDecoder.default) {
+    init(
+        basePath: String,
+        transport: DefaultAPITransport,
+        middlewares: [DefaultAPIClientMiddleware],
+        jsonDecoder: JSONDecoder = JSONDecoder.default,
+        jsonEncoder: JSONEncoder = JSONEncoder.default
+    ) {
         self.basePath = basePath
         self.transport = transport
         self.middlewares = middlewares
         self.jsonDecoder = jsonDecoder
+        self.jsonEncoder = jsonEncoder
     }
 
     func send<Response: Codable>(
@@ -145,7 +153,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         request: T
     ) throws -> Request {
         var r = try makeRequest(uriPath: uriPath, queryParams: queryParams, httpMethod: httpMethod)
-        r.body = try JSONEncoder().encode(request)
+        r.body = try jsonEncoder.encode(request)
         return r
     }
 
