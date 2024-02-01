@@ -176,6 +176,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private var currentScreenhsareType: ScreensharingType?
     private var isFastReconnecting = false
     private var disconnectTime: Date?
+    private lazy var callStatisticsReporter = StreamCallStatisticsReporter()
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
 
@@ -556,8 +557,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         async let statsPublisher = publisher?.statsReport()
         async let statsSubscriber = subscriber?.statsReport()
         let result = try await [statsPublisher, statsSubscriber]
-        return StatsReporter.createStatsReport(
-            from: result,
+        
+        return callStatisticsReporter.buildReport(
+            publisherReport: .init(result[safe: 0] ?? nil),
+            subscriberReport: .init(result[safe: 1] ?? nil),
             datacenter: signalService.hostname
         )
     }

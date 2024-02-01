@@ -47,9 +47,15 @@ final class ParticipantStatsViewModel: ObservableObject {
     private func handleStatsReport(_ report: CallStatsReport?) {
         guard let report,
               let trackId = participant.track?.trackId,
-              let participantStats = report.participantsStats.report[trackId] else {
+              let participantsStatsArray = report.participantsStats.report[trackId],
+              !participantsStatsArray.isEmpty
+        else {
             return
         }
+
+        let participantStats = participantsStatsArray.sorted { lhs, rhs in
+            lhs.frameWidth >= rhs.frameWidth && lhs.frameHeight >= rhs.frameHeight
+        }[0]
 
         let isLocalUser = participant.sessionId == call.state.sessionId
         let datacenter = StatsEntry(
