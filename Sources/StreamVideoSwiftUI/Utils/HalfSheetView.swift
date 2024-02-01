@@ -43,7 +43,7 @@ struct DraggableSheetView<Content: View>: View {
             VStack(spacing: 0) {
                 DragHandleView()
                     .background(Color(colors.callBackground)) // Give the view "volume" so the DragGesture is effective from it's whole width.
-                    .padding(.vertical, 6)
+                    .padding(.vertical, 5)
                     .padding(.horizontal, 24) // Avoid collision with rounded corners.
                     .gesture(
                         DragGesture()
@@ -83,7 +83,7 @@ public struct DragHandleView: View {
     public var body: some View {
         VStack(alignment: .center) {
             Color.white.opacity(0.3)
-                .frame(width: 44, height: 5)
+                .frame(width: 35, height: 5)
                 .clipShape(Capsule())
         }
         .frame(maxWidth: .infinity)
