@@ -221,7 +221,8 @@ end
 private_lane :test_ui do |options|
   next unless is_check_required(sources: sources_matrix[options[:source]], force_check: @force_check)
 
-  remove_snapshots(scheme: options[:scheme]) unless options[:record].to_s.empty?
+  record_mode = !options[:record].to_s.empty?
+  remove_snapshots(scheme: options[:scheme]) if record_mode
 
   update_testplan_on_ci(path: "#{options[:scheme]}Tests/#{options[:scheme]}.xctestplan")
 
@@ -236,10 +237,10 @@ private_lane :test_ui do |options|
     result_bundle: true,
     devices: options[:device],
     xcargs: buildcache_xcargs,
-    fail_build: options[:record].to_s.empty?
+    fail_build: !record_mode
   )
 
-  if options[:record] && is_ci
+  if record_mode && is_ci
     png_files = git_status(ext: '.png').map { |_, png| png }.flatten
     next if png_files.empty?
 
