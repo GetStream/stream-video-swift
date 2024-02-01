@@ -62,7 +62,9 @@ struct DemoStatsView: View {
                             viewModel,
                             title: "RECEIVE JITTER",
                             value: 0.0,
-                            valueTransformer: { $0?.subscriberStats.averageJitterInMs ?? 0 },
+                            valueTransformer: {
+                                $0?.subscriberStats.averageJitterInMs ?? 0
+                            },
                             presentationTransformer: { "\(Int($0)) ms" },
                             valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
                         )
