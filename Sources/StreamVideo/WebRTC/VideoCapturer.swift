@@ -90,7 +90,7 @@ class VideoCapturer: CameraVideoCapturing {
                     continuation.resume(returning: ())
                 }
             }
-        }
+        } as Void
     }
     
     func stopCapture() async throws {
