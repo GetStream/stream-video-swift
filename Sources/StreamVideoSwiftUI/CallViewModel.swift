@@ -147,6 +147,10 @@ open class CallViewModel: ObservableObject {
     /// A flag controlling whether picture-in-picture should be enabled for the call. Default value is `true`.
     @Published public var isPictureInPictureEnabled = true
 
+    @Published public var captureSnapshot = false {
+        didSet { if captureSnapshot { captureSnapshot = false } }
+    }
+
     /// Returns the local participant of the call.
     public var localParticipant: CallParticipant? {
         call?.state.localParticipant
@@ -445,7 +449,11 @@ open class CallViewModel: ObservableObject {
     public func update(participantsSortComparators: [StreamSortComparator<CallParticipant>]) {
         self.participantsSortComparators = participantsSortComparators
     }
-    
+
+    public func didCaptureSnapshot(_ snapshot: UIImage) {
+        log.debug("📸 Got snapshot!")
+    }
+
     // MARK: - private
     
     /// Leaves the current call.

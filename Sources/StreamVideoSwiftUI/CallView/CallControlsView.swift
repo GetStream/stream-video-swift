@@ -205,3 +205,32 @@ public struct SpeakerIconView: View {
         )
     }
 }
+
+public struct SnapshotIconView: View {
+
+    @Injected(\.images) var images
+
+    @ObservedObject var viewModel: CallViewModel
+    let size: CGFloat
+
+    public init(viewModel: CallViewModel, size: CGFloat = 44) {
+        self.viewModel = viewModel
+        self.size = size
+    }
+
+    public var body: some View {
+        Button(
+            action: {
+                viewModel.captureSnapshot = true
+            },
+            label: {
+                CallIconView(
+                    icon: Image(systemName: "circle.inset.filled"),
+                    size: size,
+                    iconStyle: .transparent
+                )
+            }
+        )
+    }
+
+}
