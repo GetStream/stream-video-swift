@@ -4,7 +4,6 @@ on:
   pull_request:
     branches:
       - '**'
-      # - '!main' TODO: commented until `develop` branch is in place
     paths-ignore:
       - 'docusaurus/**'
       - 'README.md'
@@ -29,33 +28,12 @@ concurrency:
 
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1 # Disable cleanup for homebrew, we don't need it on CI
-  IOS_SIMULATOR_DEVICE: "iPhone 15 Pro"
+  IOS_SIMULATOR_DEVICE: "iPhone 15 Pro (17.2)"
 
 jobs:
-  automated-code-review:
-    name: Automated Code Review
-    runs-on: macos-13
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_PR_NUM: ${{ github.event.number }}
-    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-    steps:
-    - uses: actions/checkout@v3.1.0
-      with:
-        fetch-depth: 100
-    - uses: ./.github/actions/bootstrap
-    - name: Run Danger
-      run: bundle exec danger
-    - name: Run Fastlane Linting
-      run: bundle exec fastlane rubocop
-    - name: Run SwiftFormat Linting
-      run: bundle exec fastlane run_swift_format lint:true
-    - name: Run Podspec Linting
-      run: bundle exec fastlane pod_lint
-
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-13
+    runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     steps:
     - uses: actions/checkout@v3.1.0
@@ -77,7 +55,7 @@ jobs:
 
   test-llc-debug:
     name: Test LLC (Debug)
-    runs-on: macos-13
+    runs-on: macos-14
     needs: build-test-app-and-frameworks
     if: ${{ github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     env:
@@ -93,8 +71,6 @@ jobs:
         name: cache-derived-data
         path: derived_data/Build/
     - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_YEETD: true
     - uses: ./.github/actions/python-cache
     - name: Run LLC Tests (Debug)
       run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" skip_build:true
@@ -127,7 +103,7 @@ jobs:
 
   test-swiftui-debug:
     name: Test SwiftUI (Debug)
-    runs-on: macos-13
+    runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
@@ -135,8 +111,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
       timeout-minutes: 40
@@ -155,7 +129,7 @@ jobs:
 
   test-uikit-debug:
     name: Test UIKit (Debug)
-    runs-on: macos-13
+    runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
     env:
       GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
@@ -163,8 +137,6 @@ jobs:
     steps:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_YEETD: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
       timeout-minutes: 40
@@ -183,7 +155,7 @@ jobs:
 
   build-apps:
     name: Build Demo Apps
-    runs-on: macos-13
+    runs-on: macos-14
     needs: build-test-app-and-frameworks
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     env:
@@ -206,7 +178,7 @@ jobs:
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
-    runs-on: macos-12
+    runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     needs:
       - allure_testops_launch
@@ -229,8 +201,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_ALLURE: true
-        INSTALL_VIDEO_BUDDY: false
-        INSTALL_YEETD: true
+        INSTALL_VIDEO_BUDDY: true
     - name: Run UI Tests (Debug)
       run: bundle exec fastlane test_e2e device:"${{ env.IOS_SIMULATOR_DEVICE }}" batch:'${{ matrix.batch }}' test_without_building:true
       timeout-minutes: 60
@@ -241,8 +212,6 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
         STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
-        IOS_SIMULATOR_DEVICE: "iPhone 11 (16.2)" # TODO: delete this line as soon as Xcode 15 is stable on CI
-        XCODE_VERSION: "14.2" # TODO: delete this line as soon as Xcode 15 is stable on CI
     - name: Allure TestOps Upload
       if: env.LAUNCH_ID != '' && (success() || failure())
       run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
@@ -282,3 +251,25 @@ jobs:
     - id: get_launch_id
       run: echo "launch_id=${{env.LAUNCH_ID}}" >> $GITHUB_OUTPUT
       if: env.LAUNCH_ID != ''
+
+  automated-code-review:
+    name: Automated Code Review
+    runs-on: macos-12
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.number }}
+      XCODE_VERSION: "14.0.1"
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    steps:
+    - uses: actions/checkout@v3.1.0
+      with:
+        fetch-depth: 100
+    - uses: ./.github/actions/bootstrap
+    - name: Run Danger
+      run: bundle exec danger
+    - name: Run Fastlane Linting
+      run: bundle exec fastlane rubocop
+    - name: Run SwiftFormat Linting
+      run: bundle exec fastlane run_linter
+    - name: Run Podspec Linting
+      run: bundle exec fastlane pod_lint

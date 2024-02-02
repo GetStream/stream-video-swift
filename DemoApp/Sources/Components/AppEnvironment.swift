@@ -57,7 +57,7 @@ extension AppEnvironment {
     static var baseURL: BaseURL = {
         switch configuration {
         case .test:
-            return .pronto
+            return .demo
         case .debug:
             return .pronto
         case .release:
