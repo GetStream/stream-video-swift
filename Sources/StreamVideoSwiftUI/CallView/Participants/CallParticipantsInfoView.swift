@@ -104,7 +104,10 @@ struct CallParticipantsViewContainer: View {
 
                 HStack(spacing: 16) {
                     if viewModel.inviteParticipantsButtonShown {
-                        ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
+                        ParticipantsButton(
+                            title: L10n.Call.Participants.invite,
+                            onTapped: inviteTapped
+                        )
                     }
 
                     ParticipantsButton(
@@ -170,7 +173,7 @@ struct ParticipantsButton: View {
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
                 .foregroundColor(
-                    primaryStyle ? colors.textInverted : colors.secondaryButton
+                    primaryStyle ? colors.white : colors.secondaryButton
                 )
                 .background(primaryStyle ? colors.tintColor : Color.clear)
                 .overlay(
@@ -230,14 +233,27 @@ struct CallParticipantView: View {
     var body: some View {
         VStack(spacing: 4) {
             HStack {
-                if #available(iOS 14.0, *) {
-                    UserAvatar(imageURL: participant.profileImageURL, size: imageSize)
-                        .overlay(
-                            TopRightView {
-                                OnlineIndicatorView(indicatorSize: imageSize * 0.3)
-                            }
+                Group {
+                    if #available(iOS 14.0, *), let imageURL = participant.profileImageURL {
+                        UserAvatar(imageURL: imageURL, size: imageSize) {
+                            CircledTitleView(
+                                title: participant.name.isEmpty
+                                ? participant.id
+                                : String(participant.name.uppercased().first!),
+                                size: imageSize
+                            )
+                        }
+                    } else {
+                        CircledTitleView(
+                            title: participant.name.isEmpty
+                            ? participant.id
+                            : String(participant.name.uppercased().first!),
+                            size: imageSize
                         )
+                    }
                 }
+                .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) } )
+
                 Text(participant.name)
                     .font(fonts.bodyBold)
                 Spacer()
