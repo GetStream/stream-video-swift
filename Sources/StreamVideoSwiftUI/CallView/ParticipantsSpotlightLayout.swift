@@ -21,7 +21,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
         participants: [CallParticipant],
         frame: CGRect,
         innerItemSpace: CGFloat = 8,
-        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
@@ -55,7 +55,7 @@ public struct ParticipantsSpotlightLayout<Factory: ViewFactory>: View {
     }
     
     private var topParticipantFrame: CGRect {
-        /// Top 
+        /// Top
         .init(
             origin: frame.origin,
             size: CGSize(width: frame.size.width, height: frame.height - participantsStripFrame.height - innerItemSpace)

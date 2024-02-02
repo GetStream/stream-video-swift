@@ -33,7 +33,7 @@ public struct CornerDraggableView<Content: View>: View {
         self.onTap = onTap
 
         let proxyFrame = proxy.frame(in: .local)
-        self.availableFrame = .init(
+        availableFrame = .init(
             origin: .zero,
             size: .init(
                 width: proxyFrame.width * scaleFactorX,

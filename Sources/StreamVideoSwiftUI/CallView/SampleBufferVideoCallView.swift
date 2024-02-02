@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import UIKit
 import AVKit
+import UIKit
 
 final class SampleBufferVideoCallView: UIView {
     override class var layerClass: AnyClass {
@@ -11,6 +11,6 @@ final class SampleBufferVideoCallView: UIView {
     }
     
     var sampleBufferDisplayLayer: AVSampleBufferDisplayLayer {
-        return layer as! AVSampleBufferDisplayLayer
+        layer as! AVSampleBufferDisplayLayer
     }
 }

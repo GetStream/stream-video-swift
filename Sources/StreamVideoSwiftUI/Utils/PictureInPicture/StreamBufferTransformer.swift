@@ -43,7 +43,7 @@ struct StreamBufferTransformer {
     ) -> CMSampleBuffer? {
         var sampleBuffer: CMSampleBuffer?
 
-        var timimgInfo  = CMSampleTimingInfo()
+        var timimgInfo = CMSampleTimingInfo()
         var formatDescription: CMFormatDescription?
         CMVideoFormatDescriptionCreateForImageBuffer(
             allocator: kCFAllocatorDefault,
@@ -182,7 +182,7 @@ struct StreamBufferTransformer {
                 let vValue = Int(vPlane[vOffset]) - 128
 
                 let index = (y * bgraBytesPerRow) + (x * 4)
-                var pixel: [UInt8] = [0, 0, 0, 255]  // BGRA format, fully opaque
+                var pixel: [UInt8] = [0, 0, 0, 255] // BGRA format, fully opaque
 
                 // Perform YUV to RGB conversion with chroma upsampling
                 let c = yValue - 16
@@ -209,6 +209,6 @@ struct StreamBufferTransformer {
     }
 
     private func clamp(_ value: Int) -> UInt8 {
-        return UInt8(max(0, min(255, value)))
+        UInt8(max(0, min(255, value)))
     }
 }

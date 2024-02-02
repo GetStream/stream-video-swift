@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import StreamWebRTC
-import Foundation
 import Combine
+import Foundation
 import StreamVideo
+import StreamWebRTC
 
 /// A view that can be used to render an instance of `RTCVideoTrack`
 final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
@@ -52,7 +52,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// The track's size.
     private var trackSize: CGSize = .zero {
         didSet {
-            guard trackSize != oldValue else { return  }
+            guard trackSize != oldValue else { return }
             didUpdateTrackSize()
         }
     }
@@ -129,14 +129,12 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
         if
             let pixelBuffer = frame.buffer as? RTCCVPixelBuffer,
-            let sampleBuffer = bufferTransformer.transform(pixelBuffer.pixelBuffer)
-        {
+            let sampleBuffer = bufferTransformer.transform(pixelBuffer.pixelBuffer) {
             bufferPublisher.send(sampleBuffer)
         } else if
             let i420buffer = frame.buffer as? RTCI420Buffer,
             let transformedBuffer = bufferTransformer.transform(i420buffer, targetSize: contentSize),
-            let sampleBuffer = bufferTransformer.transform(transformedBuffer)
-        {
+            let sampleBuffer = bufferTransformer.transform(transformedBuffer) {
             bufferPublisher.send(sampleBuffer)
         } else {
             log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
@@ -179,7 +177,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
                 contentView.sampleBufferDisplayLayer.enqueue(buffer)
             }
         }
-
     }
 
     /// A method used to start consuming frames from the track.
@@ -214,7 +211,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         requiresResize = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
         framesToSkip = requiresResize ? max(Int(min(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) : 1
         framesSkipped = 0
-        log.debug("contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) framesToSkip:\(framesToSkip) framesSkipped:\(framesSkipped)")
+        log
+            .debug(
+                "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) framesToSkip:\(framesToSkip) framesSkipped:\(framesSkipped)"
+            )
     }
 
     /// A method used to handle the frameSkipping(step) during frame consumption.

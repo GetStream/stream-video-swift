@@ -15,16 +15,16 @@ struct LobbyView_iOS13: View {
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
-    var onJoinCallTap: () -> ()
-    var onCloseLobby: () -> ()
+    var onJoinCallTap: () -> Void
+    var onCloseLobby: () -> Void
     
     public init(
         callViewModel: CallViewModel,
         callId: String,
         callType: String,
         callSettings: Binding<CallSettings>,
-        onJoinCallTap: @escaping () -> (),
-        onCloseLobby: @escaping () -> ()
+        onJoinCallTap: @escaping () -> Void,
+        onCloseLobby: @escaping () -> Void
     ) {
         _callViewModel = ObservedObject(wrappedValue: callViewModel)
         _viewModel = BackportStateObject(

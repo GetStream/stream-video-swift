@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 extension View {
 
@@ -15,10 +15,10 @@ extension View {
         @ObservedObject viewModel: CallViewModel,
         viewFactory: Factory
     ) -> some View {
-        self.halfSheet(isPresented: $viewModel.participantsShown) {
+        halfSheet(isPresented: $viewModel.participantsShown) {
             viewFactory.makeParticipantsListView(viewModel: viewModel)
-            .opacity(viewModel.hideUIElements ? 0 : 1)
-            .accessibility(identifier: "trailingTopView")
+                .opacity(viewModel.hideUIElements ? 0 : 1)
+                .accessibility(identifier: "trailingTopView")
         }
     }
 }

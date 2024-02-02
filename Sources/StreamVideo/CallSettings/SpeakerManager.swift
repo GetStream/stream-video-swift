@@ -18,8 +18,8 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
         initialAudioOutputStatus: CallSettingsStatus
     ) {
         self.callController = callController
-        self.status = initialSpeakerStatus
-        self.audioOutputStatus = initialAudioOutputStatus
+        status = initialSpeakerStatus
+        audioOutputStatus = initialAudioOutputStatus
     }
     
     /// Toggles the speaker during a call.
@@ -56,7 +56,7 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
             action: { [unowned self] state in
                 try await callController.changeSpeakerState(isEnabled: state)
             },
-            onUpdate: { value in
+            onUpdate: { _ in
                 self.status = status
             }
         )
@@ -65,11 +65,11 @@ public final class SpeakerManager: ObservableObject, CallSettingsManager, @unche
     private func updateAudioOutputStatus(_ status: CallSettingsStatus) async throws {
         try await updateState(
             newState: status.boolValue,
-            current: self.audioOutputStatus.boolValue,
+            current: audioOutputStatus.boolValue,
             action: { [unowned self] state in
                 try await callController.changeSoundState(isEnabled: state)
             },
-            onUpdate: { value in
+            onUpdate: { _ in
                 self.audioOutputStatus = status
             }
         )

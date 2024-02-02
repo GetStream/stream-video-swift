@@ -61,7 +61,6 @@ extension CallSettingsResponse {
             cameraPosition: video.cameraFacing == .back ? .back : .front
         )
     }
-    
 }
 
 public extension CallSettings {

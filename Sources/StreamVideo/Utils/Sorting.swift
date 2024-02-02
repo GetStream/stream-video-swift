@@ -135,13 +135,14 @@ func comparison<Value>(
 }
 
 // MARK: - Comparators
+
 // MARK: Aggregators
 
 /// Combines multiple comparators into a single comparator.
 /// It uses the first comparator to compare two elements. If they are deemed "equal" (i.e., orderedSame),
 /// it moves to the next comparator, and so on, until a decision can be made or all comparators have been exhausted.
 public func combineComparators<T>(_ comparators: [StreamSortComparator<T>]) -> StreamSortComparator<T> {
-    return { a, b in
+    { a, b in
         for comparator in comparators {
             let result = comparator(a, b)
             if result != .orderedSame {
@@ -154,9 +155,10 @@ public func combineComparators<T>(_ comparators: [StreamSortComparator<T>]) -> S
 
 /// Returns a new comparator that only applies the given comparator if the predicate returns true.
 /// If the predicate returns false, it deems the two elements "equal" (i.e., orderedSame).
-public func conditional<T>(_ predicate: @escaping (T, T) -> Bool) -> (@escaping StreamSortComparator<T>) -> StreamSortComparator<T> {
-    return { comparator in
-        return { a, b in
+public func conditional<T>(_ predicate: @escaping (T, T) -> Bool)
+    -> (@escaping StreamSortComparator<T>) -> StreamSortComparator<T> {
+    { comparator in
+        { a, b in
             if !predicate(a, b) {
                 return .orderedSame
             }
@@ -184,10 +186,10 @@ public var pinned: StreamSortComparator<CallParticipant> = { a, b in
     switch (a.pin, b.pin) {
     case (nil, _?): return .orderedDescending
     case (_?, nil): return .orderedAscending
-    case (let aPin?, let bPin?) where aPin.isLocal && !bPin.isLocal: return .orderedAscending
-    case (let aPin?, let bPin?) where !aPin.isLocal && bPin.isLocal: return .orderedDescending
-    case (let aPin?, let bPin?) where aPin.pinnedAt > bPin.pinnedAt: return .orderedAscending
-    case (let aPin?, let bPin?) where aPin.pinnedAt < bPin.pinnedAt: return .orderedDescending
+    case let (aPin?, bPin?) where aPin.isLocal && !bPin.isLocal: return .orderedAscending
+    case let (aPin?, bPin?) where !aPin.isLocal && bPin.isLocal: return .orderedDescending
+    case let (aPin?, bPin?) where aPin.pinnedAt > bPin.pinnedAt: return .orderedAscending
+    case let (aPin?, bPin?) where aPin.pinnedAt < bPin.pinnedAt: return .orderedDescending
     default: return .orderedSame
     }
 }
@@ -206,7 +208,7 @@ public var name: StreamSortComparator<CallParticipant> = { comparison($0, $1, ke
 
 /// A comparator creator which will set up a comparator which prioritizes participants who have a specific role.
 public func roles(_ priorityRoles: [String] = ["admin", "host", "speaker"]) -> StreamSortComparator<CallParticipant> {
-    return { (p1, p2) in
+    { (p1, p2) in
         if p1.roles == p2.roles { return .orderedSame }
         for role in priorityRoles {
             if p1.roles.contains(role) && !p2.roles.contains(role) {

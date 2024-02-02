@@ -21,5 +21,4 @@ class LocationFetcher {
         }
         throw FetchingLocationError()
     }
-    
 }

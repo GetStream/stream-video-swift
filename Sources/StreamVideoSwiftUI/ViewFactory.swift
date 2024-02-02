@@ -274,7 +274,7 @@ extension ViewFactory {
         callSettings: Binding<CallSettings>
     ) -> some View {
         let handleJoinCall = {
-            if case .lobby(_) = viewModel.callingState {
+            if case .lobby = viewModel.callingState {
                 viewModel.startCall(
                     callType: lobbyInfo.callType,
                     callId: lobbyInfo.callId,

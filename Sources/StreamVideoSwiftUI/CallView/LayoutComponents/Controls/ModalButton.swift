@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 public struct ModalButton: View {
 

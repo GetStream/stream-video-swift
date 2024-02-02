@@ -204,5 +204,4 @@ public struct SpeakerIconView: View {
             }
         )
     }
-    
 }

@@ -9,7 +9,7 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
     
     private var clientConnection: BroadcastBufferUploadConnection?
     private var uploader: BroadcastBufferUploader?
-    private let notificationCenter: CFNotificationCenter    
+    private let notificationCenter: CFNotificationCenter
     private var socketFilePath: String {
         guard let appGroupIdentifier = infoPlistValue(for: BroadcastConstants.broadcastAppGroupIdentifier),
               let sharedContainer = FileManager.default.containerURL(forSecurityApplicationGroupIdentifier: appGroupIdentifier)
@@ -23,20 +23,20 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
         .path
     }
     
-    public override init() {
+    override public init() {
         notificationCenter = CFNotificationCenterGetDarwinNotifyCenter()
         super.init()
         
-        if let connection = BroadcastBufferUploadConnection(filePath: self.socketFilePath) {
-            self.clientConnection = connection
-            self.setupConnection()
-            self.uploader = BroadcastBufferUploader(connection: connection)
+        if let connection = BroadcastBufferUploadConnection(filePath: socketFilePath) {
+            clientConnection = connection
+            setupConnection()
+            uploader = BroadcastBufferUploader(connection: connection)
         }
     }
     
     override public func broadcastStarted(withSetupInfo setupInfo: [String: NSObject]?) {
         postNotification(BroadcastConstants.broadcastStartedNotification)
-        self.openConnection()
+        openConnection()
     }
     
     override public func broadcastPaused() {}
@@ -59,7 +59,7 @@ open class BroadcastSampleHandler: RPBroadcastSampleHandler {
         }
     }
     
-    //MARK: - private
+    // MARK: - private
     
     private func setupConnection() {
         clientConnection?.onClose = { [weak self] error in

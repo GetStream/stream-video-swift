@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftProtobuf
 import StreamWebRTC
+import SwiftProtobuf
 
 enum PeerConnectionType: String {
     case subscriber
@@ -183,7 +183,10 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
     func peerConnection(_ peerConnection: RTCPeerConnection, didChange stateChanged: RTCSignalingState) {}
 
     func peerConnection(_ peerConnection: RTCPeerConnection, didAdd stream: RTCMediaStream) {
-        log.debug("New stream added with id = \(stream.streamId) for \(type.rawValue), sfu = \(signalService.hostname)", subsystems: .webRTC)
+        log.debug(
+            "New stream added with id = \(stream.streamId) for \(type.rawValue), sfu = \(signalService.hostname)",
+            subsystems: .webRTC
+        )
         if stream.streamId.contains(WebRTCClient.Constants.screenshareTrackType) {
             screensharingStreams.append(stream)
         }
@@ -265,11 +268,11 @@ class PeerConnection: NSObject, RTCPeerConnectionDelegate, @unchecked Sendable {
 
     func update(configuration: RTCConfiguration?) {
         guard let configuration else { return }
-        self.pc.setConfiguration(configuration)
+        pc.setConfiguration(configuration)
     }
 
     func statsReport() async throws -> RTCStatisticsReport {
-        return try await withCheckedThrowingContinuation { [weak self] continuation in
+        try await withCheckedThrowingContinuation { [weak self] continuation in
             guard let self else {
                 return continuation.resume(throwing: ClientError.Unexpected())
             }

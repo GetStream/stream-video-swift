@@ -48,7 +48,7 @@ public struct CreateCallOptions: Sendable {
     public init(
         memberIds: [String]? = nil,
         members: [MemberRequest]? = nil,
-        custom: [String : RawJSON]? = nil,
+        custom: [String: RawJSON]? = nil,
         settings: CallSettingsRequest? = nil,
         startsAt: Date? = nil,
         team: String? = nil

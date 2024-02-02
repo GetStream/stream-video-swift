@@ -10,7 +10,7 @@ public struct LivestreamPlayer: View {
     
     @Injected(\.colors) var colors
     
-    var onFullScreenStateChange: ((Bool) -> ())?
+    var onFullScreenStateChange: ((Bool) -> Void)?
     
     @StateObject var state: CallState
     @StateObject var viewModel: LivestreamPlayerViewModel
@@ -20,7 +20,7 @@ public struct LivestreamPlayer: View {
         id: String,
         muted: Bool = false,
         showParticipantCount: Bool = true,
-        onFullScreenStateChange: ((Bool) -> ())? = nil
+        onFullScreenStateChange: ((Bool) -> Void)? = nil
     ) {
         let viewModel = LivestreamPlayerViewModel(
             type: type,
@@ -131,7 +131,6 @@ struct LiveIndicator: View {
             .background(colors.primaryButtonBackground)
             .cornerRadius(8)
     }
-    
 }
 
 struct LivestreamPlayPauseButton: View {
@@ -139,7 +138,7 @@ struct LivestreamPlayPauseButton: View {
     @Injected(\.colors) var colors
     
     @ObservedObject var viewModel: LivestreamPlayerViewModel
-    var trackUpdate: () -> ()
+    var trackUpdate: () -> Void
     
     var body: some View {
         Button {
@@ -152,7 +151,6 @@ struct LivestreamPlayPauseButton: View {
                 .frame(width: 60)
                 .foregroundColor(colors.livestreamCallControlsColor)
         }
-
     }
 }
 
@@ -199,7 +197,7 @@ struct LivestreamButton: View {
     private let buttonSize: CGFloat = 32
     
     var imageName: String
-    var action: () -> ()
+    var action: () -> Void
     
     var body: some View {
         Button {
@@ -213,6 +211,6 @@ struct LivestreamButton: View {
                 .background(colors.participantInfoBackgroundColor)
                 .cornerRadius(8)
         }
-        .padding(.horizontal, 2)        
+        .padding(.horizontal, 2)
     }
 }

@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamWebRTC
+import SwiftUI
 
 public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
     
@@ -19,7 +19,7 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
         participant: CallParticipant,
         call: Call?,
         frame: CGRect,
-        onChangeTrackVisibility: @escaping @MainActor (CallParticipant, Bool) -> Void
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participant = participant
@@ -50,9 +50,11 @@ public struct ParticipantsFullScreenLayout<Factory: ViewFactory>: View {
             log.debug("Participant \(participant.name) is visible")
             onChangeTrackVisibility(participant, true)
         }
-        .modifier(ParticipantChangeModifier(
-            participant: participant,
-            onChangeTrackVisibility: onChangeTrackVisibility)
+        .modifier(
+            ParticipantChangeModifier(
+                participant: participant,
+                onChangeTrackVisibility: onChangeTrackVisibility
+            )
         )
     }
     
@@ -77,5 +79,4 @@ struct ParticipantChangeModifier: ViewModifier {
             content
         }
     }
-    
 }

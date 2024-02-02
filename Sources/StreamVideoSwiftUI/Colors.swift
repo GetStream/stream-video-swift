@@ -61,7 +61,7 @@ private extension UIColor {
     static let streamBlueAlice = mode(0xe9f2ff, 0x00193d)
     static let streamAccentBlue = mode(0x005fff, 0x005fff)
     static let streamAccentRed = mode(0xff3742, 0xff3742)
-    static let streamAccentGreen = mode(0x00E2A1, 0x00E2A1)
+    static let streamAccentGreen = mode(0x00e2a1, 0x00e2a1)
     static let streamGrayDisabledText = mode(0x72767e, 0x72767e)
     static let streamInnerBorder = mode(0xdbdde1, 0x272a30)
     static let streamHighlight = mode(0xfbf4dd, 0x333024)
@@ -71,7 +71,7 @@ private extension UIColor {
     static let streamCallControlsBackground = mode(0xffffff, 0x1c1e22)
     static let streamWaitingRoomBackground = mode(0xffffff, 0x2c2c2e)
     static let streamWaitingRoomSecondaryBackground = mode(0xf2f2f2, 0x1c1c1e)
-    static let streamParticipantBackground = mode(0x19232D, 0x19232D)
+    static let streamParticipantBackground = mode(0x19232d, 0x19232d)
 
     // Currently we are not using the correct shadow color from figma's color palette. This is to avoid
     // an issue with snapshots inconsistency between Intel vs M1. We can't use shadows with transparency.

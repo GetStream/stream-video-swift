@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftProtobuf
 import StreamWebRTC
+import SwiftProtobuf
 
 public typealias UserTokenProvider = (@escaping (Result<UserToken, Error>) -> Void) -> Void
 public typealias UserTokenUpdater = (UserToken) -> Void
@@ -26,6 +26,7 @@ public class StreamVideo: ObservableObject {
                 }
             }
         }
+
         @Published public internal(set) var ringingCall: Call?
         
         init(user: User) {
@@ -105,7 +106,7 @@ public class StreamVideo: ObservableObject {
             pushNotificationsConfig: pushNotificationsConfig,
             environment: Environment()
         )
-    }    
+    }
         
     init(
         apiKey: String,
@@ -117,22 +118,22 @@ public class StreamVideo: ObservableObject {
         environment: Environment
     ) {
         self.apiKey = APIKey(apiKey)
-        self.state = State(user: user)
+        state = State(user: user)
         self.token = token
         self.tokenProvider = tokenProvider
         self.videoConfig = videoConfig
         self.environment = environment
         self.pushNotificationsConfig = pushNotificationsConfig
         
-        self.apiTransport = environment.apiTransportBuilder(tokenProvider)
+        apiTransport = environment.apiTransportBuilder(tokenProvider)
         let defaultParams = DefaultParams(apiKey: apiKey)
-        self.coordinatorClient = DefaultAPI(
+        coordinatorClient = DefaultAPI(
             basePath: Self.endpointConfig.baseVideoURL,
             transport: apiTransport,
             middlewares: [defaultParams]
         )
         StreamVideoProviderKey.currentValue = self
-        (self.apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
+        (apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
         }
         if user.type != .anonymous {
@@ -146,7 +147,7 @@ public class StreamVideo: ObservableObject {
             let anonymousAuth = AnonymousAuth(token: token.rawValue)
             coordinatorClient.middlewares.append(anonymousAuth)
         }
-        self.prefetchLocation()
+        prefetchLocation()
         connectTask = Task {
             if user.type == .guest {
                 do {
@@ -270,7 +271,7 @@ public class StreamVideo: ObservableObject {
     /// Subscribes to a particular WS event.
     /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
-        return AsyncStream(event) { [weak self] continuation in
+        AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
                 guard let coordinatorEvent = event.unwrap() else {
                     return
@@ -287,7 +288,7 @@ public class StreamVideo: ObservableObject {
         next: String? = nil,
         watch: Bool = false
     ) async throws -> (calls: [Call], next: String?) {
-        try await self.queryCalls(filters:nil, sort:nil, next: next, watch: watch)
+        try await queryCalls(filters: nil, sort: nil, next: next, watch: watch)
     }
 
     public func queryCalls(
@@ -296,7 +297,7 @@ public class StreamVideo: ObservableObject {
         limit: Int? = 25,
         watch: Bool = false
     ) async throws -> (calls: [Call], next: String?) {
-        try await self.queryCalls(filters:filters, sort:sort, limit:limit, next: nil, watch: watch)
+        try await queryCalls(filters: filters, sort: sort, limit: limit, next: nil, watch: watch)
     }
 
     internal func queryCalls(
@@ -307,12 +308,12 @@ public class StreamVideo: ObservableObject {
         watch: Bool = false
     ) async throws -> (calls: [Call], next: String?) {
         let response = try await queryCalls(request: QueryCallsRequest(filterConditions: filters, limit: limit, sort: sort))
-        return (response.calls.map({
+        return (response.calls.map {
             let callController = makeCallController(callType: $0.call.type, callId: $0.call.id)
-            let call =  Call(from: $0, coordinatorClient: self.coordinatorClient, callController: callController)
+            let call = Call(from: $0, coordinatorClient: self.coordinatorClient, callController: callController)
             eventsMiddleware.add(subscriber: call)
             return call
-        }), response.next)
+        }, response.next)
     }
 
     /// Queries calls with the provided request.
@@ -403,7 +404,7 @@ public class StreamVideo: ObservableObject {
         }
         
         guard webSocketClient?.connectionState == .connecting
-                || webSocketClient?.connectionState == .authenticating else {
+            || webSocketClient?.connectionState == .authenticating else {
             return ""
         }
         
@@ -527,7 +528,7 @@ public class StreamVideo: ObservableObject {
         apiKey: String,
         environment: Environment,
         result: @escaping (Result<UserToken, Error>) -> Void
-    )  {
+    ) {
         Task {
             do {
                 let response = try await createGuestUser(
@@ -549,7 +550,6 @@ public class StreamVideo: ObservableObject {
             self.cachedLocation = try await LocationFetcher.getLocation()
         }
     }
-    
 }
 
 extension StreamVideo: ConnectionStateDelegate {

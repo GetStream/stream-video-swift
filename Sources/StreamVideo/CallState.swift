@@ -23,7 +23,7 @@ public struct PermissionRequest: @unchecked Sendable, Identifiable {
         self.onReject = onReject
     }
 
-    public func reject() -> Void {
+    public func reject() {
         onReject(self)
     }
 }
@@ -40,6 +40,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var participantsMap = [String: CallParticipant]() {
         didSet { didUpdate(Array(participantsMap.values)) }
     }
+
     @Published public internal(set) var localParticipant: CallParticipant?
     @Published public internal(set) var dominantSpeaker: CallParticipant?
     @Published public internal(set) var remoteParticipants: [CallParticipant] = []
@@ -53,6 +54,7 @@ public class CallState: ObservableObject {
             }
         }
     }
+
     @Published public internal(set) var recordingState: RecordingState = .noRecording
     @Published public internal(set) var blockedUserIds: Set<String> = []
     @Published public internal(set) var settings: CallSettingsResponse?
@@ -63,6 +65,7 @@ public class CallState: ObservableObject {
     @Published public internal(set) var createdAt: Date = .distantPast {
         didSet { if !isInitialized { isInitialized = true }}
     }
+
     @Published public internal(set) var updatedAt: Date = .distantPast
     @Published public internal(set) var startsAt: Date?
     @Published public internal(set) var startedAt: Date? {
@@ -70,6 +73,7 @@ public class CallState: ObservableObject {
             setupDurationTimer()
         }
     }
+
     @Published public internal(set) var endedAt: Date?
     @Published public internal(set) var endedBy: User?
     @Published public internal(set) var custom: [String: RawJSON] = [:]
@@ -84,6 +88,7 @@ public class CallState: ObservableObject {
             didUpdate(session)
         }
     }
+
     @Published public internal(set) var reconnectionStatus = ReconnectionStatus.connected
     @Published public internal(set) var participantCount: UInt32 = 0
     @Published public internal(set) var isInitialized: Bool = false
@@ -97,83 +102,83 @@ public class CallState: ObservableObject {
         
     internal func updateState(from event: VideoEvent) {
         switch event {
-        case .typeBlockedUserEvent(let event):
+        case let .typeBlockedUserEvent(event):
             blockUser(id: event.user.id)
-        case .typeCallAcceptedEvent(let event):
+        case let .typeCallAcceptedEvent(event):
             update(from: event.call)
-        case .typeCallHLSBroadcastingStartedEvent(_):
-            self.egress?.broadcasting = true
-        case .typeCallHLSBroadcastingStoppedEvent(_):
-            self.egress?.broadcasting = false
-        case .typeCallCreatedEvent(let event):
+        case .typeCallHLSBroadcastingStartedEvent:
+            egress?.broadcasting = true
+        case .typeCallHLSBroadcastingStoppedEvent:
+            egress?.broadcasting = false
+        case let .typeCallCreatedEvent(event):
             update(from: event.call)
             mergeMembers(event.members)
-        case .typeCallEndedEvent(let event):
+        case let .typeCallEndedEvent(event):
             update(from: event.call)
-        case .typeCallLiveStartedEvent(let event):
+        case let .typeCallLiveStartedEvent(event):
             update(from: event.call)
-        case .typeCallMemberAddedEvent(let event):
+        case let .typeCallMemberAddedEvent(event):
             mergeMembers(event.members)
-        case .typeCallMemberRemovedEvent(let event):
+        case let .typeCallMemberRemovedEvent(event):
             let updated = members.filter { !event.members.contains($0.id) }
-            self.members = updated
-        case .typeCallMemberUpdatedEvent(let event):
+            members = updated
+        case let .typeCallMemberUpdatedEvent(event):
             mergeMembers(event.members)
-        case .typeCallMemberUpdatedPermissionEvent(let event):
+        case let .typeCallMemberUpdatedPermissionEvent(event):
             capabilitiesByRole = event.capabilitiesByRole
             mergeMembers(event.members)
             update(from: event.call)
-        case .typeCallNotificationEvent(let event):
+        case let .typeCallNotificationEvent(event):
             mergeMembers(event.members)
             update(from: event.call)
-        case .typeCallReactionEvent(_):
+        case .typeCallReactionEvent:
             break
-        case .typeCallRecordingStartedEvent(_):
+        case .typeCallRecordingStartedEvent:
             if recordingState != .recording {
                 recordingState = .recording
             }
-        case .typeCallRecordingStoppedEvent(_):
+        case .typeCallRecordingStoppedEvent:
             if recordingState != .noRecording {
                 recordingState = .noRecording
             }
-        case .typeCallRejectedEvent(let event):
+        case let .typeCallRejectedEvent(event):
             update(from: event.call)
-        case .typeCallRingEvent(let event):
+        case let .typeCallRingEvent(event):
             update(from: event.call)
             mergeMembers(event.members)
-        case .typeCallSessionEndedEvent(let event):
+        case let .typeCallSessionEndedEvent(event):
             update(from: event.call)
-        case .typeCallSessionParticipantJoinedEvent(let event):
+        case let .typeCallSessionParticipantJoinedEvent(event):
             if session?.participants.contains(event.participant) == false {
                 session?.participants.append(event.participant)
             }
-        case .typeCallSessionParticipantLeftEvent(let event):
+        case let .typeCallSessionParticipantLeftEvent(event):
             session?.participants.removeAll(where: { participant in
                 participant == event.participant
             })
-        case .typeCallSessionStartedEvent(let event):
+        case let .typeCallSessionStartedEvent(event):
             update(from: event.call)
-        case .typeCallUpdatedEvent(let event):
+        case let .typeCallUpdatedEvent(event):
             update(from: event.call)
-        case .typePermissionRequestEvent(let event):
+        case let .typePermissionRequestEvent(event):
             addPermissionRequest(user: event.user.toUser, permissions: event.permissions, requestedAt: event.createdAt)
-        case .typeUnblockedUserEvent(let event):
+        case let .typeUnblockedUserEvent(event):
             unblockUser(id: event.user.id)
-        case .typeUpdatedCallPermissionsEvent(let event):
+        case let .typeUpdatedCallPermissionsEvent(event):
             updateOwnCapabilities(event)
-        case .typeConnectedEvent(_):
+        case .typeConnectedEvent:
             // note: connection events are not relevant for call state sync'ing
             break
-        case .typeConnectionErrorEvent(_):
+        case .typeConnectionErrorEvent:
             // note: connection events are not relevant for call state sync'ing
             break
-        case .typeCustomVideoEvent(_):
+        case .typeCustomVideoEvent:
             // note: custom events are exposed via event subscriptions
             break
-        case .typeHealthCheckEvent(_):
+        case .typeHealthCheckEvent:
             // note: health checks are not relevant for call state sync'ing
             break
-        case .typeCallUserMuted(_):
+        case .typeCallUserMuted:
             break
         }
     }
@@ -288,7 +293,7 @@ public class CallState: ObservableObject {
             address: response.ingress.rtmp.address,
             streamKey: streamVideo.token.rawValue
         )
-        self.ingress = Ingress(rtmp: rtmp)
+        ingress = Ingress(rtmp: rtmp)
 
         if !localCallSettingsUpdate {
             callSettings = response.settings.toCallSettings
@@ -310,21 +315,20 @@ public class CallState: ObservableObject {
         else {
             return
         }
-        self.ownCapabilities = event.ownCapabilities
+        ownCapabilities = event.ownCapabilities
     }
 
     private func didUpdate(_ newParticipants: [CallParticipant]) {
         // Combine existing and newly added participants.
-        let currentParticipantIds = Set(self.participants.map(\.id))
+        let currentParticipantIds = Set(participants.map(\.id))
         let newlyAddedParticipants = Set(newParticipants.map(\.id))
             .subtracting(currentParticipantIds)
             .compactMap { participantsMap[$0] }
 
         // Sort the updated participants.
         let updatedCurrentParticipants: [CallParticipant] = (
-            self
-            .participants
-            .compactMap { participantsMap[$0.id] } + newlyAddedParticipants
+            participants
+                .compactMap { participantsMap[$0.id] } + newlyAddedParticipants
         )
         .sorted(by: defaultComparators)
 
@@ -359,14 +363,14 @@ public class CallState: ObservableObject {
         }
 
         // Update the respective class properties.
-        self.participants = updatedCurrentParticipants
+        participants = updatedCurrentParticipants
         self.screenSharingSession = screenSharingSession
         self.remoteParticipants = remoteParticipants
         self.activeSpeakers = activeSpeakers
     }
 
     private func didUpdate(_ egress: EgressResponse?) {
-        self.broadcasting = egress?.broadcasting ?? false
+        broadcasting = egress?.broadcasting ?? false
     }
     
     private func didUpdate(_ session: CallSessionResponse?) {

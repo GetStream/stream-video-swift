@@ -21,9 +21,9 @@ public struct CallTopView: View {
         Group {
             HStack(spacing: 0) {
                 HStack {
-                    if 
+                    if
                         #available(iOS 14.0, *),
-                        viewModel.callParticipants.count > 1 
+                        viewModel.callParticipants.count > 1
                     {
                         LayoutMenuView(viewModel: viewModel)
                             .opacity(hideLayoutMenu ? 0 : 1)
@@ -58,12 +58,12 @@ public struct CallTopView: View {
         }
         .overlay(
             viewModel.call?.state.isCurrentUserScreensharing == true ?
-            SharingIndicator(
-                viewModel: viewModel,
-                sharingPopupDismissed: $sharingPopupDismissed
-            )
-            .opacity(sharingPopupDismissed ? 0 : 1)
-            : nil
+                SharingIndicator(
+                    viewModel: viewModel,
+                    sharingPopupDismissed: $sharingPopupDismissed
+                )
+                .opacity(sharingPopupDismissed ? 0 : 1)
+                : nil
         )
     }
     
@@ -103,10 +103,8 @@ public struct SharingIndicator: View {
                     .frame(height: 14)
             }
             .padding(.leading, 4)
-
         }
         .padding(.all, 8)
         .modifier(ShadowViewModifier())
     }
-    
 }

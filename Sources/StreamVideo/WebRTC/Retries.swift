@@ -43,7 +43,6 @@ func executeTask<Output>(
             throw error
         }
     }
-
 }
 
 struct RetryPolicy {
@@ -76,6 +75,6 @@ extension RetryPolicy {
     }
     
     static func delay(retries: Int) -> TimeInterval {
-        return TimeInterval.random(in: 0.5...2.5)
+        TimeInterval.random(in: 0.5...2.5)
     }
 }

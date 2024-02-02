@@ -45,7 +45,8 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
             track: track,
             outputSettings: [
                 kCVPixelBufferPixelFormatTypeKey as String: NSNumber(value: kCVPixelFormatType_32BGRA)
-            ])
+            ]
+        )
         do {
             assetReader = try AVAssetReader(asset: asset)
             assetReader?.add(trackOutput)
@@ -65,15 +66,19 @@ final class SimulatorScreenCapturer: RTCVideoCapturer {
             let pixelBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
             let frameTime = CMSampleBufferGetPresentationTimeStamp(sampleBuffer)
             let videoFrame = RTCCVPixelBuffer(pixelBuffer: pixelBuffer)
-            let rtcVideoFrame = RTCVideoFrame(buffer: videoFrame, rotation: ._0, timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9))
+            let rtcVideoFrame = RTCVideoFrame(
+                buffer: videoFrame,
+                rotation: ._0,
+                timeStampNs: Int64(CMTimeGetSeconds(frameTime) * 1e9)
+            )
 
             DispatchQueue.main.async {
                 self.delegate?.capturer(self, didCapture: rtcVideoFrame)
             }
         } else {
             // Reached the end of the video file, restart from the beginning
-            self.assetReader?.cancelReading()
-            self.setupAssetReader()
+            assetReader?.cancelReading()
+            setupAssetReader()
         }
     }
 }

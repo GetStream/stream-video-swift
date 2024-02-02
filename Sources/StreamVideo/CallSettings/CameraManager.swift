@@ -18,8 +18,8 @@ public final class CameraManager: ObservableObject, CallSettingsManager, @unchec
         initialDirection: CameraPosition
     ) {
         self.callController = callController
-        self.status = initialStatus
-        self.direction = initialDirection
+        status = initialStatus
+        direction = initialDirection
     }
 
     /// Toggles the camera state.
@@ -31,7 +31,7 @@ public final class CameraManager: ObservableObject, CallSettingsManager, @unchec
     public func flip() async throws {
         let next = direction.next()
         try await callController.changeCameraMode(position: next)
-        self.direction = next
+        direction = next
     }
 
     /// Enables the camera.
@@ -53,7 +53,7 @@ public final class CameraManager: ObservableObject, CallSettingsManager, @unchec
             action: { [unowned self] state in
                 try await callController.changeVideoState(isEnabled: state)
             },
-            onUpdate: { value in
+            onUpdate: { _ in
                 self.status = status
             }
         )

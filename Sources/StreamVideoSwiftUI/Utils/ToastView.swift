@@ -65,7 +65,7 @@ public struct ToastModifier: ViewModifier {
                 }
                 .animation(.spring(), value: toast)
             )
-            .onChange(of: toast) { value in
+            .onChange(of: toast) { _ in
                 showToast()
             }
     }
@@ -120,6 +120,6 @@ public struct ToastModifier: ViewModifier {
 @available(iOS 14.0, *)
 extension View {
     public func toastView(toast: Binding<Toast?>) -> some View {
-        self.modifier(ToastModifier(toast: toast))
+        modifier(ToastModifier(toast: toast))
     }
 }

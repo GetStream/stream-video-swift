@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import Combine
+import SwiftUI
 
 extension Alert {
     public static var defaultErrorAlert: Alert {
@@ -21,9 +21,9 @@ extension View {
     func onReceive<P>(
         _ publisher: P?,
         perform action: @escaping (P.Output) -> Void
-    ) -> some View where P : Publisher, P.Failure == Never {
+    ) -> some View where P: Publisher, P.Failure == Never {
         if let publisher = publisher {
-            self.onReceive(publisher, perform: action)
+            onReceive(publisher, perform: action)
         } else {
             self
         }

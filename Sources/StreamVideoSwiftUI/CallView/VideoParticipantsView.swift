@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamWebRTC
+import SwiftUI
 
 public struct VideoParticipantsView<Factory: ViewFactory>: View {
     
@@ -71,7 +71,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                 orientation = .landscapeRight
             default:
                 orientation = .unknown
-                break
             }
         }
     }
@@ -243,7 +242,8 @@ public struct VideoCallParticipantOptionsModifier: ViewModifier {
             .actionSheet(isPresented: $presentActionSheet) {
                 ActionSheet(
                     title: Text("\(participant.name)"),
-                    buttons: elements.map { ActionSheet.Button.default(Text($0.title), action: $0.action) } + [ActionSheet.Button.cancel()]
+                    buttons: elements
+                        .map { ActionSheet.Button.default(Text($0.title), action: $0.action) } + [ActionSheet.Button.cancel()]
                 )
             }
         }
@@ -454,16 +454,15 @@ public struct SoundIndicator: View {
             .accessibility(identifier: "participantMic")
             .streamAccessibility(value: participant.hasAudio ? "1" : "0")
     }
-    
 }
 
 public struct PopoverButton: View {
         
     var title: String
     @Binding var popoverShown: Bool
-    var action: () -> ()
+    var action: () -> Void
     
-    public init(title: String, popoverShown: Binding<Bool>, action: @escaping () -> ()) {
+    public init(title: String, popoverShown: Binding<Bool>, action: @escaping () -> Void) {
         self.title = title
         _popoverShown = popoverShown
         self.action = action

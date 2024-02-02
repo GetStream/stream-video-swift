@@ -14,7 +14,7 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
 
     init(callController: CallController, initialStatus: CallSettingsStatus) {
         self.callController = callController
-        self.status = initialStatus
+        status = initialStatus
     }
 
     /// Toggles the microphone state.
@@ -41,7 +41,7 @@ public final class MicrophoneManager: ObservableObject, CallSettingsManager, @un
             action: { [unowned self] state in
                 try await callController.changeAudioState(isEnabled: state)
             },
-            onUpdate: { value in
+            onUpdate: { _ in
                 self.status = status
             }
         )

@@ -49,8 +49,8 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             }
 
             let updatedFrame = handleRotation
-            ? adjustRotation(capturer, for: _buffer, frame: frame)
-            : frame
+                ? adjustRotation(capturer, for: _buffer, frame: frame)
+                : frame
 
             self.source.capturer(capturer, didCapture: updatedFrame)
         }
@@ -100,11 +100,11 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     }
     
     deinit {
-       NotificationCenter.default.removeObserver(
+        NotificationCenter.default.removeObserver(
             self,
             name: UIDevice.orientationDidChangeNotification,
             object: nil
-       )
+        )
     }
 }
 

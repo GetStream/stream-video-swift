@@ -93,7 +93,7 @@ extension SystemEnvironment {
 }
 
 extension Array {
-  private subscript(safe index: Int) -> Element? {
-    return indices ~= index ? self[index] : nil
-  }
+    private subscript(safe index: Int) -> Element? {
+        indices ~= index ? self[index] : nil
+    }
 }

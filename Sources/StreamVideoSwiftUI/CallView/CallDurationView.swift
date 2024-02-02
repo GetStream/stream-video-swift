@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 /// A view that presents the call's duration and recording state.
 public struct CallDurationView: View {
@@ -20,7 +20,7 @@ public struct CallDurationView: View {
     @MainActor
     public init(_ viewModel: CallViewModel) {
         self.viewModel = viewModel
-        self.duration = viewModel.call?.state.duration ?? 0
+        duration = viewModel.call?.state.duration ?? 0
     }
 
     public var body: some View {
@@ -28,14 +28,14 @@ public struct CallDurationView: View {
             if duration > 0, let formattedDuration = formatter.format(duration) {
                 HStack(spacing: 4) {
                     iconView
-                    .resizable()
-                    .aspectRatio(contentMode: .fit)
-                    .frame(width: 12)
-                    .foregroundColor(
-                        viewModel.recordingState == .recording
-                        ? colors.inactiveCallControl
-                        : colors.onlineIndicatorColor
-                    )
+                        .resizable()
+                        .aspectRatio(contentMode: .fit)
+                        .frame(width: 12)
+                        .foregroundColor(
+                            viewModel.recordingState == .recording
+                                ? colors.inactiveCallControl
+                                : colors.onlineIndicatorColor
+                        )
 
                     TimeView(formattedDuration)
                         .layoutPriority(2)
@@ -52,7 +52,7 @@ public struct CallDurationView: View {
         .accessibility(identifier: accessibilityLabel)
     }
 
-    // MARK - Private Helpers
+    // MARK: - Private Helpers
 
     private var iconView: Image {
         viewModel.recordingState == .recording
@@ -70,7 +70,7 @@ public struct CallDurationView: View {
     }
 }
 
-fileprivate struct TimeView: View {
+private struct TimeView: View {
 
     @Injected(\.fonts) private var fonts: Fonts
     @Injected(\.colors) private var colors: Colors
@@ -80,8 +80,16 @@ fileprivate struct TimeView: View {
     fileprivate init(_ value: String) {
         let attributed = NSMutableAttributedString(string: value)
         self.value = attributed
-        self.value.addAttribute(.foregroundColor, value: colors.callDurationColor.withAlphaComponent(0.6), range: .init(location: 0, length: attributed.length - 3))
-        self.value.addAttribute(.foregroundColor, value: colors.callDurationColor, range: .init(location: attributed.length - 3, length: 3))
+        self.value.addAttribute(
+            .foregroundColor,
+            value: colors.callDurationColor.withAlphaComponent(0.6),
+            range: .init(location: 0, length: attributed.length - 3)
+        )
+        self.value.addAttribute(
+            .foregroundColor,
+            value: colors.callDurationColor,
+            range: .init(location: attributed.length - 3, length: 3)
+        )
     }
 
     fileprivate var body: some View {

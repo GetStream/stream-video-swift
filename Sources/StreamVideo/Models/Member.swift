@@ -10,6 +10,7 @@ public struct Member: Identifiable, Equatable, Sendable, Codable {
     public var id: String {
         user.id
     }
+
     /// The underlying user.
     public let user: User
     /// The role of the member in the call.
@@ -18,7 +19,7 @@ public struct Member: Identifiable, Equatable, Sendable, Codable {
     public let customData: [String: RawJSON]
     public let updatedAt: Date
 
-    public init(user: User, role: String? = nil, customData: [String : RawJSON] = [:], updatedAt: Date) {
+    public init(user: User, role: String? = nil, customData: [String: RawJSON] = [:], updatedAt: Date) {
         self.user = user
         self.role = role ?? user.role
         self.customData = customData

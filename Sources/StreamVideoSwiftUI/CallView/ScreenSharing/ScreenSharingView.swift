@@ -30,7 +30,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     ) {
         self.viewModel = viewModel
         self.screenSharing = screenSharing
-        self.frame = availableFrame
+        frame = availableFrame
         self.innerItemSpace = innerItemSpace
         self.viewFactory = viewFactory
         self.isZoomEnabled = isZoomEnabled
@@ -61,7 +61,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                 )
             }
         }
-        .onRotate { newOrientation in
+        .onRotate { _ in
             orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
@@ -73,7 +73,10 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
             contentMode: .scaleAspectFit
         ) { view in
             if let track = screenSharing.participant.screenshareTrack {
-                log.info("Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)):\(identifier))", subsystems: .webRTC)
+                log.info(
+                    "Found \(track.kind) track:\(track.trackId) for \(screenSharing.participant.name) and will add on \(type(of: self)):\(identifier))",
+                    subsystems: .webRTC
+                )
                 view.add(track: track)
             }
         }
@@ -120,5 +123,4 @@ struct HorizontalContainer<Content: View>: View {
             HStack(content: content)
         }
     }
-    
 }

@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 /// A button that can be used to present toggle the Participants List's presentation. Additionally, it will
 /// display a badge with the number of the total participants in the call.

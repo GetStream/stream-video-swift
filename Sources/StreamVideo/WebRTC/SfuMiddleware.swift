@@ -15,9 +15,9 @@ class SfuMiddleware: EventMiddleware {
     private var subscriber: PeerConnection?
     private var publisher: PeerConnection?
     var onSocketConnected: ((Bool) -> Void)?
-    var onParticipantCountUpdated: ((UInt32) -> ())?
+    var onParticipantCountUpdated: ((UInt32) -> Void)?
     var onSessionMigrationEvent: (() -> Void)?
-    var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> ())?
+    var onPinsChanged: (([Stream_Video_Sfu_Models_Pin]) -> Void)?
     
     init(
         sessionID: String,
@@ -52,43 +52,43 @@ class SfuMiddleware: EventMiddleware {
                 return
             }
             switch event {
-            case .subscriberOffer(let event):
+            case let .subscriberOffer(event):
                 await handleSubscriberEvent(event)
-            case .publisherAnswer(_):
+            case .publisherAnswer:
                 log.warning("Publisher answer event shouldn't be sent")
-            case .connectionQualityChanged(let event):
+            case let .connectionQualityChanged(event):
                 await handleConnectionQualityChangedEvent(event)
-            case .audioLevelChanged(let event):
+            case let .audioLevelChanged(event):
                 await handleAudioLevelsChanged(event)
-            case .iceTrickle(let event):
+            case let .iceTrickle(event):
                 try await handleICETrickle(event)
-            case .changePublishQuality(let event):
+            case let .changePublishQuality(event):
                 handleChangePublishQualityEvent(event)
-            case .participantJoined(let event):
+            case let .participantJoined(event):
                 await handleParticipantJoined(event)
-            case .participantLeft(let event):
+            case let .participantLeft(event):
                 await handleParticipantLeft(event)
-            case .dominantSpeakerChanged(let event):
+            case let .dominantSpeakerChanged(event):
                 await handleDominantSpeakerChanged(event)
-            case .joinResponse(let event):
+            case let .joinResponse(event):
                 onSocketConnected?(event.reconnected)
                 await loadParticipants(from: event)
-            case .healthCheckResponse(let event):
+            case let .healthCheckResponse(event):
                 onParticipantCountUpdated?(event.participantCount.total)
-            case .trackPublished(let event):
+            case let .trackPublished(event):
                 await handleTrackPublishedEvent(event)
-            case .trackUnpublished(let event):
+            case let .trackUnpublished(event):
                 await handleTrackUnpublishedEvent(event)
-            case .error(let event):
+            case let .error(event):
                 log.error(event.error.message, error: event.error)
-            case .callGrantsUpdated(_):
+            case .callGrantsUpdated:
                 log.warning("TODO: callGrantsUpdated")
-            case .goAway(let event):
+            case let .goAway(event):
                 log.info("Received go away event with reason: \(event.reason.rawValue)")
                 onSessionMigrationEvent?()
-            case .iceRestart(_):
+            case .iceRestart:
                 log.info("Received ice restart message")
-            case .pinsUpdated(let event):
+            case let .pinsUpdated(event):
                 log.debug("Pins changed \(event.pins.map(\.sessionID))")
                 onPinsChanged?(event.pins)
             }

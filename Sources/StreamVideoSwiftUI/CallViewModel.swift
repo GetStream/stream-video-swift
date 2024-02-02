@@ -4,8 +4,8 @@
 
 import Combine
 import StreamVideo
-import SwiftUI
 import StreamWebRTC
+import SwiftUI
 
 // View model that provides methods for views that present a call.
 @MainActor
@@ -27,12 +27,12 @@ open class CallViewModel: ObservableObject {
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] blockedUserIds in
                     self?.blockedUsers = blockedUserIds.map { User(id: $0) }
-            })
+                })
             recordingUpdates = call?.state.$recordingState
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] newState in
                     self?.recordingState = newState
-            })
+                })
             reconnectionUpdates = call?.state.$reconnectionStatus
                 .receive(on: RunLoop.main)
                 .sink(receiveValue: { [weak self] reconnectionStatus in
@@ -194,9 +194,9 @@ open class CallViewModel: ObservableObject {
     ) {
         self.participantsLayout = participantsLayout
         self.callSettings = callSettings ?? CallSettings()
-        self.localCallSettingsChange = callSettings != nil
+        localCallSettingsChange = callSettings != nil
 
-        self.subscribeToCallEvents()
+        subscribeToCallEvents()
         pictureInPictureAdapter.onSizeUpdate = { [weak self] in
             self?.updateTrackSize($0, for: $1)
         }
@@ -205,7 +205,7 @@ open class CallViewModel: ObservableObject {
     /// Toggles the state of the camera (visible vs non-visible).
     public func toggleCameraEnabled() {
         guard let call = call else {
-            self.callSettings = callSettings.withUpdatedVideoState(!callSettings.videoOn)
+            callSettings = callSettings.withUpdatedVideoState(!callSettings.videoOn)
             return
         }
         Task {
@@ -221,7 +221,7 @@ open class CallViewModel: ObservableObject {
     /// Toggles the state of the microphone (muted vs unmuted).
     public func toggleMicrophoneEnabled() {
         guard let call = call else {
-            self.callSettings = callSettings.withUpdatedAudioState(!callSettings.audioOn)
+            callSettings = callSettings.withUpdatedAudioState(!callSettings.audioOn)
             return
         }
         Task {
@@ -253,7 +253,7 @@ open class CallViewModel: ObservableObject {
     /// Enables or disables the audio output.
     public func toggleAudioOutput() {
         guard let call = call else {
-            self.callSettings = callSettings.withUpdatedAudioOutputState(!callSettings.audioOutputOn)
+            callSettings = callSettings.withUpdatedAudioOutputState(!callSettings.audioOutputOn)
             return
         }
         Task {
@@ -273,7 +273,7 @@ open class CallViewModel: ObservableObject {
     /// Enables or disables the speaker.
     public func toggleSpeaker() {
         guard let call = call else {
-            self.callSettings = callSettings.withUpdatedSpeakerState(!callSettings.speakerOn)
+            callSettings = callSettings.withUpdatedSpeakerState(!callSettings.speakerOn)
             return
         }
         Task {
@@ -335,7 +335,7 @@ open class CallViewModel: ObservableObject {
         callingState = .lobby(lobbyInfo)
         if !localCallSettingsChange {
             Task {
-                let call =  streamVideo.call(callType: callType, callId: callId)
+                let call = streamVideo.call(callType: callType, callId: callId)
                 let info = try await call.get()
                 self.callSettings = info.settings.toCallSettings
             }
@@ -426,16 +426,16 @@ open class CallViewModel: ObservableObject {
     /// Updates the participants layout.
     /// - Parameter participantsLayout: the new participants layout.
     public func update(participantsLayout: ParticipantsLayout) {
-        self.automaticLayoutHandling = false
+        automaticLayoutHandling = false
         self.participantsLayout = participantsLayout
     }
     
     public func setActiveCall(_ call: Call?) {
         if let call {
-            self.callingState = .inCall
+            callingState = .inCall
             self.call = call
         } else {
-            self.callingState = .idle
+            callingState = .idle
             self.call = nil
         }
     }
@@ -551,7 +551,8 @@ open class CallViewModel: ObservableObject {
                     } else if case let .accepted(callEventInfo) = callEvent {
                         if callingState == .outgoing {
                             enterCall(call: call, callType: callEventInfo.type, callId: callEventInfo.callId, members: [])
-                        } else if case .incoming(_) = callingState, callEventInfo.user?.id == streamVideo.user.id && enteringCallTask == nil {
+                        } else if case .incoming = callingState,
+                                  callEventInfo.user?.id == streamVideo.user.id && enteringCallTask == nil {
                             // Accepted on another device.
                             callingState = .idle
                         }
@@ -585,12 +586,12 @@ open class CallViewModel: ObservableObject {
     }
     
     private func handleRejectedEvent(_ callEvent: CallEvent) {
-        if case .rejected(_) = callEvent {
-            let outgoingMembersCount = outgoingCallMembers.filter({ $0.userId != streamVideo.user.id }).count
+        if case .rejected = callEvent {
+            let outgoingMembersCount = outgoingCallMembers.filter { $0.userId != streamVideo.user.id }.count
             let rejections = call?.state.session?.rejectedBy.count ?? 0
             let accepted = call?.state.session?.acceptedBy.count ?? 0
                         
-            if accepted == 0, rejections >= outgoingMembersCount  {
+            if accepted == 0, rejections >= outgoingMembersCount {
                 Task {
                     _ = try? await call?.reject()
                     leaveCall()
@@ -601,7 +602,7 @@ open class CallViewModel: ObservableObject {
     
     private func updateCallStateIfNeeded() {
         if callingState == .outgoing {
-            if callParticipants.count > 0 {
+            if !callParticipants.isEmpty {
                 callingState = .inCall
             }
             return

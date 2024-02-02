@@ -51,13 +51,12 @@ public struct LayoutMenuView: View {
     }
 }
 
-
 struct LayoutMenuItem: View {
     
     var title: String
     var layout: ParticipantsLayout
     var selectedLayout: ParticipantsLayout
-    var selectLayout: (ParticipantsLayout) -> ()
+    var selectLayout: (ParticipantsLayout) -> Void
     
     var body: some View {
         Button {
@@ -74,5 +73,4 @@ struct LayoutMenuItem: View {
             }
         }
     }
-    
 }

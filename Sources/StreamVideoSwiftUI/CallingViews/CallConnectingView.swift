@@ -30,7 +30,7 @@ struct CallConnectingView<CallControls: View, CallTopView: View>: View {
                         participants: outgoingCallMembers
                     )
                     .accessibility(identifier: "callConnectingGroupView")
-                } else if outgoingCallMembers.count > 0 {
+                } else if !outgoingCallMembers.isEmpty {
                     AnimatingParticipantView(
                         participant: outgoingCallMembers.first
                     )

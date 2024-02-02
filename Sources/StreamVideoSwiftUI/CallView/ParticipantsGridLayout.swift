@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamWebRTC
+import SwiftUI
 
 public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     
@@ -309,7 +309,6 @@ struct VerticalParticipantsView<Factory: ViewFactory>: View {
         )
     }
 }
-
 
 struct HorizontalParticipantsView<Factory: ViewFactory>: View {
             

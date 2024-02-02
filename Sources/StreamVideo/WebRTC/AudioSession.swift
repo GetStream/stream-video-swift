@@ -41,7 +41,6 @@ actor AudioSession {
         defer { audioSession.unlockForConfiguration() }
         audioSession.isAudioEnabled = enabled
     }
-    
 }
 
 extension RTCAudioSessionConfiguration {

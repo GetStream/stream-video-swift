@@ -85,7 +85,7 @@ extension ClientError {
     public class MissingPermissions: ClientError {}
     
     /// Invalid url error.
-    public class InvalidURL: ClientError {}    
+    public class InvalidURL: ClientError {}
 }
 
 // This should probably live only in the test target since it's not "true" equatable
@@ -124,7 +124,7 @@ extension Error {
     
     var hasClientErrors: Bool {
         if let apiError = self as? APIError,
-            ClosedRange.clientErrorCodes ~= apiError.statusCode {
+           ClosedRange.clientErrorCodes ~= apiError.statusCode {
             return false
         }
         return true

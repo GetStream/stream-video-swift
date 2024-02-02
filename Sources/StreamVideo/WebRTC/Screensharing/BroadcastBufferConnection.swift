@@ -57,7 +57,7 @@ class BroadcastBufferConnection: NSObject {
         scheduleStreams()
     }
     
-    //MARK: - private
+    // MARK: - private
     
     private func scheduleStreams() {
         shouldKeepRunning = true

@@ -11,15 +11,16 @@ final class LivestreamPlayerViewModel: ObservableObject {
     @Published private(set) var controlsShown = false {
         didSet {
             if controlsShown {
-                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: { [weak self] in
+                DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) { [weak self] in
                     guard let self else { return }
                     if !self.streamPaused {
                         self.controlsShown = false
                     }
-                })
+                }
             }
         }
     }
+
     @Published private(set) var streamPaused = false
     @Published private(set) var loading = false
     @Published private(set) var muted: Bool
@@ -58,7 +59,7 @@ final class LivestreamPlayerViewModel: ObservableObject {
     }
     
     func duration(from state: CallState) -> String? {
-        guard state.duration > 0  else { return nil }
+        guard state.duration > 0 else { return nil }
         return formatter.string(from: state.duration)
     }
     

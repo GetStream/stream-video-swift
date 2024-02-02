@@ -25,23 +25,23 @@ struct VideoOptions: Sendable {
         self.preferredFormat = preferredFormat
         self.preferredFps = preferredFps
         if let targetResolution {
-            self.preferredDimensions = CMVideoDimensions(
+            preferredDimensions = CMVideoDimensions(
                 width: Int32(targetResolution.width),
                 height: Int32(targetResolution.height)
             )
             do {
-                self.supportedCodecs = try VideoCapturingUtils.codecs(
+                supportedCodecs = try VideoCapturingUtils.codecs(
                     preferredFormat: preferredFormat,
                     preferredDimensions: preferredDimensions,
                     preferredFps: preferredFps,
                     preferredBitrate: targetResolution.bitrate
                 )
             } catch {
-                self.supportedCodecs = VideoCodec.defaultCodecs
+                supportedCodecs = VideoCodec.defaultCodecs
             }
         } else {
-            self.preferredDimensions = .full
-            self.supportedCodecs = VideoCodec.defaultCodecs
+            preferredDimensions = .full
+            supportedCodecs = VideoCodec.defaultCodecs
         }
     }
 }

@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 struct HalfSheetView<Content: View>: View {
     @Injected(\.colors) var colors
@@ -42,7 +42,10 @@ struct DraggableSheetView<Content: View>: View {
         GeometryReader { proxy in
             VStack(spacing: 0) {
                 DragHandleView()
-                    .background(Color(colors.callBackground)) // Give the view "volume" so the DragGesture is effective from it's whole width.
+                    .background(Color(
+                        colors
+                            .callBackground
+                    )) // Give the view "volume" so the DragGesture is effective from it's whole width.
                     .padding(.vertical, 5)
                     .padding(.horizontal, 24) // Avoid collision with rounded corners.
                     .gesture(
@@ -99,8 +102,8 @@ extension View {
         isPresented: Binding<Bool>,
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
-    ) -> some View where Content : View {
-        if #available (iOS 16.0, *) {
+    ) -> some View where Content: View {
+        if #available(iOS 16.0, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()
                     .padding(.vertical)

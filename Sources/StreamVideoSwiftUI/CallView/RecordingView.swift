@@ -6,7 +6,7 @@ import SwiftUI
 
 public struct RecordingView: View {
     
-    public init() { /* Public init. */}
+    public init() { /* Public init. */ }
     
     public var body: some View {
         HStack {

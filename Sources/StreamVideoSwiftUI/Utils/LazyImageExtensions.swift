@@ -44,20 +44,20 @@ public struct StreamLazyImage<Failback: View>: View {
         if failedToLoadContent, let failback {
             failback()
         } else {
-#if STREAM_SNAPSHOT_TESTS
+            #if STREAM_SNAPSHOT_TESTS
             if let imageURL = imageURL,
                imageURL.isFileURL,
-               let image = UIImage(contentsOfFile: imageURL.path)  {
+               let image = UIImage(contentsOfFile: imageURL.path) {
                 NukeImage(image)
                     .aspectRatio(contentMode: .fill)
             } else {
                 LazyImage(imageURL: imageURL)
                     .onFailure { _ in self.failedToLoadContent = true }
             }
-#else
+            #else
             LazyImage(imageURL: imageURL)
                 .onFailure { _ in self.failedToLoadContent = true }
-#endif
+            #endif
         }
     }
 }
