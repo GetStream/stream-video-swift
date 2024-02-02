@@ -28,11 +28,11 @@ public struct ParticipantsStats: Sendable, Equatable {
     /// The report containing statistics for individual participants.
     public let report: [String: [BaseStats]]
 
-    public static func +(
+    public static func + (
         lhs: ParticipantsStats,
         rhs: ParticipantsStats
     ) -> ParticipantsStats {
-        ParticipantsStats(report: lhs.report.merging(rhs.report) { $1 } )
+        ParticipantsStats(report: lhs.report.merging(rhs.report) { $1 })
     }
 }
 

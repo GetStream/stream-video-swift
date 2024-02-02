@@ -81,8 +81,8 @@ struct StreamCallStatisticsFormatter {
 
             /// - Note: outbound statistics do not contain the trackIdentifier.
             return isOutbound
-            ? statistic.type == direction.rawValue
-            : statistic.trackIdentifier != nil
+                ? statistic.type == direction.rawValue
+                : statistic.trackIdentifier != nil
         }
 
         /// Optionally overrides the track identifier for outbound statistics.
@@ -114,7 +114,7 @@ struct StreamCallStatisticsFormatter {
         /// resolutions.
         /// 3. We then use the found `trackIdentifier` to associate the `BaseStats` to our publishing
         /// participant.
-        let overrideTrackIdentifier = isOutbound ? statistics.compactMap { $0.trackIdentifier }.first : nil
+        let overrideTrackIdentifier = isOutbound ? statistics.compactMap(\.trackIdentifier).first : nil
 
         /// Aggregates statistics into a report structured by track identifiers.
         let report = videoStatistics.reduce(into: [String: [BaseStats]]()) { partialResult, videoStatistic in
@@ -142,11 +142,13 @@ struct StreamCallStatisticsFormatter {
         var roundTripTime: Double = 0.0
 
         /// Attempts to find a related transport and candidate pair to determine round trip time.
-        if let transport = statistics.first(where: { $0.type == RTCStatisticType.transport.rawValue && $0.id == statistic.transportId }),
-           transport.dtlsState == RTCTransportDtlsState.connected.rawValue,
-           let selectedCandidatePairId: String = transport.selectedCandidatePairId,
-           let candidatePairStatistic = statistics.first(where: { $0.type == RTCStatisticType.candidatePair.rawValue && $0.id == selectedCandidatePairId }),
-           let currentRoundTripTime: Double = candidatePairStatistic.currentRoundTripTime {
+        if let transport = statistics
+            .first(where: { $0.type == RTCStatisticType.transport.rawValue && $0.id == statistic.transportId }),
+            transport.dtlsState == RTCTransportDtlsState.connected.rawValue,
+            let selectedCandidatePairId: String = transport.selectedCandidatePairId,
+            let candidatePairStatistic = statistics
+            .first(where: { $0.type == RTCStatisticType.candidatePair.rawValue && $0.id == selectedCandidatePairId }),
+            let currentRoundTripTime: Double = candidatePairStatistic.currentRoundTripTime {
             roundTripTime = currentRoundTripTime
         }
 
@@ -246,4 +248,3 @@ struct StreamCallStatisticsFormatter {
         }
     }
 }
-

@@ -10,9 +10,9 @@ struct StreamCallStatisticsReporter {
     /// Builds a unified call statistics report from publisher and subscriber statistics.
     ///
     /// - Parameters:
-    ///   - publisherReport: A `StreamRTCStatisticsReport` instance containing statistics 
+    ///   - publisherReport: A `StreamRTCStatisticsReport` instance containing statistics
     ///   for the publisher (outbound stream).
-    ///   - subscriberReport: A `StreamRTCStatisticsReport` instance containing statistics 
+    ///   - subscriberReport: A `StreamRTCStatisticsReport` instance containing statistics
     ///   for the subscriber (inbound stream).
     ///   - datacenter: A string representing the datacenter where the call is hosted.
     /// - Returns: A `CallStatsReport` structure containing aggregated statistics and raw data.
@@ -47,7 +47,8 @@ struct StreamCallStatisticsReporter {
             publisherRawStats: publisherReport.source, /// Raw statistics for the publisher.
             subscriberStats: subscriberReportBuilder.aggregatedReport, /// Aggregated statistics for the subscriber.
             subscriberRawStats: subscriberReport.source, /// Raw statistics for the subscriber.
-            participantsStats: publisherReportBuilder.participantsReport + subscriberReportBuilder.participantsReport, /// Combined participant statistics from both publisher and subscriber.
+            participantsStats: publisherReportBuilder.participantsReport + subscriberReportBuilder.participantsReport,
+            /// Combined participant statistics from both publisher and subscriber.
             timestamp: publisherReportBuilder.timestamp /// Timestamp of the publisher's report, used for the overall report.
         )
     }
