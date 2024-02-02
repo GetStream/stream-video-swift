@@ -247,6 +247,7 @@ struct CallParticipantView: View {
                                 : String(participant.name.uppercased().first!),
                             size: imageSize
                         )
+                    }
                 }
                 .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) })
 
