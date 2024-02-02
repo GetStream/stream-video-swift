@@ -219,5 +219,5 @@ jobs:
     - uses: actions/checkout@v3.1.0
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane rubocop
-    - run: bundle exec fastlane run_linter
+    - run: bundle exec fastlane run_swift_format lintOnly:true
     - run: bundle exec fastlane pod_lint

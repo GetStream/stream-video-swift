@@ -582,17 +582,11 @@ lane :rubocop do
   sh('bundle exec rubocop')
 end
 
-desc 'Run source code linting'
-lane :run_linter do
+desc 'Run source code formatting/linting'
+lane :run_swift_format do |options|
   Dir.chdir('..') do
-    sh("mint run swiftformat --lint --config .swiftformat --exclude #{swiftformat_excluded_paths.join(",")} Sources")
-  end
-end
-
-desc 'Run source code formatting'
-lane :run_formatter do
-  Dir.chdir('..') do
-    sh("mint run swiftformat --config .swiftformat --exclude #{swiftformat_excluded_paths.join(",")} Sources")
+    action = options[:lintOnly] ? "--lint" : ""
+    sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(",")} Sources")
   end
 end
 
