@@ -87,11 +87,33 @@ struct StreamCallStatisticsFormatter {
 
         /// Optionally overrides the track identifier for outbound statistics.
         ///
-        /// - Note: It's used on when direction is `outbound`(publishing) where the the codec
-        /// information exists in an RTCStatistics object that doesn't have the trackIdentifier. In that case
-        /// we look into the rest of the statistics to find the first that contains a trackIdentifier. As this object
-        /// is constrained with reports from either participants or subscribers, there is now case where
-        /// we may get a subscriber's track identifier instead of publisher.
+        /// - Note: The steps to create the `BaseStats` representation for a track based on the `direction`
+        /// we are looking for, are the following:
+        ///
+        /// - `direction == .inbound` (A.K.A subscriber):
+        ///
+        /// Find an `RTCStatistics` instance that contains a `trackIdentifier` and has a
+        /// `kind` property that matches the `direction` we are looking for (`inbound` or `outbound`).
+        /// This instance contains most of the information that we need to fill in the `BaseStats`.
+        ///
+        /// - `direction == .outbound` (A.K.A publisher):
+        ///
+        /// Our publishers have more `RTCStatistics` instances containing information. That's because
+        /// we are using `Simulcast` and we are publishing 3 resolutions for the same track. In order
+        /// to collect the statistics for our publishing track we need to discover the statistics for all the
+        /// resolutions we are sharing. In oder to do that we are following the process below:
+        /// 1. Look for all `RTCStatistics` instances that match the `direction` we are looking for
+        /// (in this case it will be `outbound`). The number of instances we will discover will be equal
+        /// to the number of resolutions we are publishing.
+        /// 2. Those instances, won't contain a `trackIdentifier` which means that we cannot related
+        /// them to a participant in the same way we do for `subscribers`. To fix that, we are looking -
+        /// in the remaining `RTCStatistic` instances we got from the Publisher PeerConnection - for
+        /// an instance that contains a `trackIdentifier` value. The found `trackIdentifier`
+        /// will be the correct one because all the `RTCStatistics` instance we have come from the same
+        /// PeerConnection and our publisher PeerConnection only serves a single track with multiple
+        /// resolutions.
+        /// 3. We then use the found `trackIdentifier` to associate the `BaseStats` to our publishing
+        /// participant.
         let overrideTrackIdentifier = isOutbound ? statistics.compactMap { $0.trackIdentifier }.first : nil
 
         /// Aggregates statistics into a report structured by track identifiers.
