@@ -91,6 +91,7 @@
 		407D5D3D2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */; };
 		407F29FF2AA6011500C3EAF8 /* MemoryLogViewer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861E2AA0A21800FF5AF4 /* MemoryLogViewer.swift */; };
 		407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4093861B2AA0A11500FF5AF4 /* LogQueue.swift */; };
+		408D29AA2B6D5CD000885473 /* StreamDeviceOrientationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408D29A82B6D55FB00885473 /* StreamDeviceOrientationAdapter.swift */; };
 		40901A612AE6A48C00B6831D /* LongPressToFocusViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */; };
 		40901A692AE8018900B6831D /* mock-profile-image.jpg in Resources */ = {isa = PBXBuildFile; fileRef = 40901A682AE8018900B6831D /* mock-profile-image.jpg */; };
 		40914C982B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */; };
@@ -1040,6 +1041,7 @@
 		407AF7172B61619900E9E3E7 /* ParticipantListButton_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantListButton_Tests.swift; sourceTree = "<group>"; };
 		407AF7192B6163DD00E9E3E7 /* StreamMediaDurationFormatter_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamMediaDurationFormatter_Tests.swift; sourceTree = "<group>"; };
 		407D5D3C2ACEF0C500B5044E /* VisibilityThresholdModifier_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisibilityThresholdModifier_Tests.swift; sourceTree = "<group>"; };
+		408D29A82B6D55FB00885473 /* StreamDeviceOrientationAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamDeviceOrientationAdapter.swift; sourceTree = "<group>"; };
 		40901A5E2AE693B100B6831D /* LongPressToFocusViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LongPressToFocusViewModifier.swift; sourceTree = "<group>"; };
 		40901A682AE8018900B6831D /* mock-profile-image.jpg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = "mock-profile-image.jpg"; sourceTree = "<group>"; };
 		40914C972B567C8200F6A13E /* StreamPictureInPictureTrackStateAdapterTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureTrackStateAdapterTests.swift; sourceTree = "<group>"; };
@@ -2071,6 +2073,14 @@
 				4063033E2AD847EC0091AE77 /* CallState_Tests.swift */,
 			);
 			path = CallState;
+			sourceTree = "<group>";
+		};
+		408D29A72B6D55EE00885473 /* DeviceOrientation */ = {
+			isa = PBXGroup;
+			children = (
+				408D29A82B6D55FB00885473 /* StreamDeviceOrientationAdapter.swift */,
+			);
+			path = DeviceOrientation;
 			sourceTree = "<group>";
 		};
 		40901A602AE6A44F00B6831D /* LongPressToFocusViewModifier */ = {
@@ -3528,6 +3538,7 @@
 		84EBAA91288C135700BE3176 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				408D29A72B6D55EE00885473 /* DeviceOrientation */,
 				40E1104A2B5A9F5B007DF492 /* Formatters */,
 				40A9416C2B4D958A006D6965 /* PictureInPicture */,
 				40AA2EE02AE00179000DCA5C /* ClipCorners.swift */,
@@ -4837,6 +4848,7 @@
 				8277D12C2AE81CC800BC4ECF /* FetchImage.swift in Sources */,
 				8277D1292AE81CC800BC4ECF /* ImageViewExtensions.swift in Sources */,
 				849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */,
+				408D29AA2B6D5CD000885473 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				8277D1732AE81CC800BC4ECF /* ImageCache.swift in Sources */,
 				8277D1642AE81CC800BC4ECF /* ImageRequestKeys.swift in Sources */,
 				8277D13D2AE81CC800BC4ECF /* ImagePipeline.swift in Sources */,
