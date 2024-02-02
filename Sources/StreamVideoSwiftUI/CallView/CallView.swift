@@ -27,7 +27,6 @@ public struct CallView<Factory: ViewFactory>: View {
             GeometryReader { videoFeedProxy in
                 ZStack {
                     contentView(videoFeedProxy.frame(in: .global))
-                        .snapshot(viewModel: viewModel)
 
                     cornerDraggableView(videoFeedProxy)
                 }

@@ -1,13 +1,10 @@
 //
-//  SnapshotViewModifier.swift
-//  StreamVideoSwiftUI
-//
-//  Created by Ilias Pavlidakis on 2/2/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import SwiftUI
-import Combine
 
 struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
 
@@ -15,15 +12,19 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
 
     @MainActor
     final class SnapshotViewContainerCoordinator {
-        let viewModel: CallViewModel
+        private let snapshotHandler: (UIImage) -> Void
+        private var captureTrigger: AnyPublisher<Bool, Never>
         private var cancellable: AnyCancellable?
 
         weak var content: UIViewControllerType?
 
-        init(viewModel: CallViewModel) {
-            self.viewModel = viewModel
-            cancellable = viewModel
-                .$captureSnapshot
+        init(
+            captureTrigger: AnyPublisher<Bool, Never>,
+            snapshotHandler: @escaping (UIImage) -> Void
+        ) {
+            self.captureTrigger = captureTrigger
+            self.snapshotHandler = snapshotHandler
+            cancellable = captureTrigger
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] in self?.didUpdateCaptureSnapshot($0) }
@@ -41,18 +42,21 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
                 return
             }
 
-            viewModel.didCaptureSnapshot(content.view.snapshot())
+            snapshotHandler(content.view.snapshot())
         }
     }
 
-    let viewModel: CallViewModel
+    private let captureTrigger: AnyPublisher<Bool, Never>
+    private let snapshotHandler: (UIImage) -> Void
     let contentProvider: () -> Content
 
     init(
-        viewModel: CallViewModel,
+        captureTrigger: AnyPublisher<Bool, Never>,
+        snapshotHandler: @escaping (UIImage) -> Void,
         @ViewBuilder contentProvider: @escaping () -> Content
     ) {
-        self.viewModel = viewModel
+        self.captureTrigger = captureTrigger
+        self.snapshotHandler = snapshotHandler
         self.contentProvider = contentProvider
     }
 
@@ -70,19 +74,28 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
     }
 
     func makeCoordinator() -> SnapshotViewContainerCoordinator {
-        SnapshotViewContainerCoordinator(viewModel: viewModel)
+        SnapshotViewContainerCoordinator(
+            captureTrigger: captureTrigger,
+            snapshotHandler: snapshotHandler
+        )
     }
 }
 
 @MainActor
 struct SnapshotViewModifier: ViewModifier {
 
-    var viewModel: CallViewModel
+    var captureTrigger: AnyPublisher<Bool, Never>
+    var snapshotHandler: (UIImage) -> Void
 
     func body(content: Content) -> some View {
-        SnapshotViewContainer(viewModel: viewModel) {
+        SnapshotViewContainer(
+            captureTrigger: captureTrigger,
+            snapshotHandler: snapshotHandler
+        ) {
             content
+                .frame(maxWidth: .infinity, maxHeight: .infinity)
         }
+        .edgesIgnoringSafeArea(.all)
     }
 }
 
@@ -90,8 +103,14 @@ extension View {
 
     @ViewBuilder
     public func snapshot(
-        viewModel: CallViewModel
+        captureTrigger: AnyPublisher<Bool, Never>,
+        snapshotHandler: @escaping (UIImage) -> Void
     ) -> some View {
-        modifier(SnapshotViewModifier(viewModel: viewModel))
+        modifier(
+            SnapshotViewModifier(
+                captureTrigger: captureTrigger,
+                snapshotHandler: snapshotHandler
+            )
+        )
     }
 }
