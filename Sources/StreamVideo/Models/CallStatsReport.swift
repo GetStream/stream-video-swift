@@ -24,13 +24,20 @@ public struct CallStatsReport: Sendable {
 }
 
 /// A struct representing statistics for participants in the call.
-public struct ParticipantsStats: Sendable {
+public struct ParticipantsStats: Sendable, Equatable {
     /// The report containing statistics for individual participants.
-    public let report: [String: BaseStats]
+    public let report: [String: [BaseStats]]
+
+    public static func + (
+        lhs: ParticipantsStats,
+        rhs: ParticipantsStats
+    ) -> ParticipantsStats {
+        ParticipantsStats(report: lhs.report.merging(rhs.report) { $1 })
+    }
 }
 
 /// A struct representing basic statistics for a participant in the call.
-public struct BaseStats: Sendable {
+public struct BaseStats: Sendable, Equatable {
     /// The total bytes sent by the participant.
     public let bytesSent: Int
     /// The total bytes received by the participant.
@@ -60,23 +67,23 @@ public struct BaseStats: Sendable {
 }
 
 /// A struct representing an aggregated stats report for the call.
-public struct AggregatedStatsReport: Sendable {
+public struct AggregatedStatsReport: Sendable, Equatable {
     /// The total bytes sent by all participants.
-    public let totalBytesSent: Int
+    public internal(set) var totalBytesSent: Int
     /// The total bytes received by all participants.
-    public let totalBytesReceived: Int
+    public internal(set) var totalBytesReceived: Int
     /// The average jitter across all participants in milliseconds.
-    public let averageJitterInMs: Double
+    public internal(set) var averageJitterInMs: Double
     /// The average round-trip time across all participants in milliseconds.
-    public let averageRoundTripTimeInMs: Double
+    public internal(set) var averageRoundTripTimeInMs: Double
     /// The reasons for quality limitations in the call.
-    public let qualityLimitationReasons: String
+    public internal(set) var qualityLimitationReasons: String
     /// The highest frame width among all video streams.
-    public let highestFrameWidth: Int
+    public internal(set) var highestFrameWidth: Int
     /// The highest frame height among all video streams.
-    public let highestFrameHeight: Int
+    public internal(set) var highestFrameHeight: Int
     /// The highest frames per second among all video streams.
-    public let highestFramesPerSecond: Int
+    public internal(set) var highestFramesPerSecond: Int
     /// The timestamp when the aggregated stats report was generated.
-    public let timestamp: Double
+    public internal(set) var timestamp: Double
 }
