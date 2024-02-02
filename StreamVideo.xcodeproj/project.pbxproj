@@ -3581,6 +3581,7 @@
 		84EBAA91288C135700BE3176 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				408D29A72B6D55EE00885473 /* DeviceOrientation */,
 				40E1104A2B5A9F5B007DF492 /* Formatters */,
 				40A9416C2B4D958A006D6965 /* PictureInPicture */,
 				40AA2EE02AE00179000DCA5C /* ClipCorners.swift */,
@@ -4891,6 +4892,7 @@
 				8277D12C2AE81CC800BC4ECF /* FetchImage.swift in Sources */,
 				8277D1292AE81CC800BC4ECF /* ImageViewExtensions.swift in Sources */,
 				849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */,
+				408D29AA2B6D5CD000885473 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				8277D1732AE81CC800BC4ECF /* ImageCache.swift in Sources */,
 				8277D1642AE81CC800BC4ECF /* ImageRequestKeys.swift in Sources */,
 				8277D13D2AE81CC800BC4ECF /* ImagePipeline.swift in Sources */,

@@ -12,8 +12,6 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
     @ObservedObject var viewModel: CallViewModel
     var availableFrame: CGRect
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
-    @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
 
     public init(
         viewFactory: Factory,
@@ -52,25 +50,8 @@ public struct VideoParticipantsView<Factory: ViewFactory>: View {
                     call: viewModel.call,
                     participants: viewModel.participants,
                     availableFrame: availableFrame,
-                    orientation: orientation,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
-            }
-        }
-        .onRotate { newOrientation in
-            switch newOrientation {
-            case .unknown:
-                orientation = .unknown
-            case .portrait:
-                orientation = .portrait
-            case .portraitUpsideDown:
-                orientation = .portraitUpsideDown
-            case .landscapeLeft:
-                orientation = .landscapeLeft
-            case .landscapeRight:
-                orientation = .landscapeRight
-            default:
-                orientation = .unknown
             }
         }
     }
