@@ -47,7 +47,7 @@ struct DemoReactionSelectorView: View {
 
     @ViewBuilder
     private var contentView: some View {
-        HStack(alignment: /*@START_MENU_TOKEN@*/.center/*@END_MENU_TOKEN@*/) {
+        HStack(alignment: .center) {
             ForEach(reactions) { reaction in
                 DemoReactionButton(reaction: reaction)
             }
