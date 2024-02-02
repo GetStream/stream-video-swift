@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
 public class Call: @unchecked Sendable, WSEventsSubscriber {
@@ -44,25 +44,25 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         self.callType = callType
         self.coordinatorClient = coordinatorClient
         self.callController = callController
-        self.microphone = MicrophoneManager(
+        microphone = MicrophoneManager(
             callController: callController,
             initialStatus: .enabled
         )
-        self.camera = CameraManager(
+        camera = CameraManager(
             callController: callController,
             initialStatus: .enabled,
             initialDirection: .front
         )
-        self.speaker = SpeakerManager(
+        speaker = SpeakerManager(
             callController: callController,
             initialSpeakerStatus: .enabled,
             initialAudioOutputStatus: .enabled
         )
         self.callController.call = self
-        self.subscribeToLocalCallSettingsChanges()
+        subscribeToLocalCallSettingsChanges()
     }
     
-    convenience internal init(
+    internal convenience init(
         from response: CallStateResponseFields,
         coordinatorClient: DefaultAPI,
         callController: CallController
@@ -221,7 +221,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     @discardableResult
     public func reject() async throws -> RejectCallResponse {
         let response = try await coordinatorClient.rejectCall(type: callType, id: callId)
-        if streamVideo.state.ringingCall?.cId == self.cId {
+        if streamVideo.state.ringingCall?.cId == cId {
             streamVideo.state.ringingCall = nil
         }
         return response
@@ -231,14 +231,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter blockedUser: The user to add to the list of blocked users.
     @discardableResult
     public func block(user: User) async throws -> BlockUserResponse {
-        return try await blockUser(with: user.id)
+        try await blockUser(with: user.id)
     }
     
     /// Removes the given user from the list of blocked users for the call.
     /// - Parameter blockedUser: The user to remove from the list of blocked users.
     @discardableResult
-    public func unblock(user: User) async throws -> UnblockUserResponse{
-        return try await unblockUser(with: user.id)
+    public func unblock(user: User) async throws -> UnblockUserResponse {
+        try await unblockUser(with: user.id)
     }
     
     /// Changes the track visibility for a participant (not visible if they go off-screen).
@@ -251,14 +251,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     @discardableResult
     public func addMembers(members: [MemberRequest]) async throws -> UpdateCallMembersResponse {
-        try await self.updateCallMembers(
+        try await updateCallMembers(
             updateMembers: members
         )
     }
 
     @discardableResult
     public func updateMembers(members: [MemberRequest]) async throws -> UpdateCallMembersResponse {
-        try await self.updateCallMembers(
+        try await updateCallMembers(
             updateMembers: members
         )
     }
@@ -268,7 +268,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the members could not be added to the call.
     @discardableResult
     public func addMembers(ids: [String]) async throws -> UpdateCallMembersResponse {
-        try await self.updateCallMembers(
+        try await updateCallMembers(
             updateMembers: ids.map { MemberRequest(userId: $0) }
         )
     }
@@ -278,7 +278,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: An error if the members could not be removed from the call.
     @discardableResult
     public func removeMembers(ids: [String]) async throws -> UpdateCallMembersResponse {
-        try await self.updateCallMembers(
+        try await updateCallMembers(
             removedIds: ids
         )
     }
@@ -326,7 +326,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter event: the type of the event you are subscribing to.
     /// - Returns: `AsyncStream` of web socket events from the provided type.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
-        return AsyncStream(event) { [weak self] continuation in
+        AsyncStream(event) { [weak self] continuation in
             let eventHandler: EventHandling = { event in
                 guard case let .coordinatorEvent(event) = event else {
                     return
@@ -352,7 +352,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         streamVideo.state.activeCall = nil
     }
     
-    //MARK: - Permissions
+    // MARK: - Permissions
     
     /// Checks if the current user can request permissions.
     /// - Parameter permissions: The permissions to request.
@@ -366,10 +366,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 && callSettings.audio.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.sendVideo.rawValue
-                        && callSettings.video.accessRequestEnabled == false {
+                && callSettings.video.accessRequestEnabled == false {
                 return false
             } else if permission.rawValue == Permission.screenshare.rawValue
-                        && callSettings.screensharing.accessRequestEnabled == false {
+                && callSettings.screensharing.accessRequestEnabled == false {
                 return false
             }
         }
@@ -487,7 +487,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
 
-
     /// Ends a call.
     /// - Throws: error if ending the call fails.
     @discardableResult
@@ -501,7 +500,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: error if blocking the user fails.
     @discardableResult
     public func blockUser(with userId: String) async throws -> BlockUserResponse {
-        let response = try await coordinatorClient.blockUser(type: callType, id: callId, blockUserRequest: BlockUserRequest(userId: userId))
+        let response = try await coordinatorClient.blockUser(
+            type: callType,
+            id: callId,
+            blockUserRequest: BlockUserRequest(userId: userId)
+        )
         await state.blockUser(id: userId)
         return response
     }
@@ -512,7 +515,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Throws: error if unblocking the user fails.
     @discardableResult
     public func unblockUser(with userId: String) async throws -> UnblockUserResponse {
-        let response = try await coordinatorClient.unblockUser(type: callType, id: callId, unblockUserRequest: UnblockUserRequest(userId: userId))
+        let response = try await coordinatorClient.unblockUser(
+            type: callType,
+            id: callId,
+            unblockUserRequest: UnblockUserRequest(userId: userId)
+        )
         await state.unblockUser(id: userId)
         return response
     }
@@ -544,10 +551,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Stops an ongoing live call.
     @discardableResult
     public func stopLive() async throws -> StopLiveResponse {
-        return try await coordinatorClient.stopLive(type: callType, id: callId)
+        try await coordinatorClient.stopLive(type: callType, id: callId)
     }
     
-    //MARK: - Recording
+    // MARK: - Recording
     
     /// Starts recording for the call.
     @discardableResult
@@ -572,12 +579,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         return response.recordings
     }
     
-    //MARK: - Broadcasting
+    // MARK: - Broadcasting
     
     /// Starts HLS broadcasting of the call.
     @discardableResult
     public func startHLS() async throws -> StartHLSBroadcastingResponse {
-        return try await coordinatorClient.startHLSBroadcasting(type: callType, id: callId)
+        try await coordinatorClient.startHLSBroadcasting(type: callType, id: callId)
     }
     
     /// Stops HLS broadcasting of the call.
@@ -586,7 +593,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.stopHLSBroadcasting(type: callType, id: callId)
     }
     
-    //MARK: - Events
+    // MARK: - Events
     
     /// Sends a custom event to the call.
     /// - Throws: An error if the sending fails.
@@ -602,7 +609,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Sends a reaction to the call.
     /// - Throws: An error if the sending fails.
     @discardableResult
-    public func sendReaction(type: String, custom: [String: RawJSON]? = nil, emojiCode: String? = nil) async throws -> SendReactionResponse {
+    public func sendReaction(
+        type: String,
+        custom: [String: RawJSON]? = nil,
+        emojiCode: String? = nil
+    ) async throws -> SendReactionResponse {
         try await coordinatorClient.sendVideoReaction(
             type: callType,
             id: callId,
@@ -610,19 +621,26 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
     }
     
-    //MARK: - Query members methods
+    // MARK: - Query members methods
 
     internal func queryMembers(
         filters: [String: RawJSON]? = nil, limit: Int? = nil, next: String? = nil, sort: [SortParamRequest]? = nil
     ) async throws -> QueryMembersResponse {
-        let request = QueryMembersRequest(filterConditions: filters, id: callId, limit: limit, next: next, sort: sort, type: callType)
+        let request = QueryMembersRequest(
+            filterConditions: filters,
+            id: callId,
+            limit: limit,
+            next: next,
+            sort: sort,
+            type: callType
+        )
         let response = try await coordinatorClient.queryMembers(queryMembersRequest: request)
         await state.mergeMembers(response.members)
         return response
     }
 
     public func queryMembers(
-        filters: [String : RawJSON]? = nil,
+        filters: [String: RawJSON]? = nil,
         sort: [SortParamRequest] = [SortParamRequest.descending("created_at")],
         limit: Int = 25
     ) async throws -> QueryMembersResponse {
@@ -703,19 +721,19 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// method, which is expected to handle the camera focus logic. If an error occurs during the process,
     /// it throws an exception.
     ///
-    /// - Parameter point: A `CGPoint` value representing the location within the view where the 
+    /// - Parameter point: A `CGPoint` value representing the location within the view where the
     /// camera should focus. The point (0, 0) is at the top-left corner of the view, and the point (1, 1) is at
     /// the bottom-right corner.
-    /// - Throws: An error if the focus operation cannot be completed. The type of error depends on 
+    /// - Throws: An error if the focus operation cannot be completed. The type of error depends on
     /// the underlying implementation in the `callController`.
     ///
-    /// - Note: Ensure that the device supports tap to focus and that it is enabled before calling this 
+    /// - Note: Ensure that the device supports tap to focus and that it is enabled before calling this
     /// method. Otherwise, it might result in an error.
     public func focus(at point: CGPoint) throws {
         try callController.focus(at: point)
     }
 
-    //MARK: - Internal
+    // MARK: - Internal
     
     internal func update(reconnectionStatus: ReconnectionStatus) {
         executeOnMain { [weak self] in
@@ -750,7 +768,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
     }
     
-    //MARK: - private
+    // MARK: - private
+
     private func updatePermissions(
         for userId: String,
         granted: [String],
@@ -843,4 +862,3 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         speaker.audioOutputStatus = callSettings.audioOutputOn ? .enabled : .disabled
     }
 }
-

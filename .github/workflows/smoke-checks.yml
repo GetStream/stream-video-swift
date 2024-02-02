@@ -49,7 +49,7 @@ jobs:
     - name: Run Fastlane Linting
       run: bundle exec fastlane rubocop
     - name: Run SwiftFormat Linting
-      run: bundle exec fastlane run_linter
+      run: bundle exec fastlane run_swift_format lint:true
     - name: Run Podspec Linting
       run: bundle exec fastlane pod_lint
 

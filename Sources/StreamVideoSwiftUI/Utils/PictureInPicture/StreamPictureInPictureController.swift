@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import AVKit
-import StreamWebRTC
-import StreamVideo
 import Combine
+import Foundation
+import StreamVideo
+import StreamWebRTC
 
 /// A controller class for picture-in-picture whenever that is possible.
 final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
@@ -48,20 +48,19 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     /// A set of `AnyCancellable` objects used to manage subscriptions.
     private var cancellableBag: Set<AnyCancellable> = []
 
-    /// A `AnyCancellable` object used to ensure that the active track is enabled while in picture-in-picture 
+    /// A `AnyCancellable` object used to ensure that the active track is enabled while in picture-in-picture
     /// mode.
     private var ensureActiveTrackIsEnabledCancellable: AnyCancellable?
 
-    /// A `StreamPictureInPictureTrackStateAdapter` object that manages the state of the 
+    /// A `StreamPictureInPictureTrackStateAdapter` object that manages the state of the
     /// active track.
     private let trackStateAdapter: StreamPictureInPictureTrackStateAdapter = .init()
-
 
     // MARK: - Lifecycle
 
     /// Initializes the controller and creates the content view
     ///
-    /// - Parameter canStartPictureInPictureAutomaticallyFromInline A boolean value 
+    /// - Parameter canStartPictureInPictureAutomaticallyFromInline A boolean value
     /// indicating whether the picture-in-picture session should start automatically when the app enters
     /// background.
     ///
@@ -146,11 +145,12 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
                 pictureInPictureController?
                     .publisher(for: \.isPictureInPictureActive)
                     .removeDuplicates()
-                    .sink { [weak self] in self?.didUpdatePictureInPictureActiveState($0)  }
+                    .sink { [weak self] in self?.didUpdatePictureInPictureActiveState($0) }
                     .store(in: &cancellableBag)
             } else {
                 // If picture-in-picture is active, simply update the sourceView.
-                if #available(iOS 15.0, *), let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
+                if #available(iOS 15.0, *),
+                   let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
                     pictureInPictureController?.contentSource = .init(
                         activeVideoCallSourceView: sourceView,
                         contentViewController: contentViewController
@@ -165,16 +165,19 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     }
 
     private func makePictureInPictureController(with sourceView: UIView) {
-        if #available(iOS 15.0, *), let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
+        if #available(iOS 15.0, *),
+           let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
             pictureInPictureController = .init(
                 contentSource: .init(
                     activeVideoCallSourceView: sourceView,
                     contentViewController: contentViewController
-                ))
+                )
+            )
         }
 
         if #available(iOS 14.2, *) {
-            pictureInPictureController?.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
+            pictureInPictureController?
+                .canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
         }
 
         pictureInPictureController?.delegate = self

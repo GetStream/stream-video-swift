@@ -43,7 +43,7 @@ public struct CallContainer_iOS13<Factory: ViewFactory>: View {
             }
         }
         .alert(isPresented: $viewModel.errorAlertShown, content: {
-            return Alert.defaultErrorAlert
+            Alert.defaultErrorAlert
         })
         .overlay(overlayView)
         .onReceive(viewModel.$callingState) { _ in

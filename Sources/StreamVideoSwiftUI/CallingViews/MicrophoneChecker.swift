@@ -3,9 +3,9 @@
 //
 
 import AVFoundation
+import Combine
 import Foundation
 import StreamVideo
-import Combine
 
 /// Checks the audio capabilities of the device.
 public class MicrophoneChecker: ObservableObject {
@@ -49,7 +49,7 @@ public class MicrophoneChecker: ObservableObject {
         self.valueLimit = valueLimit
         self.audioSession = audioSession
         self.notificationCenter = notificationCenter
-        self.audioLevels = [Float](repeating: 0.0, count: valueLimit)
+        audioLevels = [Float](repeating: 0.0, count: valueLimit)
         setUpAudioCapture()
 
         subscribeToCallEnded()
@@ -76,7 +76,7 @@ public class MicrophoneChecker: ObservableObject {
         stopAudioRecorder()
     }
     
-    //MARK: - private
+    // MARK: - private
 
     private func subscribeToCallEnded() {
         callEndedCancellable = notificationCenter
@@ -120,7 +120,7 @@ public class MicrophoneChecker: ObservableObject {
 
         newAudioRecorder.record()
         newAudioRecorder.isMeteringEnabled = true
-        self.audioRecorder = newAudioRecorder
+        audioRecorder = newAudioRecorder
         timer = Timer.scheduledTimer(withTimeInterval: 0.1, repeats: true) { [weak self] _ in
             guard let self = self else { return }
             newAudioRecorder.updateMeters()

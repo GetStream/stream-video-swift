@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-import CoreVideo
 import CoreImage
+import CoreVideo
+import Foundation
 import StreamWebRTC
 
 private class Message {
@@ -38,7 +38,7 @@ private class Message {
             framedMessage,
             BroadcastConstants.contentLength as CFString
         )?.takeRetainedValue(),
-              let body = CFHTTPMessageCopyBody(framedMessage)?.takeRetainedValue()
+            let body = CFHTTPMessageCopyBody(framedMessage)?.takeRetainedValue()
         else {
             return -1
         }
@@ -49,7 +49,7 @@ private class Message {
         let missingBytesCount = contentLength - bodyLength
         if missingBytesCount == 0 {
             let success = unwrapMessage(framedMessage)
-            self.onComplete?(success, self)
+            onComplete?(success, self)
             self.framedMessage = nil
         }
         
@@ -57,7 +57,7 @@ private class Message {
     }
     
     private func imageContext() -> CIContext? {
-        return Message.imageContextVar
+        Message.imageContextVar
     }
     
     private func unwrapMessage(_ framedMessage: CFHTTPMessage) -> Bool {
@@ -81,7 +81,7 @@ private class Message {
         
         let width = Int(CFStringGetIntValue(widthStr))
         let height = Int(CFStringGetIntValue(heightStr))
-        self.imageOrientation = CGImagePropertyOrientation(
+        imageOrientation = CGImagePropertyOrientation(
             rawValue: UInt32(CFStringGetIntValue(imageOrientationStr))
         ) ?? .up
         
@@ -208,7 +208,6 @@ final class BroadcastBufferReader: NSObject {
         
         onCapture?(pixelBuffer, rotation)
     }
-    
 }
 
 extension BroadcastBufferReader: StreamDelegate {

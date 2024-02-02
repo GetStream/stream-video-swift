@@ -25,8 +25,8 @@ class BroadcastBufferUploadConnection: BroadcastBufferConnection {
     
     func open() -> Bool {
         guard FileManager.default.fileExists(atPath: filePath),
-                setupAddress(),
-                connectSocket() else {
+              setupAddress(),
+              connectSocket() else {
             return false
         }
         
@@ -40,7 +40,7 @@ class BroadcastBufferUploadConnection: BroadcastBufferConnection {
         return true
     }
     
-    //MARK: - private
+    // MARK: - private
     
     private func setupAddress() -> Bool {
         var addr = sockaddr_un()

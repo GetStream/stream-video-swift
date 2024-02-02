@@ -100,7 +100,7 @@ class WebSocketClient {
     /// Calling this method has no effect is the web socket is already connected, or is in the connecting phase.
     func connect() {
         switch connectionState {
-            // Calling connect in the following states has no effect
+        // Calling connect in the following states has no effect
         case .connecting, .authenticating, .connected(healthCheckInfo: _):
             return
         default: break
@@ -202,11 +202,11 @@ extension WebSocketClient: WebSocketEngineDelegate {
         }
         
         switch event {
-        case .coordinatorEvent(let event):
+        case let .coordinatorEvent(event):
             log.info("received WS \(event.type) event from coordinator \(connectURL)", subsystems: .webSocket)
-        case .internalEvent(_):
+        case .internalEvent:
             break
-        case .sfuEvent(_):
+        case .sfuEvent:
             break
         }
 
@@ -236,7 +236,11 @@ extension WebSocketClient: WebSocketEngineDelegate {
             connectionState = .disconnected(source: source)
         
         case .initialized, .disconnected:
-            log.error("Web socket can not be disconnected when in \(connectionState) state", subsystems: .webSocket, error: engineError)
+            log.error(
+                "Web socket can not be disconnected when in \(connectionState) state",
+                subsystems: .webSocket,
+                error: engineError
+            )
         }
     }
     

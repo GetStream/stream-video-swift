@@ -19,7 +19,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     private let call: Call
     
     public init(callType: String, callId: String) {
-        self.call = InjectedValues[\.streamVideo].call(
+        call = InjectedValues[\.streamVideo].call(
             callType: callType,
             callId: callId
         )
@@ -53,7 +53,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     public func startCamera(front: Bool) {
         if #available(iOS 14, *) {
             Task {
-                await (camera as? Camera)?.start()
+                await(camera as? Camera)?.start()
                 if front {
                     (camera as? Camera)?.switchCaptureDevice()
                 }
@@ -82,7 +82,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         Task {
             let response = try await call.get()
             withAnimation {
-                participants = response.session?.participants.map { $0.user.toUser } ?? []
+                participants = response.session?.participants.map(\.user.toUser) ?? []
             }
         }
     }

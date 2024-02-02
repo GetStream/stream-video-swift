@@ -30,9 +30,10 @@ struct VisibilityThresholdModifier: ViewModifier {
     /// Closure to handle visibility changes.
     var changeHandler: (Bool) -> Void
 
-    init(in bounds: CGRect,
-         threshold: CGFloat,
-         changeHandler: @escaping (Bool) -> Void
+    init(
+        in bounds: CGRect,
+        threshold: CGFloat,
+        changeHandler: @escaping (Bool) -> Void
     ) {
         self.bounds = bounds
         self.threshold = threshold
@@ -72,10 +73,10 @@ struct VisibilityThresholdModifier: ViewModifier {
 
         /// Check if the content view is vertically within the parent's bounds.
         let verticalVisible = (minY + requiredHeight <= bounds.maxY && minY >= bounds.minY) ||
-        (maxY - requiredHeight >= bounds.minY && maxY <= bounds.maxY)
+            (maxY - requiredHeight >= bounds.minY && maxY <= bounds.maxY)
         /// Check if the content view is horizontally within the parent's bounds.
         let horizontalVisible = (minX + requiredWidth <= bounds.maxX && minX >= bounds.minX) ||
-        (maxX - requiredWidth >= bounds.minX && maxX <= bounds.maxX)
+            (maxX - requiredWidth >= bounds.minX && maxX <= bounds.maxX)
 
         return (verticalVisible, horizontalVisible)
     }

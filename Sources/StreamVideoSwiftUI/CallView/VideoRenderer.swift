@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import StreamVideo
-import SwiftUI
-import StreamWebRTC
-import MetalKit
 import Combine
+import MetalKit
+import StreamVideo
+import StreamWebRTC
+import SwiftUI
 
 public struct LocalVideoView<Factory: ViewFactory>: View {
     
@@ -54,7 +54,6 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     private var shouldRotate: Bool {
         callSettings.cameraPosition == .front && callSettings.videoOn
     }
-    
 }
 
 public struct VideoRendererView: UIViewRepresentable {
@@ -93,8 +92,8 @@ public struct VideoRendererView: UIViewRepresentable {
 
     public func makeUIView(context: Context) -> VideoRenderer {
         let view = showVideo
-        ? utils.videoRendererFactory.view(for: id, size: size)
-        : VideoRenderer()
+            ? utils.videoRendererFactory.view(for: id, size: size)
+            : VideoRenderer()
         view.videoContentMode = contentMode
         view.backgroundColor = colors.participantBackground
         if showVideo {
@@ -127,14 +126,15 @@ public class VideoRenderer: RTCMTLVideoView {
             log.debug("🔄 preferredFramesPerSecond was updated to \(preferredFramesPerSecond).")
         }
     }
+
     private lazy var metalView: MTKView? = { subviews.compactMap { $0 as? MTKView }.first }()
-    var trackId: String? { self.track?.trackId }
+    var trackId: String? { track?.trackId }
     private var viewSize: CGSize?
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
 
-    public override init(frame: CGRect) {
+    override public init(frame: CGRect) {
         super.init(frame: frame)
         cancellable = thermalStateObserver
             .statePublisher
@@ -158,7 +158,7 @@ public class VideoRenderer: RTCMTLVideoView {
         track?.remove(self)
     }
 
-    public override var hash: Int { identifier.hashValue }
+    override public var hash: Int { identifier.hashValue }
 
     public func add(track: RTCVideoTrack) {
         queue.sync {
@@ -170,9 +170,9 @@ public class VideoRenderer: RTCMTLVideoView {
         }
     }
     
-    public override func layoutSubviews() {
+    override public func layoutSubviews() {
         super.layoutSubviews()
-        self.viewSize = bounds.size
+        viewSize = bounds.size
     }
 }
 
@@ -180,16 +180,22 @@ extension VideoRenderer {
     
     public func handleViewRendering(
         for participant: CallParticipant,
-        onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> ()
+        onTrackSizeUpdate: @escaping (CGSize, CallParticipant) -> Void
     ) {
         if let track = participant.track {
-            log.info("Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier))", subsystems: .webRTC)
-            self.add(track: track)
+            log.info(
+                "Found \(track.kind) track:\(track.trackId) for \(participant.name) and will add on \(type(of: self)):\(identifier))",
+                subsystems: .webRTC
+            )
+            add(track: track)
             DispatchQueue.global(qos: .userInteractive).asyncAfter(deadline: .now() + 0.01) { [weak self] in
                 guard let self else { return }
                 let prev = participant.trackSize
                 if let viewSize, prev != viewSize {
-                    log.debug("Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)", subsystems: .webRTC)
+                    log.debug(
+                        "Update trackSize of \(track.kind) track for \(participant.name) on \(type(of: self)):\(identifier)), \(prev) → \(viewSize)",
+                        subsystems: .webRTC
+                    )
                     onTrackSizeUpdate(viewSize, participant)
                 }
             }

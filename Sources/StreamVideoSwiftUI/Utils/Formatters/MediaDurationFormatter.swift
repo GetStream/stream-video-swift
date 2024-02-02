@@ -31,9 +31,8 @@ open class StreamMediaDurationFormatter: MediaDurationFormatter {
 
     open func format(_ time: TimeInterval) -> String? {
         let dateComponentsFormatter = time < 3600
-        ? withoutHoursDateComponentsFormatter
-        : withHoursDateComponentsFormatter
+            ? withoutHoursDateComponentsFormatter
+            : withHoursDateComponentsFormatter
         return dateComponentsFormatter.string(from: time)
     }
 }
-

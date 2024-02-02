@@ -27,7 +27,7 @@ extension Event {
     }
 
     func forCall(cid: String) -> Bool {
-        guard let videoEvent = self.unwrap() else {
+        guard let videoEvent = unwrap() else {
             return false
         }
         guard let wsCallEvent = videoEvent.rawValue as? WSCallEvent else {
@@ -50,17 +50,19 @@ internal enum WrappedEvent: Event {
                 return HealthCheckInfo(coordinatorHealthCheck: healthCheckEvent)
             }
             if case let .typeConnectedEvent(connectedEvent) = event {
-                return HealthCheckInfo(coordinatorHealthCheck: .init(
-                    connectionId: connectedEvent.connectionId,
-                    createdAt: connectedEvent.createdAt,
-                    type: connectedEvent.type)
+                return HealthCheckInfo(
+                    coordinatorHealthCheck: .init(
+                        connectionId: connectedEvent.connectionId,
+                        createdAt: connectedEvent.createdAt,
+                        type: connectedEvent.type
+                    )
                 )
             }
         case let .sfuEvent(event):
             if case let .healthCheckResponse(healthCheckEvent) = event {
                 return HealthCheckInfo(sfuHealthCheck: healthCheckEvent)
             }
-        case .internalEvent(_):
+        case .internalEvent:
             break
         }
         return nil
@@ -77,7 +79,7 @@ internal enum WrappedEvent: Event {
                 return errorEvent.error
             }
             return nil
-        case .internalEvent(_):
+        case .internalEvent:
             break
         }
         return nil

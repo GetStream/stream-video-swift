@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import ReplayKit
+import SwiftUI
 
 public struct BroadcastPickerView: UIViewRepresentable {
     
@@ -23,5 +23,4 @@ public struct BroadcastPickerView: UIViewRepresentable {
     }
     
     public func updateUIView(_ uiView: UIViewType, context: Context) {}
-    
 }

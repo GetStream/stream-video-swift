@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 import StreamVideo
 
 @MainActor
@@ -46,5 +46,4 @@ public class IncomingViewModel: ObservableObject {
         ringingTimer?.invalidate()
         ringingTimer = nil
     }
-
 }

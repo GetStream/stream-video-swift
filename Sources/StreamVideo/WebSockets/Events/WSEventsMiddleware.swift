@@ -38,5 +38,4 @@ final class WSEventsMiddleware: EventMiddleware {
 protocol WSEventsSubscriber: AnyObject {
     
     func onEvent(_ event: WrappedEvent)
-    
 }

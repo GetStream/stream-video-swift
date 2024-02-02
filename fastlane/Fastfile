@@ -22,6 +22,7 @@ reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
 develop_branch = 'main'
+swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi", "**/Nuke*"]
 
 before_all do |lane|
   if is_ci
@@ -581,11 +582,11 @@ lane :rubocop do
   sh('bundle exec rubocop')
 end
 
-desc 'Run source code linting'
-lane :run_linter do
+desc 'Run source code formatting/linting'
+lane :run_swift_format do |options|
   Dir.chdir('..') do
-    UI.error('SwiftFormat lint was skipped. Check out https://github.com/GetStream/ios-issues-tracking/issues/465 for more info')
-    # sh('mint run swiftformat --lint --config .swiftformat Sources --exclude **/Generated, **/generated, **/protobuf, **/OpenApi, Sources/StreamChatSwiftUI/StreamNuke')
+    action = options[:lint] ? "--lint" : ""
+    sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(',')} Sources")
   end
 end
 

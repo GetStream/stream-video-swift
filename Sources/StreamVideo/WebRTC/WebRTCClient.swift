@@ -38,7 +38,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                         scheduledUpdate = false
                     }
                 }
-
             }
         }
         var tracks = [String: RTCVideoTrack]()
@@ -181,14 +180,15 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     @Injected(\.thermalStateObserver) private var thermalStateObserver
 
     var onParticipantsUpdated: (([String: CallParticipant]) -> Void)?
-    var onSignalConnectionStateChange: ((WebSocketConnectionState) -> ())?
-    var onParticipantCountUpdated: ((UInt32) -> ())?
-    var onSessionMigrationEvent: (() -> ())? {
+    var onSignalConnectionStateChange: ((WebSocketConnectionState) -> Void)?
+    var onParticipantCountUpdated: ((UInt32) -> Void)?
+    var onSessionMigrationEvent: (() -> Void)? {
         didSet {
             sfuMiddleware.onSessionMigrationEvent = onSessionMigrationEvent
         }
     }
-    var onSessionMigrationCompleted: (() -> ())?
+
+    var onSessionMigrationCompleted: (() -> Void)?
 
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
@@ -308,7 +308,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             hostname: url,
             token: token
         )
-        self.migratingSignalService = signalServer
+        migratingSignalService = signalServer
         if let url = URL(string: webSocketURL) {
             migratingWSClient = makeWebSocketClient(
                 url: url,
@@ -402,7 +402,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let connectURL = signalChannel?.connectURL
         try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
             self?.sfuChanged(connectURL) == false
-            && self?.callSettings.audioOn == !isEnabled
+                && self?.callSettings.audioOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             callSettings = callSettings.withUpdatedAudioState(isEnabled)
@@ -444,7 +444,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         let connectURL = signalChannel?.connectURL
         try await executeTask(retryPolicy: .neverGonnaGiveYouUp { [weak self] in
             self?.sfuChanged(connectURL) == false
-            && self?.callSettings.videoOn == !isEnabled
+                && self?.callSettings.videoOn == !isEnabled
         }) {
             _ = try await signalService.updateMuteStates(updateMuteStatesRequest: request)
             callSettings = callSettings.withUpdatedVideoState(isEnabled)
@@ -522,7 +522,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         } else {
             throw ClientError.MissingPermissions()
         }
-        self.currentScreenhsareType = type
+        currentScreenhsareType = type
         try await screenshareCapturer?.startCapture(device: nil)
     }
 
@@ -899,7 +899,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         return joinRequest
     }
 
-
     private func makeWebSocketClient(
         url: URL,
         apiKey: APIKey,
@@ -1024,12 +1023,13 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         var tracks = [Stream_Video_Sfu_Signal_TrackSubscriptionDetails]()
         let callParticipants = await state.callParticipants
 
-
-
         for (_, value) in callParticipants {
             if value.id != sessionID {
                 if value.hasVideo {
-                    log.debug("updating video subscription for user \(value.name) with size \(value.trackSize)", subsystems: .webRTC)
+                    log.debug(
+                        "updating video subscription for user \(value.name) with size \(value.trackSize)",
+                        subsystems: .webRTC
+                    )
                     var dimension = Stream_Video_Sfu_Models_VideoDimension()
                     dimension.height = UInt32(value.trackSize.height)
                     dimension.width = UInt32(value.trackSize.width)
@@ -1158,7 +1158,6 @@ class WebRTCClient: NSObject, @unchecked Sendable {
             }
             await state.update(pausedTrackIds: pausedTrackIds)
         }
-
     }
 
     @objc private func unpauseTracks() {
@@ -1189,7 +1188,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
                     )
                     updated = participant.withUpdated(pin: pin)
                 } else if !sessionIds.contains(sessionId)
-                            && (participant.pin != nil && participant.pin?.isLocal == false) {
+                    && (participant.pin != nil && participant.pin?.isLocal == false) {
                     updated = participant.withUpdated(pin: nil)
                 }
                 updatedParticipants[sessionId] = updated
@@ -1233,7 +1232,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     }
 
     @objc private func handleConnectionStateChange(_ notification: NSNotification) {
-        guard let status = notification.userInfo?[Notification.internetConnectionStatusUserInfoKey] as? InternetConnection.Status else {
+        guard let status = notification.userInfo?[Notification.internetConnectionStatusUserInfoKey] as? InternetConnection.Status
+        else {
             return
         }
 
@@ -1279,8 +1279,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private func checkFastReconnectionStatus(retries: Int = 0) {
         DispatchQueue.main.asyncAfter(deadline: .now() + Constants.fastReconnectTimeout) { [weak self] in
             guard let self else { return }
-            if (self.isPeerConnectionConnecting(self.publisher, otherNotDisconnected: self.subscriber)
-                || self.isPeerConnectionConnecting(self.subscriber, otherNotDisconnected: self.publisher))
+            if (
+                self.isPeerConnectionConnecting(self.publisher, otherNotDisconnected: self.subscriber)
+                    || self.isPeerConnectionConnecting(self.subscriber, otherNotDisconnected: self.publisher)
+            )
                 && retries == 0 {
                 log.debug("Still connecting, check again after the interval")
                 self.checkFastReconnectionStatus(retries: 1)

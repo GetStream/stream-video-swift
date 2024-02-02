@@ -108,10 +108,10 @@ class CallParticipantsInfoViewModel: ObservableObject {
         }
     }
     
-    private func executeMute(userId: String,audio: Bool = true,video: Bool = true){
+    private func executeMute(userId: String, audio: Bool = true, video: Bool = true) {
         guard let call else { return }
         Task {
-            try await call.mute(userId:userId, audio:audio, video:video)
+            try await call.mute(userId: userId, audio: audio, video: video)
         }
     }
 }

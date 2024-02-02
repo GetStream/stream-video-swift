@@ -88,7 +88,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     
     private var shouldShowCallView: Bool {
         switch viewModel.callingState {
-        case .outgoing, .incoming(_), .inCall, .joining, .lobby(_):
+        case .outgoing, .incoming(_), .inCall, .joining, .lobby:
             return true
         default:
             return false

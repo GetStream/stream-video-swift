@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-import StreamWebRTC
 import Combine
+import Foundation
 import StreamVideo
+import StreamWebRTC
 
 /// StreamPictureInPictureTrackStateAdapter serves as an adapter for managing the state of a video track
 /// used for picture-in-picture functionality. It can enable or disable observers based on its isEnabled property
@@ -16,7 +16,7 @@ final class StreamPictureInPictureTrackStateAdapter {
     var isEnabled: Bool = false {
         didSet {
             /// When the 'isEnabled' property changes, this didSet observer is called.
-            /// It checks if the new value is different from the old value, and if so, 
+            /// It checks if the new value is different from the old value, and if so,
             /// it calls the 'enableObserver' function.
             guard isEnabled != oldValue else { return }
             enableObserver(isEnabled)

@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamWebRTC
+import SwiftUI
 
 public struct CallView<Factory: ViewFactory>: View {
 
@@ -46,9 +46,9 @@ public struct CallView<Factory: ViewFactory>: View {
                         .modifier(ShadowViewModifier())
                         .padding()
                         .accessibility(identifier: "participantEventLabel")
-#if STREAM_E2E_TESTS
+                    #if STREAM_E2E_TESTS
                         .offset(y: 300)
-#endif
+                    #endif
                 }
 
                 Spacer()
@@ -73,8 +73,7 @@ public struct CallView<Factory: ViewFactory>: View {
                 .accessibility(identifier: "localVideoView")
         } else if
             let screenSharingSession = viewModel.call?.state.screenSharingSession,
-            viewModel.call?.state.isCurrentUserScreensharing == false
-        {
+            viewModel.call?.state.isCurrentUserScreensharing == false {
             viewFactory.makeScreenSharingView(
                 viewModel: viewModel,
                 screensharingSession: screenSharingSession,
@@ -109,8 +108,8 @@ public struct CallView<Factory: ViewFactory>: View {
 
     private var shouldShowDraggableView: Bool {
         (viewModel.call?.state.screenSharingSession == nil || viewModel.call?.state.isCurrentUserScreensharing == true)
-        && viewModel.participantsLayout == .grid
-        && viewModel.participants.count <= 3
+            && viewModel.participantsLayout == .grid
+            && viewModel.participants.count <= 3
     }
 
     @ViewBuilder
@@ -140,7 +139,8 @@ public struct CallView<Factory: ViewFactory>: View {
                     availableFrame: bounds,
                     ratio: bounds.width / bounds.height,
                     showAllInfo: true
-                ))
+                )
+            )
             .accessibility(identifier: "minimizedParticipantView")
         } else {
             EmptyView()

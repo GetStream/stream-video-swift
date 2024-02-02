@@ -25,7 +25,7 @@ public struct CallsQuery {
     public init(
         pageSize: Int = 25,
         sortParams: [CallSortParam],
-        filters: [String : RawJSON]? = nil,
+        filters: [String: RawJSON]? = nil,
         watch: Bool
     ) {
         self.pageSize = pageSize

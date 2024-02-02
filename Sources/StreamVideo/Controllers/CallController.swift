@@ -45,7 +45,7 @@ class CallController {
         self.callType = callType
         self.apiKey = apiKey
         self.videoConfig = videoConfig
-        self.sfuReconnectionTime = environment.sfuReconnectionTime
+        sfuReconnectionTime = environment.sfuReconnectionTime
         self.environment = environment
         self.defaultAPI = defaultAPI
         self.cachedLocation = cachedLocation
@@ -84,7 +84,7 @@ class CallController {
             notify: notify
         )
 
-        self.currentSFU = response.credentials.server.edgeName
+        currentSFU = response.credentials.server.edgeName
         let settings = callSettings ?? response.call.settings.toCallSettings
         
         try await connectToEdge(
@@ -188,24 +188,24 @@ class CallController {
 
     /// Initiates a focus operation at a specific point on the camera's view.
     ///
-    /// This method attempts to focus the camera at the given point by calling the `focus(at:)` 
+    /// This method attempts to focus the camera at the given point by calling the `focus(at:)`
     /// method on the current WebRTC client. The focus point is specified as a `CGPoint` within the
     /// coordinate space of the view.
     ///
-    /// - Parameter point: A `CGPoint` value representing the location within the view where the 
+    /// - Parameter point: A `CGPoint` value representing the location within the view where the
     /// camera should attempt to focus. The coordinate space of the point is typically normalized to the
     /// range [0, 1], where (0, 0) represents the top-left corner of the view, and (1, 1) represents the
     /// bottom-right corner.
-    /// - Throws: An error if the focus operation cannot be completed. This might occur if there is no 
+    /// - Throws: An error if the focus operation cannot be completed. This might occur if there is no
     /// current WebRTC client available, if the camera does not support tap to focus, or if an internal error
     /// occurs within the WebRTC client.
     ///
-    /// - Note: Before calling this method, ensure that the device's camera supports tap to focus 
+    /// - Note: Before calling this method, ensure that the device's camera supports tap to focus
     /// functionality and that the current WebRTC client is properly configured and connected. Otherwise,
     /// the method may throw an error.
-   func focus(at point: CGPoint) throws {
-       try currentWebRTCClient().focus(at: point)
-   }
+    func focus(at point: CGPoint) throws {
+        try currentWebRTCClient().focus(at: point)
+    }
 
     /// Cleans up the call controller.
     func cleanUp() {
@@ -309,7 +309,7 @@ class CallController {
     
     private func handleSignalChannelConnectionStateChange(_ state: WebSocketConnectionState) {
         switch state {
-        case .disconnected(let source):
+        case let .disconnected(source):
             log.debug("Signal channel disconnected")
             executeOnMain { [weak self] in
                 self?.handleSignalChannelDisconnect(source: source)
@@ -339,7 +339,7 @@ class CallController {
             return
         }
         guard (call.state.reconnectionStatus != .reconnecting || isRetry),
-                source != .userInitiated else {
+              source != .userInitiated else {
             return
         }
         if reconnectionDate == nil {
@@ -382,8 +382,8 @@ class CallController {
     
     private func handleReconnectionError() {
         log.error("Error while reconnecting to the call")
-        self.call?.update(reconnectionStatus: .disconnected)
-        self.cleanUp()
+        call?.update(reconnectionStatus: .disconnected)
+        cleanUp()
     }
     
     private func handleSessionMigrationEvent() {

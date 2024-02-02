@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 import StreamVideo
 import UIKit
 
@@ -72,7 +72,8 @@ final class StreamPictureInPictureAdapter {
         let sessionId = call?.state.sessionId
         let otherParticipants = participants.filter { $0.sessionId != sessionId }
 
-        if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false, let track = session.track {
+        if let session = call?.state.screenSharingSession, call?.state.isCurrentUserScreensharing == false,
+           let track = session.track {
             pictureInPictureController?.track = track
             activeParticipant = nil
         } else if let participant = otherParticipants.first(where: { $0.track != nil }), let track = participant.track {

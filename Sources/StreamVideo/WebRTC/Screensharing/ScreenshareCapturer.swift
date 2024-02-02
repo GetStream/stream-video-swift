@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import StreamWebRTC
 import ReplayKit
+import StreamWebRTC
 
 class ScreenshareCapturer: VideoCapturing {
     private var videoCapturer: RTCVideoCapturer
@@ -42,7 +42,7 @@ class ScreenshareCapturer: VideoCapturing {
         RPScreenRecorder.shared().isMicrophoneEnabled = false
         
         return try await withCheckedThrowingContinuation { continuation in
-            RPScreenRecorder.shared().startCapture(handler: { [weak self] sampleBuffer, type, error in
+            RPScreenRecorder.shared().startCapture(handler: { [weak self] sampleBuffer, type, _ in
                 guard let self else { return }
                 self.handle(sampleBuffer: sampleBuffer, type: type, for: device)
             }) { error in
@@ -57,7 +57,7 @@ class ScreenshareCapturer: VideoCapturing {
     
     func stopCapture() async throws {
         try await stopScreensharing()
-        await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+        await(videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
     }
     
     func handle(sampleBuffer: CMSampleBuffer, type: RPSampleBufferType, for device: AVCaptureDevice) {
@@ -89,9 +89,9 @@ class ScreenshareCapturer: VideoCapturing {
                 timeStampNs: timeStampNs
             )
 
-            self.videoCaptureHandler?.capturer(self.videoCapturer, didCapture: rtcFrame)
+            videoCaptureHandler?.capturer(videoCapturer, didCapture: rtcFrame)
             if let dimensions = outputFormat.dimensions {
-                self.videoSource.adaptOutputFormat(
+                videoSource.adaptOutputFormat(
                     toWidth: dimensions.width,
                     height: dimensions.height,
                     fps: Int32(outputFormat.fps)
@@ -101,7 +101,7 @@ class ScreenshareCapturer: VideoCapturing {
     }
     
     private func stopScreensharing() async throws {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             guard RPScreenRecorder.shared().isRecording else {
                 continuation.resume(returning: ())
                 return
@@ -115,5 +115,4 @@ class ScreenshareCapturer: VideoCapturing {
             }
         }
     }
-
 }

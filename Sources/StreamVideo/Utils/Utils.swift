@@ -22,14 +22,14 @@ public enum CallNotification {
     public static let participantLeft = "StreamVideo.Call.ParticipantLeft"
 }
 
-typealias EventHandling = ((WrappedEvent) -> ())?
+typealias EventHandling = ((WrappedEvent) -> Void)?
 
-func executeOnMain(_ task: @escaping @MainActor () -> ()) {
+func executeOnMain(_ task: @escaping @MainActor() -> Void) {
     Task {
         await task()
     }
 }
 
 func infoPlistValue(for key: String) -> String? {
-    return Bundle.main.infoDictionary?[key] as? String
+    Bundle.main.infoDictionary?[key] as? String
 }

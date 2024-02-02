@@ -53,7 +53,7 @@ class VideoCapturer: CameraVideoCapturing {
     }
     
     func startCapture(device: AVCaptureDevice?) async throws {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             guard let videoCapturer = videoCapturer as? RTCCameraVideoCapturer, let device else {
                 continuation.resume(throwing: ClientError.Unexpected())
                 return
@@ -90,11 +90,11 @@ class VideoCapturer: CameraVideoCapturing {
                     continuation.resume(returning: ())
                 }
             }
-        }
+        } as Void
     }
     
     func stopCapture() async throws {
-        return try await withCheckedThrowingContinuation { continuation in
+        try await withCheckedThrowingContinuation { continuation in
             if let capturer = videoCapturer as? RTCCameraVideoCapturer {
                 capturer.stopCapture {
                     continuation.resume(returning: ())
@@ -107,18 +107,18 @@ class VideoCapturer: CameraVideoCapturing {
 
     /// Initiates a focus and exposure operation at the specified point on the camera's view.
     ///
-    /// This method attempts to focus the camera and set the exposure at a specific point by interacting 
+    /// This method attempts to focus the camera and set the exposure at a specific point by interacting
     /// with the device's capture session.
-    /// It requires the `videoCapturer` property to be cast to `RTCCameraVideoCapturer`, and for 
+    /// It requires the `videoCapturer` property to be cast to `RTCCameraVideoCapturer`, and for
     /// a valid `AVCaptureDeviceInput` to be accessible.
     /// If these conditions are not met, it throws a `ClientError.Unexpected` error.
     ///
-    /// - Parameter point: A `CGPoint` representing the location within the view where the camera 
+    /// - Parameter point: A `CGPoint` representing the location within the view where the camera
     /// should adjust focus and exposure.
-    /// - Throws: A `ClientError.Unexpected` error if the necessary video capture components are 
+    /// - Throws: A `ClientError.Unexpected` error if the necessary video capture components are
     /// not available or properly configured.
     ///
-    /// - Note: Ensure that the `point` is normalized to the camera's coordinate space, ranging 
+    /// - Note: Ensure that the `point` is normalized to the camera's coordinate space, ranging
     /// from (0,0) at the top-left to (1,1) at the bottom-right.
     func focus(at point: CGPoint) throws {
         guard
@@ -159,7 +159,7 @@ class VideoCapturer: CameraVideoCapturing {
         }
     }
 
-    //MARK: - private
+    // MARK: - private
     
     private func checkForBackgroundCameraAccess() {
         if #available(iOS 16, *) {
@@ -196,8 +196,8 @@ extension AVCaptureDevice.Format {
         videoSupportedFrameRateRanges
             .map { $0.toRange() }
             .reduce(into: 0...0) { result, current in
-            result = merge(range: result, with: current)
-        }
+                result = merge(range: result, with: current)
+            }
     }
 }
 

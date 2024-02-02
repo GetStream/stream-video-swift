@@ -99,7 +99,7 @@ struct CallParticipantsViewContainer: View {
                             )
                         }
                     }
-                        .padding(.horizontal)
+                    .padding(.horizontal)
                 }
 
                 HStack(spacing: 16) {
@@ -128,7 +128,7 @@ struct CallParticipantsViewContainer: View {
                     EmptyView()
                 }
             }
-            .toolbar{
+            .toolbar {
                 ToolbarItem(placement: .navigationBarTrailing) {
                     ModalButton(image: images.xmark, action: closeTapped)
                         .accessibility(identifier: "Close")
@@ -188,7 +188,7 @@ struct ParticipantsButton: View {
 struct BlockedUsersView: View {
     
     var blockedUsers: [User]
-    var unblockActions: @MainActor (User) -> [CallParticipantMenuAction]
+    var unblockActions: @MainActor(User) -> [CallParticipantMenuAction]
     
     var body: some View {
         HStack {
@@ -238,21 +238,21 @@ struct CallParticipantView: View {
                         UserAvatar(imageURL: imageURL, size: imageSize) {
                             CircledTitleView(
                                 title: participant.name.isEmpty
-                                ? participant.id
-                                : String(participant.name.uppercased().first!),
+                                    ? participant.id
+                                    : String(participant.name.uppercased().first!),
                                 size: imageSize
                             )
                         }
                     } else {
                         CircledTitleView(
                             title: participant.name.isEmpty
-                            ? participant.id
-                            : String(participant.name.uppercased().first!),
+                                ? participant.id
+                                : String(participant.name.uppercased().first!),
                             size: imageSize
                         )
                     }
                 }
-                .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) } )
+                .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) })
 
                 Text(participant.name)
                     .font(fonts.bodyBold)

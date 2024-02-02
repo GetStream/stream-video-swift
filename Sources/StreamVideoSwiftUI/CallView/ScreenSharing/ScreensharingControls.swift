@@ -53,7 +53,7 @@ public struct BroadcastIconView: View {
         self.viewModel = viewModel
         self.preferredExtension = preferredExtension
         self.size = size
-        self.offset = {
+        offset = {
             if #available(iOS 16.0, *) {
                 return .init(x: -5, y: -4)
             } else {

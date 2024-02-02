@@ -16,11 +16,11 @@ public class BroadcastObserver: ObservableObject {
     
     public init() {}
     
-    lazy var broadcastStarted: CFNotificationCallback = { center, observer, name, object, userInfo in
+    lazy var broadcastStarted: CFNotificationCallback = { _, _, _, _, _ in
         postNotification(with: BroadcastConstants.broadcastStartedNotification)
     }
     
-    lazy var broadcastStopped: CFNotificationCallback = { center, observer, name, object, userInfo in
+    lazy var broadcastStopped: CFNotificationCallback = { _, _, _, _, _ in
         postNotification(with: BroadcastConstants.broadcastStoppedNotification)
     }
     
@@ -61,10 +61,10 @@ public class BroadcastObserver: ObservableObject {
     }
 
     @objc func handleBroadcastStarted() {
-        self.broadcastState = .started
+        broadcastState = .started
     }
     
     @objc func handleBroadcastStopped() {
-        self.broadcastState = .finished
+        broadcastState = .finished
     }
 }

@@ -14,16 +14,16 @@ public struct LobbyView: View {
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
-    var onJoinCallTap: () -> ()
-    var onCloseLobby: () -> ()
+    var onJoinCallTap: () -> Void
+    var onCloseLobby: () -> Void
         
     public init(
         viewModel: LobbyViewModel? = nil,
         callId: String,
         callType: String,
         callSettings: Binding<CallSettings>,
-        onJoinCallTap: @escaping () -> (),
-        onCloseLobby: @escaping () -> ()
+        onJoinCallTap: @escaping () -> Void,
+        onCloseLobby: @escaping () -> Void
     ) {
         self.callId = callId
         self.callType = callType
@@ -63,8 +63,8 @@ struct LobbyContentView: View {
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
-    var onJoinCallTap: () -> ()
-    var onCloseLobby: () -> ()
+    var onJoinCallTap: () -> Void
+    var onCloseLobby: () -> Void
     
     var body: some View {
         VStack {
@@ -189,7 +189,7 @@ struct JoinCallView: View {
     var callId: String
     var callType: String
     var callParticipants: [User]
-    var onJoinCallTap: () -> ()
+    var onJoinCallTap: () -> Void
     
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
@@ -201,7 +201,7 @@ struct JoinCallView: View {
                 .streamAccessibility(value: "\(otherParticipantsCount)")
             
             if #available(iOS 14, *) {
-                if callParticipants.count > 0 {
+                if !callParticipants.isEmpty {
                     ParticipantsInCallView(
                         callParticipants: callParticipants
                     )
@@ -227,7 +227,7 @@ struct JoinCallView: View {
     }
     
     private var waitingRoomDescription: String {
-        return "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
+        "\(L10n.WaitingRoom.description) \(L10n.WaitingRoom.numberOfParticipants(callParticipants.count))"
     }
     
     private var otherParticipantsCount: Int {
@@ -316,13 +316,15 @@ struct ParticipantsInCallView: View {
                         if let imageURL = participant.user.imageURL {
                             UserAvatar(imageURL: imageURL, size: 40) {
                                 CircledTitleView(
-                                    title: participant.user.name.isEmpty ? participant.user.id : String(participant.user.name.uppercased().first!),
+                                    title: participant.user.name.isEmpty ? participant.user
+                                        .id : String(participant.user.name.uppercased().first!),
                                     size: 40
                                 )
                             }
                         } else {
                             CircledTitleView(
-                                title: participant.user.name.isEmpty ? participant.user.id : String(participant.user.name.uppercased().first!),
+                                title: participant.user.name.isEmpty ? participant.user
+                                    .id : String(participant.user.name.uppercased().first!),
                                 size: 40
                             )
                         }

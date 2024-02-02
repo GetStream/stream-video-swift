@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 @available(iOS 14.0, *)
 public struct LocalParticipantViewModifier: ViewModifier {
@@ -26,7 +26,7 @@ public struct LocalParticipantViewModifier: ViewModifier {
         self.localParticipant = localParticipant
         self.call = call
         _microphoneChecker = .init(wrappedValue: .init())
-        self._callSettings = callSettings
+        _callSettings = callSettings
         self.showAllInfo = showAllInfo
         self.decorations = .init(decorations)
     }
@@ -74,7 +74,6 @@ public struct LocalParticipantViewModifier: ViewModifier {
     }
 }
 
-
 @available(iOS, introduced: 13, obsoleted: 14)
 public struct LocalParticipantViewModifier_iOS13: ViewModifier {
 
@@ -95,7 +94,7 @@ public struct LocalParticipantViewModifier_iOS13: ViewModifier {
         self.localParticipant = localParticipant
         self.call = call
         _microphoneChecker = .init(wrappedValue: .init())
-        self._callSettings = callSettings
+        _callSettings = callSettings
         self.showAllInfo = showAllInfo
         self.decorations = .init(decorations)
     }

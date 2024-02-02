@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Darwin
+import Foundation
 
 final class BroadcastBufferReaderConnection: BroadcastBufferConnection {
     private let streamDelegate: StreamDelegate
@@ -61,7 +61,7 @@ final class BroadcastBufferReaderConnection: BroadcastBufferConnection {
         Darwin.close(socketHandle)
     }
     
-    //MARK: - private
+    // MARK: - private
     
     private func setupAddress() -> Bool {
         var addr = sockaddr_un()

@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 /// Controller used for querying and watching calls.
 public class CallsController: ObservableObject {
@@ -39,8 +39,8 @@ public class CallsController: ObservableObject {
     init(streamVideo: StreamVideo, callsQuery: CallsQuery) {
         self.callsQuery = callsQuery
         self.streamVideo = streamVideo
-        self.subscribeToWatchEvents()
-        self.subscribeToConnectionUpdates()
+        subscribeToWatchEvents()
+        subscribeToConnectionUpdates()
     }
     
     /// Loads the next page of calls.
@@ -62,7 +62,7 @@ public class CallsController: ObservableObject {
     private func subscribeToConnectionUpdates() {
         streamVideo.state.$connection.sink { [weak self] status in
             guard let self = self else { return }
-            if case .disconnected(_) = status {
+            if case .disconnected = status {
                 self.socketDisconnected = true
             } else if status == .disconnecting {
                 self.socketDisconnected = true

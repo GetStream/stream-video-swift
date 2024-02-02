@@ -128,6 +128,7 @@ struct AudioLevel: Identifiable {
     var id: String {
         "\(index)-\(value)"
     }
+
     let value: Float
     let index: Int
 }

@@ -41,7 +41,7 @@ enum StatsReporter {
                 for (_, value) in values {
                     let stats = value.values
                     if let trackIdentifier = stats[StatsConstants.trackIdentifier] as? String,
-                        stats[StatsConstants.kind] as? String == "video" {
+                       stats[StatsConstants.kind] as? String == "video" {
                         if var existing = current[trackIdentifier] {
                             for (key, value) in stats {
                                 existing[key] = value
@@ -52,7 +52,7 @@ enum StatsReporter {
                         }
                     }
                     if let codecId = stats[StatsConstants.codecId] as? String,
-                        stats[StatsConstants.kind] as? String == "video" {
+                       stats[StatsConstants.kind] as? String == "video" {
                         fallbackCodecId = codecId
                     }
                 }

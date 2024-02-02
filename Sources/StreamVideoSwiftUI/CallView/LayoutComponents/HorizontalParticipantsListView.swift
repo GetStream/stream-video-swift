@@ -59,8 +59,8 @@ public struct HorizontalParticipantsListView<Factory: ViewFactory>: View {
         )
         self.barFrame = barFrame
 
-        let aspectRatioWidth = min(barFrame.width, barFrame.height * 16/9)
-        self.itemFrame = .init(
+        let aspectRatioWidth = min(barFrame.width, barFrame.height * 16 / 9)
+        itemFrame = .init(
             origin: .zero,
             size: .init(
                 width: aspectRatioWidth - innerItemSpace / 2,

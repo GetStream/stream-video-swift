@@ -7,7 +7,7 @@ import Foundation
 extension String {
     
     var preferredRedCodec: String {
-        let parts = self.components(separatedBy: "\r\n")
+        let parts = components(separatedBy: "\r\n")
         var redId: String = ""
         var opusId: String = ""
         for part in parts {
@@ -25,7 +25,7 @@ extension String {
         if !redId.isEmpty && !opusId.isEmpty {
             let redOpusPair = "\(redId) \(opusId)"
             let opusRedPair = "\(opusId) \(redId)"
-            let updatedResult = self.replacingOccurrences(
+            let updatedResult = replacingOccurrences(
                 of: opusRedPair,
                 with: redOpusPair
             )
@@ -44,5 +44,4 @@ extension String {
         guard components.count > 1 else { return "" }
         return components[1]
     }
-    
 }

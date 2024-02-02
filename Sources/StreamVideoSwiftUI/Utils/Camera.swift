@@ -253,7 +253,7 @@ class Camera: NSObject, @unchecked Sendable {
         }
     }
     
-    func stop() {        
+    func stop() {
         if captureSession.isRunning {
             sessionQueue.async {
                 self.captureSession.stopRunning()

@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
+import Foundation
 
 extension LogSubsystem {
     public static let thermalState = Self(rawValue: 1 << 6)
@@ -72,10 +72,9 @@ final class ThermalStateObserver: ObservableObject, ThermalStateObserving {
         self.init { ProcessInfo.processInfo.thermalState }
     }
 
-
     init(thermalStateProvider: @escaping () -> ProcessInfo.ThermalState) {
         // Initialize the thermal state with the current process's thermal state
-        self.state = thermalStateProvider()
+        state = thermalStateProvider()
         self.thermalStateProvider = thermalStateProvider
 
         // Set up a publisher to monitor thermal state changes

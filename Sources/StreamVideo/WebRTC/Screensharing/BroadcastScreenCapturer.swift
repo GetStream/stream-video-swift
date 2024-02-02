@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import StreamWebRTC
 import ReplayKit
+import StreamWebRTC
 
 class BroadcastScreenCapturer: VideoCapturing {
     
@@ -23,13 +23,13 @@ class BroadcastScreenCapturer: VideoCapturing {
     ) {
         self.videoOptions = videoOptions
         self.videoSource = videoSource
-#if targetEnvironment(simulator)
+        #if targetEnvironment(simulator)
         videoCapturer = RTCFileVideoCapturer(delegate: videoSource)
-#else
+        #else
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters, handleRotation: false)
         videoCaptureHandler = handler
         videoCapturer = RTCCameraVideoCapturer(delegate: handler)
-#endif
+        #endif
     }
     
     func startCapture(device: AVCaptureDevice?) async throws {
@@ -38,7 +38,7 @@ class BroadcastScreenCapturer: VideoCapturing {
         }
         
         guard let identifier = infoPlistValue(for: BroadcastConstants.broadcastAppGroupIdentifier),
-              let filePath = self.filePathForIdentifier(identifier)
+              let filePath = filePathForIdentifier(identifier)
         else {
             return
         }
@@ -93,14 +93,14 @@ class BroadcastScreenCapturer: VideoCapturing {
     }
     
     func stopCapture() async throws {
-        guard self.bufferReader != nil else {
+        guard bufferReader != nil else {
             // already stopped
             return
         }
         
-        self.bufferReader?.stopCapturing()
-        self.bufferReader = nil
-        await (videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
+        bufferReader?.stopCapturing()
+        bufferReader = nil
+        await(videoCapturer as? RTCCameraVideoCapturer)?.stopCapture()
     }
     
     private func filePathForIdentifier(_ identifier: String) -> String? {

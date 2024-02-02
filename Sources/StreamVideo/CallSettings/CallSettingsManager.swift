@@ -11,8 +11,8 @@ protocol CallSettingsManager {
     func updateState(
         newState state: Bool,
         current: Bool,
-        action: (Bool) async throws  -> (),
-        onUpdate: @Sendable (Bool) -> ()
+        action: (Bool) async throws -> Void,
+        onUpdate: @Sendable(Bool) -> Void
     ) async throws
 }
 
@@ -20,8 +20,8 @@ extension CallSettingsManager {
     func updateState(
         newState state: Bool,
         current: Bool,
-        action: (Bool) async throws  -> (),
-        onUpdate: @Sendable (Bool) -> ()
+        action: (Bool) async throws -> Void,
+        onUpdate: @Sendable(Bool) -> Void
     ) async throws {
         let updatingState = await self.state.updatingState
         if state == current || updatingState == state {

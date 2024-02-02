@@ -94,14 +94,20 @@ final class URLSessionClient: HTTPClient, @unchecked Sendable {
                             continuation.resume(throwing: ClientError.InvalidToken())
                         } else {
                             let requestURLString = request.url?.absoluteString ?? ""
-                            log.debug("Error executing request \(requestURLString) \(String(describing: errorResponse))", subsystems: .httpRequests)
+                            log.debug(
+                                "Error executing request \(requestURLString) \(String(describing: errorResponse))",
+                                subsystems: .httpRequests
+                            )
                             continuation.resume(throwing: ClientError.NetworkError(response.description))
                         }
                         return
                     } else if response.statusCode >= 400 {
                         let requestURLString = request.url?.absoluteString ?? ""
                         let errorResponse = Self.errorResponse(from: data, response: response) as? [String: Any]
-                        log.error("Error executing request \(requestURLString) \(String(describing: errorResponse))", subsystems: .httpRequests)
+                        log.error(
+                            "Error executing request \(requestURLString) \(String(describing: errorResponse))",
+                            subsystems: .httpRequests
+                        )
                         continuation.resume(throwing: ClientError.NetworkError(response.description))
                         return
                     }

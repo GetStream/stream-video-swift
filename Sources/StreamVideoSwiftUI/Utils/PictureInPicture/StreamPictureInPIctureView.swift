@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 /// A view that can be used as the sourceView for picture-in-picture. This is quite useful as PiP can become
 /// very weird if the sourceView isn't in the ViewHierarchy or doesn't have an appropriate size.
@@ -64,6 +64,6 @@ extension View {
     /// - Note:The View itself won't be used as sourceView.
     @ViewBuilder
     public func enablePictureInPicture(_ isActive: Bool) -> some View {
-        self.modifier(PictureInPictureModifier(isActive: isActive))
+        modifier(PictureInPictureModifier(isActive: isActive))
     }
 }
