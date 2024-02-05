@@ -20,8 +20,24 @@ final class AppState: ObservableObject {
     @Published var loading = false
     @Published var activeCall: Call?
     @Published var activeAnonymousCallId: String = ""
-    @Published var voIPPushToken: String? { didSet { didSet(voIPPushToken: voIPPushToken) } }
-    @Published var pushToken: String? { didSet { didSet(pushToken: pushToken) } }
+    @Published var voIPPushToken: String? {
+        didSet {
+            if voIPPushToken != oldValue {
+                unsecureRepository.save(voIPPushToken: voIPPushToken)
+                didSet(voIPPushToken: voIPPushToken)
+            }
+        }
+    }
+
+    @Published var pushToken: String? {
+        didSet {
+            if pushToken != oldValue {
+                unsecureRepository.save(pushToken: pushToken)
+                didSet(pushToken: pushToken)
+            }
+        }
+    }
+
     @Published var audioFilter: AudioFilter? { didSet { didSet(audioFilter: audioFilter) } }
     @Published var users: [User]
 
@@ -30,7 +46,17 @@ final class AppState: ObservableObject {
 
     // MARK: Mutable
 
-    var streamVideo: StreamVideo? { didSet { didSet(pushToken: nil); didSet(voIPPushToken: nil) } }
+    var streamVideo: StreamVideo? {
+        didSet {
+            didSet(pushToken: pushToken)
+            didSet(voIPPushToken: voIPPushToken)
+            deferSetDevice = false
+            deferSetVoipDevice = false
+        }
+    }
+
+    private var deferSetDevice = false
+    private var deferSetVoipDevice = false
 
     // MARK: Immutable
 
@@ -69,10 +95,20 @@ final class AppState: ObservableObject {
     
     func logout() async {
         if let voipPushToken = unsecureRepository.currentVoIPPushToken() {
-            _ = try? await streamVideo?.deleteDevice(id: voipPushToken)
+            do {
+                try await streamVideo?.deleteDevice(id: voipPushToken)
+                log.debug("✅ Removed VOIP push notification device for token: \(voipPushToken)")
+            } catch {
+                log.error("Removing VOIP push notification device for token: \(voipPushToken)")
+            }
         }
         if let pushToken = unsecureRepository.currentPushToken() {
-            _ = try? await streamVideo?.deleteDevice(id: pushToken)
+            do {
+                try await streamVideo?.deleteDevice(id: pushToken)
+                log.debug("✅ Removed push notification device for token: \(pushToken)")
+            } catch {
+                log.error("Removing push notification device for token: \(pushToken)")
+            }
         }
         await streamVideo?.disconnect()
         unsecureRepository.removeCurrentUser()
@@ -87,20 +123,38 @@ final class AppState: ObservableObject {
     // MARK: - Private API
 
     private func didSet(voIPPushToken: String?) {
-        unsecureRepository.save(voIPPushToken: voIPPushToken)
         if let voIPPushToken, let streamVideo {
             Task {
-                try await streamVideo.setVoipDevice(id: voIPPushToken)
+                do {
+                    try await streamVideo.setVoipDevice(id: voIPPushToken)
+                    log.debug("VOIP push notification registration ✅")
+                } catch {
+                    log.error("VOIP push notification registration ❌:\(error)")
+                }
             }
+        } else if let voIPPushToken, !voIPPushToken.isEmpty {
+            deferSetVoipDevice = true
+            log.debug("Deferring VOIPD push notification setup for token: \(voIPPushToken)")
+        } else {
+            log.debug("Clearing up VOIP push notification token.")
         }
     }
     
     private func didSet(pushToken: String?) {
-        unsecureRepository.save(pushToken: pushToken)
         if let pushToken, let streamVideo {
             Task {
-                try await streamVideo.setDevice(id: pushToken)
+                do {
+                    try await streamVideo.setDevice(id: pushToken)
+                    log.debug("Push notification registration ✅")
+                } catch {
+                    log.error("Push notification registration ❌:\(error)")
+                }
             }
+        } else if let pushToken, !pushToken.isEmpty {
+            deferSetDevice = true
+            log.debug("Deferring push notification setup for token: \(pushToken)")
+        } else {
+            log.debug("Clearing up push notification token.")
         }
     }
 

@@ -25,7 +25,7 @@ internal struct DemoCallContainerView: View {
     }
 
     internal var body: some View {
-        DemoCallContentView(viewModel: viewModel, callId: callId)
+        DemoCallContentView(viewModel: viewModel, callId: callId, loggedInView: AppEnvironment.loggedInView)
             .modifier(
                 DemoCallModifier(
                     viewFactory: DemoAppViewFactory.shared,

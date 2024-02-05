@@ -32,6 +32,7 @@ struct LoginView: View {
                             viewModel: viewModel,
                             completion: completion
                         )
+                        .listRowBackground(Color.clear)
                     }
 
                     LoginItemView {
@@ -87,6 +88,7 @@ struct LoginView: View {
                 }
             }
             .listStyle(.plain)
+            .background(Color.clear)
         }
         .alignedToReadableContentGuide()
         .foregroundColor(appearance.colors.text)
@@ -112,6 +114,7 @@ struct LoginView: View {
                 dismissButton: .cancel { error = nil }
             )
         })
+        .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
     }
 
     private var isGoogleSignInAvailable: Bool {
@@ -155,6 +158,7 @@ struct LoginItemView<Title: View, Icon: View>: View {
             }
         }
         .padding(8)
+        .listRowBackground(Color.clear)
     }
 }
 
