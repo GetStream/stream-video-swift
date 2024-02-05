@@ -24,7 +24,7 @@ final class ScreenSharingView_Tests: StreamVideoUITestCase {
             availableFrame: .init(origin: .zero, size: defaultScreenSize),
             isZoomEnabled: false
         )
-        AssertSnapshot(view, variants: snapshotVariants)
+        AssertSnapshot(view, variants: snapshotVariants, record: true)
     }
 }
 
