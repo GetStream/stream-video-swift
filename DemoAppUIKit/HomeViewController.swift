@@ -3,11 +3,11 @@
 //
 
 import Combine
-import UIKit
 import StreamVideo
-import StreamVideoUIKit
 import StreamVideoSwiftUI
+import StreamVideoUIKit
 import SwiftUI
+import UIKit
 
 class HomeViewController: UIViewController {
     
@@ -38,7 +38,7 @@ class HomeViewController: UIViewController {
         
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.title = "Call Details"
+        title = "Call Details"
         let stackView = UIStackView(arrangedSubviews: [
             createParticipantsTitle(),
             createParticipantsView(),
@@ -55,7 +55,7 @@ class HomeViewController: UIViewController {
             stackView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
-        self.view.backgroundColor = UIColor.white
+        view.backgroundColor = UIColor.white
         listenToIncomingCalls()
     }
     
@@ -113,7 +113,7 @@ class HomeViewController: UIViewController {
     private func listenToIncomingCalls() {
         callViewModel.$callingState.sink { [weak self] newState in
             guard let self = self else { return }
-            if case .incoming(_) = newState, self == self.navigationController?.topViewController {
+            if case .incoming = newState, self == self.navigationController?.topViewController {
                 let next = CallViewController.make(with: self.callViewModel)
                 CallViewHelper.shared.add(callView: next.view)
             } else if newState == .idle {
@@ -122,7 +122,6 @@ class HomeViewController: UIViewController {
         }
         .store(in: &cancellables)
     }
-    
 }
 
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {

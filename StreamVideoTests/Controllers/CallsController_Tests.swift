@@ -112,5 +112,4 @@ final class CallsController_Tests: ControllerTestCase {
         )
         return callsController
     }
-
 }

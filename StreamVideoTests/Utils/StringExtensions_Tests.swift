@@ -233,5 +233,4 @@ final class StringExtensions_Tests: XCTestCase {
         // Then
         XCTAssert(updatedSdp == expected)
     }
-
 }

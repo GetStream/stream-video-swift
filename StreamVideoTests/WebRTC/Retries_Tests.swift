@@ -116,8 +116,9 @@ final class Retries_Tests: XCTestCase {
         let result = try await executeTask(
             retryPolicy: .neverGonnaGiveYouUp(condition),
             task: {
-            try await httpClient.execute(request: dummyRequest)
-        })
+                try await httpClient.execute(request: dummyRequest)
+            }
+        )
         
         // Then
         XCTAssert(result == dummyData)
@@ -150,5 +151,4 @@ final class Retries_Tests: XCTestCase {
             XCTAssert(httpClient.requestCounter == 1)
         }
     }
-
 }

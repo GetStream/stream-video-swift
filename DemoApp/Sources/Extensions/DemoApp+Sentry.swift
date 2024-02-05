@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import StreamVideo
 import Sentry
+import StreamVideo
 
 extension DemoApp {
 
@@ -16,8 +16,10 @@ extension DemoApp {
                 options.debug = true
                 options.tracesSampleRate = 1.0
                 options.enableAppHangTracking = true
-                options.failedRequestStatusCodes = [HttpStatusCodeRange(min: 400, max: 400), HttpStatusCodeRange(min: 404, max: 599)]
-
+                options.failedRequestStatusCodes = [
+                    HttpStatusCodeRange(min: 400, max: 400),
+                    HttpStatusCodeRange(min: 404, max: 599)
+                ]
             }
 
             LogConfig.destinationTypes = [
@@ -37,7 +39,7 @@ extension DemoApp {
 
 private final class SentryLogDestination: LogDestination {
     func write(message: String) {
-        //TODO remove me once this function is gone from the protocol
+        // TODO: remove me once this function is gone from the protocol
     }
     
     var identifier: String

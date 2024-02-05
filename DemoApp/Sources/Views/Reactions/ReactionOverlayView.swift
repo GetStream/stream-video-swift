@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct ReactionOverlayView: View {
 
@@ -15,14 +15,12 @@ struct ReactionOverlayView: View {
     var body: some View {
         if let firstReaction = reactionsHelper
             .activeReactions[participant.userId]?
-            .last 
-        {
+            .last {
             reactionView(for: firstReaction)
         } else {
             EmptyView()
         }
     }
-
 
     @ViewBuilder
     private func reactionView(for reaction: Reaction) -> some View {

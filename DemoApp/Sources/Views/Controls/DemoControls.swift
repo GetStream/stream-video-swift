@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import class StreamChat.ChatChannelController
+import struct StreamChatSwiftUI.ChatChannelView
 import StreamVideo
 import StreamVideoSwiftUI
-import struct StreamChatSwiftUI.ChatChannelView
 import SwiftUI
-import class StreamChat.ChatChannelController
 
 struct AppControlsWithChat: View {
 
@@ -64,7 +64,6 @@ struct ChatControlsHeader: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.chatViewModel) var chatViewModel
-
 
     private let size: CGFloat = 50
 
@@ -152,7 +151,7 @@ extension View {
         isPresented: Binding<Bool>,
         onDismiss: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
-    ) -> some View where Content : View {
+    ) -> some View where Content: View {
         if #available(iOS 16.0, *) {
             sheet(isPresented: isPresented, onDismiss: onDismiss) {
                 content()

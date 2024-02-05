@@ -2,8 +2,8 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 struct AddUserView: View {
 

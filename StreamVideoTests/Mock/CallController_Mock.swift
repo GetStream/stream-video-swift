@@ -30,7 +30,7 @@ class CallController_Mock: CallController {
     )
     
     @MainActor func update(participants: [String: CallParticipant]) {
-        self.call?.state.participantsMap = participants
+        call?.state.participantsMap = participants
     }
 
     override func joinCall(
@@ -61,7 +61,6 @@ class CallController_Mock: CallController {
     override func changeSoundState(isEnabled: Bool) async throws { /* no op */ }
     
     override func changeSpeakerState(isEnabled: Bool) async throws { /* no op */ }
-    
 }
 
 extension CallController_Mock {

@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-import SwiftUI
-import StreamVideo
 import AVFoundation
+import Foundation
+import StreamVideo
+import SwiftUI
 
 @MainActor
 final class ReactionsHelper: ObservableObject {
@@ -127,10 +127,10 @@ final class ReactionsHelper: ObservableObject {
 
     private func handleFireworksReaction(_ reaction: Reaction, from user: User) {
         guard reaction.id == .fireworks else { return }
-        self.showFireworks = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5, execute: {
+        showFireworks = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + 2.5) {
             self.showFireworks = false
-        })
+        }
     }
 
     private func handleRaiseHandReaction(_ reaction: Reaction, from user: User) {
@@ -147,9 +147,9 @@ final class ReactionsHelper: ObservableObject {
         register(reaction: reaction, for: user.id)
 
         let duration: Double = reaction.duration ?? 2.5
-        DispatchQueue.main.asyncAfter(deadline: .now() + duration, execute: {
+        DispatchQueue.main.asyncAfter(deadline: .now() + duration) {
             self.unregister(reaction: reaction, for: user.id)
-        })
+        }
     }
 
     private func register(reaction: Reaction, for userId: String) {

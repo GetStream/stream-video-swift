@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
+import GoogleSignIn
 import StreamVideo
 import StreamVideoSwiftUI
 import StreamWebRTC
-import GoogleSignIn
+import SwiftUI
 
 @main
 struct DemoApp: App {

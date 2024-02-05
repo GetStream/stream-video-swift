@@ -15,17 +15,17 @@ final class CallService {
     private init() {}
 
     func registerForIncomingCalls() {
-    #if targetEnvironment(simulator)
+        #if targetEnvironment(simulator)
         log.info("CallKit notifications not working on a simulator")
-    #else
+        #else
         voIPPushService.registerForVoIPPushes()
-    #endif
+        #endif
     }
 
     private func makeVoIPPushService() -> VoIPPushService {
         let defaultCallText = "Unknown Caller"
 
-        return .init(voIPTokenHandler: AppState.shared.unsecureRepository) { [weak self] payload, type, completion in
+        return .init(voIPTokenHandler: AppState.shared.unsecureRepository) { [weak self] payload, _, completion in
             guard let self = self else {
                 completion()
                 return

@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import StreamVideo
 import OSLog
+import StreamVideo
 
 final class OSLogDestination: BaseLogDestination {
 

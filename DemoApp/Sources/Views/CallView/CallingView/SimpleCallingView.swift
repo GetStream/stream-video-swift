@@ -3,9 +3,9 @@
 //
 
 import Intents
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct SimpleCallingView: View {
 
@@ -79,7 +79,6 @@ struct SimpleCallingView: View {
                     .disabled(appState.loading || text.isEmpty)
                 }
                 .disabled(appState.loading || text.isEmpty)
-
             }
 
             HStack {
@@ -142,14 +141,14 @@ struct SimpleCallingView: View {
 
     private func handleDeeplink(_ deeplinkInfo: DeeplinkInfo?) {
         guard let deeplinkInfo else {
-            self.text = ""
+            text = ""
             return
         }
 
         if deeplinkInfo.baseURL == AppEnvironment.baseURL {
-            self.text = deeplinkInfo.callId
+            text = deeplinkInfo.callId
         } else if let url = deeplinkInfo.url {
-            self.changeEnvironmentPromptForURL = url
+            changeEnvironmentPromptForURL = url
             DispatchQueue
                 .main
                 .asyncAfter(deadline: .now() + 0.1) {
@@ -161,6 +160,6 @@ struct SimpleCallingView: View {
 
 extension URL: Identifiable {
     public var id: ObjectIdentifier {
-        .init(self.absoluteString as NSString)
+        .init(absoluteString as NSString)
     }
 }

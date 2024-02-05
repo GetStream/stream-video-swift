@@ -66,6 +66,4 @@ final class SpeakerManager_Tests: XCTestCase {
         // Then
         XCTAssert(speakerManager.audioOutputStatus == .enabled)
     }
-
-
 }

@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 @testable import StreamVideo
 import XCTest
-import Combine
 
 final class ThermalStateObserverTests: XCTestCase {
 

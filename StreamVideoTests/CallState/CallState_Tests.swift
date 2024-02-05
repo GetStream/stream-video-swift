@@ -50,13 +50,13 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", isSpeaking: false)
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", isSpeaking: true),
                     .dummy(id: "4", isSpeaking: true)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[2], updated[3], updated[0], updated[1]]
+                [updated[2], updated[3], updated[0], updated[1]]
             }
         )
     }
@@ -69,13 +69,13 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", hasVideo: false)
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", hasVideo: true),
                     .dummy(id: "4", hasVideo: true)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[2], updated[3], updated[0], updated[1]]
+                [updated[2], updated[3], updated[0], updated[1]]
             }
         )
     }
@@ -88,13 +88,13 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", hasAudio: false)
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", hasAudio: true),
                     .dummy(id: "4", hasAudio: true)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[2], updated[3], updated[0], updated[1]]
+                [updated[2], updated[3], updated[0], updated[1]]
             }
         )
     }
@@ -107,13 +107,13 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", userId: "D")
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", userId: "A"),
                     .dummy(id: "4", userId: "C")
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[2], updated[0], updated[3], updated[1]]
+                [updated[2], updated[0], updated[3], updated[1]]
             }
         )
     }
@@ -126,13 +126,13 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", hasVideo: true, isSpeaking: false)
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", hasVideo: true, isSpeaking: true),
                     .dummy(id: "4", hasVideo: false, isSpeaking: false)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[2], updated[0], updated[1], updated[3]]
+                [updated[2], updated[0], updated[1], updated[3]]
             }
         )
     }
@@ -145,13 +145,13 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", hasAudio: false)
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", hasAudio: true),
                     .dummy(id: "4", hasAudio: false)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[0], updated[2], updated[1], updated[3]]
+                [updated[0], updated[2], updated[1], updated[3]]
             }
         )
     }
@@ -164,16 +164,15 @@ final class CallState_Tests: XCTestCase {
                 .dummy(id: "3", userId: "D", showTrack: true, isSpeaking: true)
             ],
             update: { initial in
-                return initial + [
+                initial + [
                     .dummy(id: "2", userId: "B", showTrack: true, isSpeaking: true),
                     .dummy(id: "4", userId: "C", showTrack: false, isSpeaking: false)
                 ]
             },
             expectedTransformer: { updated in
-                return [updated[1], updated[2], updated[0], updated[3]]
+                [updated[1], updated[2], updated[0], updated[3]]
             }
         )
-
     }
 
     /// Test the execution time of `didUpdate` with many merge/add/remove operations.

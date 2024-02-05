@@ -3,26 +3,29 @@
 //
 
 import Foundation
+import GoogleSignIn
 import StreamVideo
 import StreamVideoSwiftUI
-import SwiftUI
 import StreamWebRTC
-import GoogleSignIn
+import SwiftUI
 
 @MainActor
 final class Router: ObservableObject {
 
     // MARK: - Properties
+
     // MARK: Singleton
 
     static let shared = Router(.shared)
 
     // MARK: Instance
+
     var streamVideoUI: StreamVideoUI?
     var streamChatWrapper: DemoChatAdapter?
     private lazy var deeplinkAdapter = DeeplinkAdapter()
 
     // MARK: Published
+
     let appState: AppState
 
     // MARK: - Lifecycle
@@ -30,9 +33,9 @@ final class Router: ObservableObject {
     private init(_ appState: AppState) {
         self.appState = appState
 
-        if 
+        if
             appState.unsecureRepository.currentConfiguration() != AppEnvironment.configuration
-                || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL
+            || appState.unsecureRepository.currentBaseURL() != AppEnvironment.baseURL
         {
             // Clean up the currently logged in use, if we run in different
             // configuration since the last time.
@@ -61,10 +64,9 @@ final class Router: ObservableObject {
             return
         }
 
-        if 
+        if
             deeplinkInfo.baseURL != AppEnvironment.baseURL,
-            let currentUser = appState.currentUser
-        {
+            let currentUser = appState.currentUser {
             Task {
                 await appState.logout()
                 AppEnvironment.baseURL = deeplinkInfo.baseURL
@@ -89,7 +91,7 @@ final class Router: ObservableObject {
             return
         } else if let userCredentials = AppState.shared.unsecureRepository.loadCurrentUser() {
             if userCredentials.userInfo.id.contains("@getstream") {
-                GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _,_ in
+                GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _, _ in
                     Task {
                         try await self?.setupUser(with: userCredentials)
                     }
@@ -182,7 +184,8 @@ final class Router: ObservableObject {
                 user: .init(
                     userInfo: user,
                     token: .init(stringLiteral: token)
-                ))
+                )
+            )
         }
     }
 

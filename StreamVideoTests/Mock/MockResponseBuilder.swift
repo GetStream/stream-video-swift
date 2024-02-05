@@ -17,8 +17,9 @@ class MockResponseBuilder {
                     url: "test.com",
                     wsEndpoint: "wss://test.com"
                 ),
-                token: "test")
-            ,
+                token: "test"
+            ),
+            
             duration: "1.0",
             members: [],
             ownCapabilities: [.sendAudio, .sendVideo]
@@ -181,5 +182,4 @@ class MockResponseBuilder {
             startedAt: liveStartedAt
         )
     }
-    
 }

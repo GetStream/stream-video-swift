@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct ChatModifier: ViewModifier {
 
@@ -36,7 +36,7 @@ extension View {
     @ViewBuilder
     func chat(viewModel: CallViewModel, chatViewModel: DemoChatViewModel?) -> some View {
         if let chatViewModel {
-            self.modifier(ChatModifier(viewModel: viewModel, chatViewModel: chatViewModel))
+            modifier(ChatModifier(viewModel: viewModel, chatViewModel: chatViewModel))
         } else {
             self
         }

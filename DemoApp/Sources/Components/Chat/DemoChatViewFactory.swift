@@ -3,10 +3,10 @@
 //
 
 import Foundation
-import StreamChatSwiftUI
 import StreamChat
-import SwiftUI
+import StreamChatSwiftUI
 import class StreamVideoSwiftUI.CallViewModel
+import SwiftUI
 
 final class DemoChatViewFactory: ViewFactory {
 

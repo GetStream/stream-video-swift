@@ -57,5 +57,4 @@ final class CallParticipants_Tests: XCTestCase {
         XCTAssert(participant.trackLookupPrefix == "123-track")
         XCTAssert(participant.connectionQuality == .excellent)
     }
-
 }

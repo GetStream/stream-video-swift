@@ -21,13 +21,13 @@ extension AppEnvironment {
     }
 
     static var configuration: Configuration = {
-#if STREAM_RELEASE
+        #if STREAM_RELEASE
         return .release
-#elseif STREAM_E2E_TESTS
+        #elseif STREAM_E2E_TESTS
         return .test
-#else
+        #else
         return .debug
-#endif
+        #endif
     }()
 }
 
@@ -74,7 +74,6 @@ extension AppEnvironment {
 
     static var appURLScheme: String = { AppURLScheme.universal.rawValue }()
 }
-
 
 extension AppEnvironment {
 

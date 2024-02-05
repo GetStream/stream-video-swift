@@ -3,9 +3,9 @@
 //
 
 import Foundation
+import GDPerformanceView_Swift
 import StreamVideo
 import SwiftUI
-import GDPerformanceView_Swift
 
 struct DebugMenu: View {
 
@@ -35,7 +35,8 @@ struct DebugMenu: View {
         didSet { AppEnvironment.supportedDeeplinks = supportedDeeplinks }
     }
 
-    @State private var performanceTrackerVisibility: AppEnvironment.PerformanceTrackerVisibility = AppEnvironment.performanceTrackerVisibility {
+    @State private var performanceTrackerVisibility: AppEnvironment.PerformanceTrackerVisibility = AppEnvironment
+        .performanceTrackerVisibility {
         didSet {
             switch performanceTrackerVisibility {
             case .visible:
@@ -53,7 +54,8 @@ struct DebugMenu: View {
         didSet { AppEnvironment.chatIntegration = chatIntegration }
     }
     
-    @State private var pictureInPictureIntegration: AppEnvironment.PictureInPictureIntegration = AppEnvironment.pictureInPictureIntegration {
+    @State private var pictureInPictureIntegration: AppEnvironment.PictureInPictureIntegration = AppEnvironment
+        .pictureInPictureIntegration {
         didSet { AppEnvironment.pictureInPictureIntegration = pictureInPictureIntegration }
     }
 
@@ -139,8 +141,8 @@ struct DebugMenu: View {
                         Text(item.title)
                     } icon: {
                         currentValue == item
-                        ? AnyView(Image(systemName: "checkmark"))
-                        : AnyView(EmptyView())
+                            ? AnyView(Image(systemName: "checkmark"))
+                            : AnyView(EmptyView())
                     }
                 }
             }
@@ -165,8 +167,8 @@ struct DebugMenu: View {
                         Text(item.title)
                     } icon: {
                         currentValues.contains(item)
-                        ? AnyView(Image(systemName: "checkmark"))
-                        : AnyView(EmptyView())
+                            ? AnyView(Image(systemName: "checkmark"))
+                            : AnyView(EmptyView())
                     }
                 }
             }

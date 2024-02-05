@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import UIKit
-import Foundation
 @preconcurrency import CallKit
+import Foundation
 import StreamVideo
 import StreamVideoSwiftUI
+import UIKit
 
 final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     
@@ -50,9 +50,9 @@ final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         provider.setDelegate(self, queue: nil)
         let update = CXCallUpdate()
         let idComponents = callCid.components(separatedBy: ":")
-        if idComponents.count >= 2  {
-            self.callId = idComponents[1]
-            self.callType = idComponents[0]
+        if idComponents.count >= 2 {
+            callId = idComponents[1]
+            callType = idComponents[0]
         }
         let callUUID = UUID()
         callKitId = callUUID
@@ -133,7 +133,6 @@ final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
                         } catch {
                             state = .idle
                         }
-                        
                     }
                 }
             }
@@ -186,15 +185,15 @@ final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             for await wsEvent in streamVideo.subscribe() {
                 if let event = callEventsHandler.checkForCallEvents(from: wsEvent) {
                     switch event {
-                    case .ended(_):
+                    case .ended:
                         endCurrentCall()
-                    case .rejected(let callInfo):
+                    case let .rejected(callInfo):
                         if callInfo.user?.id == streamVideo.user.id {
                             endCurrentCall()
                         } else if callInfo.user?.id == createdBy?.id {
                             endCurrentCall()
                         }
-                    case .accepted(let callInfo):
+                    case let .accepted(callInfo):
                         if callInfo.user?.id == streamVideo.user.id && state == .idle {
                             endCurrentCall()
                         }

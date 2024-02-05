@@ -15,9 +15,9 @@ final class VideoCapturerUtils_Tests: XCTestCase {
         let quarter = CMVideoDimensions.quarter
         
         // Then
-        XCTAssert(full.area == 921600)
-        XCTAssert(half.area == 307200)
-        XCTAssert(quarter.area == 172800)
+        XCTAssert(full.area == 921_600)
+        XCTAssert(half.area == 307_200)
+        XCTAssert(quarter.area == 172_800)
     }
     
     func test_mergeRanges() {
@@ -88,7 +88,5 @@ final class VideoCapturerUtils_Tests: XCTestCase {
         XCTAssert(codecs[2].dimensions.width == targetResolution.width)
         XCTAssert(codecs[2].dimensions.height == targetResolution.height)
         XCTAssert(codecs[2].maxBitrate == preferredBitrate)
-
     }
-
 }

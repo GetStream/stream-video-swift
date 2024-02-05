@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
-import StreamVideo
 @preconcurrency import StreamChat
 import StreamChatSwiftUI
-import Combine
+import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
@@ -24,10 +24,10 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
     @Published var unreadCount = 0
 
     private var channelId: ChannelId?
-    var isChatEnabled: Bool { AppEnvironment.chatIntegration == .enabled && chatWrapper != nil  }
+    var isChatEnabled: Bool { AppEnvironment.chatIntegration == .enabled && chatWrapper != nil }
 
     init(_ callViewModel: CallViewModel) {
-        self.callUpdateCancellable = callViewModel.$call.sink { [weak self] newCall in
+        callUpdateCancellable = callViewModel.$call.sink { [weak self] newCall in
             guard let newCall, let self else {
                 self?.channelController = nil
                 return
@@ -69,7 +69,7 @@ final class DemoChatViewModel: ObservableObject, ChatChannelControllerDelegate {
 
     func channelDisappeared() {
         guard let channelId = channelId else { return }
-        self.channelController = self.chatWrapper?
+        channelController = chatWrapper?
             .chatClient
             .channelController(for: channelId)
     }

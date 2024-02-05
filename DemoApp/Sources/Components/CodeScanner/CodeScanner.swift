@@ -1,11 +1,10 @@
 //
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
-// Source from https://github.com/twostraws/CodeScanner
 
 import AVFoundation
-import UIKit
 import SwiftUI
+import UIKit
 
 /// An enum describing the ways CodeScannerView can hit scanning problems.
 enum ScanError: Error {
@@ -92,7 +91,7 @@ struct CodeScannerView: UIViewControllerRepresentable {
     }
 
     func makeUIViewController(context: Context) -> ScannerViewController {
-        return ScannerViewController(showViewfinder: showViewfinder, parentView: self)
+        ScannerViewController(showViewfinder: showViewfinder, parentView: self)
     }
 
     func updateUIViewController(_ uiViewController: ScannerViewController, context: Context) {
@@ -103,18 +102,18 @@ struct CodeScannerView: UIViewControllerRepresentable {
             isManualSelect: manualSelect
         )
     }
-
 }
 
 struct CodeScannerView_Previews: PreviewProvider {
     static var previews: some View {
-        CodeScannerView(codeTypes: [.qr]) { result in
+        CodeScannerView(codeTypes: [.qr]) { _ in
             // do nothing
         }
     }
 }
 
-final class ScannerViewController: UIViewController, UINavigationControllerDelegate, AVCaptureMetadataOutputObjectsDelegate, UIAdaptivePresentationControllerDelegate {
+final class ScannerViewController: UIViewController, UINavigationControllerDelegate, AVCaptureMetadataOutputObjectsDelegate,
+    UIAdaptivePresentationControllerDelegate {
     private let photoOutput = AVCapturePhotoOutput()
     private var isCapturing = false
     private var handler: ((UIImage) -> Void)?
@@ -133,7 +132,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
     }
 
     required init?(coder: NSCoder) {
-        self.showViewfinder = false
+        showViewfinder = false
         super.init(coder: coder)
     }
 
@@ -161,9 +160,9 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.addOrientationDidChangeObserver()
-        self.setBackgroundColor()
-        self.handleCameraPermission()
+        addOrientationDidChangeObserver()
+        setBackgroundColor()
+        handleCameraPermission()
     }
 
     override func viewWillLayoutSubviews() {
@@ -226,17 +225,17 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
         case .restricted:
             break
         case .denied:
-            self.didFail(reason: .permissionDenied)
+            didFail(reason: .permissionDenied)
         case .notDetermined:
-            self.requestCameraAccess {
+            requestCameraAccess {
                 self.setupCaptureDevice()
                 DispatchQueue.main.async {
                     self.setupSession()
                 }
             }
         case .authorized:
-            self.setupCaptureDevice()
-            self.setupSession()
+            setupCaptureDevice()
+            setupSession()
 
         default:
             break
@@ -315,7 +314,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
             imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
             imageView.centerXAnchor.constraint(equalTo: view.centerXAnchor),
             imageView.widthAnchor.constraint(equalToConstant: 200),
-            imageView.heightAnchor.constraint(equalToConstant: 200),
+            imageView.heightAnchor.constraint(equalToConstant: 200)
         ])
     }
 
@@ -368,7 +367,7 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
     }
 
     @objc func manualCapturePressed(_ sender: Any?) {
-        self.readyManualCapture()
+        readyManualCapture()
     }
 
     func showManualCaptureButton(_ isManualCapture: Bool) {
@@ -401,9 +400,9 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
             videoCaptureDevice.unlockForConfiguration()
         }
 
-#if !targetEnvironment(simulator)
+        #if !targetEnvironment(simulator)
         showManualCaptureButton(isManualCapture)
-#endif
+        #endif
     }
 
     func reset() {
@@ -414,11 +413,15 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
 
     func readyManualCapture() {
         guard parentView.scanMode == .manual else { return }
-        self.reset()
+        reset()
         lastTime = Date()
     }
 
-    func metadataOutput(_ output: AVCaptureMetadataOutput, didOutput metadataObjects: [AVMetadataObject], from connection: AVCaptureConnection) {
+    func metadataOutput(
+        _ output: AVCaptureMetadataOutput,
+        didOutput metadataObjects: [AVMetadataObject],
+        from connection: AVCaptureConnection
+    ) {
         if let metadataObject = metadataObjects.first {
             guard let readableObject = metadataObject as? AVMetadataMachineReadableCodeObject else { return }
             guard let stringValue = readableObject.stringValue else { return }
@@ -430,7 +433,12 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
             isCapturing = true
 
             handler = { [self] image in
-                let result = ScanResult(string: stringValue, type: readableObject.type, image: image, corners: readableObject.corners)
+                let result = ScanResult(
+                    string: stringValue,
+                    type: readableObject.type,
+                    image: image,
+                    corners: readableObject.corners
+                )
 
                 switch parentView.scanMode {
                 case .once:
@@ -481,7 +489,6 @@ final class ScannerViewController: UIViewController, UINavigationControllerDeleg
     func didFail(reason: ScanError) {
         parentView.completion(.failure(reason))
     }
-
 }
 
 extension ScannerViewController: AVCapturePhotoCaptureDelegate {
@@ -493,11 +500,11 @@ extension ScannerViewController: AVCapturePhotoCaptureDelegate {
     ) {
         isCapturing = false
         guard let imageData = photo.fileDataRepresentation() else {
-            print("Error while generating image from photo capture data.");
+            print("Error while generating image from photo capture data.")
             return
         }
         guard let qrImage = UIImage(data: imageData) else {
-            print("Unable to generate UIImage from image data.");
+            print("Unable to generate UIImage from image data.")
             return
         }
         handler?(qrImage)
@@ -522,7 +529,12 @@ extension AVCaptureDevice {
 
     /// This returns the Ultra Wide Camera on capable devices and the default Camera for Video otherwise.
     static var bestForVideo: AVCaptureDevice? {
-        let deviceHasUltraWideCamera = !AVCaptureDevice.DiscoverySession(deviceTypes: [.builtInUltraWideCamera], mediaType: .video, position: .back).devices.isEmpty
-        return deviceHasUltraWideCamera ? AVCaptureDevice.default(.builtInUltraWideCamera, for: .video, position: .back) : AVCaptureDevice.default(for: .video)
+        let deviceHasUltraWideCamera = !AVCaptureDevice.DiscoverySession(
+            deviceTypes: [.builtInUltraWideCamera],
+            mediaType: .video,
+            position: .back
+        ).devices.isEmpty
+        return deviceHasUltraWideCamera ? AVCaptureDevice
+            .default(.builtInUltraWideCamera, for: .video, position: .back) : AVCaptureDevice.default(for: .video)
     }
 }

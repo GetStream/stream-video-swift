@@ -17,7 +17,7 @@ enum GoogleHelper {
     private static let directoryScope = "https://www.googleapis.com/auth/directory.readonly"
     
     static func signIn() async throws -> UserCredentials {
-        guard 
+        guard
             let rootViewController = UIApplication.shared.windows.first?.rootViewController,
             let clientId: String = AppEnvironment.value(for: .googleClientId)
         else {
@@ -36,7 +36,7 @@ enum GoogleHelper {
                 GIDSignIn.sharedInstance.addScopes(
                     [directoryScope],
                     presenting: rootViewController
-                ) { result, error in
+                ) { _, error in
                     // According to docs error code - 8 means that the user has
                     // already added the scopes, so it's safe to continue with
                     // sign in.
@@ -72,8 +72,8 @@ enum GoogleHelper {
         let (data, _) = try await URLSession.shared.data(from: url)
         guard let json = try JSONSerialization.jsonObject(
             with: data,
-            options:[]
-        ) as? [String : AnyObject], let people = json["people"] as? [[String: Any]] else {
+            options: []
+        ) as? [String: AnyObject], let people = json["people"] as? [[String: Any]] else {
             throw ClientError.NetworkError()
         }
         
@@ -83,7 +83,7 @@ enum GoogleHelper {
         
         for person in people {
             if let emails = person["emailAddresses"] as? [[String: Any]],
-                let email = emails.first?["value"] as? String {
+               let email = emails.first?["value"] as? String {
                 let id = email.replacingOccurrences(of: ".", with: "_")
                 let firstPhoto = (person["photos"] as? [[String: Any]])?.first as? [String: Any]
                 let photoUrl = firstPhoto?["url"] as? String ?? ""
@@ -96,7 +96,7 @@ enum GoogleHelper {
                 let employee = StreamEmployee(
                     email: email,
                     id: id,
-                    name: name, 
+                    name: name,
                     isFavorite: favoriteUserIds.contains(id),
                     imageURL: URL(string: photoUrl)
                 )

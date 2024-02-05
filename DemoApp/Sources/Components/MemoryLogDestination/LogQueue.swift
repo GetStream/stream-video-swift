@@ -24,7 +24,7 @@ final class Queue<T>: ObservableObject {
 
     init(maxCount: Int) {
         self.maxCount = maxCount
-        self.queue = .init(label: "io.getstream.queue")
+        queue = .init(label: "io.getstream.queue")
     }
 
     func insert(_ element: T) {

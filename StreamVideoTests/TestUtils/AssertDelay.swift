@@ -32,7 +32,8 @@ extension XCTestCase {
         let expectation = XCTNSPredicateExpectation(
             predicate: NSPredicate(block: { _, _ in
                 (try? expression()) ?? false
-            }), object: message())
+            }), object: message()
+        )
 
         await fulfillment(
             of: [expectation],

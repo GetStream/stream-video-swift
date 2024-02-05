@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import XCTest
 @testable import StreamVideo
+import XCTest
 
 final class EventTests: XCTestCase {
 
@@ -23,18 +23,22 @@ final class EventTests: XCTestCase {
     // MARK: - unwrap
 
     func test_unwrap_isVideoEvent_returnsExpected() {
-        let videoEvent = VideoEvent.typeHealthCheckEvent(.init(
-            connectionId: UUID().uuidString,
-            createdAt: .init())
+        let videoEvent = VideoEvent.typeHealthCheckEvent(
+            .init(
+                connectionId: UUID().uuidString,
+                createdAt: .init()
+            )
         )
 
         XCTAssertEqual(videoEvent.unwrap(), videoEvent)
     }
 
     func test_unwrap_isWrappedCoordinatorEvent_returnsExpected() {
-        let videoEvent = VideoEvent.typeHealthCheckEvent(.init(
-            connectionId: UUID().uuidString,
-            createdAt: .init())
+        let videoEvent = VideoEvent.typeHealthCheckEvent(
+            .init(
+                connectionId: UUID().uuidString,
+                createdAt: .init()
+            )
         )
         let wrappedEvent = WrappedEvent.coordinatorEvent(videoEvent)
 
@@ -71,9 +75,11 @@ final class EventTests: XCTestCase {
     }
 
     func test_forCall_isNotWSCallEvent_returnsFalse() {
-        let subject = VideoEvent.typeHealthCheckEvent(.init(
-            connectionId: UUID().uuidString,
-            createdAt: Date())
+        let subject = VideoEvent.typeHealthCheckEvent(
+            .init(
+                connectionId: UUID().uuidString,
+                createdAt: Date()
+            )
         )
 
         XCTAssertFalse(subject.forCall(cid: "123"))

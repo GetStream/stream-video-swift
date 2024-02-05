@@ -3,8 +3,8 @@
 //
 
 @testable import StreamVideo
-import XCTest
 import SwiftProtobuf
+import XCTest
 
 @MainActor
 final class CallController_Tests: ControllerTestCase {
@@ -13,7 +13,7 @@ final class CallController_Tests: ControllerTestCase {
     
     lazy var eventNotificationCenter = streamVideo?.eventNotificationCenter
     
-    public override func setUp() {
+    override public func setUp() {
         super.setUp()
         streamVideo = StreamVideo(
             apiKey: apiKey,
@@ -430,7 +430,7 @@ final class CallController_Tests: ControllerTestCase {
             hostname: "test.com",
             webSocketURLString: "wss://test.com/ws",
             token: StreamVideo.mockToken.rawValue,
-            callCid: self.callCid,
+            callCid: callCid,
             sessionID: nil,
             ownCapabilities: [.sendAudio, .sendVideo],
             videoConfig: VideoConfig(),
@@ -446,18 +446,16 @@ final class CallController_Tests: ControllerTestCase {
         )
         return webRTCClient
     }
-
 }
 
 extension CallController.Environment {
     
     static func mock(with webRTCClient: WebRTCClient) -> Self {
         .init(
-            webRTCBuilder: { _, _, _, _, _, _, _, _, _, _,_  in
-            webRTCClient
-        },
+            webRTCBuilder: { _, _, _, _, _, _, _, _, _, _, _ in
+                webRTCClient
+            },
             sfuReconnectionTime: 5
         )
     }
-    
 }

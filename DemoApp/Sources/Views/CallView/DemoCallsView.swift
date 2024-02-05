@@ -19,7 +19,7 @@ struct DemoCallsView: View {
     var body: some View {
         ScrollView {
             LazyVStack(alignment: .leading) {
-                if viewModel.favorites.count > 0 {
+                if !viewModel.favorites.isEmpty {
                     Text("Favorites")
                         .font(.headline)
                     ForEach(viewModel.favorites) { employee in
@@ -41,7 +41,7 @@ struct DemoCallsView: View {
         .navigationTitle("Stream Calls")
         .toolbar(content: {
             ToolbarItem(placement: .topBarTrailing) {
-                if viewModel.groupCallParticipants.count > 0 {
+                if !viewModel.groupCallParticipants.isEmpty {
                     Button(action: {
                         viewModel.startCall(with: viewModel.groupCallParticipants)
                         viewModel.groupCallParticipants = []

@@ -12,7 +12,7 @@ struct MockStreamStatistics: StreamStatisticsProtocol {
     
     var id: String
     
-    var values: [String : NSObject] = [:]
+    var values: [String: NSObject] = [:]
     
     subscript<T>(dynamicMember keyPath: KeyPath<StreamRTCStatistics.CodingKeys, T>) -> T? {
         set {

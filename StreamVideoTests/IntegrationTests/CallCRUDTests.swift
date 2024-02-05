@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-import XCTest
 @preconcurrency import Combine
+import Foundation
 @testable import StreamVideo
+import XCTest
 
 final class CallCRUDTest: IntegrationTest {
     
@@ -114,15 +114,15 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(updateResponse.call.custom[colorKey], blue)
         
         await assertNext(call.state.$custom) { v in
-            return v[colorKey] == blue
+            v[colorKey] == blue
         }
     }
     
     func test_getCallMissingId() async throws {
         let call = client.call(callType: defaultCallType, callId: randomCallId)
-        let apiErr = await XCTAssertThrowsErrorAsync({
-            let _ = try await call.get()
-        })
+        let apiErr = await XCTAssertThrowsErrorAsync {
+            _ = try await call.get()
+        }
         guard let apiErr = apiErr as? APIError else {
             XCTAssert((apiErr as Any) is APIError)
             return
@@ -136,16 +136,15 @@ final class CallCRUDTest: IntegrationTest {
     func test_getCallWrongType() async throws {
         let wrongCallType = "bananas"
         let call = client.call(callType: wrongCallType, callId: randomCallId)
-        let apiErr = await XCTAssertThrowsErrorAsync({
-            let _ = try await call.get()
+        let apiErr = await XCTAssertThrowsErrorAsync {
+            _ = try await call.get()
             return
-        })
+        }
         guard let apiErr = apiErr as? APIError else {
             XCTAssert((apiErr as Any) is APIError)
             return
         }
         XCTAssertEqual(apiErr.code, apiErrorCode)
-        
         
         let expectedErrMessage = "\(wrongCallType): call type does not exist"
         XCTAssertTrue(apiErr.message.localizedStandardContains(expectedErrMessage))
@@ -162,7 +161,7 @@ final class CallCRUDTest: IntegrationTest {
         try await call.sendCustomEvent([customEventKey: .string(customEventValue)])
         
         await assertNext(subscription) { ev in
-            return ev.custom[customEventKey]?.stringValue == customEventValue
+            ev.custom[customEventKey]?.stringValue == customEventValue
         }
     }
     
@@ -176,10 +175,10 @@ final class CallCRUDTest: IntegrationTest {
         try await call.create(memberIds: [user1])
         
         await assertNext(call.state.$members) { v in
-            return v.count == 1 && v[0].id == self.user1
+            v.count == 1 && v[0].id == self.user1
         }
         
-        try await call.updateMembers(members: [.init(custom: [membersGroup : .number(membersCount)], userId: user1)])
+        try await call.updateMembers(members: [.init(custom: [membersGroup: .number(membersCount)], userId: user1)])
         await assertNext(call.state.$members) { v in
             guard let member = v.first else {
                 return false
@@ -189,10 +188,10 @@ final class CallCRUDTest: IntegrationTest {
         
         try await call.removeMembers(ids: [user1])
         await assertNext(call.state.$members) { v in
-            return v.count == 0
+            v.isEmpty
         }
         
-        try await call.addMembers(members: [.init(custom: [roleKey : .string(roleValue)], userId: user1)])
+        try await call.addMembers(members: [.init(custom: [roleKey: .string(roleValue)], userId: user1)])
         await assertNext(call.state.$members) { v in
             guard let member = v.first else {
                 return false
@@ -206,9 +205,9 @@ final class CallCRUDTest: IntegrationTest {
         try await call1.create(memberIds: [user1])
         
         let call2 = client.call(callType: call1.callType, callId: call1.callId)
-        let _ = try await call2.get(membersLimit: 1)
+        _ = try await call2.get(membersLimit: 1)
         await assertNext(call1.state.$members) { v in
-            return v.count == 1
+            v.count == 1
         }
         
         var membersResponse = try await call2.queryMembers()
@@ -226,13 +225,13 @@ final class CallCRUDTest: IntegrationTest {
         // add to call2 so we can test that the other call object is updated via WS events
         try await call2.addMembers(ids: [user2])
         await assertNext(call1.state.$members) { v in
-            return v.count == 2
+            v.count == 2
         }
         
         membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user2)])
         XCTAssertEqual(1, membersResponse.members.count)
         
-        membersResponse = try await call2.queryMembers(limit:1)
+        membersResponse = try await call2.queryMembers(limit: 1)
         XCTAssertEqual(1, membersResponse.members.count)
         XCTAssertEqual(user2, membersResponse.members.first?.userId)
         
@@ -241,7 +240,7 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(user1, membersResponse.members.first?.userId)
         
         await assertNext(call2.state.$members) { v in
-            return v.count == 2 && v.first?.id == self.user2
+            v.count == 2 && v.first?.id == self.user2
         }
     }
     
@@ -264,12 +263,14 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertEqual(updateResponse.call.custom[colorKey], blue)
         
         await assertNext(calls[0].state.$custom) { v in
-            return v[colorKey] == blue
+            v[colorKey] == blue
         }
         
         let (secondTry, _) = try await client.queryCalls(
-            filters: [CallSortField.endedAt.rawValue: .nil,
-                      CallSortField.cid.rawValue: .string(call.cId)]
+            filters: [
+                CallSortField.endedAt.rawValue: .nil,
+                CallSortField.cid.rawValue: .string(call.cId)
+            ]
         )
         XCTAssertEqual(1, secondTry.count)
         XCTAssertEqual(call.cId, calls[0].cId)
@@ -277,14 +278,16 @@ final class CallCRUDTest: IntegrationTest {
         try await call.end()
         
         let (thirdTry, _) = try await client.queryCalls(
-            filters: [CallSortField.endedAt.rawValue: .nil,
-                      CallSortField.cid.rawValue: .string(call.cId)]
+            filters: [
+                CallSortField.endedAt.rawValue: .nil,
+                CallSortField.cid.rawValue: .string(call.cId)
+            ]
         )
         XCTAssertEqual(0, thirdTry.count)
         
         // check propagation as well
         await assertNext(calls[0].state.$endedAt) { v in
-            return v != nil
+            v != nil
         }
     }
     
@@ -301,22 +304,22 @@ final class CallCRUDTest: IntegrationTest {
         
         let specificSub = call.subscribe(for: CallReactionEvent.self)
         
-        let _ = try await call.sendReaction(type: reactionType1)
+        _ = try await call.sendReaction(type: reactionType1)
         await assertNext(specificSub) { ev in
-            return ev.reaction.type == reactionType1
+            ev.reaction.type == reactionType1
         }
         
-        let _ = try await call.sendReaction(type: reactionType2, emojiCode: emojiCode)
+        _ = try await call.sendReaction(type: reactionType2, emojiCode: emojiCode)
         await assertNext(specificSub) { ev in
-            return ev.reaction.type == reactionType2 && ev.reaction.emojiCode == emojiCode
+            ev.reaction.type == reactionType2 && ev.reaction.emojiCode == emojiCode
         }
         
-        let _ = try await call.sendReaction(
+        _ = try await call.sendReaction(
             type: reactionType3,
             custom: [customReactionKey: .string(customReactionValue)]
         )
         await assertNext(specificSub) { ev in
-            return ev.reaction.type == reactionType3 && ev.reaction.custom?[customReactionKey]?.stringValue == customReactionValue
+            ev.reaction.type == reactionType3 && ev.reaction.custom?[customReactionKey]?.stringValue == customReactionValue
         }
     }
     
@@ -334,7 +337,7 @@ final class CallCRUDTest: IntegrationTest {
             callId: firstUserCall.callId
         )
 
-        let _ = try await secondUserCall.get()
+        _ = try await secondUserCall.get()
         var hasAudioCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
         XCTAssertFalse(hasAudioCapability)
         var hasVideoCapability = await secondUserCall.currentUserHasCapability(.sendVideo)
@@ -343,7 +346,7 @@ final class CallCRUDTest: IntegrationTest {
         try await secondUserCall.request(permissions: [.sendAudio])
 
         await assertNext(firstUserCall.state.$permissionRequests) { value in
-            return value.count == 1 && value.first?.permission == Permission.sendAudio.rawValue
+            value.count == 1 && value.first?.permission == Permission.sendAudio.rawValue
         }
         if let p = await firstUserCall.state.permissionRequests.first {
             p.reject()
@@ -351,7 +354,7 @@ final class CallCRUDTest: IntegrationTest {
         
         // Test: permission requests list is now empty
         await assertNext(firstUserCall.state.$permissionRequests) { value in
-            return value.count == 0
+            value.isEmpty
         }
 
         hasAudioCapability = await secondUserCall.currentUserHasCapability(.sendAudio)
@@ -527,7 +530,7 @@ final class CallCRUDTest: IntegrationTest {
         XCTAssertFalse(userHasUnexpectedCapability)
         
         await assertNext(firstUserCall.state.$permissionRequests) { value in
-            return value.count == 1 && value.first?.permission == Permission.sendAudio.rawValue
+            value.count == 1 && value.first?.permission == Permission.sendAudio.rawValue
         }
         if let p = await firstUserCall.state.permissionRequests.first {
             try await firstUserCall.grant(request: p)
@@ -563,7 +566,7 @@ final class CallCRUDTest: IntegrationTest {
         try await customWait()
         
         await assertNext(subscription) { [user2] ev in
-            return ev.members.first?.userId == user2
+            ev.members.first?.userId == user2
         }
     }
     

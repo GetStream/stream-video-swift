@@ -10,7 +10,7 @@ open class StreamVideoTestCase: XCTestCase {
     public var streamVideo: StreamVideo?
     var httpClient = HTTPClient_Mock()
 
-    open override func setUp() {
+    override open func setUp() {
         super.setUp()
         streamVideo = StreamVideo.mock(httpClient: httpClient)
     }

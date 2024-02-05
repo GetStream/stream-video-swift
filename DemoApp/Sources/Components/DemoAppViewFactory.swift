@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import struct StreamChatSwiftUI.InjectedValues
 import StreamVideo
 import StreamVideoSwiftUI
-import struct StreamChatSwiftUI.InjectedValues
 import SwiftUI
 
 final class DemoAppViewFactory: ViewFactory {

@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 struct MemoryLogViewer: View {
     
@@ -12,7 +12,6 @@ struct MemoryLogViewer: View {
     
     @State private var logs = LogQueue.queue.elements
 
-    
     var body: some View {
         List {
             ForEach(logs, id: \.date) { entry in
@@ -33,7 +32,8 @@ struct MemoryLogViewer: View {
                         .elements
                         .filter { $0.message.contains(query) }
                 }
-            })
+            }
+        )
     }
     
     @ViewBuilder

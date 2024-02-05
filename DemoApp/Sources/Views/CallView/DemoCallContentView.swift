@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoCallContentView: View {
 
@@ -22,4 +22,3 @@ struct DemoCallContentView: View {
         }
     }
 }
-

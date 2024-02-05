@@ -9,6 +9,7 @@ struct UserCredentials: Identifiable, Codable {
     var id: String {
         userInfo.id
     }
+
     let userInfo: User
     let token: UserToken
 }

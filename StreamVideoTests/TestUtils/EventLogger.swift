@@ -25,11 +25,11 @@ final class EventLogger {
             return
         }
         switch event {
-        case .internalEvent(let event):
+        case let .internalEvent(event):
             events.append(event)
-        case .coordinatorEvent(let event):
+        case let .coordinatorEvent(event):
             events.append(event)
-        case .sfuEvent(_):
+        case .sfuEvent:
             break
         }
     }

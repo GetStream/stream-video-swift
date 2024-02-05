@@ -6,7 +6,7 @@ import Foundation
 import PushKit
 import StreamVideo
 
-typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> ()
+typealias VoIPPushHandler = ((PKPushPayload, PKPushType, () -> Void)) -> Void
 
 final class VoIPPushService: NSObject, PKPushRegistryDelegate {
 
@@ -19,15 +19,15 @@ final class VoIPPushService: NSObject, PKPushRegistryDelegate {
     var onReceiveIncomingPush: VoIPPushHandler
     
     init(voIPTokenHandler: VoIPTokenHandler, pushHandler: @escaping VoIPPushHandler) {
-        self.tokenHandler = voIPTokenHandler
-        self.queue = DispatchQueue(label: "io.getstream.voip")
-        self.registry = PKPushRegistry(queue: queue)
-        self.onReceiveIncomingPush = pushHandler
+        tokenHandler = voIPTokenHandler
+        queue = DispatchQueue(label: "io.getstream.voip")
+        registry = PKPushRegistry(queue: queue)
+        onReceiveIncomingPush = pushHandler
     }
     
     func registerForVoIPPushes() {
-        self.registry.delegate = self
-        self.registry.desiredPushTypes = [.voIP]
+        registry.delegate = self
+        registry.desiredPushTypes = [.voIP]
     }
     
     func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
@@ -57,6 +57,6 @@ final class VoIPPushService: NSObject, PKPushRegistryDelegate {
         for type: PKPushType,
         completion: @escaping () -> Void
     ) {
-        self.onReceiveIncomingPush((payload, type, completion))
+        onReceiveIncomingPush((payload, type, completion))
     }
 }

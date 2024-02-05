@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import UIKit
 import StreamVideo
 import StreamVideoSwiftUI
 import StreamVideoUIKit
+import UIKit
 
 @main
 class AppDelegate: UIResponder, UIApplicationDelegate {
@@ -14,7 +14,7 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]?
     ) -> Bool {
-        return true
+        true
     }
 
     // MARK: UISceneSession Lifecycle
@@ -24,6 +24,6 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
         configurationForConnecting connectingSceneSession: UISceneSession,
         options: UIScene.ConnectionOptions
     ) -> UISceneConfiguration {
-        return UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
+        UISceneConfiguration(name: "Default Configuration", sessionRole: connectingSceneSession.role)
     }
 }

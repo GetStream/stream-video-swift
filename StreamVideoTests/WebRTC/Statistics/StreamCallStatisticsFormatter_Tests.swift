@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import XCTest
 @testable import StreamVideo
+import XCTest
 
 final class StreamCallStatisticsFormatter_Tests: XCTestCase {
 
@@ -18,6 +18,7 @@ final class StreamCallStatisticsFormatter_Tests: XCTestCase {
     }
 
     // MARK: Test cases
+
     // MARK: - base
 
     func test_base_directionOutbound_trackAudio_returnsExpectedResult() {
@@ -160,13 +161,13 @@ final class StreamCallStatisticsFormatter_Tests: XCTestCase {
                 direction: .outbound,
                 update: { $0.transportId = transportId }
             ),
-
+            
             ///  The statistics instance we actually care about.
             makeMock(
                 trackKind: .video,
                 direction: .outbound,
                 update: { $0.transportId = transportId }
-            ),
+            )
         ]
 
         if containsTransportStatistic {
@@ -225,13 +226,13 @@ final class StreamCallStatisticsFormatter_Tests: XCTestCase {
                 direction: .outbound,
                 update: { $0.codecId = codecId }
             ),
-
+            
             ///  The statistics instance we actually care about.
             makeMock(
                 trackKind: .video,
                 direction: .outbound,
                 update: { $0.codecId = codecId }
-            ),
+            )
         ]
 
         if containsCodec {

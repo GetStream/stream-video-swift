@@ -73,7 +73,6 @@ class CallCoordinatorController_Mock: CallCoordinatorController {
     }
     
     func update(callSettings: CallSettingsInfo) {
-        self.currentCallSettings = callSettings
+        currentCallSettings = callSettings
     }
-    
 }

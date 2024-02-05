@@ -2,13 +2,13 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 @MainActor
 final class LoginViewModel: ObservableObject {
 
-    func login(user: User, callId: String = "", completion: @escaping (UserCredentials) -> ()) {
+    func login(user: User, callId: String = "", completion: @escaping (UserCredentials) -> Void) {
         AppState.shared.loading = true
         Task {
             let token = try await AuthenticationProvider.fetchToken(for: user.id, callIds: [callId])
@@ -18,7 +18,7 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
-    func ssoLogin(_ completion: @escaping (Result<UserCredentials, Error>) -> ()) {
+    func ssoLogin(_ completion: @escaping (Result<UserCredentials, Error>) -> Void) {
         AppState.shared.loading = true
         Task {
             do {
@@ -30,7 +30,7 @@ final class LoginViewModel: ObservableObject {
         }
     }
 
-    func joinCallAnonymously(callId: String, completion: @escaping (UserCredentials) -> ()) {
+    func joinCallAnonymously(callId: String, completion: @escaping (UserCredentials) -> Void) {
         AppState.shared.loading = true
         Task {
             let token = try await AuthenticationProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
