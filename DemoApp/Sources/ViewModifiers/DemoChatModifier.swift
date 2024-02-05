@@ -3,29 +3,32 @@
 //
 
 import Foundation
+import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
 struct ChatModifier: ViewModifier {
+
+    @Injected(\.images) var images
+    @Injected(\.fonts) var fonts
+    @Injected(\.colors) var colors
 
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var chatViewModel: DemoChatViewModel
 
     func body(content: Content) -> some View {
         content
-            .halfSheetIfAvailable(
-                isPresented: $chatViewModel.isChatVisible,
-                onDismiss: {}
+            .sheet(
+                isPresented: $chatViewModel.isChatVisible
             ) {
                 if let channelController = chatViewModel.channelController {
-                    VStack {
-                        ChatControlsHeader(viewModel: viewModel)
-                        ChatView(
-                            channelController: channelController,
-                            chatViewModel: chatViewModel,
-                            callViewModel: viewModel
-                        )
-                    }
+                    ChatView(
+                        channelController: channelController,
+                        chatViewModel: chatViewModel,
+                        callViewModel: viewModel
+                    )
+                    .withModalNavigationBar(title: "Chat") { chatViewModel.isChatVisible = false }
+                    .withDragIndicator()
                 }
             }
     }

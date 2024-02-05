@@ -104,10 +104,7 @@ struct CallParticipantsViewContainer: View {
 
                 HStack(spacing: 16) {
                     if viewModel.inviteParticipantsButtonShown {
-                        ParticipantsButton(
-                            title: L10n.Call.Participants.invite,
-                            onTapped: inviteTapped
-                        )
+                        ParticipantsButton(title: L10n.Call.Participants.invite, onTapped: inviteTapped)
                     }
 
                     ParticipantsButton(
@@ -173,7 +170,7 @@ struct ParticipantsButton: View {
                 .padding(.vertical, 12)
                 .frame(maxWidth: .infinity)
                 .foregroundColor(
-                    primaryStyle ? colors.white : colors.secondaryButton
+                    primaryStyle ? colors.textInverted : colors.secondaryButton
                 )
                 .background(primaryStyle ? colors.tintColor : Color.clear)
                 .overlay(

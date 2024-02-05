@@ -14,6 +14,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     var microphoneChecker: MicrophoneChecker
 
+    @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var reactionsHelper: ReactionsHelper = AppState.shared.reactionsHelper
 
@@ -75,6 +76,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             .onAppear {
                 updateMicrophoneChecker()
             }
+            .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
     }
 

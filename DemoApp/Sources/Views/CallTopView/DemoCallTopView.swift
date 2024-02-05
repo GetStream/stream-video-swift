@@ -23,66 +23,35 @@ struct DemoCallTopView: View {
     }
 
     var body: some View {
-        HStack {
-            Menu {
-                Button {
-                    viewModel.toggleSpeaker()
-                } label: {
-                    HStack {
-                        Text("Speaker")
-                        if viewModel.callSettings.speakerOn {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-
-                Button {
-                    if appState.audioFilter == nil {
-                        appState.audioFilter = RobotVoiceFilter(pitchShift: 0.8)
-                    } else {
-                        appState.audioFilter = nil
-                    }
-                } label: {
-                    HStack {
-                        Text("Robot voice")
-                        if appState.audioFilter != nil {
-                            Image(systemName: "checkmark")
-                        }
-                    }
-                }
-
-                reactionsList()
-            } label: {
-                Image(systemName: "ellipsis")
-                    .foregroundColor(.white)
-                    .font(fonts.bodyBold)
-                    .padding()
-            }
-
-            if viewModel.recordingState == .recording {
-                RecordingView()
-                    .accessibility(identifier: "recordingLabel")
-            }
-
-            Spacer()
-
-            if #available(iOS 14, *) {
-                HStack(spacing: 16) {
+        HStack(spacing: 0) {
+            HStack {
+                if viewModel.callParticipants.count > 1 {
                     LayoutMenuView(viewModel: viewModel)
                         .opacity(hideLayoutMenu ? 0 : 1)
                         .accessibility(identifier: "viewMenu")
-
-                    Button {
-                        viewModel.participantsShown.toggle()
-                    } label: {
-                        images.participants
-                            .foregroundColor(.white)
-                    }
-                    .accessibility(identifier: "participantMenu")
                 }
-                .padding(.horizontal)
+
+                ToggleCameraIconView(viewModel: viewModel)
+
+                Spacer()
             }
+            .frame(maxWidth: .infinity)
+
+            HStack(alignment: .center) {
+                CallDurationView(viewModel)
+            }
+            .frame(height: 44)
+            .frame(maxWidth: .infinity)
+
+            HStack {
+                Spacer()
+                HangUpIconView(viewModel: viewModel)
+            }
+            .frame(maxWidth: .infinity)
         }
+        .padding(.horizontal, 16)
+        .padding(.top)
+        .frame(maxWidth: .infinity)
         .overlay(
             viewModel.call?.state.isCurrentUserScreensharing == true ?
                 SharingIndicator(

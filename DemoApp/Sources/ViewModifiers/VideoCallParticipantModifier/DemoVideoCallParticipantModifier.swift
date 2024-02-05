@@ -42,11 +42,10 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
                         availableFrame: availableFrame,
                         ratio: ratio,
                         showAllInfo: showAllInfo,
-                        decorations: [.speaking]
+                        decorations: [.speaking, .options]
                     )
                 )
                 .modifier(ReactionsViewModifier(participant: participant))
-                .participantStats(call: call, participant: participant)
         }
     }
     

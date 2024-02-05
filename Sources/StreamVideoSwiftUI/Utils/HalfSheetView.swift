@@ -86,7 +86,7 @@ public struct DragHandleView: View {
     public var body: some View {
         VStack(alignment: .center) {
             Color.white.opacity(0.3)
-                .frame(width: 35, height: 5)
+                .frame(width: 44, height: 5)
                 .clipShape(Capsule())
         }
         .frame(maxWidth: .infinity)

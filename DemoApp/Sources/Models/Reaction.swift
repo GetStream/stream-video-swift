@@ -4,7 +4,7 @@
 
 import Foundation
 
-struct Reaction: Identifiable, Codable {
+struct Reaction: Identifiable, Codable, Equatable {
 
     enum ID: String, Codable {
         case fireworks = ":fireworks:"

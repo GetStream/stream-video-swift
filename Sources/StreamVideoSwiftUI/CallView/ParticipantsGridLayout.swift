@@ -216,7 +216,6 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     var firstRowParticipants: [CallParticipant]
     var secondRowParticipants: [CallParticipant]
     var availableFrame: CGRect
-    var innerItemSpace: CGFloat = 8
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
     
     var body: some View {
@@ -244,10 +243,7 @@ struct TwoRowParticipantsView<Factory: ViewFactory>: View {
     private var bounds: CGRect {
         .init(
             origin: .zero,
-            size: CGSize(
-                width: availableFrame.width,
-                height: (availableFrame.height - innerItemSpace) / 2
-            )
+            size: CGSize(width: availableFrame.width, height: availableFrame.height / 2)
         )
     }
 }
