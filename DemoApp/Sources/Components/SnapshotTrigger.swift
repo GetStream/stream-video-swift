@@ -1,8 +1,5 @@
 //
-//  SnapshotTrigger.swift
-//  StreamVideoSwiftUI
-//
-//  Created by Ilias Pavlidakis on 2/2/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
