@@ -15,5 +15,4 @@ class ControllerTestCase: StreamVideoTestCase {
     var callCid: String {
         "\(callType):\(callId)"
     }
-
 }

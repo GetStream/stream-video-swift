@@ -61,5 +61,4 @@ final class BroadcastUtils_Tests: XCTestCase {
         XCTAssert(result.width == size)
         XCTAssert(result.height == 151)
     }
-
 }

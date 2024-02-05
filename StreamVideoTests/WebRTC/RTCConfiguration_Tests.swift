@@ -25,5 +25,4 @@ final class RTCConfiguration_Tests: XCTestCase {
         XCTAssert(rtcConfiguration.iceServers[0].credential == "martin")
         XCTAssert(rtcConfiguration.sdpSemantics == .unifiedPlan)
     }
-    
 }

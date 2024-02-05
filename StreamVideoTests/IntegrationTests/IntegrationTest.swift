@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
 import Combine
-import XCTest
+import Foundation
 @testable import StreamVideo
+import XCTest
 
 class IntegrationTest: XCTestCase {
     
@@ -36,13 +36,13 @@ class IntegrationTest: XCTestCase {
         StreamVideoProviderKey.currentValue = client
     }
 
-    public override func setUp() async throws {
-    #if compiler(<5.8)
+    override public func setUp() async throws {
+        #if compiler(<5.8)
         throw XCTSkip("API tests are flaky on Xcode <14.3 due to async expectation handler in XCTest")
-    #else
+        #else
         try await super.setUp()
         try await client.connect()
-    #endif
+        #endif
     }
 
     // TODO: extract code between these two assertNext methods
@@ -94,10 +94,10 @@ class IntegrationTest: XCTestCase {
         of expectations: [XCTestExpectation],
         timeout seconds: TimeInterval = .infinity
     ) async {
-    #if compiler(>=5.8)
+        #if compiler(>=5.8)
         await super.fulfillment(of: expectations, timeout: seconds)
-    #else
+        #else
         await waitForExpectations(timeout: seconds)
-    #endif
+        #endif
     }
 }

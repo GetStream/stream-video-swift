@@ -62,5 +62,4 @@ final class MicrophoneManager_Tests: XCTestCase {
         // Then
         XCTAssert(microphoneManager.status == .enabled)
     }
-    
 }

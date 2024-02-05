@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import SnapshotTesting
+import StreamSwiftTestHelpers
 @testable import StreamVideo
 @testable import StreamVideoUIKit
-import StreamSwiftTestHelpers
-import SnapshotTesting
 import XCTest
 
 final class CallViewController_Tests: StreamVideoUITestCase {
@@ -24,5 +24,4 @@ final class CallViewController_Tests: StreamVideoUITestCase {
         // Then
         AssertSnapshot(callViewController.view, variants: snapshotVariants)
     }
-
 }

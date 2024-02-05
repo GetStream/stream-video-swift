@@ -575,7 +575,6 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         webRTCClient.eventNotificationCenter.process(.sfuEvent(.iceTrickle(trickleEvent)))
         try await waitForCallEvent()
 
-        
         // Then
         XCTAssert(webRTCClient.subscriber?.pendingIceCandidates.count == 1)
     }
@@ -590,7 +589,6 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         webRTCClient.eventNotificationCenter.process(.sfuEvent(.iceTrickle(trickleEvent)))
         try await waitForCallEvent()
 
-        
         // Then
         XCTAssert(webRTCClient.publisher?.pendingIceCandidates.count == 1)
     }
@@ -769,5 +767,4 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
         let track = await factory.makeVideoTrack(source: videoSource)
         return track
     }
-
 }

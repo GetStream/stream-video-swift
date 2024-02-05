@@ -189,7 +189,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         XCTAssert(streamVideo.state.connection == .initialized)
     }
     
-    //MARK: - private
+    // MARK: - private
     
     private func makeCallResponse() -> CallResponse {
         let callResponse = MockResponseBuilder().makeCallResponse(cid: "default:123")
@@ -220,5 +220,4 @@ final class StreamVideo_Tests: StreamVideoTestCase {
         httpClient.dataResponses = [data]
         return httpClient
     }
-    
 }

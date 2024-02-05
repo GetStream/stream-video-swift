@@ -57,7 +57,8 @@ final class CameraManager_Tests: XCTestCase {
         let cameraManager = CameraManager(
             callController: CallController_Mock.make(),
             initialStatus: .enabled,
-            initialDirection: .back        )
+            initialDirection: .back
+        )
         
         // When
         try await cameraManager.flip()
@@ -65,5 +66,4 @@ final class CameraManager_Tests: XCTestCase {
         // Then
         XCTAssert(cameraManager.direction == .front)
     }
-
 }

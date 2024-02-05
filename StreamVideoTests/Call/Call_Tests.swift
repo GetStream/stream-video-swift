@@ -253,5 +253,4 @@ final class Call_Tests: StreamVideoTestCase {
         duration = call?.state.duration ?? 0
         XCTAssertTrue(Int(duration) >= 1)
     }
-    
 }

@@ -31,5 +31,4 @@ final class Mapping_Tests: XCTestCase {
         XCTAssert(user.role == userResponse.role)
         XCTAssert(user.imageURL?.absoluteString == userResponse.image)
     }
-
 }

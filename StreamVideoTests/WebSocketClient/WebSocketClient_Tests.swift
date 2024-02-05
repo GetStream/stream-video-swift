@@ -29,7 +29,8 @@ final class WebSocketClient_Tests: XCTestCase {
         coordinatorHealthCheck: HealthCheckEvent(
             connectionId: connectionId,
             createdAt: createdAt,
-            type: "health.check")
+            type: "health.check"
+        )
     )
     
     override func setUp() {
@@ -115,7 +116,9 @@ final class WebSocketClient_Tests: XCTestCase {
         AssertAsync.willBeEqual(webSocketClient.connectionState, .authenticating)
 
         // Simulate a health check event is received and the connection state is updated
-        decoder.decodedEvent = .success(.coordinatorEvent(.typeHealthCheckEvent(HealthCheckEvent(connectionId: connectionId, createdAt: createdAt))))
+        decoder
+            .decodedEvent =
+            .success(.coordinatorEvent(.typeHealthCheckEvent(HealthCheckEvent(connectionId: connectionId, createdAt: createdAt))))
         engine!.simulateMessageReceived()
 
         AssertAsync.willBeEqual(webSocketClient.connectionState, .connected(healthCheckInfo: healthCheckInfo))
@@ -224,7 +227,12 @@ final class WebSocketClient_Tests: XCTestCase {
         test_connectionFlow()
         AssertAsync.willBeEqual(
             pingController.connectionStateDidChange_connectionStates,
-            [.connecting, .authenticating, .connected(healthCheckInfo: healthCheckInfo), .connected(healthCheckInfo: healthCheckInfo)]
+            [
+                .connecting,
+                .authenticating,
+                .connected(healthCheckInfo: healthCheckInfo),
+                .connected(healthCheckInfo: healthCheckInfo)
+            ]
         )
     }
 
@@ -244,10 +252,12 @@ final class WebSocketClient_Tests: XCTestCase {
         assert(pingController.pongReceivedCount == 1)
 
         // Simulate a health check (pong) event is received
-        decoder.decodedEvent = .success(.coordinatorEvent(
-            .typeHealthCheckEvent(
-                HealthCheckEvent(connectionId: connectionId, createdAt: createdAt)
-            ))
+        decoder.decodedEvent = .success(
+            .coordinatorEvent(
+                .typeHealthCheckEvent(
+                    HealthCheckEvent(connectionId: connectionId, createdAt: createdAt)
+                )
+            )
         )
         engine!.simulateMessageReceived()
 
@@ -322,7 +332,8 @@ final class WebSocketClient_Tests: XCTestCase {
                 id: "test",
                 role: "user",
                 teams: [],
-                updatedAt: Date())
+                updatedAt: Date()
+            )
         )
         decoder.decodedEvent = .success(.coordinatorEvent(.typeCustomVideoEvent(incomingEvent)))
         engine!.simulateMessageReceived()

@@ -4,7 +4,7 @@
 set -e
 
 # Define an array of paths
-paths=("Sources" "DemoApp" "DemoAppUIKit")
+paths=("Sources" "DemoApp" "DemoAppUIKit" "StreamVideoTests" "StreamVideoUIKitTests")
 
 # Loop through each path
 for path in "${paths[@]}"; do

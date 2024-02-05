@@ -3,8 +3,8 @@
 //
 
 @testable import StreamVideo
-import XCTest
 import StreamWebRTC
+import XCTest
 
 final class Sorting_Tests: XCTestCase {
 
@@ -218,7 +218,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(hasVideo: true)
             ],
             comparator: publishingVideo,
-            expectedTransformer: { [$0[1], $0[0]] }  // Expecting the one publishing video to be first.
+            expectedTransformer: { [$0[1], $0[0]] } // Expecting the one publishing video to be first.
         )
     }
 
@@ -256,7 +256,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(hasAudio: true)
             ],
             comparator: publishingAudio,
-            expectedTransformer: { [$0[1], $0[0]] }  // Expecting the one publishing audio to be first.
+            expectedTransformer: { [$0[1], $0[0]] } // Expecting the one publishing audio to be first.
         )
     }
 
@@ -282,7 +282,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Aaron")
             ],
             comparator: nameComparator,
-            expectedTransformer: { [$0[1], $0[0]] }  // Expecting the names in alphabetical order.
+            expectedTransformer: { [$0[1], $0[0]] } // Expecting the names in alphabetical order.
         )
     }
 
@@ -295,7 +295,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "AARON")
             ],
             comparator: nameComparator,
-            expectedTransformer: { [$0[2], $0[1], $0[0]] }  // Expecting a case-sensitive alphabetical order.
+            expectedTransformer: { [$0[2], $0[1], $0[0]] } // Expecting a case-sensitive alphabetical order.
         )
     }
 
@@ -307,7 +307,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Adam")
             ],
             comparator: nameComparator,
-            expectedTransformer: { [$0[0], $0[1]] }  // Order doesn't matter when names are identical.
+            expectedTransformer: { [$0[0], $0[1]] } // Order doesn't matter when names are identical.
         )
     }
 
@@ -324,7 +324,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(roles: ["admin"])
             ],
             comparator: rolesComparator,
-            expectedTransformer: { [$0[2], $0[1], $0[0]] }  // Expecting the order: "admin", "host", "speaker".
+            expectedTransformer: { [$0[2], $0[1], $0[0]] } // Expecting the order: "admin", "host", "speaker".
         )
     }
 
@@ -338,7 +338,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(roles: ["member"])
             ],
             comparator: rolesComparator,
-            expectedTransformer: { [$0[0], $0[1]] }  // "speaker" has priority over "member".
+            expectedTransformer: { [$0[0], $0[1]] } // "speaker" has priority over "member".
         )
     }
 
@@ -352,7 +352,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(roles: ["user"])
             ],
             comparator: rolesComparator,
-            expectedTransformer: { [$0[0], $0[1]] }  // The order remains unchanged as neither role has priority.
+            expectedTransformer: { [$0[0], $0[1]] } // The order remains unchanged as neither role has priority.
         )
     }
 
@@ -366,7 +366,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(roles: ["host", "user"])
             ],
             comparator: rolesComparator,
-            expectedTransformer: { [$0[0], $0[1]] }  // "admin" has the highest priority among all roles in the list.
+            expectedTransformer: { [$0[0], $0[1]] } // "admin" has the highest priority among all roles in the list.
         )
     }
 
@@ -378,7 +378,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(roles: [])
             ],
             comparator: roles(["admin", "host", "speaker", "attendee"]),
-            expectedTransformer: { [$0[0], $0[1]] }  // Order doesn't matter when there are no roles.
+            expectedTransformer: { [$0[0], $0[1]] } // Order doesn't matter when there are no roles.
         )
     }
 
@@ -418,7 +418,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(id: "A123")
             ],
             comparator: id,
-            expectedTransformer: { [$0[0], $0[1]] }  // Order doesn't matter when IDs are identical.
+            expectedTransformer: { [$0[0], $0[1]] } // Order doesn't matter when IDs are identical.
         )
     }
 
@@ -458,7 +458,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(userId: "A123")
             ],
             comparator: userId,
-            expectedTransformer: { [$0[0], $0[1]] }  // Order doesn't matter when user IDs are identical.
+            expectedTransformer: { [$0[0], $0[1]] } // Order doesn't matter when user IDs are identical.
         )
     }
 
@@ -498,7 +498,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(joinedAt: Date(timeIntervalSince1970: 1000))
             ],
             comparator: joinedAt,
-            expectedTransformer: { [$0[0], $0[1]] }  // Order doesn't matter when join times are identical.
+            expectedTransformer: { [$0[0], $0[1]] } // Order doesn't matter when join times are identical.
         )
     }
 
@@ -548,7 +548,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(id: "1", userId: "A", name: "Aaron")
             ],
             comparator: combineComparators([nameComparator, id, userId]),
-            expectedTransformer: { [$0[0], $0[1]] }  // Order doesn't matter when all comparators return .orderedSame.
+            expectedTransformer: { [$0[0], $0[1]] } // Order doesn't matter when all comparators return .orderedSame.
         )
     }
 
@@ -566,7 +566,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(id: "2", name: "Aaron")
             ],
             comparator: condition(nameComparator),
-            expectedTransformer: { [$0[1], $0[0]] }  // Aaron should come before Zane based on the condition.
+            expectedTransformer: { [$0[1], $0[0]] } // Aaron should come before Zane based on the condition.
         )
     }
 
@@ -582,7 +582,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(id: "1", name: "Zane")
             ],
             comparator: condition(id),
-            expectedTransformer: { [$0[1], $0[0]] }  // ID 1 should come before ID 2 based on the condition.
+            expectedTransformer: { [$0[1], $0[0]] } // ID 1 should come before ID 2 based on the condition.
         )
     }
 
@@ -598,7 +598,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(id: "2", userId: "A", name: "Zane")
             ],
             comparator: condition(userId),
-            expectedTransformer: { [$0[1], $0[0]] }  // UserId A should come before UserId B based on the condition.
+            expectedTransformer: { [$0[1], $0[0]] } // UserId A should come before UserId B based on the condition.
         )
     }
 
@@ -612,7 +612,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Aaron", showTrack: true)
             ],
             comparator: ifInvisible(nameComparator),
-            expectedTransformer: { [$0[1], $0[0]] }  // Since Zane is invisible, sorting by name is applied.
+            expectedTransformer: { [$0[1], $0[0]] } // Since Zane is invisible, sorting by name is applied.
         )
     }
 
@@ -624,7 +624,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Aaron", showTrack: false)
             ],
             comparator: ifInvisible(nameComparator),
-            expectedTransformer: { [$0[1], $0[0]] }  // Since both are invisible, sorting by name is applied.
+            expectedTransformer: { [$0[1], $0[0]] } // Since both are invisible, sorting by name is applied.
         )
     }
 
@@ -636,7 +636,7 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(name: "Aaron", showTrack: true)
             ],
             comparator: ifInvisible(nameComparator),
-            expectedTransformer: { [$0[0], $0[1]] }  // Since both are visible, order remains unchanged.
+            expectedTransformer: { [$0[0], $0[1]] } // Since both are visible, order remains unchanged.
         )
     }
 
@@ -648,11 +648,12 @@ final class Sorting_Tests: XCTestCase {
 
         assertSort(
             [
-                .dummy(hasVideo: false,showTrack: false, pin: PinInfo(isLocal: true, pinnedAt: Date())),
+                .dummy(hasVideo: false, showTrack: false, pin: PinInfo(isLocal: true, pinnedAt: Date())),
                 .dummy(hasVideo: true, showTrack: false, pin: nil)
             ],
             comparator: combined,
-            expectedTransformer: { [$0[0], $0[1]] }  // Pinned participant should come first even if the other has video, when both are invisible.
+            expectedTransformer: { [$0[0], $0[1]]
+            } // Pinned participant should come first even if the other has video, when both are invisible.
         )
     }
 
@@ -666,7 +667,8 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(isScreenSharing: false, showTrack: false, isSpeaking: true, isDominantSpeaker: true)
             ],
             comparator: combined,
-            expectedTransformer: { [$0[0], $0[1]] }  // Participant with screen sharing should come first even if the other is a dominant speaker and is speaking, when both are invisible.
+            expectedTransformer: { [$0[0], $0[1]]
+            } // Participant with screen sharing should come first even if the other is a dominant speaker and is speaking, when both are invisible.
         )
     }
 
@@ -680,7 +682,8 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(hasAudio: false, showTrack: false, pin: PinInfo(isLocal: true, pinnedAt: Date()))
             ],
             comparator: combined,
-            expectedTransformer: { [$0[1], $0[0]] }  // Pinned participant should come first even if the other has audio, when both are invisible.
+            expectedTransformer: { [$0[1], $0[0]]
+            } // Pinned participant should come first even if the other has audio, when both are invisible.
         )
     }
 
@@ -694,7 +697,8 @@ final class Sorting_Tests: XCTestCase {
                 .dummy(hasVideo: true, hasAudio: false, isScreenSharing: false, showTrack: false, isDominantSpeaker: true)
             ],
             comparator: combined,
-            expectedTransformer: { [$0[0], $0[1]] }  // Participant with screen sharing should come first even if the other is a dominant speaker, has video but no audio, when both are invisible.
+            expectedTransformer: { [$0[0], $0[1]]
+            } // Participant with screen sharing should come first even if the other is a dominant speaker, has video but no audio, when both are invisible.
         )
     }
 
@@ -715,4 +719,4 @@ final class Sorting_Tests: XCTestCase {
 }
 
 /// This is required as XCTestCase has a `name` property that collides with our `name` comparator
-fileprivate let nameComparator = name
+private let nameComparator = name

@@ -32,7 +32,7 @@ final class BroadcastObserver_Tests: StreamVideoTestCase {
         XCTAssert(broadcastObserver.broadcastState == .finished)
     }
     
-    //MARK: - private
+    // MARK: - private
     
     private func postNotification(_ name: String) {
         CFNotificationCenterPostNotification(
@@ -43,5 +43,4 @@ final class BroadcastObserver_Tests: StreamVideoTestCase {
             true
         )
     }
-
 }

@@ -1,3 +1,7 @@
+//
+// Copyright © 2024 Stream.io Inc. All rights reserved.
+//
+
 import Foundation
 import XCTest
 
@@ -8,7 +12,7 @@ func XCTAssertThrowsErrorAsync(
     line: UInt = #line
 ) async -> Error? {
     do {
-        let _ = try await expression()
+        _ = try await expression()
         XCTFail(message(), file: file, line: line)
     } catch {
         return error

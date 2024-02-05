@@ -98,7 +98,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Feed events that should be posted and catch the completion
         var completionCalled = false
-        center.process(events.map { .internalEvent($0)}, postNotifications: true) {
+        center.process(events.map { .internalEvent($0) }, postNotifications: true) {
             completionCalled = true
         }
 
@@ -121,7 +121,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
 
         // Feed events that should not be posted and catch the completion
         var completionCalled = false
-        center.process(events.map { .internalEvent($0)}, postNotifications: false) {
+        center.process(events.map { .internalEvent($0) }, postNotifications: false) {
             completionCalled = true
         }
 
@@ -155,7 +155,7 @@ final class EventNotificationCenter_Tests: XCTestCase {
             guard let wrappedEvent = notification.event else { return }
 
             switch wrappedEvent {
-            case .internalEvent(let event):
+            case let .internalEvent(event):
                 // Assert notification contains test event
                 XCTAssertEqual(event as? TestEvent, testEvent)
                 // Assert notification is posted on correct queue
