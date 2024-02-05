@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoReactionSelectorView: View {
 
@@ -26,7 +26,7 @@ struct DemoReactionSelectorView: View {
 
         HStack {
             if showsCloseButton {
-                HStack {  }
+                HStack {}
                     .frame(maxWidth: .infinity)
                 contentView
                     .frame(maxWidth: .infinity)
@@ -35,7 +35,7 @@ struct DemoReactionSelectorView: View {
                     ModalButton(image: images.xmark, action: closeTapped)
                         .accessibility(identifier: "Close")
                 }
-                    .frame(maxWidth: .infinity)
+                .frame(maxWidth: .infinity)
             } else {
                 contentView
             }

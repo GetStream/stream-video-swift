@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoParticipantOptionsButton: View {
 

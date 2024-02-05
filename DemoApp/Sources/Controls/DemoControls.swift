@@ -2,11 +2,11 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import class StreamChat.ChatChannelController
+import struct StreamChatSwiftUI.ChatChannelView
 import StreamVideo
 import StreamVideoSwiftUI
-import struct StreamChatSwiftUI.ChatChannelView
 import SwiftUI
-import class StreamChat.ChatChannelController
 
 struct AppControlsWithChat: View {
 
@@ -34,14 +34,14 @@ struct AppControlsWithChat: View {
                 MoreControlsIconView(viewModel: viewModel)
             }
 
-#if !targetEnvironment(simulator)
+            #if !targetEnvironment(simulator)
             if !ProcessInfo.processInfo.isiOSAppOnMac {
                 BroadcastIconView(
                     viewModel: viewModel,
                     preferredExtension: "io.getstream.iOS.VideoDemoApp.ScreenSharing"
                 )
             }
-#endif
+            #endif
             VideoIconView(viewModel: viewModel)
             MicrophoneIconView(viewModel: viewModel)
 
@@ -93,7 +93,6 @@ struct ChatControlsHeader: View {
     @Injected(\.images) var images
     @Injected(\.colors) var colors
     @Injected(\.chatViewModel) var chatViewModel
-
 
     private let size: CGFloat = 50
 

@@ -3,10 +3,10 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideoSwiftUI
+import SwiftUI
 
-fileprivate struct DemoMoreControlsViewModifier: ViewModifier {
+private struct DemoMoreControlsViewModifier: ViewModifier {
 
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
@@ -29,8 +29,8 @@ fileprivate struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"
                             ) { Image(
                                 systemName: viewModel.callSettings.speakerOn
-                                ? "speaker.wave.3.fill"
-                                : "speaker.fill"
+                                    ? "speaker.wave.3.fill"
+                                    : "speaker.fill"
                             )
                             }
 

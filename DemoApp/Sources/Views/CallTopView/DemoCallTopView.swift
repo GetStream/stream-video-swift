@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoCallTopView: View {
 
@@ -54,12 +54,12 @@ struct DemoCallTopView: View {
         .frame(maxWidth: .infinity)
         .overlay(
             viewModel.call?.state.isCurrentUserScreensharing == true ?
-            SharingIndicator(
-                viewModel: viewModel,
-                sharingPopupDismissed: $sharingPopupDismissed
-            )
-            .opacity(sharingPopupDismissed ? 0 : 1)
-            : nil
+                SharingIndicator(
+                    viewModel: viewModel,
+                    sharingPopupDismissed: $sharingPopupDismissed
+                )
+                .opacity(sharingPopupDismissed ? 0 : 1)
+                : nil
         )
     }
 
@@ -129,7 +129,6 @@ struct SharingIndicator: View {
                     .frame(height: 14)
             }
             .padding(.leading, 4)
-
         }
         .padding(.all, 8)
         .modifier(ShadowViewModifier())
@@ -137,7 +136,7 @@ struct SharingIndicator: View {
 }
 
 /// Modifier for adding shadow and corner radius to a view.
-fileprivate struct ShadowViewModifier: ViewModifier {
+private struct ShadowViewModifier: ViewModifier {
 
     var cornerRadius: CGFloat = 16
     var borderColor: Color = Color.gray
@@ -158,11 +157,10 @@ fileprivate struct ShadowViewModifier: ViewModifier {
 }
 
 /// Modifier for adding shadow to a view.
-fileprivate struct ShadowModifier: ViewModifier {
+private struct ShadowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
             .shadow(color: Color.black.opacity(0.1), radius: 10, x: 0, y: 12)
             .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
     }
 }
-

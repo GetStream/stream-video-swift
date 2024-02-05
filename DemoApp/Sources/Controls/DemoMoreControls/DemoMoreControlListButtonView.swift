@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoMoreControlListButtonView: View {
 
@@ -42,7 +42,6 @@ struct DemoMoreControlListButtonView: View {
     }
 }
 
-
 @MainActor
 struct DemoRaiseHandToggleButtonView: View {
 
@@ -61,8 +60,8 @@ struct DemoRaiseHandToggleButtonView: View {
         ) {
             Image(
                 systemName: currentUserHasRaisedHand
-                ? Reaction.lowerHand.iconName
-                : Reaction.raiseHand.iconName
+                    ? Reaction.lowerHand.iconName
+                    : Reaction.raiseHand.iconName
             )
         }
     }

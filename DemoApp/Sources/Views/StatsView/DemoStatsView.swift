@@ -2,12 +2,12 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Charts
+import Combine
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
-import Combine
-import Charts
+import SwiftUI
 
 struct DemoStatsView: View {
 
@@ -176,8 +176,7 @@ struct DemoStatsView: View {
     ) -> String {
         if
             let qualityLimitationReasons = report?.qualityLimitationReasons,
-            !qualityLimitationReasons.isEmpty
-        {
+            !qualityLimitationReasons.isEmpty {
             return qualityLimitationReasons
         } else {
             return "none"
@@ -206,8 +205,7 @@ extension View {
                 .listRowSeparatorTint(.clear)
                 .listSectionSeparatorTint(.clear)
         } else {
-            self
-                .listRowInsets(EdgeInsets(top: -1, leading: -1, bottom: -1, trailing: -1))
+            listRowInsets(EdgeInsets(top: -1, leading: -1, bottom: -1, trailing: -1))
         }
     }
 }
@@ -299,7 +297,7 @@ private struct DemoStatView<Value: Comparable>: View {
             case .bad:
                 view("Bad", with: colors.accentRed)
             case .ok:
-                view("Ok", with: Color(red: 255/255, green: 214/255, blue: 70/255))
+                view("Ok", with: Color(red: 255 / 255, green: 214 / 255, blue: 70 / 255))
             case .good:
                 view("Good", with: colors.accentGreen)
             }
@@ -333,7 +331,7 @@ private struct DemoStatView<Value: Comparable>: View {
         presentationTransformer: @escaping (Value) -> String = { "\($0)" },
         valueQualityTransformer: @escaping (Value) -> DemoStatQuality = { _ in .unknown }
     ) {
-        self._viewModel = .init(
+        _viewModel = .init(
             wrappedValue: .init(
                 viewModel: callViewModel,
                 title: title,
@@ -382,6 +380,7 @@ private struct DemoLatencyChartView: View {
                 values = Array(internalValues.enumerated())
             }
         }
+
         @Published var values: [(offset: Int, element: Double)] = []
         @Published var visibleRange: ClosedRange<Int> = 0...0
 
@@ -389,7 +388,7 @@ private struct DemoLatencyChartView: View {
             viewModel: CallViewModel
         ) {
             self.viewModel = viewModel
-            self.values = []
+            values = []
             cancellable = viewModel
                 .call?
                 .state
@@ -408,7 +407,7 @@ private struct DemoLatencyChartView: View {
     init(
         _ callViewModel: CallViewModel
     ) {
-        self._viewModel = .init(wrappedValue: .init(viewModel: callViewModel))
+        _viewModel = .init(wrappedValue: .init(viewModel: callViewModel))
     }
 
     var body: some View {

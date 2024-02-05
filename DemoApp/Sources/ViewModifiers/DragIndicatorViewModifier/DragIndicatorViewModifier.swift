@@ -3,8 +3,8 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DragIndicatorViewModifier: ViewModifier {
 
