@@ -34,6 +34,7 @@
 		402F04A92B70ED8600CA1986 /* StreamCallStatisticsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A62B70ED8600CA1986 /* StreamCallStatisticsReporter.swift */; };
 		402F04AA2B70ED8600CA1986 /* Statistics+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */; };
 		402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A82B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift */; };
+		402F04AE2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
@@ -1025,6 +1026,7 @@
 		402F04A62B70ED8600CA1986 /* StreamCallStatisticsReporter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsReporter.swift; sourceTree = "<group>"; };
 		402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Statistics+Convenience.swift"; sourceTree = "<group>"; };
 		402F04A82B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsFormatter.swift; sourceTree = "<group>"; };
+		402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamDeviceOrientationAdapter.swift; sourceTree = "<group>"; };
 		4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
@@ -1943,6 +1945,14 @@
 				402F04A82B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift */,
 			);
 			path = Statistics;
+			sourceTree = "<group>";
+		};
+		402F04AC2B714E9B00CA1986 /* DeviceOrientation */ = {
+			isa = PBXGroup;
+			children = (
+				402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */,
+			);
+			path = DeviceOrientation;
 			sourceTree = "<group>";
 		};
 		4030E5912A9DF3E6003E8CBA /* Resources */ = {
@@ -3581,7 +3591,7 @@
 		84EBAA91288C135700BE3176 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
-				408D29A72B6D55EE00885473 /* DeviceOrientation */,
+				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
 				40E1104A2B5A9F5B007DF492 /* Formatters */,
 				40A9416C2B4D958A006D6965 /* PictureInPicture */,
 				40AA2EE02AE00179000DCA5C /* ClipCorners.swift */,
@@ -4892,7 +4902,6 @@
 				8277D12C2AE81CC800BC4ECF /* FetchImage.swift in Sources */,
 				8277D1292AE81CC800BC4ECF /* ImageViewExtensions.swift in Sources */,
 				849EDA8B297AFCC80072A12D /* PreJoiningView.swift in Sources */,
-				408D29AA2B6D5CD000885473 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				8277D1732AE81CC800BC4ECF /* ImageCache.swift in Sources */,
 				8277D1642AE81CC800BC4ECF /* ImageRequestKeys.swift in Sources */,
 				8277D13D2AE81CC800BC4ECF /* ImagePipeline.swift in Sources */,
@@ -5003,6 +5012,7 @@
 				8277D1342AE81CC800BC4ECF /* UIImage.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,
 				8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */,
+				402F04AE2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				8277D1582AE81CC800BC4ECF /* ImagePrefetcher.swift in Sources */,
 				8277D1312AE81CC800BC4ECF /* GIFImageView.swift in Sources */,
 				40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */,

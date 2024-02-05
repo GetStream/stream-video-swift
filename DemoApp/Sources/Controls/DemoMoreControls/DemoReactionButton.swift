@@ -19,13 +19,13 @@ struct DemoReactionSelectorView: View {
 
     @Injected(\.images) private var images
 
-    @State private var showsCloseButton = false
+    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
     var closeTapped: () -> Void
 
     var body: some View {
 
         HStack {
-            if showsCloseButton {
+            if orientationAdapter.orientation.isLandscape {
                 HStack {}
                     .frame(maxWidth: .infinity)
                 contentView
@@ -39,9 +39,6 @@ struct DemoReactionSelectorView: View {
             } else {
                 contentView
             }
-        }
-        .onRotate { orientation in
-            showsCloseButton = !orientation.isPortrait && UIDevice.current.userInterfaceIdiom == .phone
         }
     }
 
