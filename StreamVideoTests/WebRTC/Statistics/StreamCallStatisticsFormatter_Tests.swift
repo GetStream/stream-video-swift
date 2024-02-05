@@ -333,8 +333,8 @@ final class StreamCallStatisticsFormatter_Tests: XCTestCase {
         let expected = AggregatedStatsReport(
             totalBytesSent: sumRawData,
             totalBytesReceived: sumRawData,
-            averageJitterInMs: Double(sumRawData) / Double(count),
-            averageRoundTripTimeInMs: Double(sumRawData) / Double(count),
+            averageJitterInMs: (Double(sumRawData) / Double(count)) * 1000,
+            averageRoundTripTimeInMs: (Double(sumRawData) / Double(count)) * 1000,
             qualityLimitationReasons: rawData.map { "\($0)" }.joined(separator: ","),
             highestFrameWidth: count,
             highestFrameHeight: count,
