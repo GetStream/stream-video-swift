@@ -1,29 +1,34 @@
 {
-  "configurations" : [
+  "configurations": [
     {
-      "id" : "7CCDCF41-AF57-4E40-9F72-95CC8A036F82",
-      "name" : "Configuration 1",
-      "options" : {
-
+      "id": "7CCDCF41-AF57-4E40-9F72-95CC8A036F82",
+      "name": "Configuration 1",
+      "options": {
       }
     }
   ],
-  "defaultOptions" : {
-    "codeCoverage" : false,
-    "defaultTestExecutionTimeAllowance" : 100,
-    "maximumTestExecutionTimeAllowance" : 100,
-    "maximumTestRepetitions" : 3,
-    "testRepetitionMode" : "retryOnFailure",
-    "testTimeoutsEnabled" : true
+  "defaultOptions": {
+    "codeCoverage": false,
+    "defaultTestExecutionTimeAllowance": 100,
+    "maximumTestExecutionTimeAllowance": 100,
+    "maximumTestRepetitions": 3,
+    "testRepetitionMode": "retryOnFailure",
+    "testTimeoutsEnabled": true,
+    "environmentVariableEntries": [
+      {
+        "key": "CI",
+        "value": "TRUE"
+      }
+    ]
   },
-  "testTargets" : [
+  "testTargets": [
     {
-      "target" : {
-        "containerPath" : "container:StreamVideo.xcodeproj",
-        "identifier" : "84F7380D287C141000A363F4",
-        "name" : "StreamVideoSwiftUITests"
+      "target": {
+        "containerPath": "container:StreamVideo.xcodeproj",
+        "identifier": "84F7380D287C141000A363F4",
+        "name": "StreamVideoSwiftUITests"
       }
     }
   ],
-  "version" : 1
+  "version": 1
 }
