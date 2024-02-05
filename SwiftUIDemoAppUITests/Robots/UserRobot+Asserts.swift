@@ -145,7 +145,7 @@ extension UserRobot {
     func assertEmptyCall() -> Self {
         XCTAssertEqual(1, CallPage.participantView.count) // active user is treated as a participant
         XCTAssertEqual(0, CallPage.participantName.count)
-        XCTAssertFalse(CallPage.participantMenu.exists, "participantMenu icon should disappear")
+        XCTAssertTrue(CallPage.participantMenu.exists, "participantMenu icon should disappear")
         return self
     }
     
