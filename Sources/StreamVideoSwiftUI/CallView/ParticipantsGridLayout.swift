@@ -12,28 +12,27 @@ public struct ParticipantsGridLayout<Factory: ViewFactory>: View {
     var call: Call?
     var participants: [CallParticipant]
     var availableFrame: CGRect
-    var orientation: UIInterfaceOrientation
     var onChangeTrackVisibility: @MainActor(CallParticipant, Bool) -> Void
-    
+
+    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
+
     public init(
         viewFactory: Factory,
         call: Call?,
         participants: [CallParticipant],
         availableFrame: CGRect,
-        orientation: UIInterfaceOrientation,
         onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
     ) {
         self.viewFactory = viewFactory
         self.participants = participants
         self.availableFrame = availableFrame
         self.onChangeTrackVisibility = onChangeTrackVisibility
-        self.orientation = orientation
         self.call = call
     }
     
     public var body: some View {
         ZStack {
-            if orientation.isPortrait || orientation == .unknown {
+            if orientationAdapter.orientation.isPortrait {
                 VideoParticipantsViewPortrait(
                     viewFactory: viewFactory,
                     call: call,

@@ -17,8 +17,7 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
     var isZoomEnabled: Bool
 
     private let identifier = UUID()
-
-    @State private var orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
+    @ObservedObject private var orientationAdapter = InjectedValues[\.orientationAdapter]
 
     public init(
         viewModel: CallViewModel,
@@ -38,9 +37,9 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
 
     public var body: some View {
         VStack(spacing: innerItemSpace) {
-            if !viewModel.hideUIElements, orientation.isPortrait || UIDevice.current.isIpad {
+            if !viewModel.hideUIElements, orientationAdapter.orientation.isPortrait || UIDevice.current.isIpad {
                 Text("\(screenSharing.participant.name) presenting")
-                    .foregroundColor(.white)
+                    .foregroundColor(colors.text)
                     .padding()
                     .accessibility(identifier: "participantPresentingLabel")
             }
@@ -60,9 +59,6 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
                     showAllInfo: true
                 )
             }
-        }
-        .onRotate { _ in
-            orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
 

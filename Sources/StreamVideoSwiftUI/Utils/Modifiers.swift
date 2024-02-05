@@ -86,21 +86,3 @@ struct ShadowModifier: ViewModifier {
             .shadow(color: Color.black.opacity(0.1), radius: 1, x: 0, y: 1)
     }
 }
-
-struct DeviceRotationViewModifier: ViewModifier {
-    let action: (UIDeviceOrientation) -> Void
-
-    func body(content: Content) -> some View {
-        content
-            .onAppear { action(UIDevice.current.orientation) }
-            .onReceive(NotificationCenter.default.publisher(for: UIDevice.orientationDidChangeNotification)) { _ in
-                action(UIDevice.current.orientation)
-            }
-    }
-}
-
-extension View {
-    public func onRotate(perform action: @escaping (UIDeviceOrientation) -> Void) -> some View {
-        modifier(DeviceRotationViewModifier(action: action))
-    }
-}

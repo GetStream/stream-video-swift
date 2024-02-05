@@ -38,7 +38,6 @@ fileprivate func content() {
             call: viewModel.call,
             participants: viewModel.participants,
             availableFrame: availableFrame,
-            orientation: orientation,
             onChangeTrackVisibility: onChangeTrackVisibility
         )
     }

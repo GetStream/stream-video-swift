@@ -27,6 +27,8 @@ _December 08, 2023_
     - `LocalVideoView` now accepts a `availableFrame` parameter.
     - `OutgoingCallView` now accepts an additional `callTopView` parameter to align with the updated design.
     - `CallParticipantsInfoView` and the `ViewFactory.makeParticipantsListView` method aren't accept the `availableFrame` anymore.
+    - `ParticipantsGridLayout` `orientation` parameter isn't required anymore.
+    - The `onRotate` ViewModifier has been removed. You can use the `InjectedValues[\.orientationAdapter]` which is an ObservableObject that can provide information regarding device orientation.
 
 # [0.4.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.1)
 _October 16, 2023_
