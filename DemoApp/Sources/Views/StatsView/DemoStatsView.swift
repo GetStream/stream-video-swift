@@ -123,7 +123,7 @@ struct DemoStatsView: View {
                             viewModel,
                             title: "RECEIVING BITRATE",
                             value: "none",
-                            valueTransformer: { bytesFormatter(from: $0?.publisherStats.totalBytesReceived) }
+                            valueTransformer: { bytesFormatter(from: $0?.subscriberStats.totalBytesReceived) }
                         )
                     }
                 }

@@ -218,6 +218,9 @@ struct StreamCallStatisticsFormatter {
         if count > 0 {
             result.averageJitterInMs /= count
             result.averageRoundTripTimeInMs /= count
+
+            result.averageJitterInMs *= 1000
+            result.averageRoundTripTimeInMs *= 1000
         }
         result.qualityLimitationReasons = qualityLimitationReasons.sorted().joined(separator: ",")
 
