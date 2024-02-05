@@ -2,16 +2,16 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import Foundation
-@preconcurrency import class StreamChat.ChatClient
-import class StreamChat.ChatChannelController
-import struct StreamChat.ChannelId
-import protocol StreamChat.ChatChannelControllerDelegate
-import enum StreamChat.EntityChange
-import struct StreamChat.ChatChannel
-import StreamVideo
-import StreamChatSwiftUI
 import Combine
+import Foundation
+import struct StreamChat.ChannelId
+import struct StreamChat.ChatChannel
+import class StreamChat.ChatChannelController
+import protocol StreamChat.ChatChannelControllerDelegate
+@preconcurrency import class StreamChat.ChatClient
+import enum StreamChat.EntityChange
+import StreamChatSwiftUI
+import StreamVideo
 import StreamVideoSwiftUI
 
 struct DemoChatAdapter {
@@ -33,7 +33,8 @@ struct DemoChatAdapter {
                 id: user.id,
                 name: user.name,
                 imageURL: user.imageURL
-            )) { result in result(.success(.init(stringLiteral: token))) }
+            )
+        ) { result in result(.success(.init(stringLiteral: token))) }
     }
 }
 

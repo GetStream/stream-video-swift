@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoLocalViewModifier: ViewModifier {
         
@@ -27,5 +27,4 @@ struct DemoLocalViewModifier: ViewModifier {
             .modifier(ReactionsViewModifier(participant: localParticipant))
             .participantStats(call: call, participant: localParticipant)
     }
-    
 }

@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoVideoCallParticipantModifier: ViewModifier {
 
@@ -55,7 +55,7 @@ struct DemoVideoCallParticipantModifier: ViewModifier {
         call?.state.participants.count ?? 0
     }
 
-    @MainActor 
+    @MainActor
     @ViewBuilder
     private func withLongPress<Content: View>(
         @ViewBuilder _ content: () -> Content

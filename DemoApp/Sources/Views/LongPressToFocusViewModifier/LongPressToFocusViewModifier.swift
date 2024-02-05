@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import AVFoundation
 import StreamVideo
 import SwiftUI
-import AVFoundation
 
 /// A `ViewModifier` that adds a long press to focus gesture to a SwiftUI view.
 struct LongPressToFocusViewModifier: ViewModifier {
@@ -25,7 +25,7 @@ struct LongPressToFocusViewModifier: ViewModifier {
             // When scrolling the participants list, the swipe gesture is being
             // overridden from the LonPress gesture below. The TapGesture is added
             // here to give priority on scrolling over LongPress.
-            .onTapGesture { }
+            .onTapGesture {}
             .gesture(
                 // A long press gesture requiring a minimum of 0.5 seconds to be recognized.
                 LongPressGesture(minimumDuration: 0.5)

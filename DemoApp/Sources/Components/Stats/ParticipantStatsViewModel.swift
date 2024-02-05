@@ -34,7 +34,7 @@ final class ParticipantStatsViewModel: ObservableObject {
     ) {
         self.call = call
         self.participant = participant
-        self.subscribeToStatsUpdates()
+        subscribeToStatsUpdates()
     }
 
     private func subscribeToStatsUpdates() {
@@ -100,7 +100,7 @@ final class ParticipantStatsViewModel: ObservableObject {
             entries.append(rid)
         }
         
-        self.statsEntries = entries
+        statsEntries = entries
     }
     
     deinit {
@@ -115,6 +115,7 @@ struct StatsEntry: Identifiable {
     var id: String {
         "\(title)-\(value)"
     }
+
     var title: String
     var value: String
 }

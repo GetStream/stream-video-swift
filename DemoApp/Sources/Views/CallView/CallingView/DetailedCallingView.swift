@@ -3,9 +3,9 @@
 //
 
 import Intents
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DetailedCallingView: View {
     @ObservedObject var viewModel: CallViewModel
@@ -64,7 +64,6 @@ struct DetailedCallingView: View {
                                 } label: {
                                     Text("Calls")
                                 }
-
                             }
                         }
                         .padding()

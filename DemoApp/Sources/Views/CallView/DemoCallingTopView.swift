@@ -3,10 +3,10 @@
 //
 
 import Foundation
-import SwiftUI
+import GoogleSignIn
 import StreamVideo
 import StreamVideoSwiftUI
-import GoogleSignIn
+import SwiftUI
 
 struct DemoCallingTopView: View {
 
@@ -64,4 +64,3 @@ struct DemoCallingTopView: View {
         }
     }
 }
-

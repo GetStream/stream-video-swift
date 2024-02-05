@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import EffectsLibrary
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import EffectsLibrary
 
 struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
@@ -34,7 +34,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     var body: some View {
         viewFactory
             .makeInnerCallView(viewModel: viewModel)
-            .onReceive(viewModel.callSettingsPublisher) { callSettings in
+            .onReceive(viewModel.callSettingsPublisher) { _ in
                 updateMicrophoneChecker()
             }
             .onReceive(microphoneChecker.decibelsPublisher, perform: { values in
@@ -42,31 +42,31 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
                 for value in values {
                     if (value > -50 && value < 0) && !mutedIndicatorShown {
                         mutedIndicatorShown = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                             mutedIndicatorShown = false
-                        })
+                        }
                         return
                     }
                 }
             })
             .overlay(
                 mutedIndicatorShown ?
-                VStack {
-                    Spacer()
-                    Text("You are muted.")
-                        .padding(8)
-                        .background(Color(UIColor.systemBackground))
-                        .foregroundColor(appearance.colors.text)
-                        .cornerRadius(16)
-                        .padding()
-                }
-                : nil
+                    VStack {
+                        Spacer()
+                        Text("You are muted.")
+                            .padding(8)
+                            .background(Color(UIColor.systemBackground))
+                            .foregroundColor(appearance.colors.text)
+                            .cornerRadius(16)
+                            .padding()
+                    }
+                    : nil
             )
             .overlay(
                 ZStack {
                     reactionsHelper.showFireworks
-                    ? FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
-                    : nil
+                        ? FireworksView(config: FireworksConfig(intensity: .high, lifetime: .long, initialVelocity: .fast))
+                        : nil
                 }
             )
             .onDisappear {

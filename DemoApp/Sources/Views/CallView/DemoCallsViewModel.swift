@@ -7,7 +7,7 @@ import StreamVideo
 import StreamVideoSwiftUI
 
 @MainActor
-class DemoCallsViewModel: ObservableObject {    
+class DemoCallsViewModel: ObservableObject {
     @Injected(\.streamVideo) var streamVideo
 
     @Published var streamEmployees = [StreamEmployee]()
@@ -17,6 +17,7 @@ class DemoCallsViewModel: ObservableObject {
             groupCallParticipants = []
         }
     }
+
     @Published var groupCallParticipants = [StreamEmployee]()
     
     let callViewModel: CallViewModel

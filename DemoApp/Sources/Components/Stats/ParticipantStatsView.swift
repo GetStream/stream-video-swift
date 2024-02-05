@@ -28,7 +28,7 @@ struct ParticipantStatsView: View {
                 participant: participant
             )
         )
-        self._presentationBinding = presentationBinding
+        _presentationBinding = presentationBinding
         self.availableFrame = availableFrame
     }
 

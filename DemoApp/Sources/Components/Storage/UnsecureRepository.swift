@@ -25,7 +25,6 @@ protocol VoIPTokenHandler {
     func save(voIPPushToken: String?)
 
     func currentVoIPPushToken() -> String?
-
 }
 
 protocol PushTokenHandler {
@@ -33,7 +32,6 @@ protocol PushTokenHandler {
     func save(pushToken: String?)
     
     func currentPushToken() -> String?
-    
 }
 
 protocol RunConfigurationHandler {
@@ -42,7 +40,7 @@ protocol RunConfigurationHandler {
     func currentConfiguration() -> AppEnvironment.Configuration?
 }
 
-//NOTE: This is just for simplicity. User data shouldn't be kept in `UserDefaults`.
+// NOTE: This is just for simplicity. User data shouldn't be kept in `UserDefaults`.
 final class UnsecureRepository: UserRepository, VoIPTokenHandler, PushTokenHandler, RunConfigurationHandler {
     enum Key: String, CaseIterable {
         case user = "stream.video.user"

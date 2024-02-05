@@ -9,7 +9,7 @@ import SwiftUI
 struct ShareActivityView: UIViewControllerRepresentable {
 
     var activityItems: [Any]
-    var applicationActivities: [UIActivity]? = nil
+    var applicationActivities: [UIActivity]?
 
     init(activityItems: [Any], applicationActivities: [UIActivity]? = nil) {
         self.activityItems = activityItems

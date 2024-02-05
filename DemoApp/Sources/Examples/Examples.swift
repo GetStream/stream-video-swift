@@ -44,7 +44,6 @@ struct FBCallControlsView: View {
         .modifier(BackgroundModifier())
         .padding(.horizontal, 32)
     }
-    
 }
 
 struct BackgroundModifier: ViewModifier {
@@ -62,7 +61,6 @@ struct BackgroundModifier: ViewModifier {
                 .cornerRadius(24)
         }
     }
-    
 }
 
 struct CustomVideoCallParticipantView: View {
@@ -134,7 +132,6 @@ struct CustomVideoCallParticipantView: View {
         participant.shouldDisplayTrack
     }
 }
-
 
 struct CustomParticipantModifier: ViewModifier {
             
@@ -257,7 +254,6 @@ struct CustomIncomingCallView: View {
                 Spacer()
             }
             .padding()
-            
         }
         .background(Color.white.edgesIgnoringSafeArea(.all))
         .onChange(of: viewModel.hideIncomingCallScreen) { newValue in
@@ -273,5 +269,4 @@ struct CustomIncomingCallView: View {
     var callInfo: IncomingCall {
         viewModel.callInfo
     }
-    
 }

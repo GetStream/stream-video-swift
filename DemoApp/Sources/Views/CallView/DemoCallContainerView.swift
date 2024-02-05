@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
+import Intents
 import StreamVideo
 import StreamVideoSwiftUI
-import Intents
+import SwiftUI
 
 internal struct DemoCallContainerView: View {
 

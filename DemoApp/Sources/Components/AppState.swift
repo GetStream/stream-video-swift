@@ -3,13 +3,14 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamVideoSwiftUI
+import SwiftUI
 
 @MainActor
 final class AppState: ObservableObject {
     
     // MARK: - Properties
+
     // MARK: Published
 
     @Published var apiKey: String = ""
@@ -29,7 +30,7 @@ final class AppState: ObservableObject {
 
     // MARK: Mutable
 
-    var streamVideo: StreamVideo? { didSet { didSet(pushToken: nil); didSet(voIPPushToken: nil); } }
+    var streamVideo: StreamVideo? { didSet { didSet(pushToken: nil); didSet(voIPPushToken: nil) } }
 
     // MARK: Immutable
 
@@ -44,11 +45,11 @@ final class AppState: ObservableObject {
     private init() {
         switch AppEnvironment.configuration {
         case .debug:
-            self.users = User.builtIn
+            users = User.builtIn
         case .test:
-            self.users = User.builtIn
+            users = User.builtIn
         case .release:
-            self.users = []
+            users = []
         }
     }
     
@@ -109,6 +110,7 @@ final class AppState: ObservableObject {
 }
 
 // MARK: - UserListProvider
+
 extension AppState: UserListProvider {
 
     func loadNextUsers(

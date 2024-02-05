@@ -27,7 +27,7 @@ enum AuthenticationProvider {
         for userId: String,
         callIds: [String] = []
     ) async throws -> UserToken {
-        if 
+        if
             AppEnvironment.configuration.isTest,
             AppEnvironment.contains(.mockJWT) {
             AppState.shared.apiKey = "hd8szvscpxvd"

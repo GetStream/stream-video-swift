@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import GDPerformanceView_Swift
 import StreamVideo
 import SwiftUI
 import UIKit
-import GDPerformanceView_Swift
 
 class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDelegate {
 
@@ -29,7 +29,7 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(
         _ app: UIApplication,
         open url: URL,
-        options: [UIApplication.OpenURLOptionsKey : Any] = [:]
+        options: [UIApplication.OpenURLOptionsKey: Any] = [:]
     ) -> Bool {
         Router.shared.handle(url: url)
         return true
@@ -39,8 +39,10 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
     func application(
         _ application: UIApplication,
         continue userActivity: NSUserActivity,
-        restorationHandler: @escaping ([UIUserActivityRestoring]?
-        ) -> Void) -> Bool {
+        restorationHandler: @escaping (
+            [UIUserActivityRestoring]?
+        ) -> Void
+    ) -> Bool {
         guard let url = userActivity.webpageURL else {
             return false
         }

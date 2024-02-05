@@ -2,14 +2,14 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
+import SwiftUI
 
 struct JoinCallView: View {
 
     @Environment(\.presentationMode) var presentationMode
     @StateObject var viewModel: LoginViewModel
-    var completion: (UserCredentials) -> ()
+    var completion: (UserCredentials) -> Void
 
     @State private var callId = ""
 
@@ -31,7 +31,7 @@ struct JoinCallView: View {
             }
             .padding()
             .navigationTitle("Join Call")
-            .overlay( AppState.shared.loading ? ProgressView() : nil)
+            .overlay(AppState.shared.loading ? ProgressView() : nil)
         }
     }
 }

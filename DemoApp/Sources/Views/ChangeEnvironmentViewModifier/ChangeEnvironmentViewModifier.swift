@@ -15,7 +15,9 @@ struct ChangeEnvironmentModifier: ViewModifier {
                 if let url = changeEnvironmentPromptForURL {
                     return Alert(
                         title: Text("Change environment"),
-                        message: Text("In order to access the call you scanned, we will need to change the environment you are logged in. Would you like to proceed?"),
+                        message: Text(
+                            "In order to access the call you scanned, we will need to change the environment you are logged in. Would you like to proceed?"
+                        ),
                         primaryButton: .default(Text("OK")) {
                             Router.shared.handle(url: url)
                             showChangeEnvironmentPrompt = false

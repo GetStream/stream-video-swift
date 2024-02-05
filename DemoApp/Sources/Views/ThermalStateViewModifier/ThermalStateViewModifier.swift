@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct ThermalStateViewModifier: ViewModifier {
 
@@ -30,11 +30,11 @@ struct ThermalStateViewModifier: ViewModifier {
                     )
                 case .critical:
                     toast = .init(
-                            style: .error,
-                            message: "Device temperature is critical.",
-                            placement: .top,
-                            duration: 5
-                        )
+                        style: .error,
+                        message: "Device temperature is critical.",
+                        placement: .top,
+                        duration: 5
+                    )
                 @unknown default:
                     toast = nil
                 }

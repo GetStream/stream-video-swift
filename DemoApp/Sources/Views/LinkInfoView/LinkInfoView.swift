@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
-import StreamVideoSwiftUI
 import StreamVideo
+import StreamVideoSwiftUI
+import SwiftUI
 
 struct LinkInfoView: View {
 
@@ -23,7 +23,6 @@ struct LinkInfoView: View {
                     .aspectRatio(contentMode: .fit)
                     .frame(width: 22)
                     .foregroundColor(.white)
-
             }
 
             Text("Send the URL below to someone to have them join this call:")
@@ -35,5 +34,4 @@ struct LinkInfoView: View {
             Spacer()
         }
     }
-
 }

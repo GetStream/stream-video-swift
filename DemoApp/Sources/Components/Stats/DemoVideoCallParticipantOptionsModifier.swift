@@ -2,9 +2,9 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 @MainActor
 public struct DemoVideoCallParticipantOptionsModifier: ViewModifier {
@@ -81,7 +81,8 @@ public struct DemoVideoCallParticipantOptionsModifier: ViewModifier {
                 .actionSheet(isPresented: $presentActionSheet) {
                     ActionSheet(
                         title: Text("\(participant.name)"),
-                        buttons: elements.map { ActionSheet.Button.default(Text($0.title), action: $0.action) } + [ActionSheet.Button.cancel()]
+                        buttons: elements
+                            .map { ActionSheet.Button.default(Text($0.title), action: $0.action) } + [ActionSheet.Button.cancel()]
                     )
                 }
             }

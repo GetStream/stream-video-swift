@@ -2,14 +2,14 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct LoginView: View {
 
     @StateObject var viewModel: LoginViewModel
-    var completion: (UserCredentials) -> ()
+    var completion: (UserCredentials) -> Void
     @Injected(\.appearance) var appearance
 
     @State var addUserShown = false
@@ -17,7 +17,7 @@ struct LoginView: View {
     @State private var showJoinCallPopup = false
     @State private var error: Error?
 
-    init(completion: @escaping (UserCredentials) -> ()) {
+    init(completion: @escaping (UserCredentials) -> Void) {
         _viewModel = StateObject(wrappedValue: LoginViewModel())
         self.completion = completion
     }
@@ -59,9 +59,9 @@ struct LoginView: View {
                         LoginItemView {
                             viewModel.ssoLogin { result in
                                 switch result {
-                                case .success(let credentials):
+                                case let .success(credentials):
                                     completion(credentials)
-                                case .failure(let failure):
+                                case let .failure(failure):
                                     log.error(failure)
                                     error = failure
                                 }
@@ -120,7 +120,7 @@ struct LoginView: View {
             let reversedClientId: String = AppEnvironment.value(for: .googleReversedClientId),
             !clientId.isEmpty,
             !reversedClientId.isEmpty
-        else{
+        else {
             return false
         }
 
@@ -130,12 +130,12 @@ struct LoginView: View {
 
 struct LoginItemView<Title: View, Icon: View>: View {
 
-    var action: () -> ()
+    var action: () -> Void
     var title: Title
     var icon: Icon
 
     init(
-        action: @escaping () -> (),
+        action: @escaping () -> Void,
         @ViewBuilder title: @escaping () -> Title,
         @ViewBuilder icon: @escaping () -> Icon
     ) {
@@ -143,7 +143,6 @@ struct LoginItemView<Title: View, Icon: View>: View {
         self.title = title()
         self.icon = icon()
     }
-
 
     var body: some View {
         Button {

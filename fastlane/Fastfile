@@ -23,6 +23,7 @@ is_localhost = !is_ci
 @force_check = false
 develop_branch = 'main'
 swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi", "**/Nuke*"]
+swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit"]
 
 before_all do |lane|
   if is_ci
@@ -586,7 +587,10 @@ desc 'Run source code formatting/linting'
 lane :run_swift_format do |options|
   Dir.chdir('..') do
     action = options[:lint] ? "--lint" : ""
-    sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(',')} Sources")
+
+    swiftformat_source_paths.each do |path|
+      sh("mint run swiftformat #{action} --config .swiftformat --exclude #{swiftformat_excluded_paths.join(',')} #{path}")
+    end
   end
 end
 

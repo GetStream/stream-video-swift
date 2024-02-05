@@ -19,7 +19,6 @@ struct ReactionIcon: View {
     }
 }
 
-
 struct ReactionIcon_Previews: PreviewProvider {
     static var previews: some View {
         let sizes: [CGFloat] = [20, 40, 60]

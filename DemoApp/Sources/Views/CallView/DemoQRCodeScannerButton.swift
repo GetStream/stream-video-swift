@@ -3,9 +3,9 @@
 //
 
 import Foundation
-import SwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
+import SwiftUI
 
 struct DemoQRCodeScannerButton: View {
 
@@ -22,11 +22,11 @@ struct DemoQRCodeScannerButton: View {
     ) {
         self.viewModel = viewModel
         self.completion = completion
-        self.deeplinkAdapter = DeeplinkAdapter()
+        deeplinkAdapter = DeeplinkAdapter()
     }
 
     var body: some View {
-#if !targetEnvironment(simulator) && !os(macOS)
+        #if !targetEnvironment(simulator) && !os(macOS)
         Button {
             isQRScannerPresented = true
         } label: {
@@ -37,7 +37,7 @@ struct DemoQRCodeScannerButton: View {
         .halfSheetIfAvailable(isPresented: $isQRScannerPresented) {
             CodeScannerView(codeTypes: [.qr]) { result in
                 switch result {
-                case .success(let scanResult):
+                case let .success(scanResult):
                     if let url = URL(string: scanResult.string), url.isWeb {
                         if deeplinkAdapter.canHandle(url: url) {
                             let deeplinkInfo = deeplinkAdapter.handle(url: url).deeplinkInfo
@@ -53,7 +53,7 @@ struct DemoQRCodeScannerButton: View {
                             baseURL: AppEnvironment.baseURL
                         ))
                     }
-                case .failure(let error):
+                case let .failure(error):
                     log.error(error)
                     viewModel.toast = Toast(style: .error, message: "\(error)")
                     completion(nil)
@@ -62,9 +62,8 @@ struct DemoQRCodeScannerButton: View {
             }
             .ignoresSafeArea()
         }
-#else
-    EmptyView()
-#endif
+        #else
+        EmptyView()
+        #endif
     }
 }
-

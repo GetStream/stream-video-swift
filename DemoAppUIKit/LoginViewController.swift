@@ -2,14 +2,14 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import UIKit
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+import UIKit
 
 class LoginViewController: UIViewController {
 
-    var onUserSelected: ((UserCredentials) -> ())?
+    var onUserSelected: ((UserCredentials) -> Void)?
         
     override func viewDidLoad() {
         super.viewDidLoad()

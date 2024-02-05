@@ -2,10 +2,10 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import ReplayKit
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-import ReplayKit
 
 struct DemoAppCallControlsView: View {
     
@@ -59,14 +59,13 @@ struct EqualSpacingHStack: View {
     
     var body: some View {
         HStack(alignment: .top) {
-            ForEach(0..<views().count, id:\.self) { index in
+            ForEach(0..<views().count, id: \.self) { index in
                 Spacer()
                 views()[index]
                 Spacer()
             }
         }
     }
-    
 }
 
 extension View {
@@ -74,5 +73,4 @@ extension View {
     var asAnyView: AnyView {
         AnyView(self)
     }
-    
 }

@@ -18,7 +18,7 @@ struct CustomCallView<Factory: ViewFactory>: View {
     
     var body: some View {
         StreamVideoSwiftUI.CallView(viewFactory: viewFactory, viewModel: viewModel)
-            .onReceive(viewModel.$callSettings) { callSettings in
+            .onReceive(viewModel.$callSettings) { _ in
                 updateMicrophoneChecker()
             }
             .onReceive(microphoneChecker.$audioLevels, perform: { values in
@@ -26,25 +26,25 @@ struct CustomCallView<Factory: ViewFactory>: View {
                 for value in values {
                     if (value > -50 && value < 0) && !mutedIndicatorShown {
                         mutedIndicatorShown = true
-                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0, execute: {
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
                             mutedIndicatorShown = false
-                        })
+                        }
                         return
                     }
                 }
             })
             .overlay(
                 mutedIndicatorShown ?
-                VStack {
-                    Spacer()
-                    Text("You are muted.")
-                        .padding(8)
-                        .background(Color(UIColor.systemBackground))
-                        .foregroundColor(colors.text)
-                        .cornerRadius(16)
-                        .padding()
-                }
-                : nil
+                    VStack {
+                        Spacer()
+                        Text("You are muted.")
+                            .padding(8)
+                            .background(Color(UIColor.systemBackground))
+                            .foregroundColor(colors.text)
+                            .cornerRadius(16)
+                            .padding()
+                    }
+                    : nil
             )
             .onDisappear {
                 microphoneChecker.stopListening()

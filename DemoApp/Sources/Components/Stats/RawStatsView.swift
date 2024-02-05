@@ -3,8 +3,8 @@
 //
 
 import StreamVideo
-import SwiftUI
 import StreamWebRTC
+import SwiftUI
 
 struct RawStatsView: View {
     
@@ -68,5 +68,4 @@ struct RawStatsView: View {
         
         return result
     }
-    
 }
