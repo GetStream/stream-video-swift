@@ -11,7 +11,7 @@ extension CallViewModel {
     func sendSnapshot(_ snapshotData: Data) {
         Task {
             do {
-                let response = try await call?.sendCustomEvent([
+                try await call?.sendCustomEvent([
                     "snapshot": .string(snapshotData.base64EncodedString())
                 ])
                 log.debug("Snapshot was sent successfully ✅")
