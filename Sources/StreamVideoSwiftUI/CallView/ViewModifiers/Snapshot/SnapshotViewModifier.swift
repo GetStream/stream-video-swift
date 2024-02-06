@@ -12,50 +12,47 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
 
     @MainActor
     final class SnapshotViewContainerCoordinator {
+        private var trigger: SnapshotTriggering
         private let snapshotHandler: (UIImage) -> Void
-        private var captureTrigger: AnyPublisher<Bool, Never>
         private var cancellable: AnyCancellable?
 
-        weak var content: UIViewControllerType?
+        weak var content: UIViewControllerType? {
+            didSet { captureSnapshot() }
+        }
 
         init(
-            captureTrigger: AnyPublisher<Bool, Never>,
+            trigger: SnapshotTriggering,
             snapshotHandler: @escaping (UIImage) -> Void
         ) {
-            self.captureTrigger = captureTrigger
+            self.trigger = trigger
             self.snapshotHandler = snapshotHandler
-            cancellable = captureTrigger
+
+            cancellable = trigger
+                .publisher
                 .removeDuplicates()
-                .receive(on: DispatchQueue.main)
-                .sink { [weak self] in self?.didUpdateCaptureSnapshot($0) }
+                .sink { [weak self] triggered in
+                    guard triggered == true else { return }
+                    self?.captureSnapshot()
+                }
         }
 
-        deinit {
-            cancellable?.cancel()
-        }
-
-        private func didUpdateCaptureSnapshot(_ newValue: Bool) {
-            guard
-                newValue,
-                let content = content
-            else {
-                return
-            }
-
+        private func captureSnapshot() {
+            defer { trigger.binding.wrappedValue = false }
+            guard let content else { return }
             snapshotHandler(content.view.snapshot())
         }
     }
 
-    private let captureTrigger: AnyPublisher<Bool, Never>
+    private let trigger: SnapshotTriggering
     private let snapshotHandler: (UIImage) -> Void
     let contentProvider: () -> Content
 
     init(
-        captureTrigger: AnyPublisher<Bool, Never>,
+        trigger: SnapshotTriggering,
         snapshotHandler: @escaping (UIImage) -> Void,
         @ViewBuilder contentProvider: @escaping () -> Content
     ) {
-        self.captureTrigger = captureTrigger
+        self.trigger = trigger
         self.snapshotHandler = snapshotHandler
         self.contentProvider = contentProvider
     }
@@ -75,7 +72,7 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
 
     func makeCoordinator() -> SnapshotViewContainerCoordinator {
         SnapshotViewContainerCoordinator(
-            captureTrigger: captureTrigger,
+            trigger: trigger,
             snapshotHandler: snapshotHandler
         )
     }
@@ -84,12 +81,12 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
 @MainActor
 struct SnapshotViewModifier: ViewModifier {
 
-    var captureTrigger: AnyPublisher<Bool, Never>
+    var trigger: SnapshotTriggering
     var snapshotHandler: (UIImage) -> Void
 
     func body(content: Content) -> some View {
         SnapshotViewContainer(
-            captureTrigger: captureTrigger,
+            trigger: trigger,
             snapshotHandler: snapshotHandler
         ) {
             content
@@ -99,16 +96,25 @@ struct SnapshotViewModifier: ViewModifier {
     }
 }
 
+public protocol SnapshotTriggering {
+
+    var binding: Binding<Bool> { get set }
+
+    var publisher: AnyPublisher<Bool, Never> { get }
+
+    func capture()
+}
+
 extension View {
 
     @ViewBuilder
     public func snapshot(
-        captureTrigger: AnyPublisher<Bool, Never>,
+        trigger: SnapshotTriggering,
         snapshotHandler: @escaping (UIImage) -> Void
     ) -> some View {
         modifier(
             SnapshotViewModifier(
-                captureTrigger: captureTrigger,
+                trigger: trigger,
                 snapshotHandler: snapshotHandler
             )
         )

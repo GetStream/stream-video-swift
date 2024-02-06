@@ -11,7 +11,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
 
     @Injected(\.appearance) var appearance
     @Injected(\.chatViewModel) var chatViewModel
-    @Injected(\.snapshotTrigger) var snapshotTrigger
 
     var microphoneChecker: MicrophoneChecker
 
@@ -79,20 +78,6 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             }
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
-            .snapshot(captureTrigger: snapshotTrigger.$capture.eraseToAnyPublisher()) { [weak viewModel, weak snapshotTrigger] in
-                guard let data = $0.pngData() else { return }
-                snapshotTrigger?.capture = false
-                Task {
-                    do {
-                        let response = try await viewModel?.call?.sendCustomEvent([
-                            "snapshot": .string(data.base64EncodedString())
-                        ])
-                        log.debug("\(response)")
-                    } catch {
-                        log.error(error)
-                    }
-                }
-            }
     }
 
     private func updateMicrophoneChecker() {

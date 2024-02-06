@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 
@@ -10,6 +11,7 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
 
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
+    @Injected(\.snapshotTrigger) var snapshotTrigger
 
     @State private var isStatsPresented = false
 
@@ -24,6 +26,13 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                         }
 
                         VStack {
+                            DemoMoreControlListButtonView(
+                                action: {
+                                    snapshotTrigger.capture()
+                                },
+                                label: "Capture snapshot"
+                            ) { Image(systemName: "circle.inset.filled") }
+
                             DemoMoreControlListButtonView(
                                 action: { viewModel.toggleSpeaker() },
                                 label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"

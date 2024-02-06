@@ -2,7 +2,6 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
-import struct StreamChatSwiftUI.InjectedValues
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
@@ -12,6 +11,7 @@ final class DemoAppViewFactory: ViewFactory {
     static let shared = DemoAppViewFactory()
 
     @Injected(\.colors) var colors
+    @Injected(\.snapshotTrigger) var snapshotTrigger
 
     func makeWaitingLocalUserView(viewModel: CallViewModel) -> some View {
         DemoWaitingLocalUserView(viewFactory: self, viewModel: viewModel)
@@ -76,7 +76,7 @@ final class DemoAppViewFactory: ViewFactory {
             showAllInfo: showAllInfo
         )
     }
-    
+
     func makeLocalParticipantViewModifier(
         localParticipant: CallParticipant,
         callSettings: Binding<CallSettings>,
@@ -87,5 +87,21 @@ final class DemoAppViewFactory: ViewFactory {
             callSettings: callSettings,
             call: call
         )
+    }
+
+    func makeVideoParticipantsView(
+        viewModel: CallViewModel,
+        availableFrame: CGRect,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) -> some View {
+        DefaultViewFactory.shared.makeVideoParticipantsView(
+            viewModel: viewModel,
+            availableFrame: availableFrame,
+            onChangeTrackVisibility: onChangeTrackVisibility
+        )
+        .snapshot(trigger: snapshotTrigger) { [weak viewModel] in
+            guard let data = $0.jpegData(compressionQuality: 0.3) else { return }
+            viewModel?.sendSnapshot(data)
+        }
     }
 }

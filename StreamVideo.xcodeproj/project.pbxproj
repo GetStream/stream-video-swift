@@ -35,6 +35,8 @@
 		402F04AA2B70ED8600CA1986 /* Statistics+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */; };
 		402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A82B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift */; };
 		402F04AE2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */; };
+		402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
+		402F04B12B724EE500CA1986 /* CallViewModel+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
@@ -1031,6 +1033,7 @@
 		402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Statistics+Convenience.swift"; sourceTree = "<group>"; };
 		402F04A82B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamCallStatisticsFormatter.swift; sourceTree = "<group>"; };
 		402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamDeviceOrientationAdapter.swift; sourceTree = "<group>"; };
+		402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+Snapshot.swift"; sourceTree = "<group>"; };
 		4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
@@ -2061,6 +2064,7 @@
 				40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */,
 				40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */,
 				409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */,
+				402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */,
 			);
 			path = Extensions;
 			sourceTree = "<group>";
@@ -2102,7 +2106,7 @@
 			path = CallState;
 			sourceTree = "<group>";
 		};
-        408D29A02B6D208700885473 /* Snapshot */ = {
+		408D29A02B6D208700885473 /* Snapshot */ = {
 			isa = PBXGroup;
 			children = (
 				408D29A12B6D209700885473 /* SnapshotViewModifier.swift */,
@@ -4446,6 +4450,7 @@
 				40F446002A9E2B5E004BE3DA /* LinkInfoView.swift in Sources */,
 				409146082B68FF4B007F3C17 /* DemoReactionButton.swift in Sources */,
 				84201793288AB699004964B3 /* AddUserView.swift in Sources */,
+				402F04B12B724EE500CA1986 /* CallViewModel+Snapshot.swift in Sources */,
 				8468821328DFA448003BA9EE /* UnsecureRepository.swift in Sources */,
 				408D29AD2B6D680D00885473 /* SnapshotTrigger.swift in Sources */,
 				4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */,
@@ -4481,6 +4486,7 @@
 				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
 				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
 				406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */,
+				402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */,
 				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
 				406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,

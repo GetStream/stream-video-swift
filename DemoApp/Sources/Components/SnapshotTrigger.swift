@@ -2,18 +2,36 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
+import StreamVideoSwiftUI
+import SwiftUI
 
- final class StreamSnapshotTrigger: ObservableObject {
+final class StreamSnapshotTrigger: SnapshotTriggering {
+    lazy var binding: Binding<Bool> = Binding<Bool>(
+        get: { [weak self] in
+            self?.currentValueSubject.value ?? false
+        },
+        set: { [weak self] in
+            self?.currentValueSubject.send($0)
+        }
+    )
 
-    @Published var capture: Bool = false
+    var publisher: AnyPublisher<Bool, Never> { currentValueSubject.eraseToAnyPublisher() }
+
+    private let currentValueSubject = CurrentValueSubject<Bool, Never>(false)
 
     init() {}
+
+    func capture() {
+        binding.wrappedValue = true
+    }
 }
 
 /// Provides the default value of the `StreamSnapshotTrigger` class.
 struct StreamSnapshotTriggerKey: InjectionKey {
+    @MainActor
     static var currentValue: StreamSnapshotTrigger = .init()
 }
 
@@ -28,4 +46,3 @@ extension InjectedValues {
         }
     }
 }
-
