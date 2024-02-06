@@ -84,4 +84,15 @@ internal enum WrappedEvent: Event {
         }
         return nil
     }
+
+    var name: String {
+        switch self {
+        case let .coordinatorEvent(event):
+            return "Coordinator:\(event.name)"
+        case let .sfuEvent(event):
+            return "SFU:\(type(of: event))"
+        case let .internalEvent(event):
+            return "Internal:\(event.name)"
+        }
+    }
 }

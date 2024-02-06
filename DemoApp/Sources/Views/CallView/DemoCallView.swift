@@ -17,6 +17,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
     @ObservedObject var reactionsHelper: ReactionsHelper = AppState.shared.reactionsHelper
+    @StateObject var snapshotViewModel: DemoSnapshotViewModel
 
     @State var mutedIndicatorShown = false
 
@@ -30,6 +31,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         self.viewFactory = viewFactory
         self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
+        _snapshotViewModel = .init(wrappedValue: .init(viewModel))
     }
 
     var body: some View {
@@ -78,6 +80,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             }
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
+            .toastView(toast: $snapshotViewModel.toast)
     }
 
     private func updateMicrophoneChecker() {
@@ -85,6 +88,54 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             microphoneChecker.startListening()
         } else {
             microphoneChecker.stopListening()
+        }
+    }
+}
+
+@MainActor
+final class DemoSnapshotViewModel: ObservableObject {
+
+    private let viewModel: CallViewModel
+    private var snapshotEventsTask: Task<Void, Never>?
+
+    @Published var toast: Toast?
+
+    init(_ viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        subscribeForSnapshotEvents()
+    }
+
+    private func subscribeForSnapshotEvents() {
+        guard let call = viewModel.call else {
+            snapshotEventsTask?.cancel()
+            snapshotEventsTask = nil
+            return
+        }
+
+        snapshotEventsTask = Task {
+            for await event in call.subscribe(for: CustomVideoEvent.self) {
+                guard
+                    let imageBase64Data = event.custom["snapshot"]?.stringValue,
+                    let imageData = Data(base64Encoded: imageBase64Data),
+                    let image = UIImage(data: imageData)
+                else {
+                    return
+                }
+
+                toast = .init(
+                    style: .custom(
+                        baseStyle: .success,
+                        icon: AnyView(
+                            Image(uiImage: image)
+                                .resizable()
+                                .frame(maxWidth: 30, maxHeight: 30)
+                                .aspectRatio(contentMode: .fit)
+                                .clipShape(Circle())
+                        )
+                    ),
+                    message: "Snapshot captured!"
+                )
+            }
         }
     }
 }
