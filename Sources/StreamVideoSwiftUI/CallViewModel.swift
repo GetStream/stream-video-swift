@@ -445,11 +445,7 @@ open class CallViewModel: ObservableObject {
     public func update(participantsSortComparators: [StreamSortComparator<CallParticipant>]) {
         self.participantsSortComparators = participantsSortComparators
     }
-
-    public func didCaptureSnapshot(_ snapshot: UIImage) {
-        log.debug("📸 Got snapshot!")
-    }
-
+    
     // MARK: - private
     
     /// Leaves the current call.
