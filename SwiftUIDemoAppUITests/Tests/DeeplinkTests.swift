@@ -57,8 +57,10 @@ final class DeeplinkTests: StreamTestCase {
         ].forEach { try assertEnvironment($0) }
     }
 
-    func test_universalLink_production_joinsExpectedCall() {
+    func test_universalLink_production_joinsExpectedCall() throws {
         linkToScenario(withId: 2856)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/721")
         
         WHEN("user navigates to the app through deeplink") {
             Safari()
@@ -73,7 +75,10 @@ final class DeeplinkTests: StreamTestCase {
         }
     }
 
-    func test_universalLink_deeplinkUrlWithCallIdInPath_joinsExpectedCall() {
+    func test_universalLink_deeplinkUrlWithCallIdInPath_joinsExpectedCall() throws {
+        linkToScenario(withId: 2954)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/721")
 
         WHEN("user navigates to the app through deeplink") {
             Safari()
@@ -88,8 +93,10 @@ final class DeeplinkTests: StreamTestCase {
         }
     }
 
-    func skip_test_customSchemeURL_joinsExpectedCall() {
+    func test_customSchemeURL_joinsExpectedCall() throws {
         linkToScenario(withId: 2857)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/721")
         
         WHEN("user opens a URL that contains a custom scheme") {
             Safari()
@@ -103,8 +110,11 @@ final class DeeplinkTests: StreamTestCase {
         }
     }
 
-    func skip_test_customSchemeWithCallIdInPath_joinsExpectedCall() {
-        _ = XCTSkip()
+    func test_customSchemeWithCallIdInPath_joinsExpectedCall() throws {
+        linkToScenario(withId: 2955)
+        
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/721")
+        
         WHEN("user opens a URL that contains a custom scheme") {
             Safari()
                 .open(MockDeeplink.customSchemeWithCallIdInPath)

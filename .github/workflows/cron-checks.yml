@@ -4,12 +4,6 @@ on:
   schedule:
     # Runs "At 01:00 every night"
     - cron: '0 1 * * *'
-
-  # TODO: commented until `develop` branch is in place
-  # pull_request:
-  #   branches:
-  #     - 'main'
-
   workflow_dispatch:
 
 concurrency:
@@ -22,9 +16,9 @@ env:
 jobs:
   build-test-app-and-frameworks:
     name: Build Test App and Frameworks
-    runs-on: macos-13
+    runs-on: macos-14
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build
@@ -45,14 +39,13 @@ jobs:
     strategy:
       matrix:
         include:
-          # TODO: uncomment this block as soon as Xcode 15 is stable on CI
-          # - ios: 17.0
-          #   xcode: 15.0
-          #   os: macos-13
-          #   device: "iPhone 14 Pro Max"
-          #   setup_runtime: false
-          - ios: 16.2
-            xcode: 14.2
+          - ios: 17.2
+            xcode: 15.2
+            os: macos-14
+            device: "iPhone 14 Pro Max"
+            setup_runtime: false
+          - ios: 16.4
+            xcode: 14.3.1
             os: macos-12
             device: "iPhone 11 Pro"
             setup_runtime: false
@@ -61,23 +54,15 @@ jobs:
             os: macos-12
             device: "iPhone 8"
             setup_runtime: true
-
-          # TODO: https://github.com/GetStream/ios-issues-tracking/issues/611
-          # - ios: 14.5
-          #   xcode: 14.2
-          #   os: macos-12
-          #   device: "iPhone SE (2nd generation)"
-          #   setup_runtime: true
       fail-fast: false
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_EVENT: ${{ toJson(github.event) }}
-      GITHUB_PR_NUM: ${{ github.event.number }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
       XCODE_VERSION: ${{ matrix.xcode }}
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v3
       with:
         name: cache-derived-data
@@ -85,7 +70,7 @@ jobs:
     - uses: ./.github/actions/bootstrap
       env:
         INSTALL_ALLURE: true
-        INSTALL_VIDEO_BUDDY: false
+        INSTALL_VIDEO_BUDDY: true
     - name: Cache iOS Simulator Runtime
       uses: actions/cache@v3
       id: runtime-cache
@@ -143,10 +128,10 @@ jobs:
     strategy:
       matrix:
         include:
-          - ios: 17.0.1
-            xcode: 15.0.1
-            os: macos-13
-            device: "iPhone 14 Pro Max"
+          - ios: 17.2
+            xcode: 15.2
+            os: macos-14
+            device: "iPhone 15 Pro"
             setup_runtime: false
           - ios: 16.4
             xcode: 14.3.1
@@ -167,14 +152,11 @@ jobs:
     runs-on: ${{ matrix.os }}
     env:
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      GITHUB_PR_NUM: ${{ github.event.number }}
       XCODE_VERSION: ${{ matrix.xcode }}
       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
-      env:
-        INSTALL_YEETD: true
     - name: Setup iOS ${{ matrix.ios }} Runtime
       if: ${{ matrix.setup_runtime }}
       timeout-minutes: 60
@@ -195,10 +177,10 @@ jobs:
 
   build-apps:
     name: Build Demo Apps
-    runs-on: macos-13
+    runs-on: macos-14
     needs: build-test-app-and-frameworks
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v3
       with:
         name: cache-derived-data
@@ -214,9 +196,11 @@ jobs:
 
   automated-code-review:
     name: Automated Code Review
-    runs-on: macos-13
+    runs-on: macos-12
+    env:
+      XCODE_VERSION: "14.0.1"
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane rubocop
     - run: bundle exec fastlane run_swift_format lint:true

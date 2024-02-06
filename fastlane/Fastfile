@@ -270,7 +270,6 @@ end
 
 desc 'Starts Stream Video Buddy'
 lane :start_video_buddy do
-  sh("stream-video-buddy auth --record-session")
   sh("stream-video-buddy server --port #{video_buddy_port} > video-buddy-server.log 2>&1 &")
 end
 
@@ -308,9 +307,7 @@ lane :test_e2e do |options|
   update_testplan_on_ci(path: 'SwiftUIDemoAppUITests/SwiftUIDemoApp.xctestplan')
 
   start_sinatra
-  start_video_buddy if is_localhost # TODO: https://github.com/GetStream/ios-issues-tracking/issues/688
-
-  prepare_simulator(device: options[:device]) if is_ci
+  start_video_buddy
 
   scan_options = {
     project: xcode_project,
@@ -322,6 +319,7 @@ lane :test_e2e do |options|
     clean: is_localhost,
     test_without_building: options[:test_without_building],
     devices: options[:device],
+    prelaunch_simulator: is_ci,
     number_of_retries: 3,
     xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
   }
@@ -661,5 +659,5 @@ private_lane :create_pr do |options|
 end
 
 private_lane :current_branch do
-  ENV['BRANCH_NAME'] || git_branch
+  ENV['BRANCH_NAME'].to_s.empty? ? git_branch : ENV.fetch('BRANCH_NAME')
 end

@@ -16,7 +16,7 @@ env:
 
 jobs:
   deploy:
-    runs-on: macos-13
+    runs-on: macos-14
     env:
       MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
       APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
@@ -27,7 +27,7 @@ jobs:
       uses: webfactory/ssh-agent@v0.7.0
       with:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - run: bundle exec fastlane swiftui_testflight_build
