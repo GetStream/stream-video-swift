@@ -10,9 +10,9 @@ import SwiftUI
 
 struct DemoCallingTopView: View {
 
-    @Injected(\.streamVideo) var streamVideo
     @Injected(\.colors) var colors
 
+    @ObservedObject var streamVideo = InjectedValues[\.streamVideo]
     @ObservedObject var callViewModel: CallViewModel
     @State var logoutAlertShown = false
 
@@ -38,6 +38,7 @@ struct DemoCallingTopView: View {
                         AppUserView(user: streamVideo.user)
                     }
                 }
+                .accessibilityIdentifier("userAvatar")
             }
 
             Spacer()
@@ -47,6 +48,7 @@ struct DemoCallingTopView: View {
                     DemoCallsView(callViewModel: callViewModel)
                 } label: {
                     Text("Calls")
+                        .foregroundColor(.primary)
                 }
             }
         }

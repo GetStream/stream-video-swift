@@ -19,8 +19,8 @@ public struct PushNotificationsConfig: Sendable {
 public extension PushNotificationsConfig {
     /// Default push notifications config.
     static let `default` = PushNotificationsConfig(
-        pushProviderInfo: PushProviderInfo(name: "apn", pushProvider: .apn),
-        voipPushProviderInfo: PushProviderInfo(name: "voip", pushProvider: .apn)
+        pushProviderInfo: PushProviderInfo(name: "ios-apn", pushProvider: .apn),
+        voipPushProviderInfo: PushProviderInfo(name: "ios-voip", pushProvider: .apn)
     )
     
     /// Creates a push notifications config with the provided parameters.

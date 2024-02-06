@@ -18,7 +18,13 @@ class IntegrationTest: XCTestCase {
             apiKey: testApiKey,
             user: User(id: userId),
             token: token,
-            tokenProvider: { _ in }
+            pushNotificationsConfig: .init(
+                pushProviderInfo: .init(name: "apn", pushProvider: .apn),
+                voipPushProviderInfo: .init(name: "voip", pushProvider: .apn)
+            ),
+            tokenProvider: {
+                _ in
+            }
         )
     }()
 
@@ -28,6 +34,10 @@ class IntegrationTest: XCTestCase {
             apiKey: Self.testApiKey,
             user: User(id: id),
             token: token,
+            pushNotificationsConfig: .init(
+                pushProviderInfo: .init(name: "apn", pushProvider: .apn),
+                voipPushProviderInfo: .init(name: "voip", pushProvider: .apn)
+            ),
             tokenProvider: { _ in }
         )
     }

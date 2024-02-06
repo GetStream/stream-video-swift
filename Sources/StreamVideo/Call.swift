@@ -763,6 +763,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             self.callController.updateOwnCapabilities(ownCapabilities: self.state.ownCapabilities)
         }
         
+        // Get a copy of eventHandlers to avoid crashes when `leave` call is being
+        // triggered, during event processing.
+        let eventHandlers = self.eventHandlers
         for eventHandler in eventHandlers {
             eventHandler?(event)
         }

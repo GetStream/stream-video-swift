@@ -197,8 +197,8 @@ final class Router: ObservableObject {
         appState.deeplinkInfo = deeplinkInfo
         appState.currentUser = user
         appState.userState = .loggedIn
-
         appState.streamVideo = streamVideo
+
         let utils = UtilsKey.currentValue
         utils.userListProvider = appState
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
