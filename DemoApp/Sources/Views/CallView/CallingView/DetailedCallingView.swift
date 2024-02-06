@@ -8,6 +8,17 @@ import StreamVideoSwiftUI
 import SwiftUI
 
 struct DetailedCallingView: View {
+    enum CallAction: String, CaseIterable {
+        case startCall = "Start a call"
+        case joinCall = "Join a call"
+    }
+
+    enum CallFlow: String, CaseIterable {
+        case joinImmediately = "Join immediately"
+        case ringEvents = "Ring events"
+        case lobby = "Lobby"
+    }
+
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.appearance) var appearance
 
@@ -17,11 +28,7 @@ struct DetailedCallingView: View {
     private let imageSize: CGFloat = 32
 
     private var participants: [User] {
-        var participants = AppState.shared.users
-        participants.removeAll { userInfo in
-            userInfo.id == streamVideo.user.id
-        }
-        return participants
+        AppState.shared.users.filter { $0.id != streamVideo.user.id }
     }
 
     private var makeCallEnabled: Bool {
@@ -91,8 +98,9 @@ struct DetailedCallingView: View {
             .padding(.horizontal)
 
             Picker("Call action", selection: $callAction) {
-                Text(CallAction.startCall.rawValue).tag(CallAction.startCall)
-                Text(CallAction.joinCall.rawValue).tag(CallAction.joinCall)
+                ForEach(CallAction.allCases, id: \.self) { callAction in
+                    Text(callAction.rawValue).tag(callAction)
+                }
             }
             .pickerStyle(.segmented)
             .padding(.horizontal)
@@ -130,15 +138,11 @@ struct DetailedCallingView: View {
                 .accessibility(identifier: "participantList")
 
                 Picker("Call flow", selection: $callFlow) {
-                    Text(CallFlow.joinImmediately.rawValue)
-                        .tag(CallFlow.joinImmediately)
-                        .accessibility(identifier: CallFlow.joinImmediately.rawValue)
-                    Text(CallFlow.ringEvents.rawValue)
-                        .tag(CallFlow.ringEvents)
-                        .accessibility(identifier: CallFlow.ringEvents.rawValue)
-                    Text(CallFlow.lobby.rawValue)
-                        .tag(CallFlow.lobby)
-                        .accessibility(identifier: CallFlow.lobby.rawValue)
+                    ForEach(CallFlow.allCases, id: \.self) { callFlow in
+                        Text(callFlow.rawValue)
+                            .tag(callFlow)
+                            .accessibility(identifier: callFlow.rawValue)
+                    }
                 }
                 .pickerStyle(.segmented)
                 .padding(.horizontal)
@@ -227,15 +231,4 @@ struct DetailedCallingView: View {
             }
         }
     }
-}
-
-enum CallAction: String {
-    case startCall = "Start a call"
-    case joinCall = "Join a call"
-}
-
-enum CallFlow: String {
-    case ringEvents = "Ring events"
-    case lobby = "Lobby"
-    case joinImmediately = "Join immediately"
 }

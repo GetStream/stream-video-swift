@@ -24,7 +24,7 @@ final class AppState: ObservableObject {
         didSet {
             if voIPPushToken != oldValue {
                 unsecureRepository.save(voIPPushToken: voIPPushToken)
-                didSet(voIPPushToken: voIPPushToken)
+                didUpdate(voIPPushToken: voIPPushToken)
             }
         }
     }
@@ -33,12 +33,12 @@ final class AppState: ObservableObject {
         didSet {
             if pushToken != oldValue {
                 unsecureRepository.save(pushToken: pushToken)
-                didSet(pushToken: pushToken)
+                didUpdate(pushToken: pushToken)
             }
         }
     }
 
-    @Published var audioFilter: AudioFilter? { didSet { didSet(audioFilter: audioFilter) } }
+    @Published var audioFilter: AudioFilter? { didSet { didUpdate(audioFilter: audioFilter) } }
     @Published var users: [User]
 
     let unsecureRepository = UnsecureRepository()
@@ -48,8 +48,8 @@ final class AppState: ObservableObject {
 
     var streamVideo: StreamVideo? {
         didSet {
-            didSet(pushToken: pushToken)
-            didSet(voIPPushToken: voIPPushToken)
+            didUpdate(pushToken: pushToken)
+            didUpdate(voIPPushToken: voIPPushToken)
             deferSetDevice = false
             deferSetVoipDevice = false
         }
@@ -122,7 +122,7 @@ final class AppState: ObservableObject {
 
     // MARK: - Private API
 
-    private func didSet(voIPPushToken: String?) {
+    private func didUpdate(voIPPushToken: String?) {
         if let voIPPushToken, let streamVideo {
             Task {
                 do {
@@ -140,7 +140,7 @@ final class AppState: ObservableObject {
         }
     }
     
-    private func didSet(pushToken: String?) {
+    private func didUpdate(pushToken: String?) {
         if let pushToken, let streamVideo {
             Task {
                 do {
@@ -158,7 +158,7 @@ final class AppState: ObservableObject {
         }
     }
 
-    private func didSet(audioFilter: AudioFilter?) {
+    private func didUpdate(audioFilter: AudioFilter?) {
         voiceProcessor.setAudioFilter(audioFilter)
     }
 }
