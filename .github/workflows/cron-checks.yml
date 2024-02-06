@@ -18,7 +18,7 @@ jobs:
     name: Build Test App and Frameworks
     runs-on: macos-14
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
     - name: Build
@@ -62,7 +62,7 @@ jobs:
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
       XCODE_VERSION: ${{ matrix.xcode }}
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v3
       with:
         name: cache-derived-data
@@ -155,7 +155,7 @@ jobs:
       XCODE_VERSION: ${{ matrix.xcode }}
       STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
     - name: Setup iOS ${{ matrix.ios }} Runtime
       if: ${{ matrix.setup_runtime }}
@@ -180,7 +180,7 @@ jobs:
     runs-on: macos-14
     needs: build-test-app-and-frameworks
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: actions/download-artifact@v3
       with:
         name: cache-derived-data
@@ -200,7 +200,7 @@ jobs:
     env:
       XCODE_VERSION: "14.0.1"
     steps:
-    - uses: actions/checkout@v3.1.0
+    - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
     - run: bundle exec fastlane rubocop
     - run: bundle exec fastlane run_swift_format lint:true
