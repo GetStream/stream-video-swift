@@ -6,7 +6,7 @@ require 'net/http'
 import 'Sonarfile'
 import 'Allurefile'
 
-xcode_version = ENV['XCODE_VERSION'] || '15.0.1'
+xcode_version = ENV['XCODE_VERSION'] || '15.2'
 xcode_project = 'StreamVideo.xcodeproj'
 sdk_names = ['StreamVideo', 'StreamVideoSwiftUI', 'StreamVideoUIKit']
 podspec_names = ['StreamVideo', 'StreamVideo-XCFramework', 'StreamVideoSwiftUI', 'StreamVideoSwiftUI-XCFramework', 'StreamVideoUIKit', 'StreamVideoUIKit-XCFramework']
