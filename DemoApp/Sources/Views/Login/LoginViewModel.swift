@@ -36,8 +36,8 @@ final class LoginViewModel: ObservableObject {
             let token = try await AuthenticationProvider.fetchToken(for: User.anonymous.id, callIds: ["default:\(callId)"])
             let credentials = UserCredentials(userInfo: User.anonymous, token: token)
             // Perform login
-            completion(credentials)
             AppState.shared.activeAnonymousCallId = callId
+            completion(credentials)
         }
     }
 }

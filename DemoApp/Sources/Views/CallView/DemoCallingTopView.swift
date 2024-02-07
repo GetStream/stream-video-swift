@@ -14,28 +14,37 @@ struct DemoCallingTopView: View {
 
     @ObservedObject var streamVideo = InjectedValues[\.streamVideo]
     @ObservedObject var callViewModel: CallViewModel
+    @ObservedObject var appState: AppState = .shared
     @State var logoutAlertShown = false
+
+    private var currentUser: User {
+        appState.currentUser ?? streamVideo.user
+    }
+
+    private var username: String {
+        currentUser == .anonymous ? "Anonymous" : currentUser.name
+    }
 
     var body: some View {
         HStack {
             if AppEnvironment.configuration.isRelease {
                 Label {
-                    Text(streamVideo.user.name)
+                    Text(username)
                         .bold()
                         .foregroundColor(.primary)
                 } icon: {
-                    AppUserView(user: streamVideo.user)
+                    AppUserView(user: currentUser, overrideUserName: username)
                 }
             } else {
                 Button {
                     logoutAlertShown = !AppEnvironment.configuration.isRelease
                 } label: {
                     Label {
-                        Text(streamVideo.user.name)
+                        Text(username)
                             .bold()
                             .foregroundColor(.primary)
                     } icon: {
-                        AppUserView(user: streamVideo.user)
+                        AppUserView(user: currentUser, overrideUserName: username)
                     }
                 }
                 .accessibilityIdentifier("userAvatar")

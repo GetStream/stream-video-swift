@@ -48,7 +48,10 @@ struct LoginView: View {
 
                 Section {
                     LoginItemView {
-                        viewModel.login(user: .guest(UUID().uuidString), completion: completion)
+                        viewModel.login(
+                            user: .guest(String(String.unique.prefix(8))),
+                            completion: completion
+                        )
                     } title: {
                         Text("Guest User")
                             .accessibility(identifier: "Login as Guest")
@@ -115,6 +118,13 @@ struct LoginView: View {
             )
         })
         .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
+        .onReceive(appState.$deeplinkInfo) { [weak viewModel] deeplinkInfo in
+            guard appState.userState == .notLoggedIn, deeplinkInfo != .empty else { return }
+            viewModel?.login(
+                user: User(id: String(String.unique.prefix(8))),
+                completion: completion
+            )
+        }
     }
 
     private var isGoogleSignInAvailable: Bool {
@@ -187,12 +197,13 @@ struct AppUserView: View {
     @Injected(\.colors) var colors
     var user: User
     var size: CGFloat = 32
+    var overrideUserName: String? = nil
 
     var body: some View {
         if let imageURL = user.imageURL {
             UserAvatar(imageURL: imageURL, size: size)
                 .accessibilityIdentifier("userAvatar")
-        } else if let firstCharacter = user.name.first {
+        } else if let firstCharacter = (overrideUserName ?? user.name).first {
             Text(String(firstCharacter))
                 .fontWeight(.medium)
                 .foregroundColor(colors.text)

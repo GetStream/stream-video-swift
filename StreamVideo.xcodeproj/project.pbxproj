@@ -174,6 +174,8 @@
 		40AB35662B738CE800E465CC /* SimpleCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */; };
 		40AB35672B738CF100E465CC /* DetailedCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* DetailedCallingView.swift */; };
 		40AB35692B738D3D00E465CC /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 40AB35682B738D3D00E465CC /* EffectsLibrary */; };
+		40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
+		40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
 		40B499CA2AC1A5E100A53B60 /* OSLogDestination.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */; };
 		40B499CC2AC1A90F00A53B60 /* DeeplinkTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */; };
 		40B499CE2AC1AA0900A53B60 /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
@@ -1136,6 +1138,7 @@
 		40AB31252A49838000C270E1 /* EventTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EventTests.swift; sourceTree = "<group>"; };
 		40AB352F2B72810800E465CC /* DemoSnapshotViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoSnapshotViewModel.swift; sourceTree = "<group>"; };
 		40AB353A2B738B5700E465CC /* DemoSnapshotViewModel.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DemoSnapshotViewModel.swift; sourceTree = "<group>"; };
+		40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallingViewModifier.swift; sourceTree = "<group>"; };
 		40B499C92AC1A5E100A53B60 /* OSLogDestination.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OSLogDestination.swift; sourceTree = "<group>"; };
 		40B499CB2AC1A90F00A53B60 /* DeeplinkTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkTests.swift; sourceTree = "<group>"; };
 		40C7B82B2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListViewModifier.swift; sourceTree = "<group>"; };
@@ -2305,6 +2308,7 @@
 			children = (
 				84093810288A90390089A35B /* DetailedCallingView.swift */,
 				40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */,
+				40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */,
 			);
 			path = CallingView;
 			sourceTree = "<group>";
@@ -4494,6 +4498,7 @@
 				409146002B68FEF0007F3C17 /* LongPressToFocusViewModifier.swift in Sources */,
 				4093861A2AA09E4A00FF5AF4 /* MemoryLogDestination.swift in Sources */,
 				40D946432AA5F65300C8861B /* DemoQRCodeScannerButton.swift in Sources */,
+				40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */,
 				409145FB2B68FEF0007F3C17 /* DemoCallModifier.swift in Sources */,
 				40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */,
 				40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */,
@@ -4550,6 +4555,7 @@
 				40AB35562B738C7100E465CC /* CallsView.swift in Sources */,
 				402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */,
 				40AB35582B738C7700E465CC /* DemoCallContentView.swift in Sources */,
+				40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */,
 				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
 				406A8EAF2AA1D80C001F598A /* CallKitService.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,

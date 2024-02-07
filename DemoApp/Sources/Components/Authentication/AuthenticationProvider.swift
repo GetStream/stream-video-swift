@@ -52,7 +52,12 @@ enum AuthenticationProvider {
                 .appending(.init(name: "environment", value: environment))
 
             if !callIds.isEmpty {
-                url = url.appending(URLQueryItem(name: "call_cids", value: callIds.joined(separator: ",")))
+                url = url.appending(
+                    URLQueryItem(
+                        name: "call_cids",
+                        value: callIds.joined(separator: ",")
+                    )
+                )
             }
 
             let (data, _) = try await URLSession.shared.data(from: url)

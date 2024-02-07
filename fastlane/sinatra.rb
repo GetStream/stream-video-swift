@@ -14,7 +14,7 @@ post '/connection/:state' do
 end
 
 get '/deeplink' do
-  deeplink = "streamvideo://getstream.io/video/demos/?id=#{params['id']}"
+  deeplink = "streamvideo://pronto.getstream.io/video/demos/?id=#{params['id']}"
 
   <<-HTML
     <!DOCTYPE html>
@@ -29,7 +29,7 @@ get '/deeplink' do
 end
 
 get '/deeplink/join/:id' do
-  deeplink = "streamvideo://getstream.io/video/demos/join/#{params['id']}"
+  deeplink = "streamvideo://pronto.getstream.io/video/demos/join/#{params['id']}"
 
   <<-HTML
     <!DOCTYPE html>
