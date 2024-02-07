@@ -51,8 +51,8 @@ struct DetailedCallingView: View {
         return members
     }
 
-    @State private var text = ""
-    @State private var callAction = CallAction.startCall
+    @State private var text: String
+    @State private var callAction: CallAction = .startCall
     @State private var callFlow: CallFlow = .joinImmediately
 
     @State var selectedParticipants = [User]()
@@ -66,6 +66,14 @@ struct DetailedCallingView: View {
         return appState.loading || text.isEmpty
     }
 
+    private var isAnonymous: Bool { appState.currentUser == .anonymous }
+    private var canStartCall: Bool { appState.currentUser?.type == .regular }
+
+    init(viewModel: CallViewModel, callId: String) {
+        _text = .init(initialValue: callId)
+        self.viewModel = viewModel
+    }
+
     var body: some View {
         VStack {
             DemoCallingTopView(callViewModel: viewModel)
@@ -77,19 +85,22 @@ struct DetailedCallingView: View {
                     .foregroundColor(appearance.colors.text)
                     .padding(.all, 12)
                     .accessibilityIdentifier("callId")
+                    .disabled(isAnonymous)
 
-                Button {
-                    text = String(
-                        String
-                            .unique
-                            .replacingOccurrences(of: "-", with: "")
-                            .prefix(10)
-                    )
-                } label: {
-                    Image(systemName: "arrow.triangle.2.circlepath")
-                        .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                if canStartCall {
+                    Button {
+                        text = String(
+                            String
+                                .unique
+                                .replacingOccurrences(of: "-", with: "")
+                                .prefix(10)
+                        )
+                    } label: {
+                        Image(systemName: "arrow.triangle.2.circlepath")
+                            .foregroundColor(.init(appearance.colors.textLowEmphasis))
+                    }
+                    .padding(.trailing)
                 }
-                .padding(.trailing)
             }
             .background(Color(appearance.colors.background))
             .clipShape(RoundedRectangle(cornerRadius: 8))
@@ -97,13 +108,15 @@ struct DetailedCallingView: View {
             .padding(.bottom, 4)
             .padding(.horizontal)
 
-            Picker("Call action", selection: $callAction) {
-                ForEach(CallAction.allCases, id: \.self) { callAction in
-                    Text(callAction.rawValue).tag(callAction)
+            if canStartCall {
+                Picker("Call action", selection: $callAction) {
+                    ForEach(CallAction.allCases, id: \.self) { callAction in
+                        Text(callAction.rawValue).tag(callAction)
+                    }
                 }
+                .pickerStyle(.segmented)
+                .padding(.horizontal)
             }
-            .pickerStyle(.segmented)
-            .padding(.horizontal)
 
             if callAction == .startCall {
                 List(participants) { participant in
@@ -181,54 +194,15 @@ struct DetailedCallingView: View {
             .disabled(isActionDisabled)
             .accessibilityIdentifier(callAction == .joinCall ? "joinCall" : "startCall")
         }
-        .alignedToReadableContentGuide()
-        .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
-        .onChange(of: appState.deeplinkInfo) { deeplinkInfo in
-            self.text = deeplinkInfo.callId
-            joinCallIfNeeded(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
-        }
-        .onChange(of: viewModel.callingState) { callingState in
-            switch callingState {
-            case .inCall:
-                appState.deeplinkInfo = .empty
-            default:
-                break
-            }
-        }
-        .onAppear {
-            CallService.shared.registerForIncomingCalls()
-            self.text = text
-            joinCallIfNeeded(with: text)
-        }
-        .onReceive(appState.$activeCall) { call in
-            viewModel.setActiveCall(call)
-        }
-        .onChange(of: viewModel.call?.callId, perform: { [callId = viewModel.call?.callId] newValue in
-            if newValue == nil, callId != nil, !appState.activeAnonymousCallId.isEmpty {
-                appState.activeAnonymousCallId = ""
-                appState.dispatchLogout()
-            }
-        })
-        .onReceive(appState.$activeAnonymousCallId) { callId in
-            guard !callId.isEmpty else { return }
-            self.text = callId
-            viewModel.joinCall(callType: .default, callId: callId)
-        }
-    }
-
-    private func joinCallIfNeeded(
-        with callId: String,
-        callType: String = .default
-    ) {
-        guard !callId.isEmpty, viewModel.callingState == .idle else {
-            return
-        }
-
-        Task {
-            try await streamVideo.connect()
-            await MainActor.run {
-                viewModel.joinCall(callType: callType, callId: callId)
-            }
+        .modifier(
+            DemoCallingViewModifier(
+                text: $text,
+                viewModel: viewModel
+            )
+        )
+        .onReceive(appState.$currentUser) { currentUser in
+            self.callAction = currentUser?.type == .regular ? callAction : .joinCall
+            self.callFlow = currentUser?.type == .regular ? callFlow : .joinImmediately
         }
     }
 }

@@ -44,7 +44,10 @@ struct DemoApp: App {
                         NavigationView {
                             LoginView() { credentials in
                                 Task {
-                                    try await router.handleLoggedInUserCredentials(credentials, deeplinkInfo: .empty)
+                                    try await router.handleLoggedInUserCredentials(
+                                        credentials,
+                                        deeplinkInfo: router.appState.deeplinkInfo
+                                    )
                                 }
                             }
                         }

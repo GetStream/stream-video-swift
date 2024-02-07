@@ -16,13 +16,12 @@ struct SimpleCallingView: View {
     @State private var changeEnvironmentPromptForURL: URL?
     @State private var showChangeEnvironmentPrompt: Bool = false
 
-    private var callId: String
     @ObservedObject var appState = AppState.shared
     @ObservedObject var viewModel: CallViewModel
 
     init(viewModel: CallViewModel, callId: String) {
         self.viewModel = viewModel
-        self.callId = callId
+        text = callId
     }
 
     var body: some View {
@@ -58,12 +57,22 @@ struct SimpleCallingView: View {
                     TextField("Call ID", text: $text)
                         .foregroundColor(appearance.colors.text)
                         .padding(.all, 12)
+                        .disabled(isAnonymous)
 
-                    DemoQRCodeScannerButton(viewModel: viewModel) { handleDeeplink($0) }
+                    if !isAnonymous {
+                        DemoQRCodeScannerButton(
+                            viewModel: viewModel
+                        ) { handleDeeplink($0) }
+                    }
                 }
                 .background(Color(appearance.colors.background))
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-                .overlay(RoundedRectangle(cornerRadius: 8).stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 8).stroke(
+                        Color(appearance.colors.textLowEmphasis),
+                        lineWidth: 1
+                    )
+                )
                 .changeEnvironmentIfRequired(
                     showPrompt: $showChangeEnvironmentPrompt,
                     environmentURL: $changeEnvironmentPromptForURL
@@ -71,72 +80,67 @@ struct SimpleCallingView: View {
 
                 Button {
                     resignFirstResponder()
-                    viewModel.enterLobby(callType: .default, callId: text, members: [])
+                    viewModel.enterLobby(
+                        callType: .default,
+                        callId: text,
+                        members: []
+                    )
                 } label: {
                     CallButtonView(
-                        title: "Join Call", maxWidth: 120, isDisabled: appState.loading || text.isEmpty
+                        title: "Join Call",
+                        maxWidth: 120,
+                        isDisabled: appState.loading || text.isEmpty
                     )
                     .disabled(appState.loading || text.isEmpty)
                 }
                 .disabled(appState.loading || text.isEmpty)
             }
 
-            HStack {
-                Text("Don't have a Call ID?")
-                    .font(.caption)
-                    .foregroundColor(.init(appearance.colors.textLowEmphasis))
-                Spacer()
-            }
-            .padding(.top)
+            if canStartCall {
+                HStack {
+                    Text("Don't have a Call ID?")
+                        .font(.caption)
+                        .foregroundColor(
+                            .init(
+                                appearance.colors.textLowEmphasis
+                            )
+                        )
+                    Spacer()
+                }
+                .padding(.top)
 
-            Button {
-                resignFirstResponder()
-                viewModel.startCall(callType: .default, callId: .unique, members: [], ring: false)
-            } label: {
-                CallButtonView(title: "Start New Call", isDisabled: appState.loading)
+                Button {
+                    resignFirstResponder()
+                    viewModel.startCall(
+                        callType: .default,
+                        callId: .unique,
+                        members: [],
+                        ring: false
+                    )
+                } label: {
+                    CallButtonView(
+                        title: "Start New Call",
+                        isDisabled: appState.loading
+                    )
                     .disabled(appState.loading)
+                }
+                .padding(.bottom)
+                .disabled(appState.loading)
             }
-            .padding(.bottom)
-            .disabled(appState.loading)
 
             Spacer()
         }
-        .padding()
-        .alignedToReadableContentGuide()
-        .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
-        .onChange(of: appState.deeplinkInfo) { deeplinkInfo in
-            self.text = deeplinkInfo.callId
-            joinCallIfNeeded(with: deeplinkInfo.callId, callType: deeplinkInfo.callType)
-        }
-        .onChange(of: viewModel.callingState) { callingState in
-            switch callingState {
-            case .inCall:
-                appState.deeplinkInfo = .empty
-            default:
-                break
-            }
-        }
-        .onAppear {
-            CallService.shared.registerForIncomingCalls()
-            self.text = callId
-            joinCallIfNeeded(with: callId)
-        }
-        .onReceive(appState.$activeCall) { call in
-            viewModel.setActiveCall(call)
-        }
+        .modifier(
+            DemoCallingViewModifier(
+                text: $text,
+                viewModel: viewModel
+            )
+        )
     }
 
-    private func joinCallIfNeeded(with callId: String, callType: String = .default) {
-        guard !callId.isEmpty, viewModel.callingState == .idle else {
-            return
-        }
-
-        Task {
-            try await streamVideo.connect()
-            await MainActor.run {
-                viewModel.joinCall(callType: callType, callId: callId)
-            }
-        }
+    private var isAnonymous: Bool { appState.currentUser == .anonymous }
+    private var canStartCall: Bool {
+        appState.currentUser?.type == .regular
     }
 
     private func handleDeeplink(_ deeplinkInfo: DeeplinkInfo?) {
