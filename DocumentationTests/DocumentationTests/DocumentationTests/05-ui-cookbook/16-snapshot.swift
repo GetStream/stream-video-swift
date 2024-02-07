@@ -71,8 +71,11 @@ fileprivate func content() {
                     availableFrame: availableFrame,
                     onChangeTrackVisibility: onChangeTrackVisibility
                 )
-                .snapshot(trigger: snapshotTrigger) { [weak viewModel] in
-                    guard let snapshotData = $0.jpegData(compressionQuality: 0.3) else { return }
+                .snapshot(trigger: snapshotTrigger) { [weak viewModel, weak self] in
+                    guard
+                        let resizedImage = self?.resize(image: $0, to: CGSize(width: 30, height: 30)),
+                        let snapshotData = resizedImage.jpegData(compressionQuality: 0.8)
+                    else { return }
                     Task {
                         do {
                             try await viewModel?.call?.sendCustomEvent([
@@ -84,6 +87,43 @@ fileprivate func content() {
                         }
                     }
                 }
+            }
+
+            private func resize(
+                image: UIImage,
+                to targetSize: CGSize
+            ) -> UIImage? {
+                guard
+                    image.size.width > targetSize.width || image.size.height > targetSize.height
+                else {
+                    return image
+                }
+
+                let widthRatio = targetSize.width / image.size.width
+                let heightRatio = targetSize.height / image.size.height
+
+                // Determine the scale factor that preserves aspect ratio
+                let scaleFactor = min(widthRatio, heightRatio)
+
+                let scaledWidth = image.size.width * scaleFactor
+                let scaledHeight = image.size.height * scaleFactor
+                let targetRect = CGRect(
+                    x: (
+                        targetSize.width - scaledWidth
+                    ) / 2,
+                    y: (targetSize.height - scaledHeight) / 2,
+                    width: scaledWidth,
+                    height: scaledHeight
+                )
+
+                // Create a new image context
+                UIGraphicsBeginImageContextWithOptions(targetSize, false, 0)
+                image.draw(in: targetRect)
+
+                let newImage = UIGraphicsGetImageFromCurrentImageContext()
+                UIGraphicsEndImageContext()
+
+                return newImage
             }
         }
     }

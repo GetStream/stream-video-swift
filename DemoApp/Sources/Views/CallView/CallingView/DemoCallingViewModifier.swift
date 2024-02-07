@@ -71,6 +71,11 @@ struct DemoCallingViewModifier: ViewModifier {
             .onReceive(appState.$activeCall) { call in
                 viewModel.setActiveCall(call)
             }
+            .onReceive(appState.$userState) { userState in
+                if userState == .notLoggedIn {
+                    text.wrappedValue = ""
+                }
+            }
     }
 
     private func joinCallIfNeeded(with callId: String, callType: String = .default) {

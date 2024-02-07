@@ -25,9 +25,8 @@ struct DemoCallTopView: View {
     var body: some View {
         HStack(spacing: 0) {
             HStack {
-                if viewModel.callParticipants.count > 1 {
+                if viewModel.callParticipants.count > 1, !hideLayoutMenu {
                     LayoutMenuView(viewModel: viewModel)
-                        .opacity(hideLayoutMenu ? 0 : 1)
                         .accessibility(identifier: "viewMenu")
                 }
 
