@@ -51,7 +51,7 @@ struct DetailedCallingView: View {
         return members
     }
 
-    @State private var text = ""
+    @State private var text: String
     @State private var callAction: CallAction = .startCall
     @State private var callFlow: CallFlow = .joinImmediately
 
@@ -69,7 +69,8 @@ struct DetailedCallingView: View {
     private var isAnonymous: Bool { appState.currentUser == .anonymous }
     private var canStartCall: Bool { appState.currentUser?.type == .regular }
 
-    init(viewModel: CallViewModel) {
+    init(viewModel: CallViewModel, callId: String) {
+        _text = .init(initialValue: callId)
         self.viewModel = viewModel
     }
 

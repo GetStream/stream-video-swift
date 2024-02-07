@@ -20,7 +20,7 @@ struct DemoCallContentView: View {
             case (false, .simple):
                 SimpleCallingView(viewModel: viewModel, callId: callId)
             case (false, .detailed):
-                DetailedCallingView(viewModel: viewModel)
+                DetailedCallingView(viewModel: viewModel, callId: callId)
             }
         }
     }

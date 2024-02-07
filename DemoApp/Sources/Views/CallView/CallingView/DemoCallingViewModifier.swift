@@ -33,19 +33,28 @@ struct DemoCallingViewModifier: ViewModifier {
             .alignedToReadableContentGuide()
             .background(appearance.colors.lobbyBackground.edgesIgnoringSafeArea(.all))
             .onReceive(appState.$deeplinkInfo) { deeplinkInfo in
-                guard !isAnonymous else { return }
-                self.text.wrappedValue = deeplinkInfo.callId
-                DispatchQueue.main.async {
+                guard
+                    !isAnonymous,
+                    deeplinkInfo.callId != self.text.wrappedValue
+                else { return }
+
+                // We may get in this situation when launching the app from a
+                // deeplink.
+                if deeplinkInfo.callId.isEmpty {
+                    joinCallIfNeeded(with: self.text.wrappedValue)
+                } else {
+                    self.text.wrappedValue = deeplinkInfo.callId
                     joinCallIfNeeded(
-                        with: deeplinkInfo.callId,
+                        with: self.text.wrappedValue,
                         callType: deeplinkInfo.callType
                     )
                 }
             }
             .onChange(of: viewModel.callingState) { callingState in
                 switch callingState {
-                case .inCall:
+                case .inCall where !self.text.wrappedValue.isEmpty:
                     appState.deeplinkInfo = .empty
+                    self.text.wrappedValue = ""
                 default:
                     break
                 }
