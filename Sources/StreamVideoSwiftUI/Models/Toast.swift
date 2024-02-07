@@ -35,7 +35,8 @@ public enum ToastPlacement {
     case bottom
 }
 
-public enum ToastStyle {
+public indirect enum ToastStyle: Equatable {
+
     /// Displays error messages.
     case error
     /// Displays warning messages.
@@ -44,6 +45,28 @@ public enum ToastStyle {
     case success
     /// Displays info messages.
     case info
+
+    case custom(baseStyle: ToastStyle, icon: AnyView)
+
+    public static func == (
+        lhs: ToastStyle,
+        rhs: ToastStyle
+    ) -> Bool {
+        switch (lhs, rhs) {
+        case (.error, .error):
+            return true
+        case (.warning, .warning):
+            return true
+        case (.success, .success):
+            return true
+        case (.info, .info):
+            return true
+        case (.custom, .custom):
+            return false
+        default:
+            return false
+        }
+    }
 }
 
 extension ToastStyle {
@@ -53,6 +76,7 @@ extension ToastStyle {
         case .warning: return Color.orange
         case .info: return Color.blue
         case .success: return Color.green
+        case let .custom(baseStyle, _): return baseStyle.themeColor
         }
     }
     
@@ -62,6 +86,7 @@ extension ToastStyle {
         case .warning: return "exclamationmark.triangle.fill"
         case .success: return "checkmark.circle.fill"
         case .error: return "exclamationmark.circle.fill"
+        case let .custom(baseStyle, _): return baseStyle.iconFileName
         }
     }
 }

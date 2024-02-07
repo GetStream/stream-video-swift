@@ -19,6 +19,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
     @ObservedObject var reactionsHelper: ReactionsHelper = AppState.shared.reactionsHelper
 
     @State var mutedIndicatorShown = false
+    @StateObject var snapshotViewModel: DemoSnapshotViewModel
 
     private let viewFactory: ViewFactory
 
@@ -30,6 +31,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         self.viewFactory = viewFactory
         self.microphoneChecker = microphoneChecker
         self.viewModel = viewModel
+        _snapshotViewModel = .init(wrappedValue: .init(viewModel))
     }
 
     var body: some View {
@@ -78,6 +80,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
             }
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
+            .toastView(toast: $snapshotViewModel.toast)
     }
 
     private func updateMicrophoneChecker() {

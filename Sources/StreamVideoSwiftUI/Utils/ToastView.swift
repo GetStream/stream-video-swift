@@ -20,11 +20,22 @@ public struct ToastView: View {
         self.onCancelTapped = onCancelTapped
     }
     
-    public var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+    @ViewBuilder
+    private var iconView: some View {
+        switch style {
+        case let .custom(_, icon):
+            icon
+        default:
             Image(systemName: style.iconFileName)
                 .foregroundColor(style.themeColor)
-            
+        }
+    }
+
+    public var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+
+            iconView
+
             Text(message)
                 .font(Font.caption)
                 .foregroundColor(Color.primary)
