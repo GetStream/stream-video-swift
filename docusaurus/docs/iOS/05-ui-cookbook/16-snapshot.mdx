@@ -1,9 +1,9 @@
 ---
-title: Snapshot
+title: Capturing Snapshots
 description: Documentation on implementing capturing snapshots in a StreamVideo call.
 ---
 
-# Snapshot
+# Capturing Snapshots
 
 Capturing a snapshot of a call it's a very common usecase for video-call products. Luckily StreamVideo provides you with the means to implement it easily in yours. Below you will find the few simple steps required:
 
@@ -35,7 +35,7 @@ The snapshot ViewModifier requires few parameters:
 
 ### The snapshot trigger
 
-As we discussed below, in a common scenario that button that triggers the snapshot capturing and the view that we need to be snapshotted, will be in different ViewHierarchies. The trigger exists to bridge the communication between those and make capturing a snapshot easy and performant. Here is a simple implementation for the trigger
+As we discussed below, in a common scenario that button that triggers the snapshot capturing and the view that we need to be snapshotted, will be in different ViewHierarchies. The trigger exists to bridge the communication between those and make capturing a snapshot easy and performant. Here is a simple implementation for the button that triggers the capture:
 
 ```swift
 final class StreamSnapshotTrigger: SnapshotTriggering {
@@ -142,7 +142,7 @@ class CustomViewFactory: ViewFactory {
 ```
 
 :::warning
-As we want to send the snapshot using WebRTC's internal event channel, we are affected by some limitations. The size of each event cannot surpasses the 5KB. For this reason, we are reducing the snapshot's quality before sending it.
+As we want to send the snapshot using WebRTC's internal event channel, we are affected by some limitations. The size of each event cannot surpass the 5KB limit. For this reason, we are reducing the snapshot's quality before sending it.
 :::
 
 In order then to present the snapshot for every participant, we need to subscribe on CallEvents of type `CustomVideoEvent` and then extract the snapshot before passing it to the UI for presentation. For simplicity, we are going to encapsulate all this logic around a `DemoSnapshotViewModel` object like below:
