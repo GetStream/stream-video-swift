@@ -1,0 +1,209 @@
+---
+title: Snapshot
+description: Documentation on implementing capturing snapshots in a StreamVideo call.
+---
+
+# Long Press to Focus
+
+Capturing a snapshot of a call it's a very common usecase for video-call products. Luckily StreamVideo provides you with the means to implement it easily in yours. Below you will find the few simple steps required:
+
+## Overview
+
+- **Focus Implementation**: Focus on the specified point on your video feed.
+- **Gesture Recognition**: Detect a long press or a tap on a participant's video feed.
+- **User Experience**: Intuitive interaction for a more immersive call experience.
+
+## Implementing Capturing snapshots during call
+
+### The snapshot ViewModifier
+
+The `StreamVideoSwiftUI` SDK ships with a ViewModifier that can should be attached on the container of the view hierarchy that we would like to capture in our snapshots. You can simply attach the modifier as in the example below:
+
+```swift
+YourHostView()
+    .snapshot(
+        trigger: snapshotTrigger, 
+        snapshotHandler: { snapshot in 
+            // Further processing ...
+        } 
+    )
+```
+
+The snapshot ViewModifier requires few parameters:
+- `trigger`: This is the object controls when the capture should occur. Usually the button that triggers the snapshot and view that will be captured are in different viewHierarchies, which makes passing bindings from a rootView to another, difficult. For this reason the viewModifier expects a trigger of type `SnapshotTriggering` in order to bridge this communication. Below we will see a simple implementation for the trigger.
+- `snapshotHandler`: The closure that will be called once the snapshot's capturing completes. The SDK will pass the snapshot in the handler for further processing.
+
+### The snapshot trigger
+
+As we discussed below, in a common scenario that button that triggers the snapshot capturing and the view that we need to be snapshotted, will be in different ViewHierarchies. The trigger exists to bridge the communication between those and make capturing a snapshot easy and performant. Here is a simple implementation for the trigger
+
+```swift
+final class StreamSnapshotTrigger: SnapshotTriggering {
+    lazy var binding: Binding<Bool> = Binding<Bool>(
+        get: { [weak self] in
+            self?.currentValueSubject.value ?? false
+        },
+        set: { [weak self] in
+            self?.currentValueSubject.send($0)
+        }
+    )
+
+    var publisher: AnyPublisher<Bool, Never> { currentValueSubject.eraseToAnyPublisher() }
+
+    private let currentValueSubject = CurrentValueSubject<Bool, Never>(false)
+
+    init() {}
+
+    func capture() {
+        binding.wrappedValue = true
+    }
+}
+```
+
+In order to use it in our Views easily we are going to insert it in the SDK's DependencyInjection system for easy fetcing:
+
+```swift
+/// Provides the default value of the `StreamSnapshotTrigger` class.
+struct StreamSnapshotTriggerKey: InjectionKey {
+    @MainActor
+    static var currentValue: StreamSnapshotTrigger = .init()
+}
+
+extension InjectedValues {
+    /// Provides access to the `StreamSnapshotTrigger` class to the views and view models.
+    var snapshotTrigger: StreamSnapshotTrigger {
+        get {
+            Self[StreamSnapshotTriggerKey.self]
+        }
+        set {
+            Self[StreamSnapshotTriggerKey.self] = newValue
+        }
+    }
+}
+```
+
+With the trigger in the DI system we can easily create a `SnapshotButtonView` that we can add in our controls (or anywhere in our app) that will trigger a snapshot:
+
+```swift
+struct SnapshotButtonView: View {
+    @Injected(\.snapshotTrigger) var snapshotTrigger
+
+    var body: some View {
+        Button {
+            snapshotTrigger.capture()
+        } label: {
+            Label {
+                Text("Capture snapshot")
+            } icon: {
+                Image(systemName: "circle.inset.filled")
+            }
+
+        }
+    }
+}
+```
+
+### The snapshotHandler
+
+Once the snapshot is ready, the StreamVideo SDK will call the `snapshotHandler` we passed to the `snapshot` ViewModifier. At this point we have control over the snapshot and what we want to do with it. 
+
+In the example below, we want to send the snapshot the CallPartipants View and using the WebRTC's event channel, send it to all participants in the call. When a new snapshot is being received then each participant will display a simple `ToastView` with the new snapshot.
+
+Firstly we need to attach the `snapshot` ViewModifier to the desired View. The `ViewFactory` comes in handy as we can update it as following:
+
+```swift
+class CustomViewFactory: ViewFactory {
+
+    func makeVideoParticipantsView(
+        viewModel: CallViewModel,
+        availableFrame: CGRect,
+        onChangeTrackVisibility: @escaping @MainActor(CallParticipant, Bool) -> Void
+    ) -> some View {
+        DefaultViewFactory.shared.makeVideoParticipantsView(
+            viewModel: viewModel,
+            availableFrame: availableFrame,
+            onChangeTrackVisibility: onChangeTrackVisibility
+        )
+        .snapshot(trigger: snapshotTrigger) { [weak viewModel] in
+            guard let snapshotData = $0.jpegData(compressionQuality: 0.3) else { return }
+            Task {
+                do {
+                    try await viewModel?.call?.sendCustomEvent([
+                        "snapshot": .string(snapshotData.base64EncodedString())
+                    ])
+                    log.debug("Snapshot was sent successfully ✅")
+                } catch {
+                    log.error("Snapshot failed to  send with error: \(error)")
+                }
+            }
+        }
+    }
+}
+```
+
+:::warning
+As we want to send the snapshot using WebRTC's internal event channel, we are affected by some limitations. The size of each event cannot surpasses the 5KB. For this reason, we are reducing the snapshot's quality before sending it.
+:::
+
+In order then to present the snapshot for every participant, we need to subscribe on CallEvents of type `CustomVideoEvent` and then extract the snapshot before passing it to the UI for presentation. For simplicity, we are going to encapsulate all this logic around a `DemoSnapshotViewModel` object like below:
+
+```swift
+@MainActor
+final class DemoSnapshotViewModel: ObservableObject {
+
+    private let viewModel: CallViewModel
+    private var snapshotEventsTask: Task<Void, Never>?
+
+    @Published var toast: Toast?
+
+    init(_ viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        subscribeForSnapshotEvents()
+    }
+
+    private func subscribeForSnapshotEvents() {
+        guard let call = viewModel.call else {
+            snapshotEventsTask?.cancel()
+            snapshotEventsTask = nil
+            return
+        }
+
+        snapshotEventsTask = Task {
+            for await event in call.subscribe(for: CustomVideoEvent.self) {
+                guard
+                    let imageBase64Data = event.custom["snapshot"]?.stringValue,
+                    let imageData = Data(base64Encoded: imageBase64Data),
+                    let image = UIImage(data: imageData)
+                else {
+                    return
+                }
+
+                toast = .init(
+                    style: .custom(
+                        baseStyle: .success,
+                        icon: AnyView(
+                            Image(uiImage: image)
+                                .resizable()
+                                .frame(maxWidth: 30, maxHeight: 30)
+                                .aspectRatio(contentMode: .fit)
+                                .clipShape(Circle())
+                        )
+                    ),
+                    message: "Snapshot captured!"
+                )
+            }
+        }
+    }
+}
+```
+
+Finally, we can use the snapshotViewModel in CallView (or any other View) in order to present a toast when a new snapshot arrives, as you can see below:
+
+```swift
+YourRootView()
+    .toastView(toast: $snapshotViewModel.toast)
+```
+
+## Conclusion
+
+By using the snapshot `ViewModifier`, the `trigger` and passing your logic inside the `snapshotHandler`, you get control over when and what will happen during snapshot capturing.§

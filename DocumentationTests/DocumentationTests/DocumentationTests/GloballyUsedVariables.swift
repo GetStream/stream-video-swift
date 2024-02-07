@@ -1,6 +1,7 @@
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+import Combine
 
 var apiKey = ""
 var user = User(id: "")
@@ -279,4 +280,33 @@ final class CallKitService {
         callerId: String,
         completion: @escaping (Error?) -> Void
     ) {}
+}
+
+final class StreamSnapshotTrigger: SnapshotTriggering {
+    var binding: Binding<Bool> = .constant(false)
+
+    var publisher: AnyPublisher<Bool, Never> = Just(false).eraseToAnyPublisher()
+
+    func capture() {}
+}
+var snapshotTrigger = StreamSnapshotTrigger()
+/// Provides the default value of the `StreamSnapshotTrigger` class.
+struct StreamSnapshotTriggerKey: InjectionKey {
+    @MainActor
+    static var currentValue: StreamSnapshotTrigger = .init()
+}
+
+extension InjectedValues {
+    /// Provides access to the `StreamSnapshotTrigger` class to the views and view models.
+    var snapshotTrigger: StreamSnapshotTrigger {
+        get {
+            Self[StreamSnapshotTriggerKey.self]
+        }
+        set {
+            Self[StreamSnapshotTriggerKey.self] = newValue
+        }
+    }
+}
+final class SnapshotViewModel: ObservableObject {
+    @Published var toast: Toast?
 }
