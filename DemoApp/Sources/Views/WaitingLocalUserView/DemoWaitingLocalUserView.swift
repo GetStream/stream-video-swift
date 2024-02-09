@@ -58,6 +58,7 @@ struct DemoWaitingLocalUserView<Factory: DemoAppViewFactory>: View {
 
             viewFactory.makeCallControlsView(viewModel: viewModel)
         }
+        .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         .chat(viewModel: viewModel, chatViewModel: chatViewModel)
         .background(Color(appearance.colors.callBackground).edgesIgnoringSafeArea(.all))
     }

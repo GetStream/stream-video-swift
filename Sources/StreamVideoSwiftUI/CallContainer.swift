@@ -144,6 +144,7 @@ public struct WaitingLocalUserView<Factory: ViewFactory>: View {
                 viewFactory.makeCallControlsView(viewModel: viewModel)
                     .opacity(viewModel.callingState == .reconnecting ? 0 : 1)
             }
+            .presentParticipantListView(viewModel: viewModel, viewFactory: viewFactory)
         }
     }
 }
