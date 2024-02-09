@@ -56,8 +56,8 @@ public class StreamVideo: ObservableObject {
     private let eventsMiddleware = WSEventsMiddleware()
     private var cachedLocation: String?
     private var connectTask: Task<Void, Error>?
-    private var eventHandlers = [EventHandling]()
-            
+    private var eventHandlers = [EventHandler]()
+
     /// The notification center used to send and receive notifications about incoming events.
     private(set) lazy var eventNotificationCenter: EventNotificationCenter = {
         let center = EventNotificationCenter()
@@ -241,6 +241,7 @@ public class StreamVideo: ObservableObject {
     
     /// Disconnects the current `StreamVideo` client.
     public func disconnect() async {
+        eventHandlers.forEach { $0.cancel() }
         eventHandlers.removeAll()
 
         await withCheckedContinuation { [webSocketClient] continuation in
@@ -258,12 +259,12 @@ public class StreamVideo: ObservableObject {
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
-            let eventHandler: EventHandling = { event in
+            let eventHandler = EventHandler(handler: { event in
                 guard case let .coordinatorEvent(event) = event else {
                     return
                 }
                 continuation.yield(event)
-            }
+            }, cancel: { continuation.finish() })
             self?.eventHandlers.append(eventHandler)
         }
     }
@@ -272,14 +273,14 @@ public class StreamVideo: ObservableObject {
     /// - Returns: `AsyncStream` of the requested WS event.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         AsyncStream(event) { [weak self] continuation in
-            let eventHandler: EventHandling = { event in
+            let eventHandler = EventHandler(handler: { event in
                 guard let coordinatorEvent = event.unwrap() else {
                     return
                 }
                 if let event = coordinatorEvent.unwrap() as? WSEvent {
                     continuation.yield(event)
                 }
-            }
+            }, cancel: { continuation.finish() })
             self?.eventHandlers.append(eventHandler)
         }
     }
@@ -574,9 +575,9 @@ extension StreamVideo: ConnectionStateDelegate {
                     }
                 }
             }
-            eventHandlers.forEach { $0?(.internalEvent(WSDisconnected())) }
+            eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }
         case .connected(healthCheckInfo: _):
-            eventHandlers.forEach { $0?(.internalEvent(WSConnected())) }
+            eventHandlers.forEach { $0.handler(.internalEvent(WSConnected())) }
         default:
             log.debug("Web socket connection state update \(state)")
         }
@@ -587,7 +588,7 @@ extension StreamVideo: WSEventsSubscriber {
     
     func onEvent(_ event: WrappedEvent) {
         for eventHandler in eventHandlers {
-            eventHandler?(event)
+            eventHandler.handler(event)
         }
         checkRingEvent(event)
     }
