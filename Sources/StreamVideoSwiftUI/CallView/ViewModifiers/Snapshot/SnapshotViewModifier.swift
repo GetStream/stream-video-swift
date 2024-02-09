@@ -4,11 +4,12 @@
 
 import Combine
 import Foundation
+import StreamVideo
 import SwiftUI
 
-struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
+struct SnapshotViewContainer<Content: View>: UIViewRepresentable {
 
-    typealias UIViewControllerType = UIViewController
+    typealias UIViewType = UIView
 
     @MainActor
     final class SnapshotViewContainerCoordinator {
@@ -16,7 +17,7 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
         private let snapshotHandler: (UIImage) -> Void
         private var cancellable: AnyCancellable?
 
-        weak var content: UIViewControllerType? {
+        weak var content: UIViewType? {
             didSet { captureSnapshot() }
         }
 
@@ -38,8 +39,8 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
 
         private func captureSnapshot() {
             defer { trigger.binding.wrappedValue = false }
-            guard let content else { return }
-            snapshotHandler(content.view.snapshot())
+            guard let content, trigger.binding.wrappedValue == true else { return }
+            snapshotHandler(content.snapshot())
         }
     }
 
@@ -57,17 +58,19 @@ struct SnapshotViewContainer<Content: View>: UIViewControllerRepresentable {
         self.contentProvider = contentProvider
     }
 
-    func makeUIViewController(context: Context) -> UIViewControllerType {
+    func makeUIView(
+        context: Context
+    ) -> UIViewType {
         let viewController = UIHostingController(rootView: contentProvider())
-        context.coordinator.content = viewController
-        return viewController
+        context.coordinator.content = viewController.view
+        return viewController.view
     }
 
-    func updateUIViewController(
-        _ uiViewController: UIViewControllerType,
+    func updateUIView(
+        _ uiView: UIViewType,
         context: Context
     ) {
-        context.coordinator.content = uiViewController
+        context.coordinator.content = uiView
     }
 
     func makeCoordinator() -> SnapshotViewContainerCoordinator {
@@ -89,10 +92,11 @@ struct SnapshotViewModifier: ViewModifier {
             trigger: trigger,
             snapshotHandler: snapshotHandler
         ) {
-            content
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
+            GeometryReader { proxy in
+                content
+                    .frame(maxWidth: proxy.size.width, maxHeight: proxy.size.height)
+            }
         }
-        .edgesIgnoringSafeArea(.all)
     }
 }
 

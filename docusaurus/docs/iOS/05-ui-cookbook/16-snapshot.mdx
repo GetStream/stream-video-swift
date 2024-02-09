@@ -124,8 +124,11 @@ class CustomViewFactory: ViewFactory {
             availableFrame: availableFrame,
             onChangeTrackVisibility: onChangeTrackVisibility
         )
-        .snapshot(trigger: snapshotTrigger) { [weak viewModel] in
-            guard let snapshotData = $0.jpegData(compressionQuality: 0.3) else { return }
+        .snapshot(trigger: snapshotTrigger) { [weak viewModel, weak self] in
+            guard
+                let resizedImage = self?.resize(image: $0, to: CGSize(width: 30, height: 30)),
+                let snapshotData = resizedImage.jpegData(compressionQuality: 0.8)
+            else { return }
             Task {
                 do {
                     try await viewModel?.call?.sendCustomEvent([
@@ -138,11 +141,48 @@ class CustomViewFactory: ViewFactory {
             }
         }
     }
+
+    private func resize(
+        image: UIImage,
+        to targetSize: CGSize
+    ) -> UIImage? {
+        guard
+            image.size.width > targetSize.width || image.size.height > targetSize.height
+        else {
+            return image
+        }
+
+        let widthRatio = targetSize.width / image.size.width
+        let heightRatio = targetSize.height / image.size.height
+
+        // Determine the scale factor that preserves aspect ratio
+        let scaleFactor = min(widthRatio, heightRatio)
+
+        let scaledWidth = image.size.width * scaleFactor
+        let scaledHeight = image.size.height * scaleFactor
+        let targetRect = CGRect(
+            x: (
+                targetSize.width - scaledWidth
+            ) / 2,
+            y: (targetSize.height - scaledHeight) / 2,
+            width: scaledWidth,
+            height: scaledHeight
+        )
+
+        // Create a new image context
+        UIGraphicsBeginImageContextWithOptions(targetSize, false, 0)
+        image.draw(in: targetRect)
+
+        let newImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+
+        return newImage
+    }
 }
 ```
 
 :::warning
-As we want to send the snapshot using WebRTC's internal event channel, we are affected by some limitations. The size of each event cannot surpass the 5KB limit. For this reason, we are reducing the snapshot's quality before sending it.
+As we want to send the snapshot using WebRTC's internal event channel, we are affected by some limitations. The size of each event cannot surpass the 100KB limit. For this reason, we are reducing the snapshot's size & quality before sending it.
 :::
 
 In order then to present the snapshot for every participant, we need to subscribe on CallEvents of type `CustomVideoEvent` and then extract the snapshot before passing it to the UI for presentation. For simplicity, we are going to encapsulate all this logic around a `DemoSnapshotViewModel` object like below:

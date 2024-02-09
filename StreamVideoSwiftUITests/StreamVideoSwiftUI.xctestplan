@@ -9,12 +9,7 @@
     }
   ],
   "defaultOptions" : {
-    "codeCoverage" : false,
-    "defaultTestExecutionTimeAllowance" : 100,
-    "maximumTestExecutionTimeAllowance" : 100,
-    "maximumTestRepetitions" : 3,
-    "testRepetitionMode" : "retryOnFailure",
-    "testTimeoutsEnabled" : true
+
   },
   "testTargets" : [
     {

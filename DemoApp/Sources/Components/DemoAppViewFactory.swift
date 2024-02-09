@@ -99,9 +99,6 @@ final class DemoAppViewFactory: ViewFactory {
             availableFrame: availableFrame,
             onChangeTrackVisibility: onChangeTrackVisibility
         )
-        .snapshot(trigger: snapshotTrigger) { [weak viewModel] in
-            guard let data = $0.jpegData(compressionQuality: 0.3) else { return }
-            viewModel?.sendSnapshot(data)
-        }
+        .snapshot(trigger: snapshotTrigger) { [weak viewModel] in viewModel?.sendSnapshot($0) }
     }
 }

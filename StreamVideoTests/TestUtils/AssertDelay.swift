@@ -16,28 +16,3 @@ func XCTAssertWithDelay(
     try await Task.sleep(nanoseconds: nanoseconds)
     XCTAssert(try expression(), message(), file: file, line: line)
 }
-
-extension XCTestCase {
-    /// An assertion that will keep checking the provided closure for a true result until the timeout ends.
-    /// - Note: If the closure's result becomes `true` early then the execution won't keep running untill
-    /// the timeout.
-    @MainActor
-    func XCTAssertContinuously(
-        _ expression: @escaping () throws -> Bool,
-        _ message: @escaping () -> String = { "" },
-        timeout: TimeInterval = defaultTimeout,
-        file: StaticString = #file,
-        line: UInt = #line
-    ) async throws {
-        let expectation = XCTNSPredicateExpectation(
-            predicate: NSPredicate(block: { _, _ in
-                (try? expression()) ?? false
-            }), object: message()
-        )
-
-        await fulfillment(
-            of: [expectation],
-            timeout: timeout
-        )
-    }
-}
