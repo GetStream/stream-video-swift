@@ -40,7 +40,7 @@ struct DemoCallsView: View {
         }
         .navigationTitle("Stream Calls")
         .toolbar(content: {
-            ToolbarItem(placement: .topBarTrailing) {
+            ToolbarItem(placement: .navigationBarTrailing) {
                 if !viewModel.groupCallParticipants.isEmpty {
                     Button(action: {
                         viewModel.startCall(with: viewModel.groupCallParticipants)
