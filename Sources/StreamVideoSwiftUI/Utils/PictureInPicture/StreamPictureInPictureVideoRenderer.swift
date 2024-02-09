@@ -168,14 +168,8 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             }
         }
 
-        if #available(iOS 17.0, *) {
-            if contentView.sampleBufferDisplayLayer.sampleBufferRenderer.isReadyForMoreMediaData {
-                contentView.sampleBufferDisplayLayer.sampleBufferRenderer.enqueue(buffer)
-            }
-        } else {
-            if contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData {
-                contentView.sampleBufferDisplayLayer.enqueue(buffer)
-            }
+        if contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData {
+            contentView.sampleBufferDisplayLayer.enqueue(buffer)
         }
     }
 
