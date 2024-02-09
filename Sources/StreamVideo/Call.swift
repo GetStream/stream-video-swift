@@ -30,7 +30,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public let speaker: SpeakerManager
     
     internal let callController: CallController
-    private var eventHandlers = [EventHandling]()
+    private var eventHandlers = [EventHandler]()
     private let coordinatorClient: DefaultAPI
     private var cancellables = Set<AnyCancellable>()
     
@@ -312,12 +312,12 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
         AsyncStream(VideoEvent.self) { [weak self] continuation in
-            let eventHandler: EventHandling = { event in
+            let eventHandler = EventHandler(handler: { event in
                 guard case let .coordinatorEvent(event) = event else {
                     return
                 }
                 continuation.yield(event)
-            }
+            }, cancel: { continuation.finish() })
             self?.eventHandlers.append(eventHandler)
         }
     }
@@ -327,14 +327,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Returns: `AsyncStream` of web socket events from the provided type.
     public func subscribe<WSEvent: Event>(for event: WSEvent.Type) -> AsyncStream<WSEvent> {
         AsyncStream(event) { [weak self] continuation in
-            let eventHandler: EventHandling = { event in
+            let eventHandler = EventHandler(handler: { event in
                 guard case let .coordinatorEvent(event) = event else {
                     return
                 }
                 if let event = event.rawValue as? WSEvent {
                     continuation.yield(event)
                 }
-            }
+            }, cancel: { continuation.finish() })
+
             self?.eventHandlers.append(eventHandler)
         }
     }
@@ -345,6 +346,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         for cancellable in cancellables {
             cancellable.cancel()
         }
+        eventHandlers.forEach { $0.cancel() }
+
         cancellables.removeAll()
         eventHandlers.removeAll()
         callController.cleanUp()
@@ -767,7 +770,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         // triggered, during event processing.
         let eventHandlers = self.eventHandlers
         for eventHandler in eventHandlers {
-            eventHandler?(event)
+            eventHandler.handler(event)
         }
     }
     

@@ -22,7 +22,10 @@ public enum CallNotification {
     public static let participantLeft = "StreamVideo.Call.ParticipantLeft"
 }
 
-typealias EventHandling = ((WrappedEvent) -> Void)?
+struct EventHandler {
+    var handler: ((WrappedEvent) -> Void)
+    var cancel: () -> Void
+}
 
 func executeOnMain(_ task: @escaping @MainActor() -> Void) {
     Task {
