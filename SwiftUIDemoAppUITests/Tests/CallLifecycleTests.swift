@@ -10,7 +10,7 @@ final class CallLifecycleTests: StreamTestCase {
         linkToScenario(withId: 1808)
                 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId, waitForCompletion: false)
+            userRobot.waitForAutoLogin().startCall(callId, waitForCompletion: false)
         }
         WHEN("user leaves the call as soon as possible") {
             userRobot.endCall()
@@ -27,7 +27,7 @@ final class CallLifecycleTests: StreamTestCase {
         try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot.waitForAutoLogin().startCall(callId)
         }
         WHEN("participant joins the call") {
             participantRobot.joinCall(callId)
@@ -49,7 +49,7 @@ final class CallLifecycleTests: StreamTestCase {
         throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/378")
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot.waitForAutoLogin().startCall(callId)
         }
         AND("participant joins the call") {
             participantRobot
@@ -89,7 +89,7 @@ final class CallLifecycleTests: StreamTestCase {
         let participants = 1
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot.waitForAutoLogin().startCall(callId)
         }
         AND("participant joins the call") {
             participantRobot.joinCall(callId)
@@ -98,7 +98,7 @@ final class CallLifecycleTests: StreamTestCase {
         WHEN("user re-enters the call as the same user") {
             userRobot
                 .endCall()
-                .tapOnStartCallButton(withDelay: true)
+                .tapOnStartCallButton()
         }
         THEN("there is one participant on the call") {
             userRobot
@@ -179,7 +179,7 @@ final class CallLifecycleTests: StreamTestCase {
         }
         AND("user joins the call") {
             sleep(15) // to be sure that participant has joined
-            userRobot.login().joinCall(callId)
+            userRobot.waitForAutoLogin().joinCall(callId)
         }
         THEN("there is one participant on the call") {
             userRobot
@@ -201,7 +201,7 @@ final class CallLifecycleTests: StreamTestCase {
             participantRobot.setUserCount(participantCountOnSecondCall).joinCall(anotherCallId)
         }
         AND("user starts a new call") {
-            userRobot.login().startCall(callId)
+            userRobot.waitForAutoLogin().startCall(callId)
         }
         AND("participant joins the call with the user") {
             participantRobot.setUserCount(participantCountOnFirstCall).joinCall(callId)

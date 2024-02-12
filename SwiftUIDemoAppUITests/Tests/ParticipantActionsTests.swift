@@ -13,7 +13,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -38,7 +38,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -63,7 +63,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
                 .camera(.enable)
@@ -89,7 +89,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
                 .camera(.disable)
@@ -115,7 +115,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -139,7 +139,7 @@ final class ParticipantActionsTests: StreamTestCase {
         try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
                 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot.waitForAutoLogin().startCall(callId)
         }
         AND("participant joins the call and starts recording the call for 3 seconds") {
             participantRobot
@@ -173,7 +173,7 @@ final class ParticipantActionsTests: StreamTestCase {
         let participants = 1
 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot.waitForAutoLogin().startCall(callId)
         }
         WHEN("participant joins the call and shares the screen for 3 seconds") {
             participantRobot

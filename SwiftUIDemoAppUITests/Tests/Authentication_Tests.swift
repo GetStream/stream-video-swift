@@ -37,7 +37,7 @@ final class Authentication_Tests: StreamTestCase {
         }
         WHEN("user logs in") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -62,7 +62,7 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -91,7 +91,7 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -124,7 +124,7 @@ final class Authentication_Tests: StreamTestCase {
         }
         AND("user tries to log in") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId, waitForCompletion: false)
         }
         WHEN("app requests a token refresh") {}

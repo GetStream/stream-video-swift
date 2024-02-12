@@ -120,22 +120,24 @@ public class ParticipantRobot {
         if let screenSharingDuration {
             params[Config.screenSharingDuration.rawValue] = screenSharingDuration
         }
-        
-        invokeBuddy(with: params, async: async)
+
+        let _params = params
+        Task {
+            do {
+                try await invokeBuddy(with: _params, async: async)
+            } catch {
+                debugPrint(error)
+            }
+        }
     }
        
-    private func invokeBuddy(with params: [String: Any], async: Bool) {
+    private func invokeBuddy(with params: [String: Any], async: Bool) async throws {
         guard let apiUrl = URL(string: "\(videoBuddyUrlString)/?async=\(async)") else { return }
         var request = URLRequest(url: apiUrl)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: params, options: [])
         
-        let semaphore = DispatchSemaphore(value: 0)
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            semaphore.signal()
-        }
-        task.resume()
-        semaphore.wait()
+        _ = try await URLSession.shared.data(for: request)
     }
 }

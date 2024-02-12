@@ -125,10 +125,10 @@ extension UserRobot {
     
     @discardableResult
     func assertCallControls() -> Self {
+        XCTAssertTrue(CallPage.cameraToggle.wait().exists, "cameraToggle should appear")
+        XCTAssertTrue(CallPage.cameraPositionToggle.wait().exists, "cameraPositionToggle should appear")
+        XCTAssertTrue(CallPage.microphoneToggle.wait().exists, "microphoneToggle should appear")
         XCTAssertTrue(CallPage.hangUpButton.wait().exists, "hangUpButton should appear")
-        XCTAssertTrue(CallPage.cameraToggle.exists, "cameraToggle should appear")
-        XCTAssertTrue(CallPage.cameraPositionToggle.exists, "cameraPositionToggle should appear")
-        XCTAssertTrue(CallPage.microphoneToggle.exists, "microphoneToggle should appear")
         return self
     }
     
@@ -153,9 +153,13 @@ extension UserRobot {
     func assertConnectingView(with participantCount: Int) -> Self {
         XCTAssertTrue(CallPage.ConnectingView.callConnectingView.wait().exists, "callConnectingView should appear")
         XCTAssertTrue(CallPage.ConnectingView.callingIndicator.exists, "callingIndicator should appear")
-        if participantCount > 1 {
-            XCTAssertEqual(participantCount, CallPage.ConnectingView.callConnectingGroupView.count)
-        } else if participantCount > 0 {
+        if participantCount > 0 {
+            XCTAssertEqual(
+                participantCount,
+                CallPage.ConnectingView.callConnectingGroupView.firstMatch.value as? Int,
+                "callConnectingGroupView should contain \(participantCount) participants."
+            )
+        } else if participantCount == 0 {
             XCTAssertTrue(CallPage.ConnectingView.callConnectingParticipantView.exists, "callConnectingParticipantView should appear")
         }
         return self
@@ -243,7 +247,9 @@ extension XCUIElement {
     
     @discardableResult
     func wait(timeout: Double = UserRobot.defaultTimeout) -> Self {
-        _ = waitForExistence(timeout: timeout)
+        if !exists {
+            _ = waitForExistence(timeout: timeout)
+        }
         return self
     }
 }

@@ -33,7 +33,13 @@ extension UserRobot {
         }
         return self
     }
-    
+
+    @discardableResult
+    func waitForAutoLogin() -> Self {
+        CallDetailsPage.callIdInputField.wait()
+        return self
+    }
+
     @discardableResult
     func logout() -> Self {
         let users = LoginPage.users
@@ -192,7 +198,7 @@ extension UserRobot {
     
     @discardableResult
     func moveCornerDraggableViewToTheBottom() -> Self {
-        CallPage.cornerDraggableView.dragAndDrop(dropElement: CallPage.hangUpButton, duration: 0.5)
+        CallPage.cornerDraggableView.dragAndDrop(dropElement: CallPage.participantMenu, duration: 0.5)
         return self
     }
     
