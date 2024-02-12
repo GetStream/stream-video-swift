@@ -67,11 +67,14 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     /// to improve performance.
     /// - Note: The number of frames to skip is being calculated based on the ``trackSize`` and
     /// ``contentSize``. It takes into account also the ``sizeRatioThreshold``
-    private var framesToSkip = 1
+    private var noOfFramesToSkipAfterRendering = 1
 
     /// The number of frames that we have skipped so far. This is used as a step counter in the
     /// ``renderFrame(_:)``.
-    private var framesSkipped = 0
+    private var skippedFrames = 0
+
+    /// We render frames every time the stepper/counter value is 0 and have a valid trackSize.
+    private var shouldRenderFrame: Bool { skippedFrames == 0 && trackSize != .zero }
 
     /// A size ratio threshold used to determine if resizing is required.
     let sizeRatioThreshold: CGFloat = 2
@@ -118,22 +121,31 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
 
+        log.debug("Received frame with trackSize:\(trackSize)")
+
         defer {
             handleFrameSkippingIfRequired()
         }
 
-        // We render frames every time the stepper/counter value is 0.
-        guard framesSkipped == 0 else {
+        guard shouldRenderFrame else {
             return
         }
 
+        let pixelBuffer: RTCVideoFrameBuffer? = {
+            if
+                let i420buffer = frame.buffer as? RTCI420Buffer,
+                let transformed = bufferTransformer.transform(i420buffer, targetSize: trackSize) {
+                return RTCCVPixelBuffer(pixelBuffer: transformed)
+            } else {
+                return frame.buffer
+            }
+        }()
+
         if
-            let pixelBuffer = frame.buffer as? RTCCVPixelBuffer,
-            let sampleBuffer = bufferTransformer.transform(pixelBuffer.pixelBuffer) {
-            bufferPublisher.send(sampleBuffer)
-        } else if
-            let i420buffer = frame.buffer as? RTCI420Buffer,
-            let transformedBuffer = bufferTransformer.transform(i420buffer, targetSize: contentSize),
+            let transformedBuffer = bufferTransformer.transform(
+                pixelBuffer ?? frame.buffer,
+                targetSize: contentSize
+            ),
             let sampleBuffer = bufferTransformer.transform(transformedBuffer) {
             bufferPublisher.send(sampleBuffer)
         } else {
@@ -198,38 +210,38 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// A method used to calculate rendering required properties, every time the trackSize changes.
     private func didUpdateTrackSize() {
-        guard contentSize != .zero else { return }
+        guard contentSize != .zero, trackSize != .zero else { return }
 
         let widthDiffRatio = trackSize.width / contentSize.width
         let heightDiffRatio = trackSize.height / contentSize.height
         requiresResize = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
-        framesToSkip = requiresResize ? max(Int(min(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) : 1
-        framesSkipped = 0
+        noOfFramesToSkipAfterRendering = requiresResize ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) : 1
+        skippedFrames = 0
         log
             .debug(
-                "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) framesToSkip:\(framesToSkip) framesSkipped:\(framesSkipped)"
+                "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"
             )
     }
 
     /// A method used to handle the frameSkipping(step) during frame consumption.
     private func handleFrameSkippingIfRequired() {
-        if framesToSkip > 0 {
-            if framesSkipped == framesToSkip {
-                framesSkipped = 0
+        if noOfFramesToSkipAfterRendering > 0 {
+            if skippedFrames == noOfFramesToSkipAfterRendering {
+                skippedFrames = 0
             } else {
-                framesSkipped += 1
+                skippedFrames += 1
             }
-            log.debug("framesToSkip:\(framesToSkip) framesSkipped:\(framesSkipped)")
-        } else if framesSkipped > 0 {
-            framesSkipped = 0
+            log.debug("noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames)")
+        } else if skippedFrames > 0 {
+            skippedFrames = 0
         }
     }
 
     /// A method used to prepare the view for a new track rendering.
     private func prepareForTrackRendering(_ oldValue: RTCVideoTrack?) {
         stopFrameStreaming(for: oldValue)
-        framesToSkip = 0
-        framesSkipped = 0
+        noOfFramesToSkipAfterRendering = 0
+        skippedFrames = 0
         requiresResize = false
         startFrameStreaming(for: track, on: window)
     }
