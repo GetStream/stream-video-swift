@@ -15,6 +15,7 @@
         "value" : "$(STREAM_VIDEO_SECRET)"
       }
     ],
+    "preferredScreenCaptureFormat" : "screenshot",
     "targetForVariableExpansion" : {
       "containerPath" : "container:StreamVideo.xcodeproj",
       "identifier" : "842D8BC22865B31B00801910",
