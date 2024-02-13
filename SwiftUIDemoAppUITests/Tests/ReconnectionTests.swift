@@ -17,7 +17,9 @@ final class ReconnectionTests: StreamTestCase {
         linkToScenario(withId: 2030)
         
         GIVEN("user starts a new call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("user loses the internet connection") {
             sinatra.setConnection(state: .off)

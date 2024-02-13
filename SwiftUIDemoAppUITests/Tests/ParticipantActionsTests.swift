@@ -9,11 +9,11 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantEnablesMicrophone() throws {
         linkToScenario(withId: 1536)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -34,11 +34,11 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantDisablesMicrophone() throws {
         linkToScenario(withId: 1537)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -59,11 +59,11 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantEnablesCamera() throws {
         linkToScenario(withId: 1538)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
                 .camera(.enable)
@@ -85,11 +85,11 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantDisablesCamera() throws {
         linkToScenario(withId: 1539)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
                 .camera(.disable)
@@ -111,11 +111,11 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantConnectionQualityIndicator() throws {
         linkToScenario(withId: 1540)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -136,10 +136,12 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantRecordsCall() throws {
         linkToScenario(withId: 1769)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
                 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("participant joins the call and starts recording the call for 3 seconds") {
             participantRobot
@@ -168,12 +170,14 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantSharesScreen() throws {
         linkToScenario(withId: 1773)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("participant joins the call and shares the screen for 3 seconds") {
             participantRobot

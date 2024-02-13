@@ -23,14 +23,20 @@ extension UserRobot {
     }
     
     @discardableResult
+    func waitForAutoLogin() -> Self {
+        CallDetailsPage.callIdInputField.wait()
+        return self
+    }
+    
+    @discardableResult
     func login(userIndex: Int = 0, waitForLoginPage: Bool = false) -> Self {
         let users = LoginPage.users
+        
         if waitForLoginPage {
             users.firstMatch.wait()
         }
-        if users.count > 0 {
-            users.element(boundBy: userIndex).tap()
-        }
+        
+        users.element(boundBy: userIndex).tap()
         return self
     }
     

@@ -15,7 +15,7 @@ final class LobbyTests: StreamTestCase {
         
         GIVEN("participant is on call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
             
             participantRobot
@@ -49,7 +49,9 @@ final class LobbyTests: StreamTestCase {
         linkToScenario(withId: 1786)
         
         WHEN("user enters lobby") {
-            userRobot.login().enterLobby(callId)
+            userRobot
+                .waitForAutoLogin()
+                .enterLobby(callId)
         }
         THEN("all required elements are on the screen") {
             userRobot.assertLobby()

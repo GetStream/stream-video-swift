@@ -10,7 +10,9 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1541)
 
         WHEN("user starts a new call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         THEN("user is alone on the call") {
             userRobot
@@ -22,13 +24,13 @@ final class CallViewsTests: StreamTestCase {
     func testOneParticipantOnTheCall() throws {
         linkToScenario(withId: 1766)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
 
         WHEN("user starts a new call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -67,13 +69,13 @@ final class CallViewsTests: StreamTestCase {
     func testTwoParticipantsOnTheCall() throws {
         linkToScenario(withId: 1767)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         let participants = 2
 
         WHEN("user starts a new call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -112,13 +114,13 @@ final class CallViewsTests: StreamTestCase {
     func testSwitchingBetweenViewsOnTheCall() throws {
         linkToScenario(withId: 1768)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 4
 
         WHEN("user starts a new call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -159,12 +161,14 @@ final class CallViewsTests: StreamTestCase {
     func testUserMovesCornerDraggableView() throws {
         linkToScenario(withId: 1771)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("participant joins the call") {
             participantRobot
@@ -192,12 +196,14 @@ final class CallViewsTests: StreamTestCase {
     func testUserCanSeeAllParticipantsInScreenSharingView() throws {
         linkToScenario(withId: 1774)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 10
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("ten participants join the call") {
             participantRobot
@@ -214,12 +220,14 @@ final class CallViewsTests: StreamTestCase {
     func testUserCanSeeAllParticipantsInGridView() throws {
         linkToScenario(withId: 1775)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 10
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("ten participants join the call") {
             participantRobot
@@ -245,13 +253,15 @@ final class CallViewsTests: StreamTestCase {
     func testUserCanSeeAllParticipantsInSpotlightView() throws {
         linkToScenario(withId: 1776)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 10
         let expectedParticipantsInSpotlight = 3
 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("ten participants join the call") {
             participantRobot
@@ -272,7 +282,9 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1777)
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("user unmutes themselves") {
             userRobot.microphone(.enable)
