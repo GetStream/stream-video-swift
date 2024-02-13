@@ -332,7 +332,7 @@ lane :test_e2e do |options|
     test_without_building: options[:test_without_building],
     devices: options[:device],
     prelaunch_simulator: is_ci,
-    number_of_retries: 3,
+    number_of_retries: is_ci ? 3 : nil,
     xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
   }
 
