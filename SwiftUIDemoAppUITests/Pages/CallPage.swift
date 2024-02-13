@@ -10,13 +10,15 @@ enum CallPage {
     static var microphoneToggle: XCUIElement { app.buttons["microphoneToggle"] }
     static var cameraPositionToggle: XCUIElement { app.buttons["cameraPositionToggle"] }
     static var hangUpButton: XCUIElement { app.buttons["hangUp"] }
-    
-    static var recordingLabel: XCUIElement { app.staticTexts["recordingLabel"] }
     static var participantMenu: XCUIElement { app.buttons["participantMenu"] }
     static var cornerDraggableView: XCUIElement { app.otherElements["cornerDraggableView"].otherElements.firstMatch }
     static var minimizedCallView: XCUIElement { participantView.firstMatch }
     static var viewMenu: XCUIElement { app.buttons["viewMenu"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
+    static var recordingIcon: XCUIElement {
+        app.images.matching(NSPredicate(format: "label LIKE 'Screen Recording'")).firstMatch
+        
+    }
     
     enum ViewMenu {
         static var fullscreen: XCUIElement {

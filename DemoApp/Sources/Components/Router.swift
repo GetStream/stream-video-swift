@@ -88,7 +88,7 @@ final class Router: ObservableObject {
 
     private func loadLoggedInUser() async throws {
         if AppEnvironment.configuration == .test, AppEnvironment.contains(.mockJWT) {
-            return
+            try await handleGuestUser(deeplinkInfo: .empty)
         } else if let userCredentials = AppState.shared.unsecureRepository.loadCurrentUser() {
             if userCredentials.userInfo.id.contains("@getstream") {
                 GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _, _ in

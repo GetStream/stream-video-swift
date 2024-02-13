@@ -106,7 +106,7 @@ final class CallLifecycleTests: StreamTestCase {
         WHEN("user re-enters the call as the same user") {
             userRobot
                 .endCall()
-                .tapOnStartCallButton(withDelay: true)
+                .startCall(callId)
         }
         THEN("there is one participant on the call") {
             userRobot

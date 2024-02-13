@@ -42,18 +42,15 @@ extension UserRobot {
     
     @discardableResult
     func logout() -> Self {
-        let users = LoginPage.users
-        if users.count == 0 {
-            CallDetailsPage.userAvatar.wait().tap()
-            CallDetailsPage.signOutButton.wait().tap()
-        }
+        CallDetailsPage.callIdInputField.wait().tap() // this is an excess action just to fix the XCTest flakiness
+        CallDetailsPage.userAvatar.wait().tap()
+        CallDetailsPage.signOutButton.wait().tap()
         return self
     }
     
     @discardableResult
-    func tapOnStartCallButton(withDelay: Bool = false) -> Self {
-        if withDelay { sleep(2) } // FIXME: https://github.com/GetStream/ios-issues-tracking/issues/382
-        CallDetailsPage.startCallButton.tap()
+    func tapOnStartCallButton() -> Self {
+        CallDetailsPage.startCallButton.safeTap()
         return self
     }
     
@@ -91,8 +88,9 @@ extension UserRobot {
     
     @discardableResult
     func enterLobby(_ callId: String, clearTextField clean: Bool = false) -> Self {
+        CallDetailsPage.lobbyTab.tap()
         typeText(callId, clean: clean)
-        enterLobby()
+        tapOnStartCallButton()
         return self
     }
     
@@ -198,7 +196,7 @@ extension UserRobot {
     
     @discardableResult
     func moveCornerDraggableViewToTheBottom() -> Self {
-        CallPage.cornerDraggableView.dragAndDrop(dropElement: CallPage.hangUpButton, duration: 0.5)
+        CallPage.cornerDraggableView.dragAndDrop(dropElement: CallPage.participantMenu, duration: 0.5)
         return self
     }
     

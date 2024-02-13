@@ -85,13 +85,13 @@ extension UserRobot {
     
     @discardableResult
     func assertParticipantStartRecordingCall() -> Self {
-        XCTAssertTrue(CallPage.recordingLabel.wait(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should appear")
+        XCTAssertTrue(CallPage.recordingIcon.wait(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should appear")
         return self
     }
     
     @discardableResult
     func assertParticipantStopRecordingCall() -> Self {
-        XCTAssertFalse(CallPage.recordingLabel.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should disappear")
+        XCTAssertFalse(CallPage.recordingIcon.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should disappear")
         return self
     }
     
@@ -125,10 +125,10 @@ extension UserRobot {
     
     @discardableResult
     func assertCallControls() -> Self {
+        XCTAssertTrue(CallPage.cameraToggle.wait().exists, "cameraToggle should appear")
+        XCTAssertTrue(CallPage.cameraPositionToggle.wait().exists, "cameraPositionToggle should appear")
+        XCTAssertTrue(CallPage.microphoneToggle.wait().exists, "microphoneToggle should appear")
         XCTAssertTrue(CallPage.hangUpButton.wait().exists, "hangUpButton should appear")
-        XCTAssertTrue(CallPage.cameraToggle.exists, "cameraToggle should appear")
-        XCTAssertTrue(CallPage.cameraPositionToggle.exists, "cameraPositionToggle should appear")
-        XCTAssertTrue(CallPage.microphoneToggle.exists, "microphoneToggle should appear")
         return self
     }
     
@@ -143,7 +143,7 @@ extension UserRobot {
     
     @discardableResult
     func assertEmptyCall() -> Self {
-        XCTAssertEqual(1, CallPage.participantView.count) // active user is treated as a participant
+        XCTAssertEqual(1, CallPage.participantView.waitCount(1).count) // active user is treated as a participant
         XCTAssertEqual(0, CallPage.participantName.count)
         XCTAssertTrue(CallPage.participantMenu.exists, "participantMenu icon should disappear")
         return self
@@ -243,7 +243,9 @@ extension XCUIElement {
     
     @discardableResult
     func wait(timeout: Double = UserRobot.defaultTimeout) -> Self {
-        _ = waitForExistence(timeout: timeout)
+        if !exists {
+            _ = waitForExistence(timeout: timeout)
+        }
         return self
     }
 }

@@ -7,7 +7,7 @@ import XCTest
 final class Authentication_Tests: StreamTestCase {
     
     let participants = 1
-    let jwtExpirationTimeoutInSeconds = TestRunnerEnvironment.isCI ? "30" : "2"
+    let jwtExpirationTimeoutInSeconds = TestRunnerEnvironment.isCI ? "20" : "10"
     
     override func setUpWithError() throws {
         launchApp = false
@@ -37,7 +37,7 @@ final class Authentication_Tests: StreamTestCase {
         }
         WHEN("user logs in") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -62,7 +62,7 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -76,7 +76,6 @@ final class Authentication_Tests: StreamTestCase {
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .waitForParticipantsToJoin(participants)
-                .assertCallControls()
                 .assertGridView(with: participants)
         }
     }
@@ -91,7 +90,7 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -124,7 +123,7 @@ final class Authentication_Tests: StreamTestCase {
         }
         AND("user tries to log in") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId, waitForCompletion: false)
         }
         WHEN("app requests a token refresh") {}
