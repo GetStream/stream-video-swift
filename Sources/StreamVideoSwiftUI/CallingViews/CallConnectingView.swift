@@ -30,6 +30,7 @@ struct CallConnectingView<CallControls: View, CallTopView: View>: View {
                         participants: outgoingCallMembers
                     )
                     .accessibility(identifier: "callConnectingGroupView")
+                    .streamAccessibility(value: "\(outgoingCallMembers.endIndex)")
                 } else if !outgoingCallMembers.isEmpty {
                     AnimatingParticipantView(
                         participant: outgoingCallMembers.first
