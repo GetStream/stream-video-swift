@@ -181,16 +181,16 @@ jobs:
     runs-on: macos-14
     if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
     needs:
-      # - allure_testops_launch
+      - allure_testops_launch
       - build-test-app-and-frameworks
     env:
-      # LAUNCH_ID: ${{ needs.allure_testops_launch.outputs.launch_id }}
+      LAUNCH_ID: ${{ needs.allure_testops_launch.outputs.launch_id }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       GITHUB_PR_NUM: ${{ github.event.number }}
       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
     strategy:
       matrix:
-        batch: [0] # , 1] FIXME
+        batch: [0, 1]
       fail-fast: false
     steps:
     - uses: actions/checkout@v4.1.1
@@ -212,17 +212,17 @@ jobs:
         STREAM_SDK_TEST_ACCOUNT_PASSWORD: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_PASSWORD }}
         STREAM_SDK_TEST_ACCOUNT_OTP_SECRET: ${{ secrets.STREAM_SDK_TEST_ACCOUNT_OTP_SECRET }}
         STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
-    # - name: Allure TestOps Upload
-    #   if: env.LAUNCH_ID != '' && (success() || failure())
-    #   run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
-    # - name: Allure TestOps Launch Removal
-    #   if: env.LAUNCH_ID != '' && cancelled()
-    #   run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
-    # - name: Parse xcresult
-    #   if: failure()
-    #   run: |
-    #     brew install chargepoint/xcparse/xcparse
-    #     xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
+    - name: Allure TestOps Upload
+      if: env.LAUNCH_ID != '' && (success() || failure())
+      run: bundle exec fastlane allure_upload launch_id:$LAUNCH_ID
+    - name: Allure TestOps Launch Removal
+      if: env.LAUNCH_ID != '' && cancelled()
+      run: bundle exec fastlane allure_launch_removal launch_id:$LAUNCH_ID
+    - name: Parse xcresult
+      if: failure()
+      run: |
+        brew install chargepoint/xcparse/xcparse
+        xcparse logs fastlane/test_output/DemoApp.xcresult fastlane/test_output/logs/
     - uses: actions/upload-artifact@v3
       if: failure()
       with:
@@ -233,24 +233,24 @@ jobs:
           fastlane/*.log
           fastlane/test_output/DemoApp.xcresult
 
-  # allure_testops_launch:
-  #   name: Launch Allure TestOps
-  #   runs-on: macos-13
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-  #   outputs:
-  #     launch_id: ${{ steps.get_launch_id.outputs.launch_id }}
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #   - uses: ./.github/actions/ruby-cache
-  #   - name: Launch Allure TestOps
-  #     run: bundle exec fastlane allure_launch
-  #     env:
-  #       ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
-  #       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #       GITHUB_EVENT: ${{ toJson(github.event) }}
-  #   - id: get_launch_id
-  #     run: echo "launch_id=${{env.LAUNCH_ID}}" >> $GITHUB_OUTPUT
-  #     if: env.LAUNCH_ID != ''
+  allure_testops_launch:
+    name: Launch Allure TestOps
+    runs-on: macos-13
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    outputs:
+      launch_id: ${{ steps.get_launch_id.outputs.launch_id }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/ruby-cache
+    - name: Launch Allure TestOps
+      run: bundle exec fastlane allure_launch
+      env:
+        ALLURE_TOKEN: ${{ secrets.ALLURE_TOKEN }}
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        GITHUB_EVENT: ${{ toJson(github.event) }}
+    - id: get_launch_id
+      run: echo "launch_id=${{env.LAUNCH_ID}}" >> $GITHUB_OUTPUT
+      if: env.LAUNCH_ID != ''
 
   # automated-code-review:
   #   name: Automated Code Review
