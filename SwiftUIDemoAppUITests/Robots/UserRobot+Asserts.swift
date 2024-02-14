@@ -153,8 +153,11 @@ extension UserRobot {
     func assertConnectingView(with participantCount: Int) -> Self {
         XCTAssertTrue(CallPage.ConnectingView.callConnectingView.wait().exists, "callConnectingView should appear")
         XCTAssertTrue(CallPage.ConnectingView.callingIndicator.exists, "callingIndicator should appear")
-        if participantCount > 1 {
-            XCTAssertEqual(participantCount, CallPage.ConnectingView.callConnectingGroupView.count)
+        if participantCount > 3 {
+            XCTAssertEqual(3, CallPage.ConnectingView.participantsBubbles.count)
+            XCTAssertEqual("+\(participantCount - 2)", CallPage.ConnectingView.participantsBubbles.lastMatch?.text)
+        } else if participantCount > 1 {
+            XCTAssertEqual(participantCount, CallPage.ConnectingView.participantsBubbles.count)
         } else if participantCount > 0 {
             XCTAssertTrue(CallPage.ConnectingView.callConnectingParticipantView.exists, "callConnectingParticipantView should appear")
         }

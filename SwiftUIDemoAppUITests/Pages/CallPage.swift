@@ -41,8 +41,8 @@ enum CallPage {
         static var callConnectingView: XCUIElement { app.staticTexts["callConnectingView"] }
         static var callingIndicator: XCUIElement { app.otherElements["callingIndicator"] }
         static var callConnectingParticipantView: XCUIElement { app.staticTexts["callConnectingParticipantView"] }
-        static var callConnectingGroupView: XCUIElementQuery {
-            app.staticTexts.matching(NSPredicate(format: "identifier LIKE 'callConnectingGroupView'"))
+        static var participantsBubbles: XCUIElementQuery {
+            app.staticTexts["callConnectingGroupView"].staticTexts
         }
     }
     

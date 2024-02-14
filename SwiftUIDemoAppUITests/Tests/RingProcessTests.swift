@@ -61,4 +61,23 @@ final class RingProcessTests: StreamTestCase {
                 .assertCallControls()
         }
     }
+    
+    func testRingProcessWithFourParticipants() {
+        linkToScenario(withId: 3350)
+        
+        let participants = 4
+        let user = 1
+        
+        WHEN("user calls to participant") {
+            userRobot
+                .waitForAutoLogin()
+                .selectParticipants(count: participants)
+                .enterRingEvents(callId)
+        }
+        THEN("all required elements are on the screen") {
+            userRobot
+                .assertConnectingView(with: participants + user)
+                .assertCallControls()
+        }
+    }
 }
