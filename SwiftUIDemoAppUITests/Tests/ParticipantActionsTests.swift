@@ -143,26 +143,35 @@ final class ParticipantActionsTests: StreamTestCase {
                 .waitForAutoLogin()
                 .startCall(callId)
         }
-        AND("participant joins the call and starts recording the call for 3 seconds") {
+        AND("participant joins the call and starts recording the call for 10 seconds") {
             participantRobot
-                .setCallRecordingDuration(35)
+                .setCallRecordingDuration(10)
                 .joinCall(callId, actions: [.recordCall])
+        }
+
+        THEN("wait participants to join") {
             userRobot.waitForParticipantsToJoin()
         }
+
+        WHEN("user observes that participant started recording the screen") {
+            userRobot.assertParticipantStartRecordingCall()
+        }
+
         for view in allViews {
-            WHEN("user turns on \(view.rawValue) view") {
+            THEN("user turns on \(view.rawValue) view and recordingView is visible.") {
                 userRobot.setView(mode: view)
-            }
-            THEN("user observes that participant started recording the screen") {
-                userRobot.assertParticipantStartRecordingCall()
+                XCTAssertTrue(CallPage.recordingView.exists)
             }
         }
+
+        WHEN("user observes that participant stopped recording the screen") {
+            userRobot.assertParticipantStopRecordingCall()
+        }
+
         for view in allViews {
-            WHEN("user turns on \(view.rawValue) view") {
+            AND("user turns on \(view.rawValue) view and recordingView isn't visible.") {
                 userRobot.setView(mode: view)
-            }
-            THEN("user observes that participant stopped recording the screen") {
-                userRobot.assertParticipantStopRecordingCall()
+                XCTAssertTrue(CallPage.callDurationView.exists)
             }
         }
     }

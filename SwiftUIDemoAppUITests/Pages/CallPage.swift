@@ -15,11 +15,9 @@ enum CallPage {
     static var minimizedCallView: XCUIElement { participantView.firstMatch }
     static var viewMenu: XCUIElement { app.buttons["viewMenu"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
-    static var recordingIcon: XCUIElement {
-        app.images.matching(NSPredicate(format: "label LIKE 'Screen Recording'")).firstMatch
-        
-    }
-    
+    static var recordingView: XCUIElement { app.staticTexts["recordingView"] }
+    static var callDurationView: XCUIElement { app.staticTexts["callDurationView"] }
+
     enum ViewMenu {
         static var fullscreen: XCUIElement {
             app.collectionViews.buttons.matching(NSPredicate(format: "label LIKE 'Full Screen'")).firstMatch

@@ -85,13 +85,13 @@ extension UserRobot {
     
     @discardableResult
     func assertParticipantStartRecordingCall() -> Self {
-        XCTAssertTrue(CallPage.recordingIcon.wait(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should appear")
+        XCTAssertTrue(CallPage.recordingView.wait(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should appear")
         return self
     }
     
     @discardableResult
     func assertParticipantStopRecordingCall() -> Self {
-        XCTAssertFalse(CallPage.recordingIcon.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should disappear")
+        XCTAssertTrue(CallPage.callDurationView.wait().exists, "recordingLabel should disappear and callDurationView should appear in its place.")
         return self
     }
     
