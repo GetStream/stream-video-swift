@@ -31,14 +31,18 @@ class TokenGenerator {
     
     var retries = 0
     
-    func fetchToken(for userId: String, expiration tokenDurationInSeconds: Int = 0) -> UserToken? {
+    func fetchToken(
+        for userId: String,
+        expiration tokenDurationInSeconds: Int = 0
+    ) -> UserToken? {
         #if STREAM_E2E_TESTS
         if ProcessInfo.processInfo.arguments.contains("INVALIDATE_JWT") {
             if retries == 0 {
                 retries += 1
-                let expiredToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9" +
-                    ".eyJ1c2VyX2lkIjoibWFydGluIiwiZXhwIjoxNjkxMDc0MDgyfQ.u8JJBJSMa8yU93iRRid9FNblGb2yR6JJODZKq7PbihM"
-                return UserToken(rawValue: expiredToken)
+                /// - Important: The token has been created with Demo Environment apiKey. If we
+                /// ever change the environment on which we run UITests against, then this token
+                /// will need to be recreated.
+                return UserToken(rawValue: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoibWFydGluIiwiZXhwIjoxNjA3OTIxMTM3fQ.eKokB6oC-ZesrD28OPh-96tp_ykulJYiFZY76lG-eRA")
             }
         }
         
