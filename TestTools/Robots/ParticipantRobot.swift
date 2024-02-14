@@ -8,8 +8,8 @@ public class ParticipantRobot {
     private let videoBuddyUrlString = "http://localhost:5678/stream-video-buddy"
     private var screenSharingDuration: Int? = nil
     private var callRecordingDuration: Int? = nil
+    private var messageCount: Int? = nil
     private var userCount: Int = 1
-    private var messageCount: Int = 1
     private var callDuration: Double = TestRunnerEnvironment.isCI ? 60 : 30
     private var _showWindow: Bool = false
     private var _printConsoleLogs: Bool = true
@@ -119,6 +119,10 @@ public class ParticipantRobot {
         
         if let screenSharingDuration {
             params[Config.screenSharingDuration.rawValue] = screenSharingDuration
+        }
+        
+        if let messageCount {
+            params[Config.messageCount.rawValue] = messageCount
         }
 
         let _params = params
