@@ -149,29 +149,27 @@ final class ParticipantActionsTests: StreamTestCase {
                 .joinCall(callId, actions: [.recordCall])
         }
 
-        THEN("wait participants to join") {
+        WHEN("participants join the call and one of them starts recording") {
             userRobot.waitForParticipantsToJoin()
         }
 
-        WHEN("user observes that participant started recording the screen") {
-            userRobot.assertParticipantStartRecordingCall()
-        }
-
         for view in allViews {
-            THEN("user turns on \(view.rawValue) view and recordingView is visible.") {
-                userRobot.setView(mode: view)
-                XCTAssertTrue(CallPage.recordingView.exists)
+            THEN("user turns on \(view.rawValue) view and observes the recording icon appeared") {
+                userRobot
+                    .setView(mode: view)
+                    .assertRecordingIcon(isVisible: true)
+                    .assertCallDurationView(isVisible: false)
             }
         }
 
-        WHEN("user observes that participant stopped recording the screen") {
-            userRobot.assertParticipantStopRecordingCall()
-        }
+        WHEN("participant stops recording") {}
 
         for view in allViews {
-            AND("user turns on \(view.rawValue) view and recordingView isn't visible.") {
-                userRobot.setView(mode: view)
-                XCTAssertTrue(CallPage.callDurationView.exists)
+            THEN("user turns on \(view.rawValue) view and observes the recording icon disappeared") {
+                userRobot
+                    .setView(mode: view)
+                    .assertRecordingIcon(isVisible: false)
+                    .assertCallDurationView(isVisible: true)
             }
         }
     }
