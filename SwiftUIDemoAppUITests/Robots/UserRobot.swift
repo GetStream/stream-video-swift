@@ -78,7 +78,7 @@ extension UserRobot {
     
     @discardableResult
     func joinCallFromLobby() -> Self {
-        if !LobbyPage.otherParticipantsCount.exists {
+        if !LobbyPage.callParticipantsCount.exists {
             CallDetailsPage.lobbyTab.tap()
             tapOnStartCallButton()
         }

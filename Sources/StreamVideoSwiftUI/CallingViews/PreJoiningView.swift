@@ -197,8 +197,8 @@ struct JoinCallView: View {
                 .font(.headline)
                 .multilineTextAlignment(.leading)
                 .fixedSize(horizontal: false, vertical: true)
-                .accessibility(identifier: "otherParticipantsCount")
-                .streamAccessibility(value: "\(otherParticipantsCount)")
+                .accessibility(identifier: "callParticipantsCount")
+                .streamAccessibility(value: "\(callParticipants.count)")
             
             if #available(iOS 14, *) {
                 if !callParticipants.isEmpty {

@@ -9,8 +9,6 @@ final class LobbyTests: StreamTestCase {
     func testLobbyWithTwoParticipants() throws {
         linkToScenario(withId: 1785)
         
-        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/379")
-        
         let participants = 2
         
         GIVEN("participant is on call") {
@@ -27,7 +25,9 @@ final class LobbyTests: StreamTestCase {
                 .endCall()
         }
         WHEN("user enters lobby") {
-            userRobot.enterLobby()
+            userRobot
+                .waitForAutoLogin()
+                .enterLobby(callId)
         }
         THEN("all required elements are on the screen") {
             userRobot.assertLobby()

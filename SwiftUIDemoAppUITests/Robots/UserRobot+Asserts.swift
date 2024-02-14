@@ -213,7 +213,7 @@ extension UserRobot {
     
     @discardableResult
     func assertLobby() -> Self {
-        XCTAssertTrue(LobbyPage.otherParticipantsCount.wait().exists, "otherParticipantsCount should appear")
+        XCTAssertTrue(LobbyPage.callParticipantsCount.wait().exists, "callParticipantsCount should appear")
         XCTAssertTrue(LobbyPage.microphoneToggle.exists, "microphoneToggle should appear")
         XCTAssertTrue(LobbyPage.cameraToggle.exists, "cameraToggle should appear")
         XCTAssertTrue(LobbyPage.microphoneCheckView.exists, "microphoneCheckView should appear")
@@ -223,7 +223,7 @@ extension UserRobot {
     
     @discardableResult
     func assertOtherParticipantsCountInLobby(_ count: Int) -> Self {
-        XCTAssertEqual("\(count)", LobbyPage.otherParticipantsCount.wait().value as? String)
+        XCTAssertEqual("\(count)", LobbyPage.callParticipantsCount.wait().value as? String)
         return self
     }
     
