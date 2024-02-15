@@ -281,6 +281,10 @@ jobs:
     - name: Build UIKit
       run: bundle exec fastlane test_uikit device:"iPhone 15" build_for_testing:true
       timeout-minutes: 25
+    - name: Install Bot SSH Key
+      uses: webfactory/ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - name: Build XCFrameworks
       run: bundle exec fastlane build_xcframeworks
       timeout-minutes: 25
