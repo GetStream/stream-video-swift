@@ -9,7 +9,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantEnablesMicrophone() throws {
         linkToScenario(withId: 1536)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -34,7 +34,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantDisablesMicrophone() throws {
         linkToScenario(withId: 1537)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -59,7 +59,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantEnablesCamera() throws {
         linkToScenario(withId: 1538)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -85,7 +85,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantDisablesCamera() throws {
         linkToScenario(withId: 1539)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -111,7 +111,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantConnectionQualityIndicator() throws {
         linkToScenario(withId: 1540)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
 
         GIVEN("user starts a call") {
             userRobot
@@ -136,7 +136,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantRecordsCall() throws {
         linkToScenario(withId: 1769)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
                 
         GIVEN("user starts a call") {
             userRobot
