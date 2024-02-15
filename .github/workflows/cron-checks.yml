@@ -73,6 +73,7 @@ jobs:
       env:
         INSTALL_ALLURE: true
         INSTALL_VIDEO_BUDDY: true
+        INSTALL_YEETD: true
     - name: Cache iOS Simulator Runtime
       uses: actions/cache@v3
       id: runtime-cache
@@ -160,6 +161,8 @@ jobs:
     steps:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/bootstrap
+      env:
+        INSTALL_YEETD: true
     - name: Setup iOS ${{ matrix.ios }} Runtime
       if: ${{ matrix.setup_runtime }}
       timeout-minutes: 60
