@@ -231,7 +231,8 @@ jobs:
           ~/Library/Logs/scan
           fastlane/recordings
           fastlane/*.log
-          fastlane/test_output/DemoApp.xcresult
+          fastlane/test_output/logs/*/Diagnostics/SwiftUIDemoAppUITests-*/*/*.txt
+          fastlane/test_output/logs/*/Diagnostics/simctl_diagnostics/DiagnosticReports/*
 
   allure_testops_launch:
     name: Launch Allure TestOps
