@@ -53,128 +53,128 @@ jobs:
           derived_data/Build/**/*.xctestrun
           derived_data/Build/**/*.framework
 
-  # test-llc-debug:
-  #   name: Test LLC (Debug)
-  #   runs-on: macos-14
-  #   needs: build-test-app-and-frameworks
-  #   if: ${{ github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     GITHUB_PR_NUM: ${{ github.event.number }}
-  #     STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #     with:
-  #       fetch-depth: 100
-  #   - uses: actions/download-artifact@v3
-  #     with:
-  #       name: cache-derived-data
-  #       path: derived_data/Build/
-  #   - uses: ./.github/actions/bootstrap
-  #   - uses: ./.github/actions/python-cache
-  #   - name: Run LLC Tests (Debug)
-  #     run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" skip_build:true
-  #     timeout-minutes: 40
-  #   - name: Get branch name
-  #     id: get_branch_name
-  #     run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
-  #   - name: Run Sonar analysis
-  #     run: bundle exec fastlane sonar_upload
-  #     env:
-  #       BRANCH_NAME: ${{ steps.get_branch_name.outputs.branch }}
-  #       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  #       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #   - uses: actions/upload-artifact@v3
-  #     if: failure()
-  #     with:
-  #       name: LLC Test Data
-  #       path: |
-  #         ~/Library/Logs/scan
-  #   - uses: 8398a7/action-slack@v3
-  #     with:
-  #       status: ${{ job.status }}
-  #       text: "You shall not pass!"
-  #       job_name: "Test LLC (Debug)"
-  #       fields: message,commit,author,action,workflow,job,took
-  #     env:
-  #       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-  #       MATRIX_CONTEXT: ${{ toJson(matrix) }}
-  #     if: ${{ github.event_name == 'push' && failure() }}
+  test-llc-debug:
+    name: Test LLC (Debug)
+    runs-on: macos-14
+    needs: build-test-app-and-frameworks
+    if: ${{ github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.number }}
+      STREAM_VIDEO_SECRET: ${{ secrets.STREAM_VIDEO_SECRET }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 100
+    - uses: actions/download-artifact@v3
+      with:
+        name: cache-derived-data
+        path: derived_data/Build/
+    - uses: ./.github/actions/bootstrap
+    - uses: ./.github/actions/python-cache
+    - name: Run LLC Tests (Debug)
+      run: bundle exec fastlane test device:"${{ env.IOS_SIMULATOR_DEVICE }}" skip_build:true
+      timeout-minutes: 40
+    - name: Get branch name
+      id: get_branch_name
+      run: echo "branch=${GITHUB_REF#refs/heads/}" >> $GITHUB_OUTPUT
+    - name: Run Sonar analysis
+      run: bundle exec fastlane sonar_upload
+      env:
+        BRANCH_NAME: ${{ steps.get_branch_name.outputs.branch }}
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: LLC Test Data
+        path: |
+          ~/Library/Logs/scan
+    - uses: 8398a7/action-slack@v3
+      with:
+        status: ${{ job.status }}
+        text: "You shall not pass!"
+        job_name: "Test LLC (Debug)"
+        fields: message,commit,author,action,workflow,job,took
+      env:
+        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        MATRIX_CONTEXT: ${{ toJson(matrix) }}
+      if: ${{ github.event_name == 'push' && failure() }}
 
-  # test-swiftui-debug:
-  #   name: Test SwiftUI (Debug)
-  #   runs-on: macos-14
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
-  #     GITHUB_PR_NUM: ${{ github.event.number }}
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #   - uses: ./.github/actions/bootstrap
-  #   - name: Run UI Tests (Debug)
-  #     run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
-  #     timeout-minutes: 40
-  #   - name: Parse xcresult
-  #     if: failure()
-  #     run: |
-  #       brew install chargepoint/xcparse/xcparse
-  #       xcparse screenshots fastlane/test_output/StreamVideoSwiftUI.xcresult fastlane/test_output/snapshots --test
-  #   - uses: actions/upload-artifact@v3
-  #     if: failure()
-  #     with:
-  #       name: SwiftUI Test Data
-  #       path: |
-  #         ~/Library/Logs/scan
-  #         fastlane/test_output/snapshots
+  test-swiftui-debug:
+    name: Test SwiftUI (Debug)
+    runs-on: macos-14
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'false' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
+      GITHUB_PR_NUM: ${{ github.event.number }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/bootstrap
+    - name: Run UI Tests (Debug)
+      run: bundle exec fastlane test_swiftui device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.swiftui_snapshots }}
+      timeout-minutes: 40
+    - name: Parse xcresult
+      if: failure()
+      run: |
+        brew install chargepoint/xcparse/xcparse
+        xcparse screenshots fastlane/test_output/StreamVideoSwiftUI.xcresult fastlane/test_output/snapshots --test
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: SwiftUI Test Data
+        path: |
+          ~/Library/Logs/scan
+          fastlane/test_output/snapshots
 
-  # test-uikit-debug:
-  #   name: Test UIKit (Debug)
-  #   runs-on: macos-14
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
-  #     GITHUB_PR_NUM: ${{ github.event.number }}
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #   - uses: ./.github/actions/bootstrap
-  #   - name: Run UI Tests (Debug)
-  #     run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
-  #     timeout-minutes: 40
-  #   - name: Parse xcresult
-  #     if: failure()
-  #     run: |
-  #       brew install chargepoint/xcparse/xcparse
-  #       xcparse screenshots fastlane/test_output/StreamVideoUIKit.xcresult fastlane/test_output/snapshots --test
-  #   - uses: actions/upload-artifact@v3
-  #     if: failure()
-  #     with:
-  #       name: UIKit Test Data
-  #       path: |
-  #         ~/Library/Logs/scan
-  #         fastlane/test_output/snapshots
+  test-uikit-debug:
+    name: Test UIKit (Debug)
+    runs-on: macos-14
+    if: ${{ github.event_name != 'push' && github.event.inputs.uikit_snapshots != 'false' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.CI_BOT_GITHUB_TOKEN }} # to open a PR
+      GITHUB_PR_NUM: ${{ github.event.number }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: ./.github/actions/bootstrap
+    - name: Run UI Tests (Debug)
+      run: bundle exec fastlane test_uikit device:"${{ env.IOS_SIMULATOR_DEVICE }}" record:${{ github.event.inputs.uikit_snapshots }}
+      timeout-minutes: 40
+    - name: Parse xcresult
+      if: failure()
+      run: |
+        brew install chargepoint/xcparse/xcparse
+        xcparse screenshots fastlane/test_output/StreamVideoUIKit.xcresult fastlane/test_output/snapshots --test
+    - uses: actions/upload-artifact@v3
+      if: failure()
+      with:
+        name: UIKit Test Data
+        path: |
+          ~/Library/Logs/scan
+          fastlane/test_output/snapshots
 
-  # build-apps:
-  #   name: Build Demo Apps
-  #   runs-on: macos-14
-  #   needs: build-test-app-and-frameworks
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     GITHUB_PR_NUM: ${{ github.event.number }}
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #   - uses: actions/download-artifact@v3
-  #     with:
-  #       name: cache-derived-data
-  #       path: derived_data/Build/
-  #   - uses: ./.github/actions/ruby-cache
-  #   - uses: ./.github/actions/xcode-cache
-  #   - name: Build SwiftUI Demo App
-  #     run: bundle exec fastlane build_swiftui_demo
-  #   - name: Build UIKit Demo App
-  #     run: bundle exec fastlane build_uikit_demo
-  #   - name: Build Docs Test Project
-  #     run: bundle exec fastlane build_docs_test
+  build-apps:
+    name: Build Demo Apps
+    runs-on: macos-14
+    needs: build-test-app-and-frameworks
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.number }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+    - uses: actions/download-artifact@v3
+      with:
+        name: cache-derived-data
+        path: derived_data/Build/
+    - uses: ./.github/actions/ruby-cache
+    - uses: ./.github/actions/xcode-cache
+    - name: Build SwiftUI Demo App
+      run: bundle exec fastlane build_swiftui_demo
+    - name: Build UIKit Demo App
+      run: bundle exec fastlane build_uikit_demo
+    - name: Build Docs Test Project
+      run: bundle exec fastlane build_docs_test
 
   test-e2e-debug:
     name: Test E2E UI (Debug)
@@ -252,24 +252,24 @@ jobs:
       run: echo "launch_id=${{env.LAUNCH_ID}}" >> $GITHUB_OUTPUT
       if: env.LAUNCH_ID != ''
 
-  # automated-code-review:
-  #   name: Automated Code Review
-  #   runs-on: macos-12
-  #   env:
-  #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-  #     GITHUB_PR_NUM: ${{ github.event.number }}
-  #     XCODE_VERSION: "14.0.1"
-  #   if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
-  #   steps:
-  #   - uses: actions/checkout@v4.1.1
-  #     with:
-  #       fetch-depth: 100
-  #   - uses: ./.github/actions/bootstrap
-  #   - name: Run Danger
-  #     run: bundle exec danger
-  #   - name: Run Fastlane Linting
-  #     run: bundle exec fastlane rubocop
-  #   - name: Run SwiftFormat Linting
-  #     run: bundle exec fastlane run_swift_format lint:true
-  #   - name: Run Podspec Linting
-  #     run: bundle exec fastlane pod_lint
+  automated-code-review:
+    name: Automated Code Review
+    runs-on: macos-12
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GITHUB_PR_NUM: ${{ github.event.number }}
+      XCODE_VERSION: "14.0.1"
+    if: ${{ github.event_name != 'push' && github.event.inputs.swiftui_snapshots != 'true' && github.event.inputs.uikit_snapshots != 'true' }}
+    steps:
+    - uses: actions/checkout@v4.1.1
+      with:
+        fetch-depth: 100
+    - uses: ./.github/actions/bootstrap
+    - name: Run Danger
+      run: bundle exec danger
+    - name: Run Fastlane Linting
+      run: bundle exec fastlane rubocop
+    - name: Run SwiftFormat Linting
+      run: bundle exec fastlane run_swift_format lint:true
+    - name: Run Podspec Linting
+      run: bundle exec fastlane pod_lint
