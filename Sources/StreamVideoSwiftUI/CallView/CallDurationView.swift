@@ -20,7 +20,7 @@ public struct CallDurationView: View {
     @MainActor
     public init(_ viewModel: CallViewModel) {
         self.viewModel = viewModel
-        duration = viewModel.call?.state.duration ?? 0
+        _duration = .init(initialValue: viewModel.call?.state.duration ?? 0)
     }
 
     public var body: some View {
