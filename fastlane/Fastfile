@@ -194,6 +194,7 @@ lane :test do |options|
     devices: options[:device],
     number_of_retries: 2,
     skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing],
     xcargs: is_ci ? "#{buildcache_xcargs} STREAM_VIDEO_SECRET=#{app_secret}" : buildcache_xcargs
   )
 end
@@ -205,7 +206,8 @@ lane :test_swiftui do |options|
     source: :swiftui,
     device: options[:device],
     record: options[:record],
-    skip_build: options[:skip_build]
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing]
   )
 end
 
@@ -216,7 +218,8 @@ lane :test_uikit do |options|
     source: :uikit,
     device: options[:device],
     record: options[:record],
-    skip_build: options[:skip_build]
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing]
   )
 end
 
@@ -239,6 +242,7 @@ private_lane :test_ui do |options|
     result_bundle: true,
     devices: options[:device],
     xcargs: buildcache_xcargs,
+    build_for_testing: options[:build_for_testing],
     fail_build: !record_mode
   )
 
@@ -330,6 +334,7 @@ lane :test_e2e do |options|
     cloned_source_packages_path: source_packages_path,
     clean: is_localhost,
     test_without_building: options[:test_without_building],
+    build_for_testing: options[:build_for_testing],
     devices: options[:device],
     prelaunch_simulator: is_ci,
     number_of_retries: is_ci ? 3 : 1,
