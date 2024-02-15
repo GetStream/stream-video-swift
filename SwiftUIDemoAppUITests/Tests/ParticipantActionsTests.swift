@@ -177,7 +177,7 @@ final class ParticipantActionsTests: StreamTestCase {
     func testParticipantSharesScreen() throws {
         linkToScenario(withId: 1773)
         
-        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 1
 
