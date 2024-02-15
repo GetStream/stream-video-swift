@@ -6,6 +6,11 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [0.5.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.0)
+_February 15, 2024_
+
+### 🔄 Changed
+
 - The following API changes occurred as part of the redesign. [#269](https://github.com/GetStream/stream-video-swift/pull/269) & [#270](https://github.com/GetStream/stream-video-swift/pull/270)
     - `OutgoingCallView` now accepts an additional `callTopView` parameter to align with the updated design.
     - `CallParticipantsInfoView` and the `ViewFactory.makeParticipantsListView` method aren't accept the `availableFrame` anymore.
