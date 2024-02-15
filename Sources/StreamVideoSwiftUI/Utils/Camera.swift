@@ -129,37 +129,27 @@ class Camera: NSObject, @unchecked Sendable {
             logger.error("Failed to obtain video input.")
             return
         }
-        
-        let photoOutput = AVCapturePhotoOutput()
-                        
-        captureSession.sessionPreset = AVCaptureSession.Preset.photo
+
+        captureSession.sessionPreset = AVCaptureSession.Preset.high
 
         let videoOutput = AVCaptureVideoDataOutput()
-        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue(label: "VideoDataOutputQueue"))
-  
+        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: .userInteractive))
+
         guard captureSession.canAddInput(deviceInput) else {
             logger.error("Unable to add device input to capture session.")
             return
         }
-        guard captureSession.canAddOutput(photoOutput) else {
-            logger.error("Unable to add photo output to capture session.")
-            return
-        }
+
         guard captureSession.canAddOutput(videoOutput) else {
             logger.error("Unable to add video output to capture session.")
             return
         }
         
         captureSession.addInput(deviceInput)
-        captureSession.addOutput(photoOutput)
         captureSession.addOutput(videoOutput)
         
         self.deviceInput = deviceInput
-        self.photoOutput = photoOutput
         self.videoOutput = videoOutput
-        
-        photoOutput.isHighResolutionCaptureEnabled = true
-        photoOutput.maxPhotoQualityPrioritization = .quality
         
         updateVideoOutputConnection()
         
@@ -288,11 +278,17 @@ class Camera: NSObject, @unchecked Sendable {
 @available(iOS 14.0, *)
 extension Camera: AVCaptureVideoDataOutputSampleBufferDelegate {
     
-    func captureOutput(_ output: AVCaptureOutput, didOutput sampleBuffer: CMSampleBuffer, from connection: AVCaptureConnection) {
+    func captureOutput(
+        _ output: AVCaptureOutput,
+        didOutput sampleBuffer: CMSampleBuffer,
+        from connection: AVCaptureConnection
+    ) {
         guard let pixelBuffer = sampleBuffer.imageBuffer else { return }
         
-        if connection.isVideoOrientationSupported,
-           let videoOrientation = videoOrientationFor(deviceOrientation) {
+        if
+            connection.isVideoOrientationSupported,
+            let videoOrientation = videoOrientationFor(deviceOrientation),
+            connection.videoOrientation != videoOrientation {
             connection.videoOrientation = videoOrientation
         }
 

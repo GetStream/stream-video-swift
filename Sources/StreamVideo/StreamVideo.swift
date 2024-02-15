@@ -81,7 +81,7 @@ public class StreamVideo: ObservableObject {
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
-    
+
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
     ///   - apiKey: The API key.

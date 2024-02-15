@@ -10,74 +10,68 @@ import StreamVideo
 import Combine
 
 final class MicrophoneChecker_Tests: XCTestCase {
-    
-    private lazy var notificationCenter: NotificationCenter! = .default
-    private lazy var audioSession: MockAVAudioSession! = .init()
-    private lazy var subject: MicrophoneChecker! = .init(
-        valueLimit: 3,
-        audioSession: audioSession,
-        notificationCenter: notificationCenter
-    )
 
-    private var cancellable: AnyCancellable?
+    private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
+    private lazy var mockAudioRecorder: MockStreamAudioRecorder! = MockStreamAudioRecorder(filename: "test.wav")
+
+    override func setUp() {
+        super.setUp()
+        InjectedValues[\.audioRecorder] = mockAudioRecorder
+    }
 
     override func tearDown() {
-        cancellable = nil
+        mockAudioRecorder = nil
         subject = nil
-        audioSession = nil
-        notificationCenter = nil
         super.tearDown()
     }
 
     // MARK: - init
 
-    func test_startListening_audioSessionIsActiveWasCalled() {
-        _ = subject
-        
-        XCTAssertTrue(audioSession.setActiveWasCalledWithIsActive ?? false)
+    func test_startListening_startListeningWasCalledOnAudioRecorder() async {
+        await subject.startListening()
+
+        XCTAssertTrue(mockAudioRecorder.startRecordingWasCalled)
     }
 
     // MARK: - stopListening
 
-    func test_stopListening_audioSessionIsActiveWasNotCalled() {
-        subject.startListening()
+    func test_stopListening_stopListeningWasCalledOnAudioRecorder() async {
+        await subject.stopListening()
 
-        subject.stopListening()
-
-        XCTAssertTrue(audioSession.setActiveWasCalledWithIsActive ?? false)
+        XCTAssertTrue(mockAudioRecorder.stopRecordingWasCalled)
     }
 
-    // MARK: - CallNotification.callEnded notification
+    // MARK: - audioLevels
 
-    func test_didReceiveCallEndedNotification_audioSessionIsActiveWasCalled() {
-        subject.startListening()
-        let waitExpectation = expectation(description: "Ensure CallNotification.callEnded was posted")
-        cancellable = notificationCenter
-            .publisher(for: NSNotification.Name(CallNotification.callEnded))
-            .sink { _ in waitExpectation.fulfill() }
+    func test_startListeningAndPostAudioLevels_microphoneCheckerHasExpectedValues() async {
+        await subject.startListening()
 
-        notificationCenter.post(
-            name: NSNotification.Name(CallNotification.callEnded),
-            object: nil
-        )
+        mockAudioRecorder.mockMetersPublisher.send(-100)
+        mockAudioRecorder.mockMetersPublisher.send(-25)
+        mockAudioRecorder.mockMetersPublisher.send(-10)
+        mockAudioRecorder.mockMetersPublisher.send(-50)
 
-        wait(for: [waitExpectation], timeout: defaultTimeout)
-        XCTAssertFalse(audioSession.setActiveWasCalledWithIsActive ?? true)
+        let waitExpectation = expectation(description: "Wait for time interval...")
+        waitExpectation.isInverted = true
+        await fulfillment(of: [waitExpectation], timeout: 1)
+
+        XCTAssertEqual(subject.audioLevels, [0.5, 0.8, 0.0])
     }
 }
 
-private final class MockAVAudioSession: AudioSessionProtocol {
+private final class MockStreamAudioRecorder: StreamAudioRecorder {
 
-    private(set) var setActiveWasCalledWithIsActive: Bool?
+    private(set) var startRecordingWasCalled = false
+    private(set) var stopRecordingWasCalled = false
 
-    func setCategory(_ category: AVAudioSession.Category) throws { /* No-op */ }
+    private(set) var mockMetersPublisher: PassthroughSubject<Float, Never> = .init()
+    override var metersPublisher: AnyPublisher<Float, Never> { mockMetersPublisher.eraseToAnyPublisher() }
 
-    func setActive(
-        _ active: Bool,
-        options: AVAudioSession.SetActiveOptions
-    ) throws {
-        setActiveWasCalledWithIsActive = active
+    override func startRecording() async {
+        startRecordingWasCalled = true
     }
 
-    func requestRecordPermission(_ response: @escaping (Bool) -> Void) { /* No-op */ }
+    override func stopRecording() async {
+        stopRecordingWasCalled = true
+    }
 }

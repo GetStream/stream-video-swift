@@ -50,5 +50,12 @@ struct LobbyView_iOS13: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
+        .onReceive(callViewModel.$callSettings) { newValue in
+            Task {
+                newValue.audioOn
+                    ? await microphoneChecker.startListening()
+                    : await microphoneChecker.stopListening()
+            }
+        }
     }
 }

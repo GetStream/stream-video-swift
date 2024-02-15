@@ -36,6 +36,14 @@ public struct LobbyView: View {
                 callId: callId
             )
         )
+        let microphoneCheckerInstance = MicrophoneChecker()
+        _microphoneChecker = .init(wrappedValue: microphoneCheckerInstance)
+
+        Task {
+            callSettings.wrappedValue.audioOn
+                ? await microphoneCheckerInstance.startListening()
+                : await microphoneCheckerInstance.stopListening()
+        }
     }
     
     public var body: some View {
@@ -48,6 +56,13 @@ public struct LobbyView: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
+        .onChange(of: callSettings) { newValue in
+            Task {
+                newValue.audioOn
+                    ? await microphoneChecker.startListening()
+                    : await microphoneChecker.stopListening()
+            }
+        }
     }
 }
 

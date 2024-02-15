@@ -13,6 +13,7 @@ open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
+    @Injected(\.audioRecorder) var audioRecorder
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -71,6 +72,7 @@ open class CallViewModel: ObservableObject {
     @Published public var callingState: CallingState = .idle {
         didSet {
             handleRingingEvents()
+            audioRecorder.hasActiveCall = callingState != .idle
         }
     }
     
@@ -292,7 +294,12 @@ open class CallViewModel: ObservableObject {
     ///  - callId: the id of the call.
     ///  - members: list of members that are part of the call.
     ///  - ring: whether the call should ring.
-    public func startCall(callType: String, callId: String, members: [MemberRequest], ring: Bool = false) {
+    public func startCall(
+        callType: String,
+        callId: String,
+        members: [MemberRequest],
+        ring: Bool = false
+    ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
         if !ring {
@@ -330,7 +337,11 @@ open class CallViewModel: ObservableObject {
     ///  - callType: the type of the call.
     ///  - callId: the id of the call.
     ///  - members: list of members that are part of the call.
-    public func enterLobby(callType: String, callId: String, members: [MemberRequest]) {
+    public func enterLobby(
+        callType: String,
+        callId: String,
+        members: [MemberRequest]
+    ) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         callingState = .lobby(lobbyInfo)
         if !localCallSettingsChange {

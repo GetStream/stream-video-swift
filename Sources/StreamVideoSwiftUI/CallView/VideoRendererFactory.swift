@@ -56,11 +56,19 @@ class VideoRendererFactory {
         }
         log.debug("Removing view for participant \(participantId)")
         queue.sync {
+            if let participantView = views[participantId] {
+                participantView.track = nil
+                participantView.removeFromSuperview()
+            }
             views[participantId] = nil
         }
     }
     
     @objc func clearViews() {
+        views.forEach {
+            $0.value.track = nil
+            $0.value.removeFromSuperview()
+        }
         views = [String: VideoRenderer]()
     }
 }
