@@ -216,7 +216,8 @@ lane :test_uikit do |options|
     source: :uikit,
     device: options[:device],
     record: options[:record],
-    skip_build: options[:skip_build]
+    skip_build: options[:skip_build],
+    build_for_testing: options[:build_for_testing]
   )
 end
 
@@ -239,6 +240,7 @@ private_lane :test_ui do |options|
     result_bundle: true,
     devices: options[:device],
     xcargs: buildcache_xcargs,
+    build_for_testing: options[:build_for_testing],
     fail_build: !record_mode
   )
 
