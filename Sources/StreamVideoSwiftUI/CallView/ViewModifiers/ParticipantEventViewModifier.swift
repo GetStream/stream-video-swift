@@ -26,9 +26,6 @@ struct ParticipantEventsNotificationViewModifier: ViewModifier {
                 .modifier(ShadowViewModifier())
                 .padding()
                 .accessibility(identifier: "participantEventLabel")
-            #if STREAM_E2E_TESTS
-                .offset(y: 300)
-            #endif
         } else {
             EmptyView()
         }
