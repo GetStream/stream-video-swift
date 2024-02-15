@@ -62,3 +62,12 @@ if [[ ${INSTALL_VIDEO_BUDDY-default} == true ]]; then
   puts "Install stream-video-buddy v${STREAM_VIDEO_BUDDY_VERSION}"
   npm install -g "https://github.com/GetStream/stream-video-buddy#${STREAM_VIDEO_BUDDY_VERSION}"
 fi
+
+if [[ ${INSTALL_YEETD-default} == true ]]; then
+  PACKAGE="yeetd-normal.pkg"
+  puts "Install yeetd v${YEETD_VERSION}"
+  wget "https://github.com/biscuitehh/yeetd/releases/download/${YEETD_VERSION}/${PACKAGE}"
+  sudo installer -pkg ${PACKAGE} -target /
+  puts "Running yeetd daemon"
+  yeetd &
+fi

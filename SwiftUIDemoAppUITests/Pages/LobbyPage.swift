@@ -10,7 +10,7 @@ enum LobbyPage {
     static var microphoneToggle: XCUIElement { app.buttons["microphoneToggle"] }
     static var closeButton: XCUIElement { app.buttons["Close"] }
     static var joinCallButton: XCUIElement { app.buttons["joinCall"] }
-    static var otherParticipantsCount: XCUIElement { app.staticTexts["otherParticipantsCount"] }
+    static var callParticipantsCount: XCUIElement { app.staticTexts["callParticipantsCount"] }
     static var cameraCheckView: XCUIElement { app.otherElements["cameraCheckView"] }
     static var microphoneCheckView: XCUIElement { app.staticTexts["microphoneCheckView"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }

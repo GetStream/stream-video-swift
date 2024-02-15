@@ -10,7 +10,9 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1541)
 
         WHEN("user starts a new call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         THEN("user is alone on the call") {
             userRobot
@@ -28,7 +30,7 @@ final class CallViewsTests: StreamTestCase {
 
         WHEN("user starts a new call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -73,7 +75,7 @@ final class CallViewsTests: StreamTestCase {
 
         WHEN("user starts a new call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -118,7 +120,7 @@ final class CallViewsTests: StreamTestCase {
 
         WHEN("user starts a new call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -164,7 +166,9 @@ final class CallViewsTests: StreamTestCase {
         let participants = 1
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("participant joins the call") {
             participantRobot
@@ -197,7 +201,9 @@ final class CallViewsTests: StreamTestCase {
         let participants = 10
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("ten participants join the call") {
             participantRobot
@@ -219,7 +225,9 @@ final class CallViewsTests: StreamTestCase {
         let participants = 10
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("ten participants join the call") {
             participantRobot
@@ -251,7 +259,9 @@ final class CallViewsTests: StreamTestCase {
         let expectedParticipantsInSpotlight = 3
 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         AND("ten participants join the call") {
             participantRobot
@@ -272,7 +282,9 @@ final class CallViewsTests: StreamTestCase {
         linkToScenario(withId: 1777)
         
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("user unmutes themselves") {
             userRobot.microphone(.enable)

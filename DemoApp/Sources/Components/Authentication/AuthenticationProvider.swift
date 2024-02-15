@@ -27,46 +27,47 @@ enum AuthenticationProvider {
         for userId: String,
         callIds: [String] = []
     ) async throws -> UserToken {
-        if
-            AppEnvironment.configuration.isTest,
-            AppEnvironment.contains(.mockJWT) {
-            AppState.shared.apiKey = "hd8szvscpxvd"
-            return fetchTestToken(for: userId)
-        } else {
-            let environment = {
-                switch AppEnvironment.baseURL {
-                case .staging:
-                    return "pronto"
-                case .pronto:
-                    return "pronto"
-                case .legacy:
-                    return "pronto"
-                case .demo:
-                    return "demo"
-                }
-            }()
-
-            var url = AppEnvironment
-                .authBaseURL
-                .appending(.init(name: "user_id", value: userId))
-                .appending(.init(name: "environment", value: environment))
-
-            if !callIds.isEmpty {
-                url = url.appending(
-                    URLQueryItem(
-                        name: "call_cids",
-                        value: callIds.joined(separator: ",")
-                    )
-                )
+        let environment = {
+            switch AppEnvironment.baseURL {
+            case .staging:
+                return "pronto"
+            case .pronto:
+                return "pronto"
+            case .legacy:
+                return "pronto"
+            case .demo:
+                return "demo"
             }
+        }()
 
-            let (data, _) = try await URLSession.shared.data(from: url)
-            let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
-            let token = UserToken(rawValue: tokenResponse.token)
-            AppState.shared.apiKey = tokenResponse.apiKey
-            log.debug("Authentication info userId:\(tokenResponse.userId) apiKey:\(tokenResponse.apiKey) token:\(token)")
-            return token
+        var url = AppEnvironment
+            .authBaseURL
+            .appending(.init(name: "user_id", value: userId))
+            .appending(.init(name: "environment", value: environment))
+
+        if !callIds.isEmpty {
+            url = url.appending(
+                URLQueryItem(
+                    name: "call_cids",
+                    value: callIds.joined(separator: ",")
+                )
+            )
         }
+
+        let (data, _) = try await URLSession.shared.data(from: url)
+        let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
+        AppState.shared.apiKey = tokenResponse.apiKey
+        let token = {
+            if
+                AppEnvironment.configuration.isTest,
+                AppEnvironment.contains(.mockJWT) {
+                return fetchTestToken(for: userId)
+            } else {
+                return UserToken(rawValue: tokenResponse.token)
+            }
+        }()
+        log.debug("Authentication info userId:\(tokenResponse.userId) apiKey:\(tokenResponse.apiKey) token:\(token)")
+        return token
     }
 
     static func fetchTestToken(

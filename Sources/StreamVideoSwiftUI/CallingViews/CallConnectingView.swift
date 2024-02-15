@@ -29,6 +29,7 @@ struct CallConnectingView<CallControls: View, CallTopView: View>: View {
                     CallingGroupView(
                         participants: outgoingCallMembers
                     )
+                    .accessibilityElement(children: .combine)
                     .accessibility(identifier: "callConnectingGroupView")
                 } else if !outgoingCallMembers.isEmpty {
                     AnimatingParticipantView(

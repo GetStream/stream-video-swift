@@ -10,14 +10,14 @@ enum CallPage {
     static var microphoneToggle: XCUIElement { app.buttons["microphoneToggle"] }
     static var cameraPositionToggle: XCUIElement { app.buttons["cameraPositionToggle"] }
     static var hangUpButton: XCUIElement { app.buttons["hangUp"] }
-    
-    static var recordingLabel: XCUIElement { app.staticTexts["recordingLabel"] }
     static var participantMenu: XCUIElement { app.buttons["participantMenu"] }
     static var cornerDraggableView: XCUIElement { app.otherElements["cornerDraggableView"].otherElements.firstMatch }
     static var minimizedCallView: XCUIElement { participantView.firstMatch }
     static var viewMenu: XCUIElement { app.buttons["viewMenu"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
-    
+    static var recordingView: XCUIElement { app.staticTexts["recordingView"] }
+    static var callDurationView: XCUIElement { app.staticTexts["callDurationView"] }
+
     enum ViewMenu {
         static var fullscreen: XCUIElement {
             app.collectionViews.buttons.matching(NSPredicate(format: "label LIKE 'Full Screen'")).firstMatch
@@ -41,8 +41,8 @@ enum CallPage {
         static var callConnectingView: XCUIElement { app.staticTexts["callConnectingView"] }
         static var callingIndicator: XCUIElement { app.otherElements["callingIndicator"] }
         static var callConnectingParticipantView: XCUIElement { app.staticTexts["callConnectingParticipantView"] }
-        static var callConnectingGroupView: XCUIElementQuery {
-            app.staticTexts.matching(NSPredicate(format: "identifier LIKE 'callConnectingGroupView'"))
+        static var participantsBubbles: XCUIElementQuery {
+            app.staticTexts["callConnectingGroupView"].staticTexts
         }
     }
     

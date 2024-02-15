@@ -13,22 +13,34 @@ public class Sinatra {
     }
     
     func setConnection(state: ConnectionState) {
-        let url = URL(string: "\(baseUrl)/connection/\(state.rawValue)")!
-        invokeSinatra(url: url)
+        Task {
+            do {
+                let url = URL(string: "\(baseUrl)/connection/\(state.rawValue)")!
+                try await invokeSinatra(url: url)
+            } catch {
+                debugPrint(error)
+            }
+        }
     }
     
     func recordVideo(name: String, delete: Bool = false, stop: Bool = false) {
-        let json: [String: Any] = ["delete": delete, "stop": stop]
-        let udid = ProcessInfo.processInfo.environment["SIMULATOR_UDID"] ?? ""
-        let url = URL(string: "\(baseUrl)/record_video/\(udid)/\(name)")!
-        invokeSinatra(url: url, body: json)
+        Task {
+            do {
+                let json: [String: Any] = ["delete": delete, "stop": stop]
+                let udid = ProcessInfo.processInfo.environment["SIMULATOR_UDID"] ?? ""
+                let url = URL(string: "\(baseUrl)/record_video/\(udid)/\(name)")!
+                try await invokeSinatra(url: url, body: json)
+            } catch {
+                debugPrint(error)
+            }
+        }
     }
     
-    private func invokeSinatra(url: URL, body: [String: Any] = [:]) {
+    private func invokeSinatra(url: URL, body: [String: Any] = [:]) async throws {
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         request.httpBody = try? JSONSerialization.data(withJSONObject: body, options: [])
-        URLSession.shared.dataTask(with: request).resume()
+        _ = try await URLSession.shared.data(for: request)
     }
 }
