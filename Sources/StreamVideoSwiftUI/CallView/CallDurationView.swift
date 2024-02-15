@@ -20,7 +20,7 @@ public struct CallDurationView: View {
     @MainActor
     public init(_ viewModel: CallViewModel) {
         self.viewModel = viewModel
-        duration = viewModel.call?.state.duration ?? 0
+        _duration = .init(initialValue: viewModel.call?.state.duration ?? 0)
     }
 
     public var body: some View {
@@ -31,11 +31,7 @@ public struct CallDurationView: View {
                         .resizable()
                         .aspectRatio(contentMode: .fit)
                         .frame(width: 12)
-                        .foregroundColor(
-                            viewModel.recordingState == .recording
-                                ? colors.inactiveCallControl
-                                : colors.onlineIndicatorColor
-                        )
+                        .foregroundColor(foregroundColor)
 
                     TimeView(formattedDuration)
                         .layoutPriority(2)
@@ -49,10 +45,16 @@ public struct CallDurationView: View {
             }
         }
         .onReceive(viewModel.call?.state.$duration) { self.duration = $0 }
-        .accessibility(identifier: accessibilityLabel)
+        .accessibility(identifier: accessibilityIdentifier)
     }
 
     // MARK: - Private Helpers
+
+    private var foregroundColor: Color {
+        viewModel.recordingState == .recording
+            ? colors.inactiveCallControl
+            : colors.onlineIndicatorColor
+    }
 
     private var iconView: Image {
         viewModel.recordingState == .recording
@@ -60,13 +62,10 @@ public struct CallDurationView: View {
             : images.secureCallIcon
     }
 
-    private var accessibilityLabel: String {
-        var result = "Call duration: \(duration) seconds."
-        if viewModel.recordingState == .recording {
-            result += "Recording in progress."
-        }
-
-        return result
+    private var accessibilityIdentifier: String {
+        viewModel.recordingState == .recording
+            ? "recordingView"
+            : "callDurationView"
     }
 }
 

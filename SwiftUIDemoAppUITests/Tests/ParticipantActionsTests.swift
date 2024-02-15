@@ -13,7 +13,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -38,7 +38,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -63,7 +63,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
                 .camera(.enable)
@@ -89,7 +89,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
                 .camera(.disable)
@@ -115,7 +115,7 @@ final class ParticipantActionsTests: StreamTestCase {
 
         GIVEN("user starts a call") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .microphone(.disable)
         }
@@ -139,28 +139,37 @@ final class ParticipantActionsTests: StreamTestCase {
         try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
                 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
-        AND("participant joins the call and starts recording the call for 3 seconds") {
+        AND("participant joins the call and starts recording the call for 10 seconds") {
             participantRobot
-                .setCallRecordingDuration(35)
+                .setCallRecordingDuration(15)
                 .joinCall(callId, actions: [.recordCall])
+        }
+
+        WHEN("participants join the call and one of them starts recording") {
             userRobot.waitForParticipantsToJoin()
         }
+
         for view in allViews {
-            WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
-            }
-            THEN("user observes that participant started recording the screen") {
-                userRobot.assertParticipantStartRecordingCall()
+            THEN("user turns on \(view.rawValue) view and observes the recording icon appeared") {
+                userRobot
+                    .setView(mode: view)
+                    .assertRecordingIcon(isVisible: true)
+                    .assertCallDurationView(isVisible: false)
             }
         }
+
+        WHEN("participant stops recording") {}
+
         for view in allViews {
-            WHEN("user turns on \(view.rawValue) view") {
-                userRobot.setView(mode: view)
-            }
-            THEN("user observes that participant stopped recording the screen") {
-                userRobot.assertParticipantStopRecordingCall()
+            THEN("user turns on \(view.rawValue) view and observes the recording icon disappeared") {
+                userRobot
+                    .setView(mode: view)
+                    .assertRecordingIcon(isVisible: false)
+                    .assertCallDurationView(isVisible: true)
             }
         }
     }
@@ -173,7 +182,9 @@ final class ParticipantActionsTests: StreamTestCase {
         let participants = 1
 
         GIVEN("user starts a call") {
-            userRobot.login().startCall(callId)
+            userRobot
+                .waitForAutoLogin()
+                .startCall(callId)
         }
         WHEN("participant joins the call and shares the screen for 3 seconds") {
             participantRobot

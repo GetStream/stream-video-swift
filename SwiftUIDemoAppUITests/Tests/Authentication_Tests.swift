@@ -7,23 +7,16 @@ import XCTest
 final class Authentication_Tests: StreamTestCase {
     
     let participants = 1
-    let jwtExpirationTimeoutInSeconds = TestRunnerEnvironment.isCI ? "30" : "2"
-    
+    let jwtExpirationTimeoutInSeconds = TestRunnerEnvironment.isCI ? "20" : "10"
+
     override func setUpWithError() throws {
         launchApp = false
         app.setLaunchArguments(.mockJwt)
         try super.setUpWithError()
     }
     
-    override class func tearDown() {
-        app.launch()
-        userRobot.logout()
-        sleep(1) // to make sure jwt mocking is turned off
-        super.tearDown()
-    }
-    
     func waitForJwtToExpire() {
-        sleep(UInt32(jwtExpirationTimeoutInSeconds)!)
+        Thread.sleep(forTimeInterval: TimeInterval(jwtExpirationTimeoutInSeconds)!)
     }
     
     func test_tokenExpiresBeforeUserLogsIn() throws {
@@ -37,13 +30,14 @@ final class Authentication_Tests: StreamTestCase {
         }
         WHEN("user logs in") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
         THEN("app requests a token refresh") {}
         WHEN("participant joins the call") {
-            participantRobot.joinCall(callId)
+            participantRobot
+                .joinCall(callId)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
@@ -62,7 +56,7 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -71,12 +65,12 @@ final class Authentication_Tests: StreamTestCase {
         }
         THEN("app requests a token refresh") {}
         WHEN("participant joins the call") {
-            participantRobot.joinCall(callId)
+            participantRobot
+                .joinCall(callId)
         }
         THEN("there are \(participants) participants on the call") {
             userRobot
                 .waitForParticipantsToJoin(participants)
-                .assertCallControls()
                 .assertGridView(with: participants)
         }
     }
@@ -91,7 +85,7 @@ final class Authentication_Tests: StreamTestCase {
             app.launch()
             
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId)
                 .waitCallControllsToAppear()
         }
@@ -99,7 +93,8 @@ final class Authentication_Tests: StreamTestCase {
             deviceRobot.moveApplication(to: .background)
         }
         AND("participant joins the call") {
-            participantRobot.joinCall(callId)
+            participantRobot
+                .joinCall(callId)
         }
         WHEN("token expires") {
             waitForJwtToExpire()
@@ -124,7 +119,7 @@ final class Authentication_Tests: StreamTestCase {
         }
         AND("user tries to log in") {
             userRobot
-                .login()
+                .waitForAutoLogin()
                 .startCall(callId, waitForCompletion: false)
         }
         WHEN("app requests a token refresh") {}

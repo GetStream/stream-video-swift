@@ -84,14 +84,22 @@ extension UserRobot {
     }
     
     @discardableResult
-    func assertParticipantStartRecordingCall() -> Self {
-        XCTAssertTrue(CallPage.recordingLabel.wait(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should appear")
+    func assertRecordingIcon(isVisible: Bool) -> Self {
+        if isVisible {
+            XCTAssertTrue(CallPage.recordingView.wait().exists, "recording icon should appear")
+        } else {
+            XCTAssertFalse(CallPage.recordingView.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recording icon should disappear")
+        }
         return self
     }
     
     @discardableResult
-    func assertParticipantStopRecordingCall() -> Self {
-        XCTAssertFalse(CallPage.recordingLabel.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "recordingLabel should disappear")
+    func assertCallDurationView(isVisible: Bool) -> Self {
+        if isVisible {
+            XCTAssertTrue(CallPage.callDurationView.wait().exists, "callDurationView should appear")
+        } else {
+            XCTAssertFalse(CallPage.callDurationView.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "callDurationView should disappear")
+        }
         return self
     }
     
@@ -125,10 +133,10 @@ extension UserRobot {
     
     @discardableResult
     func assertCallControls() -> Self {
+        XCTAssertTrue(CallPage.cameraToggle.wait().exists, "cameraToggle should appear")
+        XCTAssertTrue(CallPage.cameraPositionToggle.wait().exists, "cameraPositionToggle should appear")
+        XCTAssertTrue(CallPage.microphoneToggle.wait().exists, "microphoneToggle should appear")
         XCTAssertTrue(CallPage.hangUpButton.wait().exists, "hangUpButton should appear")
-        XCTAssertTrue(CallPage.cameraToggle.exists, "cameraToggle should appear")
-        XCTAssertTrue(CallPage.cameraPositionToggle.exists, "cameraPositionToggle should appear")
-        XCTAssertTrue(CallPage.microphoneToggle.exists, "microphoneToggle should appear")
         return self
     }
     
@@ -143,7 +151,7 @@ extension UserRobot {
     
     @discardableResult
     func assertEmptyCall() -> Self {
-        XCTAssertEqual(1, CallPage.participantView.count) // active user is treated as a participant
+        XCTAssertEqual(1, CallPage.participantView.waitCount(1).count) // active user is treated as a participant
         XCTAssertEqual(0, CallPage.participantName.count)
         XCTAssertTrue(CallPage.participantMenu.exists, "participantMenu icon should disappear")
         return self
@@ -153,8 +161,11 @@ extension UserRobot {
     func assertConnectingView(with participantCount: Int) -> Self {
         XCTAssertTrue(CallPage.ConnectingView.callConnectingView.wait().exists, "callConnectingView should appear")
         XCTAssertTrue(CallPage.ConnectingView.callingIndicator.exists, "callingIndicator should appear")
-        if participantCount > 1 {
-            XCTAssertEqual(participantCount, CallPage.ConnectingView.callConnectingGroupView.count)
+        if participantCount > 3 {
+            XCTAssertEqual(3, CallPage.ConnectingView.participantsBubbles.count)
+            XCTAssertEqual("+\(participantCount - 2)", CallPage.ConnectingView.participantsBubbles.lastMatch?.text)
+        } else if participantCount > 1 {
+            XCTAssertEqual(participantCount, CallPage.ConnectingView.participantsBubbles.count)
         } else if participantCount > 0 {
             XCTAssertTrue(CallPage.ConnectingView.callConnectingParticipantView.exists, "callConnectingParticipantView should appear")
         }
@@ -202,7 +213,7 @@ extension UserRobot {
     
     @discardableResult
     func assertLobby() -> Self {
-        XCTAssertTrue(LobbyPage.otherParticipantsCount.wait().exists, "otherParticipantsCount should appear")
+        XCTAssertTrue(LobbyPage.callParticipantsCount.wait().exists, "callParticipantsCount should appear")
         XCTAssertTrue(LobbyPage.microphoneToggle.exists, "microphoneToggle should appear")
         XCTAssertTrue(LobbyPage.cameraToggle.exists, "cameraToggle should appear")
         XCTAssertTrue(LobbyPage.microphoneCheckView.exists, "microphoneCheckView should appear")
@@ -212,7 +223,7 @@ extension UserRobot {
     
     @discardableResult
     func assertOtherParticipantsCountInLobby(_ count: Int) -> Self {
-        XCTAssertEqual("\(count)", LobbyPage.otherParticipantsCount.wait().value as? String)
+        XCTAssertEqual("\(count)", LobbyPage.callParticipantsCount.wait().value as? String)
         return self
     }
     
@@ -243,7 +254,9 @@ extension XCUIElement {
     
     @discardableResult
     func wait(timeout: Double = UserRobot.defaultTimeout) -> Self {
-        _ = waitForExistence(timeout: timeout)
+        if !exists {
+            _ = waitForExistence(timeout: timeout)
+        }
         return self
     }
 }

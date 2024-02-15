@@ -8,6 +8,15 @@ import StreamVideo
 
 extension DemoApp {
 
+    private struct DemoLogFormatter: LogFormatter {
+        func format(logDetails: LogDetails, message: String) -> String {
+            guard logDetails.level == .error, let error = logDetails.error else {
+                return message
+            }
+            return "\(message) [Error details: \(error)]"
+        }
+    }
+
     func configureSentry() {
         if AppEnvironment.configuration.isRelease {
             // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
@@ -32,6 +41,9 @@ extension DemoApp {
             LogConfig.destinationTypes = [
                 MemoryLogDestination.self,
                 OSLogDestination.self
+            ]
+            LogConfig.formatters = [
+                DemoLogFormatter()
             ]
         }
     }

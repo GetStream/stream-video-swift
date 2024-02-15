@@ -88,7 +88,7 @@ final class Router: ObservableObject {
 
     private func loadLoggedInUser() async throws {
         if AppEnvironment.configuration == .test, AppEnvironment.contains(.mockJWT) {
-            return
+            try await handleGuestUser(deeplinkInfo: .empty)
         } else if let userCredentials = AppState.shared.unsecureRepository.loadCurrentUser() {
             if userCredentials.userInfo.id.contains("@getstream") {
                 GIDSignIn.sharedInstance.restorePreviousSignIn { [weak self] _, _ in
@@ -120,19 +120,11 @@ final class Router: ObservableObject {
         handle(
             user: updatedCredentials.userInfo,
             token: updatedCredentials.token.rawValue,
-            deeplinkInfo: deeplinkInfo
-        ) { result in
-            Task {
-                do {
-                    let token = try await AuthenticationProvider.fetchToken(for: updatedCredentials.id)
-                    result(.success(token))
-                } catch {
-                    result(.failure(error))
-                }
-            }
-        }
+            deeplinkInfo: deeplinkInfo,
+            tokenProvider: { [weak self] in self?.refreshToken(for: updatedCredentials.id, $0) }
+        )
     }
-    
+
     private func setupUser(with userCredentials: UserCredentials) async throws {
         appState.currentUser = userCredentials.userInfo
         // First we sign in and then update the loggedIn state and the UI
@@ -151,14 +143,19 @@ final class Router: ObservableObject {
             }
         }()
 
-        handle(user: user, token: token, deeplinkInfo: deeplinkInfo)
+        handle(
+            user: user,
+            token: token,
+            deeplinkInfo: deeplinkInfo,
+            tokenProvider: { [weak self] in self?.refreshToken(for: user.id, $0) }
+        )
     }
 
     private func handle(
         user: User,
         token: String,
         deeplinkInfo: DeeplinkInfo,
-        tokenProvider: @escaping UserTokenProvider = { _ in }
+        tokenProvider: @escaping UserTokenProvider
     ) {
         let audioProcessingModule = RTCDefaultAudioProcessingModule(
             config: nil,
@@ -204,5 +201,19 @@ final class Router: ObservableObject {
         streamVideoUI = StreamVideoUI(streamVideo: streamVideo, utils: utils)
 
         appState.connectUser()
+    }
+
+    private func refreshToken(
+        for userId: String,
+        _ completionHandler: @escaping (Result<UserToken, Error>) -> Void
+    ) {
+        Task {
+            do {
+                let token = try await AuthenticationProvider.fetchToken(for: userId)
+                completionHandler(.success(token))
+            } catch {
+                completionHandler(.failure(error))
+            }
+        }
     }
 }

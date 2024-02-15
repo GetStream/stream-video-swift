@@ -219,7 +219,7 @@ final class CallCRUDTest: IntegrationTest {
         membersResponse = try await call2.queryMembers(filters: [userIdKey: .string(user2)])
         XCTAssertEqual(0, membersResponse.members.count)
         
-        let secondUserClient = getUserClient(id: user2)
+        let secondUserClient = try await getUserClient(id: user2)
         try await secondUserClient.connect()
         
         // add to call2 so we can test that the other call object is updated via WS events
@@ -330,7 +330,7 @@ final class CallCRUDTest: IntegrationTest {
         )
         try await firstUserCall.create(memberIds: [user1])
 
-        let secondUserClient = getUserClient(id: user2)
+        let secondUserClient = try await getUserClient(id: user2)
         try await secondUserClient.connect()
         let secondUserCall = secondUserClient.call(
             callType: String.audioRoom,
@@ -370,7 +370,7 @@ final class CallCRUDTest: IntegrationTest {
         try await firstUserCall.create(memberIds: [user1, user2])
         try await firstUserCall.goLive()
         
-        let secondUserClient = getUserClient(id: user2)
+        let secondUserClient = try await getUserClient(id: user2)
         let secondUserCall = secondUserClient.call(
             callType: String.audioRoom,
             callId: firstUserCall.callId
@@ -414,7 +414,7 @@ final class CallCRUDTest: IntegrationTest {
         try await firstUserCall.create(memberIds: [user1, user2])
         try await firstUserCall.goLive()
         
-        let secondUserClient = getUserClient(id: user2)
+        let secondUserClient = try await getUserClient(id: user2)
         let secondUserCall = secondUserClient.call(
             callType: String.audioRoom,
             callId: firstUserCall.callId
@@ -511,7 +511,7 @@ final class CallCRUDTest: IntegrationTest {
         let firstUserCall = client.call(callType: String.audioRoom, callId: randomCallId)
         try await firstUserCall.create(memberIds: [user1, user2])
         
-        let secondUserClient = getUserClient(id: user2)
+        let secondUserClient = try await getUserClient(id: user2)
         let secondUserCall = secondUserClient.call(
             callType: firstUserCall.callType,
             callId: firstUserCall.callId
@@ -613,7 +613,7 @@ final class CallCRUDTest: IntegrationTest {
         let firstUserCall = client.call(callType: .default, callId: randomCallId)
         try await firstUserCall.create(memberIds: [user1, user2])
         
-        let secondUserClient = getUserClient(id: user2)
+        let secondUserClient = try await getUserClient(id: user2)
         let secondUserCall = secondUserClient.call(
             callType: .default,
             callId: firstUserCall.callId

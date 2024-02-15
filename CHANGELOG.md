@@ -6,6 +6,17 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 
+# [0.5.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.0)
+_February 15, 2024_
+
+### 🔄 Changed
+
+- The following API changes occurred as part of the redesign. [#269](https://github.com/GetStream/stream-video-swift/pull/269) & [#270](https://github.com/GetStream/stream-video-swift/pull/270)
+    - `OutgoingCallView` now accepts an additional `callTopView` parameter to align with the updated design.
+    - `CallParticipantsInfoView` and the `ViewFactory.makeParticipantsListView` method aren't accept the `availableFrame` anymore.
+    - `ParticipantsGridLayout` `orientation` parameter isn't required anymore.
+    - The `onRotate` ViewModifier has been removed. You can use the `InjectedValues[\.orientationAdapter]` which is an ObservableObject that can provide information regarding device orientation.
+
 # [0.4.2](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.2)
 _December 08, 2023_
 
@@ -20,15 +31,11 @@ _December 08, 2023_
 
 ### 🔄 Changed
 - You can now focus on a desired point in the local video stream. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
-- The following API changes occurred as part of the redesign. [#221](https://github.com/GetStream/stream-video-swift/pull/221) & [#269](https://github.com/GetStream/stream-video-swift/pull/269)
+- The following API changes occurred as part of the redesign. [#221](https://github.com/GetStream/stream-video-swift/pull/221)
     - `CornerDragableView` has been renamed to `CornerDraggableView` and initializer changed.
     - `LocalParticipantViewModifier` & `VideoCallParticipantModifier` now accept a few parameters that allow you to further control their presentation.
     - `ScreenSharingView` now accepts a `isZoomEnabled` parameter to control if the the view will be zoom-able.
     - `LocalVideoView` now accepts a `availableFrame` parameter.
-    - `OutgoingCallView` now accepts an additional `callTopView` parameter to align with the updated design.
-    - `CallParticipantsInfoView` and the `ViewFactory.makeParticipantsListView` method aren't accept the `availableFrame` anymore.
-    - `ParticipantsGridLayout` `orientation` parameter isn't required anymore.
-    - The `onRotate` ViewModifier has been removed. You can use the `InjectedValues[\.orientationAdapter]` which is an ObservableObject that can provide information regarding device orientation.
 
 # [0.4.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.4.1)
 _October 16, 2023_
