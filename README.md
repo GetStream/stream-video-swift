@@ -21,11 +21,11 @@ This is the official iOS SDK for StreamVideo, a platform for building apps with 
 
 Stream allows developers to rapidly deploy scalable feeds, chat messaging and video with an industry leading 99.999% uptime SLA guarantee.
 
-With Stream's video components, you can use their SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with their tutorials:
+With Stream's video components, you can use our SDK to build in-app video calling, audio rooms, audio calls, or live streaming. The best place to get started is with our tutorials:
 
-- Video & Audio Calling Tutorial
-- Audio Rooms Tutorial
-- Livestreaming Tutorial
+- [Video & Audio Calling Tutorial](https://getstream.io/video/sdk/ios/tutorial/video-calling/)
+- [Audio Rooms Tutorial](https://getstream.io/video/sdk/ios/tutorial/audio-room/)
+- [Livestreaming Tutorial](https://getstream.io/video/sdk/ios/tutorial/livestreaming/)
 
 Stream provides UI components and state handling that make it easy to build video calling for your app. All calls run on Stream's network of edge servers around the world, ensuring optimal latency and reliability.
 
