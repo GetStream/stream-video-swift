@@ -40,6 +40,7 @@
 		402F04B12B724EE500CA1986 /* CallViewModel+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
+		4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
@@ -4624,6 +4625,7 @@
 				40AB35542B738C6C00E465CC /* ShareActivityView.swift in Sources */,
 				406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */,
 				40AB35672B738CF100E465CC /* DetailedCallingView.swift in Sources */,
+				4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
 				82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */,
