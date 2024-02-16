@@ -154,7 +154,7 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     private(set) var localVideoTrack: RTCVideoTrack?
     private(set) var localAudioTrack: RTCAudioTrack?
     private(set) var localScreenshareTrack: RTCVideoTrack?
-    private var videoCapturer: CameraVideoCapturing?
+    private(set) var videoCapturer: CameraVideoCapturing?
     private var screenshareCapturer: VideoCapturing?
     private let user: User
     private let callCid: String
@@ -585,7 +585,80 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         
         try videoCapturer.focus(at: point)
     }
-    
+
+    /// Adds the `AVCapturePhotoOutput` on the `CameraVideoCapturer` to enable photo
+    /// capturing capabilities.
+    ///
+    /// This method configures the local user's `CameraVideoCapturer` with an
+    /// `AVCapturePhotoOutput` for capturing photos. This enhancement allows applications to capture
+    /// still images while video capturing is ongoing.
+    ///
+    /// - Parameter capturePhotoOutput: The `AVCapturePhotoOutput` instance to be added
+    /// to the `CameraVideoCapturer`. This output enables the capture of photos alongside video
+    /// capturing.
+    ///
+    /// - Throws: An error if the `CameraVideoCapturer` does not support adding an `AVCapturePhotoOutput`.
+    /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
+    /// `CameraVideoCapturer` in use does not support photo output functionality, an appropriate error
+    /// will be thrown to indicate that the operation is not supported.
+    func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
+        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+            throw ClientError.Unexpected()
+        }
+
+        try videoCapturer.addCapturePhotoOutput(capturePhotoOutput)
+    }
+
+    /// Adds an `AVCaptureVideoDataOutput` to the `CameraVideoCapturer` for video frame
+    /// processing capabilities.
+    ///
+    /// This method configures the local user's `CameraVideoCapturer` with an
+    /// `AVCaptureVideoDataOutput`, enabling the processing of video frames. This is particularly
+    /// useful for applications that require access to raw video data for analysis, filtering, or other processing
+    /// tasks while video capturing is in progress.
+    ///
+    /// - Parameter videoOutput: The `AVCaptureVideoDataOutput` instance to be added to
+    /// the `CameraVideoCapturer`. This output facilitates the capture and processing of live video
+    /// frames.
+    ///
+    /// - Throws: An error if the `CameraVideoCapturer` does not support adding an
+    /// `AVCaptureVideoDataOutput`. This functionality is specific to `RTCCameraVideoCapturer`
+    /// instances. If the current `CameraVideoCapturer` does not accommodate video output, an error
+    /// will be thrown to signify the unsupported operation.
+    func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
+        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+            throw ClientError.Unexpected()
+        }
+
+        try videoCapturer.addVideoOutput(videoOutput)
+    }
+
+    /// Zooms the camera video by the specified factor.
+    ///
+    /// This method attempts to zoom the camera's video feed by adjusting the `videoZoomFactor` of
+    /// the camera's active device. It first checks if the video capturer is of type `RTCCameraVideoCapturer`
+    /// and if the current camera device supports zoom by verifying that the `videoMaxZoomFactor` of
+    /// the active format is greater than 1.0. If these conditions are met, it proceeds to apply the requested
+    /// zoom factor, clamping it within the supported range to avoid exceeding the device's capabilities.
+    ///
+    /// - Parameter factor: The desired zoom factor. A value of 1.0 represents no zoom, while values
+    /// greater than 1.0 increase the zoom level. The factor is clamped to the maximum zoom factor supported
+    /// by the device to ensure it remains within valid bounds.
+    ///
+    /// - Throws: `ClientError.Unexpected` if the video capturer is not of type
+    /// `RTCCameraVideoCapturer`, or if the device does not support zoom. Also, throws an error if
+    /// locking the device for configuration fails.
+    ///
+    /// - Note: This method should be used cautiously, as setting a zoom factor significantly beyond the
+    /// optimal range can degrade video quality.
+    func zoom(by factor: CGFloat) throws {
+        guard let videoCapturer = videoCapturer as? VideoCapturer else {
+            throw ClientError.Unexpected()
+        }
+
+        try videoCapturer.zoom(by: factor)
+    }
+
     // MARK: - private
     
     private func handleOnSocketConnected(reconnected: Bool) {
