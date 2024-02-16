@@ -601,6 +601,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
     /// `CameraVideoCapturer` in use does not support photo output functionality, an appropriate error
     /// will be thrown to indicate that the operation is not supported.
+    ///
+    /// - Warning: A maximum of one output of each type may be added.
     func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
         guard let videoCapturer = videoCapturer as? VideoCapturer else {
             throw ClientError.Unexpected()
@@ -625,6 +627,10 @@ class WebRTCClient: NSObject, @unchecked Sendable {
     /// `AVCaptureVideoDataOutput`. This functionality is specific to `RTCCameraVideoCapturer`
     /// instances. If the current `CameraVideoCapturer` does not accommodate video output, an error
     /// will be thrown to signify the unsupported operation.
+    ///
+    /// - Warning: A maximum of one output of each type may be added. For applications linked on or
+    /// after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more
+    /// than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account.
     func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
         guard let videoCapturer = videoCapturer as? VideoCapturer else {
             throw ClientError.Unexpected()

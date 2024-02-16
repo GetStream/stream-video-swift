@@ -48,7 +48,7 @@ var participants = [participant]
 var imageURL: URL!
 var members: [MemberRequest] = []
 
-func container(_ content: () -> Void) {}
+func container(_ content: () throws -> Void) {}
 func asyncContainer(_ content: () async throws -> Void) {}
 func viewContainer(@ViewBuilder _ content: () -> some View) {}
 func classContainer<V: AnyObject>(_ content: (V) -> Void) {}

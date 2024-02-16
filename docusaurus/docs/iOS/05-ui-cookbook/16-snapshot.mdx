@@ -9,11 +9,10 @@ Capturing a snapshot of a call it's a very common usecase for video-call product
 
 ## Overview
 
-- **Focus Implementation**: Focus on the specified point on your video feed.
-- **Gesture Recognition**: Detect a long press or a tap on a participant's video feed.
-- **User Experience**: Intuitive interaction for a more immersive call experience.
+- **Capturing snapshots during call**: Capture snapshots from any CallView.
+- **Capturing local participant photo**: Capture photos from the local participant's camera.
 
-## Implementing Capturing snapshots during call
+## Capturing snapshots during call
 
 ### The snapshot ViewModifier
 
@@ -242,6 +241,121 @@ Finally, we can use the snapshotViewModel in CallView (or any other View) in ord
 ```swift
 YourRootView()
     .toastView(toast: $snapshotViewModel.toast)
+```
+
+## Capturing local participant photo
+
+In order to capture photos of the local participant, we can leverage the `AVCaptureSession`. The `Call` object allows us to attach `AVCapturePhotoOutput` & `AVCaptureVideoDataOutput` on the active `AVCaptureSession` and `AVCaptureDevice`. 
+
+```swift
+let photoOutput: AVCapturePhotoOutput = .init()
+let videoOutput: AVCaptureVideoDataOutput = .init()
+
+do {
+    try call?.addCapturePhotoOutput(photoOutput)
+    if #available(iOS 16.0, *) {
+        try call?.addVideoOutput(videoOutput)
+    }
+
+    videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: .background))
+} catch {
+    log.error("Failed to setup for localParticipant snapshot", error: error)
+}
+```
+
+:::note
+A maximum of one output of each type may be added. For applications linked on or after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account. Given that WebRTC adds a videoOutput for frame processing, we cannot accept videoOutputs on versions prior to iOS 16.0.
+:::
+
+To capture a photo we can choose one of the following ways, depending on which output we would like to use:
+
+### Capture photo using AVCapturePhotoOutput
+
+```swift
+func capturePhoto() {
+    guard !photoOutput.connections.isEmpty else { return }
+    photoOutput.capturePhoto(with: .init(), delegate: self)
+}
+
+// MARK: - AVCapturePhotoCaptureDelegate
+
+func photoOutput(
+    _ output: AVCapturePhotoOutput,
+    didFinishProcessingPhoto photo: AVCapturePhoto,
+    error: Error?
+) {
+    if let error {
+        log.error("Failed to capture photo.", error: error)
+    } else {
+        if let data = photo.fileDataRepresentation() {
+            Task { await sendImageData(data) }
+        }
+    }
+}
+```
+
+### Capture photo using AVCaptureVideoDataOutput
+
+```swift
+func captureVideoFrame() {
+    guard !videoOutput.connections.isEmpty else { return }
+    Task { await state.setIsCapturingVideoFrame(true) }
+}
+
+// MARK: - AVCaptureVideoDataOutputSampleBufferDelegate
+
+func captureOutput(
+    _ output: AVCaptureOutput,
+    didOutput sampleBuffer: CMSampleBuffer,
+    from connection: AVCaptureConnection
+) {
+    Task {
+        guard await state.isCapturingVideoFrame else { return }
+
+        if  let imageBuffer = sampleBuffer.imageBuffer {
+            let ciImage = CIImage(cvPixelBuffer: imageBuffer)
+            if let data = UIImage(ciImage: ciImage).jpegData(compressionQuality: 1) {
+                await sendImageData(data)
+            }
+        }
+
+        await state.setIsCapturingVideoFrame(false)
+    }
+}
+```
+
+We are using a `State` actor to control the photo's triggering.
+
+```swift
+actor State {
+    private(set) var isCapturingVideoFrame = false
+
+    func setIsCapturingVideoFrame(_ value: Bool) {
+        isCapturingVideoFrame = value
+    }
+}
+```
+
+Both examples are using the same method to send the Image data:
+
+```swift
+func sendImageData(_ data: Data) async {
+    guard
+        let snapshot = UIImage(data: data),
+        let resizedImage = resize(image: snapshot, to: .init(width: 30, height: 30)),
+        let snapshotData = resizedImage.jpegData(compressionQuality: 0.8)
+    else {
+        return
+    }
+
+    do {
+        try await call?.sendCustomEvent([
+            "snapshot": .string(snapshotData.base64EncodedString())
+        ])
+    } catch {
+        log.error("Failed to send image.", error: error)
+    }
+}
 ```
 
 ## Conclusion

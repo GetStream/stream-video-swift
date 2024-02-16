@@ -752,7 +752,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
     /// `CameraVideoCapturer` in use does not support photo output functionality, an appropriate error
     /// will be thrown to indicate that the operation is not supported.
-    public func setCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
+    ///
+    /// - Warning: A maximum of one output of each type may be added.
+    public func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
         try callController.addCapturePhotoOutput(capturePhotoOutput)
     }
 
@@ -772,7 +774,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// `AVCaptureVideoDataOutput`. This functionality is specific to `RTCCameraVideoCapturer`
     /// instances. If the current `CameraVideoCapturer` does not accommodate video output, an error
     /// will be thrown to signify the unsupported operation.
-    func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
+    ///
+    /// - Warning: A maximum of one output of each type may be added. For applications linked on or
+    /// after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more
+    /// than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account.
+    /// Given that WebRTC adds a videoOutput for frame processing, we cannot accept videoOutputs
+    /// on versions prior to iOS 16.0.
+    @available(iOS 16.0, *)
+    public func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
         try callController.addVideoOutput(videoOutput)
     }
 

@@ -11,9 +11,9 @@ class VideoCapturer: CameraVideoCapturing {
     private var videoOptions: VideoOptions
     private let videoSource: RTCVideoSource
     private var videoCaptureHandler: StreamVideoCaptureHandler?
-
+    
     private var simulatorStreamFile: URL? = InjectedValues[\.simulatorStreamFile]
-
+    
     init(
         videoSource: RTCVideoSource,
         videoOptions: VideoOptions,
@@ -104,7 +104,7 @@ class VideoCapturer: CameraVideoCapturing {
             }
         }
     }
-
+    
     /// Initiates a focus and exposure operation at the specified point on the camera's view.
     ///
     /// This method attempts to focus the camera and set the exposure at a specific point by interacting
@@ -127,23 +127,23 @@ class VideoCapturer: CameraVideoCapturing {
         else {
             throw ClientError.Unexpected()
         }
-
+        
         try activeCaptureDevice.lockForConfiguration()
-
+        
         if activeCaptureDevice.isFocusPointOfInterestSupported {
             log.debug("Will focus at point: \(point)")
             activeCaptureDevice.focusPointOfInterest = point
-
+            
             if activeCaptureDevice.isFocusModeSupported(.autoFocus) {
                 activeCaptureDevice.focusMode = .autoFocus
             } else {
                 log.warning("There are no supported focusMode.")
             }
-
+            
             log.debug("Will set exposure at point: \(point)")
             if activeCaptureDevice.isExposurePointOfInterestSupported {
                 activeCaptureDevice.exposurePointOfInterest = point
-
+                
                 if activeCaptureDevice.isExposureModeSupported(.autoExpose) {
                     activeCaptureDevice.exposureMode = .autoExpose
                 } else {
@@ -151,10 +151,10 @@ class VideoCapturer: CameraVideoCapturing {
                 }
             }
         }
-
+        
         activeCaptureDevice.unlockForConfiguration()
     }
-
+    
     /// Adds the `AVCapturePhotoOutput` on the `CameraVideoCapturer` to enable photo
     /// capturing capabilities.
     ///
@@ -170,6 +170,8 @@ class VideoCapturer: CameraVideoCapturing {
     /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
     /// `CameraVideoCapturer` in use does not support photo output functionality, an appropriate error
     /// will be thrown to indicate that the operation is not supported.
+    ///
+    /// - Warning: A maximum of one output of each type may be added.
     func addCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
         guard
             let cameraVideoCapturer = videoCapturer as? RTCCameraVideoCapturer,
@@ -177,12 +179,12 @@ class VideoCapturer: CameraVideoCapturing {
         else {
             throw ClientError.Unexpected("Cannot set capturePhotoOutput for videoCapturer of type:\(type(of: videoCapturer)).")
         }
-
+        
         cameraVideoCapturer.captureSession.beginConfiguration()
         cameraVideoCapturer.captureSession.addOutput(capturePhotoOutput)
         cameraVideoCapturer.captureSession.commitConfiguration()
     }
-
+    
     /// Adds an `AVCaptureVideoDataOutput` to the `CameraVideoCapturer` for video frame
     /// processing capabilities.
     ///
@@ -199,6 +201,10 @@ class VideoCapturer: CameraVideoCapturing {
     /// `AVCaptureVideoDataOutput`. This functionality is specific to `RTCCameraVideoCapturer`
     /// instances. If the current `CameraVideoCapturer` does not accommodate video output, an error
     /// will be thrown to signify the unsupported operation.
+    ///
+    /// - Warning: A maximum of one output of each type may be added. For applications linked on or
+    /// after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more
+    /// than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account.
     func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
         guard
             let cameraVideoCapturer = videoCapturer as? RTCCameraVideoCapturer,
@@ -210,7 +216,7 @@ class VideoCapturer: CameraVideoCapturing {
         cameraVideoCapturer.captureSession.addOutput(videoOutput)
         cameraVideoCapturer.captureSession.commitConfiguration()
     }
-
+    
     /// Zooms the camera video by the specified factor.
     ///
     /// This method attempts to zoom the camera's video feed by adjusting the `videoZoomFactor` of
@@ -237,13 +243,13 @@ class VideoCapturer: CameraVideoCapturing {
         else {
             throw ClientError.Unexpected("Cannot zoom captureDevice for videoCapturer of type:\(type(of: videoCapturer)).")
         }
-
+        
         try activeCaptureDevice.lockForConfiguration()
         let zoomFactor = max(1.0, min(factor, activeCaptureDevice.activeFormat.videoMaxZoomFactor))
         activeCaptureDevice.videoZoomFactor = zoomFactor
         activeCaptureDevice.unlockForConfiguration()
     }
-
+    
     // MARK: - private
     
     private func checkForBackgroundCameraAccess() {
@@ -253,7 +259,7 @@ class VideoCapturer: CameraVideoCapturing {
             }
             // Configure the capture session.
             captureSession.beginConfiguration()
-
+            
             if captureSession.isMultitaskingCameraAccessSupported {
                 // Enable use of the camera in multitasking modes.
                 captureSession.isMultitaskingCameraAccessEnabled = true
@@ -275,7 +281,7 @@ extension CMVideoDimensions {
 }
 
 extension AVCaptureDevice.Format {
-
+    
     // computes a ClosedRange of supported FPSs for this format
     func fpsRange() -> ClosedRange<Int> {
         videoSupportedFrameRateRanges
@@ -287,7 +293,7 @@ extension AVCaptureDevice.Format {
 }
 
 extension AVFrameRateRange {
-
+    
     // convert to a ClosedRange
     func toRange() -> ClosedRange<Int> {
         Int(minFrameRate)...Int(maxFrameRate)
@@ -302,7 +308,7 @@ internal func merge<T>(
 }
 
 extension Comparable {
-
+    
     // clamp a value within the range
     func clamped(to limits: ClosedRange<Self>) -> Self {
         min(max(self, limits.lowerBound), limits.upperBound)

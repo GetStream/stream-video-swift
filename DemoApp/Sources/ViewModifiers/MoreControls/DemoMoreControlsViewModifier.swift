@@ -12,8 +12,14 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
     @ObservedObject var appState: AppState = .shared
     @ObservedObject var viewModel: CallViewModel
     @Injected(\.snapshotTrigger) var snapshotTrigger
+    @Injected(\.localParticipantSnapshotViewModel) var localParticipantSnapshotViewModel
 
     @State private var isStatsPresented = false
+
+    init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        localParticipantSnapshotViewModel.call = viewModel.call
+    }
 
     fileprivate func body(content: Content) -> some View {
         content
@@ -28,9 +34,16 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                         VStack {
                             DemoMoreControlListButtonView(
                                 action: {
-                                    snapshotTrigger.capture()
+                                    localParticipantSnapshotViewModel.zoom()
                                 },
-                                label: "Capture snapshot"
+                                label: "Zoom"
+                            ) { Image(systemName: "circle.inset.filled") }
+
+                            DemoMoreControlListButtonView(
+                                action: {
+                                    localParticipantSnapshotViewModel.captureVideoFrame()
+                                },
+                                label: "Capture Photo"
                             ) { Image(systemName: "circle.inset.filled") }
 
                             DemoMoreControlListButtonView(
