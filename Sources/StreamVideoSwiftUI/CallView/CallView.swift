@@ -22,7 +22,9 @@ public struct CallView<Factory: ViewFactory>: View {
 
     public var body: some View {
         VStack {
-            viewFactory.makeCallTopView(viewModel: viewModel)
+            viewFactory
+                .makeCallTopView(viewModel: viewModel)
+                .presentParticipantEventsNotification(viewModel: viewModel)
 
             GeometryReader { videoFeedProxy in
                 ZStack {
@@ -36,24 +38,6 @@ public struct CallView<Factory: ViewFactory>: View {
             viewFactory.makeCallControlsView(viewModel: viewModel)
                 .opacity(viewModel.hideUIElements ? 0 : 1)
         }
-        .overlay(
-            VStack {
-                if let event = viewModel.participantEvent {
-                    Text("\(event.user) \(event.action.display) the call.")
-                        .padding(8)
-                        .background(Color(UIColor.systemBackground))
-                        .foregroundColor(colors.text)
-                        .modifier(ShadowViewModifier())
-                        .padding()
-                        .accessibility(identifier: "participantEventLabel")
-                    #if STREAM_E2E_TESTS
-                        .offset(y: 300)
-                    #endif
-                }
-
-                Spacer()
-            }
-        )
         .background(Color(colors.callBackground).edgesIgnoringSafeArea(.all))
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .onAppear {
