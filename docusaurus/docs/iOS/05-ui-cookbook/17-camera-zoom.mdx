@@ -1,0 +1,16 @@
+---
+title: Camera zoom
+description: Documentation on implementing cammera zooming.
+---
+
+# Camera zoom
+
+Zooming the local participant's camera is a feature that users will look into when using your app. Fotunately the StreamVideo SDK makes that easy for you by taking care of all interactions with the `AVCaptureSession` and the `AVCaptureDevice`. 
+
+Zoom factors are limited with the following: `1 < zoomFactor < activeCaptureDevice.activeFormat.videoMaxZoomFactor`.
+
+In order to zoom you can simply call the method on the `Call` instance by providing the desired zoomFactor:
+
+```swift
+try call.zoom(by: 1.5)
+```

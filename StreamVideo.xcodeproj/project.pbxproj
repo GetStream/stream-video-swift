@@ -40,6 +40,7 @@
 		402F04B12B724EE500CA1986 /* CallViewModel+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
+		4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
@@ -185,6 +186,8 @@
 		40C7B8322B61325500FB9DB2 /* ModalButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8312B61325500FB9DB2 /* ModalButton.swift */; };
 		40C7B8342B613A8200FB9DB2 /* ControlBadgeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */; };
 		40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */; };
+		40CB9FA42B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */; };
+		40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
 		40D1657E2B5FE82200C6D951 /* HalfSheetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D1657D2B5FE82200C6D951 /* HalfSheetView.swift */; };
 		40D1657F2B5FE8AB00C6D951 /* (null) in Sources */ = {isa = PBXBuildFile; };
 		40D6ADDD2ACDB51C00EF5336 /* VideoRenderer_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */; };
@@ -1149,6 +1152,8 @@
 		40C7B8312B61325500FB9DB2 /* ModalButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ModalButton.swift; sourceTree = "<group>"; };
 		40C7B8332B613A8200FB9DB2 /* ControlBadgeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ControlBadgeView.swift; sourceTree = "<group>"; };
 		40C7B8352B613C7800FB9DB2 /* ParticipantsListButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantsListButton.swift; sourceTree = "<group>"; };
+		40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "AVCaptureSession+ActiveCaptureDevice.swift"; sourceTree = "<group>"; };
+		40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantSnapshotViewModel.swift; sourceTree = "<group>"; };
 		40D1657D2B5FE82200C6D951 /* HalfSheetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HalfSheetView.swift; sourceTree = "<group>"; };
 		40D6ADDC2ACDB51C00EF5336 /* VideoRenderer_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoRenderer_Tests.swift; sourceTree = "<group>"; };
 		40D946402AA5ECEF00C8861B /* CodeScanner.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CodeScanner.swift; sourceTree = "<group>"; };
@@ -2089,7 +2094,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
-				408D29AB2B6D638100885473 /* SnapshotTrigger.swift */,
+				40CB9FA52B7FB1B2006BED93 /* Snapshot */,
 				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
 				40D9463F2AA5ECDC00C8861B /* CodeScanner */,
 				40F445D02A9E2028004BE3DA /* Reactions */,
@@ -2378,6 +2383,15 @@
 				40C7B8312B61325500FB9DB2 /* ModalButton.swift */,
 			);
 			path = Controls;
+			sourceTree = "<group>";
+		};
+		40CB9FA52B7FB1B2006BED93 /* Snapshot */ = {
+			isa = PBXGroup;
+			children = (
+				408D29AB2B6D638100885473 /* SnapshotTrigger.swift */,
+				40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */,
+			);
+			path = Snapshot;
 			sourceTree = "<group>";
 		};
 		40D9463F2AA5ECDC00C8861B /* CodeScanner */ = {
@@ -3423,6 +3437,7 @@
 				840042CA2A701C2000917B30 /* BroadcastUtils.swift */,
 				8454A31C2AAF41E100A012C6 /* Array+SafeSubscript.swift */,
 				401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */,
+				40CB9FA32B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -4529,6 +4544,7 @@
 				40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */,
 				409146102B6913BA007F3C17 /* DemoStatsView.swift in Sources */,
 				402EE1302AA8861B00312632 /* DemoChatViewModel.swift in Sources */,
+				40CB9FA72B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				8434C5222899572F0001490A /* CallService.swift in Sources */,
 				84D6493C29E7F5D2002CA428 /* CallsView.swift in Sources */,
 				40F445D42A9E2051004BE3DA /* Reaction.swift in Sources */,
@@ -4609,6 +4625,7 @@
 				40AB35542B738C6C00E465CC /* ShareActivityView.swift in Sources */,
 				406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */,
 				40AB35672B738CF100E465CC /* DetailedCallingView.swift in Sources */,
+				4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
 				82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */,
@@ -4883,6 +4900,7 @@
 				84A7E1AA2883E4AD00526C98 /* APIKey.swift in Sources */,
 				848CCCEE2AB8ED8F002E83A2 /* CallUserMuted.swift in Sources */,
 				435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */,
+				40CB9FA42B7F8EA4006BED93 /* AVCaptureSession+ActiveCaptureDevice.swift in Sources */,
 				84E4F7D1294CB5F300DD4CE3 /* ConnectionQuality.swift in Sources */,
 				848CCCE72AB8ED8F002E83A2 /* ThumbnailsSettingsRequest.swift in Sources */,
 				84DC38AD29ADFCFD00946713 /* HealthCheckEvent.swift in Sources */,

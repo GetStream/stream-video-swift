@@ -20,9 +20,11 @@ struct HalfSheetView<Content: View>: View {
             DraggableSheetView(isPresented: $isPresented) {
                 content()
             }
+            .animation(
+                .easeInOut
+            )
         }
         .alignedToReadableContentGuide()
-        .animation(.interpolatingSpring(mass: 1, stiffness: 1, damping: 0.5, initialVelocity: 10))
         .opacity(isPresented ? 1 : 0)
         .edgesIgnoringSafeArea(.all)
     }
