@@ -70,7 +70,8 @@ public class StreamVideo: ObservableObject {
         return center
     }()
     
-    /// Background worker that takes care about client connection recovery when the Internet comes back OR app transitions from background to foreground.
+    /// Background worker that takes care about client connection recovery when the Internet comes back
+    /// OR app transitions from background to foreground.
     private(set) var connectionRecoveryHandler: ConnectionRecoveryHandler?
     private(set) var timerType: Timer.Type = DefaultTimer.self
 
@@ -299,7 +300,13 @@ public class StreamVideo: ObservableObject {
         limit: Int? = 25,
         watch: Bool = false
     ) async throws -> (calls: [Call], next: String?) {
-        try await queryCalls(filters: filters, sort: sort, limit: limit, next: nil, watch: watch)
+        try await queryCalls(
+            filters: filters,
+            sort: sort,
+            limit: limit,
+            next: nil,
+            watch: watch
+        )
     }
 
     internal func queryCalls(
@@ -309,19 +316,37 @@ public class StreamVideo: ObservableObject {
         next: String? = nil,
         watch: Bool = false
     ) async throws -> (calls: [Call], next: String?) {
-        let response = try await queryCalls(request: QueryCallsRequest(filterConditions: filters, limit: limit, sort: sort))
-        return (response.calls.map {
-            let callController = makeCallController(callType: $0.call.type, callId: $0.call.id)
-            let call = Call(from: $0, coordinatorClient: self.coordinatorClient, callController: callController)
-            eventsMiddleware.add(subscriber: call)
-            return call
-        }, response.next)
+        let response = try await queryCalls(
+            request: QueryCallsRequest(
+                filterConditions: filters,
+                limit: limit,
+                sort: sort
+            )
+        )
+        return (
+            response.calls.map {
+                let callController = makeCallController(
+                    callType: $0.call.type,
+                    callId: $0.call.id
+                )
+                let call = Call(
+                    from: $0,
+                    coordinatorClient: self.coordinatorClient,
+                    callController: callController
+                )
+                eventsMiddleware.add(subscriber: call)
+                return call
+            },
+            response.next
+        )
     }
 
     /// Queries calls with the provided request.
     /// - Parameter request: the query calls request.
     /// - Returns: response with the queried calls.
-    internal func queryCalls(request: QueryCallsRequest) async throws -> QueryCallsResponse {
+    internal func queryCalls(
+        request: QueryCallsRequest
+    ) async throws -> QueryCallsResponse {
         try await coordinatorClient.queryCalls(queryCallsRequest: request)
     }
 
@@ -332,7 +357,10 @@ public class StreamVideo: ObservableObject {
     ///    - callType: the type of the call.
     ///    - callId: the id of the call.
     /// - Returns: `CallController`
-    private func makeCallController(callType: String, callId: String) -> CallController {
+    private func makeCallController(
+        callType: String,
+        callId: String
+    ) -> CallController {
         let controller = environment.callControllerBuilder(
             coordinatorClient,
             user,
@@ -346,7 +374,9 @@ public class StreamVideo: ObservableObject {
     }
     
     private func connectWebSocketClient() async throws {
-        let queryParams = Self.endpointConfig.connectQueryParams(apiKey: apiKey.apiKeyString)
+        let queryParams = Self.endpointConfig.connectQueryParams(
+            apiKey: apiKey.apiKeyString
+        )
         if let connectURL = try? URL(string: Self.endpointConfig.wsEndpoint)?.appendingQueryItems(queryParams) {
             webSocketClient = makeWebSocketClient(url: connectURL, apiKey: apiKey)
             webSocketClient?.connect()
@@ -375,7 +405,10 @@ public class StreamVideo: ObservableObject {
         }
     }
     
-    private func makeWebSocketClient(url: URL, apiKey: APIKey) -> WebSocketClient {
+    private func makeWebSocketClient(
+        url: URL,
+        apiKey: APIKey
+    ) -> WebSocketClient {
         let webSocketClient = environment.webSocketClientBuilder(eventNotificationCenter, url)
         
         webSocketClient.connectionStateDelegate = self
