@@ -32,12 +32,12 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
         didSet {
             guard call?.cId != oldValue?.cId else { return }
             do {
-                try call?.addCapturePhotoOutput(photoOutput)
                 if #available(iOS 16.0, *) {
                     try call?.addVideoOutput(videoOutput)
+                    videoOutput.alwaysDiscardsLateVideoFrames = true
+                } else {
+                    try call?.addCapturePhotoOutput(photoOutput)
                 }
-
-                videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: .background))
             } catch {
                 log.error("Failed to setup for localParticipant snapshot", error: error)
             }
@@ -51,6 +51,10 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
 
     func captureVideoFrame() {
         guard !videoOutput.connections.isEmpty else { return }
+        videoOutput.setSampleBufferDelegate(
+            self,
+            queue: DispatchQueue.global(qos: .background)
+        )
         Task { await state.setIsCapturingVideoFrame(true) }
     }
 
@@ -69,6 +73,12 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
     // MARK: - Private Helpers
 
     private func sendImageData(_ data: Data) async {
+        defer {
+            videoOutput.setSampleBufferDelegate(
+                nil,
+                queue: videoOutput.sampleBufferCallbackQueue
+            )
+        }
         guard
             let snapshot = UIImage(data: data),
             let resizedImage = resize(image: snapshot, to: .init(width: 30, height: 30)),

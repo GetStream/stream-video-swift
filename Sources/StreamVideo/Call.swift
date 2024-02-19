@@ -758,6 +758,32 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try callController.addCapturePhotoOutput(capturePhotoOutput)
     }
 
+    /// Removes the `AVCapturePhotoOutput` from the `CameraVideoCapturer` to disable photo
+    /// capturing capabilities.
+    ///
+    /// This method configures the local user's `CameraVideoCapturer` by removing an
+    /// `AVCapturePhotoOutput` previously added for capturing photos. This action is necessary when
+    /// the application needs to stop capturing still images or when adjusting the capturing setup. It ensures
+    /// that the video capturing process can continue without the overhead or interference of photo
+    /// capturing capabilities.
+    ///
+    /// - Parameter capturePhotoOutput: The `AVCapturePhotoOutput` instance to be removed
+    /// from the `CameraVideoCapturer`. Removing this output disables the capture of photos alongside
+    /// video capturing.
+    ///
+    /// - Throws: An error if the `CameraVideoCapturer` does not support removing an
+    /// `AVCapturePhotoOutput`.
+    /// This method is specifically designed for `RTCCameraVideoCapturer` instances. If the
+    /// `CameraVideoCapturer` in use does not support the removal of photo output functionality, an
+    /// appropriate error will be thrown to indicate that the operation is not supported.
+    ///
+    /// - Note: Ensure that the `AVCapturePhotoOutput` being removed was previously added to the
+    /// `CameraVideoCapturer`. Attempting to remove an output that is not currently added will not
+    /// affect the capture session but may result in unnecessary processing.
+    public func removeCapturePhotoOutput(_ capturePhotoOutput: AVCapturePhotoOutput) throws {
+        try callController.removeCapturePhotoOutput(capturePhotoOutput)
+    }
+
     /// Adds an `AVCaptureVideoDataOutput` to the `CameraVideoCapturer` for video frame
     /// processing capabilities.
     ///
@@ -777,12 +803,40 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     ///
     /// - Warning: A maximum of one output of each type may be added. For applications linked on or
     /// after iOS 16.0, this restriction no longer applies to AVCaptureVideoDataOutputs. When adding more
-    /// than one AVCaptureVideoDataOutput, AVCaptureSession.hardwareCost must be taken into account.
-    /// Given that WebRTC adds a videoOutput for frame processing, we cannot accept videoOutputs
-    /// on versions prior to iOS 16.0.
+    /// than one AVCaptureVideoDataOutput, AVCaptureSession **hardwareCost must be taken into
+    /// account as it can result in delayed fames delivery**. Given that WebRTC adds a videoOutput
+    /// for frame processing, we cannot accept videoOutputs on versions prior to iOS 16.0.
     @available(iOS 16.0, *)
     public func addVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
         try callController.addVideoOutput(videoOutput)
+    }
+
+    /// Removes an `AVCaptureVideoDataOutput` from the `CameraVideoCapturer` to disable
+    /// video frame processing capabilities.
+    ///
+    /// This method reconfigures the local user's `CameraVideoCapturer` by removing an
+    /// `AVCaptureVideoDataOutput` that was previously added. This change is essential when the
+    /// application no longer requires access to raw video data for analysis, filtering, or other processing
+    /// tasks, or when adjusting the video capturing setup for different operational requirements. It ensures t
+    /// hat video capturing can proceed without the additional processing overhead associated with
+    /// handling video frame outputs.
+    ///
+    /// - Parameter videoOutput: The `AVCaptureVideoDataOutput` instance to be removed
+    /// from the `CameraVideoCapturer`. Removing this output stops the capture and processing of live video
+    /// frames through the specified output, simplifying the capture session.
+    ///
+    /// - Throws: An error if the `CameraVideoCapturer` does not support removing an
+    /// `AVCaptureVideoDataOutput`. This functionality is tailored for `RTCCameraVideoCapturer`
+    /// instances. If the `CameraVideoCapturer` being used does not permit the removal of video outputs,
+    /// an error will be thrown to indicate the unsupported operation.
+    ///
+    /// - Note: It is crucial to ensure that the `AVCaptureVideoDataOutput` intended for removal
+    /// has been previously added to the `CameraVideoCapturer`. Trying to remove an output that is
+    /// not part of the capture session will have no negative impact but could lead to unnecessary processing
+    /// and confusion.
+    @available(iOS 16.0, *)
+    public func removeVideoOutput(_ videoOutput: AVCaptureVideoDataOutput) throws {
+        try callController.removeVideoOutput(videoOutput)
     }
 
     /// Zooms the camera video by the specified factor.
