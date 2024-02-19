@@ -41,9 +41,20 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
 
                             DemoMoreControlListButtonView(
                                 action: {
-                                    localParticipantSnapshotViewModel.captureVideoFrame()
+                                    if #available(iOS 16.0, *) {
+                                        localParticipantSnapshotViewModel.captureVideoFrame()
+                                    } else {
+                                        localParticipantSnapshotViewModel.capturePhoto()
+                                    }
                                 },
                                 label: "Capture Photo"
+                            ) { Image(systemName: "person.crop.square.badge.camera") }
+
+                            DemoMoreControlListButtonView(
+                                action: {
+                                    snapshotTrigger.capture()
+                                },
+                                label: "Snapshot"
                             ) { Image(systemName: "circle.inset.filled") }
 
                             DemoMoreControlListButtonView(

@@ -194,12 +194,14 @@ fileprivate func content() {
         let videoOutput: AVCaptureVideoDataOutput = .init()
 
         do {
-            try call?.addCapturePhotoOutput(photoOutput)
             if #available(iOS 16.0, *) {
                 try call?.addVideoOutput(videoOutput)
+                /// Following Apple guidelines for videoOutputs from here:
+                /// https://developer.apple.com/library/archive/technotes/tn2445/_index.html
+                videoOutput.alwaysDiscardsLateVideoFrames = true
+            } else {
+                try call?.addCapturePhotoOutput(photoOutput)
             }
-
-            videoOutput.setSampleBufferDelegate(Delegate(), queue: DispatchQueue.global(qos: .background))
         } catch {
             log.error("Failed to setup for localParticipant snapshot", error: error)
         }
@@ -271,7 +273,9 @@ fileprivate func content() {
             }
         }
 
-        func sendImageData(_ data: Data) async {}
+        func sendImageData(_ data: Data) async {
+            defer { videoOutput.setSampleBufferDelegate(nil, queue: nil) }
+        }
     }
 
     container {
