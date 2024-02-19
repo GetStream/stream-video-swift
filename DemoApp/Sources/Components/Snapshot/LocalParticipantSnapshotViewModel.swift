@@ -34,6 +34,8 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
             do {
                 if #available(iOS 16.0, *) {
                     try call?.addVideoOutput(videoOutput)
+                    /// Following Apple guidelines for videoOutputs from here:
+                    /// https://developer.apple.com/library/archive/technotes/tn2445/_index.html
                     videoOutput.alwaysDiscardsLateVideoFrames = true
                 } else {
                     try call?.addCapturePhotoOutput(photoOutput)
@@ -73,12 +75,7 @@ final class LocalParticipantSnapshotViewModel: NSObject, AVCapturePhotoCaptureDe
     // MARK: - Private Helpers
 
     private func sendImageData(_ data: Data) async {
-        defer {
-            videoOutput.setSampleBufferDelegate(
-                nil,
-                queue: videoOutput.sampleBufferCallbackQueue
-            )
-        }
+        defer { videoOutput.setSampleBufferDelegate(nil, queue: nil) }
         guard
             let snapshot = UIImage(data: data),
             let resizedImage = resize(image: snapshot, to: .init(width: 30, height: 30)),

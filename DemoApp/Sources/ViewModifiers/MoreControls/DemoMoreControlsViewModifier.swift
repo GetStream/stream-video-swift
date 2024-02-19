@@ -48,6 +48,13 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                                     }
                                 },
                                 label: "Capture Photo"
+                            ) { Image(systemName: "person.crop.square.badge.camera") }
+
+                            DemoMoreControlListButtonView(
+                                action: {
+                                    snapshotTrigger.capture()
+                                },
+                                label: "Snapshot"
                             ) { Image(systemName: "circle.inset.filled") }
 
                             DemoMoreControlListButtonView(

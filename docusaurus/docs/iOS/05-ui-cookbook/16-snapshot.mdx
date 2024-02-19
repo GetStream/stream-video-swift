@@ -252,12 +252,19 @@ let photoOutput: AVCapturePhotoOutput = .init()
 let videoOutput: AVCaptureVideoDataOutput = .init()
 
 do {
-    try call?.addCapturePhotoOutput(photoOutput)
-    if #available(iOS 16.0, *) {
-        try call?.addVideoOutput(videoOutput)
+    guard call?.cId != oldValue?.cId else { return }
+    do {
+        if #available(iOS 16.0, *) {
+            try call?.addVideoOutput(videoOutput)
+            /// Following Apple guidelines for videoOutputs from here:
+            /// https://developer.apple.com/library/archive/technotes/tn2445/_index.html
+            videoOutput.alwaysDiscardsLateVideoFrames = true
+        } else {
+            try call?.addCapturePhotoOutput(photoOutput)
+        }
+    } catch {
+        log.error("Failed to setup for localParticipant snapshot", error: error)
     }
-
-    videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: .background))
 } catch {
     log.error("Failed to setup for localParticipant snapshot", error: error)
 }
@@ -340,6 +347,7 @@ Both examples are using the same method to send the Image data:
 
 ```swift
 func sendImageData(_ data: Data) async {
+    defer { videoOutput.setSampleBufferDelegate(nil, queue: nil) }
     guard
         let snapshot = UIImage(data: data),
         let resizedImage = resize(image: snapshot, to: .init(width: 30, height: 30)),
@@ -357,6 +365,8 @@ func sendImageData(_ data: Data) async {
     }
 }
 ```
+
+We are removing the videoOutput's delegate so we stop receiving frames and avoid video delays due to unnecessary processing.
 
 ## Conclusion
 
