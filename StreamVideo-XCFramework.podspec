@@ -24,7 +24,7 @@ Pod::Spec.new do |spec|
 
   spec.prepare_command = <<-CMD
     mkdir -p Frameworks/
-    wget https://github.com/GetStream/stream-video-swift-webrtc/releases/download/114.5735.08/StreamWebRTC.zip -O Frameworks/StreamWebRTC.zip
+    curl -sL "https://github.com/GetStream/stream-video-swift-webrtc/releases/download/114.5735.08/StreamWebRTC.zip" -o Frameworks/StreamWebRTC.zip
     unzip -o Frameworks/StreamWebRTC.zip -d Frameworks/
     rm Frameworks/StreamWebRTC.zip
   CMD
