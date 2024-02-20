@@ -3,9 +3,14 @@
 //
 
 import Foundation
+import XCTest
 
 public class Sinatra {
     let baseUrl = "http://localhost:4567"
+
+    var springboard: XCUIApplication {
+        XCUIApplication(bundleIdentifier: "com.apple.springboard")
+    }
     
     enum ConnectionState: String {
         case on
@@ -47,6 +52,7 @@ public class Sinatra {
                 debugPrint(error)
             }
         }
+        springboard.buttons["Open"].tapIfExists()
     }
 
     private func invokeSinatra(url: URL, body: [String: Any] = [:]) async throws {
