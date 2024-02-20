@@ -92,6 +92,10 @@ extension StreamTestCase {
         }
     }
 
+    func openURL(_ url: URL) {
+        sinatra.openURL(url)
+    }
+
     private func isTestFailed() -> Bool {
         if let testRun = testRun {
             let failureCount = testRun.failureCount + testRun.unexpectedExceptionCount

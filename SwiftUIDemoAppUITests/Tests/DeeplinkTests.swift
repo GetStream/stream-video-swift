@@ -22,8 +22,8 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     private enum MockDeeplink {
-        static let deeplinkUrl: URL = .init(string: "\(Sinatra().baseUrl)/deeplink?id=test-call")!
-        static let deeplinkUrlWithCallIdInPath: URL = .init(string: "\(Sinatra().baseUrl)/deeplink/join/test-call")!
+        static let deeplinkUrl: URL = .init(string: "https://getstream.io/video/demos/join?id=test-call")!
+        static let deeplinkUrlWithCallIdInPath: URL = .init(string: "https://getstream.io/video/demos/join/test-call")!
         static let customScheme: URL = .init(string: "streamvideo://video/demos?id=test-call")!
         static let customSchemeWithCallIdInPath: URL = .init(string: "streamvideo://video/demos/join/test-call")!
     }
@@ -61,10 +61,7 @@ final class DeeplinkTests: StreamTestCase {
         linkToScenario(withId: 2856)
         
         WHEN("user navigates to the app through deeplink") {
-            Safari()
-                .open(MockDeeplink.deeplinkUrl)
-                .tapOnDeeplinkButton()
-                .tapOnOpenButton()
+            openURL(MockDeeplink.deeplinkUrl)
         }
         THEN("user joins the the specified call") {
             userRobot
@@ -77,10 +74,7 @@ final class DeeplinkTests: StreamTestCase {
         linkToScenario(withId: 2954)
 
         WHEN("user navigates to the app through deeplink") {
-            Safari()
-                .open(MockDeeplink.deeplinkUrlWithCallIdInPath)
-                .tapOnDeeplinkButton()
-                .tapOnOpenButton()
+            openURL(MockDeeplink.deeplinkUrlWithCallIdInPath)
         }
         THEN("user joins the the specified call") {
             userRobot
@@ -93,9 +87,7 @@ final class DeeplinkTests: StreamTestCase {
         linkToScenario(withId: 2857)
         
         WHEN("user opens a URL that contains a custom scheme") {
-            Safari()
-                .open(MockDeeplink.customScheme)
-                .tapOnOpenButton()
+            openURL(MockDeeplink.customScheme)
         }
         THEN("user joins the the specified call") {
             userRobot
@@ -108,9 +100,7 @@ final class DeeplinkTests: StreamTestCase {
         linkToScenario(withId: 2955)
         
         WHEN("user opens a URL that contains a custom scheme") {
-            Safari()
-                .open(MockDeeplink.customSchemeWithCallIdInPath)
-                .tapOnOpenButton()
+            openURL(MockDeeplink.customSchemeWithCallIdInPath)
         }
         THEN("user joins the the specified call") {
             userRobot
