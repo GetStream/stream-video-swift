@@ -67,7 +67,7 @@ private final class MockStreamCallAudioRecorder: StreamCallAudioRecorder {
     private(set) var mockMetersPublisher: PassthroughSubject<Float, Never> = .init()
     override var metersPublisher: AnyPublisher<Float, Never> { mockMetersPublisher.eraseToAnyPublisher() }
 
-    override func startRecording() async {
+    override func startRecording(ignoreActiveCall: Bool) async {
         startRecordingWasCalled = true
     }
 

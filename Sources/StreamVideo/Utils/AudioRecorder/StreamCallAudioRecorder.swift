@@ -86,10 +86,13 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     // MARK: - Public API
 
     /// Starts recording audio asynchronously.
-    open func startRecording() async {
+    /// - Parameters:
+    /// - ignoreActiveCall: Instructs the internal AudioRecorder to ignore the existence of an activeCall
+    /// and start recording anyway.
+    open func startRecording(ignoreActiveCall: Bool = false) async {
         do {
             let audioRecorder = try await setUpAudioCaptureIfRequired()
-            guard hasActiveCall, !audioRecorder.isRecording else {
+            guard hasActiveCall || ignoreActiveCall, !audioRecorder.isRecording else {
                 log
                     .info(
                         "🎙️Attempted to start recording but failed. hasActiveCall:\(hasActiveCall) isRecording:\(audioRecorder.isRecording)"

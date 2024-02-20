@@ -41,8 +41,11 @@ public final class MicrophoneChecker: ObservableObject {
     }
     
     /// Starts listening to audio updates.
-    public func startListening() async {
-        await audioRecorder.startRecording()
+    /// - Parameters:
+    /// - ignoreActiveCall: Instructs the internal AudioRecorder to ignore the existence of an activeCall
+    /// and start recording anyway.
+    public func startListening(ignoreActiveCall: Bool = false) async {
+        await audioRecorder.startRecording(ignoreActiveCall: ignoreActiveCall)
         if updateMetersCancellable == nil {
             updateMetersCancellable = audioRecorder
                 .metersPublisher

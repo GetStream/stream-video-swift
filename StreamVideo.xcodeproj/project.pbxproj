@@ -44,7 +44,7 @@
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
 		4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
-		4031D7F82B83C087002EC6E4 /* StreamAudioRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F72B83C087002EC6E4 /* StreamAudioRecorderTests.swift */; };
+		4031D7F82B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */; };
 		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
@@ -1096,7 +1096,7 @@
 		402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+Snapshot.swift"; sourceTree = "<group>"; };
 		4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
-		4031D7F72B83C087002EC6E4 /* StreamAudioRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioRecorderTests.swift; sourceTree = "<group>"; };
+		4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorderTests.swift; sourceTree = "<group>"; };
 		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
@@ -3009,7 +3009,7 @@
 				845E31072A712389004DC470 /* BroadcastUtils_Tests.swift */,
 				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
 				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
-				4031D7F72B83C087002EC6E4 /* StreamAudioRecorderTests.swift */,
+				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -5036,7 +5036,7 @@
 				846D162B2A52F62B0036CE4C /* CameraManager_Tests.swift in Sources */,
 				4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */,
 				843DAB9C29E6FFCD00E0EB63 /* StreamVideo_Tests.swift in Sources */,
-				4031D7F82B83C087002EC6E4 /* StreamAudioRecorderTests.swift in Sources */,
+				4031D7F82B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

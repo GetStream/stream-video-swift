@@ -90,6 +90,23 @@ final class StreamAudioRecorderTests: XCTestCase {
         try await assertRecording(true)
     }
 
+    func testStartRecording_givenPermissionGrantedButNoActiveCall_whenStarted_thenRecordsAndMetersWontStart() async throws {
+        mockAudioSession.recordPermission = true
+
+        await subject.startRecording()
+
+        try await assertRecording(false, isMeteringEnabled: false)
+    }
+
+    func testStartRecording_givenPermissionGrantedButNoActiveCall_whenIgnoreActiveCallAndStarted_thenRecordsAndMetersUpdates(
+    ) async throws {
+        mockAudioSession.recordPermission = true
+
+        await subject.startRecording(ignoreActiveCall: true)
+
+        try await assertRecording(true)
+    }
+
     // MARK: - stopRecording
 
     func testStopRecording_givenRecording_whenStopped_thenStopsRecording() async throws {

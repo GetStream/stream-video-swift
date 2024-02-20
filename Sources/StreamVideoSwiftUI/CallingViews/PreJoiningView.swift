@@ -41,7 +41,7 @@ public struct LobbyView: View {
 
         Task {
             callSettings.wrappedValue.audioOn
-                ? await microphoneCheckerInstance.startListening()
+                ? await microphoneCheckerInstance.startListening(ignoreActiveCall: true)
                 : await microphoneCheckerInstance.stopListening()
         }
     }
@@ -59,7 +59,7 @@ public struct LobbyView: View {
         .onChange(of: callSettings) { newValue in
             Task {
                 newValue.audioOn
-                    ? await microphoneChecker.startListening()
+                    ? await microphoneChecker.startListening(ignoreActiveCall: true)
                     : await microphoneChecker.stopListening()
             }
         }
