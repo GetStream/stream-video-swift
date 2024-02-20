@@ -15,7 +15,7 @@ public final class MicrophoneChecker: ObservableObject {
 
     private let valueLimit: Int
     private let audioNormaliser = AudioValuePercentageNormaliser()
-    private let audioRecorder = InjectedValues[\.audioRecorder]
+    private let audioRecorder = InjectedValues[\.callAudioRecorder]
 
     private var updateMetersCancellable: AnyCancellable?
 

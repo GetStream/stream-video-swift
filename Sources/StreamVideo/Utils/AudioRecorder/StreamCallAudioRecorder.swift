@@ -10,7 +10,9 @@ import Foundation
 /// audio streams. It handles setting up the recording environment, starting and stopping recording, and
 /// publishing the average power of the audio signal. Additionally, it adjusts its behavior based on the
 /// presence of an active call, automatically stopping recording if needed.
-open class StreamAudioRecorder: @unchecked Sendable {
+open class StreamCallAudioRecorder: @unchecked Sendable {
+
+    @Injected(\.activeCallProvider) private var activeCallProvider
 
     /// The builder used to create the AVAudioRecorder instance.
     let audioRecorderBuilder: AVAudioRecorderBuilder
@@ -20,6 +22,8 @@ open class StreamAudioRecorder: @unchecked Sendable {
 
     /// A private task responsible for setting up the recorder in the background.
     private var setUpTask: Task<Void, Never>?
+
+    private var hasActiveCallCancellable: AnyCancellable?
 
     /// A cancellable used to schedule the update of audio meters.
     private(set) var updateMetersTimerCancellable: AnyCancellable?
@@ -31,12 +35,17 @@ open class StreamAudioRecorder: @unchecked Sendable {
     open private(set) lazy var metersPublisher: AnyPublisher<Float, Never> = _metersPublisher.eraseToAnyPublisher()
 
     /// Indicates whether an active call is present, influencing recording behavior.
-    public var hasActiveCall: Bool = false {
+    private var hasActiveCall: Bool = false {
         didSet {
             if !hasActiveCall {
                 Task {
                     await stopRecording()
-                    try? audioSession.setActive(false, options: [])
+                    do {
+                        /// It's safe to deactivate the session as a call isn't in progress.
+                        try audioSession.setActive(false, options: [])
+                    } catch {
+                        log.error("🎙️Failed to deactivate AudioSession.", error: error)
+                    }
                 }
             }
         }
@@ -67,30 +76,31 @@ open class StreamAudioRecorder: @unchecked Sendable {
     }
 
     deinit {
+        removeRecodingFile()
         setUpTask?.cancel()
         setUpTask = nil
-        do {
-            try FileManager.default.removeItem(at: audioRecorderBuilder.fileURL)
-            log.debug("Successfully deleted audio filename")
-        } catch {
-            log.error("Error deleting fileURL.", error: error)
-        }
+        hasActiveCallCancellable?.cancel()
+        hasActiveCallCancellable = nil
     }
 
     // MARK: - Public API
 
     /// Starts recording audio asynchronously.
     open func startRecording() async {
-        await setUpAudioCaptureIfRequired { [weak self] audioRecorder in
-            guard let self, self.hasActiveCall, !audioRecorder.isRecording else {
+        do {
+            let audioRecorder = try await setUpAudioCaptureIfRequired()
+            guard hasActiveCall, !audioRecorder.isRecording else {
+                log
+                    .info(
+                        "🎙️Attempted to start recording but failed. hasActiveCall:\(hasActiveCall) isRecording:\(audioRecorder.isRecording)"
+                    )
                 return
             }
-
             audioRecorder.record()
             audioRecorder.isMeteringEnabled = true
 
-            log.debug("️Recording started.")
-            self.updateMetersTimerCancellable = Foundation.Timer
+            log.debug("️🎙️Recording started.")
+            updateMetersTimerCancellable = Foundation.Timer
                 .publish(every: 0.1, on: .main, in: .default)
                 .autoconnect()
                 .sink { [weak self, audioRecorder] _ in
@@ -98,27 +108,35 @@ open class StreamAudioRecorder: @unchecked Sendable {
                         guard let self else { return }
                         audioRecorder.updateMeters()
                         self._metersPublisher.send(audioRecorder.averagePower(forChannel: 0))
-                        log.debug("️Recording meters updated")
+                        log.debug("️🎙️Recording meters updated")
                     }
                 }
+        } catch {
+            log.error("🎙️Failed to set up recording session", error: error)
         }
     }
 
     /// Stops recording audio asynchronously.
     open func stopRecording() async {
-        guard let audioRecorder = await audioRecorderBuilder.result, audioRecorder.isRecording else {
+        guard
+            let audioRecorder = await audioRecorderBuilder.result,
+            audioRecorder.isRecording
+        else {
             return
         }
 
         updateMetersTimerCancellable?.cancel()
         updateMetersTimerCancellable = nil
         audioRecorder.stop()
+        removeRecodingFile()
         do {
+            /// - Warning: It's on purpose that we don't deactivate the AudioSession here as a
+            /// call is in progress.
             try audioSession.setCategory(.playback)
         } catch {
-            log.error("Failed to set AudiSession category to playback.", error: error)
+            log.error("🎙️Failed to set AudiSession category to playback.", error: error)
         }
-        log.debug("️Recording stopped.")
+        log.debug("️🎙️Recording stopped.")
     }
 
     // MARK: - Private helpers
@@ -137,44 +155,64 @@ open class StreamAudioRecorder: @unchecked Sendable {
                 #endif
             } catch {
                 if type(of: error) != CancellationError.self {
-                    log.error("Failed to create AVAudioRecorder.", error: error)
+                    log.error("🎙️Failed to create AVAudioRecorder.", error: error)
                 }
             }
         }
+
+        hasActiveCallCancellable = activeCallProvider
+            .hasActiveCallPublisher
+            .receive(on: DispatchQueue.global(qos: .utility))
+            .removeDuplicates()
+            .sink { [weak self] in
+                self?.hasActiveCall = $0
+            }
     }
 
-    private func setUpAudioCaptureIfRequired(
-        _ completionHandler: @escaping (AVAudioRecorder) async -> Void
-    ) async {
+    private func setUpAudioCaptureIfRequired() async throws -> AVAudioRecorder {
+        try audioSession.setCategory(.playAndRecord)
+        try audioSession.setActive(true, options: [])
+
+        guard
+            await audioSession.requestRecordPermission()
+        else {
+            throw ClientError("🎙️Permission denied.")
+        }
+
+        guard
+            let audioRecorder = await audioRecorderBuilder.result
+        else {
+            throw ClientError("🎙️Unable to fetch AVAudioRecorder instance.")
+        }
+
+        return audioRecorder
+    }
+
+    private func removeRecodingFile() {
+        let fileURL = audioRecorderBuilder.fileURL
         do {
-            try audioSession.setCategory(.playAndRecord)
-            try audioSession.setActive(true, options: [])
-            if
-                await audioSession.requestRecordPermission(),
-                let audioRecorder = await audioRecorderBuilder.result {
-                await completionHandler(audioRecorder)
-            }
+            try FileManager.default.removeItem(at: fileURL)
+            log.debug("🎙️Successfully deleted audio filename")
         } catch {
-            log.error("Failed to set up recording session", error: error)
+            log.warning("🎙️Cannot delete \(fileURL).\(error)")
         }
     }
 }
 
-/// Provides the default value of the `StreamAudioRecorder` class.
-public struct StreamAudioRecorderKey: InjectionKey {
-    public static var currentValue: StreamAudioRecorder = StreamAudioRecorder(
+/// Provides the default value of the `StreamCallAudioRecorder` class.
+public struct StreamCallAudioRecorderKey: InjectionKey {
+    public static var currentValue: StreamCallAudioRecorder = StreamCallAudioRecorder(
         filename: "recording.wav"
     )
 }
 
 extension InjectedValues {
-
-    public var audioRecorder: StreamAudioRecorder {
+    public var callAudioRecorder: StreamCallAudioRecorder {
         get {
-            Self[StreamAudioRecorderKey.self]
+            Self[StreamCallAudioRecorderKey.self]
         }
         set {
-            Self[StreamAudioRecorderKey.self] = newValue
+            Self[StreamCallAudioRecorderKey.self] = newValue
         }
     }
 }

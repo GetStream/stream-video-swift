@@ -13,7 +13,7 @@
 		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
 		40149DC32B7E202600473176 /* ParticipantEventViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DC22B7E202600473176 /* ParticipantEventViewModifier.swift */; };
 		40149DCC2B7E814300473176 /* AVAudioRecorderBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCB2B7E814300473176 /* AVAudioRecorderBuilder.swift */; };
-		40149DCE2B7E837A00473176 /* StreamAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCD2B7E837A00473176 /* StreamAudioRecorder.swift */; };
+		40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCD2B7E837A00473176 /* StreamCallAudioRecorder.swift */; };
 		40149DD02B7E839500473176 /* AudioSessionProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40149DCF2B7E839500473176 /* AudioSessionProtocol.swift */; };
 		401A0F032AB1C1B600BE2DBD /* ThermalStateObserver.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */; };
 		401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 401A64A42A9DF79E00534ED1 /* StreamChatSwiftUI */; };
@@ -45,6 +45,7 @@
 		4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
 		4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
 		4031D7F82B83C087002EC6E4 /* StreamAudioRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F72B83C087002EC6E4 /* StreamAudioRecorderTests.swift */; };
+		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
@@ -1072,7 +1073,7 @@
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
 		40149DC22B7E202600473176 /* ParticipantEventViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ParticipantEventViewModifier.swift; sourceTree = "<group>"; };
 		40149DCB2B7E814300473176 /* AVAudioRecorderBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVAudioRecorderBuilder.swift; sourceTree = "<group>"; };
-		40149DCD2B7E837A00473176 /* StreamAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioRecorder.swift; sourceTree = "<group>"; };
+		40149DCD2B7E837A00473176 /* StreamCallAudioRecorder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorder.swift; sourceTree = "<group>"; };
 		40149DCF2B7E839500473176 /* AudioSessionProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioSessionProtocol.swift; sourceTree = "<group>"; };
 		401A0F022AB1C1B600BE2DBD /* ThermalStateObserver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserver.swift; sourceTree = "<group>"; };
 		401A64AA2A9DF7EC00534ED1 /* DemoChatAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatAdapter.swift; sourceTree = "<group>"; };
@@ -1096,6 +1097,7 @@
 		4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppEnvironment.swift; sourceTree = "<group>"; };
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		4031D7F72B83C087002EC6E4 /* StreamAudioRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioRecorderTests.swift; sourceTree = "<group>"; };
+		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
@@ -1951,8 +1953,9 @@
 			isa = PBXGroup;
 			children = (
 				40149DCB2B7E814300473176 /* AVAudioRecorderBuilder.swift */,
-				40149DCD2B7E837A00473176 /* StreamAudioRecorder.swift */,
+				40149DCD2B7E837A00473176 /* StreamCallAudioRecorder.swift */,
 				40149DCF2B7E839500473176 /* AudioSessionProtocol.swift */,
+				4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */,
 			);
 			path = AudioRecorder;
 			sourceTree = "<group>";
@@ -4767,6 +4770,7 @@
 				84DC38AB29ADFCFD00946713 /* RecordSettingsRequest.swift in Sources */,
 				84EA5D3F28C09AAC004D3531 /* CallController.swift in Sources */,
 				84DC38CA29ADFCFD00946713 /* UpdateCallRequest.swift in Sources */,
+				4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */,
 				84AF64D9287C79F60012A503 /* Errors.swift in Sources */,
 				84DC389429ADFCFD00946713 /* UpdateUserPermissionsRequest.swift in Sources */,
 				8456E6D3287EC343004E180E /* BaseLogDestination.swift in Sources */,
@@ -4880,7 +4884,7 @@
 				840F59932A77FDCB00EF3EB2 /* PinResponse.swift in Sources */,
 				840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
-				40149DCE2B7E837A00473176 /* StreamAudioRecorder.swift in Sources */,
+				40149DCE2B7E837A00473176 /* StreamCallAudioRecorder.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
 				84BAD77A2A6BFEF900733156 /* BroadcastBufferUploader.swift in Sources */,
 				84DC38A429ADFCFD00946713 /* BackstageSettings.swift in Sources */,

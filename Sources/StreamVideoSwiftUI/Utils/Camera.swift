@@ -15,7 +15,11 @@ class Camera: NSObject, @unchecked Sendable {
     private var photoOutput: AVCapturePhotoOutput?
     private var videoOutput: AVCaptureVideoDataOutput?
     private var sessionQueue: DispatchQueue!
-    
+    private lazy var frameProcessingQueue: DispatchQueue = DispatchQueue(
+        label: "io.getstream.\(String(describing: type(of: self))).videoDataOutputQueue",
+        target: .global(qos: .userInteractive)
+    )
+
     private var allCaptureDevices: [AVCaptureDevice] {
         AVCaptureDevice.DiscoverySession(
             deviceTypes: [
@@ -133,7 +137,7 @@ class Camera: NSObject, @unchecked Sendable {
         captureSession.sessionPreset = AVCaptureSession.Preset.high
 
         let videoOutput = AVCaptureVideoDataOutput()
-        videoOutput.setSampleBufferDelegate(self, queue: DispatchQueue.global(qos: .userInteractive))
+        videoOutput.setSampleBufferDelegate(self, queue: frameProcessingQueue)
 
         guard captureSession.canAddInput(deviceInput) else {
             logger.error("Unable to add device input to capture session.")

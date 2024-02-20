@@ -37,11 +37,7 @@ public struct CallTopView: View {
                 .frame(maxWidth: .infinity)
 
                 HStack(alignment: .center) {
-                    if #available(iOS 14.0, *) {
-                        CallDurationView(viewModel)
-                    } else {
-                        EmptyView()
-                    }
+                    CallDurationView(viewModel)
                 }
                 .frame(height: 44)
                 .frame(maxWidth: .infinity)

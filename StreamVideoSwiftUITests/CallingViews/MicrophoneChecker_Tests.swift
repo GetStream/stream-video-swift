@@ -12,11 +12,11 @@ import Combine
 final class MicrophoneChecker_Tests: XCTestCase {
 
     private lazy var subject: MicrophoneChecker! = .init(valueLimit: 3)
-    private lazy var mockAudioRecorder: MockStreamAudioRecorder! = MockStreamAudioRecorder(filename: "test.wav")
+    private lazy var mockAudioRecorder: MockStreamCallAudioRecorder! = MockStreamCallAudioRecorder(filename: "test.wav")
 
     override func setUp() {
         super.setUp()
-        InjectedValues[\.audioRecorder] = mockAudioRecorder
+        InjectedValues[\.callAudioRecorder] = mockAudioRecorder
     }
 
     override func tearDown() {
@@ -59,7 +59,7 @@ final class MicrophoneChecker_Tests: XCTestCase {
     }
 }
 
-private final class MockStreamAudioRecorder: StreamAudioRecorder {
+private final class MockStreamCallAudioRecorder: StreamCallAudioRecorder {
 
     private(set) var startRecordingWasCalled = false
     private(set) var stopRecordingWasCalled = false

@@ -13,7 +13,7 @@ open class CallViewModel: ObservableObject {
     
     @Injected(\.streamVideo) var streamVideo
     @Injected(\.pictureInPictureAdapter) var pictureInPictureAdapter
-    @Injected(\.audioRecorder) var audioRecorder
+    @Injected(\.callAudioRecorder) var audioRecorder
 
     /// Provides access to the current call.
     @Published public private(set) var call: Call? {
@@ -72,7 +72,6 @@ open class CallViewModel: ObservableObject {
     @Published public var callingState: CallingState = .idle {
         didSet {
             handleRingingEvents()
-            audioRecorder.hasActiveCall = callingState != .idle
         }
     }
     

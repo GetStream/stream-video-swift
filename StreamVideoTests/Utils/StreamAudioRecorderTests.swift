@@ -3,6 +3,7 @@
 //
 
 import AVFoundation
+import Combine
 @testable import StreamVideo
 import XCTest
 
@@ -10,14 +11,16 @@ final class StreamAudioRecorderTests: XCTestCase {
 
     private lazy var builder: AVAudioRecorderBuilder! = .init(cachedResult: mockAudioRecorder)
     private lazy var mockAudioSession: MockAudioSession! = .init()
+    private lazy var mockActiveCallProvider: MockStreamActiveCallProvider! = .init()
     private var mockAudioRecorder: MockAudioRecorder!
-    private lazy var subject: StreamAudioRecorder! = .init(
+    private lazy var subject: StreamCallAudioRecorder! = .init(
         audioRecorderBuilder: builder,
         audioSession: mockAudioSession
     )
 
     override func setUp() async throws {
         try await super.setUp()
+        StreamActiveCallProviderKey.currentValue = mockActiveCallProvider
         mockAudioRecorder = try .init(
             url: URL(string: "test.wav")!,
             settings: AVAudioRecorderBuilder.defaultRecordingSettings
@@ -27,16 +30,17 @@ final class StreamAudioRecorderTests: XCTestCase {
     override func tearDown() {
         builder = nil
         mockAudioSession = nil
+        mockActiveCallProvider = nil
         mockAudioRecorder = nil
         subject = nil
         super.tearDown()
     }
 
-    // MARK: Initialization
+    // MARK: - init
 
     func testInitWithFilename_givenValidFilename_whenInitialized_thenSetsUpCorrectly() async throws {
         let filename = "test_recording.m4a"
-        let recorder = StreamAudioRecorder(filename: filename)
+        let recorder = StreamCallAudioRecorder(filename: filename)
 
         let actualFileURL = await recorder.audioRecorderBuilder.fileURL.lastPathComponent
         XCTAssertTrue(actualFileURL == filename)
@@ -48,14 +52,14 @@ final class StreamAudioRecorderTests: XCTestCase {
         XCTAssertTrue(subject.audioSession === mockAudioSession)
     }
 
-    // MARK: Deinitialization
+    // MARK: - deinit
 
     func testFileDeletion_givenRecordingExists_whenDeinitialized_thenDeletesFile() async throws {
         let tempDirectory = FileManager.default.temporaryDirectory
 
         let filename = tempDirectory.appendingPathComponent("test_recording.m4a")
         let mockBuilder = AVAudioRecorderBuilder(cachedResult: try .init(url: filename, settings: [:]))
-        var recorder: StreamAudioRecorder! = StreamAudioRecorder(
+        var recorder: StreamCallAudioRecorder! = StreamCallAudioRecorder(
             audioRecorderBuilder: mockBuilder,
             audioSession: MockAudioSession()
         )
@@ -66,43 +70,105 @@ final class StreamAudioRecorderTests: XCTestCase {
         XCTAssertFalse(FileManager.default.fileExists(atPath: filename.standardizedFileURL.absoluteString))
     }
 
-    // MARK: Public API
+    // MARK: - startRecording
 
     func testStartRecording_givenPermissionNotGranted_whenStarted_thenRecordsAndMetersAreNotUpdated() async throws {
         mockAudioSession.recordPermission = false
-        subject.hasActiveCall = true
+        await setUpHasActiveCall(true)
 
         await subject.startRecording()
 
-        let audioRecorder = try await XCTAsyncUnwrap(await builder.result)
-        XCTAssertFalse(audioRecorder.isRecording)
-        XCTAssertFalse(audioRecorder.isMeteringEnabled)
-        XCTAssertNil(subject.updateMetersTimerCancellable)
+        try await assertRecording(false, isMeteringEnabled: false)
     }
 
     func testStartRecording_givenPermissionGranted_whenStarted_thenRecordsAndMetersUpdates() async throws {
         mockAudioSession.recordPermission = true
-        subject.hasActiveCall = true
+        await setUpHasActiveCall(true)
 
         await subject.startRecording()
 
-        let audioRecorder = try await XCTAsyncUnwrap(await builder.result)
-        XCTAssertTrue(audioRecorder.isRecording)
-        XCTAssertTrue(audioRecorder.isMeteringEnabled)
-        XCTAssertNotNil(subject.updateMetersTimerCancellable)
+        try await assertRecording(true)
     }
+
+    // MARK: - stopRecording
 
     func testStopRecording_givenRecording_whenStopped_thenStopsRecording() async throws {
         mockAudioSession.recordPermission = true
-        subject.hasActiveCall = true
+        await setUpHasActiveCall(true)
 
         await subject.startRecording()
         await subject.stopRecording()
 
+        try await assertRecording(false)
+    }
+
+    // MARK: - activeCall ended
+
+    func test_activeCallEnded_givenAnActiveCallAndRecordingTrue_whenActiveCallEnds_thenStopsRecording() async throws {
+        mockAudioSession.recordPermission = true
+        await setUpHasActiveCall(true)
+        await subject.startRecording()
+        
+        await setUpHasActiveCall(false)
+
+        try await assertRecording(false)
+    }
+
+    // MARK: - activeCall ended and a new one started
+
+    func test_activeCallEnded_givenAnActiveCallAndRecordingTrue_whenActiveCallEndsAndAnotherOneStarts_thenStartsRecording(
+    ) async throws {
+        mockAudioSession.recordPermission = true
+        await setUpHasActiveCall(true)
+        await subject.startRecording()
+        await setUpHasActiveCall(false)
+
+        try await assertRecording(false)
+        await setUpHasActiveCall(true)
+        await subject.startRecording()
+
+        try await assertRecording(true)
+    }
+
+    // MARK: - Private Helpers
+
+    private func assertRecording(
+        _ isRecording: Bool,
+        isMeteringEnabled: Bool = true,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws {
         let audioRecorder = try await XCTAsyncUnwrap(await builder.result)
-        XCTAssertFalse(audioRecorder.isRecording)
-        XCTAssertTrue(mockAudioSession.active)
-        XCTAssertNil(subject.updateMetersTimerCancellable)
+        XCTAssertEqual(
+            audioRecorder.isRecording,
+            isRecording,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(
+            audioRecorder.isMeteringEnabled,
+            isMeteringEnabled,
+            file: file,
+            line: line
+        )
+        XCTAssertEqual(
+            subject.updateMetersTimerCancellable != nil,
+            isRecording,
+            file: file,
+            line: line
+        )
+    }
+
+    private func setUpHasActiveCall(
+        _ hasActiveCall: Bool,
+        timeout: TimeInterval = 0.5
+    ) async {
+        _ = subject
+        mockActiveCallProvider.hasActiveCall = hasActiveCall
+
+        let waitExpectation = expectation(description: "Wait for an amount of time.")
+        waitExpectation.isInverted = true
+        await fulfillment(of: [waitExpectation], timeout: timeout)
     }
 }
 
@@ -142,6 +208,18 @@ private class MockAudioSession: AudioSessionProtocol {
 
     func requestRecordPermission() async -> Bool {
         recordPermission
+    }
+}
+
+private class MockStreamActiveCallProvider: StreamActiveCallProviding {
+    private var _activeCallSubject = PassthroughSubject<Bool, Never>()
+
+    var hasActiveCall: Bool! {
+        didSet { _activeCallSubject.send(hasActiveCall!) }
+    }
+
+    var hasActiveCallPublisher: AnyPublisher<Bool, Never> {
+        _activeCallSubject.eraseToAnyPublisher()
     }
 }
 

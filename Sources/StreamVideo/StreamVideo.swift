@@ -135,6 +135,9 @@ public class StreamVideo: ObservableObject {
             middlewares: [defaultParams]
         )
         StreamVideoProviderKey.currentValue = self
+        // This is used from the `StreamCallAudioRecorder` to observe active
+        // calls and activate/deactivate the AudioSession.
+        StreamActiveCallProviderKey.currentValue = self
         (apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
         }

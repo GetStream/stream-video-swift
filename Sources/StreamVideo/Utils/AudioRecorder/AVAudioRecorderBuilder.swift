@@ -5,6 +5,12 @@
 import AVFoundation
 import Foundation
 
+/// The AVAudioRecorderBuilder actor simplifies the creation and management of AVAudioRecorder
+/// instances for audio recording. It offers:
+/// Caching: Stores created AVAudioRecorder objects for efficient reuse, avoiding redundant initialization.
+/// Customisable settings: Allows you to tailor recording parameters to your specific needs.
+///
+/// - Important: You need to call `.build()` before trying to access the `result` property.
 actor AVAudioRecorderBuilder {
 
     // `kAudioFormatLinearPCM` is being used to be able to support multiple
@@ -18,13 +24,14 @@ actor AVAudioRecorderBuilder {
         AVEncoderAudioQualityKey: AVAudioQuality.high.rawValue
     ]
 
+    /// The URL where the audio recording will be saved.
     let fileURL: URL
+
+    /// A dictionary containing audio format, sample rate, number of channels, and quality configurations.
     let settings: [String: Any]
 
+    /// A property storing the built AVAudioRecorder instance.
     private var cachedResult: AVAudioRecorder?
-    private var factory: (URL, [String: Any]) throws -> AVAudioRecorder = {
-        try .init(url: $0, settings: $1)
-    }
 
     var result: AVAudioRecorder? { cachedResult }
 
@@ -48,9 +55,10 @@ actor AVAudioRecorderBuilder {
         self.settings = cachedResult.settings
     }
 
+    /// Instructs the `AVAudioRecorderBuilder` to build and cache an instance of AVAudioRecorder.
     func build() throws {
         guard cachedResult == nil else { return }
-        let audioRecorder = try factory(fileURL, settings)
+        let audioRecorder = try AVAudioRecorder(url: fileURL, settings: settings)
         self.cachedResult = audioRecorder
     }
 }
