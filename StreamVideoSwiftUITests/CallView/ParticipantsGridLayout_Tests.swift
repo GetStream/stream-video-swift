@@ -11,7 +11,7 @@ import XCTest
 @MainActor
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
-    private var mockedOrientation: StreamDeviceOrientation! = .portrait
+    private var mockedOrientation: StreamDeviceOrientation! = .portrait(isUpsideDown: false)
     private lazy var orientationAdapter: StreamDeviceOrientationAdapter! = .init { self.mockedOrientation }
 
     private lazy var callController: CallController_Mock! = CallController_Mock(
@@ -45,7 +45,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
     func test_grid_participantWithAudio_snapshot() {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
@@ -60,7 +60,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantWithoutAudio_snapshot() {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for count in gridParticipants {
             let layout = ParticipantsGridLayout(
@@ -75,7 +75,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantsConnectionQuality_snapshot() throws {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for quality in connectionQuality {
             let count = gridParticipants.last!
@@ -91,7 +91,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     }
     
     func test_grid_participantsSpeaking_snapshot() {
-        mockedOrientation = .portrait
+        mockedOrientation = .portrait(isUpsideDown: false)
 
         for count in gridParticipants {
             let participants = ParticipantFactory.get(count, speaking: true)

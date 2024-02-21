@@ -20,6 +20,7 @@
 		401A64B32A9DF86200534ED1 /* URL+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B22A9DF86200534ED1 /* URL+Convenience.swift */; };
 		401A64B52A9DF88C00534ED1 /* String+Unique.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B42A9DF88C00534ED1 /* String+Unique.swift */; };
 		401B59672B868E5100447DAC /* PerformanceLogger.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401B59662B868E5100447DAC /* PerformanceLogger.swift */; };
+		401B59682B86984A00447DAC /* StreamDeviceOrientationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */; };
 		401BEC4F2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401BEC4E2AE1738D00EEEAC5 /* HorizontalParticipantsListView_Tests.swift */; };
 		401BEC512AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401BEC502AE17F2900EEEAC5 /* SpotlightSpeakerView_Tests.swift */; };
 		401EDBAC2ACD646000520215 /* VisibilityThresholdModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401EDBAA2ACD5F1700520215 /* VisibilityThresholdModifier.swift */; };
@@ -36,7 +37,6 @@
 		402F04A92B70ED8600CA1986 /* StreamCallStatisticsReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A62B70ED8600CA1986 /* StreamCallStatisticsReporter.swift */; };
 		402F04AA2B70ED8600CA1986 /* Statistics+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A72B70ED8600CA1986 /* Statistics+Convenience.swift */; };
 		402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04A82B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift */; };
-		402F04AE2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04AD2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift */; };
 		402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		402F04B12B724EE500CA1986 /* CallViewModel+Snapshot.swift in Sources */ = {isa = PBXBuildFile; fileRef = 402F04B02B724EE500CA1986 /* CallViewModel+Snapshot.swift */; };
 		4030E5A02A9DF5BD003E8CBA /* AppEnvironment.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E59F2A9DF5BD003E8CBA /* AppEnvironment.swift */; };
@@ -3422,6 +3422,7 @@
 		84AF64D3287C79220012A503 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
 				8456E6C7287EC343004E180E /* Logger */,
 				84C2997C28784BB30034B735 /* Utils.swift */,
 				84AF64D4287C79320012A503 /* RawJSON.swift */,
@@ -3700,7 +3701,6 @@
 			isa = PBXGroup;
 			children = (
 				40FA12EE2B76AC4B00CE3EC9 /* Extensions */,
-				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
 				40E1104A2B5A9F5B007DF492 /* Formatters */,
 				40A9416C2B4D958A006D6965 /* PictureInPicture */,
 				40AA2EE02AE00179000DCA5C /* ClipCorners.swift */,
@@ -4860,6 +4860,7 @@
 				84DC38B129ADFCFD00946713 /* AudioSettings.swift in Sources */,
 				848CCCED2AB8ED8F002E83A2 /* CallHLSBroadcastingStartedEvent.swift in Sources */,
 				840F59932A77FDCB00EF3EB2 /* PinResponse.swift in Sources */,
+				401B59682B86984A00447DAC /* StreamDeviceOrientationAdapter.swift in Sources */,
 				840042C52A6FED2900917B30 /* IntExtensions.swift in Sources */,
 				84FC2C2428AD1B5E00181490 /* WebRTCEventDecoder.swift in Sources */,
 				84DC389B29ADFCFD00946713 /* PermissionRequestEvent.swift in Sources */,
@@ -5178,7 +5179,6 @@
 				8277D1342AE81CC800BC4ECF /* UIImage.swift in Sources */,
 				842C7EBC28A2A86700C2AB7F /* CallingParticipantView.swift in Sources */,
 				8469593E29BF214700134EA0 /* ViewExtensions.swift in Sources */,
-				402F04AE2B714E9B00CA1986 /* StreamDeviceOrientationAdapter.swift in Sources */,
 				8277D1582AE81CC800BC4ECF /* ImagePrefetcher.swift in Sources */,
 				8277D1312AE81CC800BC4ECF /* GIFImageView.swift in Sources */,
 				40C7B82C2B612D6000FB9DB2 /* ParticipantsListViewModifier.swift in Sources */,
