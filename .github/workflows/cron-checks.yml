@@ -56,11 +56,6 @@ jobs:
             os: macos-12
             device: "iPhone 8"
             setup_runtime: true
-          - ios: 14.5
-            xcode: 14.2
-            os: macos-12
-            device: "iPhone SE (2nd generation)"
-            setup_runtime: true
       fail-fast: false
     runs-on: ${{ matrix.os }}
     env:
