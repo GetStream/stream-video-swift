@@ -129,6 +129,17 @@ func pushRegistry(
 }
 ```
 
+When the user sign out , we need to unregister from VoIP push notifications, by adding the following method to the `VoipPushService`:
+
+```swift
+func unregisterForVoIPPushes() {
+    self.registry.delegate = nil
+    self.registry.desiredPushTypes = []
+}
+```
+
+You will need to call this method once the signout flow has been completed.
+
 #### Saving the PN credentials
 
 We're implementing three methods here. The `pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType)` method is called when new push notifications credentials are provided. You should use this method to save the device token to our backend. In our sample app, we are storing it in our `AppState` object. Whenever the `StreamVideo` SDK is initalized, we are saving the token to our backend, by calling the `setVoipDevice` method.
@@ -176,6 +187,14 @@ final class CallService {
         log.info("CallKit notifications not working on a simulator")
     #else
         voIPPushService.registerForVoIPPushes()
+    #endif
+    }
+
+    private func unregisterForIncomingCalls() {
+    #if targetEnvironment(simulator)
+        log.info("CallKit notifications not working on a simulator")
+    #else
+        voIPPushService.unregisterForVoIPPushes()
     #endif
     }
 

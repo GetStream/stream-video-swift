@@ -32,6 +32,11 @@ fileprivate func content() {
                 self.registry.desiredPushTypes = [.voIP]
             }
 
+            func unregisterForVoIPPushes() {
+                self.registry.delegate = nil
+                self.registry.desiredPushTypes = []
+            }
+
             func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
                 print(credentials.token)
                 let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
@@ -77,6 +82,14 @@ fileprivate func content() {
                 log.info("CallKit notifications not working on a simulator")
             #else
                 voIPPushService.registerForVoIPPushes()
+            #endif
+            }
+
+            private func unregisterForIncomingCalls() {
+            #if targetEnvironment(simulator)
+                log.info("CallKit notifications not working on a simulator")
+            #else
+                voIPPushService.unregisterForVoIPPushes()
             #endif
             }
 

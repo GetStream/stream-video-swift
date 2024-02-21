@@ -29,7 +29,12 @@ final class VoIPPushService: NSObject, PKPushRegistryDelegate {
         registry.delegate = self
         registry.desiredPushTypes = [.voIP]
     }
-    
+
+    func unregisterForVoIPPushes() {
+        registry.delegate = nil
+        registry.desiredPushTypes = []
+    }
+
     func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
         print(credentials.token)
         let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
