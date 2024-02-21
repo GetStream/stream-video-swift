@@ -2,23 +2,48 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import Foundation
 import StreamVideo
 
+@MainActor
 final class CallService {
 
     static let shared = CallService()
-    
+
     let callService = CallKitService()
     lazy var voIPPushService = makeVoIPPushService()
 
-    private init() {}
+    private var isSignedInCancellable: AnyCancellable?
+
+    private init() {
+        isSignedInCancellable = AppState
+            .shared
+            .$userState
+            .removeDuplicates()
+            .sink { [weak self] in
+                switch $0 {
+                case .notLoggedIn:
+                    self?.unregisterForIncomingCalls()
+                case .loggedIn:
+                    break
+                }
+            }
+    }
 
     func registerForIncomingCalls() {
         #if targetEnvironment(simulator)
         log.info("CallKit notifications not working on a simulator")
         #else
         voIPPushService.registerForVoIPPushes()
+        #endif
+    }
+
+    private func unregisterForIncomingCalls() {
+        #if targetEnvironment(simulator)
+        log.info("CallKit notifications not working on a simulator")
+        #else
+        voIPPushService.unregisterForVoIPPushes()
         #endif
     }
 
@@ -35,7 +60,7 @@ final class CallService {
             let callCid = streamDict?["call_cid"] as? String ?? "unknown"
             let createdByName = streamDict?["created_by_display_name"] as? String ?? defaultCallText
             let createdById = streamDict?["created_by_id"] as? String ?? defaultCallText
-            
+
             self.callService.reportIncomingCall(
                 callCid: callCid,
                 displayName: createdByName,
