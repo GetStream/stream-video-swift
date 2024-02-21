@@ -1972,6 +1972,17 @@
 			path = Models;
 			sourceTree = "<group>";
 		};
+		401B59632B868CC600447DAC /* VideoCapturer */ = {
+			isa = PBXGroup;
+			children = (
+				843697CC28C647B600839D99 /* VideoCapturer.swift */,
+				8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */,
+				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
+				406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */,
+			);
+			path = VideoCapturer;
+			sourceTree = "<group>";
+		};
 		401BEC4D2AE1737C00EEEAC5 /* LayoutComponents */ = {
 			isa = PBXGroup;
 			children = (
@@ -3893,12 +3904,11 @@
 		84FC2C1C28ACF29300181490 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				401B59632B868CC600447DAC /* VideoCapturer */,
 				402F04A52B70ED8600CA1986 /* Statistics */,
 				84BAD7762A6BFE7200733156 /* Screensharing */,
 				84FC2C1D28ACF2AE00181490 /* WebRTCClient.swift */,
 				84FC2C2128ACF2E000181490 /* PeerConnection.swift */,
-				8487D8AF2A697E9A00536ED4 /* VideoCapturing.swift */,
-				843697CC28C647B600839D99 /* VideoCapturer.swift */,
 				84B0091A2A4C521000CF1FA7 /* Retries.swift */,
 				84FC2C2328AD1B5E00181490 /* WebRTCEventDecoder.swift */,
 				84FC2C2728AD350100181490 /* WebRTCEvents.swift */,
@@ -3907,10 +3917,8 @@
 				84BBF62C28AFC72700387A02 /* DefaultRTCMediaConstraints.swift */,
 				8411925D28C5E5D00074EF88 /* DefaultRTCConfiguration.swift */,
 				8440861D2901A16F0027849C /* SfuMiddleware.swift */,
-				8496A9A529CC500F00F15FF1 /* StreamVideoCaptureHandler.swift */,
 				84F0867A29632DA30099907A /* VideoFilters.swift */,
 				8408A6212A949DB700DB1DFA /* VideoCapturingUtils.swift */,
-				406AF2002AF3D98F00ED4D0C /* SimulatorScreenCapturer.swift */,
 			);
 			path = WebRTC;
 			sourceTree = "<group>";
