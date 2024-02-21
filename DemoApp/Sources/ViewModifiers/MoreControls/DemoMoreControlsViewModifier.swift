@@ -69,14 +69,18 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
 
                             DemoMoreControlListButtonView(
                                 action: {
-                                    if appState.audioFilter == nil {
-                                        appState.audioFilter = RobotVoiceFilter(pitchShift: 0.8)
-                                    } else {
-                                        appState.audioFilter = nil
-                                    }
+                                    appState.audioFilter = appState.videoFilter == nil
+                                        ? RobotVoiceFilter(pitchShift: 0.8)
+                                        : nil
                                 },
-                                label: appState.audioFilter == nil ? "Robot Voice" : "Disable Robot Voice"
+                                label: appState.audioFilter == nil
+                                    ? "Robot Voice"
+                                    : "Disable Robot Voice"
                             ) { Image(systemName: "waveform") }
+
+                            if #available(iOS 15.0, *) {
+                                DemoFiltersButtonView()
+                            }
 
                             DemoMoreControlListButtonView(
                                 action: { isStatsPresented = true },

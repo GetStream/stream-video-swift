@@ -9,9 +9,9 @@ import UIKit
 
 /// Provides access to the images used in the SDK.
 public class Images {
-    
+
     public init() { /* Public init. */ }
-    
+
     public var videoTurnOn = Image(systemName: "video.fill")
     public var videoTurnOff = Image(systemName: "video.slash.fill")
     public var micTurnOn = Image(systemName: "mic.fill")

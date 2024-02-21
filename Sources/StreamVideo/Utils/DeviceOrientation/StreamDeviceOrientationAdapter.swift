@@ -4,16 +4,30 @@
 
 import Combine
 import Foundation
-import StreamVideo
 #if canImport(UIKit)
 import UIKit
 #endif
 
 public enum StreamDeviceOrientation: Equatable {
-    case portrait, landscape
+    case portrait(isUpsideDown: Bool), landscape(isLeft: Bool)
 
-    public var isPortrait: Bool { self == .portrait }
-    public var isLandscape: Bool { self == .landscape }
+    public var isPortrait: Bool {
+        switch self {
+        case .portrait:
+            return true
+        case .landscape:
+            return false
+        }
+    }
+
+    public var isLandscape: Bool {
+        switch self {
+        case .portrait:
+            return false
+        case .landscape:
+            return true
+        }
+    }
 }
 
 open class StreamDeviceOrientationAdapter: ObservableObject {
@@ -22,17 +36,21 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
     public static let defaultProvider: Provider = {
         #if canImport(UIKit)
         switch UIDevice.current.orientation {
-        case .unknown, .portrait, .portraitUpsideDown:
-            return .portrait
-        case .landscapeLeft, .landscapeRight:
-            return .landscape
+        case .unknown, .portrait:
+            return .portrait(isUpsideDown: false)
+        case .portraitUpsideDown:
+            return .portrait(isUpsideDown: true)
+        case .landscapeLeft:
+            return .landscape(isLeft: true)
+        case .landscapeRight:
+            return .landscape(isLeft: false)
         case .faceUp, .faceDown:
-            return .portrait
+            return .portrait(isUpsideDown: false)
         @unknown default:
-            return .portrait
+            return .portrait(isUpsideDown: false)
         }
         #else
-        return .portrait
+        return .portrait(isUpsideDown: false)
         #endif
     }
 

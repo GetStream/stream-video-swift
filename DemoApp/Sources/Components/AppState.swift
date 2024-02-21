@@ -2,6 +2,7 @@
 // Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
+import Combine
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
@@ -10,6 +11,8 @@ import SwiftUI
 final class AppState: ObservableObject {
     
     // MARK: - Properties
+
+    private var activeCallCancellable: AnyCancellable?
 
     // MARK: Published
 
@@ -39,6 +42,7 @@ final class AppState: ObservableObject {
     }
 
     @Published var audioFilter: AudioFilter? { didSet { didUpdate(audioFilter: audioFilter) } }
+    @Published var videoFilter: VideoFilter? { didSet { didUpdate(videoFilter: videoFilter) } }
     @Published var users: [User]
 
     let unsecureRepository = UnsecureRepository()
@@ -52,6 +56,15 @@ final class AppState: ObservableObject {
             didUpdate(voIPPushToken: voIPPushToken)
             deferSetDevice = false
             deferSetVoipDevice = false
+            activeCallCancellable?.cancel()
+            activeCallCancellable = nil
+            if let streamVideo {
+                activeCallCancellable = streamVideo
+                    .state
+                    .$activeCall
+                    .receive(on: DispatchQueue.main)
+                    .sink { [weak self] in self?.activeCall = $0 }
+            }
         }
     }
 
@@ -160,6 +173,10 @@ final class AppState: ObservableObject {
 
     private func didUpdate(audioFilter: AudioFilter?) {
         voiceProcessor.setAudioFilter(audioFilter)
+    }
+
+    private func didUpdate(videoFilter: VideoFilter?) {
+        activeCall?.setVideoFilter(videoFilter)
     }
 }
 
