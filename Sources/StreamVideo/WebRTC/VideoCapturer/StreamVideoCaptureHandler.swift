@@ -51,7 +51,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
                         cvPixelBuffer: imageBuffer,
                         options: [CIImageOption.colorSpace: self.colorSpace]
                     )
-                    let outputImage = await self.filter(image: inputImage)
+                    let outputImage = await self.filter(image: inputImage, imageBuffer: imageBuffer)
                     CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
                     self.context.render(
                         outputImage,
@@ -105,9 +105,11 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         }
     }
 
-    private func filter(image: CIImage) async -> CIImage {
+    private func filter(image: CIImage, imageBuffer: CVPixelBuffer) async -> CIImage {
         guard let selectedFilter = selectedFilter else { return image }
-        return await selectedFilter.filter(image)
+        return await performanceLogger.measureExecution(name: #function) {
+            return await selectedFilter.filter(image, imageBuffer)
+        }
     }
 }
 

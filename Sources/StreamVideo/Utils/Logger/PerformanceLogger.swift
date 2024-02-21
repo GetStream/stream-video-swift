@@ -15,56 +15,68 @@ public final class StreamPerformanceLogger {
         category: "PerformanceMetrics"
     )
 
-    public func measureExecution(
-        name: StaticString,
-        _ handler: @escaping () -> Void
-    ) {
-        #if DEBUG
+    public func begin(_ name: StaticString) {
+#if DEBUG
         os_signpost(.begin, log: performanceLog, name: name)
-        defer { os_signpost(.end, log: performanceLog, name: name) }
-        handler()
-        #else
-        handler()
-        #endif
+#endif
     }
 
-    public func measureExecution(
-        name: StaticString,
-        _ handler: @escaping () throws -> Void
-    ) rethrows {
-        #if DEBUG
-        os_signpost(.begin, log: performanceLog, name: name)
-        defer { os_signpost(.end, log: performanceLog, name: name) }
-        try handler()
-        #else
-        try handler()
-        #endif
+    public func end(_ name: StaticString) {
+#if DEBUG
+        os_signpost(.end, log: performanceLog, name: name)
+#endif
     }
 
-    public func measureExecution(
+    public func measureExecution<T>(
         name: StaticString,
-        _ handler: @escaping () async -> Void
-    ) async {
-        #if DEBUG
+        _ handler: () -> T
+    ) -> T {
+#if DEBUG
         os_signpost(.begin, log: performanceLog, name: name)
         defer { os_signpost(.end, log: performanceLog, name: name) }
-        await handler()
-        #else
-        await handler()
-        #endif
+        return handler()
+#else
+        return handler()
+#endif
     }
 
-    public func measureExecution(
+    public func measureExecution<T>(
         name: StaticString,
-        _ handler: @escaping () async throws -> Void
-    ) async rethrows {
-        #if DEBUG
+        _ handler: () throws -> T
+    ) rethrows -> T {
+#if DEBUG
         os_signpost(.begin, log: performanceLog, name: name)
         defer { os_signpost(.end, log: performanceLog, name: name) }
-        try await handler()
-        #else
-        try await handler()
-        #endif
+        return try handler()
+#else
+        return try handler()
+#endif
+    }
+
+    public func measureExecution<T>(
+        name: StaticString,
+        _ handler: () async -> T
+    ) async -> T {
+#if DEBUG
+        os_signpost(.begin, log: performanceLog, name: name)
+        defer { os_signpost(.end, log: performanceLog, name: name) }
+        return await handler()
+#else
+        return await handler()
+#endif
+    }
+
+    public func measureExecution<T>(
+        name: StaticString,
+        _ handler: () async throws -> T
+    ) async rethrows -> T {
+#if DEBUG
+        os_signpost(.begin, log: performanceLog, name: name)
+        defer { os_signpost(.end, log: performanceLog, name: name) }
+        return try await handler()
+#else
+        return try await handler()
+#endif
     }
 }
 

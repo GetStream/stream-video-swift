@@ -50,7 +50,7 @@ open class StreamDeviceOrientationAdapter: ObservableObject {
             return .portrait(isUpsideDown: false)
         }
         #else
-        return .portrait
+        return .portrait(isUpsideDown: false)
         #endif
     }
 
