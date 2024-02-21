@@ -19,7 +19,7 @@ fileprivate func content() {
             var body: some View {
                 CallView(viewFactory: viewFactory, viewModel: viewModel)
                     .onReceive(viewModel.$callSettings) { callSettings in
-                        updateMicrophoneChecker()
+                        Task { await updateMicrophoneChecker() }
                     }
                     .onReceive(microphoneChecker.$audioLevels, perform: { values in
                         guard !viewModel.callSettings.audioOn else { return }
@@ -46,19 +46,13 @@ fileprivate func content() {
                         }
                         : nil
                     )
-                    .onDisappear {
-                        microphoneChecker.stopListening()
-                    }
-                    .onAppear {
-                        updateMicrophoneChecker()
-                    }
             }
 
-            private func updateMicrophoneChecker() {
+            private func updateMicrophoneChecker() async {
                 if !viewModel.callSettings.audioOn {
-                    microphoneChecker.startListening()
+                    await microphoneChecker.startListening()
                 } else {
-                    microphoneChecker.stopListening()
+                    await microphoneChecker.stopListening()
                 }
             }
         }

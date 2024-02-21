@@ -81,7 +81,7 @@ public class StreamVideo: ObservableObject {
     private let apiKey: APIKey
     private let environment: Environment
     private let pushNotificationsConfig: PushNotificationsConfig
-    
+
     /// Initializes a new instance of `StreamVideo` with the specified parameters.
     /// - Parameters:
     ///   - apiKey: The API key.
@@ -135,6 +135,9 @@ public class StreamVideo: ObservableObject {
             middlewares: [defaultParams]
         )
         StreamVideoProviderKey.currentValue = self
+        // This is used from the `StreamCallAudioRecorder` to observe active
+        // calls and activate/deactivate the AudioSession.
+        StreamActiveCallProviderKey.currentValue = self
         (apiTransport as? URLSessionTransport)?.setTokenUpdater { [weak self] userToken in
             self?.token = userToken
         }

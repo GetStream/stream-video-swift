@@ -5,7 +5,7 @@
 import Combine
 
 /// Represents the settings for a call.
-public final class CallSettings: ObservableObject, Sendable {
+public final class CallSettings: ObservableObject, Sendable, Equatable {
     /// Whether the audio is on for the current user.
     public let audioOn: Bool
     /// Whether the video is on for the current user.
@@ -16,7 +16,7 @@ public final class CallSettings: ObservableObject, Sendable {
     public let audioOutputOn: Bool
     /// The camera position for the current user.
     public let cameraPosition: CameraPosition
-        
+
     public init(
         audioOn: Bool = true,
         videoOn: Bool = true,
@@ -34,24 +34,32 @@ public final class CallSettings: ObservableObject, Sendable {
         self.videoOn = videoOn
         #endif
     }
-    
+
+    public static func == (lhs: CallSettings, rhs: CallSettings) -> Bool {
+        lhs.audioOn == rhs.audioOn &&
+            lhs.videoOn == rhs.videoOn &&
+            lhs.speakerOn == rhs.speakerOn &&
+            lhs.audioOutputOn == rhs.audioOutputOn &&
+            lhs.cameraPosition == rhs.cameraPosition
+    }
+
     public var shouldPublish: Bool {
         audioOn || videoOn
     }
 }
 
 /// The camera position.
-public enum CameraPosition: Sendable {
+public enum CameraPosition: Sendable, Equatable {
     case front
     case back
-    
+
     public func next() -> CameraPosition {
         self == .front ? .back : .front
     }
 }
 
 extension CallSettingsResponse {
-    
+
     public var toCallSettings: CallSettings {
         CallSettings(
             audioOn: audio.micDefaultOn,
@@ -73,7 +81,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-    
+
     func withUpdatedAudioState(_ audioOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -83,7 +91,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-    
+
     func withUpdatedVideoState(_ videoOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -93,7 +101,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-    
+
     func withUpdatedSpeakerState(_ speakerOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,
@@ -103,7 +111,7 @@ public extension CallSettings {
             cameraPosition: cameraPosition
         )
     }
-    
+
     func withUpdatedAudioOutputState(_ audioOutputOn: Bool) -> CallSettings {
         CallSettings(
             audioOn: audioOn,

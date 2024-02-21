@@ -42,7 +42,7 @@ public struct CallContainer<Factory: ViewFactory>: View {
     }
     
     public var body: some View {
-        ZStack {
+        Group {
             if shouldShowCallView {
                 if viewModel.callParticipants.count > 1 {
                     if viewModel.isMinimized {

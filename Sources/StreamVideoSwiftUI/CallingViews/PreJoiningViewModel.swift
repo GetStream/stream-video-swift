@@ -52,11 +52,11 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
     
     public func startCamera(front: Bool) {
         if #available(iOS 14, *) {
+            if front {
+                (camera as? Camera)?.switchCaptureDevice()
+            }
             Task {
                 await(camera as? Camera)?.start()
-                if front {
-                    (camera as? Camera)?.switchCaptureDevice()
-                }
             }
         }
     }

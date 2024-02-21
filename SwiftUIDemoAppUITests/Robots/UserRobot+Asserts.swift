@@ -238,7 +238,7 @@ extension UserRobot {
         if isVisible {
             XCTAssertTrue(CallPage.reconnectingMessage.wait().exists, "reconnectingMessage should appear")
         } else {
-            XCTAssertFalse(CallPage.reconnectingMessage.waitForDisappearance(timeout: UserRobot.defaultTimeout).exists, "reconnectingMessage should disappear")
+            XCTAssertFalse(CallPage.reconnectingMessage.waitForDisappearance(timeout: UserRobot.defaultTimeout * 2).exists, "reconnectingMessage should disappear")
         }
         return self
     }

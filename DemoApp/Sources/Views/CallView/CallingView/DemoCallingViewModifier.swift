@@ -76,6 +76,7 @@ struct DemoCallingViewModifier: ViewModifier {
                     text.wrappedValue = ""
                 }
             }
+            .toastView(toast: $viewModel.toast)
     }
 
     private func joinCallIfNeeded(with callId: String, callType: String = .default) {
