@@ -16,7 +16,13 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
     var currentCameraPosition: AVCaptureDevice.Position = .front
     private let handleRotation: Bool
 
-    init(source: RTCVideoSource, filters: [VideoFilter], handleRotation: Bool = true) {
+    private lazy var serialActor = SerialActor()
+
+    init(
+        source: RTCVideoSource,
+        filters: [VideoFilter],
+        handleRotation: Bool = true
+    ) {
         self.source = source
         self.filters = filters
         self.handleRotation = handleRotation
@@ -31,37 +37,42 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         )
         updateRotation()
     }
-    
-    func capturer(_ capturer: RTCVideoCapturer, didCapture frame: RTCVideoFrame) {
-        Task { [weak self] in
-            guard let self else { return }
 
-            var _buffer: RTCCVPixelBuffer?
+    func capturer(
+        _ capturer: RTCVideoCapturer,
+        didCapture frame: RTCVideoFrame
+    ) {
+        Task { [serialActor, weak self] in
+            try await serialActor.execute { [weak self] in
+                guard let self else { return }
 
-            if selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
-                _buffer = buffer
-                let imageBuffer = buffer.pixelBuffer
-                CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
-                let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
-                let outputImage = await filter(image: inputImage)
-                CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
-                self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
+                var _buffer: RTCCVPixelBuffer?
+
+                if selectedFilter != nil, let buffer: RTCCVPixelBuffer = frame.buffer as? RTCCVPixelBuffer {
+                    _buffer = buffer
+                    let imageBuffer = buffer.pixelBuffer
+                    CVPixelBufferLockBaseAddress(imageBuffer, .readOnly)
+                    let inputImage = CIImage(cvPixelBuffer: imageBuffer, options: [CIImageOption.colorSpace: colorSpace])
+                    let outputImage = await filter(image: inputImage, pixelBuffer: imageBuffer)
+                    CVPixelBufferUnlockBaseAddress(imageBuffer, .readOnly)
+                    self.context.render(outputImage, to: imageBuffer, bounds: outputImage.extent, colorSpace: colorSpace)
+                }
+
+                let updatedFrame = handleRotation
+                    ? adjustRotation(capturer, for: _buffer, frame: frame)
+                    : frame
+
+                self.source.capturer(capturer, didCapture: updatedFrame)
             }
-
-            let updatedFrame = handleRotation
-                ? adjustRotation(capturer, for: _buffer, frame: frame)
-                : frame
-
-            self.source.capturer(capturer, didCapture: updatedFrame)
         }
     }
-    
+
     @objc private func updateRotation() {
         DispatchQueue.main.async {
             self.sceneOrientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation ?? .unknown
         }
     }
-    
+
     private func adjustRotation(
         _ capturer: RTCVideoCapturer,
         for buffer: RTCCVPixelBuffer?,
@@ -93,12 +104,20 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
             return frame
         }
     }
-    
-    private func filter(image: CIImage) async -> CIImage {
-        guard let selectedFilter = selectedFilter else { return image }
-        return await selectedFilter.filter(image)
+
+    private func filter(
+        image: CIImage,
+        pixelBuffer: CVPixelBuffer
+    ) async -> CIImage {
+        await selectedFilter?.filter(
+            VideoFilter.Input(
+                originalImage: image,
+                originalPixelBuffer: pixelBuffer,
+                originalImageOrientation: sceneOrientation.cgOrientation
+            )
+        ) ?? image
     }
-    
+
     deinit {
         NotificationCenter.default.removeObserver(
             self,

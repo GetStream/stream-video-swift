@@ -25,10 +25,16 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
         content
             .halfSheet(isPresented: $viewModel.moreControlsShown) {
                 ScrollView(showsIndicators: false) {
-                    VStack(spacing: 32) {
+                    VStack(spacing: {
+                        if #available(iOS 15.0, *) { return 8 }
+                        else { return 32 }
+                    }()) {
                         VStack(spacing: 8) {
                             DemoReactionSelectorView { viewModel.moreControlsShown = false }
                             DemoRaiseHandToggleButtonView(viewModel: viewModel)
+                            if #available(iOS 15.0, *) {
+                                DemoBackgroundEffectSelector()
+                            }
                         }
 
                         VStack {
@@ -69,13 +75,13 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
 
                             DemoMoreControlListButtonView(
                                 action: {
-                                    if appState.audioFilter == nil {
-                                        appState.audioFilter = RobotVoiceFilter(pitchShift: 0.8)
-                                    } else {
-                                        appState.audioFilter = nil
-                                    }
+                                    appState.audioFilter = appState.videoFilter == nil
+                                        ? RobotVoiceFilter(pitchShift: 0.8)
+                                        : nil
                                 },
-                                label: appState.audioFilter == nil ? "Robot Voice" : "Disable Robot Voice"
+                                label: appState.audioFilter == nil
+                                    ? "Robot Voice"
+                                    : "Disable Robot Voice"
                             ) { Image(systemName: "waveform") }
 
                             DemoMoreControlListButtonView(
