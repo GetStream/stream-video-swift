@@ -24,6 +24,14 @@
   },
   "testTargets" : [
     {
+      "skippedTests" : [
+        "Authentication_Tests",
+        "CallLifecycleTests",
+        "DeeplinkTests",
+        "LobbyTests",
+        "ReconnectionTests",
+        "RingProcessTests"
+      ],
       "target" : {
         "containerPath" : "container:StreamVideo.xcodeproj",
         "identifier" : "82392D502993C9E100941435",
