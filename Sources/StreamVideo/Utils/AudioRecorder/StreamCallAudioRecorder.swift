@@ -132,13 +132,6 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
         updateMetersTimerCancellable = nil
         audioRecorder.stop()
         removeRecodingFile()
-        do {
-            /// - Warning: It's on purpose that we don't deactivate the AudioSession here as a
-            /// call is in progress.
-            try audioSession.setCategory(.playback)
-        } catch {
-            log.error("🎙️Failed to set AudiSession category to playback.", error: error)
-        }
         log.debug("️🎙️Recording stopped.")
     }
 
