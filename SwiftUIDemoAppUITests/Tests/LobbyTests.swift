@@ -9,7 +9,7 @@ final class LobbyTests: StreamTestCase {
     func testLobbyWithTwoParticipants() throws {
         linkToScenario(withId: 1785)
         
-        try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
+        // try XCTSkipIf(TestRunnerEnvironment.isCI, "https://github.com/GetStream/ios-issues-tracking/issues/688")
         
         let participants = 2
         
