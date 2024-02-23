@@ -28,7 +28,7 @@ class BroadcastScreenCapturer: VideoCapturing {
         #else
         let handler = StreamVideoCaptureHandler(source: videoSource, filters: videoFilters, handleRotation: false)
         videoCaptureHandler = handler
-        videoCapturer = RTCCameraVideoCapturer(delegate: handler)
+        videoCapturer = RTCVideoCapturer(delegate: handler)
         #endif
     }
     
