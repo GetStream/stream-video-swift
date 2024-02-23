@@ -138,6 +138,8 @@
 		409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */; };
 		40A0E9602B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		40A0E9622B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */; };
+		40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */; };
+		40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */; };
 		40A9416E2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */; };
 		40A941702B4D96E6006D6965 /* StreamPictureInPictureController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A9416F2B4D96E6006D6965 /* StreamPictureInPictureController.swift */; };
 		40A941722B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A941712B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift */; };
@@ -1162,6 +1164,8 @@
 		409BFA3F2A9F79D2003341EF /* View+OptionalPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "View+OptionalPublisher.swift"; sourceTree = "<group>"; };
 		40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoBackgroundEffectSelector.swift; sourceTree = "<group>"; };
 		40A0E9612B88D3DC0089E8D3 /* UIInterfaceOrientation+CGOrientation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIInterfaceOrientation+CGOrientation.swift"; sourceTree = "<group>"; };
+		40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor_Tests.swift; sourceTree = "<group>"; };
+		40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CIImage_Resize_Tests.swift; sourceTree = "<group>"; };
 		40A9416D2B4D959F006D6965 /* StreamPictureInPictureAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureAdapter.swift; sourceTree = "<group>"; };
 		40A9416F2B4D96E6006D6965 /* StreamPictureInPictureController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPictureInPictureController.swift; sourceTree = "<group>"; };
 		40A941712B4D9750006D6965 /* StreamAVPictureInPictureVideoCallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAVPictureInPictureVideoCallViewController.swift; sourceTree = "<group>"; };
@@ -2418,6 +2422,22 @@
 			path = CallingView;
 			sourceTree = "<group>";
 		};
+		40A0E9652B88E03B0089E8D3 /* VideoFilters */ = {
+			isa = PBXGroup;
+			children = (
+				40A0E9662B88E0400089E8D3 /* Extensions */,
+			);
+			path = VideoFilters;
+			sourceTree = "<group>";
+		};
+		40A0E9662B88E0400089E8D3 /* Extensions */ = {
+			isa = PBXGroup;
+			children = (
+				40A0E9672B88E04D0089E8D3 /* CIImage_Resize_Tests.swift */,
+			);
+			path = Extensions;
+			sourceTree = "<group>";
+		};
 		40A9416C2B4D958A006D6965 /* PictureInPicture */ = {
 			isa = PBXGroup;
 			children = (
@@ -3083,6 +3103,7 @@
 				400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */,
 				84D6E5392B3AD10000D0056C /* RepeatingTimer_Tests.swift */,
 				4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */,
+				40A0E9632B88DE830089E8D3 /* SerialActor_Tests.swift */,
 			);
 			path = Utils;
 			sourceTree = "<group>";
@@ -3607,6 +3628,7 @@
 		84D6494529E9F2B7002CA428 /* WebRTC */ = {
 			isa = PBXGroup;
 			children = (
+				40A0E9652B88E03B0089E8D3 /* VideoFilters */,
 				402C54582B6BE4C900672BFB /* Statistics */,
 				845E31042A7121BE004DC470 /* Screensharing */,
 				84D6494629E9F2D0002CA428 /* WebRTCClient_Tests.swift */,
@@ -5059,6 +5081,7 @@
 				8490031929D2E0DF00AD9BB4 /* Sorting_Tests.swift in Sources */,
 				84F58B7629EE92BF00010C4C /* UniqueValues.swift in Sources */,
 				84F58B9529EEBA3900010C4C /* EquatableEvent.swift in Sources */,
+				40A0E9682B88E04D0089E8D3 /* CIImage_Resize_Tests.swift in Sources */,
 				842747FA29EEEC5A00E063AD /* EventLogger.swift in Sources */,
 				8414080F29F2838F00FF2D7C /* RawJSON_Tests.swift in Sources */,
 				406303422AD848000091AE77 /* CallParticipant_Mock.swift in Sources */,
@@ -5091,6 +5114,7 @@
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,
 				842747FC29EEECBA00E063AD /* AssertTestQueue.swift in Sources */,
 				84DCA2112A389160000C3411 /* AssertDelay.swift in Sources */,
+				40A0E9642B88DE830089E8D3 /* SerialActor_Tests.swift in Sources */,
 				84F58B8B29EEACAD00010C4C /* WebSocketEngine_Mock.swift in Sources */,
 				84F58B8D29EEAE2D00010C4C /* AssertAsync.swift in Sources */,
 				842747F629EEDB1300E063AD /* EventBatcher_Tests.swift in Sources */,
