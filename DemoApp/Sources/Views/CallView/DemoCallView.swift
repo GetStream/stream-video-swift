@@ -38,7 +38,7 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
         viewFactory
             .makeInnerCallView(viewModel: viewModel)
             .onReceive(viewModel.callSettingsPublisher) { _ in
-                updateMicrophoneChecker()
+                Task { await updateMicrophoneChecker() }
             }
             .onReceive(microphoneChecker.decibelsPublisher, perform: { values in
                 guard !viewModel.callSettings.audioOn else { return }
@@ -72,22 +72,16 @@ struct DemoCallView<ViewFactory: DemoAppViewFactory>: View {
                         : nil
                 }
             )
-            .onDisappear {
-                microphoneChecker.stopListening()
-            }
-            .onAppear {
-                updateMicrophoneChecker()
-            }
             .presentsMoreControls(viewModel: viewModel)
             .chat(viewModel: viewModel, chatViewModel: chatViewModel)
             .toastView(toast: $snapshotViewModel.toast)
     }
 
-    private func updateMicrophoneChecker() {
-        if viewModel.call != nil, !viewModel.callSettings.audioOn {
-            microphoneChecker.startListening()
-        } else {
-            microphoneChecker.stopListening()
+    private func updateMicrophoneChecker() async {
+        if viewModel.call != nil, viewModel.callSettings.audioOn {
+            await microphoneChecker.startListening()
+        } else if viewModel.call != nil, !viewModel.callSettings.audioOn {
+            await microphoneChecker.stopListening()
         }
     }
 }

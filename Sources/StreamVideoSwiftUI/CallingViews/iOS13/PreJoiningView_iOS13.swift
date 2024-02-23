@@ -10,8 +10,8 @@ struct LobbyView_iOS13: View {
     
     @ObservedObject var callViewModel: CallViewModel
     @BackportStateObject var viewModel: LobbyViewModel
-    @BackportStateObject var microphoneChecker = MicrophoneChecker()
-    
+    @BackportStateObject var microphoneChecker: MicrophoneChecker
+
     var callId: String
     var callType: String
     @Binding var callSettings: CallSettings
@@ -33,11 +33,19 @@ struct LobbyView_iOS13: View {
                 callId: callId
             )
         )
+        let microphoneCheckerInstance = MicrophoneChecker()
+        _microphoneChecker = BackportStateObject(wrappedValue: microphoneCheckerInstance)
         _callSettings = callSettings
         self.callId = callId
         self.callType = callType
         self.onJoinCallTap = onJoinCallTap
         self.onCloseLobby = onCloseLobby
+
+        Task {
+            callSettings.wrappedValue.audioOn
+                ? await microphoneCheckerInstance.startListening(ignoreActiveCall: true)
+                : await microphoneCheckerInstance.stopListening()
+        }
     }
     
     public var body: some View {
@@ -50,5 +58,12 @@ struct LobbyView_iOS13: View {
             onJoinCallTap: onJoinCallTap,
             onCloseLobby: onCloseLobby
         )
+        .onReceive(callViewModel.$callSettings) { newValue in
+            Task {
+                newValue.audioOn
+                    ? await microphoneChecker.startListening(ignoreActiveCall: true)
+                    : await microphoneChecker.stopListening()
+            }
+        }
     }
 }
