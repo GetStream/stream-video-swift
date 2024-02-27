@@ -92,7 +92,7 @@ class IntegrationTest: XCTestCase {
             }
         }
         
-        await fulfillment(of: [expectation], timeout: seconds)
+        await safeFulfillment(of: [expectation], timeout: seconds)
     }
 
     public func assertNext<Output>(
@@ -116,18 +116,7 @@ class IntegrationTest: XCTestCase {
             }
         }.store(in: &bag)
 
-        await fulfillment(of: [expectation], timeout: seconds)
-    }
-    
-    private func fulfillment(
-        of expectations: [XCTestExpectation],
-        timeout seconds: TimeInterval = .infinity
-    ) async {
-        #if compiler(>=5.8)
-        await super.fulfillment(of: expectations, timeout: seconds)
-        #else
-        await waitForExpectations(timeout: seconds)
-        #endif
+        await safeFulfillment(of: [expectation], timeout: seconds)
     }
 }
 

@@ -17,6 +17,7 @@ enum CallPage {
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
     static var recordingView: XCUIElement { app.staticTexts["recordingView"] }
     static var callDurationView: XCUIElement { app.staticTexts["callDurationView"] }
+    static var liveMeetingLabel: XCUIElement { app.staticTexts["Your Meeting is live!"] }
 
     enum ViewMenu {
         static var fullscreen: XCUIElement {

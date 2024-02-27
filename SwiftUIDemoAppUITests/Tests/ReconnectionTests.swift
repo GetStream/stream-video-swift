@@ -20,7 +20,7 @@ final class ReconnectionTests: StreamTestCase {
             userRobot
                 .waitForAutoLogin()
                 .startCall(callId)
-                .assertCallDurationView(isVisible: true)
+                .waitLiveMeetingLabelToAppear()
         }
         WHEN("user loses the internet connection") {
             sinatra.setConnection(state: .off)

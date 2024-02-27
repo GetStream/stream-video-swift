@@ -185,7 +185,7 @@ final class StreamAudioRecorderTests: XCTestCase {
 
         let waitExpectation = expectation(description: "Wait for an amount of time.")
         waitExpectation.isInverted = true
-        await fulfillment(of: [waitExpectation], timeout: timeout)
+        await safeFulfillment(of: [waitExpectation], timeout: timeout)
     }
 }
 
