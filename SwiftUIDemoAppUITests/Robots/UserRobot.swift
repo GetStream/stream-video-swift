@@ -288,6 +288,12 @@ extension UserRobot {
         return self
     }
     
+    @discardableResult
+    func waitLiveMeetingLabelToAppear(timeout: Double = defaultTimeout) -> Self {
+        XCTAssertTrue(CallPage.liveMeetingLabel.wait(timeout: timeout).exists, "Live meeting label is not visible")
+        return self
+    }
+    
     private func safelyCloseParticipantsMenu() {
         var retries = 0
         let closeButton = CallPage.ParticipantMenu.closeButton
