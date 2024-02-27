@@ -53,7 +53,7 @@ final class MicrophoneChecker_Tests: XCTestCase {
 
         let waitExpectation = expectation(description: "Wait for time interval...")
         waitExpectation.isInverted = true
-        await fulfillment(of: [waitExpectation], timeout: 1)
+        await safeFulfillment(of: [waitExpectation], timeout: 1)
 
         XCTAssertEqual(subject.audioLevels, [0.5, 0.8, 0.0])
     }
