@@ -16,6 +16,7 @@
 		400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */; };
 		400D91D32B63DFA500EBA47D /* 06-querying-calls.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */; };
 		400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */; };
+		404CAED82B8E3874007087BC /* 06-apply-video-filters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */; };
 		4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */; };
 		409C39692B67CC5C0090044C /* 04-screensharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C39682B67CC5C0090044C /* 04-screensharing.swift */; };
 		409C396B2B67CD0B0090044C /* 05-picture-in-picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */; };
@@ -89,6 +90,7 @@
 		400D91D02B63DEA200EBA47D /* 04-camera-and-microphone.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-camera-and-microphone.swift"; sourceTree = "<group>"; };
 		400D91D22B63DFA500EBA47D /* 06-querying-calls.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-querying-calls.swift"; sourceTree = "<group>"; };
 		400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-dependency-injection.swift"; sourceTree = "<group>"; };
+		404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-apply-video-filters.swift"; sourceTree = "<group>"; };
 		4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-callkit-integration.swift"; sourceTree = "<group>"; };
 		409C39682B67CC5C0090044C /* 04-screensharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-screensharing.swift"; sourceTree = "<group>"; };
 		409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-picture-in-picture.swift"; sourceTree = "<group>"; };
@@ -271,6 +273,7 @@
 				4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */,
 				409C39682B67CC5C0090044C /* 04-screensharing.swift */,
 				409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */,
+				404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */,
 				409C396C2B67CD780090044C /* 08-recording.swift */,
 				409C396E2B67CDF30090044C /* 09-broadcasting.swift */,
 			);
@@ -432,6 +435,7 @@
 				400D91CB2B63DB5F00EBA47D /* GloballyUsedVariables.swift in Sources */,
 				40FFDC982B640566004DA7A2 /* 09-audio-volume-indicator.swift in Sources */,
 				40FFDC7E2B63FC10004DA7A2 /* 04-video-layout.swift in Sources */,
+				404CAED82B8E3874007087BC /* 06-apply-video-filters.swift in Sources */,
 				409C396B2B67CD0B0090044C /* 05-picture-in-picture.swift in Sources */,
 				40FFDC552B63EFD3004DA7A2 /* 07-screen-share-content.swift in Sources */,
 				40FFDC9C2B6405EA004DA7A2 /* 11-speaking-while-muted.swift in Sources */,

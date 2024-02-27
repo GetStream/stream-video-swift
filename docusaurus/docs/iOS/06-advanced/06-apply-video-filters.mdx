@@ -18,11 +18,11 @@ The `VideoFilter` class allows you to create your own filters. It contains the `
 For example, let's add a simple "Sepia" filter, from the default `CIFilter` options by Apple:
 
 ```swift
-static let sepia: VideoFilter = {
-    let sepia = VideoFilter(id: "sepia", name: "Sepia") { image in
+let sepia: VideoFilter = {
+    let sepia = VideoFilter(id: "sepia", name: "Sepia") { input in
         let sepiaFilter = CIFilter(name: "CISepiaTone")
-        sepiaFilter?.setValue(image, forKey: kCIInputImageKey)
-        return sepiaFilter?.outputImage ?? image
+        sepiaFilter?.setValue(input.originalImage, forKey: kCIInputImageKey)
+        return sepiaFilter?.outputImage ?? input.originalImage
     }
     return sepia
 }()
@@ -60,7 +60,7 @@ connectUser()
 
 private func connectUser() {
     Task {
-        try await streamVideo?.connect()
+        try await streamVideo.connect()
     }
 }
 ```
@@ -87,53 +87,55 @@ Second, it will conditionally show a list of the filters with a button for each 
 In this section, only the code to show the filters is added. You can see the full code [here](https://github.com/GetStream/stream-video-ios-examples/blob/main/VideoWithChat/VideoWithChat/Sources/ChatCallControls.swift), but let's have a look at the simplified version:
 
 ```swift
-public var body: some View {
-    VStack {
-        HStack {
-            /* Skip unrelated code */
-            // highlight-next-line
-            // 1. Button to toggle filters view
-            Button {
-                withAnimation {
-                    filtersService.filtersShown.toggle()
-                }
-            }, label: {
-                CallIconView(
-                    icon: Image(systemName: "camera.filters"),
-                    size: size,
-                    iconStyle: filtersService.filtersShown ? .primary : .transparent
-                )
-            }
-            /* Skip unrelated code */
-        }
-
-        if filtersService.filtersShown {
-            HStack(spacing: 16) {
+struct ChatCallControls: View {
+    var body: some View {
+        VStack {
+            HStack {
+                /* Skip unrelated code */
                 // highlight-next-line
-                // 2. Show a button for each filter
-                ForEach(FiltersService.supportedFilters) { filter in
-                    Button {
-                        withAnimation {
-                            // highlight-next-line
-                            // 3. Select or de-select filter on tap
-                            if filtersService.selectedFilter == filter {
-                                filtersService.selectedFilter = nil
-                            } else {
-                                filtersService.selectedFilter = filter
-                            }
-                            viewModel.setVideoFilter(filtersService.selectedFilter)
-                        }
-                    } label: {
-                        Text(filter.name)
-                            .background(filtersService.selectedFilter == filter ? Color.blue : Color.gray)
-                            /* more modifiers */
+                // 1. Button to toggle filters view
+                Button {
+                    withAnimation {
+                        filtersService.filtersShown.toggle()
                     }
+                } label: {
+                    CallIconView(
+                        icon: Image(systemName: "camera.filters"),
+                        size: size,
+                        iconStyle: filtersService.filtersShown ? .primary : .transparent
+                    )
+                }
+                /* Skip unrelated code */
+            }
 
+            if filtersService.filtersShown {
+                HStack(spacing: 16) {
+                    // highlight-next-line
+                    // 2. Show a button for each filter
+                    ForEach(FiltersService.supportedFilters, id: \.id) { filter in
+                        Button {
+                            withAnimation {
+                                // highlight-next-line
+                                // 3. Select or de-select filter on tap
+                                if filtersService.selectedFilter?.id == filter.id {
+                                    filtersService.selectedFilter = nil
+                                } else {
+                                    filtersService.selectedFilter = filter
+                                }
+                                viewModel.setVideoFilter(filtersService.selectedFilter)
+                            }
+                        } label: {
+                            Text(filter.name)
+                                .background(filtersService.selectedFilter?.id == filter.id ? Color.blue : Color.gray)
+                            /* more modifiers */
+                        }
+
+                    }
                 }
             }
         }
+        /* more modifiers */
     }
-    /* more modifiers */
 }
 ```
 
@@ -156,7 +158,7 @@ The code will be slightly simplified for the sake of this guide. If you want to 
 To do this, you will use the [Vision framework](https://developer.apple.com/documentation/vision) and the `VNDetectFaceRectanglesRequest`. First, let's create the method that will detect the faces:
 
 ```swift
-static func detectFaces(image: CIImage) async throws -> CGRect {
+func detectFaces(image: CIImage) async throws -> CGRect {
     return try await withCheckedThrowingContinuation { continuation in
         let detectFaceRequest = VNDetectFaceRectanglesRequest { (request, error) in
             if let result = request.results?.first as? VNFaceObservation {
@@ -178,15 +180,15 @@ The `VNDetectFaceRectanglesRequest` does not support the `async/await` syntax ye
 Next, let's add some helper methods, that will allow conversion between `CIImage` and `UIImage`, as well as the possibility to draw over an image:
 
 ```swift
-static func convert(cmage: CIImage) -> UIImage {
+func convert(ciImage: CIImage) -> UIImage {
     let context = CIContext(options: nil)
-    let cgImage = context.createCGImage(cmage, from: cmage.extent)!
-    let image = UIImage(cgImage: cgImage, scale: scale, orientation: .up)
+    let cgImage = context.createCGImage(ciImage, from: ciImage.extent)!
+    let image = UIImage(cgImage: cgImage, scale: 1, orientation: .up)
     return image
 }
 
 @MainActor
-static func drawImageIn(_ image: UIImage, size: CGSize, _ logo: UIImage, inRect: CGRect) -> UIImage {
+func drawImageIn(_ image: UIImage, size: CGSize, _ logo: UIImage, inRect: CGRect) -> UIImage {
     let format = UIGraphicsImageRendererFormat()
     format.scale = 1
     format.opaque = true
@@ -201,13 +203,13 @@ static func drawImageIn(_ image: UIImage, size: CGSize, _ logo: UIImage, inRect:
 With those two helpers in place, you can now implement your custom AI filter. The same principle applies when creating a `VideoFilter` as in [the first part](#adding-a-video-filter) of this guide.
 
 ```swift
-static let stream: VideoFilter = {
-    let stream = VideoFilter(id: "stream", name: "Stream") { image in
+let stream: VideoFilter = {
+    let stream = VideoFilter(id: "stream", name: "Stream") { input in
         // highlight-next-line
         // 1. detect, where the face is located (if there's any)
-        guard let faceRect = try? await detectFaces(image: image) else { return image }
-        let converted = convert(cmage: image)
-        let bounds = image.extent
+        guard let faceRect = try? await detectFaces(image: input.originalImage) else { return input.originalImage }
+        let converted = convert(ciImage: input.originalImage)
+        let bounds = input.originalImage.extent
         let convertedRect = CGRect(
             x: faceRect.minX * bounds.width - 80,
             y: faceRect.minY * bounds.height,
@@ -216,7 +218,7 @@ static let stream: VideoFilter = {
         )
         // highlight-next-line
         // 2. Overlay the rectangle onto the original image
-        let overlayed = await drawImageIn(converted, size: bounds.size, streamLogo, inRect: convertedRect)
+        let overlayed = drawImageIn(converted, size: bounds.size, streamLogo, inRect: convertedRect)
 
         // highlight-next-line
         // 3. convert the created image to a CIImage

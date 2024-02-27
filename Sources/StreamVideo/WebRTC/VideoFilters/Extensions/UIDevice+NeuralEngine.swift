@@ -4,7 +4,7 @@
 
 #if canImport(MLCompute)
 import MLCompute
-var neuralEngineExists = {
+let neuralEngineExists = {
     if #available(iOS 15.0, *) {
         return MLCDevice.ane() != nil
     } else {
@@ -12,5 +12,5 @@ var neuralEngineExists = {
     }
 }()
 #else
-var neuralEngineExists = false
+let neuralEngineExists = false
 #endif
