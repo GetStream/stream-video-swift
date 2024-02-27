@@ -148,6 +148,7 @@ Here are the three things this code does:
 That is everything that is needed for a basic video filter support.
 
 ## Adding AI Filters
+### Face filters
 
 In some cases, you might also want to apply AI filters. That can be an addition to the user's face (glasses, moustaches, etc), or an ML filter. In this section this use-case will be covered. Specifically, you will show Stream's logo over the user's face. Whenever the user moves along, you will update the logo's location.
 
@@ -248,6 +249,46 @@ The end result will look like this (supposedly with a different face):
 This guide shows you a concrete example how to add a specific AI filter. However, with the way this is structured we aim to give you full control over what you can build with this.
 
 We would love to see the cool things you'll build with this functionality, feel free to tweet about them and [tag us](https://twitter.com/getstream_io).
+
+### Background filters
+
+A very common use-case during a videoCall is to apply some effect on our backgrounds. Those backgrounds can vary but the most common ones are blurring and adding a static image. StreamVideo leverages Apple's Vision technology and ships with those 2 filters out of the box. Below we are going to show you how to use each of them.
+
+By simply calling the `setVideoFilter(_: VideoFilter)` method on your `Call` object you can apply or remove the provided filter.
+
+#### Background blurring
+
+```swift
+Button {
+    call.setVideoFilter(.blurredBackground)
+} label: {
+    Text("Apply blur background filter")
+}
+
+Button {
+    call.setVideoFilter(nil)
+} label: {
+    Text("Remove background filter")
+}
+```
+
+#### Background set to a static image
+
+For setting a static image as the participant's background we simply need to load our image and provide it to the filter. Finally we pass the filter to the call similarly on how we did before with the blur filter.
+
+```swift
+Button {
+    call.setVideoFilter(.imageBackground(CIImage(image: uiImage)!, id: "my-awesome-image-background-filter"))
+} label: {
+    Text("Apply image background filter")
+}
+
+Button {
+    call.setVideoFilter(nil)
+} label: {
+    Text("Remove background filter")
+}
+```
 
 ## Audio Filters
 

@@ -173,6 +173,34 @@ fileprivate func content() {
         }()
     }
 
+    viewContainer {
+        Button {
+            call.setVideoFilter(.blurredBackground)
+        } label: {
+            Text("Apply blur background filter")
+        }
+
+        Button {
+            call.setVideoFilter(nil)
+        } label: {
+            Text("Remove background filter")
+        }
+    }
+
+    viewContainer {
+        Button {
+            call.setVideoFilter(.imageBackground(CIImage(image: uiImage)!, id: "my-awesome-image-background-filter"))
+        } label: {
+            Text("Apply image background filter")
+        }
+
+        Button {
+            call.setVideoFilter(nil)
+        } label: {
+            Text("Remove background filter")
+        }
+    }
+
     container {
         let voiceProcessor = CustomVoiceProcessor()
         let filter = RobotVoiceFilter(pitchShift: 0.8)

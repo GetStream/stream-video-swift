@@ -352,3 +352,5 @@ class RobotVoiceFilter: AudioFilter {
     init(pitchShift: Float) {self.pitchShift = pitchShift}
     func applyEffect(to audioBuffer: inout RTCAudioBuffer) {}
 }
+
+let uiImage = UIImage()
