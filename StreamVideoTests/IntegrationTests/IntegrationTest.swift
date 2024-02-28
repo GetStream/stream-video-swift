@@ -9,73 +9,63 @@ import XCTest
 
 class IntegrationTest: XCTestCase {
 
-    private var environment = "demo"
-    private var apiKey: String = ""
-    private lazy var userId = "thierry"
+    private var apiKey: String! = ""
+    private var userId: String! = "thierry"
+    private var baseURL: URL! = .init(string: "https://pronto.getstream.io/api/auth/create-token")!
+    private var authenticationProvider: TestsAuthenticationProvider! = .init()
+    private(set) var client: StreamVideo!
 
-    public lazy var client: StreamVideo = {
-        let token = TokenGenerator.shared.fetchToken(for: userId, expiration: 100) ?? UserToken(rawValue: "")
-        return StreamVideo(
-            apiKey: apiKey,
-            user: User(id: userId),
-            token: token,
-            pushNotificationsConfig: .init(
-                pushProviderInfo: .init(name: "ios-apn", pushProvider: .apn),
-                voipPushProviderInfo: .init(name: "ios-voip", pushProvider: .apn)
-            ),
-            tokenProvider: {
-                _ in
-            }
-        )
-    }()
+    // MARK: - Lifecycle
 
-    public func getUserClient(id: String) async throws -> StreamVideo {
-        apiKey = try await fetchApiKey(userId: userId)
-        let token = TokenGenerator.shared.fetchToken(
-            for: id,
-            expiration: 100
-        ) ?? UserToken(rawValue: "")
-        return StreamVideo(
-            apiKey: apiKey,
-            user: User(id: id),
-            token: token,
-            pushNotificationsConfig: .init(
-                pushProviderInfo: .init(name: "apn", pushProvider: .apn),
-                voipPushProviderInfo: .init(name: "voip", pushProvider: .apn)
-            ),
-            tokenProvider: { _ in }
-        )
-    }
-    
-    public func refreshStreamVideoProviderKey() {
-        StreamVideoProviderKey.currentValue = client
-    }
-
-    override public func setUp() async throws {
+    override func setUp() async throws {
         #if compiler(<5.8)
         throw XCTSkip("API tests are flaky on Xcode <14.3 due to async expectation handler in XCTest")
         #else
         try await super.setUp()
-        apiKey = try await fetchApiKey(userId: userId)
-        try await client.connect()
+        client = try await makeClient(for: userId)
         #endif
     }
 
-    private func fetchApiKey(
-        userId: String
-    ) async throws -> String {
-        let url = URL(string: "https://pronto.getstream.io/api/auth/create-token")!
-            .appending(.init(name: "user_id", value: userId))
-            .appending(.init(name: "environment", value: environment))
+    override func tearDown() {
+        apiKey = nil
+        userId = nil
+        baseURL = nil
+        authenticationProvider = nil
+        client = nil
+        super.tearDown()
+    }
 
-        let (data, _) = try await URLSession.shared.data(from: url)
-        let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
+    // MARK: - Helpers
 
-        return tokenResponse.apiKey
+    func makeClient(
+        for userId: String,
+        environment: String = "demo"
+    ) async throws -> StreamVideo {
+        let tokenResponse = try await authenticationProvider.authenticate(
+            environment: environment,
+            baseURL: baseURL,
+            userId: userId
+        )
+        let client = StreamVideo(
+            apiKey: tokenResponse.apiKey,
+            user: User(id: userId),
+            token: .init(rawValue: tokenResponse.token),
+            pushNotificationsConfig: .init(
+                pushProviderInfo: .init(name: "ios-apn", pushProvider: .apn),
+                voipPushProviderInfo: .init(name: "ios-voip", pushProvider: .apn)
+            ),
+            tokenProvider: { _ in }
+        )
+        try await client.connect()
+        return client
+    }
+
+    func refreshStreamVideoProviderKey() {
+        StreamVideoProviderKey.currentValue = client
     }
 
     // TODO: extract code between these two assertNext methods
-    public func assertNext<Output: Sendable>(
+    func assertNext<Output: Sendable>(
         _ s: AsyncStream<Output>,
         timeout seconds: TimeInterval = 1,
         _ assertion: @Sendable @escaping (Output) -> Bool
@@ -91,11 +81,11 @@ class IntegrationTest: XCTestCase {
                 }
             }
         }
-        
+
         await safeFulfillment(of: [expectation], timeout: seconds)
     }
 
-    public func assertNext<Output>(
+    func assertNext<Output>(
         _ p: some Publisher<Output, Never>,
         timeout seconds: TimeInterval = 1,
         _ assertion: @escaping (Output) -> Bool,
@@ -104,7 +94,7 @@ class IntegrationTest: XCTestCase {
     ) async -> Void {
         let expectation = expectation(description: "NextValue")
         expectation.assertForOverFulfill = false
-        
+
         var values = [Output]()
         var bag = Set<AnyCancellable>()
         defer { bag.forEach { $0.cancel() } }
@@ -165,8 +155,43 @@ private extension URL {
     }
 }
 
-private struct TokenResponse: Codable {
-    let userId: String
-    let token: String
-    let apiKey: String
+private final class TestsAuthenticationProvider {
+    struct TokenResponse: Codable {
+        var userId: String
+        var token: String
+        var apiKey: String
+    }
+
+    func authenticate(
+        environment: String,
+        baseURL: URL,
+        userId: String,
+        callIds: [String] = [],
+        expirationIn: Int = 0
+    ) async throws -> TokenResponse {
+        var url = baseURL
+            .appending(.init(name: "user_id", value: userId))
+            .appending(.init(name: "environment", value: environment))
+
+        if !callIds.isEmpty {
+            url = url.appending(
+                URLQueryItem(
+                    name: "call_cids",
+                    value: callIds.joined(separator: ",")
+                )
+            )
+        }
+
+        if expirationIn > 0 {
+            url = url.appending(
+                URLQueryItem(
+                    name: "exp",
+                    value: "\(expirationIn)"
+                )
+            )
+        }
+
+        let (data, _) = try await URLSession.shared.data(from: url)
+        return try JSONDecoder().decode(TokenResponse.self, from: data)
+    }
 }
