@@ -2,6 +2,8 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 import Combine
+import CoreImage
+import StreamWebRTC
 
 var apiKey = ""
 var user = User(id: "")
@@ -52,6 +54,8 @@ func container(_ content: () throws -> Void) {}
 func asyncContainer(_ content: () async throws -> Void) {}
 func viewContainer(@ViewBuilder _ content: () -> some View) {}
 func classContainer<V: AnyObject>(_ content: (V) -> Void) {}
+
+let userCredentials = UserCredentials.demoUser
 
 struct UserCredentials {
     let user: User
@@ -310,3 +314,43 @@ extension InjectedValues {
 final class SnapshotViewModel: ObservableObject {
     @Published var toast: Toast?
 }
+
+let sepia: VideoFilter = {
+    let sepia = VideoFilter(id: "sepia", name: "Sepia") { input in
+        let sepiaFilter = CIFilter(name: "CISepiaTone")
+        sepiaFilter?.setValue(input.originalImage, forKey: kCIInputImageKey)
+        return sepiaFilter?.outputImage ?? input.originalImage
+    }
+    return sepia
+}()
+
+class FiltersService: ObservableObject {
+    @Published var filtersShown = false
+    @Published var selectedFilter: VideoFilter?
+
+    static let supportedFilters = [sepia]
+}
+
+let filtersService = FiltersService()
+let size: CGFloat = 0
+let streamLogo = UIImage()
+
+class CustomVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
+    private var audioFilter: AudioFilter?
+    func audioProcessingInitialize(sampleRate sampleRateHz: Int, channels: Int) {}
+    func audioProcessingProcess(audioBuffer: RTCAudioBuffer) {}
+    func audioProcessingRelease() {}
+    func setAudioFilter(_ audioFilter: AudioFilter?) {}
+}
+
+protocol AudioFilter {
+    func applyEffect(to audioBuffer: inout RTCAudioBuffer)
+}
+
+class RobotVoiceFilter: AudioFilter {
+    let pitchShift: Float
+    init(pitchShift: Float) {self.pitchShift = pitchShift}
+    func applyEffect(to audioBuffer: inout RTCAudioBuffer) {}
+}
+
+let uiImage = UIImage()
