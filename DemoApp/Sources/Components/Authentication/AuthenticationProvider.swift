@@ -54,30 +54,41 @@ enum AuthenticationProvider {
             )
         }
 
+        if AppEnvironment.configuration.isTest {
+            if AppEnvironment.contains(.invalidateJWT) {
+                AppEnvironment.tokenExpiration = .custom(2) // set to 2 seconds
+            } else if
+                let forcedExpirationString = AppEnvironment.value(for: .JWTExpiration),
+                let forcedExpiration = Int(forcedExpirationString) {
+                AppEnvironment.tokenExpiration = .custom(forcedExpiration)
+            }
+        }
+
+        switch AppEnvironment.tokenExpiration {
+        case .never:
+            break
+        default:
+            url = url.appending(
+                URLQueryItem(
+                    name: "exp",
+                    value: "\(AppEnvironment.tokenExpiration.interval)"
+                )
+            )
+        }
+
         let (data, _) = try await URLSession.shared.data(from: url)
         let tokenResponse = try JSONDecoder().decode(TokenResponse.self, from: data)
         AppState.shared.apiKey = tokenResponse.apiKey
         let token = {
             if
                 AppEnvironment.configuration.isTest,
-                AppEnvironment.contains(.mockJWT) {
-                return fetchTestToken(for: userId)
+                AppEnvironment.contains(.breakJWT) {
+                return UserToken(rawValue: "")
             } else {
                 return UserToken(rawValue: tokenResponse.token)
             }
         }()
         log.debug("Authentication info userId:\(tokenResponse.userId) apiKey:\(tokenResponse.apiKey) token:\(token)")
         return token
-    }
-
-    static func fetchTestToken(
-        for userId: String
-    ) -> UserToken {
-        TokenGenerator
-            .shared
-            .fetchToken(
-                for: userId,
-                expiration: AppEnvironment.value(for: .JWTExpiration).map { Int($0) ?? 100 } ?? 100
-            )!
     }
 }

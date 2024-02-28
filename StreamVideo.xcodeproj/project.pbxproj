@@ -254,14 +254,11 @@
 		4351AEAD2A40588D00D32D0D /* IntegrationTest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAC2A40588D00D32D0D /* IntegrationTest.swift */; };
 		4351AEAF2A40591800D32D0D /* CallCRUDTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4351AEAE2A40591800D32D0D /* CallCRUDTests.swift */; };
 		435F01B32A501148009CD0BD /* OwnCapability+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 435F01B22A501148009CD0BD /* OwnCapability+Identifiable.swift */; };
-		82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		8202215F2A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221602A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221612A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		820221622A24BB7100F7BAED /* LaunchArgument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8202215E2A24BB7100F7BAED /* LaunchArgument.swift */; };
 		8206D8532A5FF3260099F5EC /* SystemEnvironment+Version.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */; };
-		820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
-		822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 822257892A42F93600CFFD96 /* TokenGenerator.swift */; };
 		822FF71B2AEAD0B4000202A7 /* StreamSwiftTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 822FF71A2AEAD0B4000202A7 /* StreamSwiftTestHelpers */; };
 		822FF71D2AEAD0BE000202A7 /* StreamSwiftTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 822FF71C2AEAD0BE000202A7 /* StreamSwiftTestHelpers */; };
 		822FF71F2AEAD0C4000202A7 /* StreamSwiftTestHelpers in Frameworks */ = {isa = PBXBuildFile; productRef = 822FF71E2AEAD0C4000202A7 /* StreamSwiftTestHelpers */; };
@@ -1241,7 +1238,6 @@
 		8202215E2A24BB7100F7BAED /* LaunchArgument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaunchArgument.swift; sourceTree = "<group>"; };
 		8206D84F2A5DB9300099F5EC /* Credentials.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Credentials.xcconfig; sourceTree = "<group>"; };
 		8206D8522A5FF3260099F5EC /* SystemEnvironment+Version.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SystemEnvironment+Version.swift"; sourceTree = "<group>"; };
-		822257892A42F93600CFFD96 /* TokenGenerator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenGenerator.swift; sourceTree = "<group>"; };
 		8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = DemoAppUIKit.entitlements; sourceTree = "<group>"; };
 		82392D512993C9E100941435 /* SwiftUIDemoAppUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = SwiftUIDemoAppUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		82392D532993C9E100941435 /* StreamTestCase.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamTestCase.swift; sourceTree = "<group>"; };
@@ -2752,7 +2748,6 @@
 				829F7BF929FABC0E003EBACE /* ViewFactory.swift */,
 				8251E62E2A17BEEF00E7257A /* ImageFactory.swift */,
 				8202215E2A24BB7100F7BAED /* LaunchArgument.swift */,
-				822257892A42F93600CFFD96 /* TokenGenerator.swift */,
 				82C65EEC2B8DFD9500A78DD6 /* XCTestCase+SafeFulfillment.swift */,
 			);
 			path = TestData;
@@ -4640,7 +4635,6 @@
 				401A64B12A9DF83200534ED1 /* TokenResponse.swift in Sources */,
 				409145FA2B68FEF0007F3C17 /* ThermalStateViewModifier.swift in Sources */,
 				40F445DB2A9E2276004BE3DA /* DemoCallContentView.swift in Sources */,
-				820BD5F72A72C851003A7B8F /* TokenGenerator.swift in Sources */,
 				4091460B2B690AA4007F3C17 /* CallButtonView.swift in Sources */,
 				40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */,
 				409146062B68FF4B007F3C17 /* DemoControls.swift in Sources */,
@@ -4755,7 +4749,6 @@
 				4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
-				82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */,
 				404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */,
 				40AB35462B738C4500E465CC /* DemoParticipantOptionsButton.swift in Sources */,
 				40AB35532B738C6A00E465CC /* LinkInfoView.swift in Sources */,
@@ -5139,7 +5132,6 @@
 				8492B87829081D1600006649 /* HTTPClient_Mock.swift in Sources */,
 				842747E729EECF9600E063AD /* ErrorPayload_Tests.swift in Sources */,
 				84D114DA29F092E700BCCB0C /* CallController_Tests.swift in Sources */,
-				822257922A431F3200CFFD96 /* TokenGenerator.swift in Sources */,
 				8469593229BB3D7500134EA0 /* SignalServer_Tests.swift in Sources */,
 				84CC05892A530C3F00EE9815 /* SpeakerManager_Tests.swift in Sources */,
 				8251E62B2A17BEB400E7257A /* StreamVideoTestResources.swift in Sources */,

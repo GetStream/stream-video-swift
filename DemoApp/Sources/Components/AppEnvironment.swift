@@ -95,6 +95,8 @@ extension AppEnvironment {
 
     enum Argument: String {
         case mockJWT = "MOCK_JWT"
+        case invalidateJWT = "INVALIDATE_JWT"
+        case breakJWT = "BREAK_JWT"
     }
 
     enum Variable: String {
@@ -252,5 +254,62 @@ extension AppEnvironment {
 
     static var pictureInPictureIntegration: PictureInPictureIntegration = {
         .enabled
+    }()
+}
+
+extension AppEnvironment {
+
+    enum TokenExpiration: Hashable, Debuggable {
+        case never
+        case oneMinute
+        case fiveMinutes
+        case tenMinutes
+        case thirtyMinutes
+        case custom(Int)
+
+        var title: String {
+            switch self {
+            case .never:
+                return "Never"
+            case .oneMinute:
+                return "1'"
+            case .fiveMinutes:
+                return "5'"
+            case .tenMinutes:
+                return "10'"
+            case .thirtyMinutes:
+                return "30'"
+            case let .custom(value):
+                return "\(value)\""
+            }
+        }
+
+        var interval: Int {
+            switch self {
+            case .never:
+                return 0
+            case .oneMinute:
+                return 1 * 60
+            case .fiveMinutes:
+                return 5 * 60
+            case .tenMinutes:
+                return 10 * 60
+            case .thirtyMinutes:
+                return 30 * 60
+            case let .custom(value):
+                return value
+            }
+        }
+    }
+
+    static var tokenExpiration: TokenExpiration = {
+        switch configuration {
+        case .debug:
+            return .oneMinute
+        case .test:
+            return .oneMinute
+        case .release:
+            return .thirtyMinutes
+        }
     }()
 }

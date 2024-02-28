@@ -59,6 +59,10 @@ struct DebugMenu: View {
         didSet { AppEnvironment.pictureInPictureIntegration = pictureInPictureIntegration }
     }
 
+    @State private var tokenExpiration: AppEnvironment.TokenExpiration = AppEnvironment.tokenExpiration {
+        didSet { AppEnvironment.tokenExpiration = tokenExpiration }
+    }
+
     @State private var isLogsViewerVisible: Bool = false
 
     var body: some View {
@@ -86,6 +90,12 @@ struct DebugMenu: View {
                 currentValue: loggedInView,
                 label: "LoggedIn View"
             ) { self.loggedInView = $0 }
+
+            makeMenu(
+                for: [.never, .oneMinute, .fiveMinutes, .thirtyMinutes],
+                currentValue: tokenExpiration,
+                label: "Token Expiration"
+            ) { self.tokenExpiration = $0 }
 
             makeMenu(
                 for: [.enabled, .disabled],
