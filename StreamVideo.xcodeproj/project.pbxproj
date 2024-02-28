@@ -54,6 +54,7 @@
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
 		404A5CFB2AD5648100EF1C62 /* DemoChatModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404A5CFA2AD5648100EF1C62 /* DemoChatModifier.swift */; };
+		404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */; };
 		4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4059C3412AAF0CE40006928E /* DemoChatViewModel+Injection.swift */; };
 		4063033F2AD847EC0091AE77 /* CallState_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4063033E2AD847EC0091AE77 /* CallState_Tests.swift */; };
 		406303422AD848000091AE77 /* CallParticipant_Mock.swift in Sources */ = {isa = PBXBuildFile; fileRef = 406303412AD848000091AE77 /* CallParticipant_Mock.swift */; };
@@ -4755,6 +4756,7 @@
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
 				82010CAE2A851C16005C125D /* TokenGenerator.swift in Sources */,
+				404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */,
 				40AB35462B738C4500E465CC /* DemoParticipantOptionsButton.swift in Sources */,
 				40AB35532B738C6A00E465CC /* LinkInfoView.swift in Sources */,
 				40AB35612B738C7D00E465CC /* ReactionOverlayView.swift in Sources */,
