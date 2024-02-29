@@ -6,17 +6,19 @@ on:
   #   branches:
   #     - 'main'
 
-  release:
-    types: [published]
+  # release:
+  #   types: [published]
 
   workflow_dispatch:
     inputs:
       release:
-        description: 'Build for release'
-        type: boolean
+        description: 'Build configuration'
         required: true
-        default: false
-
+        default: 'Debug'
+        type: choice
+        options:
+          - Debug
+          - Release
 env:
   HOMEBREW_NO_INSTALL_CLEANUP: 1
 
@@ -36,21 +38,9 @@ jobs:
     - uses: actions/checkout@v4.1.1
     - uses: ./.github/actions/ruby-cache
     - uses: ./.github/actions/xcode-cache
-    - if: ${{ github.event.inputs.release }}
-      name: Release
-      run: bundle exec fastlane swiftui_testflight_build configuration:"Release"
-      timeout-minutes: 40
-    - if: ${{ !github.event.inputs.release }}
-      name: Debug
-      run: bundle exec fastlane swiftui_testflight_build configuration:"Debug"
-      timeout-minutes: 40
-    - if: ${{ github.event.inputs.release }}
-      name: Release
-      run: bundle exec fastlane uikit_testflight_build configuration:"Release"
-      timeout-minutes: 40
-    - if: ${{ !github.event.inputs.release }}
-      name: Debug
-      run: bundle exec fastlane uikit_testflight_build configuration:"Debug"
+    - if: ${{ github.event.inputs.release }} == 'Debug'
+      run: brew install imagemagick
+    - run: bundle exec fastlane swiftui_testflight_build configuration:"${{ github.event.inputs.release }}"
       timeout-minutes: 40
     - uses: 8398a7/action-slack@v3
       with:
