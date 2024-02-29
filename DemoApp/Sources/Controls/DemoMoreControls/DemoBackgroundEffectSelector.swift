@@ -100,11 +100,11 @@ enum BackgroundEffect: String, CaseIterable, Identifiable {
     var image: Image {
         switch self {
         case .none:
-            Image(systemName: "circle.slash")
+            return Image(systemName: "circle.slash")
         case .blur:
-            Image(systemName: "square.stack.3d.forward.dottedline.fill")
+            return Image(systemName: "square.stack.3d.forward.dottedline.fill")
         default:
-            Image(rawValue)
+            return Image(rawValue)
         }
     }
 
