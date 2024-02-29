@@ -37,6 +37,8 @@ struct DemoEffectButton: View {
         switch effect {
         case .none:
             return appState.videoFilter == nil
+        case .blur:
+            return appState.videoFilter?.id == VideoFilter.blurredBackground.id
         default:
             return appState.videoFilter?.id == effect.rawValue
         }
