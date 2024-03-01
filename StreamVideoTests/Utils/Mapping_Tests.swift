@@ -15,6 +15,7 @@ final class Mapping_Tests: XCTestCase {
             custom: ["test": "test"],
             id: "test",
             image: "https://test.com",
+            language: "en",
             name: "test",
             role: "user",
             teams: [],

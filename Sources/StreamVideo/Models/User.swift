@@ -68,6 +68,7 @@ public extension UserResponse {
             createdAt: Date(),
             custom: [:],
             id: id,
+            language: Locale.current.languageCode ?? "en",
             role: "user",
             teams: [],
             updatedAt: Date()

@@ -201,6 +201,7 @@ final class StreamVideo_Tests: StreamVideoTestCase {
             createdAt: Date(),
             custom: [:],
             id: "test",
+            language: "en",
             role: "user",
             teams: [],
             updatedAt: Date()

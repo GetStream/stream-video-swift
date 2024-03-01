@@ -28,6 +28,7 @@ class CallController {
     private let environment: CallController.Environment
     private var cachedLocation: String?
     private var currentSFU: String?
+    private var statsInterval: TimeInterval = 5
     private var statsCancellable: AnyCancellable?
     
     init(
@@ -85,6 +86,7 @@ class CallController {
         )
 
         currentSFU = response.credentials.server.edgeName
+        statsInterval = TimeInterval(response.statsOptions.reportingIntervalMs / 1000)
         let settings = callSettings ?? response.call.settings.toCallSettings
         
         try await connectToEdge(
@@ -609,21 +611,22 @@ class CallController {
     private func setupStatsTimer() {
         statsCancellable?.cancel()
         statsCancellable = Foundation.Timer.publish(
-            every: 5,
+            every: statsInterval,
             on: .main,
             in: .default
         )
         .autoconnect()
         .receive(on: DispatchQueue.main)
         .sink { [weak self] _ in
-            self?.collectStats()
+            self?.collectAndSendStats()
         }
     }
     
-    private func collectStats() {
+    private func collectAndSendStats() {
         Task {
             let stats = try await webRTCClient?.collectStats()
             await call?.state.update(statsReport: stats)
+            try await webRTCClient?.sendStats(report: stats)
         }
     }
 }

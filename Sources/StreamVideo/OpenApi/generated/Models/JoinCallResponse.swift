@@ -16,8 +16,9 @@ public struct JoinCallResponse: Codable, JSONEncodable, Hashable {
     public var members: [MemberResponse]
     public var membership: MemberResponse?
     public var ownCapabilities: [OwnCapability]
+    public var statsOptions: StatsOptions
 
-    public init(call: CallResponse, created: Bool, credentials: Credentials, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability]) {
+    public init(call: CallResponse, created: Bool, credentials: Credentials, duration: String, members: [MemberResponse], membership: MemberResponse? = nil, ownCapabilities: [OwnCapability], statsOptions: StatsOptions) {
         self.call = call
         self.created = created
         self.credentials = credentials
@@ -25,6 +26,7 @@ public struct JoinCallResponse: Codable, JSONEncodable, Hashable {
         self.members = members
         self.membership = membership
         self.ownCapabilities = ownCapabilities
+        self.statsOptions = statsOptions
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
@@ -35,6 +37,7 @@ public struct JoinCallResponse: Codable, JSONEncodable, Hashable {
         case members
         case membership
         case ownCapabilities = "own_capabilities"
+        case statsOptions = "stats_options"
     }
 
     // Encodable protocol methods
@@ -48,6 +51,7 @@ public struct JoinCallResponse: Codable, JSONEncodable, Hashable {
         try container.encode(members, forKey: .members)
         try container.encodeIfPresent(membership, forKey: .membership)
         try container.encode(ownCapabilities, forKey: .ownCapabilities)
+        try container.encode(statsOptions, forKey: .statsOptions)
     }
 }
 

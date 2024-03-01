@@ -11,11 +11,11 @@ import Foundation
 public struct ConnectionErrorEvent: @unchecked Sendable, Event, Codable, JSONEncodable, Hashable, WSClientEvent {
     public var connectionId: String
     public var createdAt: Date
-    public var error: APIError?
+    public var error: APIError
     /** The type of event: \"connection.ok\" in this case */
     public var type: String = "connection.error"
 
-    public init(connectionId: String, createdAt: Date, error: APIError?, type: String = "connection.error") {
+    public init(connectionId: String, createdAt: Date, error: APIError, type: String = "connection.error") {
         self.connectionId = connectionId
         self.createdAt = createdAt
         self.error = error

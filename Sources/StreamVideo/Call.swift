@@ -563,7 +563,11 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// Starts recording for the call.
     @discardableResult
     public func startRecording() async throws -> StartRecordingResponse {
-        let response = try await coordinatorClient.startRecording(type: callType, id: callId)
+        let response = try await coordinatorClient.startRecording(
+            type: callType,
+            id: callId,
+            startRecordingRequest: StartRecordingRequest()
+        )
         update(recordingState: .requested)
         return response
     }
@@ -576,7 +580,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     
     /// Lists recordings for the call.
     public func listRecordings() async throws -> [CallRecording] {
-        let response = try await coordinatorClient.listRecordingsTypeId0(
+        let response = try await coordinatorClient.listRecordings(
             type: callType,
             id: callId
         )

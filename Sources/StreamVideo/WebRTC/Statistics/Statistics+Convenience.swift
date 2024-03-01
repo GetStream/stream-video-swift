@@ -86,3 +86,27 @@ protocol StreamStatisticsProtocol {
 }
 
 extension RTCStatistics: StreamStatisticsProtocol {}
+
+extension RTCStatisticsReport {
+    func jsonString(for type: PeerConnectionType) -> String? {
+        let statsKey = type == .publisher ? "publisherStats" : "subscriberStats"
+        var updated = [String: Any]()
+        for (key, value) in statistics {
+            let mapped: [String: Any] = [
+                "id": value.id,
+                "type": value.type,
+                "timestamp_us": value.timestamp_us,
+                "values": value.values
+            ]
+            updated[key] = mapped
+        }
+        if let json = try? JSONSerialization.data(
+            withJSONObject: [statsKey: updated],
+            options: .prettyPrinted
+        ) {
+            return String(data: json, encoding: .utf8)
+        } else {
+            return nil
+        }
+    }
+}

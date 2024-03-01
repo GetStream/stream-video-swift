@@ -18,16 +18,12 @@ public struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
     public var id: String?
     public var pushProvider: PushProvider?
     public var pushProviderName: String?
-    public var user: UserRequest?
-    public var userId: String?
     public var voipToken: Bool?
 
-    public init(id: String? = nil, pushProvider: PushProvider? = nil, pushProviderName: String? = nil, user: UserRequest? = nil, userId: String? = nil, voipToken: Bool? = nil) {
+    public init(id: String? = nil, pushProvider: PushProvider? = nil, pushProviderName: String? = nil, voipToken: Bool? = nil) {
         self.id = id
         self.pushProvider = pushProvider
         self.pushProviderName = pushProviderName
-        self.user = user
-        self.userId = userId
         self.voipToken = voipToken
     }
 
@@ -35,8 +31,6 @@ public struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         case id
         case pushProvider = "push_provider"
         case pushProviderName = "push_provider_name"
-        case user
-        case userId = "user_id"
         case voipToken = "voip_token"
     }
 
@@ -47,8 +41,6 @@ public struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         try container.encodeIfPresent(id, forKey: .id)
         try container.encodeIfPresent(pushProvider, forKey: .pushProvider)
         try container.encodeIfPresent(pushProviderName, forKey: .pushProviderName)
-        try container.encodeIfPresent(user, forKey: .user)
-        try container.encodeIfPresent(userId, forKey: .userId)
         try container.encodeIfPresent(voipToken, forKey: .voipToken)
     }
 }

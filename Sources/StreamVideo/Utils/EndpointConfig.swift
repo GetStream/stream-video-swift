@@ -8,13 +8,13 @@ struct EndpointConfig {
     let hostname: String
     let wsEndpoint: String
     var baseVideoURL: String {
-        "\(hostname)video"
+        "\(hostname)"
     }
 }
 
 extension EndpointConfig {
     static let production = EndpointConfig(
-        hostname: "https://video.stream-io-api.com/",
+        hostname: "https://video.stream-io-api.com",
         wsEndpoint: "wss://video.stream-io-api.com/video/connect"
     )
     

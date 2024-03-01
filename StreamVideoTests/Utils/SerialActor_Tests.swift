@@ -15,7 +15,6 @@ final class SerialActor_Tests: XCTestCase {
         try await actor.execute { try await Task.sleep(nanoseconds: 2 * NSEC_PER_SEC) } // Simulate a 2-second task
         let end1 = Date()
         
-        let start2 = Date()
         try await actor.execute { try await Task.sleep(nanoseconds: 1 * NSEC_PER_SEC) }
         let end2 = Date()
         

@@ -564,6 +564,18 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         )
     }
     
+    func sendStats(report: CallStatsReport?) async throws {
+        guard let report else { return }
+        var statsRequest = Stream_Video_Sfu_Signal_SendStatsRequest()
+        statsRequest.sessionID = sessionID
+        statsRequest.sdk = "stream-ios"
+        statsRequest.sdkVersion = SystemEnvironment.version
+        statsRequest.webrtcVersion = SystemEnvironment.webRTCVersion
+        statsRequest.publisherStats = report.publisherRawStats?.jsonString(for: .publisher) ?? ""
+        statsRequest.subscriberStats = report.subscriberRawStats?.jsonString(for: .subscriber) ?? ""
+        _ = try await signalService.sendStats(sendStatsRequest: statsRequest)
+    }
+    
     /// Initiates a camera focus operation at the specified point.
     ///
     /// This method attempts to focus the camera at a specific point on the screen.

@@ -66,20 +66,12 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     internal var middlewares: [DefaultAPIClientMiddleware]
     internal var basePath: String
     internal var jsonDecoder: JSONDecoder
-    internal var jsonEncoder: JSONEncoder
 
-    init(
-        basePath: String,
-        transport: DefaultAPITransport,
-        middlewares: [DefaultAPIClientMiddleware],
-        jsonDecoder: JSONDecoder = JSONDecoder.default,
-        jsonEncoder: JSONEncoder = JSONEncoder.default
-    ) {
+    init(basePath: String, transport: DefaultAPITransport, middlewares: [DefaultAPIClientMiddleware], jsonDecoder: JSONDecoder = JSONDecoder.default) {
         self.basePath = basePath
         self.transport = transport
         self.middlewares = middlewares
         self.jsonDecoder = jsonDecoder
-        self.jsonEncoder = jsonEncoder
     }
 
     func send<Response: Codable>(
@@ -153,7 +145,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         request: T
     ) throws -> Request {
         var r = try makeRequest(uriPath: uriPath, queryParams: queryParams, httpMethod: httpMethod)
-        r.body = try jsonEncoder.encode(request)
+        r.body = try JSONEncoder().encode(request)
         return r
     }
 
@@ -161,13 +153,13 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Accept Call
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: AcceptCallResponse
      */
 
     open func acceptCall(type: String, id: String) async throws -> AcceptCallResponse {
-        var localVariablePath = "/call/{type}/{id}/accept"
+        var localVariablePath = "/video/call/{type}/{id}/accept"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -185,25 +177,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Accept Call
-     - POST /call/{type}/{id}/accept
-     -   Sends events: - call.accepted  Required permissions: - JoinCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<AcceptCallResponse>
+     - POST /video/call/{type}/{id}/accept
+     -   Sends events: - call.accepted  Required permissions: - JoinCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<AcceptCallResponse> 
      */
 
 
     /**
      Block user on a call
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter blockUserRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter blockUserRequest: (body)  
      - returns: BlockUserResponse
      */
 
     open func blockUser(type: String, id: String, blockUserRequest: BlockUserRequest) async throws -> BlockUserResponse {
-        var localVariablePath = "/call/{type}/{id}/block"
+        var localVariablePath = "/video/call/{type}/{id}/block"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -222,24 +214,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Block user on a call
-     - POST /call/{type}/{id}/block
-     - Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter blockUserRequest: (body)
-     - returns: RequestBuilder<BlockUserResponse>
+     - POST /video/call/{type}/{id}/block
+     - Block a user, preventing them from joining the call until they are unblocked.  Sends events: - call.blocked_user  Required permissions: - BlockUser 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter blockUserRequest: (body)  
+     - returns: RequestBuilder<BlockUserResponse> 
      */
 
 
     /**
      Create device
      
-     - parameter createDeviceRequest: (body)
+     - parameter createDeviceRequest: (body)  
      - returns: ModelResponse
      */
 
     open func createDevice(createDeviceRequest: CreateDeviceRequest) async throws -> ModelResponse {
-        let localVariablePath = "/devices"
+        let localVariablePath = "/video/devices"
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
@@ -252,22 +244,22 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Create device
-     - POST /devices
-     - Adds a new device to a user, if the same device already exists the call will have no effect
-     - parameter createDeviceRequest: (body)
-     - returns: RequestBuilder<ModelResponse>
+     - POST /video/devices
+     - Adds a new device to a user, if the same device already exists the call will have no effect 
+     - parameter createDeviceRequest: (body)  
+     - returns: RequestBuilder<ModelResponse> 
      */
 
 
     /**
      Create Guest
      
-     - parameter createGuestRequest: (body)
+     - parameter createGuestRequest: (body)  
      - returns: CreateGuestResponse
      */
 
     open func createGuest(createGuestRequest: CreateGuestRequest) async throws -> CreateGuestResponse {
-        let localVariablePath = "/guest"
+        let localVariablePath = "/video/guest"
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
@@ -280,10 +272,10 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Create Guest
-     - POST /guest
-     -
-     - parameter createGuestRequest: (body)
-     - returns: RequestBuilder<CreateGuestResponse>
+     - POST /video/guest
+     -  
+     - parameter createGuestRequest: (body)  
+     - returns: RequestBuilder<CreateGuestResponse> 
      */
 
 
@@ -296,7 +288,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      */
 
     open func deleteDevice(id: String? = nil, userId: String? = nil) async throws -> ModelResponse {
-        let localVariablePath = "/devices"
+        let localVariablePath = "/video/devices"
         let queryParams = APIHelper.mapValuesToQueryItems([
             "id": (wrappedValue: id?.encodeToJSON(), isExplode: true),
             "user_id": (wrappedValue: userId?.encodeToJSON(), isExplode: true),
@@ -312,24 +304,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Delete device
-     - DELETE /devices
-     - Deletes one device
+     - DELETE /video/devices
+     - Deletes one device 
      - parameter id: (query)  (optional)
      - parameter userId: (query)  (optional)
-     - returns: RequestBuilder<ModelResponse>
+     - returns: RequestBuilder<ModelResponse> 
      */
 
 
     /**
      End call
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: EndCallResponse
      */
 
     open func endCall(type: String, id: String) async throws -> EndCallResponse {
-        var localVariablePath = "/call/{type}/{id}/mark_ended"
+        var localVariablePath = "/video/call/{type}/{id}/mark_ended"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -347,19 +339,19 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      End call
-     - POST /call/{type}/{id}/mark_ended
-     -   Sends events: - call.ended  Required permissions: - EndCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<EndCallResponse>
+     - POST /video/call/{type}/{id}/mark_ended
+     -   Sends events: - call.ended  Required permissions: - EndCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<EndCallResponse> 
      */
 
 
     /**
      Get Call
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - parameter connectionId: (query)  (optional)
      - parameter membersLimit: (query)  (optional)
      - parameter ring: (query)  (optional)
@@ -368,7 +360,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      */
 
     open func getCall(type: String, id: String, connectionId: String? = nil, membersLimit: Int? = nil, ring: Bool? = nil, notify: Bool? = nil) async throws -> GetCallResponse {
-        var localVariablePath = "/call/{type}/{id}"
+        var localVariablePath = "/video/call/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -392,15 +384,15 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Get Call
-     - GET /call/{type}/{id}
-     -   Required permissions: - ReadCall
-     - parameter type: (path)
-     - parameter id: (path)
+     - GET /video/call/{type}/{id}
+     -   Required permissions: - ReadCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
      - parameter connectionId: (query)  (optional)
      - parameter membersLimit: (query)  (optional)
      - parameter ring: (query)  (optional)
      - parameter notify: (query)  (optional)
-     - returns: RequestBuilder<GetCallResponse>
+     - returns: RequestBuilder<GetCallResponse> 
      */
 
 
@@ -411,7 +403,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      */
 
     open func getEdges() async throws -> GetEdgesResponse {
-        let localVariablePath = "/edges"
+        let localVariablePath = "/video/edges"
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
@@ -423,24 +415,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Get Edges
-     - GET /edges
-     - Returns the list of all edges available for video calls.
-     - returns: RequestBuilder<GetEdgesResponse>
+     - GET /video/edges
+     - Returns the list of all edges available for video calls. 
+     - returns: RequestBuilder<GetEdgesResponse> 
      */
 
 
     /**
      Get or create a call
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter getOrCreateCallRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter getOrCreateCallRequest: (body)  
      - parameter connectionId: (query)  (optional)
      - returns: GetOrCreateCallResponse
      */
 
     open func getOrCreateCall(type: String, id: String, getOrCreateCallRequest: GetOrCreateCallRequest, connectionId: String? = nil) async throws -> GetOrCreateCallResponse {
-        var localVariablePath = "/call/{type}/{id}"
+        var localVariablePath = "/video/call/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -462,27 +454,27 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Get or create a call
-     - POST /call/{type}/{id}
-     - Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter getOrCreateCallRequest: (body)
+     - POST /video/call/{type}/{id}
+     - Gets or creates a new call  Sends events: - call.created - call.notification - call.ring  Required permissions: - CreateCall - ReadCall - UpdateCallSettings 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter getOrCreateCallRequest: (body)  
      - parameter connectionId: (query)  (optional)
-     - returns: RequestBuilder<GetOrCreateCallResponse>
+     - returns: RequestBuilder<GetOrCreateCallResponse> 
      */
 
 
     /**
      Set call as live
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter goLiveRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter goLiveRequest: (body)  
      - returns: GoLiveResponse
      */
 
     open func goLive(type: String, id: String, goLiveRequest: GoLiveRequest) async throws -> GoLiveResponse {
-        var localVariablePath = "/call/{type}/{id}/go_live"
+        var localVariablePath = "/video/call/{type}/{id}/go_live"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -501,27 +493,27 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Set call as live
-     - POST /call/{type}/{id}/go_live
-     -   Sends events: - call.live_started  Required permissions: - UpdateCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter goLiveRequest: (body)
-     - returns: RequestBuilder<GoLiveResponse>
+     - POST /video/call/{type}/{id}/go_live
+     -   Sends events: - call.live_started  Required permissions: - UpdateCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter goLiveRequest: (body)  
+     - returns: RequestBuilder<GoLiveResponse> 
      */
 
 
     /**
      Join call
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter joinCallRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter joinCallRequest: (body)  
      - parameter connectionId: (query)  (optional)
      - returns: JoinCallResponse
      */
 
     open func joinCall(type: String, id: String, joinCallRequest: JoinCallRequest, connectionId: String? = nil) async throws -> JoinCallResponse {
-        var localVariablePath = "/call/{type}/{id}/join"
+        var localVariablePath = "/video/call/{type}/{id}/join"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -543,13 +535,13 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Join call
-     - POST /call/{type}/{id}/join
-     - Request to join a call  Required permissions: - CreateCall - JoinCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter joinCallRequest: (body)
+     - POST /video/call/{type}/{id}/join
+     - Request to join a call  Required permissions: - CreateCall - JoinCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter joinCallRequest: (body)  
      - parameter connectionId: (query)  (optional)
-     - returns: RequestBuilder<JoinCallResponse>
+     - returns: RequestBuilder<JoinCallResponse> 
      */
 
 
@@ -561,7 +553,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      */
 
     open func listDevices(userId: String? = nil) async throws -> ListDevicesResponse {
-        let localVariablePath = "/devices"
+        let localVariablePath = "/video/devices"
         let queryParams = APIHelper.mapValuesToQueryItems([
             "user_id": (wrappedValue: userId?.encodeToJSON(), isExplode: true),
         ])
@@ -576,23 +568,23 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      List devices
-     - GET /devices
-     - Returns all available devices
+     - GET /video/devices
+     - Returns all available devices 
      - parameter userId: (query)  (optional)
-     - returns: RequestBuilder<ListDevicesResponse>
+     - returns: RequestBuilder<ListDevicesResponse> 
      */
 
 
     /**
-     List recordings (type, id)
+     List recordings
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: ListRecordingsResponse
      */
 
-    open func listRecordingsTypeId0(type: String, id: String) async throws -> ListRecordingsResponse {
-        var localVariablePath = "/call/{type}/{id}/recordings"
+    open func listRecordings(type: String, id: String) async throws -> ListRecordingsResponse {
+        var localVariablePath = "/video/call/{type}/{id}/recordings"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -609,66 +601,61 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         }
     }
     /**
-     List recordings (type, id)
-     - GET /call/{type}/{id}/recordings
-     - Lists recordings  Required permissions: - ListRecordings
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<ListRecordingsResponse>
+     List recordings
+     - GET /video/call/{type}/{id}/recordings
+     - Lists recordings  Required permissions: - ListRecordings 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<ListRecordingsResponse> 
      */
 
 
     /**
-     List recordings (type, id, session)
+     List transcriptions
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter session: (path)
-     - returns: ListRecordingsResponse
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: ListTranscriptionsResponse
      */
 
-    open func listRecordingsTypeIdSession1(type: String, id: String, session: String) async throws -> ListRecordingsResponse {
-        var localVariablePath = "/call/{type}/{id}/{session}/recordings"
+    open func listTranscriptions(type: String, id: String) async throws -> ListTranscriptionsResponse {
+        var localVariablePath = "/video/call/{type}/{id}/transcriptions"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
         let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
         let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
-        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
-        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
-        localVariablePath = localVariablePath.replacingOccurrences(of: "{session}", with: sessionPostEscape, options: .literal, range: nil)
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
             httpMethod: "GET"
         )
         return try await send(request: urlRequest) {
-            try self.jsonDecoder.decode(ListRecordingsResponse.self, from: $0)
+            try self.jsonDecoder.decode(ListTranscriptionsResponse.self, from: $0)
         }
     }
     /**
-     List recordings (type, id, session)
-     - GET /call/{type}/{id}/{session}/recordings
-     - Lists recordings  Required permissions: - ListRecordings
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter session: (path)
-     - returns: RequestBuilder<ListRecordingsResponse>
+     List transcriptions
+     - GET /video/call/{type}/{id}/transcriptions
+     - Lists transcriptions  Required permissions: - ListTranscriptions 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<ListTranscriptionsResponse> 
      */
 
 
     /**
      Mute users
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter muteUsersRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter muteUsersRequest: (body)  
      - returns: MuteUsersResponse
      */
 
     open func muteUsers(type: String, id: String, muteUsersRequest: MuteUsersRequest) async throws -> MuteUsersResponse {
-        var localVariablePath = "/call/{type}/{id}/mute_users"
+        var localVariablePath = "/video/call/{type}/{id}/mute_users"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -687,25 +674,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Mute users
-     - POST /call/{type}/{id}/mute_users
-     - Mutes users in a call  Required permissions: - MuteUsers
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter muteUsersRequest: (body)
-     - returns: RequestBuilder<MuteUsersResponse>
+     - POST /video/call/{type}/{id}/mute_users
+     - Mutes users in a call  Required permissions: - MuteUsers 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter muteUsersRequest: (body)  
+     - returns: RequestBuilder<MuteUsersResponse> 
      */
 
 
     /**
      Query call
      
-     - parameter queryCallsRequest: (body)
+     - parameter queryCallsRequest: (body)  
      - parameter connectionId: (query)  (optional)
      - returns: QueryCallsResponse
      */
 
     open func queryCalls(queryCallsRequest: QueryCallsRequest, connectionId: String? = nil) async throws -> QueryCallsResponse {
-        let localVariablePath = "/calls"
+        let localVariablePath = "/video/calls"
         let queryParams = APIHelper.mapValuesToQueryItems([
             "connection_id": (wrappedValue: connectionId?.encodeToJSON(), isExplode: true),
         ])
@@ -721,23 +708,23 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Query call
-     - POST /calls
-     - Query calls with filter query  Required permissions: - ReadCall
-     - parameter queryCallsRequest: (body)
+     - POST /video/calls
+     - Query calls with filter query  Required permissions: - ReadCall 
+     - parameter queryCallsRequest: (body)  
      - parameter connectionId: (query)  (optional)
-     - returns: RequestBuilder<QueryCallsResponse>
+     - returns: RequestBuilder<QueryCallsResponse> 
      */
 
 
     /**
      Query call members
      
-     - parameter queryMembersRequest: (body)
+     - parameter queryMembersRequest: (body)  
      - returns: QueryMembersResponse
      */
 
     open func queryMembers(queryMembersRequest: QueryMembersRequest) async throws -> QueryMembersResponse {
-        let localVariablePath = "/call/members"
+        let localVariablePath = "/video/call/members"
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
@@ -750,23 +737,23 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Query call members
-     - POST /call/members
-     - Query call members with filter query  Required permissions: - ReadCall
-     - parameter queryMembersRequest: (body)
-     - returns: RequestBuilder<QueryMembersResponse>
+     - POST /video/call/members
+     - Query call members with filter query  Required permissions: - ReadCall 
+     - parameter queryMembersRequest: (body)  
+     - returns: RequestBuilder<QueryMembersResponse> 
      */
 
 
     /**
      Reject Call
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: RejectCallResponse
      */
 
     open func rejectCall(type: String, id: String) async throws -> RejectCallResponse {
-        var localVariablePath = "/call/{type}/{id}/reject"
+        var localVariablePath = "/video/call/{type}/{id}/reject"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -784,25 +771,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Reject Call
-     - POST /call/{type}/{id}/reject
-     -   Sends events: - call.rejected  Required permissions: - JoinCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<RejectCallResponse>
+     - POST /video/call/{type}/{id}/reject
+     -   Sends events: - call.rejected  Required permissions: - JoinCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<RejectCallResponse> 
      */
 
 
     /**
      Request permission
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter requestPermissionRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter requestPermissionRequest: (body)  
      - returns: RequestPermissionResponse
      */
 
     open func requestPermission(type: String, id: String, requestPermissionRequest: RequestPermissionRequest) async throws -> RequestPermissionResponse {
-        var localVariablePath = "/call/{type}/{id}/request_permission"
+        var localVariablePath = "/video/call/{type}/{id}/request_permission"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -821,26 +808,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Request permission
-     - POST /call/{type}/{id}/request_permission
-     - Request permission to perform an action  Sends events: - call.permission_request
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter requestPermissionRequest: (body)
-     - returns: RequestBuilder<RequestPermissionResponse>
+     - POST /video/call/{type}/{id}/request_permission
+     - Request permission to perform an action  Sends events: - call.permission_request 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter requestPermissionRequest: (body)  
+     - returns: RequestBuilder<RequestPermissionResponse> 
      */
 
 
     /**
      Send custom event
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter sendEventRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter sendEventRequest: (body)  
      - returns: SendEventResponse
      */
 
     open func sendEvent(type: String, id: String, sendEventRequest: SendEventRequest) async throws -> SendEventResponse {
-        var localVariablePath = "/call/{type}/{id}/event"
+        var localVariablePath = "/video/call/{type}/{id}/event"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -859,26 +846,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Send custom event
-     - POST /call/{type}/{id}/event
-     - Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter sendEventRequest: (body)
-     - returns: RequestBuilder<SendEventResponse>
+     - POST /video/call/{type}/{id}/event
+     - Sends custom event to the call  Sends events: - custom  Required permissions: - SendEvent 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter sendEventRequest: (body)  
+     - returns: RequestBuilder<SendEventResponse> 
      */
 
 
     /**
      Send reaction to the call
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter sendReactionRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter sendReactionRequest: (body)  
      - returns: SendReactionResponse
      */
 
     open func sendVideoReaction(type: String, id: String, sendReactionRequest: SendReactionRequest) async throws -> SendReactionResponse {
-        var localVariablePath = "/call/{type}/{id}/reaction"
+        var localVariablePath = "/video/call/{type}/{id}/reaction"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -897,25 +884,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Send reaction to the call
-     - POST /call/{type}/{id}/reaction
-     - Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter sendReactionRequest: (body)
-     - returns: RequestBuilder<SendReactionResponse>
+     - POST /video/call/{type}/{id}/reaction
+     - Sends reaction to the call  Sends events: - call.reaction_new  Required permissions: - CreateCallReaction 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter sendReactionRequest: (body)  
+     - returns: RequestBuilder<SendReactionResponse> 
      */
 
 
     /**
      Start HLS broadcasting
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: StartHLSBroadcastingResponse
      */
 
     open func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse {
-        var localVariablePath = "/call/{type}/{id}/start_broadcasting"
+        var localVariablePath = "/video/call/{type}/{id}/start_broadcasting"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -933,24 +920,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Start HLS broadcasting
-     - POST /call/{type}/{id}/start_broadcasting
-     - Starts HLS broadcasting  Required permissions: - StartBroadcasting
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StartHLSBroadcastingResponse>
+     - POST /video/call/{type}/{id}/start_broadcasting
+     - Starts HLS broadcasting  Required permissions: - StartBroadcasting 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<StartHLSBroadcastingResponse> 
      */
 
 
     /**
      Start recording
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter startRecordingRequest: (body)  
      - returns: StartRecordingResponse
      */
 
-    open func startRecording(type: String, id: String) async throws -> StartRecordingResponse {
-        var localVariablePath = "/call/{type}/{id}/start_recording"
+    open func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws -> StartRecordingResponse {
+        var localVariablePath = "/video/call/{type}/{id}/start_recording"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -960,7 +948,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: startRecordingRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StartRecordingResponse.self, from: $0)
@@ -968,24 +957,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Start recording
-     - POST /call/{type}/{id}/start_recording
-     - Starts recording  Sends events: - call.recording_started  Required permissions: - StopRecording
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StartRecordingResponse>
+     - POST /video/call/{type}/{id}/start_recording
+     - Starts recording  Sends events: - call.recording_started  Required permissions: - StopRecording 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter startRecordingRequest: (body)  
+     - returns: RequestBuilder<StartRecordingResponse> 
      */
 
 
     /**
      Start transcription
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter startTranscriptionRequest: (body)  
      - returns: StartTranscriptionResponse
      */
 
-    open func startTranscription(type: String, id: String) async throws -> StartTranscriptionResponse {
-        var localVariablePath = "/call/{type}/{id}/start_transcription"
+    open func startTranscription(type: String, id: String, startTranscriptionRequest: StartTranscriptionRequest) async throws -> StartTranscriptionResponse {
+        var localVariablePath = "/video/call/{type}/{id}/start_transcription"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -995,7 +986,8 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
         
         let urlRequest = try makeRequest(
             uriPath: localVariablePath,
-            httpMethod: "POST"
+            httpMethod: "POST",
+            request: startTranscriptionRequest
         )
         return try await send(request: urlRequest) {
             try self.jsonDecoder.decode(StartTranscriptionResponse.self, from: $0)
@@ -1003,24 +995,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Start transcription
-     - POST /call/{type}/{id}/start_transcription
-     - Starts transcription  Required permissions: - StartTranscription
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StartTranscriptionResponse>
+     - POST /video/call/{type}/{id}/start_transcription
+     - Starts transcription  Required permissions: - StartTranscription 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter startTranscriptionRequest: (body)  
+     - returns: RequestBuilder<StartTranscriptionResponse> 
      */
 
 
     /**
      Stop HLS broadcasting
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: StopHLSBroadcastingResponse
      */
 
     open func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse {
-        var localVariablePath = "/call/{type}/{id}/stop_broadcasting"
+        var localVariablePath = "/video/call/{type}/{id}/stop_broadcasting"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1038,24 +1031,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Stop HLS broadcasting
-     - POST /call/{type}/{id}/stop_broadcasting
-     - Stops HLS broadcasting  Required permissions: - StopBroadcasting
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StopHLSBroadcastingResponse>
+     - POST /video/call/{type}/{id}/stop_broadcasting
+     - Stops HLS broadcasting  Required permissions: - StopBroadcasting 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<StopHLSBroadcastingResponse> 
      */
 
 
     /**
      Set call as not live
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: StopLiveResponse
      */
 
     open func stopLive(type: String, id: String) async throws -> StopLiveResponse {
-        var localVariablePath = "/call/{type}/{id}/stop_live"
+        var localVariablePath = "/video/call/{type}/{id}/stop_live"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1073,24 +1066,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Set call as not live
-     - POST /call/{type}/{id}/stop_live
-     -   Sends events: - call.updated  Required permissions: - UpdateCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StopLiveResponse>
+     - POST /video/call/{type}/{id}/stop_live
+     -   Sends events: - call.updated  Required permissions: - UpdateCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<StopLiveResponse> 
      */
 
 
     /**
      Stop recording
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: StopRecordingResponse
      */
 
     open func stopRecording(type: String, id: String) async throws -> StopRecordingResponse {
-        var localVariablePath = "/call/{type}/{id}/stop_recording"
+        var localVariablePath = "/video/call/{type}/{id}/stop_recording"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1108,24 +1101,24 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Stop recording
-     - POST /call/{type}/{id}/stop_recording
-     - Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StopRecordingResponse>
+     - POST /video/call/{type}/{id}/stop_recording
+     - Stops recording  Sends events: - call.recording_stopped  Required permissions: - StopRecording 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<StopRecordingResponse> 
      */
 
 
     /**
      Stop transcription
      
-     - parameter type: (path)
-     - parameter id: (path)
+     - parameter type: (path)  
+     - parameter id: (path)  
      - returns: StopTranscriptionResponse
      */
 
     open func stopTranscription(type: String, id: String) async throws -> StopTranscriptionResponse {
-        var localVariablePath = "/call/{type}/{id}/stop_transcription"
+        var localVariablePath = "/video/call/{type}/{id}/stop_transcription"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1143,25 +1136,25 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Stop transcription
-     - POST /call/{type}/{id}/stop_transcription
-     - Stops transcription  Required permissions: - StopTranscription
-     - parameter type: (path)
-     - parameter id: (path)
-     - returns: RequestBuilder<StopTranscriptionResponse>
+     - POST /video/call/{type}/{id}/stop_transcription
+     - Stops transcription  Required permissions: - StopTranscription 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - returns: RequestBuilder<StopTranscriptionResponse> 
      */
 
 
     /**
      Unblocks user on a call
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter unblockUserRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter unblockUserRequest: (body)  
      - returns: UnblockUserResponse
      */
 
     open func unblockUser(type: String, id: String, unblockUserRequest: UnblockUserRequest) async throws -> UnblockUserResponse {
-        var localVariablePath = "/call/{type}/{id}/unblock"
+        var localVariablePath = "/video/call/{type}/{id}/unblock"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1180,26 +1173,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Unblocks user on a call
-     - POST /call/{type}/{id}/unblock
-     - Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter unblockUserRequest: (body)
-     - returns: RequestBuilder<UnblockUserResponse>
+     - POST /video/call/{type}/{id}/unblock
+     - Removes the block for a user on a call. The user will be able to join the call again.  Sends events: - call.unblocked_user  Required permissions: - BlockUser 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter unblockUserRequest: (body)  
+     - returns: RequestBuilder<UnblockUserResponse> 
      */
 
 
     /**
      Update Call
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter updateCallRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter updateCallRequest: (body)  
      - returns: UpdateCallResponse
      */
 
     open func updateCall(type: String, id: String, updateCallRequest: UpdateCallRequest) async throws -> UpdateCallResponse {
-        var localVariablePath = "/call/{type}/{id}"
+        var localVariablePath = "/video/call/{type}/{id}"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1218,26 +1211,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Update Call
-     - PATCH /call/{type}/{id}
-     -   Sends events: - call.updated  Required permissions: - UpdateCall
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter updateCallRequest: (body)
-     - returns: RequestBuilder<UpdateCallResponse>
+     - PATCH /video/call/{type}/{id}
+     -   Sends events: - call.updated  Required permissions: - UpdateCall 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter updateCallRequest: (body)  
+     - returns: RequestBuilder<UpdateCallResponse> 
      */
 
 
     /**
      Update Call Member
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter updateCallMembersRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter updateCallMembersRequest: (body)  
      - returns: UpdateCallMembersResponse
      */
 
     open func updateCallMembers(type: String, id: String, updateCallMembersRequest: UpdateCallMembersRequest) async throws -> UpdateCallMembersResponse {
-        var localVariablePath = "/call/{type}/{id}/members"
+        var localVariablePath = "/video/call/{type}/{id}/members"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1256,26 +1249,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Update Call Member
-     - POST /call/{type}/{id}/members
-     -   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter updateCallMembersRequest: (body)
-     - returns: RequestBuilder<UpdateCallMembersResponse>
+     - POST /video/call/{type}/{id}/members
+     -   Sends events: - call.member_added - call.member_removed - call.member_updated  Required permissions: - RemoveCallMember - UpdateCallMember - UpdateCallMemberRole 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter updateCallMembersRequest: (body)  
+     - returns: RequestBuilder<UpdateCallMembersResponse> 
      */
 
 
     /**
      Update user permissions
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter updateUserPermissionsRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter updateUserPermissionsRequest: (body)  
      - returns: UpdateUserPermissionsResponse
      */
 
     open func updateUserPermissions(type: String, id: String, updateUserPermissionsRequest: UpdateUserPermissionsRequest) async throws -> UpdateUserPermissionsResponse {
-        var localVariablePath = "/call/{type}/{id}/user_permissions"
+        var localVariablePath = "/video/call/{type}/{id}/user_permissions"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1294,26 +1287,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Update user permissions
-     - POST /call/{type}/{id}/user_permissions
-     - Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter updateUserPermissionsRequest: (body)
-     - returns: RequestBuilder<UpdateUserPermissionsResponse>
+     - POST /video/call/{type}/{id}/user_permissions
+     - Updates user permissions  Sends events: - call.permissions_updated  Required permissions: - UpdateCallPermissions 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter updateUserPermissionsRequest: (body)  
+     - returns: RequestBuilder<UpdateUserPermissionsResponse> 
      */
 
 
     /**
      Pin
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter pinRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter pinRequest: (body)  
      - returns: PinResponse
      */
 
     open func videoPin(type: String, id: String, pinRequest: PinRequest) async throws -> PinResponse {
-        var localVariablePath = "/call/{type}/{id}/pin"
+        var localVariablePath = "/video/call/{type}/{id}/pin"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1332,26 +1325,26 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Pin
-     - POST /call/{type}/{id}/pin
-     - Pins a track for all users in the call.  Required permissions: - PinCallTrack
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter pinRequest: (body)
-     - returns: RequestBuilder<PinResponse>
+     - POST /video/call/{type}/{id}/pin
+     - Pins a track for all users in the call.  Required permissions: - PinCallTrack 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter pinRequest: (body)  
+     - returns: RequestBuilder<PinResponse> 
      */
 
 
     /**
      Unpin
      
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter unpinRequest: (body)
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter unpinRequest: (body)  
      - returns: UnpinResponse
      */
 
     open func videoUnpin(type: String, id: String, unpinRequest: UnpinRequest) async throws -> UnpinResponse {
-        var localVariablePath = "/call/{type}/{id}/unpin"
+        var localVariablePath = "/video/call/{type}/{id}/unpin"
         let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
         let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
         localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
@@ -1370,12 +1363,12 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     }
     /**
      Unpin
-     - POST /call/{type}/{id}/unpin
-     - Unpins a track for all users in the call.  Required permissions: - PinCallTrack
-     - parameter type: (path)
-     - parameter id: (path)
-     - parameter unpinRequest: (body)
-     - returns: RequestBuilder<UnpinResponse>
+     - POST /video/call/{type}/{id}/unpin
+     - Unpins a track for all users in the call.  Required permissions: - PinCallTrack 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter unpinRequest: (body)  
+     - returns: RequestBuilder<UnpinResponse> 
      */
 
 }
@@ -1419,10 +1412,10 @@ protocol DefaultAPIEndpoints {
         func listDevices(userId: String?) async throws -> ListDevicesResponse
 
 
-        func listRecordingsTypeId0(type: String, id: String) async throws -> ListRecordingsResponse
+        func listRecordings(type: String, id: String) async throws -> ListRecordingsResponse
 
 
-        func listRecordingsTypeIdSession1(type: String, id: String, session: String) async throws -> ListRecordingsResponse
+        func listTranscriptions(type: String, id: String) async throws -> ListTranscriptionsResponse
 
 
         func muteUsers(type: String, id: String, muteUsersRequest: MuteUsersRequest) async throws -> MuteUsersResponse
@@ -1449,10 +1442,10 @@ protocol DefaultAPIEndpoints {
         func startHLSBroadcasting(type: String, id: String) async throws -> StartHLSBroadcastingResponse
 
 
-        func startRecording(type: String, id: String) async throws -> StartRecordingResponse
+        func startRecording(type: String, id: String, startRecordingRequest: StartRecordingRequest) async throws -> StartRecordingResponse
 
 
-        func startTranscription(type: String, id: String) async throws -> StartTranscriptionResponse
+        func startTranscription(type: String, id: String, startTranscriptionRequest: StartTranscriptionRequest) async throws -> StartTranscriptionResponse
 
 
         func stopHLSBroadcasting(type: String, id: String) async throws -> StopHLSBroadcastingResponse
