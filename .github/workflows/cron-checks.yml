@@ -226,7 +226,7 @@ jobs:
         ssh-private-key: ${{ secrets.BOT_SSH_PRIVATE_KEY }}
     - name: Build XCFrameworks
       run: bundle exec fastlane build_xcframeworks
-      timeout-minutes: 25
+      timeout-minutes: 40
       env:
         MATCH_PASSWORD: ${{ secrets.MATCH_PASSWORD }}
         APPSTORE_API_KEY: ${{ secrets.APPSTORE_API_KEY }}
