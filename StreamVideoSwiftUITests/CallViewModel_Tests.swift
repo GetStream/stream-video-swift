@@ -208,6 +208,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 createdAt: Date(),
                 custom: [:],
                 id: secondUser.userId,
+                language: "",
                 role: "user",
                 teams: [],
                 updatedAt: Date()
@@ -251,6 +252,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
                 createdAt: Date(),
                 custom: [:],
                 id: secondUser.userId,
+                language: "en",
                 role: "user",
                 teams: [],
                 updatedAt: Date()
@@ -631,6 +633,7 @@ extension User {
             custom: customData,
             id: id,
             image: imageURL?.absoluteString,
+            language: "en",
             name: name,
             role: role,
             teams: [],
