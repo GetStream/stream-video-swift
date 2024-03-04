@@ -52,7 +52,7 @@ struct DemoStatsView: View {
                             title: "LATENCY",
                             value: 0.0,
                             valueTransformer: { $0?.publisherStats.averageRoundTripTimeInMs ?? 0 },
-                            presentationTransformer: { "\(Int($0)) ms" },
+                            presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
                             valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
                         )
                     }
@@ -65,7 +65,7 @@ struct DemoStatsView: View {
                             valueTransformer: {
                                 $0?.subscriberStats.averageJitterInMs ?? 0
                             },
-                            presentationTransformer: { "\(Int($0)) ms" },
+                            presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
                             valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
                         )
                     } _: {
@@ -74,7 +74,7 @@ struct DemoStatsView: View {
                             title: "PUBLISH JITTER",
                             value: 0.0,
                             valueTransformer: { $0?.publisherStats.averageJitterInMs ?? 0 },
-                            presentationTransformer: { "\(Int($0)) ms" },
+                            presentationTransformer: { newValue, _ in "\(Int(newValue)) ms" },
                             valueQualityTransformer: { $0 < 100 ? .good : $0 < 150 ? .ok : .bad }
                         )
                     }
@@ -115,15 +115,21 @@ struct DemoStatsView: View {
                         DemoStatView(
                             viewModel,
                             title: "PUBLISH BITRATE",
-                            value: "none",
-                            valueTransformer: { bytesFormatter(from: $0?.publisherStats.totalBytesSent) }
+                            value: 0,
+                            valueTransformer: { $0?.publisherStats.totalBytesSent ?? 0 },
+                            presentationTransformer: { newValue, previousValue in
+                                bytesFormatter(from: max(newValue - previousValue, 0))
+                            }
                         )
                     } _: {
                         DemoStatView(
                             viewModel,
                             title: "RECEIVING BITRATE",
-                            value: "none",
-                            valueTransformer: { bytesFormatter(from: $0?.subscriberStats.totalBytesReceived) }
+                            value: 0,
+                            valueTransformer: { $0?.subscriberStats.totalBytesReceived ?? 0 },
+                            presentationTransformer: { newValue, previousValue in
+                                bytesFormatter(from: max(newValue - previousValue, 0))
+                            }
                         )
                     }
                 }
@@ -254,6 +260,7 @@ private struct DemoStatView<Value: Comparable>: View {
 
         @Published var title: String
         @Published var value: Value
+        @Published var previousValue: Value
 
         init(
             viewModel: CallViewModel,
@@ -264,6 +271,7 @@ private struct DemoStatView<Value: Comparable>: View {
             self.viewModel = viewModel
             self.title = title
             self.value = value
+            previousValue = value
             cancellable = viewModel
                 .call?
                 .state
@@ -272,7 +280,11 @@ private struct DemoStatView<Value: Comparable>: View {
                 .map(valueTransformer)
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
-                .assign(to: \.value, on: self)
+                .sink { [weak self] value in
+                    guard let self else { return }
+                    self.previousValue = self.value
+                    self.value = value
+                }
         }
     }
 
@@ -320,7 +332,7 @@ private struct DemoStatView<Value: Comparable>: View {
     @Injected(\.colors) private var colors
 
     @StateObject private var viewModel: DemoStatViewModel
-    private var presentationTransformer: (Value) -> String
+    private var presentationTransformer: (Value, Value) -> String
     private var valueQualityTransformer: (Value) -> DemoStatQuality
 
     init(
@@ -328,7 +340,7 @@ private struct DemoStatView<Value: Comparable>: View {
         title: String,
         value: Value,
         valueTransformer: @escaping (CallStatsReport?) -> Value,
-        presentationTransformer: @escaping (Value) -> String = { "\($0)" },
+        presentationTransformer: @escaping (Value, Value) -> String = { newValue, _ in "\(newValue)" },
         valueQualityTransformer: @escaping (Value) -> DemoStatQuality = { _ in .unknown }
     ) {
         _viewModel = .init(
@@ -352,7 +364,7 @@ private struct DemoStatView<Value: Comparable>: View {
                 .lineLimit(2)
 
             HStack {
-                Text(presentationTransformer(viewModel.value))
+                Text(presentationTransformer(viewModel.value, viewModel.previousValue))
                     .font(fonts.bodyBold)
                     .foregroundColor(colors.text)
                     .minimumScaleFactor(0.7)
