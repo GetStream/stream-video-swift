@@ -600,7 +600,7 @@ extension StreamVideo: ConnectionStateDelegate {
         switch state {
         case let .disconnected(source):
             if let serverError = source.serverError {
-                if serverError.isInvalidTokenError 
+                if serverError.isInvalidTokenError
                     || (serverError as? APIError)?.isTokenExpiredError == true {
                     Task {
                         do {
