@@ -613,9 +613,7 @@ extension StreamVideo: ConnectionStateDelegate {
                         }
                     }
                 } else {
-                    Task {
-                        try await connect()
-                    }
+                    connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
                 }
             }
             eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }
