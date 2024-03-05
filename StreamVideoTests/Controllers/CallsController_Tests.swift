@@ -79,7 +79,7 @@ final class CallsController_Tests: ControllerTestCase {
         
         // Then
         // Calls should be rewatched
-        XCTAssert(httpClient.requestCounter == 2)
+        XCTAssertEqual(httpClient.requestCounter, 2)
     }
     
     func test_callsController_noWatchingCalls() async throws {
