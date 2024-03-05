@@ -122,6 +122,10 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             return
         }
 
+        if bufferUpdatesCancellable == nil, let track, let window {
+            startFrameStreaming(for: track, on: window)
+        }
+
         // Update the trackSize and re-calculate rendering properties if the size
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
