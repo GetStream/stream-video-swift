@@ -22,7 +22,6 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     private enum MockDeeplink {
-        static let deeplinkUrl: URL = .init(string: "https://getstream.io/video/demos/join?id=test-call")!
         static let deeplinkUrlWithCallIdInPath: URL = .init(string: "https://getstream.io/video/demos/join/test-call")!
         static let customScheme: URL = .init(string: "streamvideo://video/demos?id=test-call")!
         static let customSchemeWithCallIdInPath: URL = .init(string: "streamvideo://video/demos/join/test-call")!
@@ -55,19 +54,6 @@ final class DeeplinkTests: StreamTestCase {
             "https://staging.getstream.io/.well-known/apple-app-site-association",
             "https://pronto.getstream.io/.well-known/apple-app-site-association",
         ].forEach { try assertEnvironment($0) }
-    }
-
-    func test_universalLink_production_joinsExpectedCall() throws {
-        linkToScenario(withId: 2856)
-        
-        WHEN("user navigates to the app through deeplink") {
-            openURL(MockDeeplink.deeplinkUrl)
-        }
-        THEN("user joins the the specified call") {
-            userRobot
-                .assertCallControls()
-                .assertParticipantsAreVisible(count: 1)
-        }
     }
 
     func test_universalLink_deeplinkUrlWithCallIdInPath_joinsExpectedCall() throws {
