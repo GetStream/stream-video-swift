@@ -149,13 +149,7 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
                     .store(in: &cancellableBag)
             } else {
                 // If picture-in-picture is active, simply update the sourceView.
-                if #available(iOS 15.0, *),
-                   let contentViewController = contentViewController as? StreamAVPictureInPictureVideoCallViewController {
-                    pictureInPictureController?.contentSource = .init(
-                        activeVideoCallSourceView: sourceView,
-                        contentViewController: contentViewController
-                    )
-                }
+                makePictureInPictureController(with: sourceView)
             }
         } else {
             if #available(iOS 15.0, *) {

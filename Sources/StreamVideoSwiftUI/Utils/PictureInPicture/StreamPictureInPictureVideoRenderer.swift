@@ -95,6 +95,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }
 
     override func willMove(toWindow newWindow: UIWindow?) {
+        super.willMove(toWindow: newWindow)
         // Depending on the window we are moving we either start or stop
         // streaming frames from the track.
         if newWindow != nil {
@@ -102,7 +103,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         } else {
             stopFrameStreaming(for: track)
         }
-        super.willMove(toWindow: newWindow)
     }
 
     override func layoutSubviews() {
@@ -122,10 +122,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             return
         }
 
-        if bufferUpdatesCancellable == nil, let track, let window {
-            startFrameStreaming(for: track, on: window)
-        }
-
         // Update the trackSize and re-calculate rendering properties if the size
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
@@ -137,6 +133,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         }
 
         guard shouldRenderFrame else {
+            log.debug("→ Skipping frame.")
             return
         }
 
@@ -179,6 +176,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             buffer.isValid
         else {
             contentView.sampleBufferDisplayLayer.flush()
+            log.debug("🔥 Display layer flushed.")
             return
         }
 
@@ -231,6 +229,11 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         bufferUpdatesCancellable?.cancel()
         bufferUpdatesCancellable = nil
         track?.remove(self)
+        if #available(iOS 17.0, *) {
+            contentView.sampleBufferDisplayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true)
+        } else {
+            contentView.sampleBufferDisplayLayer.flush()
+        }
         log.debug("Frame streaming for Picture-in-Picture stopped.")
     }
 
@@ -243,7 +246,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         requiresResize = widthDiffRatio >= resizeRequiredSizeRatioThreshold || heightDiffRatio >= resizeRequiredSizeRatioThreshold
         let requiresFramesSkipping = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
         noOfFramesToSkipAfterRendering = requiresFramesSkipping ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) :
-            0
+            1
         skippedFrames = 0
         log.debug(
             "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"

@@ -13,7 +13,8 @@ struct StreamBufferTransformer {
     var requiresResize = false
 
     /// Transforms an RTCVideoFrameBuffer to a CMSampleBuffer with optional resizing.
-    ///
+    /// - Note: The current implementation always handles an i420 buffer as RTCCVPixelBuffer have been
+    /// proven problematic.
     /// - Parameters:
     ///   - source: The source RTCVideoFrameBuffer to be transformed.
     ///   - targetSize: The target size for the resulting CMSampleBuffer.
@@ -27,9 +28,9 @@ struct StreamBufferTransformer {
         guard
             requiresResize,
             let resizedSource = resize(source, to: resizeSize(sourceSize, toFitWithin: targetSize)),
-            let pixelBuffer = convert(resizedSource)
+                let pixelBuffer = convert(resizedSource.toI420())
         else {
-            if let pixelBuffer = convert(source) {
+                if let pixelBuffer = convert(source.toI420()) {
                 return transform(pixelBuffer)
             } else {
                 return nil
@@ -102,7 +103,9 @@ struct StreamBufferTransformer {
                 pixelFormat: CVPixelBufferGetPixelFormatType(rtcCVPixelBuffer.pixelBuffer)
             ) {
             let count = rtcCVPixelBuffer.bufferSizeForCroppingAndScaling(to: size)
-            rtcCVPixelBuffer.cropAndScale(to: newPixelBuffer, withTempBuffer: malloc(count))
+                let tempBuffer: UnsafeMutableRawPointer? = malloc(count)
+                rtcCVPixelBuffer.cropAndScale(to: newPixelBuffer, withTempBuffer: tempBuffer)
+                tempBuffer?.deallocate()
             return RTCCVPixelBuffer(pixelBuffer: newPixelBuffer) as? TargetBuffer
         } else {
             return source.cropAndScale?(
