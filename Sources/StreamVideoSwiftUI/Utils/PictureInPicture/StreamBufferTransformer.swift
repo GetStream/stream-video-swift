@@ -12,25 +12,30 @@ struct StreamBufferTransformer {
 
     var requiresResize = false
 
-    /// Transforms an RTCVideoFrameBuffer to a CVPixelBuffer with optional resizing.
+    /// Transforms an RTCVideoFrameBuffer to a CMSampleBuffer with optional resizing.
     ///
     /// - Parameters:
     ///   - source: The source RTCVideoFrameBuffer to be transformed.
-    ///   - targetSize: The target size for the resulting CVPixelBuffer.
-    /// - Returns: A transformed CVPixelBuffer or nil if transformation fails.
-    func transform(
+    ///   - targetSize: The target size for the resulting CMSampleBuffer.
+    /// - Returns: A transformed CMSampleBuffer or nil if transformation fails.
+    func transformAndResizeIfRequired(
         _ source: RTCVideoFrameBuffer,
         targetSize: CGSize
-    ) -> CVPixelBuffer? {
+    ) -> CMSampleBuffer? {
         let sourceSize = CGSize(width: Int(source.width), height: Int(source.height))
 
         guard
             requiresResize,
-            let resizedSource = resize(source, to: resizeSize(sourceSize, toFitWithin: targetSize))
+            let resizedSource = resize(source, to: resizeSize(sourceSize, toFitWithin: targetSize)),
+            let pixelBuffer = convert(resizedSource)
         else {
-            return convert(source)
+            if let pixelBuffer = convert(source) {
+                return transform(pixelBuffer)
+            } else {
+                return nil
+            }
         }
-        return convert(resizedSource)
+        return transform(pixelBuffer)
     }
 
     /// Transforms an CVPixelBuffer to a CMSampleBuffer.
