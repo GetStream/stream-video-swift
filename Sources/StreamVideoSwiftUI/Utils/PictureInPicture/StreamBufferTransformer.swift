@@ -12,25 +12,31 @@ struct StreamBufferTransformer {
 
     var requiresResize = false
 
-    /// Transforms an RTCVideoFrameBuffer to a CVPixelBuffer with optional resizing.
-    ///
+    /// Transforms an RTCVideoFrameBuffer to a CMSampleBuffer with optional resizing.
+    /// - Note: The current implementation always handles an i420 buffer as RTCCVPixelBuffer have been
+    /// proven problematic.
     /// - Parameters:
     ///   - source: The source RTCVideoFrameBuffer to be transformed.
-    ///   - targetSize: The target size for the resulting CVPixelBuffer.
-    /// - Returns: A transformed CVPixelBuffer or nil if transformation fails.
-    func transform(
+    ///   - targetSize: The target size for the resulting CMSampleBuffer.
+    /// - Returns: A transformed CMSampleBuffer or nil if transformation fails.
+    func transformAndResizeIfRequired(
         _ source: RTCVideoFrameBuffer,
         targetSize: CGSize
-    ) -> CVPixelBuffer? {
+    ) -> CMSampleBuffer? {
         let sourceSize = CGSize(width: Int(source.width), height: Int(source.height))
 
         guard
             requiresResize,
-            let resizedSource = resize(source, to: resizeSize(sourceSize, toFitWithin: targetSize))
+            let resizedSource = resize(source, to: resizeSize(sourceSize, toFitWithin: targetSize)),
+            let pixelBuffer = convert(resizedSource.toI420())
         else {
-            return convert(source)
+            if let pixelBuffer = convert(source.toI420()) {
+                return transform(pixelBuffer)
+            } else {
+                return nil
+            }
         }
-        return convert(resizedSource)
+        return transform(pixelBuffer)
     }
 
     /// Transforms an CVPixelBuffer to a CMSampleBuffer.
@@ -97,7 +103,9 @@ struct StreamBufferTransformer {
                 pixelFormat: CVPixelBufferGetPixelFormatType(rtcCVPixelBuffer.pixelBuffer)
             ) {
             let count = rtcCVPixelBuffer.bufferSizeForCroppingAndScaling(to: size)
-            rtcCVPixelBuffer.cropAndScale(to: newPixelBuffer, withTempBuffer: malloc(count))
+            let tempBuffer: UnsafeMutableRawPointer? = malloc(count)
+            rtcCVPixelBuffer.cropAndScale(to: newPixelBuffer, withTempBuffer: tempBuffer)
+            tempBuffer?.deallocate()
             return RTCCVPixelBuffer(pixelBuffer: newPixelBuffer) as? TargetBuffer
         } else {
             return source.cropAndScale?(
