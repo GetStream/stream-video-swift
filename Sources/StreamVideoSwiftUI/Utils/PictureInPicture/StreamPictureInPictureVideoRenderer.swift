@@ -77,7 +77,12 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     private var shouldRenderFrame: Bool { skippedFrames == 0 && trackSize != .zero }
 
     /// A size ratio threshold used to determine if resizing is required.
-    let sizeRatioThreshold: CGFloat = 2
+    /// - Note: It seems that Picture-in-Picture doesn't like rendering frames that are bigger than its
+    /// window size. For this reason, we are setting the resizeThreshold to `1`.
+    private let resizeRequiredSizeRatioThreshold: CGFloat = 1
+
+    /// A size ratio threshold used to determine if skipping frames is required.
+    private let sizeRatioThreshold: CGFloat = 2
 
     // MARK: - Lifecycle
 
@@ -90,6 +95,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }
 
     override func willMove(toWindow newWindow: UIWindow?) {
+        super.willMove(toWindow: newWindow)
         // Depending on the window we are moving we either start or stop
         // streaming frames from the track.
         if newWindow != nil {
@@ -97,7 +103,6 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         } else {
             stopFrameStreaming(for: track)
         }
-        super.willMove(toWindow: newWindow)
     }
 
     override func layoutSubviews() {
@@ -121,32 +126,29 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         // has changed.
         trackSize = .init(width: Int(frame.width), height: Int(frame.height))
 
-        log.debug("Received frame with trackSize:\(trackSize)")
+        log.debug("→ Received frame with trackSize:\(trackSize)")
 
         defer {
             handleFrameSkippingIfRequired()
         }
 
         guard shouldRenderFrame else {
+            log.debug("→ Skipping frame.")
             return
         }
 
         let pixelBuffer: RTCVideoFrameBuffer? = {
-            if
-                let i420buffer = frame.buffer as? RTCI420Buffer,
-                let transformed = bufferTransformer.transform(i420buffer, targetSize: trackSize) {
-                return RTCCVPixelBuffer(pixelBuffer: transformed)
+            if let i420buffer = frame.buffer as? RTCI420Buffer {
+                return i420buffer
             } else {
                 return frame.buffer
             }
         }()
 
         if
-            let transformedBuffer = bufferTransformer.transform(
-                pixelBuffer ?? frame.buffer,
-                targetSize: contentSize
-            ),
-            let sampleBuffer = bufferTransformer.transform(transformedBuffer) {
+            let pixelBuffer = pixelBuffer,
+            let sampleBuffer = bufferTransformer.transformAndResizeIfRequired(pixelBuffer, targetSize: contentSize) {
+            log.debug("➕ Buffer for trackId:\(track?.trackId ?? "n/a") added.")
             bufferPublisher.send(sampleBuffer)
         } else {
             log.warning("Failed to convert \(type(of: frame.buffer)) CMSampleBuffer.")
@@ -168,20 +170,38 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
     /// A method used to process the frame's buffer and enqueue on the rendering view.
     private func process(_ buffer: CMSampleBuffer) {
-        guard let trackId = track?.trackId else {
+        guard
+            bufferUpdatesCancellable != nil,
+            let trackId = track?.trackId,
+            buffer.isValid
+        else {
             contentView.sampleBufferDisplayLayer.flush()
+            log.debug("🔥 Display layer flushed.")
             return
         }
 
+        log.debug("⚙️ Processing buffer for trackId:\(trackId).")
         if #available(iOS 14.0, *) {
             if contentView.sampleBufferDisplayLayer.requiresFlushToResumeDecoding == true {
                 contentView.sampleBufferDisplayLayer.flush()
-                log.debug("Display layer for track:\(trackId) flushed ✅")
+                log.debug("🔥 Display layer for track:\(trackId) flushed.")
             }
         }
 
-        if contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData {
-            contentView.sampleBufferDisplayLayer.enqueue(buffer)
+        let isReadyForMoreMediaData: Bool = {
+            if #available(iOS 17.0, *) {
+                return contentView.sampleBufferDisplayLayer.sampleBufferRenderer.isReadyForMoreMediaData
+            } else {
+                return contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData
+            }
+        }()
+        if isReadyForMoreMediaData {
+            if #available(iOS 17.0, *) {
+                contentView.sampleBufferDisplayLayer.sampleBufferRenderer.enqueue(buffer)
+            } else {
+                contentView.sampleBufferDisplayLayer.enqueue(buffer)
+            }
+            log.debug("✅ Buffer for trackId:\(trackId) enqueued.")
         }
     }
 
@@ -199,13 +219,22 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             .sink { [weak self] in self?.process($0) }
 
         track.add(self)
+        log.debug("⏳ Frame streaming for Picture-in-Picture started.")
     }
 
     /// A method that stops the frame consumption from the track. Used automatically when the rendering
     /// view move's away from the window or when the track changes.
     private func stopFrameStreaming(for track: RTCVideoTrack?) {
+        guard bufferUpdatesCancellable != nil else { return }
         bufferUpdatesCancellable?.cancel()
+        bufferUpdatesCancellable = nil
         track?.remove(self)
+        if #available(iOS 17.0, *) {
+            contentView.sampleBufferDisplayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true)
+        } else {
+            contentView.sampleBufferDisplayLayer.flush()
+        }
+        log.debug("Frame streaming for Picture-in-Picture stopped.")
     }
 
     /// A method used to calculate rendering required properties, every time the trackSize changes.
@@ -214,13 +243,14 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
         let widthDiffRatio = trackSize.width / contentSize.width
         let heightDiffRatio = trackSize.height / contentSize.height
-        requiresResize = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
-        noOfFramesToSkipAfterRendering = requiresResize ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) : 1
+        requiresResize = widthDiffRatio >= resizeRequiredSizeRatioThreshold || heightDiffRatio >= resizeRequiredSizeRatioThreshold
+        let requiresFramesSkipping = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
+        noOfFramesToSkipAfterRendering = requiresFramesSkipping ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) :
+            1
         skippedFrames = 0
-        log
-            .debug(
-                "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"
-            )
+        log.debug(
+            "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"
+        )
     }
 
     /// A method used to handle the frameSkipping(step) during frame consumption.

@@ -138,6 +138,8 @@ lane :uikit_testflight_build do |options|
 end
 
 private_lane :upload_beta do |options|
+  configuration = options[:configuration].to_s.empty? ? 'Release' : options[:configuration]
+
   match_me
   testflight_build(
     api_key: appstore_api_key,
@@ -145,7 +147,7 @@ private_lane :upload_beta do |options|
     sdk_target: 'StreamVideo',
     app_target: options[:app_target],
     app_identifier: options[:app_identifier],
-    configuration: options[:configuration] || 'Release',
+    configuration: configuration,
     extensions: ['CallIntent', 'ScreenSharing']
   )
 end

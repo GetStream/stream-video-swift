@@ -10,6 +10,7 @@ import class StreamChat.ChatChannelController
 import protocol StreamChat.ChatChannelControllerDelegate
 @preconcurrency import class StreamChat.ChatClient
 import enum StreamChat.EntityChange
+import struct StreamChat.Token
 import StreamChatSwiftUI
 import StreamVideo
 import StreamVideoSwiftUI
@@ -34,7 +35,17 @@ struct DemoChatAdapter {
                 name: user.name,
                 imageURL: user.imageURL
             )
-        ) { result in result(.success(.init(stringLiteral: token))) }
+        ) { completionHandler in
+            Task {
+                do {
+                    let userToken = try await AuthenticationProvider.fetchToken(for: user.id)
+                    let token = try Token(rawValue: userToken.rawValue)
+                    completionHandler(.success(token))
+                } catch {
+                    completionHandler(.failure(error))
+                }
+            }
+        }
     }
 }
 

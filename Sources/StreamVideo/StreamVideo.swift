@@ -597,17 +597,21 @@ extension StreamVideo: ConnectionStateDelegate {
         self.state.connection = ConnectionStatus(webSocketConnectionState: state)
         switch state {
         case let .disconnected(source):
-            if let serverError = source.serverError, serverError.isInvalidTokenError
-                || (source.serverError as? APIError)?.isTokenExpiredError == true {
-                Task {
-                    do {
-                        guard let apiTransport = apiTransport as? URLSessionTransport else { return }
-                        self.token = try await apiTransport.refreshToken()
-                        log.debug("user token updated, will reconnect ws")
-                        webSocketClient?.connect()
-                    } catch {
-                        log.error("Error refreshing token, will disconnect ws connection", error: error)
+            if let serverError = source.serverError {
+                if serverError.isInvalidTokenError
+                    || (serverError as? APIError)?.isTokenExpiredError == true {
+                    Task {
+                        do {
+                            guard let apiTransport = apiTransport as? URLSessionTransport else { return }
+                            self.token = try await apiTransport.refreshToken()
+                            log.debug("user token updated, will reconnect ws")
+                            webSocketClient?.connect()
+                        } catch {
+                            log.error("Error refreshing token, will disconnect ws connection", error: error)
+                        }
                     }
+                } else {
+                    connectionRecoveryHandler?.webSocketClient(client, didUpdateConnectionState: state)
                 }
             }
             eventHandlers.forEach { $0.handler(.internalEvent(WSDisconnected())) }

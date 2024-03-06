@@ -4,10 +4,18 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
+### 🔄 Changed
+
+# [0.5.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.1)
+_March 05, 2024_
+
 ### ✅ Added
 - New API that allows adding/removing capturePhotoOutput, videoOutput on the local participant's AVCaptureSession. [#301](https://github.com/GetStream/stream-video-swift/pull/301)
 - New API that allows zooming the local participant's camera. [#301](https://github.com/GetStream/stream-video-swift/pull/301)
 - VideoFilters for blurring or setting an image as background. [#309](https://github.com/GetStream/stream-video-swift/pull/309)
+
+### 🐞 Fixed
+- Updated Web Socket reconnection logic. [#314](https://github.com/GetStream/stream-video-swift/pull/314)
 
 # [0.5.0](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.0)
 _February 15, 2024_

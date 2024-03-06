@@ -30,4 +30,9 @@ class StreamVideoUITestCase: XCTestCase {
     override func tearDownWithError() throws {
         try super.tearDownWithError()
     }
+    
+    override func tearDown() async throws {
+        try await super.tearDown()
+        await streamVideoUI?.streamVideo.disconnect()
+    }
 }
