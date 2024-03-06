@@ -28,9 +28,9 @@ struct StreamBufferTransformer {
         guard
             requiresResize,
             let resizedSource = resize(source, to: resizeSize(sourceSize, toFitWithin: targetSize)),
-                let pixelBuffer = convert(resizedSource.toI420())
+            let pixelBuffer = convert(resizedSource.toI420())
         else {
-                if let pixelBuffer = convert(source.toI420()) {
+            if let pixelBuffer = convert(source.toI420()) {
                 return transform(pixelBuffer)
             } else {
                 return nil
@@ -103,9 +103,9 @@ struct StreamBufferTransformer {
                 pixelFormat: CVPixelBufferGetPixelFormatType(rtcCVPixelBuffer.pixelBuffer)
             ) {
             let count = rtcCVPixelBuffer.bufferSizeForCroppingAndScaling(to: size)
-                let tempBuffer: UnsafeMutableRawPointer? = malloc(count)
-                rtcCVPixelBuffer.cropAndScale(to: newPixelBuffer, withTempBuffer: tempBuffer)
-                tempBuffer?.deallocate()
+            let tempBuffer: UnsafeMutableRawPointer? = malloc(count)
+            rtcCVPixelBuffer.cropAndScale(to: newPixelBuffer, withTempBuffer: tempBuffer)
+            tempBuffer?.deallocate()
             return RTCCVPixelBuffer(pixelBuffer: newPixelBuffer) as? TargetBuffer
         } else {
             return source.cropAndScale?(
