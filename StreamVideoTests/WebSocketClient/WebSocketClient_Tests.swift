@@ -330,6 +330,7 @@ final class WebSocketClient_Tests: XCTestCase {
                 createdAt: Date(),
                 custom: [:],
                 id: "test",
+                language: "en",
                 role: "user",
                 teams: [],
                 updatedAt: Date()

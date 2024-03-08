@@ -181,6 +181,16 @@ public class CallState: ObservableObject {
             break
         case .typeCallUserMuted:
             break
+        case .typeCallDeletedEvent:
+            break
+        case .typeCallHLSBroadcastingFailedEvent:
+            break
+        case .typeCallRecordingFailedEvent:
+            break
+        case .typeCallRecordingReadyEvent:
+            break
+        case .typeClosedCaptionEvent:
+            break
         }
     }
 

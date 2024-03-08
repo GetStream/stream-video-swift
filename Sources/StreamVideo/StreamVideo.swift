@@ -509,8 +509,6 @@ public class StreamVideo: ObservableObject {
             id: id,
             pushProvider: .init(rawValue: pushProvider.rawValue),
             pushProviderName: name,
-            user: UserRequest(id: user.id),
-            userId: user.id,
             voipToken: isVoip
         )
         

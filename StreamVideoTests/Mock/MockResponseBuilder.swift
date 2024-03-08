@@ -22,7 +22,8 @@ class MockResponseBuilder {
             
             duration: "1.0",
             members: [],
-            ownCapabilities: [.sendAudio, .sendVideo]
+            ownCapabilities: [.sendAudio, .sendVideo],
+            statsOptions: StatsOptions(reportingIntervalMs: 10000)
         )
     }
     
@@ -102,6 +103,7 @@ class MockResponseBuilder {
             createdAt: Date(),
             custom: [:],
             id: id,
+            language: "en",
             role: "user",
             teams: [],
             updatedAt: Date()

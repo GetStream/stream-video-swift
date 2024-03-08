@@ -48,6 +48,10 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
     func iceRestart(iCERestartRequest: Stream_Video_Sfu_Signal_ICERestartRequest) async throws -> Stream_Video_Sfu_Signal_ICERestartResponse {
         return try await execute(request: iCERestartRequest, path: "IceRestart")
     }
+    
+    func sendStats(sendStatsRequest: Stream_Video_Sfu_Signal_SendStatsRequest) async throws -> Stream_Video_Sfu_Signal_SendStatsResponse {
+        return try await execute(request: sendStatsRequest, path: "SendStats")
+    }
 
     private func execute<Request: ProtoModel, Response: ProtoModelResponse>(request: Request, path: String, retries: Int = 0) async throws -> Response {
         let requestData = try request.serializedData()

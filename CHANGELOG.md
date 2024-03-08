@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### ✅ Added
+- Stats reporting. [#313](https://github.com/GetStream/stream-video-swift/pull/313)
 
 # [0.5.1](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.1)
 _March 05, 2024_

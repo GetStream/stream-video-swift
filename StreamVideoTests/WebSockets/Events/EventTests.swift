@@ -12,7 +12,15 @@ final class EventTests: XCTestCase {
         callCid: "123",
         createdAt: Date(),
         custom: [:],
-        user: .init(createdAt: Date(), custom: [:], id: "456", role: "admin", teams: [], updatedAt: Date())
+        user: .init(
+            createdAt: Date(),
+            custom: [:],
+            id: "456",
+            language: "en",
+            role: "admin",
+            teams: [],
+            updatedAt: Date()
+        )
     )
 
     override func tearDown() {
