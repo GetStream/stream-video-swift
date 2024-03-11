@@ -190,14 +190,22 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
 
         let isReadyForMoreMediaData: Bool = {
             if #available(iOS 17.0, *) {
+                #if swift(>=5.9)
                 return contentView.sampleBufferDisplayLayer.sampleBufferRenderer.isReadyForMoreMediaData
+                #else
+                return contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData
+                #endif
             } else {
                 return contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData
             }
         }()
         if isReadyForMoreMediaData {
             if #available(iOS 17.0, *) {
+                #if swift(>=5.9)
                 contentView.sampleBufferDisplayLayer.sampleBufferRenderer.enqueue(buffer)
+                #else
+                contentView.sampleBufferDisplayLayer.enqueue(buffer)
+                #endif
             } else {
                 contentView.sampleBufferDisplayLayer.enqueue(buffer)
             }
@@ -230,7 +238,11 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         bufferUpdatesCancellable = nil
         track?.remove(self)
         if #available(iOS 17.0, *) {
+            #if swift(>=5.9)
             contentView.sampleBufferDisplayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true)
+            #else
+            contentView.sampleBufferDisplayLayer.flush()
+            #endif
         } else {
             contentView.sampleBufferDisplayLayer.flush()
         }
