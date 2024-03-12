@@ -23,7 +23,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     }
 
     /// The layer that renders the track's frames.
-    var displayLayer: CALayer { contentView.sampleBufferDisplayLayer }
+    var displayLayer: CALayer { contentView.layer }
 
     /// The publisher which is used to streamline the frames received from the track.
     private let bufferPublisher: PassthroughSubject<CMSampleBuffer, Never> = .init()
@@ -33,8 +33,8 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         let contentView = SampleBufferVideoCallView()
         contentView.translatesAutoresizingMaskIntoConstraints = false
         contentView.contentMode = .scaleAspectFill
-        contentView.sampleBufferDisplayLayer.videoGravity = .resizeAspectFill
-        contentView.sampleBufferDisplayLayer.preventsDisplaySleepDuringVideoPlayback = true
+        contentView.videoGravity = .resizeAspectFill
+        contentView.preventsDisplaySleepDuringVideoPlayback = true
         return contentView
     }()
 
@@ -175,32 +175,21 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
             let trackId = track?.trackId,
             buffer.isValid
         else {
-            contentView.sampleBufferDisplayLayer.flush()
+            contentView.renderingComponent.flush()
             log.debug("🔥 Display layer flushed.")
             return
         }
 
         log.debug("⚙️ Processing buffer for trackId:\(trackId).")
         if #available(iOS 14.0, *) {
-            if contentView.sampleBufferDisplayLayer.requiresFlushToResumeDecoding == true {
-                contentView.sampleBufferDisplayLayer.flush()
+            if contentView.renderingComponent.requiresFlushToResumeDecoding == true {
+                contentView.renderingComponent.flush()
                 log.debug("🔥 Display layer for track:\(trackId) flushed.")
             }
         }
 
-        let isReadyForMoreMediaData: Bool = {
-            if #available(iOS 17.0, *) {
-                return contentView.sampleBufferDisplayLayer.sampleBufferRenderer.isReadyForMoreMediaData
-            } else {
-                return contentView.sampleBufferDisplayLayer.isReadyForMoreMediaData
-            }
-        }()
-        if isReadyForMoreMediaData {
-            if #available(iOS 17.0, *) {
-                contentView.sampleBufferDisplayLayer.sampleBufferRenderer.enqueue(buffer)
-            } else {
-                contentView.sampleBufferDisplayLayer.enqueue(buffer)
-            }
+        if contentView.renderingComponent.isReadyForMoreMediaData {
+            contentView.renderingComponent.enqueue(buffer)
             log.debug("✅ Buffer for trackId:\(trackId) enqueued.")
         }
     }
@@ -229,11 +218,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         bufferUpdatesCancellable?.cancel()
         bufferUpdatesCancellable = nil
         track?.remove(self)
-        if #available(iOS 17.0, *) {
-            contentView.sampleBufferDisplayLayer.sampleBufferRenderer.flush(removingDisplayedImage: true)
-        } else {
-            contentView.sampleBufferDisplayLayer.flush()
-        }
+        contentView.renderingComponent.flush()
         log.debug("Frame streaming for Picture-in-Picture stopped.")
     }
 

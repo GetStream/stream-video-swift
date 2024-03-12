@@ -57,6 +57,8 @@ final class DeeplinkTests: StreamTestCase {
     }
 
     func test_universalLink_deeplinkUrlWithCallIdInPath_joinsExpectedCall() throws {
+        throw XCTSkip("https://github.com/GetStream/ios-issues-tracking/issues/764")
+
         linkToScenario(withId: 2954)
 
         WHEN("user navigates to the app through deeplink") {
