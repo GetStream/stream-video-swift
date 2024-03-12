@@ -154,91 +154,320 @@ struct StreamBufferTransformer {
         if let rtcCVPixelBuffer = source as? RTCCVPixelBuffer {
             return rtcCVPixelBuffer.pixelBuffer
         } else if let source = source as? RTCI420Buffer {
-            let width = Int(source.width)
-            let height = Int(source.height)
-
-            // Create a BGRA pixel buffer
-            var pixelBuffer: CVPixelBuffer?
-            let pixelFormat = kCVPixelFormatType_32BGRA
-            let pixelBufferAttrs: [String: Any] = [
-                kCVPixelBufferMetalCompatibilityKey as String: kCFBooleanTrue as Any,
-                kCVPixelBufferCGImageCompatibilityKey as String: kCFBooleanTrue as Any,
-                kCVPixelBufferCGBitmapContextCompatibilityKey as String: kCFBooleanTrue as Any
-            ]
-
-            let status = CVPixelBufferCreate(
-                kCFAllocatorDefault,
-                width,
-                height,
-                pixelFormat,
-                pixelBufferAttrs as CFDictionary,
-                &pixelBuffer
-            )
-
-            guard status == kCVReturnSuccess, let outputPixelBuffer = pixelBuffer else {
-                return nil
-            }
-
-            CVPixelBufferLockBaseAddress(outputPixelBuffer, .readOnly)
-
-            // Get the destination BGRA plane base address
-            guard let bgraBaseAddress = CVPixelBufferGetBaseAddress(outputPixelBuffer) else {
-                CVPixelBufferUnlockBaseAddress(outputPixelBuffer, .readOnly)
-                return nil
-            }
-
-            // Perform YUV to RGB conversion with proper chroma upsampling
-            let yPlane = source.dataY
-            let uPlane = source.dataU
-            let vPlane = source.dataV
-
-            let yBytesPerRow = Int(source.strideY)
-            let uBytesPerRow = Int(source.strideU)
-            let vBytesPerRow = Int(source.strideV)
-
-            let bgraBytesPerRow = CVPixelBufferGetBytesPerRow(outputPixelBuffer)
-
-            for y in stride(from: 0, to: height, by: 1) {
-                for x in stride(from: 0, to: width, by: 1) {
-                    let yOffset = y * yBytesPerRow + x
-                    let uOffset = (y / 2) * uBytesPerRow + (x / 2)
-                    let vOffset = (y / 2) * vBytesPerRow + (x / 2)
-
-                    let yValue = Int(yPlane[yOffset])
-                    let uValue = Int(uPlane[uOffset]) - 128
-                    let vValue = Int(vPlane[vOffset]) - 128
-
-                    let index = (y * bgraBytesPerRow) + (x * 4)
-                    var pixel: [UInt8] = [0, 0, 0, 255] // BGRA format, fully opaque
-
-                    // Perform YUV to RGB conversion with chroma upsampling
-                    let c = yValue - 16
-                    let d = uValue
-                    let e = vValue
-
-                    let r = clamp((298 * c + 409 * e + 128) >> 8)
-                    let g = clamp((298 * c - 100 * d - 208 * e + 128) >> 8)
-                    let b = clamp((298 * c + 516 * d + 128) >> 8)
-
-                    pixel[0] = UInt8(b)
-                    pixel[1] = UInt8(g)
-                    pixel[2] = UInt8(r)
-
-                    // Copy the pixel data to the BGRA plane
-                    memcpy(bgraBaseAddress.advanced(by: index), &pixel, 4)
-                }
-            }
-
-            // Unlock the BGRA pixel buffer
-            CVPixelBufferUnlockBaseAddress(outputPixelBuffer, .readOnly)
-
-            return outputPixelBuffer
+            return source.convertedPixelBuffer
         } else {
             return nil
         }
     }
+}
 
-    private func clamp(_ value: Int) -> UInt8 {
-        UInt8(max(0, min(255, value)))
+import Accelerate
+import CoreVideo
+
+final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
+
+    private let source: RTCI420Buffer
+
+    var width: Int32 { source.width }
+
+    var height: Int32 { source.height }
+
+    private lazy var yuvPixelBuffer = buildYUVPixelBuffer()
+
+    private lazy var YpImageBuffer: vImage_Buffer = buildYpImageBuffer()
+    private lazy var CbImageBuffer: vImage_Buffer = buildCbImageBuffer()
+    private lazy var CrImageBuffer: vImage_Buffer = buildCrImageBuffer()
+
+    init(source: RTCI420Buffer) {
+        self.source = source
+    }
+
+    func toI420() -> any RTCI420BufferProtocol { source }
+
+    func toYUVPixelBuffer() -> CVPixelBuffer { yuvPixelBuffer }
+
+    // MARK: - Private Helpers
+
+    private func buildYUVPixelBuffer() -> CVPixelBuffer {
+        fatalError()
+    }
+
+    private func buildYpImageBuffer() -> vImage_Buffer {
+        vImage_Buffer(
+            data: UnsafeMutablePointer(mutating: source.dataY),
+            height: vImagePixelCount(height),
+            width: vImagePixelCount(width),
+            rowBytes: Int(source.strideY)
+        )
+    }
+
+    private func buildCbImageBuffer() -> vImage_Buffer {
+        vImage_Buffer(
+            data: UnsafeMutablePointer(mutating: source.dataU),
+            height: vImagePixelCount(source.chromaHeight),
+            width: vImagePixelCount(source.chromaWidth),
+            rowBytes: Int(source.strideU)
+        )
+    }
+
+    private func buildCrImageBuffer() -> vImage_Buffer {
+        vImage_Buffer(
+            data: UnsafeMutablePointer(mutating: source.dataV),
+            height: vImagePixelCount(source.chromaHeight),
+            width: vImagePixelCount(source.chromaWidth),
+            rowBytes: Int(source.strideV)
+        )
+    }
+}
+
+extension RTCI420Buffer {
+
+    private static var conversionMatrix: vImage_YpCbCrToARGB = {
+        var pixelRange = vImage_YpCbCrPixelRange(
+            Yp_bias: 0,
+            CbCr_bias: 128,
+            YpRangeMax: 255,
+            CbCrRangeMax: 255,
+            YpMax: 255,
+            YpMin: 1,
+            CbCrMax: 255,
+            CbCrMin: 0
+        )
+        var matrix = vImage_YpCbCrToARGB()
+        vImageConvert_YpCbCrToARGB_GenerateConversion(
+            kvImage_YpCbCrToARGBMatrix_ITU_R_601_4,
+            // kvImage_YpCbCrToARGBMatrix_ITU_R_709_2, // Performance improvement with kvImage_YpCbCrToARGBMatrix_ITU_R_601_4
+            &pixelRange,
+            &matrix,
+            kvImage420Yp8_Cb8_Cr8,
+            kvImageARGB8888,
+            UInt32(kvImageNoFlags)
+        )
+        return matrix
+    }()
+
+    var convertedPixelBuffer: CVPixelBuffer? {
+        measureExecutionTime { () -> CVPixelBuffer? in
+            let width = Int(self.width)
+            let height = Int(self.height)
+
+            guard let pixelBuffer = CVPixelBuffer.make(
+                with: .init(width: width, height: height),
+                pixelFormat: kCVPixelFormatType_32BGRA,
+                attributes: [
+                    kCVPixelBufferMetalCompatibilityKey as String: kCFBooleanTrue as Any,
+                    kCVPixelBufferCGImageCompatibilityKey as String: kCFBooleanTrue as Any,
+                    kCVPixelBufferCGBitmapContextCompatibilityKey as String: kCFBooleanTrue as Any
+                ]
+            ) else {
+                return nil
+            }
+
+            let lumaBaseAddress = UnsafeMutablePointer(mutating: dataY)
+            let lumaWidth = width
+            let lumaHeight = height
+            let lumaRowBytes = Int(strideY)
+            var sourceLumaBuffer = vImage_Buffer(
+                data: lumaBaseAddress,
+                height: vImagePixelCount(lumaHeight),
+                width: vImagePixelCount(lumaWidth),
+                rowBytes: lumaRowBytes
+            )
+
+            let uBaseAddress = UnsafeMutablePointer(mutating: self.dataU)
+            let uRowBytes = Int(self.strideU)
+            var sourceUBuffer = vImage_Buffer(
+                data: uBaseAddress,
+                height: vImagePixelCount(chromaHeight),
+                width: vImagePixelCount(chromaWidth),
+                rowBytes: uRowBytes
+            )
+
+            let vBaseAddress = UnsafeMutablePointer(mutating: self.dataV)
+            let vRowBytes = Int(self.strideV)
+            var sourceVBuffer = vImage_Buffer(
+                data: vBaseAddress,
+                height: vImagePixelCount(self.chromaHeight),
+                width: vImagePixelCount(self.chromaWidth),
+                rowBytes: vRowBytes
+            )
+
+            CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
+            let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer)!
+            var output = vImage_Buffer(
+                data: baseAddress,
+                height: vImagePixelCount(height),
+                width: vImagePixelCount(width),
+                rowBytes: CVPixelBufferGetBytesPerRow(pixelBuffer)
+            )
+
+            let error = vImageConvert_420Yp8_Cb8_Cr8ToARGB8888(
+                &sourceLumaBuffer,
+                &sourceUBuffer,
+                &sourceVBuffer,
+                &output,
+                &Self.conversionMatrix,
+                [3, 2, 1, 0],
+                255,
+                vImage_Flags(kvImageNoFlags)
+            )
+            //            let error = vImageConvert_420Yp8_CbCr8ToARGB8888(
+            //                &sourceLumaBuffer,
+            //                &sourceChromaBuffer,
+            //                &output,
+            //                &Self.conversionMatrix,
+            //                [3, 2, 1, 0],
+            //                255,
+            //                vImage_Flags(kvImageNoFlags)
+            //            )
+
+            CVPixelBufferUnlockBaseAddress(pixelBuffer, .readOnly)
+
+            if error != kvImageNoError {
+                debugPrint(error)
+                return nil
+            } else {
+                return pixelBuffer
+            }
+        }
+    }
+
+    var interleavedData: (pointer: UnsafeMutableRawPointer, deallocate: () -> Void) {
+        let chromaSize = Int(chromaWidth * chromaHeight) // For 4:2:0, U and V each have width/2 and height/2
+        let uvPlane = UnsafeMutablePointer<UInt8>
+            .allocate(capacity: chromaSize * 2) // *2 because we store U and V for each chroma pixel
+
+        let uPlane = dataU
+        let vPlane = dataV
+
+        for i in 0..<chromaSize {
+            uvPlane[2 * i] = uPlane[i] // U value
+            uvPlane[2 * i + 1] = vPlane[i] // V value
+        }
+
+        return (pointer: UnsafeMutableRawPointer(uvPlane), deallocate: { uvPlane.deallocate() })
+    }
+
+    var chromaSize: CGSize {
+        .init(width: Int(chromaWidth), height: Int(chromaHeight))
+    }
+
+    var isInterleaved: Bool { strideU == strideV }
+
+    var chromaStride: Int { Int(strideU) }
+}
+
+func measureExecutionTime<V>(
+    of closure: () -> V,
+    file: StaticString = #file,
+    function: StaticString = #function,
+    line: UInt = #line
+) -> V {
+    let startTime = DispatchTime.now()
+    let result = closure()
+    let endTime = DispatchTime.now()
+
+    let nanoseconds = endTime.uptimeNanoseconds - startTime.uptimeNanoseconds
+    let milliseconds = Double(nanoseconds) / 1_000_000
+
+    log.debug(
+        "Execution time: \(milliseconds) ms",
+        functionName: function,
+        fileName: file,
+        lineNumber: line
+    )
+    return result
+}
+
+final class StreamPixelBufferPool {
+    let maxNoOfBuffers: Int
+    let bufferSize: CGSize
+    let pixelFormat: OSType
+
+    private var pool: CVPixelBufferPool?
+    private let lockQueue = UnfairQueue()
+
+    init(
+        bufferSize: CGSize,
+        pixelFormat: OSType = kCVPixelFormatType_32BGRA,
+        maxNoOfBuffers: Int = 5
+    ) {
+        self.bufferSize = bufferSize
+        self.pixelFormat = pixelFormat
+        self.maxNoOfBuffers = maxNoOfBuffers
+
+        var cvPool: CVPixelBufferPool?
+        let poolAttributes: [String: Any] = [
+            kCVPixelBufferPoolMinimumBufferCountKey as String: maxNoOfBuffers
+        ]
+        let pixelBufferAttributes: [String: Any] = [
+            kCVPixelBufferPixelFormatTypeKey as String: Int(pixelFormat),
+            kCVPixelBufferWidthKey as String: Int(bufferSize.width),
+            kCVPixelBufferHeightKey as String: Int(bufferSize.height),
+            kCVPixelBufferIOSurfacePropertiesKey as String: [:]
+        ]
+        CVPixelBufferPoolCreate(
+            nil,
+            poolAttributes as CFDictionary,
+            pixelBufferAttributes as CFDictionary,
+            &cvPool
+        )
+        pool = cvPool
+    }
+
+    func dequeuePixelBuffer() -> CVPixelBuffer? {
+        var pixelBuffer: CVPixelBuffer?
+        lockQueue.sync {
+            if let pool = self.pool {
+                CVPixelBufferPoolCreatePixelBuffer(nil, pool, &pixelBuffer)
+            }
+        }
+        return pixelBuffer
+    }
+}
+
+final class StreamPixelBufferRepository {
+
+    private struct Key: Hashable {
+        var width: Int
+        var height: Int
+        init(_ size: CGSize) {
+            width = Int(size.width)
+            height = Int(size.height)
+        }
+    }
+
+    private var pools: [Key: StreamPixelBufferPool] = [:]
+    private let queue = UnfairQueue()
+
+    func dequeuePixelBuffer(of size: CGSize) -> CVPixelBuffer? {
+        let key = Key(size)
+        return queue.sync {
+            if let targetPool = pools[key] {
+                return targetPool.dequeuePixelBuffer()
+            } else {
+                let targetPool = StreamPixelBufferPool(bufferSize: size)
+                pools[key] = targetPool
+                return targetPool.dequeuePixelBuffer()
+            }
+        }
+    }
+}
+
+final class UnfairQueue {
+
+    private let lock: os_unfair_lock_t
+
+    init() {
+        lock = UnsafeMutablePointer<os_unfair_lock>.allocate(capacity: 1)
+        lock.initialize(to: os_unfair_lock())
+    }
+
+    deinit { lock.deallocate() }
+
+    func sync<T>(_ block: () throws -> T) rethrows -> T {
+        os_unfair_lock_lock(lock)
+        defer { os_unfair_lock_unlock(lock) }
+        return try block()
     }
 }

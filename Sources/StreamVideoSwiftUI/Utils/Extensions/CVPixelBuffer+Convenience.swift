@@ -8,14 +8,13 @@ import Foundation
 extension CVPixelBuffer {
     public static func make(
         with size: CGSize,
-        pixelFormat: OSType
+        pixelFormat: OSType,
+        attributes: [String: Any] = [:]
     ) -> CVPixelBuffer? {
         var pixelBuffer: CVPixelBuffer?
 
-        let attributes: [CFString: Any] = [:]
-
-        _ = CVPixelBufferCreate(
-            nil,
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
             Int(size.width),
             Int(size.height),
             pixelFormat,
@@ -23,6 +22,10 @@ extension CVPixelBuffer {
             &pixelBuffer
         )
 
+        guard status == kCVReturnSuccess else {
+            return nil
+        }
+        
         return pixelBuffer
     }
 }
