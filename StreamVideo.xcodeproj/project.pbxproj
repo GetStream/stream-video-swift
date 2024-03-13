@@ -50,6 +50,12 @@
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
+		403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */; };
+		403FF3E82BA1D2D70092CE8A /* StreamPixelBufferPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */; };
+		403FF3E92BA1D2E10092CE8A /* UnfairQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E02BA1D21E0092CE8A /* UnfairQueue.swift */; };
+		403FF3F32BA1DC650092CE8A /* StreamRTCYUVBuffer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3EA2BA1D2F90092CE8A /* StreamRTCYUVBuffer.swift */; };
+		403FF3F42BA1DC690092CE8A /* StreamYUVToARGBConversion.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3EF2BA1DC230092CE8A /* StreamYUVToARGBConversion.swift */; };
+		403FF3F52BA1DC6C0092CE8A /* YpCbCrPixelRange+Default.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3F12BA1DC480092CE8A /* YpCbCrPixelRange+Default.swift */; };
 		4046DEE92A9E381F00CA6D2F /* AppIntentVocabulary.plist in Resources */ = {isa = PBXBuildFile; fileRef = 4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */; };
 		4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */ = {isa = PBXBuildFile; productRef = 4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */; settings = {ATTRIBUTES = (Required, ); }; };
 		4046DEF22A9F510C00CA6D2F /* DebugMenu.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */; };
@@ -1118,6 +1124,12 @@
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
+		403FF3E02BA1D21E0092CE8A /* UnfairQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfairQueue.swift; sourceTree = "<group>"; };
+		403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPixelBufferRepository.swift; sourceTree = "<group>"; };
+		403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPixelBufferPool.swift; sourceTree = "<group>"; };
+		403FF3EA2BA1D2F90092CE8A /* StreamRTCYUVBuffer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamRTCYUVBuffer.swift; sourceTree = "<group>"; };
+		403FF3EF2BA1DC230092CE8A /* StreamYUVToARGBConversion.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamYUVToARGBConversion.swift; sourceTree = "<group>"; };
+		403FF3F12BA1DC480092CE8A /* YpCbCrPixelRange+Default.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "YpCbCrPixelRange+Default.swift"; sourceTree = "<group>"; };
 		4046DEE82A9E381F00CA6D2F /* AppIntentVocabulary.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = AppIntentVocabulary.plist; sourceTree = "<group>"; };
 		4046DEEA2A9E38DC00CA6D2F /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		4046DEF12A9F510C00CA6D2F /* DebugMenu.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DebugMenu.swift; sourceTree = "<group>"; };
@@ -2203,6 +2215,23 @@
 			path = Examples;
 			sourceTree = "<group>";
 		};
+		403FF3DF2BA1D20E0092CE8A /* UnfairQueue */ = {
+			isa = PBXGroup;
+			children = (
+				403FF3E02BA1D21E0092CE8A /* UnfairQueue.swift */,
+			);
+			path = UnfairQueue;
+			sourceTree = "<group>";
+		};
+		403FF3E22BA1D2270092CE8A /* StreamPixelBufferRepository */ = {
+			isa = PBXGroup;
+			children = (
+				403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */,
+				403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */,
+			);
+			path = StreamPixelBufferRepository;
+			sourceTree = "<group>";
+		};
 		4063033D2AD847E60091AE77 /* CallState */ = {
 			isa = PBXGroup;
 			children = (
@@ -2449,6 +2478,9 @@
 				40A941752B4D9F16006D6965 /* StreamPictureInPIctureView.swift */,
 				40A941772B4DC576006D6965 /* StreamPictureInPictureTrackStateAdapter.swift */,
 				40914C992B56A85B00F6A13E /* StreamBufferTransformer.swift */,
+				403FF3EA2BA1D2F90092CE8A /* StreamRTCYUVBuffer.swift */,
+				403FF3EF2BA1DC230092CE8A /* StreamYUVToARGBConversion.swift */,
+				403FF3F12BA1DC480092CE8A /* YpCbCrPixelRange+Default.swift */,
 			);
 			path = PictureInPicture;
 			sourceTree = "<group>";
@@ -3822,6 +3854,8 @@
 		84EBAA91288C135700BE3176 /* Utils */ = {
 			isa = PBXGroup;
 			children = (
+				403FF3E22BA1D2270092CE8A /* StreamPixelBufferRepository */,
+				403FF3DF2BA1D20E0092CE8A /* UnfairQueue */,
 				40FA12EE2B76AC4B00CE3EC9 /* Extensions */,
 				402F04AC2B714E9B00CA1986 /* DeviceOrientation */,
 				40E1104A2B5A9F5B007DF492 /* Formatters */,
@@ -5186,6 +5220,7 @@
 				842C7EB828A2916700C2AB7F /* IncomingCallViewModel.swift in Sources */,
 				40149DC32B7E202600473176 /* ParticipantEventViewModifier.swift in Sources */,
 				8277D13A2AE81CC800BC4ECF /* LazyImage.swift in Sources */,
+				403FF3E82BA1D2D70092CE8A /* StreamPixelBufferPool.swift in Sources */,
 				8430FD222AB1AB4C007AA3E6 /* ParticipantPopoverView.swift in Sources */,
 				84366E7C29C9FB6600287D14 /* VideoRendererFactory.swift in Sources */,
 				8277D1572AE81CC800BC4ECF /* ImageDecompression.swift in Sources */,
@@ -5236,6 +5271,7 @@
 				40C7B8362B613C7800FB9DB2 /* ParticipantsListButton.swift in Sources */,
 				40AA2EE22AE0137E000DCA5C /* ClipCorners.swift in Sources */,
 				8415D3E3290BC882006E53CB /* Sounds.swift in Sources */,
+				403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */,
 				84DCA2092A382B16000C3411 /* CallModels.swift in Sources */,
 				8277D1282AE81CC800BC4ECF /* ImageLoadingOptions.swift in Sources */,
 				8442993C294232360037232A /* IncomingCallView_iOS13.swift in Sources */,
@@ -5248,6 +5284,7 @@
 				8277D16E2AE81CC800BC4ECF /* ImageDecoding.swift in Sources */,
 				8434C531289AA8770001490A /* StreamVideoUI.swift in Sources */,
 				8457BF7C2A5BF9E0000AE567 /* ToastView.swift in Sources */,
+				403FF3E92BA1D2E10092CE8A /* UnfairQueue.swift in Sources */,
 				844299412942394C0037232A /* VideoView_iOS13.swift in Sources */,
 				846E4AFF29D236EA003733AB /* CallTopView.swift in Sources */,
 				846FBE8928AAD83C00147F6E /* InviteParticipantsView.swift in Sources */,
@@ -5312,11 +5349,14 @@
 				40AA2EDC2ADFEB01000DCA5C /* HorizontalParticipantsListView.swift in Sources */,
 				846FBE8F28AAEC5D00147F6E /* KeyboardReadable.swift in Sources */,
 				8490032D29D4774500AD9BB4 /* JoiningCallView.swift in Sources */,
+				403FF3F42BA1DC690092CE8A /* StreamYUVToARGBConversion.swift in Sources */,
 				409145EB2B68FDD2007F3C17 /* ReadableContentGuide.swift in Sources */,
 				8277D1382AE81CC800BC4ECF /* Internal.swift in Sources */,
 				847D002029C8AB1F00DD0A50 /* RecordingView.swift in Sources */,
 				8277D1542AE81CC800BC4ECF /* ImageProcessors+Resize.swift in Sources */,
 				8277D1622AE81CC800BC4ECF /* ImagePublisher.swift in Sources */,
+				403FF3F52BA1DC6C0092CE8A /* YpCbCrPixelRange+Default.swift in Sources */,
+				403FF3F32BA1DC650092CE8A /* StreamRTCYUVBuffer.swift in Sources */,
 				8277D16B2AE81CC800BC4ECF /* ImageDecoders+Default.swift in Sources */,
 				84B57D37297F406400E4E709 /* MicrophoneCheckView.swift in Sources */,
 				8277D1342AE81CC800BC4ECF /* UIImage.swift in Sources */,
