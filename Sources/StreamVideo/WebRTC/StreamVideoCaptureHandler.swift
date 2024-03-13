@@ -78,7 +78,7 @@ final class StreamVideoCaptureHandler: NSObject, RTCVideoCapturerDelegate {
         for buffer: RTCCVPixelBuffer?,
         frame: RTCVideoFrame
     ) -> RTCVideoFrame {
-        #if os(macOS)
+        #if os(macOS) || targetEnvironment(simulator) || targetEnvironment(macCatalyst)
         var rotation = RTCVideoRotation._0
         #else
         var rotation = RTCVideoRotation._90

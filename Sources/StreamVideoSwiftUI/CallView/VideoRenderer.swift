@@ -52,7 +52,7 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
     }
     
     private var shouldRotate: Bool {
-        callSettings.cameraPosition == .front && callSettings.videoOn
+        callSettings.cameraPosition == .front
     }
 }
 
