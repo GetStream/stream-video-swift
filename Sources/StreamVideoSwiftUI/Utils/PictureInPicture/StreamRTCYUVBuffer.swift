@@ -164,6 +164,13 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
 
             CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
             var output = buildImageBuffer(from: pixelBuffer)
+            /// The `vImageConvert_420Yp8_Cb8_Cr8ToARGB8888` will convert our buffer
+            /// to ARGB pixel format. However, for rendering we require BGRA pixel format. The
+            /// permuteMaps adds an instruction to move around the generated ARGB buffers to the
+            /// positions described by the array:
+            /// Example:
+            /// The resulted array will be: [0: Alpha, 1: Red, 2: Green, 3: Blue]. The array that we want
+            /// to get though will have the format [0: Blue, 1: Green, 2: Red, 3: Alpha].
             let permuteMap = [3, 2, 1, 0]
             let alpha: UInt8 = 255
 
