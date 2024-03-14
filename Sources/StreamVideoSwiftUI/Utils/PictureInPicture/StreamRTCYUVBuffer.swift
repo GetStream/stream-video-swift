@@ -8,19 +8,31 @@ import Foundation
 import StreamVideo
 import StreamWebRTC
 
+/// A class that encapsulates the conversion of RTC video frame buffers from YUV to ARGB format.
 final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
 
     @Injected(\.pixelBufferRepository) private var pixelBufferRepository
 
+    /// The original source of the video frame, conforming to `RTCVideoFrameBuffer`.
     private let source: RTCVideoFrameBuffer
+
+    /// The conversion mechanism from YUV to ARGB.
     private let conversion: StreamYUVToARGBConversion
 
+    /// The width of the video frame.
     var width: Int32 { source.width }
 
+    /// The height of the video frame.
     var height: Int32 { source.height }
 
+    /// Lazily initialized pixel buffer that stores the converted YUV to ARGB data.
     private lazy var i420ToYUVPixelBuffer = buildI420ToYUVPixelBuffer()
 
+    /// Initializes a new buffer with the given source and conversion setup.
+    ///
+    /// - Parameters:
+    ///   - source: The video frame source.
+    ///   - conversion: The conversion configuration, default initialized if not provided.
     init(
         source: RTCVideoFrameBuffer,
         conversion: StreamYUVToARGBConversion = .init()
@@ -29,6 +41,9 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         self.conversion = conversion
     }
 
+    /// Converts the frame to the I420 format.
+    ///
+    /// - Returns: An object conforming to `RTCI420BufferProtocol`.
     func toI420() -> any RTCI420BufferProtocol {
         if let i420 = source as? RTCI420Buffer {
             return i420
@@ -37,6 +52,10 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         }
     }
 
+    /// Resizes the current buffer resized to the target size.
+    ///
+    /// - Parameter targetSize: The target size for the buffer.
+    /// - Returns: A new `StreamRTCYUVBuffer` with the resized content or nil if resizing fails.
     func resize(to targetSize: CGSize) -> StreamRTCYUVBuffer? {
         if let i420 = source as? RTCI420Buffer {
             let resizedSource = i420.cropAndScale(
@@ -64,6 +83,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         }
     }
 
+    /// Retrieves the underlying pixel buffer if available.
     var pixelBuffer: CVPixelBuffer? {
         if source is RTCI420Buffer {
             return i420ToYUVPixelBuffer
@@ -74,6 +94,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         }
     }
 
+    /// Creates a CMSampleBuffer from the current pixel buffer, if available.
     var sampleBuffer: CMSampleBuffer? {
         guard let pixelBuffer else {
             return nil
@@ -119,6 +140,9 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
 
     // MARK: - Private Helpers
 
+    /// Creates a pixel buffer converted from I420 to YUV format.
+    ///
+    /// - Returns: A `CVPixelBuffer` containing the converted data or nil if the conversion fails.
     private func buildI420ToYUVPixelBuffer() -> CVPixelBuffer? {
         guard let source = source as? RTCI420Buffer else {
             return nil
@@ -140,6 +164,8 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
 
             CVPixelBufferLockBaseAddress(pixelBuffer, .readOnly)
             var output = buildImageBuffer(from: pixelBuffer)
+            let permuteMap = [3, 2, 1, 0]
+            let alpha: UInt8 = 255
 
             let error = vImageConvert_420Yp8_Cb8_Cr8ToARGB8888(
                 &YpImageBuffer,
@@ -147,8 +173,8 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
                 &CrImageBuffer,
                 &output,
                 &conversion.output,
-                [3, 2, 1, 0],
-                255,
+                permuteMap,
+                alpha,
                 vImage_Flags(kvImageNoFlags)
             )
 
@@ -166,6 +192,10 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         }
     }
 
+    /// Constructs a `vImage_Buffer` for the Y plane from the source I420 buffer.
+    ///
+    /// - Parameter source: The source I420 buffer.
+    /// - Returns: A `vImage_Buffer` representing the Y plane.
     private func buildYpImageBuffer(_ source: RTCI420Buffer) -> vImage_Buffer {
         vImage_Buffer(
             data: UnsafeMutablePointer(mutating: source.dataY),
@@ -175,6 +205,10 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         )
     }
 
+    /// Constructs a `vImage_Buffer` for the Cb plane from the source I420 buffer.
+    ///
+    /// - Parameter source: The source I420 buffer.
+    /// - Returns: A `vImage_Buffer` representing the Cb plane.
     private func buildCbImageBuffer(_ source: RTCI420Buffer) -> vImage_Buffer {
         vImage_Buffer(
             data: UnsafeMutablePointer(mutating: source.dataU),
@@ -184,6 +218,10 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         )
     }
 
+    /// Constructs a `vImage_Buffer` for the Cr plane from the source I420 buffer.
+    ///
+    /// - Parameter source: The source I420 buffer.
+    /// - Returns: A `vImage_Buffer` representing the Cr plane.
     private func buildCrImageBuffer(_ source: RTCI420Buffer) -> vImage_Buffer {
         vImage_Buffer(
             data: UnsafeMutablePointer(mutating: source.dataV),
@@ -193,6 +231,10 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
         )
     }
 
+    /// Creates a `vImage_Buffer` from a CVPixelBuffer.
+    ///
+    /// - Parameter pixelBuffer: The pixel buffer to convert.
+    /// - Returns: A `vImage_Buffer` representing the given pixel buffer.
     private func buildImageBuffer(from pixelBuffer: CVPixelBuffer) -> vImage_Buffer {
         let baseAddress = CVPixelBufferGetBaseAddress(pixelBuffer)!
         return vImage_Buffer(
