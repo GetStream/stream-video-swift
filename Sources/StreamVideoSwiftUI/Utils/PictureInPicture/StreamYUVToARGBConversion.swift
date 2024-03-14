@@ -76,19 +76,19 @@ final class StreamYUVToARGBConversion {
     }
 
     /// The pixel range configuration for YUV to ARGB conversion, defaulting to standard range.
-    private var pixelRange: vImage_YpCbCrPixelRange = .default
+    private var pixelRange: vImage_YpCbCrPixelRange
 
     /// The coefficient matrix to use, defaulting to ITU-R BT.601.
-    private var coefficient: Coefficient = .YpCbCrToARGBMatrix_ITU_R_601_4
+    private var coefficient: Coefficient
 
     /// The type of YpCbCr pixel data, default set to a common format.
-    private var inYpCbCrType: vImageYpCbCrType = kvImage420Yp8_Cb8_Cr8
+    private var inYpCbCrType: vImageYpCbCrType
 
     /// The output ARGB pixel format, default set to 8 bits per channel.
-    private var outARGBType: vImageARGBType = kvImageARGB8888
+    private var outARGBType: vImageARGBType
 
     /// Flags for the conversion process, with no flags set by default.
-    private var flags: UInt32 = UInt32(kvImageNoFlags)
+    private var flags: UInt32
 
     /// The resulting conversion object to be used for converting YUV to ARGB.
     var output: vImage_YpCbCrToARGB
@@ -115,7 +115,7 @@ final class StreamYUVToARGBConversion {
         self.flags = flags
         output = vImage_YpCbCrToARGB()
 
-        // Generates a conversion setup for converting YpCbCr to ARGB using specified parameters.
+        /// Generates a conversion setup for converting YpCbCr to ARGB using specified parameters.
         vImageConvert_YpCbCrToARGB_GenerateConversion(
             self.coefficient.value,
             &self.pixelRange,
