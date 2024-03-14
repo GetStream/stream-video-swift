@@ -523,6 +523,7 @@ final class StreamCallStatisticsFormatter_Tests: XCTestCase {
         update: (inout MockStreamStatistics) -> Void = { _ in }
     ) -> MockStreamStatistics {
         var result = MockStreamStatistics(
+            timestamp_us: 123_456,
             type: type,
             id: id
         )

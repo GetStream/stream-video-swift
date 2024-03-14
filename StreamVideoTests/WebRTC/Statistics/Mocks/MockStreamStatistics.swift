@@ -4,9 +4,11 @@
 
 import Foundation
 @testable import StreamVideo
+import StreamWebRTC
 
 @dynamicMemberLookup
 struct MockStreamStatistics: StreamStatisticsProtocol {
+    var timestamp_us: CFTimeInterval
 
     var type: String
     
@@ -38,4 +40,8 @@ struct MockStreamStatistics: StreamStatisticsProtocol {
             }
         }
     }
+}
+
+struct MockStreamStatisticsReport: StreamStatisticsReportProtocol {
+    var stats: [String: any StreamStatisticsProtocol]
 }

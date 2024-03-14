@@ -854,6 +854,7 @@
 		84DC38DA29ADFCFD00946713 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC388929ADFCFC00946713 /* Extensions.swift */; };
 		84DC38DB29ADFCFD00946713 /* JSONDataEncoding.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC388A29ADFCFC00946713 /* JSONDataEncoding.swift */; };
 		84DC38DD29ADFCFD00946713 /* Models.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC388C29ADFCFC00946713 /* Models.swift */; };
+		84DC44982BA3ACC70050290C /* CallStatsReporting_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DC44972BA3ACC70050290C /* CallStatsReporting_Tests.swift */; };
 		84DCA2092A382B16000C3411 /* CallModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA2082A382B16000C3411 /* CallModels.swift */; };
 		84DCA20B2A382FE0000C3411 /* CallViewModel_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84DCA20A2A382FE0000C3411 /* CallViewModel_Tests.swift */; };
 		84DCA20C2A38300C000C3411 /* StreamVideoTestCase.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492B8722908024800006649 /* StreamVideoTestCase.swift */; };
@@ -1793,6 +1794,7 @@
 		84DC388929ADFCFC00946713 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; };
 		84DC388A29ADFCFC00946713 /* JSONDataEncoding.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = JSONDataEncoding.swift; sourceTree = "<group>"; };
 		84DC388C29ADFCFC00946713 /* Models.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Models.swift; sourceTree = "<group>"; };
+		84DC44972BA3ACC70050290C /* CallStatsReporting_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallStatsReporting_Tests.swift; sourceTree = "<group>"; };
 		84DCA2082A382B16000C3411 /* CallModels.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallModels.swift; sourceTree = "<group>"; };
 		84DCA20A2A382FE0000C3411 /* CallViewModel_Tests.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CallViewModel_Tests.swift; sourceTree = "<group>"; };
 		84DCA20D2A3885FE000C3411 /* Permissions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Permissions.swift; sourceTree = "<group>"; };
@@ -2041,6 +2043,7 @@
 			children = (
 				402C54592B6BE4F000672BFB /* Mocks */,
 				402C545C2B6BE5E200672BFB /* StreamCallStatisticsFormatter_Tests.swift */,
+				84DC44972BA3ACC70050290C /* CallStatsReporting_Tests.swift */,
 			);
 			path = Statistics;
 			sourceTree = "<group>";
@@ -5134,6 +5137,7 @@
 				84F58B7A29EE972A00010C4C /* WebSocketPingController_Tests.swift in Sources */,
 				8490033129D6D2BF00AD9BB4 /* MockResponseBuilder.swift in Sources */,
 				84F58B8F29EEB32700010C4C /* WebSocketPingController_Mock.swift in Sources */,
+				84DC44982BA3ACC70050290C /* CallStatsReporting_Tests.swift in Sources */,
 				84F58B7229EE922700010C4C /* WebSocketConnectionState_Tests.swift in Sources */,
 				40AB31262A49838000C270E1 /* EventTests.swift in Sources */,
 				84F58B7C29EE979F00010C4C /* VirtualTime.swift in Sources */,

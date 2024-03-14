@@ -81,16 +81,30 @@ protocol StreamStatisticsProtocol {
     var type: String { get }
 
     var id: String { get }
+    
+    var timestamp_us: CFTimeInterval { get }
 
     var values: [String: NSObject] { get }
 }
 
-extension RTCStatistics: StreamStatisticsProtocol {}
+protocol StreamStatisticsReportProtocol {
+    
+    var jsonString: String? { get }
+    
+    var stats: [String: any StreamStatisticsProtocol] { get }
+}
 
-extension RTCStatisticsReport {
-    func jsonString(for type: PeerConnectionType) -> String? {
+extension RTCStatistics: StreamStatisticsProtocol {}
+extension RTCStatisticsReport: StreamStatisticsReportProtocol {
+    var stats: [String: any StreamStatisticsProtocol] {
+        self.statistics
+    }
+}
+
+extension StreamStatisticsReportProtocol {
+    var jsonString: String? {
         var statsArray = [Any]()
-        for (_, value) in statistics {
+        for (_, value) in stats {
             var entry: [String: Any] = ["type": value.type, "timestamp": value.timestamp_us, "id": value.id]
             for (key, value) in value.values {
                 entry[key] = value
