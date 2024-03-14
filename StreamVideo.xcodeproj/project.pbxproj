@@ -251,7 +251,6 @@
 		40F446022A9E2C23004BE3DA /* DemoCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446012A9E2C23004BE3DA /* DemoCallView.swift */; };
 		40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		40F446062A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */; };
-		40FA12F02B76AC5900CE3EC9 /* CVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA12EF2B76AC5900CE3EC9 /* CVPixelBuffer+Convenience.swift */; };
 		40FA12F22B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */; };
 		40FAF3D32B10F611003F8029 /* UIDevice+Convenience.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */; };
 		40FBEF492AC30343007CFF17 /* Safari.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FBEF482AC30343007CFF17 /* Safari.swift */; };
@@ -1241,7 +1240,6 @@
 		40F446012A9E2C23004BE3DA /* DemoCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallView.swift; sourceTree = "<group>"; };
 		40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "MicrophoneChecker+MicrophoneChecking.swift"; sourceTree = "<group>"; };
 		40F446052A9E2CB8004BE3DA /* CallViewModel+CallSettingsPublisher.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CallViewModel+CallSettingsPublisher.swift"; sourceTree = "<group>"; };
-		40FA12EF2B76AC5900CE3EC9 /* CVPixelBuffer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "CVPixelBuffer+Convenience.swift"; sourceTree = "<group>"; };
 		40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCCVPixelBuffer+Convenience.swift"; sourceTree = "<group>"; };
 		40FAF3D22B10F611003F8029 /* UIDevice+Convenience.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIDevice+Convenience.swift"; sourceTree = "<group>"; };
 		40FBEF482AC30343007CFF17 /* Safari.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Safari.swift; sourceTree = "<group>"; };
@@ -2672,7 +2670,6 @@
 		40FA12EE2B76AC4B00CE3EC9 /* Extensions */ = {
 			isa = PBXGroup;
 			children = (
-				40FA12EF2B76AC5900CE3EC9 /* CVPixelBuffer+Convenience.swift */,
 				40FA12F12B76AC8300CE3EC9 /* RTCCVPixelBuffer+Convenience.swift */,
 			);
 			path = Extensions;
@@ -4968,7 +4965,6 @@
 				84CC058B2A531B0B00EE9815 /* CallSettingsManager.swift in Sources */,
 				84DC38B929ADFCFD00946713 /* MemberRequest.swift in Sources */,
 				84DC38BE29ADFCFD00946713 /* CallSettingsRequest.swift in Sources */,
-				40FA12F02B76AC5900CE3EC9 /* CVPixelBuffer+Convenience.swift in Sources */,
 				402F04AB2B70ED8600CA1986 /* StreamCallStatisticsFormatter.swift in Sources */,
 				8487D8B02A697E9A00536ED4 /* VideoCapturing.swift in Sources */,
 				842B8E242A2DFED900863A87 /* CallSessionParticipantJoinedEvent.swift in Sources */,

@@ -132,24 +132,6 @@ final class StreamBufferTransformerTests: XCTestCase {
         XCTAssertEqual(CVPixelBufferGetHeight(resultBuffer), Int(targetSize.height))
     }
 
-    // MARK: - transform(_: CVPixelBuffer)
-
-    func testTransformPixelBuffer() {
-        // Given
-        let transformer = StreamBufferTransformer()
-        let image = UIImage(named: "test", in: Bundle(for: type(of: self)), with: nil)!
-        let buffer = buffer(from: image)!
-
-        // When
-        let sampleBuffer = transformer.transform(buffer)!
-        let imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer)!
-        let ciimage = CIImage(cvPixelBuffer: imageBuffer)
-        let converted = self.convert(cmage: ciimage)
-
-        // Then)
-        assertSnapshot(matching: converted, as: .image(precision: precision))
-    }
-
     // MARK: - Private Helpers
 
     private func buffer(from image: UIImage) -> CVPixelBuffer? {
@@ -199,5 +181,30 @@ final class StreamBufferTransformerTests: XCTestCase {
         let cgImage = context.createCGImage(cmage, from: cmage.extent)!
         let image = UIImage(cgImage: cgImage)
         return image
+    }
+}
+
+extension CVPixelBuffer {
+    fileprivate static func make(
+        with size: CGSize,
+        pixelFormat: OSType,
+        attributes: [String: Any] = [:]
+    ) -> CVPixelBuffer? {
+        var pixelBuffer: CVPixelBuffer?
+
+        let status = CVPixelBufferCreate(
+            kCFAllocatorDefault,
+            Int(size.width),
+            Int(size.height),
+            pixelFormat,
+            attributes as CFDictionary,
+            &pixelBuffer
+        )
+
+        guard status == kCVReturnSuccess else {
+            return nil
+        }
+
+        return pixelBuffer
     }
 }
