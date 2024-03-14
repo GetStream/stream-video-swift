@@ -30,13 +30,18 @@ final class StreamPixelBufferPool {
         /// Error indicating an unknown issue occurred, including the size of the buffer attempted.
         case unknown(CGSize)
 
+        /// Error indicating that the bufferPool failed to initialise.
+        case unavailableBufferPool
+
         /// A human-readable description of the error.
         var errorDescription: String? {
             switch self {
             case .returnWouldExceedAllocationThreshold:
-                return "Pool is out of buffers, dropping frame"
+                return "BufferPool is out of buffers, dropping frame"
             case let .unknown(bufferSize):
                 return "An unknown error occurred while trying to dequeue a pixelBuffer for size: \(bufferSize)"
+            case .unavailableBufferPool:
+                return "BufferPool is unavailable."
             }
         }
     }
@@ -52,9 +57,6 @@ final class StreamPixelBufferPool {
 
     /// The underlying CVPixelBufferPool managed by this class.
     private var pool: CVPixelBufferPool?
-
-    /// A dispatch queue used for synchronizing access to the pixel buffer pool.
-    private let lockQueue = UnfairQueue()
 
     /// Initializes a new pixel buffer pool with specified characteristics.
     ///
@@ -95,25 +97,23 @@ final class StreamPixelBufferPool {
     /// - Returns: A pixel buffer from the pool.
     /// - Throws: An `Error` if it cannot dequeue a pixel buffer.
     func dequeuePixelBuffer() throws -> CVPixelBuffer {
-        var pixelBuffer: CVPixelBuffer?
-        try lockQueue.sync {
-            if let pool = self.pool {
-                let error = CVPixelBufferPoolCreatePixelBuffer(
-                    nil,
-                    pool,
-                    &pixelBuffer
-                )
+        guard let pool = self.pool else {
+            throw Error.unavailableBufferPool
+        }
 
-                if error == kCVReturnWouldExceedAllocationThreshold {
-                    throw Error.returnWouldExceedAllocationThreshold
-                } else if pixelBuffer == nil {
-                    throw Error.unknown(bufferSize)
-                }
-            }
+        var pixelBuffer: CVPixelBuffer?
+        let error = CVPixelBufferPoolCreatePixelBuffer(
+            nil,
+            pool,
+            &pixelBuffer
+        )
+
+        if error == kCVReturnWouldExceedAllocationThreshold {
+            throw Error.returnWouldExceedAllocationThreshold
+        } else if let pixelBuffer {
+            return pixelBuffer
+        } else {
+            throw Error.unknown(bufferSize)
         }
-        guard let buffer = pixelBuffer else {
-            fatalError("Unexpectedly found nil while unwrapping a PixelBuffer.")
-        }
-        return buffer
     }
 }
