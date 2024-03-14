@@ -89,13 +89,16 @@ extension RTCStatistics: StreamStatisticsProtocol {}
 
 extension RTCStatisticsReport {
     func jsonString(for type: PeerConnectionType) -> String? {
-        let statsKey = type == .publisher ? "publisherStats" : "subscriberStats"
         var statsArray = [Any]()
-        for (key, value) in statistics {
-            statsArray.append([key: value.values])
+        for (_, value) in statistics {
+            var entry: [String: Any] = ["type": value.type, "timestamp": value.timestamp_us, "id": value.id]
+            for (key, value) in value.values {
+                entry[key] = value
+            }
+            statsArray.append(entry)
         }
         if let json = try? JSONSerialization.data(
-            withJSONObject: [statsKey: statsArray],
+            withJSONObject: statsArray,
             options: .prettyPrinted
         ) {
             return String(data: json, encoding: .utf8)
