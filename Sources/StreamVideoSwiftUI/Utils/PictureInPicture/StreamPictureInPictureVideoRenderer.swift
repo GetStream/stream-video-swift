@@ -82,7 +82,7 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
     private let resizeRequiredSizeRatioThreshold: CGFloat = 1
 
     /// A size ratio threshold used to determine if skipping frames is required.
-    private let sizeRatioThreshold: CGFloat = 2
+    private let sizeRatioThreshold: CGFloat = 3
 
     // MARK: - Lifecycle
 
@@ -230,8 +230,11 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         let heightDiffRatio = trackSize.height / contentSize.height
         requiresResize = widthDiffRatio >= resizeRequiredSizeRatioThreshold || heightDiffRatio >= resizeRequiredSizeRatioThreshold
         let requiresFramesSkipping = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
+
+        /// Skipping frames is decided based on how much bigger is the incoming frame's size compared
+        /// to PiP window's size.
         noOfFramesToSkipAfterRendering = requiresFramesSkipping ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) :
-            1
+            0
         skippedFrames = 0
         log.debug(
             "contentSize:\(contentSize), trackId:\(track?.trackId ?? "n/a") trackSize:\(trackSize) requiresResize:\(requiresResize) noOfFramesToSkipAfterRendering:\(noOfFramesToSkipAfterRendering) skippedFrames:\(skippedFrames) widthDiffRatio:\(widthDiffRatio) heightDiffRatio:\(heightDiffRatio)"

@@ -38,7 +38,7 @@ final class DeeplinkTests: StreamTestCase {
                 .replacingOccurrences(of: " ", with: "")
 
             let prodAndStaging = """
-            {"applinks":{"apps":[],"details":[{"appID":"EHV7XZLAHA.io.getstream.iOS.VideoDemoApp","paths":["/video/demos/*","/video/demos"]}]}}
+            {"applinks":{"apps":[],"details":[{"appIDs":["EHV7XZLAHA.io.getstream.iOS.VideoDemoApp","EHV7XZLAHA.io.getstream.rnvideosample"],"paths":["/video/demos/*","/video/demos"]}]}}
             """
             let pronto = """
             {"applinks":{"apps":[],"details":[{"appIDs":["EHV7XZLAHA.io.getstream.iOS.VideoDemoApp","EHV7XZLAHA.io.getstream.iOS.stream-calls-dogfood","EHV7XZLAHA.io.getstream.rnvideosample","EHV7XZLAHA.io.getstream.video.flutter.dogfooding"],"paths":["*"]}]}}
