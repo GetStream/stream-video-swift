@@ -45,14 +45,6 @@ public struct LocalVideoView<Factory: ViewFactory>: View {
             call: call
         )
         .adjustVideoFrame(to: availableFrame.width, ratio: availableFrame.width / availableFrame.height)
-        .rotation3DEffect(
-            .degrees(shouldRotate ? 180 : 0),
-            axis: (x: 0, y: 1, z: 0)
-        )
-    }
-    
-    private var shouldRotate: Bool {
-        callSettings.cameraPosition == .front
     }
 }
 
