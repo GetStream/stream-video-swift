@@ -571,8 +571,8 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         statsRequest.sdk = "stream-ios"
         statsRequest.sdkVersion = SystemEnvironment.version
         statsRequest.webrtcVersion = SystemEnvironment.webRTCVersion
-        statsRequest.publisherStats = report.publisherRawStats?.jsonString(for: .publisher) ?? ""
-        statsRequest.subscriberStats = report.subscriberRawStats?.jsonString(for: .subscriber) ?? ""
+        statsRequest.publisherStats = report.publisherRawStats?.jsonString ?? ""
+        statsRequest.subscriberStats = report.subscriberRawStats?.jsonString ?? ""
         _ = try await signalService.sendStats(sendStatsRequest: statsRequest)
     }
     
