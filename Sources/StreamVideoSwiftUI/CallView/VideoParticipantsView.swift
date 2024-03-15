@@ -349,6 +349,10 @@ public struct VideoCallParticipantView: View {
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
+        .rotation3DEffect(
+            .degrees(shouldRotate ? 180 : 0),
+            axis: (x: 0, y: 1, z: 0)
+        )
         .overlay(
             CallParticipantImageView(
                 id: participant.id,
@@ -360,6 +364,11 @@ public struct VideoCallParticipantView: View {
         )
     }
     
+    @MainActor
+    private var shouldRotate: Bool {
+        streamVideo.user.id == id && call?.state.callSettings.cameraPosition == .front
+    }
+
     private var showVideo: Bool {
         participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
     }
