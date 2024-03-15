@@ -309,6 +309,7 @@ public struct VideoCallParticipantView: View {
     var call: Call?
     
     @State private var isVisible = false
+    @State private var isUsingFrontCameraForLocalUser: Bool = false
 
     public init(
         participant: CallParticipant,
@@ -329,30 +330,28 @@ public struct VideoCallParticipantView: View {
     }
     
     public var body: some View {
-        VideoRendererView(
-            id: id,
-            size: availableFrame.size,
-            contentMode: contentMode,
-            showVideo: showVideo && isVisible,
-            handleRendering: { [weak call] view in
-                guard call != nil else { return }
-                view.handleViewRendering(for: participant) { size, participant in
-                    Task {
-                        await call?.updateTrackSize(size, for: participant)
+        withCallSettingsObservartion {
+            VideoRendererView(
+                id: id,
+                size: availableFrame.size,
+                contentMode: contentMode,
+                showVideo: showVideo && isVisible,
+                handleRendering: { [weak call] view in
+                    guard call != nil else { return }
+                    view.handleViewRendering(for: participant) { size, participant in
+                        Task {
+                            await call?.updateTrackSize(size, for: participant)
+                        }
                     }
                 }
-            }
-        )
+            )
+        }
         .onAppear { isVisible = true }
         .onDisappear { isVisible = false }
         .opacity(showVideo ? 1 : 0)
         .edgesIgnoringSafeArea(edgesIgnoringSafeArea)
         .accessibility(identifier: "callParticipantView")
         .streamAccessibility(value: showVideo ? "1" : "0")
-        .rotation3DEffect(
-            .degrees(shouldRotate ? 180 : 0),
-            axis: (x: 0, y: 1, z: 0)
-        )
         .overlay(
             CallParticipantImageView(
                 id: participant.id,
@@ -363,14 +362,23 @@ public struct VideoCallParticipantView: View {
             .opacity(showVideo ? 0 : 1)
         )
     }
-    
-    @MainActor
-    private var shouldRotate: Bool {
-        streamVideo.user.id == id && call?.state.callSettings.cameraPosition == .front
-    }
 
     private var showVideo: Bool {
         participant.shouldDisplayTrack || customData["videoOn"]?.boolValue == true
+    }
+
+    @MainActor
+    @ViewBuilder
+    private func withCallSettingsObservartion(
+        @ViewBuilder _ content: () -> some View
+    ) -> some View {
+        if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
+            content()
+                .rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+                .onReceive(call?.state.$callSettings) { self.isUsingFrontCameraForLocalUser = $0.cameraPosition == .front }
+        } else {
+            content()
+        }
     }
 }
 
