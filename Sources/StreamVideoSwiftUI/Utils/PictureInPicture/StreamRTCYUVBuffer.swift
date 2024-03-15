@@ -102,7 +102,7 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
 
         var sampleBuffer: CMSampleBuffer?
 
-        var timimgInfo = CMSampleTimingInfo()
+        var timingInfo = CMSampleTimingInfo()
         var formatDescription: CMFormatDescription?
         CMVideoFormatDescriptionCreateForImageBuffer(
             allocator: kCFAllocatorDefault,
@@ -110,11 +110,16 @@ final class StreamRTCYUVBuffer: NSObject, RTCVideoFrameBuffer {
             formatDescriptionOut: &formatDescription
         )
 
+        guard let formatDescription = formatDescription else {
+            log.error("Cannot create sample buffer formatDescription.")
+            return nil
+        }
+
         _ = CMSampleBufferCreateReadyWithImageBuffer(
             allocator: kCFAllocatorDefault,
             imageBuffer: pixelBuffer,
-            formatDescription: formatDescription!,
-            sampleTiming: &timimgInfo,
+            formatDescription: formatDescription,
+            sampleTiming: &timingInfo,
             sampleBufferOut: &sampleBuffer
         )
 

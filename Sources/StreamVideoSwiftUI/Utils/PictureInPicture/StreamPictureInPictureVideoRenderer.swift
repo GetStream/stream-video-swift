@@ -231,9 +231,8 @@ final class StreamPictureInPictureVideoRenderer: UIView, RTCVideoRenderer {
         requiresResize = widthDiffRatio >= resizeRequiredSizeRatioThreshold || heightDiffRatio >= resizeRequiredSizeRatioThreshold
         let requiresFramesSkipping = widthDiffRatio >= sizeRatioThreshold || heightDiffRatio >= sizeRatioThreshold
 
-        /// After the recent changes on using Accelerate for frame processing which lead to a big
-        /// improvement in performance, we don't need to skip frames if the the size of the incoming frame
-        /// is below the sizeRatioThreshold.
+        /// Skipping frames is decided based on how much bigger is the incoming frame's size compared
+        /// to PiP window's size.
         noOfFramesToSkipAfterRendering = requiresFramesSkipping ? max(Int(max(Int(widthDiffRatio), Int(heightDiffRatio)) / 2), 1) :
             0
         skippedFrames = 0
