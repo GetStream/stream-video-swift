@@ -4,7 +4,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 # Upcoming
 
-### 🔄 Changed
+### 🐞 Fixed
+- CallView positioning when placed inside a UIKit container. [#329](https://github.com/GetStream/stream-video-swift/pull/329) 
 
 # [0.5.2](https://github.com/GetStream/stream-video-swift/releases/tag/0.5.2)
 _March 15, 2024_
