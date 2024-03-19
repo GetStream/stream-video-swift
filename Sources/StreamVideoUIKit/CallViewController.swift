@@ -29,6 +29,7 @@ open class CallViewController: UIViewController {
     
     open func setupVideoView() {
         let videoView = makeVideoView(with: DefaultViewFactory.shared)
+        videoView.translatesAutoresizingMaskIntoConstraints = false
         view.embed(videoView)
     }
     
@@ -75,9 +76,9 @@ final class CallViewContainer: UIView {
         uiView.backgroundColor = .clear
         
         super.init(frame: .zero)
-        
-        addSubview(uiView)
-        uiView.frame = frame
+
+        uiView.translatesAutoresizingMaskIntoConstraints = false
+        embed(uiView)
     }
     
     @available(iOS, introduced: 13, obsoleted: 14)
@@ -87,8 +88,8 @@ final class CallViewContainer: UIView {
         
         super.init(frame: .zero)
         
-        addSubview(uiView)
-        uiView.frame = frame
+        uiView.translatesAutoresizingMaskIntoConstraints = false
+        embed(uiView)
     }
     
     @available(*, unavailable)
