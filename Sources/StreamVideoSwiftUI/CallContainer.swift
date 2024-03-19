@@ -154,8 +154,9 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
     
     var viewFactory: Factory
     var viewModel: CallViewModel
-    
-    public init(viewFactory: Factory = DefaultViewFactory.shared, viewModel: CallViewModel) {
+
+    @MainActor
+    public init(viewFactory: Factory, viewModel: CallViewModel) {
         self.viewFactory = viewFactory
         self.viewModel = viewModel
     }
@@ -167,7 +168,8 @@ public struct CallModifier<Factory: ViewFactory>: ViewModifier {
 
 @available(iOS 14.0, *)
 extension CallModifier where Factory == DefaultViewFactory {
-    
+
+    @MainActor
     public init(viewModel: CallViewModel) {
         self.init(viewFactory: DefaultViewFactory.shared, viewModel: viewModel)
     }

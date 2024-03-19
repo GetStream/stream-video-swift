@@ -24,7 +24,24 @@ public struct ScreenSharingView<Factory: ViewFactory>: View {
         screenSharing: ScreenSharingSession,
         availableFrame: CGRect,
         innerItemSpace: CGFloat = 8,
-        viewFactory: Factory = DefaultViewFactory.shared,
+        isZoomEnabled: Bool = true
+    ) where Factory == DefaultViewFactory {
+        self.init(
+            viewModel: viewModel,
+            screenSharing: screenSharing,
+            availableFrame: availableFrame,
+            innerItemSpace: innerItemSpace,
+            viewFactory: DefaultViewFactory.shared,
+            isZoomEnabled: isZoomEnabled
+        )
+    }
+
+    public init(
+        viewModel: CallViewModel,
+        screenSharing: ScreenSharingSession,
+        availableFrame: CGRect,
+        innerItemSpace: CGFloat = 8,
+        viewFactory: Factory,
         isZoomEnabled: Bool = true
     ) {
         self.viewModel = viewModel

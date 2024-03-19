@@ -7,6 +7,7 @@ import GDPerformanceView_Swift
 import StreamVideo
 import SwiftUI
 
+@MainActor
 struct DebugMenu: View {
 
     @Injected(\.colors) var colors

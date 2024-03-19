@@ -12,7 +12,7 @@ public typealias UserTokenUpdater = (UserToken) -> Void
 
 /// Main class for interacting with the `StreamVideo` SDK.
 /// Needs to be initalized with a valid api key, user and token (and token provider).
-public class StreamVideo: ObservableObject {
+public class StreamVideo: ObservableObject, @unchecked Sendable {
     
     public class State: ObservableObject {
         @Published public internal(set) var connection: ConnectionStatus = .initialized

@@ -4,12 +4,12 @@
 
 import StreamVideo
 
-public protocol UserListProvider {
+public protocol UserListProvider: Sendable {
 
     func loadNextUsers(pagination: Pagination) async throws -> [User]
 }
 
-public class StreamUserListProvider: UserListProvider {
+public final class StreamUserListProvider: UserListProvider {
 
     public init() {}
 

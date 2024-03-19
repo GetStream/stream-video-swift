@@ -8,7 +8,7 @@ import struct StreamChat.ChannelId
 import struct StreamChat.ChatChannel
 import class StreamChat.ChatChannelController
 import protocol StreamChat.ChatChannelControllerDelegate
-@preconcurrency import class StreamChat.ChatClient
+import class StreamChat.ChatClient
 import enum StreamChat.EntityChange
 import struct StreamChat.Token
 import StreamChatSwiftUI
