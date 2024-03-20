@@ -332,9 +332,10 @@ extension ViewFactory {
     }
 }
 
-public class DefaultViewFactory: ViewFactory {
+@MainActor
+public final class DefaultViewFactory: ViewFactory, @unchecked Sendable {
 
     private init() { /* Private init. */ }
-    
+
     public static let shared = DefaultViewFactory()
 }

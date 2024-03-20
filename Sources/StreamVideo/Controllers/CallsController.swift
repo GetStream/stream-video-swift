@@ -6,7 +6,7 @@ import Combine
 import Foundation
 
 /// Controller used for querying and watching calls.
-public class CallsController: ObservableObject {
+public class CallsController: ObservableObject, @unchecked Sendable {
     
     /// Observable list of calls.
     @Published public var calls = [Call]()

@@ -7,7 +7,7 @@ import Foundation
 import StreamWebRTC
 
 /// Class that handles a particular call.
-class CallController {
+class CallController: @unchecked Sendable {
         
     private var webRTCClient: WebRTCClient? {
         didSet {

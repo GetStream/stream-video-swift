@@ -20,6 +20,7 @@ extension ImageProcessors {
         ///   - radius: The radius of the corners.
         ///   - unit: Unit of the radius.
         ///   - border: An optional border drawn around the image.
+        @MainActor
         init(radius: CGFloat, unit: ImageProcessingOptions.Unit = .points, border: ImageProcessingOptions.Border? = nil) {
             self.radius = radius.converted(to: unit)
             self.border = border

@@ -46,6 +46,7 @@ extension ImageDecoders {
             }
         }
 
+        @MainActor
         func decode(_ data: Data) throws -> ImageContainer {
             lock.lock()
             defer { lock.unlock() }
@@ -74,6 +75,7 @@ extension ImageDecoders {
             return container
         }
 
+        @MainActor
         func decodePartiallyDownloadedData(_ data: Data) -> ImageContainer? {
             lock.lock()
             defer { lock.unlock() }
@@ -162,6 +164,7 @@ private struct ProgressiveJPEGScanner: Sendable {
 }
 
 extension ImageDecoders.Default {
+    @MainActor
     private static func _decode(_ data: Data, scale: CGFloat?) -> PlatformImage? {
         #if os(macOS)
         return NSImage(data: data)

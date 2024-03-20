@@ -192,6 +192,7 @@ private extension CGContext {
 }
 
 extension CGFloat {
+    @MainActor
     func converted(to unit: ImageProcessingOptions.Unit) -> CGFloat {
         switch unit {
         case .pixels: return self
