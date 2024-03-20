@@ -44,6 +44,7 @@ enum ImageProcessingOptions: Sendable {
         ///   - color: Border color.
         ///   - width: Border width.
         ///   - unit: Unit of the width.
+        @MainActor
         init(color: UIColor, width: CGFloat = 1, unit: Unit = .points) {
             self.color = color
             self.width = width.converted(to: unit)

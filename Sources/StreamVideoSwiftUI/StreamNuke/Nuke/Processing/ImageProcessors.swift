@@ -25,6 +25,7 @@ extension ImageProcessing where Self == ImageProcessors.Resize {
     ///   - crop: If `true` will crop the image to match the target size. Does
     ///   nothing with content mode .aspectFill. `false` by default.
     ///   - upscale: Upscaling is not allowed by default.
+    @MainActor
     static func resize(size: CGSize, unit: ImageProcessingOptions.Unit = .points, contentMode: ImageProcessors.Resize.ContentMode = .aspectFill, crop: Bool = false, upscale: Bool = false) -> ImageProcessors.Resize {
         ImageProcessors.Resize(size: size, unit: unit, contentMode: contentMode, crop: crop, upscale: upscale)
     }
@@ -35,6 +36,7 @@ extension ImageProcessing where Self == ImageProcessors.Resize {
     ///   - width: The target width.
     ///   - unit: Unit of the target size.
     ///   - upscale: `false` by default.
+    @MainActor
     static func resize(width: CGFloat, unit: ImageProcessingOptions.Unit = .points, upscale: Bool = false) -> ImageProcessors.Resize {
         ImageProcessors.Resize(width: width, unit: unit, upscale: upscale)
     }
@@ -45,6 +47,7 @@ extension ImageProcessing where Self == ImageProcessors.Resize {
     ///   - height: The target height.
     ///   - unit: Unit of the target size.
     ///   - upscale: `false` by default.
+    @MainActor
     static func resize(height: CGFloat, unit: ImageProcessingOptions.Unit = .points, upscale: Bool = false) -> ImageProcessors.Resize {
         ImageProcessors.Resize(height: height, unit: unit, upscale: upscale)
     }
@@ -70,6 +73,7 @@ extension ImageProcessing where Self == ImageProcessors.RoundedCorners {
     ///
     /// - important: In order for the corners to be displayed correctly, the image must exactly match the size
     /// of the image view in which it will be displayed. See ``ImageProcessors/Resize`` for more info.
+    @MainActor
     static func roundedCorners(radius: CGFloat, unit: ImageProcessingOptions.Unit = .points, border: ImageProcessingOptions.Border? = nil) -> ImageProcessors.RoundedCorners {
         ImageProcessors.RoundedCorners(radius: radius, unit: unit, border: border)
     }

@@ -40,6 +40,7 @@ extension ImageProcessors {
         ///   - crop: If `true` will crop the image to match the target size.
         ///   Does nothing with content mode .aspectFill.
         ///  - upscale: By default, upscaling is not allowed.
+        @MainActor
         init(size: CGSize, unit: ImageProcessingOptions.Unit = .points, contentMode: ContentMode = .aspectFill, crop: Bool = false, upscale: Bool = false) {
             self.size = Size(size: size, unit: unit)
             self.contentMode = contentMode
@@ -53,6 +54,7 @@ extension ImageProcessors {
         ///   - width: The target width.
         ///   - unit: Unit of the target size.
         ///   - upscale: `false` by default.
+        @MainActor
         init(width: CGFloat, unit: ImageProcessingOptions.Unit = .points, upscale: Bool = false) {
             self.init(size: CGSize(width: width, height: 9999), unit: unit, contentMode: .aspectFit, crop: false, upscale: upscale)
         }
@@ -63,6 +65,7 @@ extension ImageProcessors {
         ///   - height: The target height.
         ///   - unit: Unit of the target size.
         ///   - upscale: By default, upscaling is not allowed.
+        @MainActor
         init(height: CGFloat, unit: ImageProcessingOptions.Unit = .points, upscale: Bool = false) {
             self.init(size: CGSize(width: 9999, height: height), unit: unit, contentMode: .aspectFit, crop: false, upscale: upscale)
         }
@@ -85,6 +88,7 @@ extension ImageProcessors {
 }
 
 // Adds Hashable without making changes to CGSize API
+@MainActor
 private struct Size: Hashable {
     let cgSize: CGSize
 
@@ -97,7 +101,7 @@ private struct Size: Hashable {
         }
     }
 
-    func hash(into hasher: inout Hasher) {
+    nonisolated func hash(into hasher: inout Hasher) {
         hasher.combine(cgSize.width)
         hasher.combine(cgSize.height)
     }
