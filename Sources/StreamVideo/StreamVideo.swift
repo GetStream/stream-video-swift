@@ -487,7 +487,18 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
         let token = UserToken(rawValue: guestUserResponse.accessToken)
         
         // Update the user and token provider.
-        let updatedUser = guestUserResponse.user.toUser
+        var updatedUser = guestUserResponse.user.toUser
+        let lastNameComponent = updatedUser.name.split(separator: "-").last.map { String($0) }
+        if lastNameComponent == user.name {
+            updatedUser = .init(
+                id: updatedUser.id,
+                name: user.name,
+                imageURL: updatedUser.imageURL,
+                role: updatedUser.role,
+                type: updatedUser.type,
+                customData: updatedUser.customData
+            )
+        }
         let tokenProvider = { [environment = self.environment] result in
             Self.loadGuestToken(
                 userId: user.id,
