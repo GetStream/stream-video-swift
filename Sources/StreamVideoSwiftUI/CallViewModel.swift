@@ -511,6 +511,7 @@ open class CallViewModel: ObservableObject {
                 log.error("Error starting a call", error: error)
                 self.error = error
                 callingState = .idle
+                Task { await audioRecorder.stopRecording() }
                 enteringCallTask = nil
             }
         }
