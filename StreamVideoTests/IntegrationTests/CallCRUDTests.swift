@@ -457,7 +457,7 @@ final class CallCRUDTest: IntegrationTest {
         var membersResponse = try await call.queryMembers()
         XCTAssertEqual(2, membersResponse.members.count)
         
-        var blockedUsers = try await call.get().blockedUserIds
+        var blockedUsers = try await call.get().call.blockedUserIds
         XCTAssertEqual(blockedUsers, [user2])
         
         try await call.unblockUser(with: user2)
@@ -465,7 +465,7 @@ final class CallCRUDTest: IntegrationTest {
         membersResponse = try await call.queryMembers()
         XCTAssertEqual(2, membersResponse.members.count)
         
-        blockedUsers = try await call.get().blockedUserIds
+        blockedUsers = try await call.get().call.blockedUserIds
         XCTAssertEqual(blockedUsers, [])
     }
     
@@ -546,13 +546,13 @@ final class CallCRUDTest: IntegrationTest {
         try await call.ring()
         try await customWait()
         
-        var session = try await call.get().session
+        var session = try await call.get().call.session
         XCTAssertEqual(session?.acceptedBy.isEmpty, true, "Call should not be accepted yet")
         
         try await call.accept()
         try await customWait()
         
-        session = try await call.get().session
+        session = try await call.get().call.session
         XCTAssertNotNil(session?.acceptedBy[client.user.id], "Call should be accepted by \(user1)")
     }
     

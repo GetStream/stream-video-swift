@@ -82,7 +82,7 @@ public class LobbyViewModel: ObservableObject, @unchecked Sendable {
         Task {
             let response = try await call.get()
             withAnimation {
-                participants = response.session?.participants.map(\.user.toUser) ?? []
+                participants = response.call.session?.participants.map(\.user.toUser) ?? []
             }
         }
     }
