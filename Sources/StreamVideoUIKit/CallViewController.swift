@@ -14,9 +14,9 @@ open class CallViewController: UIViewController {
     
     private var cancellables = Set<AnyCancellable>()
     
-    public static func make(with viewModel: CallViewModel? = nil) -> CallViewController {
+    public static func make(with viewModel: CallViewModel) -> CallViewController {
         let controller = CallViewController()
-        controller.viewModel = viewModel ?? CallViewModel()
+        controller.viewModel = viewModel
         return controller
     }
     

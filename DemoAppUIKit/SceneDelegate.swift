@@ -28,6 +28,7 @@ class SceneDelegate: UIResponder, UIWindowSceneDelegate {
         }
         window.rootViewController = loginViewController
         window.makeKeyAndVisible()
+        AppEnvironment.tokenExpiration = .never
     }
     
     private func login(_ user: UserCredentials) {
