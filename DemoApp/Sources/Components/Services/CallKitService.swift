@@ -54,45 +54,65 @@ final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
             callId = idComponents[1]
             callType = idComponents[0]
         }
-        let callUUID = UUID()
-        callKitId = callUUID
         update.localizedCallerName = displayName
         update.remoteHandle = CXHandle(type: .generic, value: callerId)
         update.hasVideo = true
+        
         Task {
-            await MainActor.run(body: {
-                setupStreamVideoIfNeeded()
-                connectStreamVideo()
-            })
-        }
-        provider.reportNewIncomingCall(
-            with: callUUID,
-            update: update,
-            completion: completion
-        )
-        checkIfCallWasHandled(callId: callId, type: callType)
-    }
-    
-    private func checkIfCallWasHandled(callId: String, type: String) {
-        Task {
-            let call = streamVideo.call(callType: type, callId: callId)
-            let callState = try await call.get().call
-            let acceptedBy = callState.session?.acceptedBy ?? [:]
-            let rejectedBy = callState.session?.rejectedBy ?? [:]
-            let currentUserId = streamVideo.user.id
-            let isAccepted = acceptedBy[currentUserId] != nil
-            let isRejected = rejectedBy[currentUserId] != nil
-            if (isAccepted || isRejected) && state == .idle {
-                endCurrentCall()
-            } else {
-                createdBy = callState.createdBy.toUser
-                await MainActor.run {
-                    startTimer(timeout: TimeInterval(callState.settings.ring.autoCancelTimeoutMs / 1000))
+            do {
+                let (call, callState) = try await callAndState(
+                    callId: callId,
+                    callType: callType
+                )
+                
+                await MainActor.run(body: {
+                    setupStreamVideoIfNeeded()
+                    connectStreamVideo()
+                })
+
+                let callUUID = UUID()
+                callKitId = callUUID
+
+                if checkIfCallWasHandled(callState: callState) == false, state == .idle {
+                    provider.reportNewIncomingCall(
+                        with: callUUID,
+                        update: update,
+                        completion: completion
+                    )
+                    startRingingTimer(for: callState)
+                } else {
+                    endCurrentCall()
+                    completion(nil)
                 }
+            } catch {
+                endCurrentCall()
+                completion(error)
             }
         }
     }
     
+    private func callAndState(callId: String, callType: String) async throws -> (call: Call, state: GetCallResponse) {
+        let call = streamVideo.call(callType: callType, callId: callId)
+        let callState = try await call.get()
+        return (call, callState)
+    }
+
+    private func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
+        let acceptedBy = callState.call.session?.acceptedBy ?? [:]
+        let rejectedBy = callState.call.session?.rejectedBy ?? [:]
+        let currentUserId = streamVideo.user.id
+        let isAccepted = acceptedBy[currentUserId] != nil
+        let isRejected = rejectedBy[currentUserId] != nil
+        let isRejectedByEveryoneElse = callState.members.count - 1 == rejectedBy.keys.filter { $0 != currentUserId }.count
+
+        return (isAccepted || isRejected || isRejectedByEveryoneElse)
+    }
+
+    private func startRingingTimer(for callState: GetCallResponse) {
+        createdBy = callState.call.createdBy.toUser
+        startTimer(timeout: TimeInterval(callState.call.settings.ring.autoCancelTimeoutMs / 1000))
+    }
+
     @objc func endCurrentCall() {
         guard let callKitId = callKitId else { return }
         let endCallAction = CXEndCallAction(call: callKitId)
