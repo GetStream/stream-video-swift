@@ -76,7 +76,7 @@ final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
     private func checkIfCallWasHandled(callId: String, type: String) {
         Task {
             let call = streamVideo.call(callType: type, callId: callId)
-            let callState = try await call.get()
+            let callState = try await call.get().call
             let acceptedBy = callState.session?.acceptedBy ?? [:]
             let rejectedBy = callState.session?.rejectedBy ?? [:]
             let currentUserId = streamVideo.user.id

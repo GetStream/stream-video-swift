@@ -128,7 +128,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         membersLimit: Int? = nil,
         ring: Bool = false,
         notify: Bool = false
-    ) async throws -> CallResponse {
+    ) async throws -> GetCallResponse {
         let response = try await coordinatorClient.getCall(
             type: callType,
             id: callId,
@@ -140,7 +140,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         if ring {
             streamVideo.state.ringingCall = self
         }
-        return response.call
+        return response
     }
     
     /// Rings the call (sends call notification to members).
@@ -149,7 +149,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func ring() async throws -> CallResponse {
         let response = try await get(ring: true)
         await state.update(from: response)
-        return response
+        return response.call
     }
     
     /// Notifies the users of the call, by sending push notification.
@@ -158,7 +158,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func notify() async throws -> CallResponse {
         let response = try await get(notify: true)
         await state.update(from: response)
-        return response
+        return response.call
     }
 
     @discardableResult

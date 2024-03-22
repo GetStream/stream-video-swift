@@ -347,7 +347,7 @@ open class CallViewModel: ObservableObject {
             Task {
                 let call = streamVideo.call(callType: callType, callId: callId)
                 let info = try await call.get()
-                self.callSettings = info.settings.toCallSettings
+                self.callSettings = info.call.settings.toCallSettings
             }
         }
     }
