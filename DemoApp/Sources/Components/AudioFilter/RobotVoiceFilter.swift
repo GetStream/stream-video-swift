@@ -13,7 +13,7 @@ final class RobotVoiceFilter: AudioFilter {
         self.pitchShift = pitchShift
     }
 
-    func applyEffect(to audioBuffer: inout RTCAudioBuffer) {
+    func applyEffect(to audioBuffer: inout RTCAudioBuffer, sampleRate sampleRateHz: Int) {
         let frameSize = 256
         let hopSize = 128
         let scaleFactor = Float(frameSize) / Float(hopSize)

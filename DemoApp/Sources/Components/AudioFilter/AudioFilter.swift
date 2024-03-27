@@ -7,5 +7,5 @@ import StreamWebRTC
 
 protocol AudioFilter {
 
-    func applyEffect(to audioBuffer: inout RTCAudioBuffer)
+    func applyEffect(to audioBuffer: inout RTCAudioBuffer, sampleRate: Int)
 }

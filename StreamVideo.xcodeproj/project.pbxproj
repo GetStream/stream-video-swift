@@ -885,6 +885,9 @@
 		84EA5D4328C1E944004D3531 /* AudioSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EA5D4228C1E944004D3531 /* AudioSession.swift */; };
 		84EBA4A22A72B81100577297 /* BroadcastBufferConnection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EBA4A12A72B81100577297 /* BroadcastBufferConnection.swift */; };
 		84ED240D286C9515002A3186 /* DemoCallContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240C286C9515002A3186 /* DemoCallContainerView.swift */; };
+		84EE53A02BB2F63500FD2A13 /* libDenoiserSDK.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 84EE539E2BB2F63400FD2A13 /* libDenoiserSDK.a */; };
+		84EE53A52BB2F7A600FD2A13 /* NoiseRemovalHelper.mm in Sources */ = {isa = PBXBuildFile; fileRef = 84EE53A42BB2F7A600FD2A13 /* NoiseRemovalHelper.mm */; };
+		84EE53A72BB3008C00FD2A13 /* NoiseRemovalFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84EE53A62BB3008C00FD2A13 /* NoiseRemovalFilter.swift */; };
 		84F3B0DA289083E70088751D /* WebSocketConstants.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F3B0D9289083E70088751D /* WebSocketConstants.swift */; };
 		84F3B0DE28913E0F0088751D /* CallControlsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F3B0DD28913E0E0088751D /* CallControlsView.swift */; };
 		84F3B0E0289150B10088751D /* CallParticipant.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84F3B0DF289150B10088751D /* CallParticipant.swift */; };
@@ -1823,6 +1826,12 @@
 		84EBA4A12A72B81100577297 /* BroadcastBufferConnection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BroadcastBufferConnection.swift; sourceTree = "<group>"; };
 		84EBAA92288C137E00BE3176 /* Modifiers.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Modifiers.swift; sourceTree = "<group>"; };
 		84ED240C286C9515002A3186 /* DemoCallContainerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoCallContainerView.swift; sourceTree = "<group>"; };
+		84EE539E2BB2F63400FD2A13 /* libDenoiserSDK.a */ = {isa = PBXFileReference; lastKnownFileType = archive.ar; path = libDenoiserSDK.a; sourceTree = "<group>"; };
+		84EE539F2BB2F63400FD2A13 /* denoiser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = denoiser.h; sourceTree = "<group>"; };
+		84EE53A22BB2F7A600FD2A13 /* DemoApp-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "DemoApp-Bridging-Header.h"; sourceTree = "<group>"; };
+		84EE53A32BB2F7A600FD2A13 /* NoiseRemovalHelper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = NoiseRemovalHelper.h; sourceTree = "<group>"; };
+		84EE53A42BB2F7A600FD2A13 /* NoiseRemovalHelper.mm */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.objcpp; path = NoiseRemovalHelper.mm; sourceTree = "<group>"; };
+		84EE53A62BB3008C00FD2A13 /* NoiseRemovalFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NoiseRemovalFilter.swift; sourceTree = "<group>"; };
 		84F3B0D9289083E70088751D /* WebSocketConstants.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WebSocketConstants.swift; sourceTree = "<group>"; };
 		84F3B0DD28913E0E0088751D /* CallControlsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallControlsView.swift; sourceTree = "<group>"; };
 		84F3B0DF289150B10088751D /* CallParticipant.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallParticipant.swift; sourceTree = "<group>"; };
@@ -1888,6 +1897,7 @@
 				844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
+				84EE53A02BB2F63500FD2A13 /* libDenoiserSDK.a in Frameworks */,
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
 				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
@@ -2585,9 +2595,11 @@
 		40F445B82A9E0809004BE3DA /* AudioFilter */ = {
 			isa = PBXGroup;
 			children = (
+				84EE539D2BB2F62100FD2A13 /* lib */,
 				40F445B92A9E0815004BE3DA /* AudioFilter.swift */,
 				40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */,
 				40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */,
+				84EE53A62BB3008C00FD2A13 /* NoiseRemovalFilter.swift */,
 			);
 			path = AudioFilter;
 			sourceTree = "<group>";
@@ -3889,6 +3901,18 @@
 			path = protobuf;
 			sourceTree = "<group>";
 		};
+		84EE539D2BB2F62100FD2A13 /* lib */ = {
+			isa = PBXGroup;
+			children = (
+				84EE539F2BB2F63400FD2A13 /* denoiser.h */,
+				84EE539E2BB2F63400FD2A13 /* libDenoiserSDK.a */,
+				84EE53A32BB2F7A600FD2A13 /* NoiseRemovalHelper.h */,
+				84EE53A42BB2F7A600FD2A13 /* NoiseRemovalHelper.mm */,
+				84EE53A22BB2F7A600FD2A13 /* DemoApp-Bridging-Header.h */,
+			);
+			path = lib;
+			sourceTree = "<group>";
+		};
 		84F58B6E29EE911500010C4C /* WebSocketClient */ = {
 			isa = PBXGroup;
 			children = (
@@ -4365,6 +4389,7 @@
 					};
 					842D8BC22865B31B00801910 = {
 						CreatedOnToolsVersion = 13.3.1;
+						LastSwiftMigration = 1530;
 					};
 					848C46A12A6ABF7E00E5AC09 = {
 						CreatedOnToolsVersion = 14.3.1;
@@ -4642,6 +4667,7 @@
 				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				409145FC2B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
+				84EE53A52BB2F7A600FD2A13 /* NoiseRemovalHelper.mm in Sources */,
 				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */,
@@ -4665,6 +4691,7 @@
 				40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */,
 				40F445BA2A9E0815004BE3DA /* AudioFilter.swift in Sources */,
 				409146132B69165E007F3C17 /* DragIndicatorViewModifier.swift in Sources */,
+				84EE53A72BB3008C00FD2A13 /* NoiseRemovalFilter.swift in Sources */,
 				844ADA692AD3F78F00769F6A /* GoogleHelper.swift in Sources */,
 				409145FD2B68FEF0007F3C17 /* DemoLocalViewModifier.swift in Sources */,
 				409145FF2B68FEF0007F3C17 /* ChangeEnvironmentViewModifier.swift in Sources */,
@@ -5844,6 +5871,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}-Debug.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -5858,6 +5886,7 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "$(SRCROOT)/DemoApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
@@ -5875,6 +5904,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
+					"$(PROJECT_DIR)/DemoApp/Sources/Components/AudioFilter/lib",
 				);
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++17";
@@ -5885,6 +5915,7 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development io.getstream.iOS.VideoDemoApp";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/Sources/Components/AudioFilter/lib/DemoApp-Bridging-Header.h";
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
@@ -6273,6 +6304,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}-Debug.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -6286,6 +6318,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "$(SRCROOT)/DemoApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
@@ -6303,6 +6336,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
+					"$(PROJECT_DIR)/DemoApp/Sources/Components/AudioFilter/lib",
 				);
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++17";
@@ -6313,6 +6347,8 @@
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match Development io.getstream.iOS.VideoDemoApp";
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/Sources/Components/AudioFilter/lib/DemoApp-Bridging-Header.h";
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -6325,6 +6361,7 @@
 				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}.entitlements";
 				CODE_SIGN_IDENTITY = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
@@ -6337,6 +6374,7 @@
 				ENABLE_PREVIEWS = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
+				HEADER_SEARCH_PATHS = "";
 				INFOPLIST_FILE = "$(SRCROOT)/DemoApp/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
@@ -6354,6 +6392,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"$(SDKROOT)/usr/lib/swift",
+					"$(PROJECT_DIR)/DemoApp/Sources/Components/AudioFilter/lib",
 				);
 				MARKETING_VERSION = 1.0;
 				MODULE_VERIFIER_SUPPORTED_LANGUAGE_STANDARDS = "gnu11 gnu++17";
@@ -6363,6 +6402,7 @@
 				PROVISIONING_PROFILE_SPECIFIER = VideoDemoAppStore;
 				"PROVISIONING_PROFILE_SPECIFIER[sdk=iphoneos*]" = "match AppStore io.getstream.iOS.VideoDemoApp";
 				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_OBJC_BRIDGING_HEADER = "DemoApp/Sources/Components/AudioFilter/lib/DemoApp-Bridging-Header.h";
 				SWIFT_STRICT_CONCURRENCY = targeted;
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = "1,2";

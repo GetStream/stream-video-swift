@@ -73,7 +73,7 @@ final class AppState: ObservableObject {
 
     // MARK: Immutable
 
-    let voiceProcessor = DemoVoiceProcessor()
+    lazy var voiceProcessor = DemoVoiceProcessor()
 
     // MARK: Singleton
 
