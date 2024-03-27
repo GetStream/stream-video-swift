@@ -76,7 +76,7 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                             DemoMoreControlListButtonView(
                                 action: {
                                     appState.audioFilter = appState.videoFilter == nil
-                                        ? NoiseRemovalFilter() //RobotVoiceFilter(pitchShift: 0.8)
+                                        ? NoiseRemovalFilter() // RobotVoiceFilter(pitchShift: 0.8)
                                         : nil
                                 },
                                 label: appState.audioFilter == nil
