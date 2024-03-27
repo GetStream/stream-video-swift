@@ -65,7 +65,10 @@ final class CallService {
                 callCid: callCid,
                 displayName: createdByName,
                 callerId: createdById
-            ) { _ in
+            ) { error in
+                if let error {
+                    log.error(error)
+                }
                 completion()
             }
         }
