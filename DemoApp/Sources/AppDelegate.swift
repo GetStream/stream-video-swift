@@ -15,6 +15,9 @@ class AppDelegate: NSObject, UIApplicationDelegate, UNUserNotificationCenterDele
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        // We make sure that that VoIP push notification handling is initialized.
+        _ = CallService.shared
+
         UNUserNotificationCenter.current().delegate = self
         setUpRemoteNotifications()
         setUpPerformanceTracking()

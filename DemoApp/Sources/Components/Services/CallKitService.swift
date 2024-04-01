@@ -113,7 +113,7 @@ final class CallKitService: NSObject, CXProviderDelegate, @unchecked Sendable {
         if !callId.isEmpty {
             stopTimer()
             if state == .inCall {
-                /// If we already handled the call from the App's interface, wesimply fulfilll the action.
+                /// If we already handled the call from the App's interface, we simply fulfil the action.
                 /// - Important: We don't nullify the callKitId to allow us to end the CallKit call
                 /// once we are done.
                 action.fulfill()
