@@ -252,19 +252,23 @@ func reportIncomingCall(
     update.localizedCallerName = displayName
     update.remoteHandle = CXHandle(type: .generic, value: callerId)
     update.hasVideo = true
-    Task {
-        await MainActor.run(body: {
-            setupStreamVideoIfNeeded()
-            connectStreamVideo()
-        })
-    }
+    
     provider.reportNewIncomingCall(
         with: callUUID,
         update: update,
         completion: completion
     )
+
+    Task { @MainActor
+        setupStreamVideoIfNeeded()
+        connectStreamVideo()
+    }
 }
 ```
+
+:::note
+Make sure to report the incoming call before attempting to perform any other operations, as Apple states in their (documentation)[https://developer.apple.com/documentation/pushkit/responding-to-voip-notifications-from-pushkit#Respond-to-VoIP-Push-Notifications-in-Your-App].
+:::
 
 The method also saves the `callId` and `callType`, and it generates a call UUID, which is required by CallKit for identifying calls.
 
