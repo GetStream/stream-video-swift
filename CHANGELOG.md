@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### 🔄 Changed
 - The return type of `call.get()` is now the API type `GetCallResponse` which encapsulates the previous `CallResponse` under the `call` property. [#335](https://github.com/GetStream/stream-video-swift/pull/335)
+- Remove Nuke dependency [#340](https://github.com/GetStream/stream-video-swift/pull/340)
 
 ### 🐞 Fixed
 - An issue where VoIP push notifications for ended calls, were received when the user connects [#336](https://github.com/GetStream/stream-video-swift/pull/336)
