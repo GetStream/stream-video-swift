@@ -26,7 +26,7 @@ final class CallService {
                 case .notLoggedIn:
                     self?.unregisterForIncomingCalls()
                 case .loggedIn:
-                    break
+                    self?.registerForIncomingCalls()
                 }
             }
     }
