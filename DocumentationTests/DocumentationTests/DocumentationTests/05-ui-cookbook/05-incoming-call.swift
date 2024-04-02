@@ -2,7 +2,6 @@ import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
 import Combine
-import NukeUI
 
 @MainActor
 fileprivate func content() {
@@ -32,7 +31,7 @@ fileprivate func content() {
                         .foregroundColor(Color(colors.textLowEmphasis))
                         .padding()
 
-                    LazyImage(url: callInfo.caller.imageURL)
+                    StreamLazyImage(imageURL: callInfo.caller.imageURL)
                         .frame(width: 80, height: 80)
                         .clipShape(RoundedRectangle(cornerRadius: 8))
                         .padding()
