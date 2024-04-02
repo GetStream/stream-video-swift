@@ -166,11 +166,9 @@ struct CameraCheckView: View {
                         Rectangle()
                             .fill(colors.lobbySecondaryBackground)
 
-                        if #available(iOS 14.0, *) {
-                            UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
-                                .accessibility(identifier: "cameraCheckView")
-                                .streamAccessibility(value: "0")
-                        }
+                        UserAvatar(imageURL: streamVideo.user.imageURL, size: 80)
+                            .accessibility(identifier: "cameraCheckView")
+                            .streamAccessibility(value: "0")
                     }
                     .opacity(callSettings.videoOn ? 0 : 1)
                 }
@@ -328,21 +326,14 @@ struct ParticipantsInCallView: View {
             LazyHStack {
                 ForEach(participantsInCall) { participant in
                     VStack {
-                        if let imageURL = participant.user.imageURL {
-                            UserAvatar(imageURL: imageURL, size: 40) {
-                                CircledTitleView(
-                                    title: participant.user.name.isEmpty ? participant.user
-                                        .id : String(participant.user.name.uppercased().first!),
-                                    size: 40
-                                )
-                            }
-                        } else {
+                        UserAvatar(imageURL: participant.user.imageURL, size: 40) {
                             CircledTitleView(
                                 title: participant.user.name.isEmpty ? participant.user
                                     .id : String(participant.user.name.uppercased().first!),
                                 size: 40
                             )
                         }
+
                         Text(participant.user.name)
                             .font(.caption)
                     }

@@ -8,9 +8,9 @@ import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
-@MainActor
 final class ScreenSharingView_Tests: StreamVideoUITestCase {
     
+    @MainActor
     func test_screenSharingView_snapshot() async throws {
         let viewModel = MockCallViewModel()
 

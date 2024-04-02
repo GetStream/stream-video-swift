@@ -100,14 +100,13 @@ struct IncomingCallParticipantView: View {
     var size: CGFloat = .expandedAvatarSize
     
     var body: some View {
-        ZStack {
-            if #available(iOS 14.0, *), let imageURL = participant.user.imageURL {
-                UserAvatar(imageURL: imageURL, size: size)
-            } else {
-                let name = participant.user.name.isEmpty ? "Unknown" : participant.user.name
-                let title = String(name.uppercased().first!)
-                CircledTitleView(title: title, size: size)
-            }
+        UserAvatar(
+            imageURL: participant.user.imageURL,
+            size: size
+        ) {
+            let name = participant.user.name.isEmpty ? "Unknown" : participant.user.name
+            let title = String(name.uppercased().first!)
+            return CircledTitleView(title: title, size: size)
         }
         .frame(width: size, height: size)
         .modifier(ShadowModifier())

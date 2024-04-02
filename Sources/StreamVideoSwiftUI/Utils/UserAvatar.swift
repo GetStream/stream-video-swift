@@ -4,7 +4,6 @@
 
 import SwiftUI
 
-@available(iOS 14.0, *)
 public struct UserAvatar<Failback: View>: View {
 
     public typealias FailbackProvider = () -> _ConditionalContent<Failback, EmptyView>
@@ -32,7 +31,6 @@ public struct UserAvatar<Failback: View>: View {
     }
 }
 
-@available(iOS 14.0, *)
 extension UserAvatar where Failback == EmptyView {
 
     public init(imageURL: URL?, size: CGFloat) {

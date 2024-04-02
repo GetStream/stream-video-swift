@@ -14,7 +14,7 @@ public struct CallBackground: View {
     }
     
     public var body: some View {
-        CallParticipantBackground(imageURL: imageURL) {
+        StreamLazyImage(imageURL: imageURL) {
             FallbackBackground()
         }
     }
@@ -40,28 +40,5 @@ struct DefaultBackgroundGradient: View {
             startPoint: .top,
             endPoint: .bottom
         )
-    }
-}
-
-struct CallParticipantBackground<Background: View>: View {
-    
-    var imageURL: URL?
-    var fallbackBackground: () -> Background
-    
-    var body: some View {
-        ZStack {
-            if #available(iOS 14.0, *), let imageURL = imageURL {
-                StreamLazyImage(imageURL: imageURL) {
-                    fallbackBackground()
-                }
-                .frame(maxWidth: .infinity, maxHeight: .infinity)
-                .blur(radius: 8)
-                .clipped()
-            } else {
-                fallbackBackground()
-            }
-        }
-        .edgesIgnoringSafeArea(.all)
-        .background(fallbackBackground())
     }
 }

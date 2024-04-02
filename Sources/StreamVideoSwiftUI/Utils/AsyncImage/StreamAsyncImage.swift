@@ -9,16 +9,7 @@ struct StreamAsyncImage<Content: View>: View {
 
     var url: URL?
     var scale: CGFloat
-    var conditionalContent: ((Image?) -> Content)?
-
-    init(
-        url: URL?,
-        scale: CGFloat = 1
-    ) where Content == Image {
-        self.url = url
-        self.scale = scale
-        conditionalContent = nil
-    }
+    var conditionalContent: ((Image?) -> Content)
 
     init<I, P>(
         url: URL?,
@@ -38,34 +29,20 @@ struct StreamAsyncImage<Content: View>: View {
     }
 
     var body: some View {
-        if let conditionalContent {
-            if #available(iOS 15.0, *) {
-                AsyncImage(
-                    url: url,
-                    scale: scale,
-                    content: { conditionalContent($0) },
-                    placeholder: { conditionalContent(nil) }
-                )
-            } else {
-                LegacyAsyncImage(
-                    url: url,
-                    scale: scale,
-                    content: { conditionalContent($0) },
-                    placeholder: { conditionalContent(nil) }
-                )
-            }
+        if #available(iOS 15.0, *) {
+            AsyncImage(
+                url: url,
+                scale: scale,
+                content: { conditionalContent($0) },
+                placeholder: { conditionalContent(nil) }
+            )
         } else {
-            if #available(iOS 15.0, *) {
-                AsyncImage(
-                    url: url,
-                    scale: scale
-                )
-            } else {
-                LegacyAsyncImage(
-                    url: url,
-                    scale: scale
-                )
-            }
+            LegacyAsyncImage(
+                url: url,
+                scale: scale,
+                content: { conditionalContent($0) },
+                placeholder: { conditionalContent(nil) }
+            )
         }
     }
 }

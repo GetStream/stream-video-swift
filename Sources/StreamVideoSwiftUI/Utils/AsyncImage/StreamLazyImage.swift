@@ -56,7 +56,7 @@ public struct StreamLazyImage<Placeholder: View>: View {
         case .fill:
             content()
                 .resizable()
-                .scaledToFit()
+                .scaledToFill()
         }
     }
 }
