@@ -358,7 +358,6 @@ public struct VideoCallParticipantView: View {
                 name: participant.name,
                 imageURL: participant.profileImageURL
             )
-            .frame(width: availableFrame.width, height: availableFrame.height, alignment: .center)
             .opacity(showVideo ? 0 : 1)
         )
     }
