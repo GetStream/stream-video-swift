@@ -7,7 +7,6 @@ import Foundation
 
 open class CallKitService {
 
-    @Injected(\.streamVideo) private var streamVideo
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
     @Injected(\.callKitAdapter) private var callKitAdapter
 
@@ -18,21 +17,11 @@ open class CallKitService {
         set { callKitAdapter.iconTemplateImageData = newValue }
     }
 
-    public init() {
-        loggedInStateCancellable = streamVideo
-            .state
-            .$connection
-            .sink { [weak self] in
-                switch $0 {
-                case .connected:
-                    self?.registerForIncomingCalls()
-                case .disconnected:
-                    self?.unregisterForIncomingCalls()
-                default:
-                    break
-                }
-            }
+    public var streamVideo: StreamVideo? {
+        didSet { didUpdate(streamVideo) }
     }
+
+    public init() {}
 
     open func registerForIncomingCalls() {
         #if targetEnvironment(simulator)
@@ -48,6 +37,30 @@ open class CallKitService {
         #else
         callKitPushNotificationAdapter.unregister()
         #endif
+    }
+
+    private func didUpdate(_ streamVideo: StreamVideo?) {
+        callKitAdapter.streamVideo = streamVideo
+
+        guard let streamVideo else {
+            unregisterForIncomingCalls()
+            loggedInStateCancellable = nil
+            return
+        }
+
+        loggedInStateCancellable = streamVideo
+            .state
+            .$connection
+            .sink { [weak self] in
+                switch $0 {
+                case .connected:
+                    self?.registerForIncomingCalls()
+                case .disconnected:
+                    self?.unregisterForIncomingCalls()
+                default:
+                    break
+                }
+            }
     }
 }
 

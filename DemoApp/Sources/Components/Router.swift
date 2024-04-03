@@ -47,7 +47,7 @@ final class Router: ObservableObject {
         appState.unsecureRepository.save(baseURL: AppEnvironment.baseURL)
 
         Task {
-//            try await loadLoggedInUser()
+            try await loadLoggedInUser()
         }
     }
 

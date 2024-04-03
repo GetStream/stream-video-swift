@@ -20,7 +20,6 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         }
     }
 
-    @Injected(\.streamVideo) private var streamVideo
     @Injected(\.callKitAdapter) private var callKitAdapter
 
     open private(set) lazy var registry: PKPushRegistry = .init(queue: .init(label: "io.getstream.voip"))
@@ -54,16 +53,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
         didInvalidatePushTokenFor type: PKPushType
     ) {
         log.debug("Device token invalidated.")
-        guard !deviceToken.isEmpty else {
-            return
-        }
-
-        let deviceToken = self.deviceToken
-        Task {
-            try await streamVideo.deleteDevice(id: deviceToken)
-            log.debug("VoIP push device for \(deviceToken) was deleted.")
-            self.deviceToken = ""
-        }
+        deviceToken = ""
     }
 
     open func pushRegistry(
@@ -80,6 +70,7 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
             .debug(
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
             )
+        
         callKitAdapter.reportIncomingCall(
             content.cid,
             localizedCallerName: content.localizedCallerName,

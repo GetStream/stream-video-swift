@@ -11,6 +11,7 @@ import SwiftUI
 final class AppState: ObservableObject {
     
     @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
+    @Injected(\.callKitService) private var callKitService
 
     // MARK: - Properties
 
@@ -61,6 +62,11 @@ final class AppState: ObservableObject {
             deferSetVoipDevice = false
             activeCallCancellable?.cancel()
             activeCallCancellable = nil
+
+            // Update the streamVideo used by CallKitService to configure proper
+            // VoIP handling.
+            callKitService.streamVideo = streamVideo
+            
             if let streamVideo {
                 activeCallCancellable = streamVideo
                     .state
