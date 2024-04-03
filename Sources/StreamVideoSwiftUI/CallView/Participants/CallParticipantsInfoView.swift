@@ -230,24 +230,13 @@ struct CallParticipantView: View {
     var body: some View {
         VStack(spacing: 4) {
             HStack {
-                Group {
-                    if #available(iOS 14.0, *), let imageURL = participant.profileImageURL {
-                        UserAvatar(imageURL: imageURL, size: imageSize) {
-                            CircledTitleView(
-                                title: participant.name.isEmpty
-                                    ? participant.id
-                                    : String(participant.name.uppercased().first!),
-                                size: imageSize
-                            )
-                        }
-                    } else {
-                        CircledTitleView(
-                            title: participant.name.isEmpty
-                                ? participant.id
-                                : String(participant.name.uppercased().first!),
-                            size: imageSize
-                        )
-                    }
+                UserAvatar(imageURL: participant.profileImageURL, size: imageSize) {
+                    CircledTitleView(
+                        title: participant.name.isEmpty
+                            ? participant.id
+                            : String(participant.name.uppercased().first!),
+                        size: imageSize
+                    )
                 }
                 .overlay(TopRightView { OnlineIndicatorView(indicatorSize: imageSize * 0.3) })
 

@@ -22,7 +22,7 @@ reversed_gci = gci.split('.').reverse.join('.')
 is_localhost = !is_ci
 @force_check = false
 develop_branch = 'main'
-swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi", "**/Nuke*"]
+swiftformat_excluded_paths = ["**/Generated", "**/generated", "**/protobuf", "**/OpenApi"]
 swiftformat_source_paths = ["Sources", "DemoApp", "DemoAppUIKit", "StreamVideoTests", "StreamVideoUIKitTests"]
 
 before_all do |lane|

@@ -7,11 +7,11 @@ import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
-@MainActor
 final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
     
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
+    @MainActor
     func test_spotlight_participantWithAudio_snapshot() {
         for count in spotlightParticipants {
             let participants = ParticipantFactory.get(count, withAudio: true)
@@ -27,6 +27,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         }
     }
     
+    @MainActor
     func test_spotlight_participantWithoutAudio_snapshot() {
         for count in spotlightParticipants {
             let participants = ParticipantFactory.get(count, withAudio: false)
@@ -42,6 +43,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         }
     }
     
+    @MainActor
     func test_spotlight_participantsConnectionQuality_snapshot() throws {
         for quality in connectionQuality {
             let participants = ParticipantFactory.get(spotlightParticipants.last!, connectionQuality: quality)
@@ -58,6 +60,7 @@ final class ParticipantsSpotlightLayout_Tests: StreamVideoUITestCase {
         }
     }
     
+    @MainActor
     func test_spotlight_participantsSpeaking_snapshot() {
         let participants = ParticipantFactory.get(spotlightParticipants.last!, speaking: true)
         let layout = ParticipantsSpotlightLayout(

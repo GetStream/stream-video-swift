@@ -8,7 +8,6 @@ import SnapshotTesting
 import StreamSwiftTestHelpers
 import XCTest
 
-@MainActor
 final class CallingGroupView_Tests: StreamVideoUITestCase {
     
     func test_callingGroupView_isCalling_snapshot() throws {

@@ -117,10 +117,8 @@ struct VideoUserView: View {
     
     var body: some View {
         HStack {
-            if #available(iOS 14.0, *) {
-                UserAvatar(imageURL: user.imageURL, size: avatarSize)
-            }
-            
+            UserAvatar(imageURL: user.imageURL, size: avatarSize)
+
             Text(user.name)
                 .lineLimit(1)
                 .font(fonts.bodyBold)

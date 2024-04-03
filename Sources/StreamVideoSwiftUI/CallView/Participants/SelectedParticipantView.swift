@@ -16,10 +16,8 @@ struct SelectedParticipantView: View {
     
     var body: some View {
         VStack {
-            if #available(iOS 14.0, *) {
-                UserAvatar(imageURL: user.imageURL, size: avatarSize)
-            }
-            
+            UserAvatar(imageURL: user.imageURL, size: avatarSize)
+
             Text(user.name)
                 .lineLimit(1)
                 .font(fonts.footnote)

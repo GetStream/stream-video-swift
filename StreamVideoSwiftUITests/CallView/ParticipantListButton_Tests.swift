@@ -9,11 +9,12 @@ import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
-@MainActor
 final class ParticipantListButton_Tests: StreamVideoUITestCase {
 
+    @MainActor
     private lazy var viewModel: CallViewModel! = .init()
 
+    @MainActor
     override func setUp() {
         super.setUp()
 
@@ -25,6 +26,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
         )
     }
 
+    @MainActor
     override func tearDown() {
         viewModel = nil
         super.tearDown()
@@ -32,10 +34,12 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
 
     // MARK: - Rendering based on viewModel.callParticipants
 
+    @MainActor
     func test_subject_noParticipants_viewWasConfiguredCorrectly() throws {
         assertSubject(makeSubject)
     }
 
+    @MainActor
     func test_subject_withParticipants_viewWasConfiguredCorrectly() async throws {
         viewModel.call?.state.participants = (0..<5).map { _ in CallParticipant.dummy() }
 
@@ -45,6 +49,7 @@ final class ParticipantListButton_Tests: StreamVideoUITestCase {
     // MARK: - Private Helpers
 
     @ViewBuilder
+    @MainActor
     private func makeSubject() -> some View {
         ParticipantsListButton(viewModel: viewModel)
             .frame(width: 100, height: 50)

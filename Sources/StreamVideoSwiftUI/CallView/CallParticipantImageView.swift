@@ -9,6 +9,8 @@ public struct CallParticipantImageView: View {
 
     @Injected(\.colors) var colors
     
+    private let size: CGFloat = 138
+
     var id: String
     var name: String
     var imageURL: URL?
@@ -20,41 +22,17 @@ public struct CallParticipantImageView: View {
     }
 
     public var body: some View {
-        ZStack {
-            CallParticipantBackground(imageURL: imageURL) {
-                Color(colors.participantBackground)
-            }
-            CallParticipantImage(id: id, name: name, imageURL: imageURL)
+        StreamLazyImage(imageURL: imageURL) {
+            Color(colors.participantBackground)
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-    }
-}
-
-struct CallParticipantImage: View {
-    
-    @Injected(\.colors) var colors
-    
-    private let size: CGFloat = 138
-    
-    var id: String
-    var name: String
-    var imageURL: URL?
-    
-    var body: some View {
-        ZStack {
-            if #available(iOS 14.0, *), let imageURL = imageURL {
-                UserAvatar(imageURL: imageURL, size: size) {
-                    CircledTitleView(
-                        title: name.isEmpty ? id : String(name.uppercased().first!),
-                        size: size
-                    )
-                }
-            } else {
+        .blur(radius: 8)
+        .overlay(
+            UserAvatar(imageURL: imageURL, size: size) {
                 CircledTitleView(
                     title: name.isEmpty ? id : String(name.uppercased().first!),
                     size: size
                 )
             }
-        }
+        )
     }
 }

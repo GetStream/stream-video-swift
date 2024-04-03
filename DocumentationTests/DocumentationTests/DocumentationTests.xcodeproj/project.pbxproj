@@ -62,10 +62,6 @@
 		40FFDC832B63FD92004DA7A2 /* StreamVideoSwiftUI in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC822B63FD92004DA7A2 /* StreamVideoSwiftUI */; };
 		40FFDC852B63FD92004DA7A2 /* StreamVideoUIKit in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */; };
 		40FFDC872B63FEAE004DA7A2 /* 05-incoming-call.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC862B63FEAE004DA7A2 /* 05-incoming-call.swift */; };
-		40FFDC8A2B63FEFD004DA7A2 /* Nuke in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC892B63FEFD004DA7A2 /* Nuke */; };
-		40FFDC8C2B63FEFD004DA7A2 /* NukeExtensions in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC8B2B63FEFD004DA7A2 /* NukeExtensions */; };
-		40FFDC8E2B63FEFD004DA7A2 /* NukeUI in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC8D2B63FEFD004DA7A2 /* NukeUI */; };
-		40FFDC902B63FEFD004DA7A2 /* NukeVideo in Frameworks */ = {isa = PBXBuildFile; productRef = 40FFDC8F2B63FEFD004DA7A2 /* NukeVideo */; };
 		40FFDC922B63FF70004DA7A2 /* 06-lobby-preview.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC912B63FF70004DA7A2 /* 06-lobby-preview.swift */; };
 		40FFDC942B6401CC004DA7A2 /* 07-video-fallback.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC932B6401CC004DA7A2 /* 07-video-fallback.swift */; };
 		40FFDC962B64023A004DA7A2 /* 08-permission-requests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC952B64023A004DA7A2 /* 08-permission-requests.swift */; };
@@ -152,13 +148,9 @@
 			buildActionMask = 2147483647;
 			files = (
 				40FFDC832B63FD92004DA7A2 /* StreamVideoSwiftUI in Frameworks */,
-				40FFDC8E2B63FEFD004DA7A2 /* NukeUI in Frameworks */,
 				40FFDC852B63FD92004DA7A2 /* StreamVideoUIKit in Frameworks */,
-				40FFDC902B63FEFD004DA7A2 /* NukeVideo in Frameworks */,
 				40FFDC812B63FD92004DA7A2 /* StreamVideo in Frameworks */,
 				40FFDC742B63F767004DA7A2 /* StreamChatSwiftUI in Frameworks */,
-				40FFDC8A2B63FEFD004DA7A2 /* Nuke in Frameworks */,
-				40FFDC8C2B63FEFD004DA7A2 /* NukeExtensions in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -356,10 +348,6 @@
 				40FFDC802B63FD92004DA7A2 /* StreamVideo */,
 				40FFDC822B63FD92004DA7A2 /* StreamVideoSwiftUI */,
 				40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */,
-				40FFDC892B63FEFD004DA7A2 /* Nuke */,
-				40FFDC8B2B63FEFD004DA7A2 /* NukeExtensions */,
-				40FFDC8D2B63FEFD004DA7A2 /* NukeUI */,
-				40FFDC8F2B63FEFD004DA7A2 /* NukeVideo */,
 			);
 			productName = DocumentationTests;
 			productReference = 400D91B22B63D88100EBA47D /* DocumentationTests.framework */;
@@ -391,7 +379,6 @@
 			mainGroup = 400D91A82B63D88100EBA47D;
 			packageReferences = (
 				40FFDC722B63F767004DA7A2 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */,
-				40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */,
 			);
 			productRefGroup = 400D91B32B63D88100EBA47D /* Products */;
 			projectDirPath = "";
@@ -722,14 +709,6 @@
 				minimumVersion = 4.47.0;
 			};
 		};
-		40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/kean/Nuke";
-			requirement = {
-				kind = upToNextMajorVersion;
-				minimumVersion = 12.3.0;
-			};
-		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -749,26 +728,6 @@
 		40FFDC842B63FD92004DA7A2 /* StreamVideoUIKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = StreamVideoUIKit;
-		};
-		40FFDC892B63FEFD004DA7A2 /* Nuke */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = Nuke;
-		};
-		40FFDC8B2B63FEFD004DA7A2 /* NukeExtensions */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = NukeExtensions;
-		};
-		40FFDC8D2B63FEFD004DA7A2 /* NukeUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = NukeUI;
-		};
-		40FFDC8F2B63FEFD004DA7A2 /* NukeVideo */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 40FFDC882B63FEFD004DA7A2 /* XCRemoteSwiftPackageReference "Nuke" */;
-			productName = NukeVideo;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};

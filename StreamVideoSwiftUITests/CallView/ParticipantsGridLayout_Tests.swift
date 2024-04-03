@@ -8,7 +8,6 @@ import StreamSwiftTestHelpers
 import SnapshotTesting
 import XCTest
 
-@MainActor
 final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
     
     private var mockedOrientation: StreamDeviceOrientation! = .portrait
@@ -44,6 +43,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
 
     private lazy var call = streamVideoUI?.streamVideo.call(callType: callType, callId: callId)
     
+    @MainActor
     func test_grid_participantWithAudio_snapshot() {
         mockedOrientation = .portrait
 
@@ -59,6 +59,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         }
     }
     
+    @MainActor
     func test_grid_participantWithoutAudio_snapshot() {
         mockedOrientation = .portrait
 
@@ -74,6 +75,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         }
     }
     
+    @MainActor
     func test_grid_participantsConnectionQuality_snapshot() throws {
         mockedOrientation = .portrait
 
@@ -90,6 +92,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         }
     }
     
+    @MainActor
     func test_grid_participantsSpeaking_snapshot() {
         mockedOrientation = .portrait
 
