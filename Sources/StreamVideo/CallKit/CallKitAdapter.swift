@@ -68,6 +68,7 @@ open class CallKitAdapter: NSObject, CXProviderDelegate, @unchecked Sendable {
             )
 
         guard let streamVideo else {
+            log.warning("CallKit operation:reportIncomingCall cannot be fulfilled because StreamVideo is nil.")
             callEnded()
             return
         }
@@ -129,6 +130,7 @@ open class CallKitAdapter: NSObject, CXProviderDelegate, @unchecked Sendable {
         }
 
         guard let streamVideo else {
+            log.warning("CallKit operation:answerCall cannot be fulfilled because StreamVideo is nil.")
             callEnded()
             return
         }
@@ -188,7 +190,10 @@ open class CallKitAdapter: NSObject, CXProviderDelegate, @unchecked Sendable {
     }
 
     public func checkIfCallWasHandled(callState: GetCallResponse) -> Bool {
-        guard let streamVideo else { return false }
+        guard let streamVideo else {
+            log.warning("CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.")
+            return false
+        }
 
         let currentUserId = streamVideo.user.id
         let acceptedBy = callState.call.session?.acceptedBy ?? [:]
@@ -220,8 +225,11 @@ open class CallKitAdapter: NSObject, CXProviderDelegate, @unchecked Sendable {
         callEventsSubscription?.cancel()
         callEventsSubscription = nil
 
-        guard let streamVideo else { return }
-        
+        guard let streamVideo else {
+            log.warning("CallKit operation:\(#function) cannot be fulfilled because StreamVideo is nil.")
+            return
+        }
+
         callEventsSubscription = Task {
             for await event in streamVideo.subscribe() {
                 switch event {
