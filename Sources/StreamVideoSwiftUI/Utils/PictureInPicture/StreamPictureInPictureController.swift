@@ -7,6 +7,9 @@ import Combine
 import Foundation
 import StreamVideo
 import StreamWebRTC
+#if canImport(UIKit)
+import UIKit
+#endif
 
 /// A controller class for picture-in-picture whenever that is possible.
 final class StreamPictureInPictureController: NSObject, AVPictureInPictureControllerDelegate {
@@ -36,6 +39,8 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
 
     /// A boolean value indicating whether the picture-in-picture session should start automatically when the app enters background.
     public var canStartPictureInPictureAutomaticallyFromInline: Bool
+
+    private var didAppBecomeActiveCancellable: AnyCancellable?
 
     // MARK: - Private Properties
 
@@ -81,6 +86,8 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
         self.contentViewController = contentViewController
         self.canStartPictureInPictureAutomaticallyFromInline = canStartPictureInPictureAutomaticallyFromInline
         super.init()
+
+        subscribeToApplicationStateNotifications()
     }
 
     // MARK: - AVPictureInPictureControllerDelegate
@@ -180,5 +187,25 @@ final class StreamPictureInPictureController: NSObject, AVPictureInPictureContro
     private func didUpdatePictureInPictureActiveState(_ isActive: Bool) {
         log.debug("isPictureInPictureActive:\(isActive)")
         trackStateAdapter.isEnabled = isActive
+    }
+
+    private func subscribeToApplicationStateNotifications() {
+        #if canImport(UIKit)
+        /// If we are running on a UIKit application, we observe the application state in order to disable
+        /// PictureInPicture when active but the app is in foreground.
+        didAppBecomeActiveCancellable = NotificationCenter.default
+            .publisher(for: UIApplication.didBecomeActiveNotification)
+            .sink { [weak self] _ in self?.applicationDidBecomeActive() }
+        #endif
+    }
+
+    private func applicationDidBecomeActive() {
+        guard
+            let pictureInPictureController,
+            pictureInPictureController.isPictureInPictureActive == true
+        else {
+            return
+        }
+        pictureInPictureController.stopPictureInPicture()
     }
 }
