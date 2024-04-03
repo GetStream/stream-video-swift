@@ -87,6 +87,7 @@ struct LobbyContentView: View {
                 HStack {
                     Spacer()
                     Button {
+                        Task { await microphoneChecker.stopListening() }
                         onCloseLobby()
                     } label: {
                         Image(systemName: "xmark")
