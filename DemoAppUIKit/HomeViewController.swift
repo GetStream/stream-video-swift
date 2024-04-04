@@ -12,7 +12,7 @@ import UIKit
 class HomeViewController: UIViewController {
 
     @Injected(\.streamVideo) var streamVideo
-    @Injected(\.callKitService) var callKitService
+    @Injected(\.callKitAdapter) var callKitAdapter
 
     let callViewModel = CallViewModel()
     lazy var callViewController = CallViewController.make(with: callViewModel)
@@ -60,7 +60,7 @@ class HomeViewController: UIViewController {
         view.backgroundColor = UIColor.white
         listenToIncomingCalls()
 
-        callKitService.registerForIncomingCalls()
+        callKitAdapter.registerForIncomingCalls()
 
         streamVideo
             .state
