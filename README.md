@@ -15,7 +15,7 @@
 
 ![Stream Video for iOS Header image](https://github.com/GetStream/stream-video-swift/assets/12433593/e4a44ae5-a8eb-4ac7-8910-28187aa011f6)
 
-This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repository includes both a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
+This is the official iOS SDK for StreamVideo, a platform for building apps with video and audio calling support. The repository includes a low-level SDK and a set of reusable UI components, available in both UIKit and SwiftUI.
 
 ## What is Stream?
 
@@ -59,6 +59,8 @@ Here are some of the features we support:
 - Push notification providers support
 - Call recording
 - Broadcasting to HLS
+
+Check our [docs](https://getstream.io/video/docs/ios/) to get more details about the supported features and integration guides.
 
 ## Repo Overview 😎
 
@@ -195,16 +197,38 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 
 - [x] Tap to focus
 - [x] Complete reconnection flows
-- [ ] Video UIKit tutorial
-- [ ] Improve logging / Sentry integration
-- [ ] Camera controls
-- [ ] Complete Livestreaming APIs and Tutorials for hosting & watching
-- [ ] Dynascale 2.0
-- [ ] Buttons to simulate ice-restart and SFU switching
+- [x] Camera controls (zooming, tap to focus)
+- [x] Picture-in-picture improvements
 
-### Dynascale 2.0
+### 1.0.0 milestone - April
 
-- currently we support selecting which of the 3 layers you want to send: f, h and q. in addition we should support:
-- changing the resolution of the f track
-- changing the codec that's used from VP8 to h264 or vice versa
-- detecting when webrtc changes the resolution of the f track, and notifying the server about it (if needed)
+- [x] Blur & AI video filters
+- [x] Analytics and stats for calls
+- [x] Standardization across SDKs
+- [x] Livestream, default video player UI for all SDKs
+- [x] Improved CallKit integration
+- [x] Benchmarks for audio rooms and livestreams
+
+### 1.1.0 milestone - June
+
+- [ ] Closed Captions and multi language support for transcriptions
+- [ ] Improve noise reduction/cancelation
+- [ ] Improved support for teams & multi-tenant
+- [ ] Waiting rooms
+- [ ] Session timers
+- [ ] Manual quality selection (currently it's always automatic)
+- [ ] Query call session endpoint + better missed calls support
+- [ ] Audio only call tutorial for each SDK
+- [ ] WHIP
+- [ ] AV1
+- [ ] RTMP out
+
+### After 1.1
+
+- SIP
+- Breakout rooms
+- Transcription Summaries
+- Ingress for SRT, RTSP, SDI, NDI, MTS/ MPEG-2 TS, RIST and Zixi
+- Whiteboards
+- RTSP input (via egress, same as RTMP input)
+- WHEP
