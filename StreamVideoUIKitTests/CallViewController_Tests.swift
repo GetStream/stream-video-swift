@@ -10,6 +10,7 @@ import XCTest
 
 final class CallViewController_Tests: StreamVideoUITestCase {
 
+    @MainActor
     func test_callViewController_outgoingSnapshot() {
         // Given
         let callViewController = CallViewController.make()
