@@ -11,7 +11,13 @@ enum LobbyPage {
     static var closeButton: XCUIElement { app.buttons["Close"] }
     static var joinCallButton: XCUIElement { app.buttons["joinCall"] }
     static var callParticipantsCount: XCUIElement { app.staticTexts["callParticipantsCount"] }
-    static var cameraCheckView: XCUIElement { app.otherElements["cameraCheckView"] }
     static var microphoneCheckView: XCUIElement { app.staticTexts["microphoneCheckView"] }
     static var connectionQualityIndicator: XCUIElement { app.otherElements["connectionQualityIndicator"] }
+    static var cameraCheckView: XCUIElement {
+        if ProcessInfo().operatingSystemVersion.majorVersion < 16 {
+            return app.scrollViews["participantsScrollView"]
+        } else {
+            return app.otherElements["cameraCheckView"]
+        }
+    }
 }
