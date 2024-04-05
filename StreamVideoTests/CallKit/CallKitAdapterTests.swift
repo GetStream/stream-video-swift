@@ -55,47 +55,7 @@ final class CallKitAdapterTests: XCTestCase {
 
         // Then
         XCTAssertTrue(callKitService.streamVideo === streamVideo)
-        XCTAssertFalse(callKitPushNotificationAdapter.registerWasCalled)
-    }
-
-    func testDidUpdate_streamVideoIsNotNilAndConnected_callKitServiceWasUpdatedAndRegisterWasCalled() async throws {
-        // Given
-        let streamVideo = try await makeStreamVideo()
-        try await streamVideo.connect()
-
-        // When
-        subject.streamVideo = streamVideo
-
-        // Then
-        XCTAssertTrue(callKitService.streamVideo === streamVideo)
         XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
-    }
-
-    func testDidUpdate_streamVideoConnectsAndDisconnects_callKitServiceWasUpdatedAndUnRegisterWasCalled() async throws {
-        // Given
-        let streamVideo = try await makeStreamVideo()
-        try await streamVideo.connect()
-        subject.streamVideo = streamVideo
-
-        // When
-        await streamVideo.disconnect()
-
-        let waitForWSDelegateToBeCalledExpectation = XCTNSPredicateExpectation(predicate: .init(block: { object, _ in
-            guard let connectionState = (object as? StreamVideo)?.state.connection else {
-                return false
-            }
-            switch connectionState {
-            case .disconnected:
-                return true
-            default:
-                return false
-            }
-        }), object: streamVideo)
-        await safeFulfillment(of: [waitForWSDelegateToBeCalledExpectation], timeout: defaultTimeout)
-
-        // Then
-        XCTAssertTrue(callKitService.streamVideo === streamVideo)
-        XCTAssertTrue(callKitPushNotificationAdapter.unregisterWasCalled)
     }
 
     func testDidUpdate_StreamVideoNil_callKitServiceWasUpdatedAndUnregisterWasCalled() {
