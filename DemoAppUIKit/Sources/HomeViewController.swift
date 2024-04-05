@@ -124,6 +124,7 @@ final class HomeViewController: UIViewController {
     }
 
     @objc private func didTapStartButton() {
+        textField.resignFirstResponder()
         let next = CallViewController(viewModel: callViewController.viewModel)
         next.startCall(
             callType: "default",
