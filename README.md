@@ -200,15 +200,16 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [x] Camera controls (zooming, tap to focus)
 - [x] Picture-in-picture improvements
 
-### 1.0.0 milestone
+### 1.0.0 milestone - April
 
 - [x] Blur & AI video filters
 - [x] Analytics and stats for calls
 - [x] Standardization across SDKs
 - [x] Livestream, default video player UI for all SDKs
+- [x] Improved CallKit integration
 - [x] Benchmarks for audio rooms and livestreams
 
-### 1.1.0 milestone
+### 1.1.0 milestone - June
 
 - [ ] Closed Captions and multi language support for transcriptions
 - [ ] Improve noise reduction/cancelation
@@ -222,9 +223,12 @@ Video roadmap and changelog is available [here](https://github.com/GetStream/pro
 - [ ] AV1
 - [ ] RTMP out
 
-### Dynascale 2.0
+### After 1.1
 
-- currently we support selecting which of the 3 layers you want to send: f, h and q. in addition we should support:
-- changing the resolution of the f track
-- changing the codec that's used from VP8 to h264 or vice versa
-- detecting when webrtc changes the resolution of the f track, and notifying the server about it (if needed)
+- SIP
+- Breakout rooms
+- Transcription Summaries
+- Ingress for SRT, RTSP, SDI, NDI, MTS/ MPEG-2 TS, RIST and Zixi
+- Whiteboards
+- RTSP input (via egress, same as RTMP input)
+- WHEP
