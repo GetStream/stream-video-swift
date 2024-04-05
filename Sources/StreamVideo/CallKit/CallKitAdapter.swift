@@ -42,7 +42,7 @@ open class CallKitAdapter {
     private func didUpdate(_ streamVideo: StreamVideo?) {
         callKitService.streamVideo = streamVideo
 
-        guard let streamVideo else {
+        guard streamVideo != nil else {
             unregisterForIncomingCalls()
             loggedInStateCancellable = nil
             return

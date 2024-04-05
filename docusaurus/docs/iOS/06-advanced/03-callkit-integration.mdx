@@ -60,311 +60,99 @@ We have a working CallKit integration in our demo app. Feel free to reference it
 
 In order for the CallKit integration to work, you should have a logged in user into your app. For simplicity, we are saving the user in the `UserDefaults`, but we strongly discourage that in production apps, since it's not secure.
 
-### PushKit integration
-
-For handling VoIP push notifications, we will create a new class, called `VoIPPushService`, that implements the `PKPushRegistryDelegate`. Internally, we will create an instance of `PKPushRegistry`, which requests the delivery and handles the receipt of PushKit notifications.
-
-```swift
-class VoIPPushService: NSObject, PKPushRegistryDelegate {
-
-    @Injected(\.streamVideo) var streamVideo
-
-    private let queue: DispatchQueue
-    private let registry: PKPushRegistry
-    private let tokenHandler: VoIPTokenHandler
-
-    var onReceiveIncomingPush: VoIPPushHandler
-
-    init(voIPTokenHandler: VoIPTokenHandler, pushHandler: @escaping VoIPPushHandler) {
-        self.tokenHandler = voIPTokenHandler
-        self.queue = DispatchQueue(label: "io.getstream.voip")
-        self.registry = PKPushRegistry(queue: queue)
-        self.onReceiveIncomingPush = pushHandler
-    }
-}
-```
-
-When the app is started, we need to register for VoIP push notifications, by adding the following method to the `VoipPushService`:
-
-```swift
-func registerForVoIPPushes() {
-    self.registry.delegate = self
-    self.registry.desiredPushTypes = [.voIP]
-}
-```
-
-You should call this method after the user authenticates in your app.
-
-Next, we need to implement the `PKPushRegistryDelegate`:
-
-```swift
-func pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType) {
-    print(credentials.token)
-    let deviceToken = credentials.token.map { String(format: "%02x", $0) }.joined()
-    log.debug("pushRegistry deviceToken = \(deviceToken)")
-    Task {
-        await MainActor.run(body: {
-            AppState.shared.voIPPushToken = deviceToken
-        })
-    }
-}
-        
-func pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType) {
-    log.debug("pushRegistry:didInvalidatePushTokenForType:")
-    if let savedToken = tokenHandler.currentVoIPPushToken() {
-        Task {
-            try await streamVideo.deleteDevice(id: savedToken)
-            tokenHandler.save(voIPPushToken: nil)
-        }
-    }
-}
-
-func pushRegistry(
-    _ registry: PKPushRegistry,
-    didReceiveIncomingPushWith payload: PKPushPayload,
-    for type: PKPushType,
-    completion: @escaping () -> Void
-) {
-    self.onReceiveIncomingPush((payload, type, completion))
-}
-```
-
-When the user sign out , we need to unregister from VoIP push notifications, by adding the following method to the `VoipPushService`:
-
-```swift
-func unregisterForVoIPPushes() {
-    self.registry.delegate = nil
-    self.registry.desiredPushTypes = []
-}
-```
-
-You will need to call this method once the signout flow has been completed.
-
-#### Saving the PN credentials
-
-We're implementing three methods here. The `pushRegistry(_ registry: PKPushRegistry, didUpdate credentials: PKPushCredentials, for type: PKPushType)` method is called when new push notifications credentials are provided. You should use this method to save the device token to our backend. In our sample app, we are storing it in our `AppState` object. Whenever the `StreamVideo` SDK is initalized, we are saving the token to our backend, by calling the `setVoipDevice` method.
-
-```swift
-private func setVoipToken() {
-    if let voipPushToken, let streamVideo {
-        Task {
-            try await streamVideo.setVoipDevice(id: voipPushToken)
-        }
-    }
-}
-```
-
-Also, you should save the token locally, in order to be able to delete it from the backend if the user logs out. For simplicity, we're storing it in a simple `UserDefaults` wrapper, but in a real-world app you should store it in a more secure place, such as the iOS Keychain.
-
-#### Removing the PN credentials
-
-The `pushRegistry(_ registry: PKPushRegistry, didInvalidatePushTokenFor type: PKPushType)` is called when the push token is invalidated. When this method is called, you should delete the value saved with the method `deleteDevice` in `StreamVideo`.
-
-```swift
-try await streamVideo.deleteDevice(id: savedToken)
-```
-
-#### Receiving a push notification
-
-The method `pushRegistry(_ registry: PKPushRegistry, didReceiveIncomingPushWith payload: PKPushPayload, for type: PKPushType, completion: @escaping () -> Void)` is called whenever a VoIP push notification is received. We're just passing this information to another object, called `CallService` (more on that shortly), by calling the `onReceiveIncomingPush` closure.
-
 ### CallKit integration
 
-The `CallService` class handles the `onReceiveIncomingPush` callbacks invoked by the `VoipPushService`. Whenever the handler is called, the `CallService` uses another class, called `CallKitService`, that handles the `CallKit` integration.
+The StreamVideo SDK provides you with the tools for an easy integration with CallKit. Let' see how:
 
+#### Logging in
+
+Firstly, whenever our user logs in and we instantiate a new StreamVideo object, we need to pass it to the `CallKitAdapter` object like below:
 ```swift
-final class CallService {
+@Injected(\.callKitAdapter) var callKitAdapter
 
-    static let shared = CallService()
-    
-    let callService = CallKitService()
-    lazy var voIPPushService = makeVoIPPushService()
+let streamVideo = StreamVideo(
+    apiKey: apiKey,
+    user: user,
+    token: token,
+    tokenProvider: { _ in }
+)
+callKitAdapter.streamVideo = streamVideo
+```
 
-    private init() {}
+In the next (and final step) we are going to instruct the `CallKitAdapter` to register for VoIP push notifications. We can do that in our SwiftUI `onAppear` block as below:
+```swift
+struct MyCustomView: View {
+    @Injected(\.callKitAdapter) var callKitAdapter
 
-    func registerForIncomingCalls() {
-    #if targetEnvironment(simulator)
-        log.info("CallKit notifications not working on a simulator")
-    #else
-        voIPPushService.registerForVoIPPushes()
-    #endif
-    }
+    var body: some View {
+        EmptyView() // Your content goes here.
+        .onAppear {
+            callKitAdapter.registerForIncomingCalls()
 
-    private func unregisterForIncomingCalls() {
-    #if targetEnvironment(simulator)
-        log.info("CallKit notifications not working on a simulator")
-    #else
-        voIPPushService.unregisterForVoIPPushes()
-    #endif
-    }
-
-    private func makeVoIPPushService() -> VoIPPushService {
-        let defaultCallText = "Unknown Caller"
-
-        return .init(voIPTokenHandler: AppState.shared.unsecureRepository) { [weak self] payload, type, completion in
-            guard let self = self else {
-                completion()
-                return
-            }
-
-            let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
-            let callCid = streamDict?["call_cid"] as? String ?? "unknown"
-            let createdByName = streamDict?["created_by_display_name"] as? String ?? defaultCallText
-            let createdById = streamDict?["created_by_id"] as? String ?? defaultCallText
-            
-            self.callService.reportIncomingCall(
-                callCid: callCid,
-                displayName: createdByName,
-                callerId: createdById
-            ) { _ in
-                completion()
-            }
+            // Here we can also inject an image (e.g. a logo) that will be used
+            // by CallKit's UI.
+            callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
         }
     }
 }
 ```
 
-The `CallKitService` has a method called `reportIncomingCall`, which reports the call to the OS:
-
+or if you are using `UIKit`, you can do the same in your `UIViewController` as below:
 ```swift
-func reportIncomingCall(
-    callCid: String,
-    displayName: String,
-    callerId: String,
-    completion: @escaping (Error?) -> Void
-) {
-    let configuration = CXProviderConfiguration()
-    configuration.supportsVideo = true
-    configuration.supportedHandleTypes = [.generic]
-    configuration.iconTemplateImageData = UIImage(named: "logo")?.pngData()
-    let provider = CXProvider(
-        configuration: configuration
-    )
-    provider.setDelegate(self, queue: nil)
-    let update = CXCallUpdate()
-    let idComponents = callCid.components(separatedBy: ":")
-    if idComponents.count >= 2  {
-        self.callId = idComponents[1]
-        self.callType = idComponents[0]
-    }
-    let callUUID = UUID()
-    callKitId = callUUID
-    update.localizedCallerName = displayName
-    update.remoteHandle = CXHandle(type: .generic, value: callerId)
-    update.hasVideo = true
-    
-    provider.reportNewIncomingCall(
-        with: callUUID,
-        update: update,
-        completion: completion
-    )
+final class MyCustomViewController: UIViewController {
+    @Injected(\.callKitAdapter) var callKitAdapter
 
-    Task { @MainActor
-        setupStreamVideoIfNeeded()
-        connectStreamVideo()
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        callKitAdapter.registerForIncomingCalls()
+        callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
     }
 }
 ```
 
-:::note
-Make sure to report the incoming call before attempting to perform any other operations, as Apple states in their (documentation)[https://developer.apple.com/documentation/pushkit/responding-to-voip-notifications-from-pushkit#Respond-to-VoIP-Push-Notifications-in-Your-App].
-:::
+#### Logging out
 
-The method also saves the `callId` and `callType`, and it generates a call UUID, which is required by CallKit for identifying calls.
-
-Before we report the call to `CallKit`, we are also setting up the `StreamVideo` client (if it's not setup already). Also, we are subscribing to web socket events. This is needed to handle the case when the caller stops the call - in this case we should also end the native calling screen.
-
+In order to unregister the device from receiving VoIP push notifications we need to simply call the `CallKitAdapter` and update its `streamVideo` property with `nil`
 ```swift
-@MainActor
-private func setupStreamVideoIfNeeded() {
-    guard let currentUser = UnsecureUserRepository.shared.loadCurrentUser() else {
-        return
-    }
-    if AppState.shared.streamVideo == nil {
-        let streamVideo = StreamVideo(
-            apiKey: Config.apiKey,
-            user: currentUser.userInfo,
-            token: currentUser.token,
-            videoConfig: VideoConfig(),
-            tokenProvider: { result in
-                result(.success(currentUser.token))
-            }
-        )
-        AppState.shared.streamVideo = streamVideo
-    }
-}
+struct MyCustomView: View {
+    @Injected(\.callKitAdapter) var callKitAdapter
 
-private func subscribeToCallEvents() {
-    Task {
-        for await videoEvent in streamVideo.subscribe() {
-            guard let event = CallEventsHandler().checkForCallEvents(from: videoEvent) else {
-                return
-            }
-
-            switch event {
-            case .ended(_):
-                endCurrentCall()
-            default:
-                log.debug("received call event")
-            }
+    var body: some View {
+        Button {
+            // Perform any other logout operations
+            callKitAdapter.streamVideo = nil
+        } label: {
+            Text("Logout")
         }
     }
 }
 ```
 
-The call can happen completely inside the native calling screen, or be transferred to the app. With the latter scenario, the SDKs calling view is presented. Important aspect with this case is syncing the actions performed from the in-app call view with the `CallKit` actions.
+By doing that, the `CallKitAdapter` will make sure to unregister the `VoIP` token from receiving notifications._createMdxContent
 
-First, we need to accept the call both from `CallKit`, as well as initiate the call inside the SDK. This is done with the `provider(_ provider: CXProvider, perform action: CXAnswerCallAction)` method in the `CXProviderDelegate`.
+### VoIP Token Observation
 
+Even though by using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there are still cases where you may want to acces the device's `VoIP` token (e.g. to persist it ).
+
+You can achieve that by accessing the `deviceToken` property on the `CallKitPushNotificationAdapter`
 ```swift
-func provider(_ provider: CXProvider, perform action: CXAnswerCallAction) {
-    if !callId.isEmpty {
-        Task {
-            await MainActor.run {
-                Task {
-                    self.call = streamVideo.call(callType: callType, callId: callId)
-                    AppState.shared.activeCall = call
-                    subscribeToCallEvents()
-                    try await call?.join()
-                    await MainActor.run {
-                        action.fulfill()
-                    }
-                }
-            }
-        }
-    } else {
-        action.fail()
-    }
+@Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
+
+let voIPDeviceToken = callKitPushNotificationAdapter.deviceToken
+```
+
+If you prefer to receive updates whenever the `deviceToken` changes you can observe property using Combine:
+```swift
+@Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
+
+callKitPushNotificationAdapter.$deviceToken.sink { updatedDeviceToken in
+    log.debug("VoIP device token updated: \(updatedDeviceToken)")
 }
 ```
 
-We're also listening to `CallNotification.callEnded` notification, published from the StreamVideo SDK. This notification is sent whenever the user ends the call from the in-app view.
+By using the provided `CallKit` integration tools you can start receiving VoIP push notifications in a breeze. 
 
-```swift
-@objc func endCurrentCall() {
-    guard let callKitId = callKitId else { return }
-    let endCallAction = CXEndCallAction(call: callKitId)
-    let transaction = CXTransaction(action: endCallAction)
-    requestTransaction(transaction)
-    self.callKitId = nil
-}
-```
-
-Similarly, when the user decides to end the call via the `CallKit` interface, we need to cleanup the session in the StreamVideo SDK.
-
-```swift
-func provider(_ provider: CXProvider, perform action: CXEndCallAction) {
-    callKitId = nil
-    call?.leave()
-    call = nil
-    Task {
-        await MainActor.run {
-            AppState.shared.activeCall = nil
-        }
-    }
-    action.fulfill()
-}
-```
+If you woud like to use your integration, there is no need to worry about `StreamVideo` SDK's integration. The integration is only initialized when you set the `CallKitAdapter.streamVideo` property.
 
 ### Starting a call from Recents
 
@@ -401,14 +189,22 @@ In the `CallView` in our DemoApp, we are adding the following code:
 var body: some View {
     HomeView(viewModel: viewModel)
         .modifier(CallModifier(viewModel: viewModel))
-        .onContinueUserActivity(NSStringFromClass(INStartCallIntent.self), perform: { userActivity in
+        .onContinueUserActivity(
+            NSStringFromClass(INStartCallIntent.self),
+            perform: {
+                userActivity in
                 let interaction = userActivity.interaction
                 if let callIntent = interaction?.intent as? INStartCallIntent {
 
                     let contact = callIntent.contacts?.first
 
                     guard let name = contact?.personHandle?.value else { return }
-                    viewModel.startCall(callId: UUID().uuidString, type: .default, members: [.init(id: name)], ring: true)
+                    viewModel.startCall(
+                        callType: .default,
+                        callId: UUID().uuidString,
+                        members: [.init(userId: name)],
+                        ring: true
+                    )
                 }
             }
         )
