@@ -8,18 +8,29 @@ import StreamVideoSwiftUI
 import SwiftUI
 import UIKit
 
+@MainActor
 open class CallViewController: UIViewController {
     
-    public var viewModel: CallViewModel!
+    public private(set) var viewModel: CallViewModel
     
     private var cancellables = Set<AnyCancellable>()
     
-    public static func make(with viewModel: CallViewModel) -> CallViewController {
-        let controller = CallViewController()
-        controller.viewModel = viewModel
-        return controller
+    public static func make(with viewModel: CallViewModel? = nil) -> CallViewController {
+        CallViewController(viewModel: viewModel ?? .init())
+    }
+
+    public convenience init() {
+        self.init(viewModel: .init())
+    }
+
+    public init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        super.init(nibName: nil, bundle: nil)
     }
     
+    @available(*, unavailable)
+    public required init?(coder: NSCoder) { fatalError("init(coder:) has not been implemented") }
+
     override open func viewDidLoad() {
         super.viewDidLoad()
         view = PassthroughView(frame: view.frame)

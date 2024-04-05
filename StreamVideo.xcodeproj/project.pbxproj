@@ -184,20 +184,15 @@
 		40AB35552B738C6E00E465CC /* LoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445EF2A9E2A4B004BE3DA /* LoadingView.swift */; };
 		40AB35562B738C7100E465CC /* CallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493B29E7F5D2002CA428 /* CallsView.swift */; };
 		40AB35572B738C7100E465CC /* CallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84D6493D29E7F75E002CA428 /* CallsViewModel.swift */; };
-		40AB35582B738C7700E465CC /* DemoCallContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DA2A9E2276004BE3DA /* DemoCallContentView.swift */; };
 		40AB35592B738C7700E465CC /* DemoQRCodeScannerButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946422AA5F65300C8861B /* DemoQRCodeScannerButton.swift */; };
 		40AB355A2B738C7700E465CC /* DemoCallsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6A2AD4439D00769F6A /* DemoCallsView.swift */; };
-		40AB355B2B738C7700E465CC /* DemoCallingTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40D946442AA5F67E00C8861B /* DemoCallingTopView.swift */; };
 		40AB355C2B738C7700E465CC /* DemoCallsViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 844ADA6C2AD443AC00769F6A /* DemoCallsViewModel.swift */; };
-		40AB355D2B738C7700E465CC /* DemoCallContainerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84ED240C286C9515002A3186 /* DemoCallContainerView.swift */; };
 		40AB355E2B738C7900E465CC /* DemoCallTopView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84FFB0692A8D1380005BA275 /* DemoCallTopView.swift */; };
 		40AB355F2B738C7D00E465CC /* ReactionsViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F62A9E2AAC004BE3DA /* ReactionsViewModifier.swift */; };
 		40AB35602B738C7D00E465CC /* ReactionIcon.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F22A9E2A87004BE3DA /* ReactionIcon.swift */; };
 		40AB35612B738C7D00E465CC /* ReactionOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445F42A9E2AA1004BE3DA /* ReactionOverlayView.swift */; };
 		40AB35622B738C8100E465CC /* CustomCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 847B47B62A260CF0000714CE /* CustomCallView.swift */; };
 		40AB35652B738CD900E465CC /* Router.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4030E5A12A9DF6B6003E8CBA /* Router.swift */; };
-		40AB35662B738CE800E465CC /* SimpleCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445DF2A9E22EA004BE3DA /* SimpleCallingView.swift */; };
-		40AB35672B738CF100E465CC /* DetailedCallingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84093810288A90390089A35B /* DetailedCallingView.swift */; };
 		40AB35692B738D3D00E465CC /* EffectsLibrary in Frameworks */ = {isa = PBXBuildFile; productRef = 40AB35682B738D3D00E465CC /* EffectsLibrary */; };
 		40AB356D2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
 		40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40AB356C2B73B7A400E465CC /* DemoCallingViewModifier.swift */; };
@@ -253,6 +248,8 @@
 		40F017732BBEF28600E89FD1 /* CallAcceptedEvent+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017722BBEF28600E89FD1 /* CallAcceptedEvent+Dummy.swift */; };
 		40F017752BBEF3E700E89FD1 /* CallRejectedEvent+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017742BBEF3E700E89FD1 /* CallRejectedEvent+Dummy.swift */; };
 		40F017772BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F017762BBEF43B00E89FD1 /* CallSessionParticipantLeftEvent+Dummy.swift */; };
+		40F017882BC014D800E89FD1 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
+		40F0178A2BC014EC00E89FD1 /* Sentry in Frameworks */ = {isa = PBXBuildFile; productRef = 40F017892BC014EC00E89FD1 /* Sentry */; };
 		40F161AB2A4C6B5C00846E3E /* ScreenSharingSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F161AA2A4C6B5C00846E3E /* ScreenSharingSession.swift */; };
 		40F445AC2A9DFC13004BE3DA /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */; };
 		40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AD2A9DFC34004BE3DA /* UserState.swift */; };
@@ -660,7 +657,6 @@
 		849322582908378B0013C029 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 849322572908378B0013C029 /* Assets.xcassets */; };
 		8493225B2908378B0013C029 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 849322592908378B0013C029 /* LaunchScreen.storyboard */; };
 		849322612908385C0013C029 /* HomeViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 849322602908385C0013C029 /* HomeViewController.swift */; };
-		8493226A290919F10013C029 /* LoginViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932269290919F10013C029 /* LoginViewController.swift */; };
 		84932274290929290013C029 /* UIView+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932273290929290013C029 /* UIView+Extensions.swift */; };
 		84932276290929630013C029 /* Animation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932275290929630013C029 /* Animation.swift */; };
 		84932278290929EF0013C029 /* NSLayoutConstraint+Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */; };
@@ -1553,7 +1549,6 @@
 		8493225C2908378B0013C029 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		849322602908385C0013C029 /* HomeViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewController.swift; sourceTree = "<group>"; };
 		8493226229083BF20013C029 /* CallViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallViewController.swift; sourceTree = "<group>"; };
-		84932269290919F10013C029 /* LoginViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LoginViewController.swift; sourceTree = "<group>"; };
 		84932273290929290013C029 /* UIView+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "UIView+Extensions.swift"; sourceTree = "<group>"; };
 		84932275290929630013C029 /* Animation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Animation.swift; sourceTree = "<group>"; };
 		84932277290929EF0013C029 /* NSLayoutConstraint+Extensions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "NSLayoutConstraint+Extensions.swift"; sourceTree = "<group>"; };
@@ -1791,13 +1786,13 @@
 			buildActionMask = 2147483647;
 			files = (
 				844ADA652AD3F1AB00769F6A /* GoogleSignInSwift in Frameworks */,
-				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
-				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
 				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
 				401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */,
 				82EB8F592B0277E70038B5A2 /* StreamWebRTC in Frameworks */,
+				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
+				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1816,12 +1811,13 @@
 			files = (
 				406303462AD9432D0091AE77 /* GoogleSignInSwift in Frameworks */,
 				82E1C14F2AEA7DD50076D7BE /* GDPerformanceView-Swift in Frameworks */,
+				40F0178A2BC014EC00E89FD1 /* Sentry in Frameworks */,
 				4029A62A2AB069600065DAFB /* StreamChatSwiftUI in Frameworks */,
 				40AB35692B738D3D00E465CC /* EffectsLibrary in Frameworks */,
+				848A805D290A808E00F3079B /* StreamVideoUIKit.framework in Frameworks */,
 				848A8058290A808A00F3079B /* StreamVideo.framework in Frameworks */,
 				848A805B290A808C00F3079B /* StreamVideoSwiftUI.framework in Frameworks */,
 				82EB8F5B2B0277EC0038B5A2 /* StreamWebRTC in Frameworks */,
-				848A805D290A808E00F3079B /* StreamVideoUIKit.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2532,6 +2528,43 @@
 			path = Dummy;
 			sourceTree = "<group>";
 		};
+		40F0178B2BC0163A00E89FD1 /* Sources */ = {
+			isa = PBXGroup;
+			children = (
+				84E4F7912947476300DD4CE3 /* CallViewHelper.swift */,
+				8493224E2908378A0013C029 /* AppDelegate.swift */,
+				849322602908385C0013C029 /* HomeViewController.swift */,
+			);
+			path = Sources;
+			sourceTree = "<group>";
+		};
+		40F0178E2BC01A5A00E89FD1 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				849322592908378B0013C029 /* LaunchScreen.storyboard */,
+				8493225C2908378B0013C029 /* Info.plist */,
+				40F017912BC01A7E00E89FD1 /* Assets */,
+				40F017902BC01A6600E89FD1 /* Entitlements */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		40F017902BC01A6600E89FD1 /* Entitlements */ = {
+			isa = PBXGroup;
+			children = (
+				8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */,
+			);
+			path = Entitlements;
+			sourceTree = "<group>";
+		};
+		40F017912BC01A7E00E89FD1 /* Assets */ = {
+			isa = PBXGroup;
+			children = (
+				849322572908378B0013C029 /* Assets.xcassets */,
+			);
+			path = Assets;
+			sourceTree = "<group>";
+		};
 		40F445B52A9E04B2004BE3DA /* Storage */ = {
 			isa = PBXGroup;
 			children = (
@@ -2911,19 +2944,19 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
-				829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */,
-				84F737E7287C137000A363F4 /* Sources */,
+				8427FF652A03D1D100AFD2C3 /* CallIntent */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				8493224D2908378A0013C029 /* DemoAppUIKit */,
-				82392D5C2993CBE200941435 /* TestTools */,
-				84F737F8287C13AD00A363F4 /* StreamVideoTests */,
+				84F73842287C195600A363F4 /* Frameworks */,
+				829EF8782A9364630045D166 /* PrivacyInfo.xcprivacy */,
+				842D8BC42865B31B00801910 /* Products */,
+				848C46A52A6ABF7E00E5AC09 /* ScreenSharing */,
+				84F737E7287C137000A363F4 /* Sources */,
 				84F73814287C141000A363F4 /* StreamVideoSwiftUITests */,
+				84F737F8287C13AD00A363F4 /* StreamVideoTests */,
 				84F73833287C146D00A363F4 /* StreamVideoUIKitTests */,
 				82392D522993C9E100941435 /* SwiftUIDemoAppUITests */,
-				8427FF652A03D1D100AFD2C3 /* CallIntent */,
-				848C46A52A6ABF7E00E5AC09 /* ScreenSharing */,
-				842D8BC42865B31B00801910 /* Products */,
-				84F73842287C195600A363F4 /* Frameworks */,
+				82392D5C2993CBE200941435 /* TestTools */,
 			);
 			sourceTree = "<group>";
 		};
@@ -3228,15 +3261,9 @@
 		8493224D2908378A0013C029 /* DemoAppUIKit */ = {
 			isa = PBXGroup;
 			children = (
-				8228CD8B2911BABF00F32136 /* DemoAppUIKit.entitlements */,
-				8493224E2908378A0013C029 /* AppDelegate.swift */,
+				40F0178E2BC01A5A00E89FD1 /* Resources */,
+				40F0178B2BC0163A00E89FD1 /* Sources */,
 				849322502908378A0013C029 /* SceneDelegate.swift */,
-				84932269290919F10013C029 /* LoginViewController.swift */,
-				849322602908385C0013C029 /* HomeViewController.swift */,
-				84E4F7912947476300DD4CE3 /* CallViewHelper.swift */,
-				849322572908378B0013C029 /* Assets.xcassets */,
-				849322592908378B0013C029 /* LaunchScreen.storyboard */,
-				8493225C2908378B0013C029 /* Info.plist */,
 			);
 			path = DemoAppUIKit;
 			sourceTree = "<group>";
@@ -3971,6 +3998,7 @@
 				82E1C14E2AEA7DD50076D7BE /* GDPerformanceView-Swift */,
 				82EB8F5A2B0277EC0038B5A2 /* StreamWebRTC */,
 				40AB35682B738D3D00E465CC /* EffectsLibrary */,
+				40F017892BC014EC00E89FD1 /* Sentry */,
 			);
 			productName = DemoAppUIKit;
 			productReference = 8493224C290837890013C029 /* DemoAppUIKit.app */;
@@ -4484,7 +4512,6 @@
 			files = (
 				40AB35652B738CD900E465CC /* Router.swift in Sources */,
 				4029A6252AB0691E0065DAFB /* DemoChatAdapter.swift in Sources */,
-				8493226A290919F10013C029 /* LoginViewController.swift in Sources */,
 				40AB355A2B738C7700E465CC /* DemoCallsView.swift in Sources */,
 				406A8EB32AA1D80C001F598A /* AuthenticationProvider.swift in Sources */,
 				4029A6282AB0693C0065DAFB /* DemoReactionsOverlayView.swift in Sources */,
@@ -4497,14 +4524,12 @@
 				40AB35482B738C4C00E465CC /* DragIndicatorViewModifier.swift in Sources */,
 				40AB355C2B738C7700E465CC /* DemoCallsViewModel.swift in Sources */,
 				4029A6272AB069320065DAFB /* DemoChatViewFactory.swift in Sources */,
-				40AB35662B738CE800E465CC /* SimpleCallingView.swift in Sources */,
 				40AB354A2B738C5100E465CC /* ThermalStateViewModifier.swift in Sources */,
 				406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */,
 				406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */,
 				40AB354E2B738C5A00E465CC /* DemoLocalViewModifier.swift in Sources */,
 				40AB35562B738C7100E465CC /* CallsView.swift in Sources */,
 				402F04AF2B7245F800CA1986 /* DemoCallView.swift in Sources */,
-				40AB35582B738C7700E465CC /* DemoCallContentView.swift in Sources */,
 				40AB356E2B73B7A400E465CC /* DemoCallingViewModifier.swift in Sources */,
 				4029A6242AB069100065DAFB /* DemoChatViewModel.swift in Sources */,
 				8493224F2908378A0013C029 /* AppDelegate.swift in Sources */,
@@ -4517,7 +4542,6 @@
 				40AB35592B738C7700E465CC /* DemoQRCodeScannerButton.swift in Sources */,
 				40AB355F2B738C7D00E465CC /* ReactionsViewModifier.swift in Sources */,
 				406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */,
-				40AB355B2B738C7700E465CC /* DemoCallingTopView.swift in Sources */,
 				40AB354F2B738C5D00E465CC /* ChangeEnvironmentViewModifier.swift in Sources */,
 				407F2A002AA6011B00C3EAF8 /* LogQueue.swift in Sources */,
 				40AB35512B738C6400E465CC /* DemoStatsView.swift in Sources */,
@@ -4536,15 +4560,14 @@
 				406A8E9D2AA1D7E9001F598A /* String+Unique.swift in Sources */,
 				406A8E942AA1D7C5001F598A /* UserCredentials.swift in Sources */,
 				40AB35492B738C4E00E465CC /* DemoChatModifier.swift in Sources */,
-				40AB355D2B738C7700E465CC /* DemoCallContainerView.swift in Sources */,
 				849322512908378A0013C029 /* SceneDelegate.swift in Sources */,
 				40AB35542B738C6C00E465CC /* ShareActivityView.swift in Sources */,
 				406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */,
-				40AB35672B738CF100E465CC /* DetailedCallingView.swift in Sources */,
 				4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */,
 				40AB35472B738C4800E465CC /* DemoModalNavigationBarViewModifier.swift in Sources */,
 				40AB35522B738C6600E465CC /* DemoWaitingLocalUserView.swift in Sources */,
 				404CAEE72B8F48F6007087BC /* DemoBackgroundEffectSelector.swift in Sources */,
+				40F017882BC014D800E89FD1 /* DemoApp+Sentry.swift in Sources */,
 				40AB35462B738C4500E465CC /* DemoParticipantOptionsButton.swift in Sources */,
 				40AB35532B738C6A00E465CC /* LinkInfoView.swift in Sources */,
 				40AB35612B738C7D00E465CC /* ReactionOverlayView.swift in Sources */,
@@ -5613,7 +5636,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = DemoAppUIKit/DemoAppUIKit.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -5623,7 +5646,7 @@
 				GCC_OPTIMIZATION_LEVEL = s;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/DemoAppUIKit/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/${TARGET_NAME}/Resources/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -6166,7 +6189,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = DemoAppUIKit/DemoAppUIKit.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
@@ -6175,7 +6198,7 @@
 				ENABLE_MODULE_VERIFIER = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/DemoAppUIKit/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/${TARGET_NAME}/Resources/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -6214,7 +6237,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
-				CODE_SIGN_ENTITLEMENTS = DemoAppUIKit/DemoAppUIKit.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "${TARGET_NAME}/Resources/Entitlements/${TARGET_NAME}.entitlements";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Distribution";
 				CODE_SIGN_STYLE = Manual;
@@ -6225,7 +6248,7 @@
 				ENABLE_MODULE_VERIFIER = YES;
 				GENERATE_INFOPLIST_FILE = NO;
 				GENERATE_PKGINFO_FILE = YES;
-				INFOPLIST_FILE = "$(SRCROOT)/DemoAppUIKit/Info.plist";
+				INFOPLIST_FILE = "$(SRCROOT)/${TARGET_NAME}/Resources/Info.plist";
 				INFOPLIST_KEY_CFBundleDisplayName = "Video Sample UIKit";
 				INFOPLIST_KEY_NSCameraUsageDescription = "DemoApp requires camera access in order to capture and transmit video";
 				INFOPLIST_KEY_NSLocalNetworkUsageDescription = "Atlantis would use Bonjour Service to discover Proxyman app from your local network.";
@@ -6826,6 +6849,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A62A9DF7B400534ED1 /* XCRemoteSwiftPackageReference "effects-library" */;
 			productName = EffectsLibrary;
+		};
+		40F017892BC014EC00E89FD1 /* Sentry */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 8423B7542950BB0A00012F8D /* XCRemoteSwiftPackageReference "sentry-cocoa" */;
+			productName = Sentry;
 		};
 		822FF71A2AEAD0B4000202A7 /* StreamSwiftTestHelpers */ = {
 			isa = XCSwiftPackageProductDependency;
