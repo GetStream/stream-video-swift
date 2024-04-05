@@ -140,15 +140,7 @@ open class StreamCallAudioRecorder: @unchecked Sendable {
     private func setUp() {
         setUpTask = Task {
             do {
-                #if DEBUG
-                let startedOn = Date()
                 try await audioRecorderBuilder.build()
-                let diff = Date().timeIntervalSince1970 - startedOn.timeIntervalSince1970
-                try Task.checkCancellation() // This required to ensure that tests aren't crashing.
-                log.debug("🎙️AVAudioRecorder creation took: \(diff) seconds.")
-                #else
-                try await audioRecorderBuilder.build()
-                #endif
             } catch {
                 if type(of: error) != CancellationError.self {
                     log.error("🎙️Failed to create AVAudioRecorder.", error: error)
