@@ -48,19 +48,7 @@ open class CallKitAdapter {
             return
         }
 
-        loggedInStateCancellable = streamVideo
-            .state
-            .$connection
-            .sink { [weak self] in
-                switch $0 {
-                case .connected:
-                    self?.registerForIncomingCalls()
-                case .disconnected:
-                    self?.unregisterForIncomingCalls()
-                default:
-                    break
-                }
-            }
+        registerForIncomingCalls()
     }
 }
 

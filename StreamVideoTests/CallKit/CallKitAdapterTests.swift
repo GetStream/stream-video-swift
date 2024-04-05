@@ -71,8 +71,7 @@ final class CallKitAdapterTests: XCTestCase {
         XCTAssertTrue(callKitPushNotificationAdapter.registerWasCalled)
     }
 
-    func testDidUpdate_streamVideoIsNotNilAndConnected_whenItDisconnect_callKitServiceWasUpdatedAndUnRegisterWasCalled(
-    ) async throws {
+    func testDidUpdate_streamVideoConnectsAndDisconnects_callKitServiceWasUpdatedAndUnRegisterWasCalled() async throws {
         // Given
         let streamVideo = try await makeStreamVideo()
         try await streamVideo.connect()

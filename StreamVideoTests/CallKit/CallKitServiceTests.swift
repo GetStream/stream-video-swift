@@ -55,7 +55,6 @@ final class CallKitServiceTests: XCTestCase {
     }
 
     func test_reportIncomingCall_streamVideoIsNil_callWasEnded() async throws {
-
         try await assertRequestTransaction(CXEndCallAction.self) {
             subject.reportIncomingCall(
                 cid,
@@ -68,7 +67,6 @@ final class CallKitServiceTests: XCTestCase {
     // MARK: - callAccepted
 
     func test_callAccepted_expectedTransactionWasRequest() async throws {
-
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
@@ -83,7 +81,6 @@ final class CallKitServiceTests: XCTestCase {
     // MARK: - callRejected
 
     func test_callRejected_expectedTransactionWasRequest() async throws {
-
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
@@ -98,7 +95,6 @@ final class CallKitServiceTests: XCTestCase {
     // MARK: - callEnded
 
     func test_callEnded_expectedTransactionWasRequest() async throws {
-
         subject.reportIncomingCall(
             cid,
             localizedCallerName: localizedCallerName,
