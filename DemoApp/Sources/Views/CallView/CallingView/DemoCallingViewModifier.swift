@@ -10,6 +10,7 @@ import SwiftUI
 struct DemoCallingViewModifier: ViewModifier {
 
     @Injected(\.streamVideo) private var streamVideo
+    @Injected(\.callKitAdapter) private var callKitAdapter
     @Injected(\.appearance) private var appearance
 
     @ObservedObject var viewModel: CallViewModel
@@ -65,7 +66,8 @@ struct DemoCallingViewModifier: ViewModifier {
             }
             .onAppear {
                 guard !isAnonymous else { return }
-                CallService.shared.registerForIncomingCalls()
+                callKitAdapter.registerForIncomingCalls()
+                callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
                 joinCallIfNeeded(with: text.wrappedValue)
             }
             .onReceive(appState.$activeCall) { call in

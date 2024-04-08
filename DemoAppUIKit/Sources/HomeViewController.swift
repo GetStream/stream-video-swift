@@ -9,19 +9,20 @@ import StreamVideoUIKit
 import SwiftUI
 import UIKit
 
-class HomeViewController: UIViewController {
-    
+final class HomeViewController: UIViewController {
+
     @Injected(\.streamVideo) var streamVideo
-    
-    let callViewModel = CallViewModel()
+    @Injected(\.callKitAdapter) var callKitAdapter
+
+    lazy var callViewController = CallViewController()
     let reuseIdentifier = "ParticipantCell"
     let startButton = UIButton(type: .system)
     var textField = UITextField()
     var participantsTableView: UITableView!
     var text: String = ""
-    
+
     private var cancellables = Set<AnyCancellable>()
-    
+
     lazy var participants: [User] = {
         var participants = User.builtIn
         participants.removeAll { userInfo in
@@ -29,13 +30,13 @@ class HomeViewController: UIViewController {
         }
         return participants
     }()
-    
+
     var selectedParticipants = [User]() {
         didSet {
             participantsTableView.reloadData()
         }
     }
-        
+
     override func viewDidLoad() {
         super.viewDidLoad()
         title = "Call Details"
@@ -56,9 +57,31 @@ class HomeViewController: UIViewController {
             stackView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor)
         ])
         view.backgroundColor = UIColor.white
+
+        // Present incoming call UI when the app is in the foreground.
         listenToIncomingCalls()
+
+        // Handle CallKit VoIP notifications.
+        callKitAdapter.registerForIncomingCalls()
+        callKitAdapter.iconTemplateImageData = UIImage(named: "logo")?.pngData()
+
+        streamVideo
+            .state
+            .$activeCall
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in
+                self?.callViewController.viewModel.setActiveCall($0)
+            }
+            .store(in: &cancellables)
+
+        navigationItem.leftBarButtonItem = .init(
+            title: "Logout",
+            primaryAction: .init { [weak self] _ in self?.didTapLogout() }
+        )
     }
-    
+
+    // MARK: - Private Helpers
+
     private func createParticipantsView() -> UITableView {
         participantsTableView = UITableView()
         participantsTableView.delegate = self
@@ -72,21 +95,21 @@ class HomeViewController: UIViewController {
         participantsTableView.widthAnchor.constraint(equalToConstant: UIScreen.main.bounds.size.width).isActive = true
         return participantsTableView
     }
-    
+
     private func createParticipantsTitle() -> UILabel {
         let title = UILabel()
         title.text = "Select participants"
         title.font = .preferredFont(forTextStyle: .title3)
         return title
     }
-    
+
     private func createInputField() -> UITextField {
         textField.placeholder = "Insert a call id"
         textField.translatesAutoresizingMaskIntoConstraints = false
         textField.addTarget(self, action: #selector(textFieldDidChange), for: .editingChanged)
         return textField
     }
-    
+
     private func createStartButton() -> UIButton {
         startButton.translatesAutoresizingMaskIntoConstraints = false
         startButton.setTitle("Start Call", for: .normal)
@@ -94,14 +117,15 @@ class HomeViewController: UIViewController {
         startButton.isEnabled = false
         return startButton
     }
-    
+
     @objc private func textFieldDidChange() {
         text = textField.text ?? ""
         startButton.isEnabled = !text.isEmpty
     }
-    
+
     @objc private func didTapStartButton() {
-        let next = CallViewController.make(with: callViewModel)
+        textField.resignFirstResponder()
+        let next = CallViewController(viewModel: callViewController.viewModel)
         next.startCall(
             callType: "default",
             callId: text,
@@ -109,28 +133,65 @@ class HomeViewController: UIViewController {
         )
         CallViewHelper.shared.add(callView: next.view)
     }
-    
+
+    private func didTapLogout() {
+        let alertController = UIAlertController(
+            title: "Sign out",
+            message: "Are you sure you want to sign out?",
+            preferredStyle: .alert
+        )
+
+        alertController.addAction(.init(title: "Sign out", style: .destructive, handler: { _ in
+            Task { await AppState.shared.logout() }
+        }))
+
+        alertController.addAction(.init(title: "Cancel", style: .cancel))
+
+        present(alertController, animated: true)
+    }
+
     private func listenToIncomingCalls() {
-        callViewModel.$callingState.sink { [weak self] newState in
-            guard let self = self else { return }
-            if case .incoming = newState, self == self.navigationController?.topViewController {
-                let next = CallViewController.make(with: self.callViewModel)
-                CallViewHelper.shared.add(callView: next.view)
-            } else if newState == .idle {
-                CallViewHelper.shared.removeCallView()
+        callViewController
+            .viewModel
+            .$callingState
+            .removeDuplicates()
+            .sink { [weak self] newState in
+                log.debug("[UIKit]Received callingState \(newState)")
+                switch newState {
+                case .incoming:
+                    self?.presentCallContainer()
+                case .inCall:
+                    self?.presentCallContainer()
+                default:
+                    log.debug("[UIKit]Unhandled callingState \(newState)")
+                }
             }
+            .store(in: &cancellables)
+    }
+
+    private func presentCallContainer() {
+        guard self == navigationController?.topViewController else {
+            log.warning("[UIKit]Cannot present callView!.")
+            return
         }
-        .store(in: &cancellables)
+        CallViewHelper.shared.removeCallView()
+        CallViewHelper.shared.add(callView: callViewController.view)
     }
 }
 
 extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
-    
-    func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+
+    func tableView(
+        _ tableView: UITableView,
+        numberOfRowsInSection section: Int
+    ) -> Int {
         participants.count
     }
-    
-    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+
+    func tableView(
+        _ tableView: UITableView,
+        cellForRowAt indexPath: IndexPath
+    ) -> UITableViewCell {
         var cell = tableView.dequeueReusableCell(withIdentifier: reuseIdentifier)
         if cell == nil {
             cell = UITableViewCell(style: .default, reuseIdentifier: reuseIdentifier)
@@ -143,8 +204,11 @@ extension HomeViewController: UITableViewDelegate, UITableViewDataSource {
         cell?.textLabel?.text = text
         return cell!
     }
-    
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+
+    func tableView(
+        _ tableView: UITableView,
+        didSelectRowAt indexPath: IndexPath
+    ) {
         let participant = participants[indexPath.row]
         if selectedParticipants.contains(participant) {
             selectedParticipants.removeAll { userInfo in

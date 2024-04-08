@@ -18,19 +18,19 @@ extension UIView {
         ])
     }
     
-    func pinItem(anchors: [LayoutAnchorName] = [.top, .leading, .bottom, .trailing], to view: UIView) {
+    public func pinItem(anchors: [LayoutAnchorName] = [.top, .leading, .bottom, .trailing], to view: UIView) {
         anchors
             .map { $0.makeConstraint(fromView: self, toView: view) }
             .forEach { $0.isActive = true }
     }
     
-    func pinItem(anchors: [LayoutAnchorName] = [.top, .leading, .bottom, .trailing], to layoutGuide: UILayoutGuide) {
+    public func pinItem(anchors: [LayoutAnchorName] = [.top, .leading, .bottom, .trailing], to layoutGuide: UILayoutGuide) {
         anchors
             .compactMap { $0.makeConstraint(fromView: self, toLayoutGuide: layoutGuide) }
             .forEach { $0.isActive = true }
     }
     
-    func pinItem(anchors: [LayoutAnchorName] = [.width, .height], to constant: CGFloat) {
+    public func pinItem(anchors: [LayoutAnchorName] = [.width, .height], to constant: CGFloat) {
         anchors
             .compactMap { $0.makeConstraint(fromView: self, constant: constant) }
             .forEach { $0.isActive = true }
@@ -111,7 +111,7 @@ extension NSLayoutConstraint {
     }
 }
 
-enum LayoutAnchorName {
+public enum LayoutAnchorName {
     case bottom
     case centerX
     case centerY

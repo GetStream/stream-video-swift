@@ -6,46 +6,43 @@ import Foundation
 import Sentry
 import StreamVideo
 
-extension DemoApp {
-
-    private struct DemoLogFormatter: LogFormatter {
-        func format(logDetails: LogDetails, message: String) -> String {
-            guard logDetails.level == .error, let error = logDetails.error else {
-                return message
-            }
-            return "\(message) [Error details: \(error)]"
+private struct DemoLogFormatter: LogFormatter {
+    func format(logDetails: LogDetails, message: String) -> String {
+        guard logDetails.level == .error, let error = logDetails.error else {
+            return message
         }
+        return "\(message) [Error details: \(error)]"
     }
+}
 
-    func configureSentry() {
-        if AppEnvironment.configuration.isRelease {
-            // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
-            SentrySDK.start { options in
-                options.dsn = "https://855ff07b9c1841e38842682d5a87d7b4@o389650.ingest.sentry.io/4505447573356544"
-                options.debug = true
-                options.tracesSampleRate = 1.0
-                options.enableAppHangTracking = true
-                options.failedRequestStatusCodes = [
-                    HttpStatusCodeRange(min: 400, max: 400),
-                    HttpStatusCodeRange(min: 404, max: 599)
-                ]
-            }
-
-            LogConfig.destinationTypes = [
-                SentryLogDestination.self,
-                MemoryLogDestination.self,
-                OSLogDestination.self
-            ]
-        } else {
-            LogConfig.level = .debug
-            LogConfig.destinationTypes = [
-                MemoryLogDestination.self,
-                OSLogDestination.self
-            ]
-            LogConfig.formatters = [
-                DemoLogFormatter()
+func configureSentry() {
+    if AppEnvironment.configuration.isRelease {
+        // We're tracking Crash Reports / Issues from the Demo App to keep improving the SDK
+        SentrySDK.start { options in
+            options.dsn = "https://855ff07b9c1841e38842682d5a87d7b4@o389650.ingest.sentry.io/4505447573356544"
+            options.debug = true
+            options.tracesSampleRate = 1.0
+            options.enableAppHangTracking = true
+            options.failedRequestStatusCodes = [
+                HttpStatusCodeRange(min: 400, max: 400),
+                HttpStatusCodeRange(min: 404, max: 599)
             ]
         }
+
+        LogConfig.destinationTypes = [
+            SentryLogDestination.self,
+            MemoryLogDestination.self,
+            OSLogDestination.self
+        ]
+    } else {
+        LogConfig.level = .debug
+        LogConfig.destinationTypes = [
+            MemoryLogDestination.self,
+            OSLogDestination.self
+        ]
+        LogConfig.formatters = [
+            DemoLogFormatter()
+        ]
     }
 }
 

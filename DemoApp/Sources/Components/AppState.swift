@@ -10,9 +10,13 @@ import SwiftUI
 @MainActor
 final class AppState: ObservableObject {
     
+    @Injected(\.callKitPushNotificationAdapter) private var callKitPushNotificationAdapter
+    @Injected(\.callKitAdapter) private var callKitAdapter
+
     // MARK: - Properties
 
     private var activeCallCancellable: AnyCancellable?
+    private var callKitDeviceTokenObservation: AnyCancellable?
 
     // MARK: Published
 
@@ -27,7 +31,7 @@ final class AppState: ObservableObject {
         didSet {
             if voIPPushToken != oldValue {
                 unsecureRepository.save(voIPPushToken: voIPPushToken)
-                didUpdate(voIPPushToken: voIPPushToken)
+                didUpdate(voIPPushToken: voIPPushToken, oldValue: oldValue)
             }
         }
     }
@@ -53,11 +57,16 @@ final class AppState: ObservableObject {
     var streamVideo: StreamVideo? {
         didSet {
             didUpdate(pushToken: pushToken)
-            didUpdate(voIPPushToken: voIPPushToken)
+            didUpdate(voIPPushToken: voIPPushToken, oldValue: nil)
             deferSetDevice = false
             deferSetVoipDevice = false
             activeCallCancellable?.cancel()
             activeCallCancellable = nil
+
+            // Update the streamVideo used by CallKitAdapter to configure proper
+            // VoIP handling.
+            callKitAdapter.streamVideo = streamVideo
+
             if let streamVideo {
                 activeCallCancellable = streamVideo
                     .state
@@ -90,6 +99,11 @@ final class AppState: ObservableObject {
         case .release:
             users = []
         }
+
+        callKitDeviceTokenObservation = callKitPushNotificationAdapter
+            .$deviceToken
+            .receive(on: DispatchQueue.main)
+            .sink { [weak self] in self?.voIPPushToken = $0 }
     }
     
     // MARK: - Actions
@@ -135,11 +149,16 @@ final class AppState: ObservableObject {
 
     // MARK: - Private API
 
-    private func didUpdate(voIPPushToken: String?) {
+    private func didUpdate(voIPPushToken: String?, oldValue: String?) {
         if let voIPPushToken, let streamVideo {
             Task {
                 do {
-                    try await streamVideo.setVoipDevice(id: voIPPushToken)
+                    if let oldValue, !oldValue.isEmpty {
+                        _ = try? await streamVideo.deleteDevice(id: oldValue)
+                    }
+                    if !voIPPushToken.isEmpty {
+                        try await streamVideo.setVoipDevice(id: voIPPushToken)
+                    }
                     log.debug("VOIP push notification registration ✅")
                 } catch {
                     log.error("VOIP push notification registration ❌:\(error)")

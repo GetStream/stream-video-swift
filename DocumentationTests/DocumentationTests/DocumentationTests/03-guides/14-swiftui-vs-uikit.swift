@@ -31,7 +31,7 @@ fileprivate func content() {
             var text = ""
 
             private func didTapStartButton() {
-                let next = CallViewController.make(with: callViewModel)
+                let next = CallViewController(viewModel: callViewModel)
                 next.modalPresentationStyle = .fullScreen
                 next.startCall(callType: "default", callId: text, members: selectedParticipants)
                 self.navigationController?.present(next, animated: true)

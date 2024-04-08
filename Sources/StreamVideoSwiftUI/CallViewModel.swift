@@ -597,7 +597,7 @@ open class CallViewModel: ObservableObject {
     }
     
     private func handleRejectedEvent(_ callEvent: CallEvent) {
-        if case .rejected = callEvent {
+        if case let .rejected(event) = callEvent, event.callId == call?.callId {
             let outgoingMembersCount = outgoingCallMembers.filter { $0.userId != streamVideo.user.id }.count
             let rejections = call?.state.session?.rejectedBy.count ?? 0
             let accepted = call?.state.session?.acceptedBy.count ?? 0
