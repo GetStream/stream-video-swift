@@ -9,7 +9,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Remove Nuke dependency from the SwiftUI SDK. [#340](https://github.com/GetStream/stream-video-swift/pull/340)
 
 ### ✅ Added
-- The SDK now provides a mechanism to manage CallKit integration. [#334](https://github.com/GetStream/stream-video-swift/pull/334)
+- The SDK now provides a CallKit integration out of the box. [#334](https://github.com/GetStream/stream-video-swift/pull/334)
 
 ### 🐞 Fixed
 - An issue where VoIP push notifications for ended calls, were received when the user connects [#336](https://github.com/GetStream/stream-video-swift/pull/336)
