@@ -159,3 +159,21 @@ ForEach(participants) { participant in
 ```
 
 Note that the container above is ommited, since you can use a `LazyVGrid`, `LazyVStack`, `LazyHStack` or other container component, based on your UI requirements.
+
+### Mirroring the VideoRendererView
+
+In most video calling apps, the video feed of the current user is mirrored. If you use the higher level view `VideoCallParticipantView`, the flipping is automatically handled, depending on whether the user is the current one. If you use the `VideoRendererView` directly, you would need to apply the flipping by yourself. 
+
+To mirror the view, you can use the following SwiftUI modifier:
+
+```swift
+.rotation3DEffect(.degrees(180), axis: (x: 0, y: 1, z: 0))
+```
+
+You can check whether the video renderer view is for the current user with the following code:
+
+```swift
+if participant.id == streamVideo.state.activeCall?.state.localParticipant?.id {
+    // apply the modifier
+}
+```
