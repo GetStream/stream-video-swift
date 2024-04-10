@@ -1,0 +1,12 @@
+//
+//  module.map.modulemap
+//  
+//
+//  Created by Ilias Pavlidakis on 10/4/24.
+//
+
+module StreamKrispPlugin {
+    header "KrispAudioProcessor.h"
+
+    export *
+}

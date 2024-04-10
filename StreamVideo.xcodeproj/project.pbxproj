@@ -47,6 +47,11 @@
 		4031D7F62B801D8A002EC6E4 /* LocalParticipantSnapshotViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA62B7FB1C9006BED93 /* LocalParticipantSnapshotViewModel.swift */; };
 		4031D7F82B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */; };
 		4031D7FA2B84B077002EC6E4 /* StreamActiveCallProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */; };
+		403591382BC53D0A00B5B767 /* StreamNoiseCancellationFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403591372BC53D0A00B5B767 /* StreamNoiseCancellationFilter.swift */; };
+		4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 4035913B2BC53D2A00B5B767 /* Accelerate.framework */; };
+		403591692BC54D9C00B5B767 /* DemoAudioEffectSelector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403591682BC54D9C00B5B767 /* DemoAudioEffectSelector.swift */; };
+		403591742BC6D8DD00B5B767 /* StreamVideoNoiseCancellation in Frameworks */ = {isa = PBXBuildFile; productRef = 403591732BC6D8DD00B5B767 /* StreamVideoNoiseCancellation */; };
+		403591752BC6DBD700B5B767 /* StreamVideoNoiseCancellation in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = 403591722BC6CFDC00B5B767 /* StreamVideoNoiseCancellation */; };
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
@@ -1056,6 +1061,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
+				403591752BC6DBD700B5B767 /* StreamVideoNoiseCancellation in Embed Frameworks */,
 				84F7384E287C198500A363F4 /* StreamVideo.framework in Embed Frameworks */,
 				84F7381B287C141000A363F4 /* StreamVideoSwiftUI.framework in Embed Frameworks */,
 			);
@@ -1094,6 +1100,10 @@
 		4030E5A12A9DF6B6003E8CBA /* Router.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Router.swift; sourceTree = "<group>"; };
 		4031D7F72B83C087002EC6E4 /* StreamCallAudioRecorderTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamCallAudioRecorderTests.swift; sourceTree = "<group>"; };
 		4031D7F92B84B077002EC6E4 /* StreamActiveCallProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamActiveCallProvider.swift; sourceTree = "<group>"; };
+		403591372BC53D0A00B5B767 /* StreamNoiseCancellationFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamNoiseCancellationFilter.swift; sourceTree = "<group>"; };
+		4035913B2BC53D2A00B5B767 /* Accelerate.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Accelerate.framework; path = System/Library/Frameworks/Accelerate.framework; sourceTree = SDKROOT; };
+		403591682BC54D9C00B5B767 /* DemoAudioEffectSelector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoAudioEffectSelector.swift; sourceTree = "<group>"; };
+		403591722BC6CFDC00B5B767 /* StreamVideoNoiseCancellation */ = {isa = PBXFileReference; lastKnownFileType = wrapper; path = StreamVideoNoiseCancellation; sourceTree = "<group>"; };
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
@@ -1843,8 +1853,10 @@
 				4046DEF02A9F469100CA6D2F /* GDPerformanceView-Swift in Frameworks */,
 				401A64A52A9DF79E00534ED1 /* StreamChatSwiftUI in Frameworks */,
 				8423B7562950BB0B00012F8D /* Sentry in Frameworks */,
+				403591742BC6D8DD00B5B767 /* StreamVideoNoiseCancellation in Frameworks */,
 				401A64A82A9DF7B400534ED1 /* EffectsLibrary in Frameworks */,
 				82EB8F592B0277E70038B5A2 /* StreamWebRTC in Frameworks */,
+				4035913C2BC53D2A00B5B767 /* Accelerate.framework in Frameworks */,
 				84F7381A287C141000A363F4 /* StreamVideoSwiftUI.framework in Frameworks */,
 				84F7384D287C198500A363F4 /* StreamVideo.framework in Frameworks */,
 			);
@@ -2357,6 +2369,7 @@
 				409146042B68FF4B007F3C17 /* DemoMoreControlListButtonView.swift */,
 				409146052B68FF4B007F3C17 /* DemoReactionButton.swift */,
 				40A0E95F2B88ABC80089E8D3 /* DemoBackgroundEffectSelector.swift */,
+				403591682BC54D9C00B5B767 /* DemoAudioEffectSelector.swift */,
 			);
 			path = DemoMoreControls;
 			sourceTree = "<group>";
@@ -2650,6 +2663,7 @@
 				40F445B92A9E0815004BE3DA /* AudioFilter.swift */,
 				40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */,
 				40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */,
+				403591372BC53D0A00B5B767 /* StreamNoiseCancellationFilter.swift */,
 			);
 			path = AudioFilter;
 			sourceTree = "<group>";
@@ -3007,6 +3021,7 @@
 		842D8BBA2865B31B00801910 = {
 			isa = PBXGroup;
 			children = (
+				403591722BC6CFDC00B5B767 /* StreamVideoNoiseCancellation */,
 				8427FF652A03D1D100AFD2C3 /* CallIntent */,
 				842D8BD42865B37800801910 /* DemoApp */,
 				8493224D2908378A0013C029 /* DemoAppUIKit */,
@@ -3916,6 +3931,7 @@
 		84F73842287C195600A363F4 /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				4035913B2BC53D2A00B5B767 /* Accelerate.framework */,
 				8400B48E29429ADC00663B99 /* libswift_Concurrency.tbd */,
 				8427FF632A03D1D100AFD2C3 /* Intents.framework */,
 				848C46A32A6ABF7E00E5AC09 /* ReplayKit.framework */,
@@ -4042,6 +4058,7 @@
 				4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */,
 				844ADA642AD3F1AB00769F6A /* GoogleSignInSwift */,
 				82EB8F582B0277E70038B5A2 /* StreamWebRTC */,
+				403591732BC6D8DD00B5B767 /* StreamVideoNoiseCancellation */,
 			);
 			productName = StreamVideoSwiftUI;
 			productReference = 842D8BC32865B31B00801910 /* StreamVideoCallApp-Debug.app */;
@@ -4530,6 +4547,7 @@
 				40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */,
 				40F445B02A9DFC58004BE3DA /* CallKitState.swift in Sources */,
 				40D946452AA5F67E00C8861B /* DemoCallingTopView.swift in Sources */,
+				403591692BC54D9C00B5B767 /* DemoAudioEffectSelector.swift in Sources */,
 				847B47B72A260CF1000714CE /* CustomCallView.swift in Sources */,
 				40F445EA2A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift in Sources */,
 				40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */,
@@ -4554,6 +4572,7 @@
 				409146062B68FF4B007F3C17 /* DemoControls.swift in Sources */,
 				4030E5A22A9DF6B6003E8CBA /* Router.swift in Sources */,
 				847B47B52A249E7E000714CE /* Examples.swift in Sources */,
+				403591382BC53D0A00B5B767 /* StreamNoiseCancellationFilter.swift in Sources */,
 				40F445F72A9E2AAC004BE3DA /* ReactionsViewModifier.swift in Sources */,
 				409145FE2B68FEF0007F3C17 /* DemoVideoCallParticipantModifier.swift in Sources */,
 				4093861F2AA0A21800FF5AF4 /* MemoryLogViewer.swift in Sources */,
@@ -6932,6 +6951,10 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 401A64A32A9DF79E00534ED1 /* XCRemoteSwiftPackageReference "stream-chat-swiftui" */;
 			productName = StreamChatSwiftUI;
+		};
+		403591732BC6D8DD00B5B767 /* StreamVideoNoiseCancellation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = StreamVideoNoiseCancellation;
 		};
 		4046DEEF2A9F469100CA6D2F /* GDPerformanceView-Swift */ = {
 			isa = XCSwiftPackageProductDependency;

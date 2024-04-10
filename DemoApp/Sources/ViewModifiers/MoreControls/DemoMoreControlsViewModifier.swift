@@ -34,6 +34,7 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                             DemoRaiseHandToggleButtonView(viewModel: viewModel)
                             if #available(iOS 15.0, *) {
                                 DemoBackgroundEffectSelector()
+                                DemoAudioEffectSelector()
                             }
                         }
 
@@ -66,23 +67,13 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                             DemoMoreControlListButtonView(
                                 action: { viewModel.toggleSpeaker() },
                                 label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"
-                            ) { Image(
-                                systemName: viewModel.callSettings.speakerOn
-                                    ? "speaker.wave.3.fill"
-                                    : "speaker.fill"
-                            )
+                            ) {
+                                Image(
+                                    systemName: viewModel.callSettings.speakerOn
+                                        ? "speaker.wave.3.fill"
+                                        : "speaker.fill"
+                                )
                             }
-
-                            DemoMoreControlListButtonView(
-                                action: {
-                                    appState.audioFilter = appState.videoFilter == nil
-                                        ? RobotVoiceFilter(pitchShift: 0.8)
-                                        : nil
-                                },
-                                label: appState.audioFilter == nil
-                                    ? "Robot Voice"
-                                    : "Disable Robot Voice"
-                            ) { Image(systemName: "waveform") }
 
                             DemoMoreControlListButtonView(
                                 action: { isStatsPresented = true },

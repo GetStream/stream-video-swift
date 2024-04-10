@@ -3,6 +3,7 @@
 //
 
 import Foundation
+import StreamVideo
 import StreamWebRTC
 
 final class RobotVoiceFilter: AudioFilter {
@@ -13,15 +14,19 @@ final class RobotVoiceFilter: AudioFilter {
         self.pitchShift = pitchShift
     }
 
-    func applyEffect(to audioBuffer: inout RTCAudioBuffer) {
+    // MARK: - AudioFilter
+
+    var id: String { "robot-\(pitchShift)" }
+
+    func applyEffect(to buffer: inout RTCAudioBuffer) {
         let frameSize = 256
         let hopSize = 128
         let scaleFactor = Float(frameSize) / Float(hopSize)
 
-        let numFrames = (audioBuffer.frames - frameSize) / hopSize
+        let numFrames = (buffer.frames - frameSize) / hopSize
 
-        for channel in 0..<audioBuffer.channels {
-            let channelBuffer = audioBuffer.rawBuffer(forChannel: channel)
+        for channel in 0..<buffer.channels {
+            let channelBuffer = buffer.rawBuffer(forChannel: channel)
 
             for i in 0..<numFrames {
                 let inputOffset = i * hopSize
@@ -33,7 +38,7 @@ final class RobotVoiceFilter: AudioFilter {
                 for j in 0..<frameSize {
                     let shiftedIndex = Int(Float(j) * pitchShift)
                     let originalIndex = inputOffset + j
-                    if shiftedIndex >= 0 && shiftedIndex < frameSize && originalIndex >= 0 && originalIndex < audioBuffer.frames {
+                    if shiftedIndex >= 0 && shiftedIndex < frameSize && originalIndex >= 0 && originalIndex < buffer.frames {
                         outputFrame[shiftedIndex] = channelBuffer[originalIndex]
                     }
                 }
@@ -41,7 +46,7 @@ final class RobotVoiceFilter: AudioFilter {
                 // Copy back to the input buffer
                 for j in 0..<frameSize {
                     let outputIndex = outputOffset + j
-                    if outputIndex >= 0 && outputIndex < audioBuffer.frames {
+                    if outputIndex >= 0 && outputIndex < buffer.frames {
                         channelBuffer[outputIndex] = outputFrame[j]
                     }
                 }
