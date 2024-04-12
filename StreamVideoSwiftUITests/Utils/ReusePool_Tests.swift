@@ -1,8 +1,5 @@
 //
-//  ReusePool_Tests.swift
-//  StreamVideoSwiftUITests
-//
-//  Created by Ilias Pavlidakis on 11/4/24.
+// Copyright © 2024 Stream.io Inc. All rights reserved.
 //
 
 import Foundation
