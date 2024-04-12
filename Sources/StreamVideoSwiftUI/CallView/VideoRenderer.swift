@@ -54,6 +54,7 @@ public struct VideoRendererView: UIViewRepresentable {
 
     @Injected(\.utils) var utils
     @Injected(\.colors) var colors
+    @Injected(\.videoRendererPool) private var videoRendererPool
 
     var id: String
     
@@ -83,9 +84,7 @@ public struct VideoRendererView: UIViewRepresentable {
     }
 
     public func makeUIView(context: Context) -> VideoRenderer {
-        let view = showVideo
-            ? utils.videoRendererFactory.view(for: id, size: size)
-            : VideoRenderer()
+        let view = videoRendererPool.acquireRenderer(size: size)
         view.videoContentMode = contentMode
         view.backgroundColor = colors.participantBackground
         if showVideo {
@@ -104,6 +103,7 @@ public struct VideoRendererView: UIViewRepresentable {
 public class VideoRenderer: RTCMTLVideoView {
 
     @Injected(\.thermalStateObserver) private var thermalStateObserver
+    @Injected(\.videoRendererPool) private var videoRendererPool
 
     let queue = DispatchQueue(label: "video-track")
     
@@ -165,6 +165,13 @@ public class VideoRenderer: RTCMTLVideoView {
     override public func layoutSubviews() {
         super.layoutSubviews()
         viewSize = bounds.size
+    }
+
+    override public func willMove(toSuperview newSuperview: UIView?) {
+        super.willMove(toSuperview: newSuperview)
+        if newSuperview == nil {
+            videoRendererPool.releaseRenderer(self)
+        }
     }
 }
 
