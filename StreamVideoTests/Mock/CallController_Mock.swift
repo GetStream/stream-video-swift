@@ -6,9 +6,9 @@
 import StreamWebRTC
 
 class CallController_Mock: CallController {
-    
+
     let mockResponseBuilder = MockResponseBuilder()
-            
+
     internal lazy var webRTCClient = WebRTCClient(
         user: StreamVideo.mockUser,
         apiKey: "key1",
@@ -29,7 +29,7 @@ class CallController_Mock: CallController {
         ),
         environment: WebSocketClient.Environment.mock
     )
-    
+
     @MainActor func update(participants: [String: CallParticipant]) {
         call?.state.participantsMap = participants
     }
@@ -52,15 +52,15 @@ class CallController_Mock: CallController {
         }
         return mockResponseBuilder.makeJoinCallResponse(cid: "\(callType):\(callId)")
     }
-    
+
     override func changeAudioState(isEnabled: Bool) async throws { /* no op */ }
-    
+
     override func changeVideoState(isEnabled: Bool) async throws { /* no op */ }
-        
+
     override func changeCameraMode(position: CameraPosition) async throws { /* no op */ }
-    
+
     override func changeSoundState(isEnabled: Bool) async throws { /* no op */ }
-    
+
     override func changeSpeakerState(isEnabled: Bool) async throws { /* no op */ }
 }
 
@@ -78,6 +78,83 @@ extension CallController_Mock {
             apiKey: "key1",
             videoConfig: .dummy(),
             cachedLocation: nil
+        )
+    }
+}
+
+extension DefaultAPI {
+
+    static func dummy(
+        basePath: String = "getstream.io",
+        transport: DefaultAPITransport = HTTPClient_Mock(),
+        middlewares: [DefaultAPIClientMiddleware] = []
+    ) -> DefaultAPI {
+        .init(
+            basePath: basePath,
+            transport: transport,
+            middlewares: middlewares
+        )
+    }
+}
+
+extension CallController {
+    static func dummy(
+        defaultAPI: DefaultAPI = .dummy(),
+        user: User = .dummy(),
+        callId: String = .unique,
+        callType: String = .default,
+        apiKey: String = .unique,
+        videoConfig: VideoConfig = .init(),
+        cachedLocation: String? = nil
+    ) -> CallController {
+        .init(
+            defaultAPI: defaultAPI,
+            user: user,
+            callId: callId,
+            callType: callType,
+            apiKey: apiKey,
+            videoConfig: videoConfig,
+            cachedLocation: cachedLocation
+        )
+    }
+}
+
+extension User {
+    static func dummy(
+        id: String = .unique,
+        name: String = .unique,
+        imageURL: URL? = nil,
+        role: String = "regular",
+        type: UserAuthType = .regular,
+        customData: [String: RawJSON] = [:]
+    ) -> User {
+        .init(
+            id: id,
+            name: name,
+            imageURL: imageURL,
+            role: role,
+            type: type,
+            customData: customData
+        )
+    }
+}
+
+extension Call {
+    static func dummy(
+        callType: String = .default,
+        callId: String = .unique,
+        coordinatorClient: DefaultAPI = .dummy(),
+        callController: CallController? = nil
+    ) -> Call {
+        .init(
+            callType: callType,
+            callId: callId,
+            coordinatorClient: coordinatorClient,
+            callController: callController ?? .dummy(
+                defaultAPI: coordinatorClient,
+                callId: callId,
+                callType: callType
+            )
         )
     }
 }

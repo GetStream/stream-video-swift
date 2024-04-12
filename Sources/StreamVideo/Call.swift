@@ -32,8 +32,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public let speaker: SpeakerManager
 
     internal let callController: CallController
+    internal let coordinatorClient: DefaultAPI
     private var eventHandlers = [EventHandler]()
-    private let coordinatorClient: DefaultAPI
     private var cancellables = Set<AnyCancellable>()
 
     internal init(
