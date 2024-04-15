@@ -52,6 +52,15 @@ class Stream_Video_Sfu_Signal_SignalServer: @unchecked Sendable {
     func sendStats(sendStatsRequest: Stream_Video_Sfu_Signal_SendStatsRequest) async throws -> Stream_Video_Sfu_Signal_SendStatsResponse {
         return try await execute(request: sendStatsRequest, path: "SendStats")
     }
+    
+    func startNoiseCancellation(startNoiseCancellationRequest: Stream_Video_Sfu_Signal_StartNoiseCancellationRequest) async throws -> Stream_Video_Sfu_Signal_StartNoiseCancellationResponse {
+        return try await execute(request: startNoiseCancellationRequest, path: "StartNoiseCancellation")
+    }
+    
+    func stopNoiseCancellation(stopNoiseCancellationRequest: Stream_Video_Sfu_Signal_StopNoiseCancellationRequest) async throws -> Stream_Video_Sfu_Signal_StopNoiseCancellationResponse {
+        return try await execute(request: stopNoiseCancellationRequest, path: "StopNoiseCancellation")
+    }
+
 
     private func execute<Request: ProtoModel, Response: ProtoModelResponse>(request: Request, path: String, retries: Int = 0) async throws -> Response {
         let requestData = try request.serializedData()
