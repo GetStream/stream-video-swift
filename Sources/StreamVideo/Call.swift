@@ -356,12 +356,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         streamVideo.state.activeCall = nil
     }
     
+    @MainActor
     public func startNoiseCancellation() async throws {
-        try await callController.startNoiseCancellation()
+        try await callController.startNoiseCancellation(state.sessionId)
     }
 
+    @MainActor
     public func stopNoiseCancellation() async throws {
-        try await callController.stopNoiseCancellation()
+        try await callController.stopNoiseCancellation(state.sessionId)
     }
 
     // MARK: - Permissions

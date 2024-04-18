@@ -163,12 +163,12 @@ class CallController: @unchecked Sendable {
         try await webRTCClient.stopScreensharing()
     }
     
-    func startNoiseCancellation() async throws {
-        try await currentWebRTCClient().startNoiseCancellation()
+    func startNoiseCancellation(_ sessionID: String) async throws {
+        try await currentWebRTCClient().startNoiseCancellation(sessionID)
     }
 
-    func stopNoiseCancellation() async throws {
-        try await currentWebRTCClient().stopNoiseCancellation()
+    func stopNoiseCancellation(_ sessionID: String) async throws {
+        try await currentWebRTCClient().stopNoiseCancellation(sessionID)
     }
 
     func changePinState(

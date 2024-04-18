@@ -576,12 +576,16 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         _ = try await signalService.sendStats(sendStatsRequest: statsRequest)
     }
     
-    func startNoiseCancellation() async throws {
-//        try await signalService.startNoiseCancellation()
+    func startNoiseCancellation(_ sessionID: String) async throws {
+        var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
+        request.sessionID = sessionID
+        _ = try await signalService.startNoiseCancellation(startNoiseCancellationRequest: request)
     }
 
-    func stopNoiseCancellation() async throws {
-//        try await signalService.stopNoiseCancellation()
+    func stopNoiseCancellation(_ sessionID: String) async throws {
+        var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
+        request.sessionID = sessionID
+        _ = try await signalService.stopNoiseCancellation(stopNoiseCancellationRequest: request)
     }
 
     /// Initiates a camera focus operation at the specified point.
