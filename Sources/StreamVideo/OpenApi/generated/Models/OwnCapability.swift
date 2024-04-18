@@ -12,6 +12,7 @@ public enum OwnCapability: String, Codable, CaseIterable {
     case blockUsers = "block-users"
     case createCall = "create-call"
     case createReaction = "create-reaction"
+    case enableNoiseCancellation = "enable-noise-cancellation"
     case endCall = "end-call"
     case joinBackstage = "join-backstage"
     case joinCall = "join-call"
