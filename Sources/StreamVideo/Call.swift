@@ -356,6 +356,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         streamVideo.state.activeCall = nil
     }
     
+    public func startNoiseCancellation() async throws {
+        try await callController.startNoiseCancellation()
+    }
+
+    public func stopNoiseCancellation() async throws {
+        try await callController.stopNoiseCancellation()
+    }
+
     // MARK: - Permissions
     
     /// Checks if the current user can request permissions.

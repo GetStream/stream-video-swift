@@ -576,6 +576,14 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         _ = try await signalService.sendStats(sendStatsRequest: statsRequest)
     }
     
+    func startNoiseCancellation() async throws {
+//        try await signalService.startNoiseCancellation()
+    }
+
+    func stopNoiseCancellation() async throws {
+//        try await signalService.stopNoiseCancellation()
+    }
+
     /// Initiates a camera focus operation at the specified point.
     ///
     /// This method attempts to focus the camera at a specific point on the screen.
