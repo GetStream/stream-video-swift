@@ -6,6 +6,9 @@ import Foundation
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+#if canImport(StreamVideoNoiseCancellation)
+import StreamVideoNoiseCancellation
+#endif
 
 @available(iOS 15.0, *)
 struct DemoAudioEffectSelector: View {
@@ -39,12 +42,10 @@ struct DemoAudioEffectButton: View {
             return appState.audioFilter == nil
         case .robot:
             return appState.audioFilter?.id.hasPrefix("robot") == true
-        case .c5ns20949d:
-            return appState.audioFilter?.id == StreamNoiseCancellationFilter.no1.id
-        case .c5swc9ac8f:
-            return appState.audioFilter?.id == StreamNoiseCancellationFilter.no2.id
-        case .c6fsced125:
-            return appState.audioFilter?.id == StreamNoiseCancellationFilter.no3.id
+        #if canImport(StreamVideoNoiseCancellation)
+        case .noiseCancellation:
+            return appState.audioFilter?.id == "noise-cancellation"
+        #endif
         }
     }
 
@@ -74,9 +75,9 @@ struct DemoAudioEffectButton: View {
 enum AudioEffect: String, CaseIterable, Identifiable {
     case none
     case robot
-    case c5ns20949d
-    case c5swc9ac8f
-    case c6fsced125
+    #if canImport(StreamVideoNoiseCancellation)
+    case noiseCancellation
+    #endif
 
     var id: ObjectIdentifier { ObjectIdentifier(rawValue as NSString) }
 
@@ -86,12 +87,16 @@ enum AudioEffect: String, CaseIterable, Identifiable {
             return nil
         case .robot:
             return RobotVoiceFilter(pitchShift: 0.8)
-        case .c5ns20949d:
-            return StreamNoiseCancellationFilter.no1
-        case .c5swc9ac8f:
-            return StreamNoiseCancellationFilter.no2
-        case .c6fsced125:
-            return StreamNoiseCancellationFilter.no3
+        #if canImport(StreamVideoNoiseCancellation)
+        case .noiseCancellation:
+            let processor = NoiseCancellationProcessor()
+            return NoiseCancellationFilter(
+                name: "noise-cancellation",
+                initialize: processor.initialize,
+                process: processor.process,
+                release: processor.release
+            )
+        #endif
         }
     }
 
@@ -105,12 +110,10 @@ enum AudioEffect: String, CaseIterable, Identifiable {
             }
         case .robot:
             return Image(systemName: "waveform")
-        case .c5ns20949d:
-            return Image(systemName: "1.circle")
-        case .c5swc9ac8f:
-            return Image(systemName: "2.circle")
-        case .c6fsced125:
+        #if canImport(StreamVideoNoiseCancellation)
+        case .noiseCancellation:
             return Image(systemName: "3.circle")
+        #endif
         }
     }
 

@@ -54,7 +54,7 @@ final class DemoVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
         sampleRate sampleRateHz: Int,
         channels: Int
     ) {
-        log.debug("krisp - AudioSession updated sampleRate:\(sampleRateHz) channels:\(channels)")
+        log.debug("AudioSession updated sampleRate:\(sampleRateHz) channels:\(channels)")
         sampleRate = sampleRateHz
         self.channels = channels
 
