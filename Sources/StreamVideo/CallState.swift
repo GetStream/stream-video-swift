@@ -191,13 +191,13 @@ public class CallState: ObservableObject {
             break
         case .typeClosedCaptionEvent:
             break
-        case .typeCallTranscriptionFailedEvent:
+        case .typeCallTranscriptionFailedEvent(_):
             break
-        case .typeCallTranscriptionReadyEvent:
+        case .typeCallTranscriptionReadyEvent(_):
             break
-        case .typeCallTranscriptionStartedEvent:
+        case .typeCallTranscriptionStartedEvent(_):
             break
-        case .typeCallTranscriptionStoppedEvent:
+        case .typeCallTranscriptionStoppedEvent(_):
             break
         }
     }
