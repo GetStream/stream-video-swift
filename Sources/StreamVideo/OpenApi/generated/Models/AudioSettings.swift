@@ -16,14 +16,16 @@ public struct AudioSettings: Codable, JSONEncodable, Hashable {
     public var accessRequestEnabled: Bool
     public var defaultDevice: DefaultDevice
     public var micDefaultOn: Bool
+    public var noiseCancellation: NoiseCancellationSettings?
     public var opusDtxEnabled: Bool
     public var redundantCodingEnabled: Bool
     public var speakerDefaultOn: Bool
 
-    public init(accessRequestEnabled: Bool, defaultDevice: DefaultDevice, micDefaultOn: Bool, opusDtxEnabled: Bool, redundantCodingEnabled: Bool, speakerDefaultOn: Bool) {
+    public init(accessRequestEnabled: Bool, defaultDevice: DefaultDevice, micDefaultOn: Bool, noiseCancellation: NoiseCancellationSettings? = nil, opusDtxEnabled: Bool, redundantCodingEnabled: Bool, speakerDefaultOn: Bool) {
         self.accessRequestEnabled = accessRequestEnabled
         self.defaultDevice = defaultDevice
         self.micDefaultOn = micDefaultOn
+        self.noiseCancellation = noiseCancellation
         self.opusDtxEnabled = opusDtxEnabled
         self.redundantCodingEnabled = redundantCodingEnabled
         self.speakerDefaultOn = speakerDefaultOn
@@ -33,6 +35,7 @@ public struct AudioSettings: Codable, JSONEncodable, Hashable {
         case accessRequestEnabled = "access_request_enabled"
         case defaultDevice = "default_device"
         case micDefaultOn = "mic_default_on"
+        case noiseCancellation = "noise_cancellation"
         case opusDtxEnabled = "opus_dtx_enabled"
         case redundantCodingEnabled = "redundant_coding_enabled"
         case speakerDefaultOn = "speaker_default_on"
@@ -45,6 +48,7 @@ public struct AudioSettings: Codable, JSONEncodable, Hashable {
         try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
         try container.encode(defaultDevice, forKey: .defaultDevice)
         try container.encode(micDefaultOn, forKey: .micDefaultOn)
+        try container.encodeIfPresent(noiseCancellation, forKey: .noiseCancellation)
         try container.encode(opusDtxEnabled, forKey: .opusDtxEnabled)
         try container.encode(redundantCodingEnabled, forKey: .redundantCodingEnabled)
         try container.encode(speakerDefaultOn, forKey: .speakerDefaultOn)

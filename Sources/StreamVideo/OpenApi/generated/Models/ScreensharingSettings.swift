@@ -11,15 +11,18 @@ import Foundation
 public struct ScreensharingSettings: Codable, JSONEncodable, Hashable {
     public var accessRequestEnabled: Bool
     public var enabled: Bool
+    public var targetResolution: TargetResolution?
 
-    public init(accessRequestEnabled: Bool, enabled: Bool) {
+    public init(accessRequestEnabled: Bool, enabled: Bool, targetResolution: TargetResolution? = nil) {
         self.accessRequestEnabled = accessRequestEnabled
         self.enabled = enabled
+        self.targetResolution = targetResolution
     }
 
     public enum CodingKeys: String, CodingKey, CaseIterable {
         case accessRequestEnabled = "access_request_enabled"
         case enabled
+        case targetResolution = "target_resolution"
     }
 
     // Encodable protocol methods
@@ -28,6 +31,7 @@ public struct ScreensharingSettings: Codable, JSONEncodable, Hashable {
         var container = encoder.container(keyedBy: CodingKeys.self)
         try container.encode(accessRequestEnabled, forKey: .accessRequestEnabled)
         try container.encode(enabled, forKey: .enabled)
+        try container.encodeIfPresent(targetResolution, forKey: .targetResolution)
     }
 }
 

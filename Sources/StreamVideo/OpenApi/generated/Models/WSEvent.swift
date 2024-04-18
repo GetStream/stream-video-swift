@@ -40,6 +40,10 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typeCallSessionParticipantJoinedEvent(CallSessionParticipantJoinedEvent)
     case typeCallSessionParticipantLeftEvent(CallSessionParticipantLeftEvent)
     case typeCallSessionStartedEvent(CallSessionStartedEvent)
+    case typeCallTranscriptionFailedEvent(CallTranscriptionFailedEvent)
+    case typeCallTranscriptionReadyEvent(CallTranscriptionReadyEvent)
+    case typeCallTranscriptionStartedEvent(CallTranscriptionStartedEvent)
+    case typeCallTranscriptionStoppedEvent(CallTranscriptionStoppedEvent)
     case typeCallUpdatedEvent(CallUpdatedEvent)
     case typeCallUserMuted(CallUserMuted)
     case typeClosedCaptionEvent(ClosedCaptionEvent)
@@ -48,6 +52,7 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
     case typePermissionRequestEvent(PermissionRequestEvent)
     case typeUnblockedUserEvent(UnblockedUserEvent)
     case typeUpdatedCallPermissionsEvent(UpdatedCallPermissionsEvent)
+    
     public var type: String {
         switch self {
         case .typeBlockedUserEvent(let value):
@@ -99,6 +104,14 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallSessionParticipantLeftEvent(let value):
             return value.type
         case .typeCallSessionStartedEvent(let value):
+            return value.type
+        case .typeCallTranscriptionFailedEvent(let value):
+            return value.type
+        case .typeCallTranscriptionReadyEvent(let value):
+            return value.type
+        case .typeCallTranscriptionStartedEvent(let value):
+            return value.type
+        case .typeCallTranscriptionStoppedEvent(let value):
             return value.type
         case .typeCallUpdatedEvent(let value):
             return value.type
@@ -174,6 +187,14 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
             return value
         case .typeCallSessionStartedEvent(let value):
             return value
+        case .typeCallTranscriptionFailedEvent(let value):
+            return value
+        case .typeCallTranscriptionReadyEvent(let value):
+            return value
+        case .typeCallTranscriptionStartedEvent(let value):
+            return value
+        case .typeCallTranscriptionStoppedEvent(let value):
+            return value
         case .typeCallUpdatedEvent(let value):
             return value
         case .typeCallUserMuted(let value):
@@ -248,6 +269,14 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         case .typeCallSessionParticipantLeftEvent(let value):
             try container.encode(value)
         case .typeCallSessionStartedEvent(let value):
+            try container.encode(value)
+        case .typeCallTranscriptionFailedEvent(let value):
+            try container.encode(value)
+        case .typeCallTranscriptionReadyEvent(let value):
+            try container.encode(value)
+        case .typeCallTranscriptionStartedEvent(let value):
+            try container.encode(value)
+        case .typeCallTranscriptionStoppedEvent(let value):
             try container.encode(value)
         case .typeCallUpdatedEvent(let value):
             try container.encode(value)
@@ -359,6 +388,18 @@ public enum VideoEvent: Codable, JSONEncodable, Hashable {
         } else if dto.type == "call.session_started" {
             let value = try container.decode(CallSessionStartedEvent.self)
             self = .typeCallSessionStartedEvent(value)
+        } else if dto.type == "call.transcription_failed" {
+            let value = try container.decode(CallTranscriptionFailedEvent.self)
+            self = .typeCallTranscriptionFailedEvent(value)
+        } else if dto.type == "call.transcription_ready" {
+            let value = try container.decode(CallTranscriptionReadyEvent.self)
+            self = .typeCallTranscriptionReadyEvent(value)
+        } else if dto.type == "call.transcription_started" {
+            let value = try container.decode(CallTranscriptionStartedEvent.self)
+            self = .typeCallTranscriptionStartedEvent(value)
+        } else if dto.type == "call.transcription_stopped" {
+            let value = try container.decode(CallTranscriptionStoppedEvent.self)
+            self = .typeCallTranscriptionStoppedEvent(value)
         } else if dto.type == "call.unblocked_user" {
             let value = try container.decode(UnblockedUserEvent.self)
             self = .typeUnblockedUserEvent(value)

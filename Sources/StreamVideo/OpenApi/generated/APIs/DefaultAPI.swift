@@ -232,6 +232,38 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
+     Collect user feedback
+     
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter session: (path)  
+     - parameter collectUserFeedbackRequest: (body)  
+     - returns: CollectUserFeedbackResponse
+     */
+
+    open func collectUserFeedback(type: String, id: String, session: String, collectUserFeedbackRequest: CollectUserFeedbackRequest) async throws -> CollectUserFeedbackResponse {
+        var localVariablePath = "/video/call/{type}/{id}/feedback/{session}"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
+        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session}", with: sessionPostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "POST",
+            request: collectUserFeedbackRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(CollectUserFeedbackResponse.self, from: $0)
+        }
+    }
+    
+    /**
      Create device
      
      - parameter createDeviceRequest: (body)  
@@ -401,6 +433,46 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
      - parameter ring: (query)  (optional)
      - parameter notify: (query)  (optional)
      - returns: RequestBuilder<GetCallResponse> 
+     */
+
+
+    /**
+     Get Call Stats
+     
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter session: (path)  
+     - returns: GetCallStatsResponse
+     */
+
+    open func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse {
+        var localVariablePath = "/video/call/{type}/{id}/stats/{session}"
+        let typePreEscape = "\(APIHelper.mapValueToPathItem(type))"
+        let typePostEscape = typePreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{type}", with: typePostEscape, options: .literal, range: nil)
+        let idPreEscape = "\(APIHelper.mapValueToPathItem(id))"
+        let idPostEscape = idPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{id}", with: idPostEscape, options: .literal, range: nil)
+        let sessionPreEscape = "\(APIHelper.mapValueToPathItem(session))"
+        let sessionPostEscape = sessionPreEscape.addingPercentEncoding(withAllowedCharacters: .urlPathAllowed) ?? ""
+        localVariablePath = localVariablePath.replacingOccurrences(of: "{session}", with: sessionPostEscape, options: .literal, range: nil)
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "GET"
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(GetCallStatsResponse.self, from: $0)
+        }
+    }
+    /**
+     Get Call Stats
+     - GET /video/call/{type}/{id}/stats/{session}
+     -   Required permissions: - ReadCallStats 
+     - parameter type: (path)  
+     - parameter id: (path)  
+     - parameter session: (path)  
+     - returns: RequestBuilder<GetCallStatsResponse> 
      */
 
 
@@ -692,6 +764,34 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
 
 
     /**
+     Query Call Stats
+     
+     - parameter queryCallStatsRequest: (body)  
+     - returns: QueryCallStatsResponse
+     */
+
+    open func queryCallStats(queryCallStatsRequest: QueryCallStatsRequest) async throws -> QueryCallStatsResponse {
+        let localVariablePath = "/video/call/stats"
+        
+        let urlRequest = try makeRequest(
+            uriPath: localVariablePath,
+            httpMethod: "POST",
+            request: queryCallStatsRequest
+        )
+        return try await send(request: urlRequest) {
+            try self.jsonDecoder.decode(QueryCallStatsResponse.self, from: $0)
+        }
+    }
+    /**
+     Query Call Stats
+     - POST /video/call/stats
+     -   Required permissions: - ReadCallStats 
+     - parameter queryCallStatsRequest: (body)  
+     - returns: RequestBuilder<QueryCallStatsResponse> 
+     */
+
+
+    /**
      Query call
      
      - parameter queryCallsRequest: (body)  
@@ -966,7 +1066,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Start recording
      - POST /video/call/{type}/{id}/start_recording
-     - Starts recording  Sends events: - call.recording_started  Required permissions: - StopRecording 
+     - Starts recording  Sends events: - call.recording_started  Required permissions: - StartRecording 
      - parameter type: (path)  
      - parameter id: (path)  
      - parameter startRecordingRequest: (body)  
@@ -1145,7 +1245,7 @@ open class DefaultAPI: DefaultAPIEndpoints, @unchecked Sendable {
     /**
      Stop transcription
      - POST /video/call/{type}/{id}/stop_transcription
-     - Stops transcription  Required permissions: - StopTranscription 
+     - Stops transcription  Sends events: - call.transcription_stopped  Required permissions: - StopTranscription 
      - parameter type: (path)  
      - parameter id: (path)  
      - returns: RequestBuilder<StopTranscriptionResponse> 
@@ -1390,6 +1490,9 @@ protocol DefaultAPIEndpoints {
         func blockUser(type: String, id: String, blockUserRequest: BlockUserRequest) async throws -> BlockUserResponse
 
 
+        func collectUserFeedback(type: String, id: String, session: String, collectUserFeedbackRequest: CollectUserFeedbackRequest) async throws -> CollectUserFeedbackResponse
+
+
         func createDevice(createDeviceRequest: CreateDeviceRequest) async throws -> ModelResponse
 
 
@@ -1403,6 +1506,9 @@ protocol DefaultAPIEndpoints {
 
 
         func getCall(type: String, id: String, connectionId: String?, membersLimit: Int?, ring: Bool?, notify: Bool?) async throws -> GetCallResponse
+
+
+        func getCallStats(type: String, id: String, session: String) async throws -> GetCallStatsResponse
 
 
         func getEdges() async throws -> GetEdgesResponse
@@ -1427,6 +1533,9 @@ protocol DefaultAPIEndpoints {
 
 
         func muteUsers(type: String, id: String, muteUsersRequest: MuteUsersRequest) async throws -> MuteUsersResponse
+
+
+        func queryCallStats(queryCallStatsRequest: QueryCallStatsRequest) async throws -> QueryCallStatsResponse
 
 
         func queryCalls(queryCallsRequest: QueryCallsRequest, connectionId: String?) async throws -> QueryCallsResponse
