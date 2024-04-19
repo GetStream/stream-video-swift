@@ -5,7 +5,7 @@ description: How the state is exposed
 
 ### Video Call State
 
-When you join a call, we'll automatically expose stateflow objects in 3 different places:
+When you join a call, we'll automatically expose observable objects in 3 different places:
 
 ```swift
 let clientState = streamVideo.state
@@ -14,6 +14,8 @@ let participants = call.state.participants
 ```
 
 ### Call State
+
+The call state is kept in sync (updates are received) only when you join the call.
 
 Here's an example of how you can access the call state:
 
