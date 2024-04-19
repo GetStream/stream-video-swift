@@ -12,6 +12,7 @@ public struct NoiseCancellationSettingsRequest: Codable, JSONEncodable, Hashable
     public enum Mode: String, Codable, CaseIterable {
         case available = "available"
         case disabled = "disabled"
+        case autoOn = "auto-on"
     }
     public var mode: Mode?
 
