@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// AudioFilter protocol defines the structure for audio filtering implementations.
-public protocol AudioFilter {
+public protocol AudioFilter: Sendable {
     /// Unique identifier for the audio filter.
     var id: String { get }
 

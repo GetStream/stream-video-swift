@@ -5,36 +5,37 @@
 import AVFoundation
 import Combine
 import Foundation
+import StreamWebRTC
 
 /// Observable object that provides info about the call state, as well as methods for updating it.
 public class Call: @unchecked Sendable, WSEventsSubscriber {
-    
+
     @Injected(\.streamVideo) var streamVideo
 
     @MainActor public internal(set) var state = CallState()
-    
+
     /// The call id.
     public let callId: String
     /// The call type.
     public let callType: String
-    
+
     /// The unique identifier of the call, formatted as `callType.name:callId`.
     public var cId: String {
         callCid(from: callId, callType: callType)
     }
-    
+
     /// Provides access to the microphone.
     public let microphone: MicrophoneManager
     /// Provides access to the camera.
     public let camera: CameraManager
     /// Provides access to the speaker.
     public let speaker: SpeakerManager
-    
+
     internal let callController: CallController
     private var eventHandlers = [EventHandler]()
     private let coordinatorClient: DefaultAPI
     private var cancellables = Set<AnyCancellable>()
-    
+
     internal init(
         callType: String,
         callId: String,
@@ -61,8 +62,18 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         self.callController.call = self
         subscribeToLocalCallSettingsChanges()
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self
+                .state
+                .$settings
+                .map(\.?.audio.noiseCancellation)
+                .removeDuplicates()
+                .sink { [weak self] in self?.didUpdate($0) }
+                .store(in: &cancellables)
+        }
     }
-    
+
     internal convenience init(
         from response: CallStateResponseFields,
         coordinatorClient: DefaultAPI,
@@ -115,7 +126,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return response
         })
     }
-    
+
     /// Gets the call on the backend with the given parameters.
     ///
     /// - Parameters:
@@ -142,7 +153,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return response
     }
-    
+
     /// Rings the call (sends call notification to members).
     /// - Returns: The call's data.
     @discardableResult
@@ -151,7 +162,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await state.update(from: response)
         return response.call
     }
-    
+
     /// Notifies the users of the call, by sending push notification.
     /// - Returns: The call's data.
     @discardableResult
@@ -217,7 +228,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func accept() async throws -> AcceptCallResponse {
         try await coordinatorClient.acceptCall(type: callType, id: callId)
     }
-    
+
     /// Rejects a call.
     @discardableResult
     public func reject() async throws -> RejectCallResponse {
@@ -227,21 +238,21 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return response
     }
-    
+
     /// Adds the given user to the list of blocked users for the call.
     /// - Parameter blockedUser: The user to add to the list of blocked users.
     @discardableResult
     public func block(user: User) async throws -> BlockUserResponse {
         try await blockUser(with: user.id)
     }
-    
+
     /// Removes the given user from the list of blocked users for the call.
     /// - Parameter blockedUser: The user to remove from the list of blocked users.
     @discardableResult
     public func unblock(user: User) async throws -> UnblockUserResponse {
         try await unblockUser(with: user.id)
     }
-    
+
     /// Changes the track visibility for a participant (not visible if they go off-screen).
     /// - Parameters:
     ///  - participant: the participant whose track visibility would be changed.
@@ -249,7 +260,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func changeTrackVisibility(for participant: CallParticipant, isVisible: Bool) async {
         await callController.changeTrackVisibility(for: participant, isVisible: isVisible)
     }
-    
+
     @discardableResult
     public func addMembers(members: [MemberRequest]) async throws -> UpdateCallMembersResponse {
         try await updateCallMembers(
@@ -273,7 +284,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             updateMembers: ids.map { MemberRequest(userId: $0) }
         )
     }
-    
+
     /// Remove members with the specified `ids` from the current call.
     /// - Parameter ids: An array of `String` values representing the member IDs to remove.
     /// - Throws: An error if the members could not be removed from the call.
@@ -283,7 +294,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             removedIds: ids
         )
     }
-    
+
     /// Updates the track size for the provided participant.
     /// - Parameters:
     ///  - trackSize: the size of the track.
@@ -291,24 +302,24 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func updateTrackSize(_ trackSize: CGSize, for participant: CallParticipant) async {
         await callController.updateTrackSize(trackSize, for: participant)
     }
-    
+
     /// Sets a `videoFilter` for the current call.
     /// - Parameter videoFilter: A `VideoFilter` instance representing the video filter to set.
     public func setVideoFilter(_ videoFilter: VideoFilter?) {
         callController.setVideoFilter(videoFilter)
     }
-    
+
     /// Starts screensharing from the device.
     /// - Parameter type: The screensharing type (in-app or broadcasting).
     public func startScreensharing(type: ScreensharingType) async throws {
         try await callController.startScreensharing(type: type)
     }
-    
+
     /// Stops screensharing from the current device.
     public func stopScreensharing() async throws {
         try await callController.stopScreensharing()
     }
-    
+
     /// Subscribes to video events.
     /// - Returns: `AsyncStream` of `VideoEvent`s.
     public func subscribe() -> AsyncStream<VideoEvent> {
@@ -374,7 +385,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     // MARK: - Permissions
-    
+
     /// Checks if the current user can request permissions.
     /// - Parameter permissions: The permissions to request.
     /// - Returns: A Boolean value indicating if the current user can request the permissions.
@@ -396,7 +407,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return true
     }
-    
+
     /// Requests permissions for a call.
     /// - Parameters:
     ///   - permissions: The permissions to request.
@@ -419,7 +430,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             requestPermissionRequest: request
         )
     }
-    
+
     /// Checks if the current user has a certain call capability.
     /// - Parameter capability: The capability to check.
     /// - Returns: A Boolean value indicating if the current user has the call capability.
@@ -429,7 +440,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         return state.ownCapabilities.contains(capability)
     }
-    
+
     /// Grants permissions to a user for a call.
     /// - Parameters:
     ///   - permissions: The permissions to grant.
@@ -446,7 +457,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             revoked: []
         )
     }
-    
+
     @discardableResult
     public func grant(request: PermissionRequest) async throws -> UpdateUserPermissionsResponse {
         let response = try await updatePermissions(
@@ -477,7 +488,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             revoked: permissions.map(\.rawValue)
         )
     }
-    
+
     @discardableResult
     public func mute(
         userId: String,
@@ -514,7 +525,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func end() async throws -> EndCallResponse {
         try await coordinatorClient.endCall(type: callType, id: callId)
     }
-    
+
     /// Blocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to block.
@@ -529,7 +540,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await state.blockUser(id: userId)
         return response
     }
-    
+
     /// Unblocks a user in a call.
     /// - Parameters:
     ///   - userId: The ID of the user to unblock.
@@ -544,7 +555,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await state.unblockUser(id: userId)
         return response
     }
-    
+
     /// Starts a live call.
     /// - Parameters:
     ///  - startsHls: whether hls streaming should be started.
@@ -568,15 +579,15 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             goLiveRequest: goLiveRequest
         )
     }
-    
+
     /// Stops an ongoing live call.
     @discardableResult
     public func stopLive() async throws -> StopLiveResponse {
         try await coordinatorClient.stopLive(type: callType, id: callId)
     }
-    
+
     // MARK: - Recording
-    
+
     /// Starts recording for the call.
     @discardableResult
     public func startRecording() async throws -> StartRecordingResponse {
@@ -588,13 +599,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         update(recordingState: .requested)
         return response
     }
-    
+
     /// Stops recording a call.
     @discardableResult
     public func stopRecording() async throws -> StopRecordingResponse {
         try await coordinatorClient.stopRecording(type: callType, id: callId)
     }
-    
+
     /// Lists recordings for the call.
     public func listRecordings() async throws -> [CallRecording] {
         let response = try await coordinatorClient.listRecordings(
@@ -603,23 +614,23 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         return response.recordings
     }
-    
+
     // MARK: - Broadcasting
-    
+
     /// Starts HLS broadcasting of the call.
     @discardableResult
     public func startHLS() async throws -> StartHLSBroadcastingResponse {
         try await coordinatorClient.startHLSBroadcasting(type: callType, id: callId)
     }
-    
+
     /// Stops HLS broadcasting of the call.
     @discardableResult
     public func stopHLS() async throws -> StopHLSBroadcastingResponse {
         try await coordinatorClient.stopHLSBroadcasting(type: callType, id: callId)
     }
-    
+
     // MARK: - Events
-    
+
     /// Sends a custom event to the call.
     /// - Throws: An error if the sending fails.
     @discardableResult
@@ -630,7 +641,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sendEventRequest: SendEventRequest(custom: data)
         )
     }
-    
+
     /// Sends a reaction to the call.
     /// - Throws: An error if the sending fails.
     @discardableResult
@@ -645,7 +656,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sendReactionRequest: SendReactionRequest(custom: custom, emojiCode: emojiCode, type: type)
         )
     }
-    
+
     // MARK: - Query members methods
 
     internal func queryMembers(
@@ -675,9 +686,9 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     public func queryMembers(next: String) async throws -> QueryMembersResponse {
         try await queryMembers(filters: nil, limit: nil, next: next, sort: nil)
     }
-    
+
     // MARK: - Pinning
-    
+
     /// Pins the user with the provided session id locally.
     /// - Parameter sessionId: the user's session id.
     public func pin(
@@ -688,7 +699,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sessionId: sessionId
         )
     }
-    
+
     /// Unpins the user with the provided session id locally.
     /// - Parameter sessionId: the user's session id.
     public func unpin(
@@ -699,7 +710,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             sessionId: sessionId
         )
     }
-    
+
     /// Pins the user with the provided session id for everyone in the call.
     /// - Parameters:
     ///  - userId: the user's id.
@@ -719,7 +730,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             pinRequest: pinRequest
         )
     }
-    
+
     /// Unpins the user with the provided session id for everyone in the call.
     /// - Parameters:
     ///  - userId: the user's id.
@@ -883,7 +894,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     }
 
     // MARK: - Internal
-    
+
     internal func update(reconnectionStatus: ReconnectionStatus) {
         executeOnMain { [weak self] in
             guard let self else { return }
@@ -892,13 +903,13 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
     }
-    
+
     internal func update(recordingState: RecordingState) {
         executeOnMain { [weak self] in
             self?.state.recordingState = recordingState
         }
     }
-    
+
     internal func onEvent(_ event: WrappedEvent) {
         guard case let .coordinatorEvent(videoEvent) = event else {
             return
@@ -911,7 +922,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             self.state.updateState(from: videoEvent)
             self.callController.updateOwnCapabilities(ownCapabilities: self.state.ownCapabilities)
         }
-        
+
         // Get a copy of eventHandlers to avoid crashes when `leave` call is being
         // triggered, during event processing.
         let eventHandlers = self.eventHandlers
@@ -919,7 +930,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             eventHandler.handler(event)
         }
     }
-    
+
     // MARK: - private
 
     private func updatePermissions(
@@ -941,7 +952,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             updateUserPermissionsRequest: updatePermissionsRequest
         )
     }
-    
+
     private func updateCallMembers(
         updateMembers: [MemberRequest] = [],
         removedIds: [String] = []
@@ -958,7 +969,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         await state.mergeMembers(response.members)
         return response
     }
-    
+
     private func subscribeToLocalCallSettingsChanges() {
         speaker.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
@@ -968,7 +979,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
         .store(in: &cancellables)
-        
+
         speaker.$audioOutputStatus.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
@@ -977,7 +988,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
         .store(in: &cancellables)
-        
+
         camera.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
@@ -986,7 +997,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
         .store(in: &cancellables)
-        
+
         camera.$direction.dropFirst().sink { [weak self] position in
             guard let self else { return }
             executeOnMain {
@@ -995,7 +1006,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         }
         .store(in: &cancellables)
-        
+
         microphone.$status.dropFirst().sink { [weak self] status in
             guard let self else { return }
             executeOnMain {
@@ -1005,12 +1016,65 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
         .store(in: &cancellables)
     }
-    
+
     private func updateCallSettingsManagers(with callSettings: CallSettings) {
         microphone.status = callSettings.audioOn ? .enabled : .disabled
         camera.status = callSettings.videoOn ? .enabled : .disabled
         camera.direction = callSettings.cameraPosition
         speaker.status = callSettings.speakerOn ? .enabled : .disabled
         speaker.audioOutputStatus = callSettings.audioOutputOn ? .enabled : .disabled
+    }
+
+    private func didUpdate(_ value: NoiseCancellationSettings?) {
+        guard
+            let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter
+        else {
+            log
+                .warning(
+                    "Unable to handle NoiseCancellationSettings. Please refer to the docs to see how to react on those updates."
+                )
+            return
+        }
+
+        let audioProcessingModule = streamVideo.videoConfig.audioProcessingModule
+        if let value {
+            switch value.mode {
+            case .available
+                where audioProcessingModule.activeAudioFilterId != noiseCancellationFilter.id && streamVideo
+                .isHardwareAccelerationAvailable:
+                log
+                    .debug(
+                        "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
+                    )
+                audioProcessingModule.setAudioFilter(noiseCancellationFilter)
+            case .disabled where audioProcessingModule.activeAudioFilterId == noiseCancellationFilter.id:
+                log
+                    .debug(
+                        "NoiseCancellationSettings updated with mode:\(value.mode). Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
+                    )
+                audioProcessingModule.setAudioFilter(nil)
+            case .autoOn
+                where audioProcessingModule.activeAudioFilterId != noiseCancellationFilter.id && streamVideo
+                .isHardwareAccelerationAvailable:
+                log
+                    .debug(
+                        "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
+                    )
+                audioProcessingModule.setAudioFilter(noiseCancellationFilter)
+            default:
+                log
+                    .debug(
+                        "NoiseCancellationSettings updated with mode:\(value.mode) isHardwareAccelerationAvailable:\(streamVideo.isHardwareAccelerationAvailable). No action!"
+                    )
+            }
+        } else if audioProcessingModule.activeAudioFilterId == noiseCancellationFilter.id {
+            log
+                .debug(
+                    "NoiseCancellationSettings updated with nil value. Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
+                )
+            audioProcessingModule.setAudioFilter(nil)
+        } else {
+            log.debug("NoiseCancellationSettings updated. No action!")
+        }
     }
 }

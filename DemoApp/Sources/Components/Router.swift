@@ -8,6 +8,9 @@ import StreamVideo
 import StreamVideoSwiftUI
 import StreamWebRTC
 import SwiftUI
+#if canImport(StreamVideoNoiseCancellation)
+import StreamVideoNoiseCancellation
+#endif
 
 @MainActor
 final class Router: ObservableObject {
@@ -157,17 +160,25 @@ final class Router: ObservableObject {
         deeplinkInfo: DeeplinkInfo,
         tokenProvider: @escaping UserTokenProvider
     ) {
-        let audioProcessingModule = RTCDefaultAudioProcessingModule(
-            config: nil,
-            capturePostProcessingDelegate: appState.voiceProcessor,
-            renderPreProcessingDelegate: nil
+        let videoConfig: VideoConfig
+        #if canImport(StreamVideoNoiseCancellation)
+        let processor = NoiseCancellationProcessor()
+        let noiseCancellationFilter = NoiseCancellationFilter(
+            name: "noise-cancellation",
+            initialize: processor.initialize,
+            process: processor.process,
+            release: processor.release
         )
+        videoConfig = .init(noiseCancellationFilter: noiseCancellationFilter)
+        #else
+        videoConfig = .init()
+        #endif
 
         let streamVideo = StreamVideo(
             apiKey: AppState.shared.apiKey,
             user: user,
             token: .init(stringLiteral: token),
-            videoConfig: VideoConfig(audioProcessingModule: audioProcessingModule),
+            videoConfig: videoConfig,
             tokenProvider: tokenProvider
         )
 

@@ -6,7 +6,7 @@ import Foundation
 import StreamWebRTC
 
 /// A concrete implementation of `AudioFilter` that applies noise cancellation effects.
-public final class NoiseCancellationFilter: AudioFilter {
+public final class NoiseCancellationFilter: AudioFilter, @unchecked Sendable {
 
     public typealias InitializeClosure = (Int, Int) -> Void
     public typealias ProcessClosure = (Int, Int, Int, UnsafeMutablePointer<Float>) -> Void

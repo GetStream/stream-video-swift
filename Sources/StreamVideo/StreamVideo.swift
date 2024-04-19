@@ -40,7 +40,10 @@ public class StreamVideo: ObservableObject, @unchecked Sendable {
     public var user: User {
         state.user
     }
-    
+
+    /// Provides information regarding hardware-acceleration capabilities (neuralEngine) on device.
+    public var isHardwareAccelerationAvailable: Bool { neuralEngineExists }
+
     var token: UserToken
 
     private var tokenProvider: UserTokenProvider

@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		40013DDC2B87AA2300915453 /* SerialActor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40013DDB2B87AA2300915453 /* SerialActor.swift */; };
 		400D63F72AC3273F0000BB30 /* ThermalStateObserverTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */; };
+		400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */; };
+		400E50552BD2AAD0008C939E /* StreamAudioProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */; };
 		401480302A5317640029166A /* AudioValuePercentageNormaliser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */; };
 		401480342A5423D60029166A /* AudioValuePercentageNormaliser_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */; };
 		401480362A5447C50029166A /* LocalParticipantViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401480352A5447C50029166A /* LocalParticipantViewModifier.swift */; };
@@ -87,7 +89,6 @@
 		406A8E942AA1D7C5001F598A /* UserCredentials.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AB2A9DFC13004BE3DA /* UserCredentials.swift */; };
 		406A8E952AA1D7CB001F598A /* AddUserView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 84201792288AB699004964B3 /* AddUserView.swift */; };
 		406A8E972AA1D7DC001F598A /* User+Demo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B12A9DFFBB004BE3DA /* User+Demo.swift */; };
-		406A8E982AA1D7E9001F598A /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */; };
 		406A8E992AA1D7E9001F598A /* MicrophoneChecker+MicrophoneChecking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */; };
 		406A8E9A2AA1D7E9001F598A /* Call+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */; };
 		406A8E9C2AA1D7E9001F598A /* CallStateResponseFields+Identifiable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */; };
@@ -98,7 +99,6 @@
 		406A8EA12AA1D7EF001F598A /* Reaction.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D32A9E2051004BE3DA /* Reaction.swift */; };
 		406A8EA22AA1D7EF001F598A /* TokenResponse.swift in Sources */ = {isa = PBXBuildFile; fileRef = 401A64B02A9DF83200534ED1 /* TokenResponse.swift */; };
 		406A8EA92AA1D80C001F598A /* ReactionsHelper.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445D12A9E2033004BE3DA /* ReactionsHelper.swift */; };
-		406A8EAA2AA1D80C001F598A /* DemoVoiceProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */; };
 		406A8EAB2AA1D80C001F598A /* RobotVoiceFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */; };
 		406A8EB02AA1D80C001F598A /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		406A8EB12AA1D80C001F598A /* UnsecureRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8468821228DFA448003BA9EE /* UnsecureRepository.swift */; };
@@ -261,9 +261,7 @@
 		40F445B02A9DFC58004BE3DA /* CallKitState.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445AF2A9DFC58004BE3DA /* CallKitState.swift */; };
 		40F445B22A9DFFBB004BE3DA /* User+Demo.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B12A9DFFBB004BE3DA /* User+Demo.swift */; };
 		40F445B42A9E01B2004BE3DA /* AuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445B32A9E01B2004BE3DA /* AuthenticationProvider.swift */; };
-		40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */; };
 		40F445BE2A9E0823004BE3DA /* RobotVoiceFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */; };
-		40F445C02A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */; };
 		40F445C22A9E1449004BE3DA /* JoinCallView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445C12A9E1449004BE3DA /* JoinCallView.swift */; };
 		40F445CC2A9E1FC9004BE3DA /* DemoChatViewFactory.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */; };
 		40F445CF2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */; };
@@ -1068,6 +1066,8 @@
 /* Begin PBXFileReference section */
 		40013DDB2B87AA2300915453 /* SerialActor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SerialActor.swift; sourceTree = "<group>"; };
 		400D63F62AC3273F0000BB30 /* ThermalStateObserverTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThermalStateObserverTests.swift; sourceTree = "<group>"; };
+		400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioFilterCapturePostProcessingModule.swift; sourceTree = "<group>"; };
+		400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamAudioProcessingModule.swift; sourceTree = "<group>"; };
 		4014802F2A5317640029166A /* AudioValuePercentageNormaliser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser.swift; sourceTree = "<group>"; };
 		401480312A54238C0029166A /* AudioValuePercentageNormaliser_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioValuePercentageNormaliser_Tests.swift; sourceTree = "<group>"; };
 		401480352A5447C50029166A /* LocalParticipantViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocalParticipantViewModifier.swift; sourceTree = "<group>"; };
@@ -1232,9 +1232,7 @@
 		40F445AF2A9DFC58004BE3DA /* CallKitState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallKitState.swift; sourceTree = "<group>"; };
 		40F445B12A9DFFBB004BE3DA /* User+Demo.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "User+Demo.swift"; sourceTree = "<group>"; };
 		40F445B32A9E01B2004BE3DA /* AuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthenticationProvider.swift; sourceTree = "<group>"; };
-		40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoVoiceProcessor.swift; sourceTree = "<group>"; };
 		40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RobotVoiceFilter.swift; sourceTree = "<group>"; };
-		40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "RTCDefaultAudioProcessingModule+AudioProcessingModule.swift"; sourceTree = "<group>"; };
 		40F445C12A9E1449004BE3DA /* JoinCallView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = JoinCallView.swift; sourceTree = "<group>"; };
 		40F445CB2A9E1FC9004BE3DA /* DemoChatViewFactory.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoChatViewFactory.swift; sourceTree = "<group>"; };
 		40F445CE2A9E1FE0004BE3DA /* DemoReactionsOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoReactionsOverlayView.swift; sourceTree = "<group>"; };
@@ -2140,7 +2138,6 @@
 				401A64B22A9DF86200534ED1 /* URL+Convenience.swift */,
 				401A64B42A9DF88C00534ED1 /* String+Unique.swift */,
 				40F445B12A9DFFBB004BE3DA /* User+Demo.swift */,
-				40F445BF2A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift */,
 				40F445E72A9E2824004BE3DA /* Call+Identifiable.swift */,
 				40F445E92A9E297B004BE3DA /* CallStateResponseFields+Identifiable.swift */,
 				40F446032A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift */,
@@ -2274,6 +2271,8 @@
 			children = (
 				402778812BD13C54002F4399 /* Filters */,
 				408679F62BD12F1000D027E0 /* AudioFilter.swift */,
+				400E50522BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift */,
+				400E50542BD2AAD0008C939E /* StreamAudioProcessingModule.swift */,
 			);
 			path = AudioFilter;
 			sourceTree = "<group>";
@@ -2668,7 +2667,6 @@
 		40F445B82A9E0809004BE3DA /* AudioFilter */ = {
 			isa = PBXGroup;
 			children = (
-				40F445BB2A9E081C004BE3DA /* DemoVoiceProcessor.swift */,
 				40F445BD2A9E0823004BE3DA /* RobotVoiceFilter.swift */,
 			);
 			path = AudioFilter;
@@ -4529,13 +4527,11 @@
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
-				40F445BC2A9E081C004BE3DA /* DemoVoiceProcessor.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
 				4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */,
 				40F445E02A9E22EA004BE3DA /* SimpleCallingView.swift in Sources */,
 				403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */,
-				40F445C02A9E0F88004BE3DA /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */,
 				842D3B5C29F6A4A10051698A /* AppDelegate.swift in Sources */,
 				403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */,
 				40F445F02A9E2A4B004BE3DA /* LoadingView.swift in Sources */,
@@ -4680,7 +4676,6 @@
 				40AB35462B738C4500E465CC /* DemoParticipantOptionsButton.swift in Sources */,
 				40AB35532B738C6A00E465CC /* LinkInfoView.swift in Sources */,
 				40AB35612B738C7D00E465CC /* ReactionOverlayView.swift in Sources */,
-				406A8EAA2AA1D80C001F598A /* DemoVoiceProcessor.swift in Sources */,
 				406A8E932AA1D7BF001F598A /* LoginViewModel.swift in Sources */,
 				402C544B2B6B9FF000672BFB /* CallButtonView.swift in Sources */,
 				406A8E8E2AA1D79D001F598A /* UserState.swift in Sources */,
@@ -4692,7 +4687,6 @@
 				408D29AE2B6D681000885473 /* SnapshotTrigger.swift in Sources */,
 				406A8E922AA1D7B3001F598A /* CallKitState.swift in Sources */,
 				406A8E8D2AA1D78C001F598A /* AppEnvironment.swift in Sources */,
-				406A8E982AA1D7E9001F598A /* RTCDefaultAudioProcessingModule+AudioProcessingModule.swift in Sources */,
 				40AB35442B738C4100E465CC /* DemoReactionButton.swift in Sources */,
 				849322612908385C0013C029 /* HomeViewController.swift in Sources */,
 				40AB35622B738C8100E465CC /* CustomCallView.swift in Sources */,
@@ -4882,6 +4876,7 @@
 				84DC38C329ADFCFD00946713 /* GeofenceSettings.swift in Sources */,
 				842B8E162A2DFED900863A87 /* CallRingEvent.swift in Sources */,
 				842B8E2D2A2DFED900863A87 /* StopTranscriptionResponse.swift in Sources */,
+				400E50532BD2A900008C939E /* StreamAudioFilterCapturePostProcessingModule.swift in Sources */,
 				842D3B5A29F667660051698A /* ModelResponse.swift in Sources */,
 				8469593729BB6B4E00134EA0 /* EdgeResponse.swift in Sources */,
 				841BAA412BD15CDE000C73E4 /* Subsession.swift in Sources */,
@@ -4902,6 +4897,7 @@
 				842E70D42B91BE1700D2D68B /* CallTranscription.swift in Sources */,
 				84274F462884249A00CF8794 /* ConnectionRecoveryHandler.swift in Sources */,
 				842B8E2F2A2DFED900863A87 /* StopRecordingResponse.swift in Sources */,
+				400E50552BD2AAD0008C939E /* StreamAudioProcessingModule.swift in Sources */,
 				84D6494329E9AD08002CA428 /* RTMPIngress.swift in Sources */,
 				84F73853287C1A2900A363F4 /* InjectedValues.swift in Sources */,
 				8406266B2A379CC5004B8748 /* WSEventsMiddleware.swift in Sources */,
