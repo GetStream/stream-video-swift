@@ -355,13 +355,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         streamVideo.state.ringingCall = nil
         streamVideo.state.activeCall = nil
     }
-    
-    @MainActor
+
+    /// Starts noise cancellation asynchronously.
+    /// - Throws: `ClientError.MissingPermissions` if the current user does not have the
+    /// capability to enable noise cancellation.
+    /// - Throws: An error if starting noise cancellation fails.
     public func startNoiseCancellation() async throws {
+        guard await currentUserHasCapability(.enableNoiseCancellation) else {
+            throw ClientError.MissingPermissions()
+        }
         try await callController.startNoiseCancellation(state.sessionId)
     }
 
-    @MainActor
+    /// Stops noise cancellation asynchronously.
+    /// - Throws: An error if stopping noise cancellation fails.
     public func stopNoiseCancellation() async throws {
         try await callController.stopNoiseCancellation(state.sessionId)
     }

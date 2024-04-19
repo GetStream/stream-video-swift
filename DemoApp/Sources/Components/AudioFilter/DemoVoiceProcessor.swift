@@ -3,76 +3,83 @@
 //
 
 import Foundation
-import StreamVideo
+@preconcurrency import StreamVideo
 import StreamVideoSwiftUI
 import StreamWebRTC
 
 final class DemoVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
 
-    private final class AtomicBox<V> {
-        private var _wrappedValue: V
-        private let queue = UnfairQueue()
-        var wrappedValue: V {
-            get { queue.sync { _wrappedValue } }
-            set { queue.sync { _wrappedValue = newValue } }
+    private actor State {
+        private(set) var audioFilter: AudioFilter?
+        private(set) var sampleRate: Int = 0
+        private(set) var channels: Int = 0
+
+        func setAudioFilter(_ value: AudioFilter?) {
+            audioFilter?.release()
+            audioFilter = value
         }
 
-        init(_ initial: V) {
-            _wrappedValue = initial
+        func setSampleRate(_ value: Int) {
+            self.sampleRate = value
+        }
+
+        func setChannels(_ value: Int) {
+            self.channels = value
         }
     }
 
-    private var audioFilter: AtomicBox<AudioFilter?> = .init(nil)
-
-    private var sampleRate: Int = 0
-    private var channels: Int = 0
+    private var state: State = .init()
 
     // MARK: - Accessors
 
     func setAudioFilter(_ audioFilter: AudioFilter?) {
-        log.debug("AudioFilter updated \(self.audioFilter.wrappedValue?.id ?? "nil") → \(audioFilter?.id ?? "nil")")
+        Task {
+            let oldValue = await state.audioFilter
+            log.debug("AudioFilter updated \(oldValue?.id ?? "nil") → \(audioFilter?.id ?? "nil")")
 
-        let oldValue = self.audioFilter.wrappedValue
-        self.audioFilter.wrappedValue = nil
-        oldValue?.release()
+            let sampleRate = await state.sampleRate
+            let channels = await state.channels
 
-        if let newValue = audioFilter, sampleRate > 0, channels > 0 {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) { [weak self, sampleRate, channels] in
-                guard let self else { return }
-                newValue.initialize(
-                    sampleRate: sampleRate,
-                    channels: channels
-                )
-                self.audioFilter.wrappedValue = newValue
+            if
+                let newValue = audioFilter,
+                sampleRate > 0,
+                channels > 0 {
+                newValue.initialize(sampleRate: sampleRate, channels: channels)
+                await state.setAudioFilter(newValue)
+            } else {
+                await state.setAudioFilter(nil)
             }
         }
     }
 
     // MARK: - RTCAudioCustomProcessingDelegate
-    
+
     func audioProcessingInitialize(
         sampleRate sampleRateHz: Int,
         channels: Int
     ) {
         log.debug("AudioSession updated sampleRate:\(sampleRateHz) channels:\(channels)")
-        sampleRate = sampleRateHz
-        self.channels = channels
-
-        audioFilter.wrappedValue?.initialize(
-            sampleRate: sampleRateHz,
-            channels: channels
-        )
+        Task {
+            await state.setSampleRate(sampleRateHz)
+            await state.setChannels(channels)
+            await state.audioFilter?.initialize(
+                sampleRate: sampleRateHz,
+                channels: channels
+            )
+        }
     }
 
     func audioProcessingProcess(audioBuffer: RTCAudioBuffer) {
-        guard let audioFilter = audioFilter.wrappedValue else { return }
-        var audioBuffer = audioBuffer
-        audioFilter.applyEffect(to: &audioBuffer)
+        Task {
+            guard let audioFilter = await state.audioFilter else { return }
+            var audioBuffer = audioBuffer
+            audioFilter.applyEffect(to: &audioBuffer)
+        }
     }
 
     func audioProcessingRelease() {
-        let _audioFilter = audioFilter.wrappedValue
-        setAudioFilter(nil)
-        _audioFilter?.release()
+        Task {
+            await state.setAudioFilter(nil)
+        }
     }
 }
