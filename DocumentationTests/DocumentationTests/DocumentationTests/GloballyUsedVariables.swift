@@ -343,11 +343,9 @@ class CustomVoiceProcessor: NSObject, RTCAudioCustomProcessingDelegate {
     func setAudioFilter(_ audioFilter: AudioFilter?) {}
 }
 
-protocol AudioFilter {
-    func applyEffect(to audioBuffer: inout RTCAudioBuffer)
-}
+final class RobotVoiceFilter: AudioFilter {
+    let id: String = ""
 
-class RobotVoiceFilter: AudioFilter {
     let pitchShift: Float
     init(pitchShift: Float) {self.pitchShift = pitchShift}
     func applyEffect(to audioBuffer: inout RTCAudioBuffer) {}
