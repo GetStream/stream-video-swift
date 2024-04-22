@@ -9,7 +9,7 @@ public struct VideoConfig: Sendable {
     /// An array of `VideoFilter` objects representing the filters to apply to the video.
     public let videoFilters: [VideoFilter]
 
-    /// The noiseCancellationFilter that StreamVideo will use to when call noiseCancellation settings
+    /// The noiseCancellationFilter that StreamVideo will use when call noiseCancellation settings
     /// require automatic handling (e.g. when the mode is set to `autoOn`).
     public let noiseCancellationFilter: NoiseCancellationFilter?
 

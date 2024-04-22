@@ -10,7 +10,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 
 ### ✅ Added
 - The SDK now provides a CallKit integration out of the box. [#334](https://github.com/GetStream/stream-video-swift/pull/334)
-- Infrastructure required for out-of-the-box NoiseCancellation support [#353](https://github.com/GetStream/stream-video-swift/pull/353)
+- Infrastructure required for NoiseCancellation support [#353](https://github.com/GetStream/stream-video-swift/pull/353)
 
 ### 🐞 Fixed
 - An issue where VoIP push notifications for ended calls, were received when the user connects [#336](https://github.com/GetStream/stream-video-swift/pull/336)

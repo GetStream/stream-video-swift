@@ -70,7 +70,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .map(\.?.audio.noiseCancellation)
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: &cancellables)
+                .store(in: &self.cancellables)
         }
     }
 
@@ -1040,16 +1040,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
         if let value {
             switch value.mode {
-            case .available
-                where audioProcessingModule.activeAudioFilterId != noiseCancellationFilter.id && streamVideo
-                .isHardwareAccelerationAvailable:
-                /// Activate noiseCancellationFilter if mode is available, hardwareAcceleration is
-                /// available and the noiseCancellation audioFilter isn't already enabled.
-                log
-                    .debug(
-                        "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
-                    )
-                audioProcessingModule.setAudioFilter(noiseCancellationFilter)
+            case .available:
+                log.debug("NoiseCancellationSettings updated with mode:\(value.mode).")
             case .disabled where audioProcessingModule.activeAudioFilterId == noiseCancellationFilter.id:
                 /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
                 /// audioFilter is currently active.
@@ -1075,14 +1067,6 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                         "NoiseCancellationSettings updated with mode:\(value.mode) isHardwareAccelerationAvailable:\(streamVideo.isHardwareAccelerationAvailable). No action!"
                     )
             }
-        } else if audioProcessingModule.activeAudioFilterId == noiseCancellationFilter.id {
-            /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
-            /// audioFilter is currently active.
-            log
-                .debug(
-                    "NoiseCancellationSettings updated with nil value. Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
-                )
-            audioProcessingModule.setAudioFilter(nil)
         } else {
             log.debug("NoiseCancellationSettings updated. No action!")
         }
