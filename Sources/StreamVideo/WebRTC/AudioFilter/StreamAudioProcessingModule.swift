@@ -5,26 +5,42 @@
 import Foundation
 import StreamWebRTC
 
-open class StreamAudioFilterProcessingModule: RTCDefaultAudioProcessingModule, AudioProcessingModule, @unchecked Sendable {
+/// A custom audio processing module that integrates with an audio filter for stream processing.
+open class StreamAudioFilterProcessingModule: NSObject, RTCAudioProcessingModule, AudioProcessingModule, @unchecked Sendable {
 
-    public convenience init(
+    /// The actual processingModule.
+    private let processingModule: RTCDefaultAudioProcessingModule
+
+    /// Initializes a new instance of `StreamAudioFilterProcessingModule`.
+    /// - Parameters:
+    ///   - config: Optional configuration for audio processing.
+    ///   - renderPreProcessingDelegate: Optional delegate for render pre-processing.
+    public init(
         config: RTCAudioProcessingConfig? = nil,
+        capturePostProcessingDelegate: AudioFilterCapturePostProcessingModule? = nil,
         renderPreProcessingDelegate: RTCAudioCustomProcessingDelegate? = nil
     ) {
-        self.init(
+        processingModule = .init(
             config: config,
-            capturePostProcessingDelegate: StreamAudioFilterCapturePostProcessingModule(),
+            capturePostProcessingDelegate: capturePostProcessingDelegate,
             renderPreProcessingDelegate: renderPreProcessingDelegate
         )
     }
 
-    public var activeAudioFilterId: String? {
-        (capturePostProcessingDelegate as? StreamAudioFilterCapturePostProcessingModule)?.activeAudioFilterId
+    public func apply(_ config: RTCAudioProcessingConfig) {
+        processingModule.apply(config)
     }
 
-    public func setAudioFilter(
-        _ filter: AudioFilter?
-    ) {
-        (capturePostProcessingDelegate as? StreamAudioFilterCapturePostProcessingModule)?.setAudioFilter(filter)
+    /// Retrieves the identifier of the currently active audio filter.
+    public var activeAudioFilterId: String? {
+        // Delegates the retrieval to the capture post-processing delegate.
+        (processingModule.capturePostProcessingDelegate as? AudioFilterCapturePostProcessingModule)?.activeAudioFilterId
+    }
+
+    /// Sets the audio filter for stream processing.
+    /// - Parameter filter: The audio filter to set.
+    public func setAudioFilter(_ filter: AudioFilter?) {
+        /// Delegates the setting of audio filter to the capture post-processing delegate.
+        (processingModule.capturePostProcessingDelegate as? AudioFilterCapturePostProcessingModule)?.setAudioFilter(filter)
     }
 }

@@ -9,15 +9,20 @@ public struct VideoConfig: Sendable {
     /// An array of `VideoFilter` objects representing the filters to apply to the video.
     public let videoFilters: [VideoFilter]
 
+    /// The noiseCancellationFilter that StreamVideo will use to when call noiseCancellation settings
+    /// require automatic handling (e.g. when the mode is set to `autoOn`).
     public let noiseCancellationFilter: AudioFilter?
 
-    /// Custom audio processing module.
+    /// The audio processing module that handles the audio streams provided by WebRTC.
     public let audioProcessingModule: AudioProcessingModule
         
     /// Initializes a new instance of `VideoConfig` with the specified parameters.
     /// - Parameters:
     ///   - videoFilters: An array of `VideoFilter` objects representing the filters to apply to the video.
-    ///   - audioProcessingModule: Option to provide your own audio processing.
+    ///   - noiseCancellationFilter: An ``AudioFilter`` object representing the
+    ///   noiseCancellationFilter, that the SDK will use whenever noiseCancellation handling requires
+    ///   automatic actions (e.g. when the NoiseCancellationSettings.mode is set to `autoOn`).
+    ///   - audioProcessingModule: Provide your own audio processing or fallback to the default one..
     /// - Returns: A new instance of `VideoConfig`.
     public init(
         videoFilters: [VideoFilter] = [],

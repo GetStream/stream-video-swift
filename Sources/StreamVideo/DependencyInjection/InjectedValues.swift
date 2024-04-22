@@ -13,7 +13,6 @@ public protocol InjectionKey {
 }
 
 /// Provides access to injected dependencies.
-@dynamicMemberLookup
 public struct InjectedValues {
     /// This is only used as an accessor to the computed properties within extensions of `InjectedValues`.
     private static var current = InjectedValues()
@@ -26,11 +25,6 @@ public struct InjectedValues {
     
     /// A static subscript accessor for updating and references dependencies directly.
     public static subscript<T>(_ keyPath: WritableKeyPath<InjectedValues, T>) -> T {
-        get { current[keyPath: keyPath] }
-        set { current[keyPath: keyPath] = newValue }
-    }
-
-    public static subscript<T>(dynamicMember keyPath: WritableKeyPath<InjectedValues, T>) -> T {
         get { current[keyPath: keyPath] }
         set { current[keyPath: keyPath] = newValue }
     }

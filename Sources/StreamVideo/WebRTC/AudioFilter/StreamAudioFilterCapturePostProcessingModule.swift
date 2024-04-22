@@ -5,11 +5,22 @@
 import Foundation
 import StreamWebRTC
 
+/// A protocol defining requirements for an audio filter capture post-processing module.
+public protocol AudioFilterCapturePostProcessingModule: RTCAudioCustomProcessingDelegate {
+
+    /// The identifier of the currently active audio filter.
+    var activeAudioFilterId: String? { get }
+
+    /// Sets the audio filter for processing captured audio.
+    /// - Parameter audioFilter: The audio filter to set.
+    func setAudioFilter(_ audioFilter: AudioFilter?)
+}
+
 /// A class that handles post-processing of captured audio streams using custom audio filtering.
 open class StreamAudioFilterCapturePostProcessingModule: NSObject, AudioFilterCapturePostProcessingModule, @unchecked Sendable {
 
     /// The state actor encapsulating the module's state.
-    public actor State {
+    private actor State {
         private(set) var audioFilter: AudioFilter?
         private(set) var sampleRate: Int = 0
         private(set) var channels: Int = 0
@@ -35,7 +46,7 @@ open class StreamAudioFilterCapturePostProcessingModule: NSObject, AudioFilterCa
     }
 
     /// The state instance containing audio processing state information.
-    public private(set) var state: State = .init()
+    private var state: State = .init()
 
     public var activeAudioFilterId: String?
 
@@ -109,11 +120,4 @@ open class StreamAudioFilterCapturePostProcessingModule: NSObject, AudioFilterCa
             await state.setAudioFilter(nil)
         }
     }
-}
-
-protocol AudioFilterCapturePostProcessingModule: RTCAudioCustomProcessingDelegate {
-
-    var activeAudioFilterId: String? { get }
-
-    func setAudioFilter(_ audioFilter: AudioFilter?)
 }

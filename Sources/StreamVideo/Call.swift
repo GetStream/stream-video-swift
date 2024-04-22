@@ -1025,10 +1025,10 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         speaker.audioOutputStatus = callSettings.audioOutputOn ? .enabled : .disabled
     }
 
+    /// Handles updates to noise cancellation settings.
+    /// - Parameter value: The updated `NoiseCancellationSettings` value.
     private func didUpdate(_ value: NoiseCancellationSettings?) {
-        guard
-            let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter
-        else {
+        guard let noiseCancellationFilter = streamVideo.videoConfig.noiseCancellationFilter else {
             log
                 .warning(
                     "Unable to handle NoiseCancellationSettings. Please refer to the docs to see how to react on those updates."
@@ -1037,17 +1037,22 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         }
 
         let audioProcessingModule = streamVideo.videoConfig.audioProcessingModule
+
         if let value {
             switch value.mode {
             case .available
                 where audioProcessingModule.activeAudioFilterId != noiseCancellationFilter.id && streamVideo
                 .isHardwareAccelerationAvailable:
+                /// Activate noiseCancellationFilter if mode is available, hardwareAcceleration is
+                /// available and the noiseCancellation audioFilter isn't already enabled.
                 log
                     .debug(
                         "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
                     )
                 audioProcessingModule.setAudioFilter(noiseCancellationFilter)
             case .disabled where audioProcessingModule.activeAudioFilterId == noiseCancellationFilter.id:
+                /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
+                /// audioFilter is currently active.
                 log
                     .debug(
                         "NoiseCancellationSettings updated with mode:\(value.mode). Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
@@ -1056,18 +1061,23 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             case .autoOn
                 where audioProcessingModule.activeAudioFilterId != noiseCancellationFilter.id && streamVideo
                 .isHardwareAccelerationAvailable:
+                /// Activate noiseCancellationFilter if mode is autoOn,  hardwareAcceleration is
+                /// available and the noiseCancellation audioFilter isn't already enabled.
                 log
                     .debug(
                         "NoiseCancellationSettings updated with mode:\(value.mode). Will activate noiseCancellationFilter:\(noiseCancellationFilter.id)"
                     )
                 audioProcessingModule.setAudioFilter(noiseCancellationFilter)
             default:
+                /// Log a debug message for other cases where no action is required.
                 log
                     .debug(
                         "NoiseCancellationSettings updated with mode:\(value.mode) isHardwareAccelerationAvailable:\(streamVideo.isHardwareAccelerationAvailable). No action!"
                     )
             }
         } else if audioProcessingModule.activeAudioFilterId == noiseCancellationFilter.id {
+            /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
+            /// audioFilter is currently active.
             log
                 .debug(
                     "NoiseCancellationSettings updated with nil value. Will deactivate noiseCancellationFilter:\(noiseCancellationFilter.id)"
