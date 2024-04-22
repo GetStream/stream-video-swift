@@ -67,18 +67,14 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                             ) { Image(systemName: "circle.inset.filled") }
 
                             #if canImport(StreamVideoNoiseCancellation)
-                            if viewModel.call?.currentUserHasCapability(.enableNoiseCancellation) == true {
+                            if
+                                viewModel.call?.currentUserHasCapability(.enableNoiseCancellation) == true,
+                                let noiseCancellationFilter = viewModel.noiseCancellationAudioFilter {
                                 DemoMoreControlListButtonView(
                                     action: {
-                                        let processor = NoiseCancellationProcessor()
-                                        appState.audioFilter = appState.audioFilter?.id == "noise-cancellation"
+                                        appState.audioFilter = appState.audioFilter?.id == noiseCancellationFilter.id
                                             ? nil
-                                            : NoiseCancellationFilter(
-                                                name: "noise-cancellation",
-                                                initialize: processor.initialize,
-                                                process: processor.process,
-                                                release: processor.release
-                                            )
+                                            : noiseCancellationFilter
                                     },
                                     label: appState.audioFilter?.id == "noise-cancellation"
                                         ? "Disable Noise Cancellation"
