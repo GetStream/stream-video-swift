@@ -34,9 +34,3 @@ public struct VideoConfig: Sendable {
         self.audioProcessingModule = audioProcessingModule
     }
 }
-
-public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {
-    var activeAudioFilterId: String? { get }
-
-    func setAudioFilter(_ filter: AudioFilter?)
-}

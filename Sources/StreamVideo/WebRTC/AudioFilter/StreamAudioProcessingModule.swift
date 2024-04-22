@@ -5,6 +5,17 @@
 import Foundation
 import StreamWebRTC
 
+/// A protocol defining requirements for an audio processing module that supports audio filters.
+public protocol AudioProcessingModule: RTCAudioProcessingModule, Sendable {
+
+    /// The identifier of the currently active audio filter.
+    var activeAudioFilterId: String? { get }
+
+    /// Sets the audio filter to be used for audio processing.
+    /// - Parameter filter: The audio filter to set.
+    func setAudioFilter(_ filter: AudioFilter?)
+}
+
 /// A custom audio processing module that integrates with an audio filter for stream processing.
 open class StreamAudioFilterProcessingModule: NSObject, RTCAudioProcessingModule, AudioProcessingModule, @unchecked Sendable {
 
