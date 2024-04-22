@@ -11,7 +11,9 @@ struct JsonEventDecoder: AnyEventDecoder {
     }
 }
 
-extension VideoEvent: @unchecked Sendable, Event {}
+extension VideoEvent: @unchecked Sendable, Event {
+    var name: String { type }
+}
 
 extension UserResponse {
     public var toUser: User {

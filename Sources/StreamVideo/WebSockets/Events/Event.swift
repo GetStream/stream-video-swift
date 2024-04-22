@@ -90,9 +90,13 @@ internal enum WrappedEvent: Event {
         case let .coordinatorEvent(event):
             return "Coordinator:\(event.name)"
         case let .sfuEvent(event):
-            return "SFU:\(type(of: event))"
+            return "SFU:\(event.name)"
         case let .internalEvent(event):
             return "Internal:\(event.name)"
         }
     }
+}
+
+extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload {
+    var name: String { String(describing: self) }
 }

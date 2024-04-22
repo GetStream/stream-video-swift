@@ -555,14 +555,14 @@ open class CallViewModel: ObservableObject {
         Task {
             for await event in streamVideo.subscribe() {
                 if let callEvent = callEventsHandler.checkForCallEvents(from: event) {
-                    if case let .incoming(incomingCall) = callEvent,
-                       incomingCall.caller.id != streamVideo.user.id {
+                    switch callEvent {
+                    case let .incoming(incomingCall) where incomingCall.caller.id != streamVideo.user.id:
                         let isAppActive = UIApplication.shared.applicationState == .active
                         // TODO: implement holding a call.
                         if callingState == .idle && isAppActive {
                             callingState = .incoming(incomingCall)
                         }
-                    } else if case let .accepted(callEventInfo) = callEvent {
+                    case let .accepted(callEventInfo):
                         if callingState == .outgoing {
                             enterCall(call: call, callType: callEventInfo.type, callId: callEventInfo.callId, members: [])
                         } else if case .incoming = callingState,
@@ -570,14 +570,22 @@ open class CallViewModel: ObservableObject {
                             // Accepted on another device.
                             callingState = .idle
                         }
-                    } else if case .rejected = callEvent {
+                    case let .rejected(callEventInfo):
+                        log.debug("Call rejected with info:\(callEventInfo)")
                         handleRejectedEvent(callEvent)
-                    } else if case .ended = callEvent {
+                    case let .ended(callEventInfo):
+                        log.debug("Call ended with info:\(callEventInfo)")
                         leaveCall()
-                    } else if case let .userBlocked(callEventInfo) = callEvent {
+                    case let .userBlocked(callEventInfo):
                         if callEventInfo.user?.id == streamVideo.user.id {
                             leaveCall()
                         }
+                    case let .userUnblocked(callEventInfo):
+                        log.debug("User unblocked with event:\(callEventInfo)")
+                    case let .sessionStarted(callSessionResponse):
+                        log.debug("Session started with response:\(callSessionResponse)")
+                    default:
+                        log.debug("Unhandled callEvent:\(callEvent).")
                     }
                 } else if let participantEvent = callEventsHandler.checkForParticipantEvents(from: event) {
                     guard participants.count < 25 else {

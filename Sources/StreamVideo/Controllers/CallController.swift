@@ -30,7 +30,8 @@ class CallController: @unchecked Sendable {
     private var currentSFU: String?
     private var statsInterval: TimeInterval = 5
     private var statsCancellable: AnyCancellable?
-    
+    private var reconnectionTask: Task<Void, Never>?
+
     init(
         defaultAPI: DefaultAPI,
         user: User,
@@ -347,6 +348,7 @@ class CallController: @unchecked Sendable {
         call = nil
         statsCancellable?.cancel()
         statsCancellable = nil
+        reconnectionTask?.cancel()
         Task {
             await webRTCClient?.cleanUp()
             webRTCClient = nil
@@ -486,7 +488,8 @@ class CallController: @unchecked Sendable {
             reconnectionDate = nil
             return
         }
-        Task {
+        
+        reconnectionTask = Task {
             do {
                 let sessionId = webRTCClient?.sessionID
                 await webRTCClient?.cleanUp()
@@ -513,7 +516,7 @@ class CallController: @unchecked Sendable {
             }
         }
     }
-    
+
     private func handleReconnectionError() {
         log.error("Error while reconnecting to the call")
         call?.update(reconnectionStatus: .disconnected)
