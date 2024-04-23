@@ -576,6 +576,30 @@ class WebRTCClient: NSObject, @unchecked Sendable {
         _ = try await signalService.sendStats(sendStatsRequest: statsRequest)
     }
     
+    /// Starts noise cancellation for a specified session ID asynchronously.
+    /// - Parameters:
+    ///   - sessionID: The session ID for which noise cancellation should be started.
+    /// - Throws: An error if starting noise cancellation fails.
+    func startNoiseCancellation(_ sessionID: String) async throws {
+        var request = Stream_Video_Sfu_Signal_StartNoiseCancellationRequest()
+        request.sessionID = sessionID
+        _ = try await signalService.startNoiseCancellation(
+            startNoiseCancellationRequest: request
+        )
+    }
+
+    /// Stops noise cancellation for a specified session ID asynchronously.
+    /// - Parameters:
+    ///   - sessionID: The session ID for which noise cancellation should be stopped.
+    /// - Throws: An error if stopping noise cancellation fails.
+    func stopNoiseCancellation(_ sessionID: String) async throws {
+        var request = Stream_Video_Sfu_Signal_StopNoiseCancellationRequest()
+        request.sessionID = sessionID
+        _ = try await signalService.stopNoiseCancellation(
+            stopNoiseCancellationRequest: request
+        )
+    }
+
     /// Initiates a camera focus operation at the specified point.
     ///
     /// This method attempts to focus the camera at a specific point on the screen.

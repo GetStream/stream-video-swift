@@ -153,6 +153,9 @@ open class CallViewModel: ObservableObject {
         call?.state.localParticipant
     }
                 
+    /// Returns the noiseCancellationFilter if available.
+    public var noiseCancellationAudioFilter: AudioFilter? { streamVideo.videoConfig.noiseCancellationFilter }
+
     private var participantUpdates: AnyCancellable?
     private var blockedUserUpdates: AnyCancellable?
     private var reconnectionUpdates: AnyCancellable?

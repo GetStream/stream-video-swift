@@ -762,7 +762,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
     }
     
     private func makeVideoTrack() async -> RTCVideoTrack {
-        let factory = PeerConnectionFactory(audioProcessingModule: nil)
+        let factory = PeerConnectionFactory(audioProcessingModule: StreamAudioFilterProcessingModule())
         let videoSource = await factory.makeVideoSource(forScreenShare: false)
         let track = await factory.makeVideoTrack(source: videoSource)
         return track

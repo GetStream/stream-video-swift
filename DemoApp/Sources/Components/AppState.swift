@@ -80,10 +80,6 @@ final class AppState: ObservableObject {
     private var deferSetDevice = false
     private var deferSetVoipDevice = false
 
-    // MARK: Immutable
-
-    let voiceProcessor = DemoVoiceProcessor()
-
     // MARK: Singleton
 
     static let shared = AppState()
@@ -191,7 +187,12 @@ final class AppState: ObservableObject {
     }
 
     private func didUpdate(audioFilter: AudioFilter?) {
-        voiceProcessor.setAudioFilter(audioFilter)
+        guard
+            let audioFilterProcessingModule = streamVideo?.videoConfig.audioProcessingModule as? StreamAudioFilterProcessingModule
+        else {
+            return
+        }
+        audioFilterProcessingModule.setAudioFilter(audioFilter)
     }
 
     private func didUpdate(videoFilter: VideoFilter?) {

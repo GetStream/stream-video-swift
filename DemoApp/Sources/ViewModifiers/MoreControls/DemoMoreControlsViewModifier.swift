@@ -6,6 +6,9 @@ import Foundation
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
+#if canImport(StreamVideoNoiseCancellation)
+import StreamVideoNoiseCancellation
+#endif
 
 private struct DemoMoreControlsViewModifier: ViewModifier {
 
@@ -43,7 +46,7 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                                     localParticipantSnapshotViewModel.zoom()
                                 },
                                 label: "Zoom"
-                            ) { Image(systemName: "circle.inset.filled") }
+                            ) { Image(systemName: "plus.magnifyingglass") }
 
                             DemoMoreControlListButtonView(
                                 action: {
@@ -54,7 +57,7 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                                     }
                                 },
                                 label: "Capture Photo"
-                            ) { Image(systemName: "person.crop.square.badge.camera") }
+                            ) { Image(systemName: "camera") }
 
                             DemoMoreControlListButtonView(
                                 action: {
@@ -63,26 +66,54 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: "Snapshot"
                             ) { Image(systemName: "circle.inset.filled") }
 
-                            DemoMoreControlListButtonView(
-                                action: { viewModel.toggleSpeaker() },
-                                label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"
-                            ) { Image(
-                                systemName: viewModel.callSettings.speakerOn
-                                    ? "speaker.wave.3.fill"
-                                    : "speaker.fill"
-                            )
+                            #if canImport(StreamVideoNoiseCancellation)
+                            if
+                                viewModel.call?.currentUserHasCapability(.enableNoiseCancellation) == true,
+                                let noiseCancellationFilter = viewModel.noiseCancellationAudioFilter {
+                                DemoMoreControlListButtonView(
+                                    action: {
+                                        appState.audioFilter = appState.audioFilter?.id == noiseCancellationFilter.id
+                                            ? nil
+                                            : noiseCancellationFilter
+                                    },
+                                    label: appState.audioFilter?.id == "noise-cancellation"
+                                        ? "Disable Noise Cancellation"
+                                        : "Noise Cancellation"
+                                ) {
+                                    Image(
+                                        systemName: appState.audioFilter?.id == "noise-cancellation"
+                                            ? "circle.slash"
+                                            : "waveform"
+                                    )
+                                }
                             }
+                            #endif
 
                             DemoMoreControlListButtonView(
                                 action: {
-                                    appState.audioFilter = appState.videoFilter == nil
-                                        ? RobotVoiceFilter(pitchShift: 0.8)
-                                        : nil
+                                    appState.audioFilter = appState.audioFilter?.id.hasPrefix("robot") == true
+                                        ? nil
+                                        : RobotVoiceFilter(pitchShift: 0.8)
                                 },
-                                label: appState.audioFilter == nil
-                                    ? "Robot Voice"
-                                    : "Disable Robot Voice"
-                            ) { Image(systemName: "waveform") }
+                                label: appState.audioFilter?.id.hasPrefix("robot") == true ? "Disable Robot" : "Robot filter"
+                            ) {
+                                Image(
+                                    systemName: appState.audioFilter?.id.hasPrefix("robot") == true
+                                        ? "circle.slash"
+                                        : "faxmachine"
+                                )
+                            }
+
+                            DemoMoreControlListButtonView(
+                                action: { viewModel.toggleSpeaker() },
+                                label: viewModel.callSettings.speakerOn ? "Disable Speaker" : "Speaker"
+                            ) {
+                                Image(
+                                    systemName: viewModel.callSettings.speakerOn
+                                        ? "speaker.wave.3.fill"
+                                        : "speaker.fill"
+                                )
+                            }
 
                             DemoMoreControlListButtonView(
                                 action: { isStatsPresented = true },

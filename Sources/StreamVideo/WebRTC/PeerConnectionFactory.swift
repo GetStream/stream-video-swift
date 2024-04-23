@@ -17,7 +17,7 @@ actor PeerConnectionFactory {
     
     private let factory: RTCPeerConnectionFactory
     
-    init(audioProcessingModule: RTCAudioProcessingModule?) {
+    init(audioProcessingModule: RTCAudioProcessingModule) {
         self.factory = Self.createRTCPeerConnectionFactory(
             audioProcessingModule: audioProcessingModule
         )
@@ -79,7 +79,7 @@ actor PeerConnectionFactory {
     }
     
     private static func createRTCPeerConnectionFactory(
-        audioProcessingModule: RTCAudioProcessingModule?
+        audioProcessingModule: RTCAudioProcessingModule
     ) -> RTCPeerConnectionFactory {
         RTCInitializeSSL()
         let defaultEncoderFactory = RTCDefaultVideoEncoderFactory()
@@ -88,21 +88,13 @@ actor PeerConnectionFactory {
             fallback: defaultEncoderFactory
         )
         let decoderFactory = RTCDefaultVideoDecoderFactory()
-        let factory: RTCPeerConnectionFactory
-        if let audioProcessingModule {
-            factory = RTCPeerConnectionFactory(
-                bypassVoiceProcessing: false,
-                encoderFactory: encoderFactory,
-                decoderFactory: decoderFactory,
-                audioProcessingModule: audioProcessingModule
-            )
-        } else {
-            factory = RTCPeerConnectionFactory(
-                encoderFactory: encoderFactory,
-                decoderFactory: decoderFactory
-            )
-        }
-        
+        let factory = RTCPeerConnectionFactory(
+            bypassVoiceProcessing: false,
+            encoderFactory: encoderFactory,
+            decoderFactory: decoderFactory,
+            audioProcessingModule: audioProcessingModule
+        )
+
         return factory
     }
 }
