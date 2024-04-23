@@ -447,7 +447,12 @@ class CallController: @unchecked Sendable {
         switch state {
         case let .disconnected(source):
             log.debug("Signal channel disconnected")
-            executeOnMain { [weak self] in
+            reconnectionTask = Task { @MainActor [weak self] in
+                /// Allow 0.5 seconds to see if the call was ended or we disconnected because
+                /// of another reason.
+                /// If the call was ended, the task will be cancelled on cleanUp and we will never trigger
+                /// a reconnection.
+                try? await Task.sleep(nanoseconds: 500_000_000)
                 self?.handleSignalChannelDisconnect(source: source)
             }
         case .connected(healthCheckInfo: _):
@@ -489,7 +494,7 @@ class CallController: @unchecked Sendable {
             return
         }
         
-        reconnectionTask = Task {
+        Task {
             do {
                 let sessionId = webRTCClient?.sessionID
                 await webRTCClient?.cleanUp()
