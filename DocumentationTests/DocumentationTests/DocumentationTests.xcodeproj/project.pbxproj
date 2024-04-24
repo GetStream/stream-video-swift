@@ -18,6 +18,7 @@
 		400D91D52B63E27300EBA47D /* 07-dependency-injection.swift in Sources */ = {isa = PBXBuildFile; fileRef = 400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */; };
 		404CAED82B8E3874007087BC /* 06-apply-video-filters.swift in Sources */ = {isa = PBXBuildFile; fileRef = 404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */; };
 		4068C1252B67C056006B0BEE /* 03-callkit-integration.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */; };
+		408CE0F52BD91B490052EC3A /* 18-transcriptions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 408CE0F42BD91B490052EC3A /* 18-transcriptions.swift */; };
 		409C39692B67CC5C0090044C /* 04-screensharing.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C39682B67CC5C0090044C /* 04-screensharing.swift */; };
 		409C396B2B67CD0B0090044C /* 05-picture-in-picture.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */; };
 		409C396D2B67CD780090044C /* 08-recording.swift in Sources */ = {isa = PBXBuildFile; fileRef = 409C396C2B67CD780090044C /* 08-recording.swift */; };
@@ -88,6 +89,7 @@
 		400D91D42B63E27300EBA47D /* 07-dependency-injection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "07-dependency-injection.swift"; sourceTree = "<group>"; };
 		404CAED72B8E3874007087BC /* 06-apply-video-filters.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "06-apply-video-filters.swift"; sourceTree = "<group>"; };
 		4068C1242B67C056006B0BEE /* 03-callkit-integration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "03-callkit-integration.swift"; sourceTree = "<group>"; };
+		408CE0F42BD91B490052EC3A /* 18-transcriptions.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "18-transcriptions.swift"; sourceTree = "<group>"; };
 		409C39682B67CC5C0090044C /* 04-screensharing.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "04-screensharing.swift"; sourceTree = "<group>"; };
 		409C396A2B67CD0B0090044C /* 05-picture-in-picture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "05-picture-in-picture.swift"; sourceTree = "<group>"; };
 		409C396C2B67CD780090044C /* 08-recording.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-recording.swift"; sourceTree = "<group>"; };
@@ -252,6 +254,7 @@
 				40FFDCA32B640772004DA7A2 /* 15-long-press-to-focus.swift */,
 				40AB356A2B73965D00E465CC /* 16-snapshot.swift */,
 				40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */,
+				408CE0F42BD91B490052EC3A /* 18-transcriptions.swift */,
 			);
 			path = "05-ui-cookbook";
 			sourceTree = "<group>";
@@ -409,6 +412,7 @@
 				400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */,
 				40FFDC4F2B63EE50004DA7A2 /* 04-active-call.swift in Sources */,
 				40FFDCA02B640676004DA7A2 /* 13-pinning-users.swift in Sources */,
+				408CE0F52BD91B490052EC3A /* 18-transcriptions.swift in Sources */,
 				409C396D2B67CD780090044C /* 08-recording.swift in Sources */,
 				40FFDC602B63F2EC004DA7A2 /* 04-local-video.swift in Sources */,
 				40FFDC632B63F370004DA7A2 /* 02-sound-indicator.swift in Sources */,
