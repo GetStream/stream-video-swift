@@ -62,24 +62,8 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         )
         self.callController.call = self
         subscribeToLocalCallSettingsChanges()
-        executeOnMain { [weak self] in
-            guard let self else { return }
-            self
-                .state
-                .$settings
-                .map(\.?.audio.noiseCancellation)
-                .removeDuplicates()
-                .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: &self.cancellables)
-
-            self
-                .state
-                .$settings
-                .map(\.?.transcription)
-                .removeDuplicates()
-                .sink { [weak self] in self?.didUpdate($0) }
-                .store(in: &self.cancellables)
-        }
+        subscribeToNoiseCancellationSettingsChanges()
+        subscribeToTranscriptionSettingsChanges()
     }
 
     internal convenience init(
@@ -906,7 +890,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Parameter transcriptionExternalStorage: The external storage location for the
     ///  transcription (optional).
     @discardableResult
-    public func startTranscriptions(
+    public func startTranscription(
         transcriptionExternalStorage: String? = nil
     ) async throws -> StartTranscriptionResponse {
         try await coordinatorClient.startTranscription(
@@ -924,7 +908,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
     /// - Returns: A StopTranscriptionResponse indicating whether the stop request was successful
     /// or not.
     @discardableResult
-    public func stopTranscriptions() async throws -> StopTranscriptionResponse {
+    public func stopTranscription() async throws -> StopTranscriptionResponse {
         try await coordinatorClient.stopTranscription(
             type: callType,
             id: callId
@@ -1055,6 +1039,31 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         .store(in: &cancellables)
     }
 
+    private func subscribeToNoiseCancellationSettingsChanges() {
+        executeOnMain { [weak self] in
+            guard let self else { return }
+            self
+                .state
+                .$settings
+                .map(\.?.audio.noiseCancellation)
+                .removeDuplicates()
+                .sink { [weak self] in self?.didUpdate($0) }
+                .store(in: &self.cancellables)
+        }
+    }
+
+    private func subscribeToTranscriptionSettingsChanges() {
+        executeOnMain {
+            self
+                .state
+                .$settings
+                .map(\.?.transcription)
+                .removeDuplicates()
+                .sink { [weak self] in self?.didUpdate($0) }
+                .store(in: &self.cancellables)
+        }
+    }
+
     private func updateCallSettingsManagers(with callSettings: CallSettings) {
         microphone.status = callSettings.audioOn ? .enabled : .disabled
         camera.status = callSettings.videoOn ? .enabled : .disabled
@@ -1118,28 +1127,20 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             return
         }
 
-        switch value.mode {
-        case .available:
-            log.debug("TranscriptionSettings updated with mode:\(value.mode).")
-        case .disabled:
-            /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
-            /// audioFilter is currently active.
-            log.debug("TranscriptionSettings updated with mode:\(value.mode). Will deactivate transcriptions.")
-            Task {
-                do {
-                    try await stopTranscriptions()
-                } catch {
-                    log.error(error)
+        Task { @MainActor in
+            do {
+                switch value.mode {
+                case .disabled where state.transcribing == true:
+                    log.debug("TranscriptionSettings updated with mode:\(value.mode). Will deactivate transcriptions.")
+                    try await stopTranscription()
+                case .autoOn where state.transcribing == false:
+                    log.debug("TranscriptionSettings updated with mode:\(value.mode). Will activate transcriptions.")
+                    try await startTranscription()
+                default:
+                    log.debug("TranscriptionSettings updated with mode:\(value.mode). No action required.")
                 }
-            }
-        case .autoOn:
-            log.debug("TranscriptionSettings updated with mode:\(value.mode). Will activate transcriptions.")
-            Task {
-                do {
-                    try await startTranscriptions()
-                } catch {
-                    log.error(error)
-                }
+            } catch {
+                log.error(error)
             }
         }
     }
