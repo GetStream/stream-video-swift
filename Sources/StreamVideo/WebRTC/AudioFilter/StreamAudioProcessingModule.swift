@@ -41,6 +41,12 @@ open class StreamAudioFilterProcessingModule: NSObject, RTCAudioProcessingModule
         self.capturePostProcessingDelegate = capturePostProcessingDelegate
     }
 
+    deinit {
+        processingModule.capturePostProcessingDelegate = nil
+        processingModule.renderPreProcessingDelegate = nil
+        capturePostProcessingDelegate.audioProcessingRelease()
+    }
+
     public func apply(_ config: RTCAudioProcessingConfig) {
         processingModule.apply(config)
     }

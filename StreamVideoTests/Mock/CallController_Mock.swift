@@ -3,6 +3,7 @@
 //
 
 @testable import StreamVideo
+import StreamWebRTC
 
 class CallController_Mock: CallController {
     
@@ -17,7 +18,7 @@ class CallController_Mock: CallController {
         callCid: "default:test",
         sessionID: nil,
         ownCapabilities: [.sendAudio, .sendVideo],
-        videoConfig: VideoConfig(),
+        videoConfig: .dummy(),
         audioSettings: AudioSettings(
             accessRequestEnabled: true,
             defaultDevice: .speaker,
@@ -75,7 +76,7 @@ extension CallController_Mock {
             callId: "123",
             callType: "default",
             apiKey: "key1",
-            videoConfig: VideoConfig(),
+            videoConfig: .dummy(),
             cachedLocation: nil
         )
     }

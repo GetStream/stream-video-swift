@@ -11,7 +11,7 @@ class ControllerTestCase: StreamVideoTestCase {
     let callId = "123"
     let callType: String = .default
     let apiKey = "123"
-    let videoConfig = VideoConfig()
+    let videoConfig = VideoConfig.dummy()
     var callCid: String {
         "\(callType):\(callId)"
     }
