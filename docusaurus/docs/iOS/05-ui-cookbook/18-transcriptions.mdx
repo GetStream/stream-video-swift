@@ -7,9 +7,9 @@ description: Documentation on implementing transcriptions.
 
 Enabling your application to provide a transcript for a call can be very useful for you users. We understand though, that this can be a difficult feature to implement/support.
 
-This is why, the StreamVideo SDK come with out of the Transcription support that you can easily manage. 
+This is why, the StreamVideo SDK comes with out of the box Transcription support that you can easily manage. 
 
-The `Call` object provides 2 levels of control. The first one in the `Call.state.settings.transcription` where you can find settings related to transcription, as they have been configured from the dashboard. The `mode` property defines the feature's availability with :
+The fo `Call` object provides 2 levels of control. The first one is in the `Call.state.settings.transcription` where you can find settings related to transcription, as they have been configured from the dashboard. The `mode` property defines the feature's availability with :
 - `available`: the feature is available for your call and can be enabled.
 - `disabled`: the feature is not available for your call. In this case, it's a good idea to "hide" any UI element you have related to transcription.
 - `autoOn`: the feature is available and it will be enabled automatically, once the user is connected on the call. 
