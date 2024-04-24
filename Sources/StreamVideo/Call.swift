@@ -71,6 +71,14 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
                 .removeDuplicates()
                 .sink { [weak self] in self?.didUpdate($0) }
                 .store(in: &self.cancellables)
+
+            self
+                .state
+                .$settings
+                .map(\.?.transcription)
+                .removeDuplicates()
+                .sink { [weak self] in self?.didUpdate($0) }
+                .store(in: &self.cancellables)
         }
     }
 
@@ -893,6 +901,36 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try callController.zoom(by: factor)
     }
 
+    /// Starts transcribing a conversation, optionally specifying an external storage location.
+    ///
+    /// - Parameter transcriptionExternalStorage: The external storage location for the
+    ///  transcription (optional).
+    @discardableResult
+    public func startTranscriptions(
+        transcriptionExternalStorage: String? = nil
+    ) async throws -> StartTranscriptionResponse {
+        try await coordinatorClient.startTranscription(
+            type: callType,
+            id: callId,
+            startTranscriptionRequest: .init(
+                transcriptionExternalStorage: transcriptionExternalStorage
+            )
+        )
+    }
+
+    /// Stops a conversation from being transcribed and returns whether the stop request was successful
+    /// or not.
+    ///
+    /// - Returns: A StopTranscriptionResponse indicating whether the stop request was successful
+    /// or not.
+    @discardableResult
+    public func stopTranscriptions() async throws -> StopTranscriptionResponse {
+        try await coordinatorClient.stopTranscription(
+            type: callType,
+            id: callId
+        )
+    }
+
     // MARK: - Internal
 
     internal func update(reconnectionStatus: ReconnectionStatus) {
@@ -1069,6 +1107,40 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
             }
         } else {
             log.debug("NoiseCancellationSettings updated. No action!")
+        }
+    }
+
+    /// Handles updates to transcription settings.
+    /// - Parameter value: The updated `TranscriptionSettings` value.
+    private func didUpdate(_ value: TranscriptionSettings?) {
+        guard let value else {
+            log.debug("TranscriptionSettings updated. No action!")
+            return
+        }
+
+        switch value.mode {
+        case .available:
+            log.debug("TranscriptionSettings updated with mode:\(value.mode).")
+        case .disabled:
+            /// Deactivate noiseCancellationFilter if mode is disabled and the noiseCancellation
+            /// audioFilter is currently active.
+            log.debug("TranscriptionSettings updated with mode:\(value.mode). Will deactivate transcriptions.")
+            Task {
+                do {
+                    try await stopTranscriptions()
+                } catch {
+                    log.error(error)
+                }
+            }
+        case .autoOn:
+            log.debug("TranscriptionSettings updated with mode:\(value.mode). Will activate transcriptions.")
+            Task {
+                do {
+                    try await startTranscriptions()
+                } catch {
+                    log.error(error)
+                }
+            }
         }
     }
 }

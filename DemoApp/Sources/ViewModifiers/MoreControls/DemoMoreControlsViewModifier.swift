@@ -18,9 +18,11 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
     @Injected(\.localParticipantSnapshotViewModel) var localParticipantSnapshotViewModel
 
     @State private var isStatsPresented = false
+    @State private var isTranscribing = false
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
+        isTranscribing = viewModel.call?.state.transcribing ?? false
         localParticipantSnapshotViewModel.call = viewModel.call
     }
 
@@ -114,6 +116,30 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                                         : "speaker.fill"
                                 )
                             }
+
+                            DemoMoreControlListButtonView(
+                                action: {
+                                    Task {
+                                        do {
+                                            if isTranscribing {
+                                                try await viewModel.call?.stopTranscriptions()
+                                            } else {
+                                                try await viewModel.call?.startTranscriptions()
+                                            }
+                                        } catch {
+                                            log.error(error)
+                                        }
+                                    }
+                                },
+                                label: isTranscribing ? "Disable Transcriptions" : "Transcriptions"
+                            ) {
+                                Image(
+                                    systemName: isTranscribing
+                                        ? "captions.bubble.fill"
+                                        : "captions.bubble"
+                                )
+                            }
+                            .onReceive(viewModel.call?.state.$transcribing) { isTranscribing = $0 }
 
                             DemoMoreControlListButtonView(
                                 action: { isStatsPresented = true },
