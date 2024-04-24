@@ -433,7 +433,7 @@ final class CallController_Tests: ControllerTestCase {
             callCid: callCid,
             sessionID: nil,
             ownCapabilities: [.sendAudio, .sendVideo],
-            videoConfig: VideoConfig(),
+            videoConfig: .dummy(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
                 defaultDevice: .speaker,

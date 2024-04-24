@@ -23,7 +23,7 @@ final class ParticipantsGridLayout_Tests: StreamVideoUITestCase {
         callId: callId,
         callType: callType,
         apiKey: "123",
-        videoConfig: VideoConfig(),
+        videoConfig: .dummy(),
         cachedLocation: nil
     )
 

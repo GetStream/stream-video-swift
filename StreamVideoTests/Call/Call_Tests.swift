@@ -118,7 +118,7 @@ final class Call_Tests: StreamVideoTestCase {
     
     func test_updateState_fromPermissionsEvent() {
         // Given
-        let videoConfig = VideoConfig()
+        let videoConfig = VideoConfig.dummy()
         let userResponse = mockResponseBuilder.makeUserResponse(id: "testuser")
         let defaultAPI = DefaultAPI(
             basePath: "https://example.com",
