@@ -736,7 +736,7 @@ final class WebRTCClient_Tests: StreamVideoTestCase {
             callCid: callCid,
             sessionID: nil,
             ownCapabilities: ownCapabilities,
-            videoConfig: VideoConfig(),
+            videoConfig: .dummy(),
             audioSettings: AudioSettings(
                 accessRequestEnabled: true,
                 defaultDevice: .speaker,

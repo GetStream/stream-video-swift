@@ -26,6 +26,7 @@ extension StreamVideo {
             apiKey: apiKey,
             user: mockUser,
             token: mockToken,
+            videoConfig: .dummy(),
             tokenProvider: { result in
                 result(.success(mockToken))
             },

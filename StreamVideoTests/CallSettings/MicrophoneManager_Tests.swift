@@ -3,63 +3,61 @@
 //
 
 @testable import StreamVideo
+import StreamWebRTC
 import XCTest
 
 final class MicrophoneManager_Tests: XCTestCase {
 
     func test_microphoneManager_toggle() async throws {
-        // Given
-        let microphoneManager = MicrophoneManager(
-            callController: CallController_Mock.make(),
-            initialStatus: .enabled
+        try await assertStatus(
+            .disabled,
+            initialStatus: .enabled,
+            action: { try await $0.toggle() }
         )
-        
-        // When
-        try await microphoneManager.toggle()
-        
-        // Then
-        XCTAssert(microphoneManager.status == .disabled)
     }
-    
+
     func test_microphoneManager_enable() async throws {
-        // Given
-        let microphoneManager = MicrophoneManager(
-            callController: CallController_Mock.make(),
-            initialStatus: .disabled
+        try await assertStatus(
+            .enabled,
+            initialStatus: .disabled,
+            action: { try await $0.enable() }
         )
-        
-        // When
-        try await microphoneManager.enable()
-        
-        // Then
-        XCTAssert(microphoneManager.status == .enabled)
     }
-    
+
     func test_microphoneManager_disable() async throws {
-        // Given
-        let microphoneManager = MicrophoneManager(
-            callController: CallController_Mock.make(),
-            initialStatus: .enabled
+        try await assertStatus(
+            .disabled,
+            initialStatus: .enabled,
+            action: { try await $0.disable() }
         )
-        
-        // When
-        try await microphoneManager.disable()
-        
-        // Then
-        XCTAssert(microphoneManager.status == .disabled)
     }
-    
+
     func test_microphoneManager_sameState() async throws {
-        // Given
+        try await assertStatus(
+            .enabled,
+            initialStatus: .enabled,
+            action: { try await $0.enable() }
+        )
+    }
+
+    // MARK: - Private helpers
+
+    private func assertStatus(
+        _ expected: CallSettingsStatus,
+        initialStatus: CallSettingsStatus,
+        action: @escaping (MicrophoneManager) async throws -> Void,
+        file: StaticString = #file,
+        line: UInt = #line
+    ) async throws {
         let microphoneManager = MicrophoneManager(
             callController: CallController_Mock.make(),
-            initialStatus: .enabled
+            initialStatus: initialStatus
         )
-        
+
         // When
-        try await microphoneManager.enable()
-        
+        try await action(microphoneManager)
+
         // Then
-        XCTAssert(microphoneManager.status == .enabled)
+        XCTAssert(microphoneManager.status == expected)
     }
 }
