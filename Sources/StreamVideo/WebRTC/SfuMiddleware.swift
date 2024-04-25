@@ -91,6 +91,8 @@ class SfuMiddleware: EventMiddleware {
             case let .pinsUpdated(event):
                 log.debug("Pins changed \(event.pins.map(\.sessionID))")
                 onPinsChanged?(event.pins)
+            case let .callEnded(event):
+                log.debug("Received call ended event with reason \(event.reason)")
             }
         }
         return event

@@ -211,6 +211,16 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     set {eventPayload = .pinsUpdated(newValue)}
   }
 
+  /// CallEnded is sent by the SFU to the client to signal that the call has ended.
+  /// The reason may specify why the call has ended.
+  var callEnded: Stream_Video_Sfu_Event_CallEnded {
+    get {
+      if case .callEnded(let v)? = eventPayload {return v}
+      return Stream_Video_Sfu_Event_CallEnded()
+    }
+    set {eventPayload = .callEnded(newValue)}
+  }
+
   var unknownFields = SwiftProtobuf.UnknownStorage()
 
   enum OneOf_EventPayload: Equatable {
@@ -271,6 +281,9 @@ struct Stream_Video_Sfu_Event_SfuEvent {
     case iceRestart(Stream_Video_Sfu_Event_ICERestart)
     /// PinsChanged is sent the list of pins in the call changes. This event contains the entire list of pins.
     case pinsUpdated(Stream_Video_Sfu_Event_PinsChanged)
+    /// CallEnded is sent by the SFU to the client to signal that the call has ended.
+    /// The reason may specify why the call has ended.
+    case callEnded(Stream_Video_Sfu_Event_CallEnded)
 
   #if !swift(>=4.1)
     static func ==(lhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload, rhs: Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload) -> Bool {
@@ -348,6 +361,10 @@ struct Stream_Video_Sfu_Event_SfuEvent {
       }()
       case (.pinsUpdated, .pinsUpdated): return {
         guard case .pinsUpdated(let l) = lhs, case .pinsUpdated(let r) = rhs else { preconditionFailure() }
+        return l == r
+      }()
+      case (.callEnded, .callEnded): return {
+        guard case .callEnded(let l) = lhs, case .callEnded(let r) = rhs else { preconditionFailure() }
         return l == r
       }()
       default: return false
@@ -1088,6 +1105,20 @@ struct Stream_Video_Sfu_Event_GoAway {
   init() {}
 }
 
+/// CallEnded is sent by the SFU to the client to signal that the call has ended.
+/// The reason may specify why the call has ended.
+struct Stream_Video_Sfu_Event_CallEnded {
+  // SwiftProtobuf.Message conformance is added in an extension below. See the
+  // `Message` and `Message+*Additions` files in the SwiftProtobuf library for
+  // methods supported on all messages.
+
+  var reason: Stream_Video_Sfu_Models_CallEndedReason = .unspecified
+
+  var unknownFields = SwiftProtobuf.UnknownStorage()
+
+  init() {}
+}
+
 #if swift(>=5.5) && canImport(_Concurrency)
 extension Stream_Video_Sfu_Event_SfuEvent: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_SfuEvent.OneOf_EventPayload: @unchecked Sendable {}
@@ -1122,6 +1153,7 @@ extension Stream_Video_Sfu_Event_VideoSender: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_ChangePublishQuality: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_CallGrantsUpdated: @unchecked Sendable {}
 extension Stream_Video_Sfu_Event_GoAway: @unchecked Sendable {}
+extension Stream_Video_Sfu_Event_CallEnded: @unchecked Sendable {}
 #endif  // swift(>=5.5) && canImport(_Concurrency)
 
 // MARK: - Code below here is support for the SwiftProtobuf runtime.
@@ -1149,6 +1181,7 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     20: .standard(proto: "go_away"),
     21: .standard(proto: "ice_restart"),
     22: .standard(proto: "pins_updated"),
+    23: .standard(proto: "call_ended"),
   ]
 
   mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
@@ -1391,6 +1424,19 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
           self.eventPayload = .pinsUpdated(v)
         }
       }()
+      case 23: try {
+        var v: Stream_Video_Sfu_Event_CallEnded?
+        var hadOneofValue = false
+        if let current = self.eventPayload {
+          hadOneofValue = true
+          if case .callEnded(let m) = current {v = m}
+        }
+        try decoder.decodeSingularMessageField(value: &v)
+        if let v = v {
+          if hadOneofValue {try decoder.handleConflictingOneOf()}
+          self.eventPayload = .callEnded(v)
+        }
+      }()
       default: break
       }
     }
@@ -1473,6 +1519,10 @@ extension Stream_Video_Sfu_Event_SfuEvent: SwiftProtobuf.Message, SwiftProtobuf.
     case .pinsUpdated?: try {
       guard case .pinsUpdated(let v)? = self.eventPayload else { preconditionFailure() }
       try visitor.visitSingularMessageField(value: v, fieldNumber: 22)
+    }()
+    case .callEnded?: try {
+      guard case .callEnded(let v)? = self.eventPayload else { preconditionFailure() }
+      try visitor.visitSingularMessageField(value: v, fieldNumber: 23)
     }()
     case nil: break
     }
@@ -2838,6 +2888,38 @@ extension Stream_Video_Sfu_Event_GoAway: SwiftProtobuf.Message, SwiftProtobuf._M
   }
 
   static func ==(lhs: Stream_Video_Sfu_Event_GoAway, rhs: Stream_Video_Sfu_Event_GoAway) -> Bool {
+    if lhs.reason != rhs.reason {return false}
+    if lhs.unknownFields != rhs.unknownFields {return false}
+    return true
+  }
+}
+
+extension Stream_Video_Sfu_Event_CallEnded: SwiftProtobuf.Message, SwiftProtobuf._MessageImplementationBase, SwiftProtobuf._ProtoNameProviding {
+  static let protoMessageName: String = _protobuf_package + ".CallEnded"
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    1: .same(proto: "reason"),
+  ]
+
+  mutating func decodeMessage<D: SwiftProtobuf.Decoder>(decoder: inout D) throws {
+    while let fieldNumber = try decoder.nextFieldNumber() {
+      // The use of inline closures is to circumvent an issue where the compiler
+      // allocates stack space for every case branch when no optimizations are
+      // enabled. https://github.com/apple/swift-protobuf/issues/1034
+      switch fieldNumber {
+      case 1: try { try decoder.decodeSingularEnumField(value: &self.reason) }()
+      default: break
+      }
+    }
+  }
+
+  func traverse<V: SwiftProtobuf.Visitor>(visitor: inout V) throws {
+    if self.reason != .unspecified {
+      try visitor.visitSingularEnumField(value: self.reason, fieldNumber: 1)
+    }
+    try unknownFields.traverse(visitor: &visitor)
+  }
+
+  static func ==(lhs: Stream_Video_Sfu_Event_CallEnded, rhs: Stream_Video_Sfu_Event_CallEnded) -> Bool {
     if lhs.reason != rhs.reason {return false}
     if lhs.unknownFields != rhs.unknownFields {return false}
     return true

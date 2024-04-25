@@ -448,6 +448,8 @@ extension Stream_Video_Sfu_Models_TrackUnpublishReason: CaseIterable {
 
 #endif  // swift(>=4.2)
 
+/// GoAwayReason represents the reason for the SFU to
+/// disconnect the client.
 enum Stream_Video_Sfu_Models_GoAwayReason: SwiftProtobuf.Enum {
   typealias RawValue = Int
   case unspecified // = 0
@@ -487,6 +489,55 @@ extension Stream_Video_Sfu_Models_GoAwayReason: CaseIterable {
     .unspecified,
     .shuttingDown,
     .rebalance,
+  ]
+}
+
+#endif  // swift(>=4.2)
+
+/// CallEndedReason represents the reason for the call to end.
+enum Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf.Enum {
+  typealias RawValue = Int
+  case unspecified // = 0
+  case ended // = 1
+  case liveEnded // = 2
+  case kicked // = 3
+  case UNRECOGNIZED(Int)
+
+  init() {
+    self = .unspecified
+  }
+
+  init?(rawValue: Int) {
+    switch rawValue {
+    case 0: self = .unspecified
+    case 1: self = .ended
+    case 2: self = .liveEnded
+    case 3: self = .kicked
+    default: self = .UNRECOGNIZED(rawValue)
+    }
+  }
+
+  var rawValue: Int {
+    switch self {
+    case .unspecified: return 0
+    case .ended: return 1
+    case .liveEnded: return 2
+    case .kicked: return 3
+    case .UNRECOGNIZED(let i): return i
+    }
+  }
+
+}
+
+#if swift(>=4.2)
+
+extension Stream_Video_Sfu_Models_CallEndedReason: CaseIterable {
+  // The compiler won't synthesize support with the UNRECOGNIZED case.
+  static var allCases: [Stream_Video_Sfu_Models_CallEndedReason] = [
+    .unspecified,
+    .ended,
+    .liveEnded,
+    .kicked,
   ]
 }
 
@@ -958,6 +1009,7 @@ extension Stream_Video_Sfu_Models_ErrorCode: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_SdkType: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_TrackUnpublishReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_GoAwayReason: @unchecked Sendable {}
+extension Stream_Video_Sfu_Models_CallEndedReason: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_CallState: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_ParticipantCount: @unchecked Sendable {}
 extension Stream_Video_Sfu_Models_Pin: @unchecked Sendable {}
@@ -1069,6 +1121,15 @@ extension Stream_Video_Sfu_Models_GoAwayReason: SwiftProtobuf._ProtoNameProvidin
     0: .same(proto: "GO_AWAY_REASON_UNSPECIFIED"),
     1: .same(proto: "GO_AWAY_REASON_SHUTTING_DOWN"),
     2: .same(proto: "GO_AWAY_REASON_REBALANCE"),
+  ]
+}
+
+extension Stream_Video_Sfu_Models_CallEndedReason: SwiftProtobuf._ProtoNameProviding {
+  static let _protobuf_nameMap: SwiftProtobuf._NameMap = [
+    0: .same(proto: "CALL_ENDED_REASON_UNSPECIFIED"),
+    1: .same(proto: "CALL_ENDED_REASON_ENDED"),
+    2: .same(proto: "CALL_ENDED_REASON_LIVE_ENDED"),
+    3: .same(proto: "CALL_ENDED_REASON_KICKED"),
   ]
 }
 
