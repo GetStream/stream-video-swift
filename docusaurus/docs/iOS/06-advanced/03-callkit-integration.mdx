@@ -134,11 +134,20 @@ By doing that, the `CallKitAdapter` will make sure to unregister the `VoIP` toke
 
 The Stream backend fills 2 properties in the VoIP push notification payload that can be used as the display name of the call.
 - **call_display_name**
-The `call_display_name` is a calculated property that evaluates the following properties on the Call object, in the order they are being presented: 
-    - `display_name` 
-    - `name` 
-    - `title`
-If none of the fields above are being set, the property will be empty.
+The `call_display_name` is a calculated property that evaluates the following customData fields on the Call object, in the order they are being presented: 
+- `display_name` 
+- `name` 
+- `title`
+
+```swift
+let call = streamVideo.call(callType: "default", callId: UUID().uuidString)
+let result = try await call.create(
+    memberIds: members, 
+    custom: ["display_name": .string("My awesome group")], 
+    ring: true
+)
+```
+If none of the fields above are being set, the property will be an empty string.
 
 - **created_by_display_name**
 The property is always set and contains the name of the user who created the call.
