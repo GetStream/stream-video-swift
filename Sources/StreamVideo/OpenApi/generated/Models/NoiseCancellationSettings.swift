@@ -13,6 +13,17 @@ public struct NoiseCancellationSettings: Codable, JSONEncodable, Hashable {
         case available = "available"
         case disabled = "disabled"
         case autoOn = "auto-on"
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+                let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
     }
     public var mode: Mode
 

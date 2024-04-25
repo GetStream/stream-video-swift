@@ -14,6 +14,17 @@ public struct CreateDeviceRequest: Codable, JSONEncodable, Hashable {
         case apn = "apn"
         case huawei = "huawei"
         case xiaomi = "xiaomi"
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+                let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
     }
     public var id: String?
     public var pushProvider: PushProvider?

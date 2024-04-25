@@ -12,6 +12,17 @@ public struct AudioSettings: Codable, JSONEncodable, Hashable {
     public enum DefaultDevice: String, Codable, CaseIterable {
         case speaker = "speaker"
         case earpiece = "earpiece"
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+                let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
     }
     public var accessRequestEnabled: Bool
     public var defaultDevice: DefaultDevice
