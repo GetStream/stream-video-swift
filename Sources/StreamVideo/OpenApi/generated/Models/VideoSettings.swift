@@ -13,6 +13,17 @@ public struct VideoSettings: Codable, JSONEncodable, Hashable {
         case front = "front"
         case back = "back"
         case external = "external"
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+                let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
     }
     public var accessRequestEnabled: Bool
     public var cameraDefaultOn: Bool

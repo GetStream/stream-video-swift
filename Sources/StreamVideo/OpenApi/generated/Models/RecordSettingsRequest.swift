@@ -13,6 +13,17 @@ public struct RecordSettingsRequest: Codable, JSONEncodable, Hashable {
         case available = "available"
         case disabled = "disabled"
         case autoOn = "auto-on"
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+                let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
     }
     public enum Quality: String, Codable, CaseIterable {
         case _360p = "360p"
@@ -20,6 +31,17 @@ public struct RecordSettingsRequest: Codable, JSONEncodable, Hashable {
         case _720p = "720p"
         case _1080p = "1080p"
         case _1440p = "1440p"
+        case unknown = "_unknown"
+
+        public init(from decoder: Decoder) throws {
+            let container = try decoder.singleValueContainer()
+            if let decodedValue = try? container.decode(String.self),
+                let value = Self(rawValue: decodedValue) {
+                self = value
+            } else {
+                self = .unknown
+            }
+        }
     }
     public var audioOnly: Bool?
     public var mode: Mode
