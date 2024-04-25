@@ -101,7 +101,8 @@ lane :match_me do |options|
       'io.getstream.iOS.VideoDemoApp',
       'io.getstream.iOS.DemoAppUIKit',
       'io.getstream.iOS.VideoDemoApp.CallIntent',
-      'io.getstream.iOS.VideoDemoApp.ScreenSharing'
+      'io.getstream.iOS.VideoDemoApp.ScreenSharing',
+      'io.getstream.StreamVideoNoiseCancellation'
     ],
     readonly: options[:readonly],
     register_device: options[:register_device]
