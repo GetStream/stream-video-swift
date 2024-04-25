@@ -37,7 +37,7 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
 
     func test_unregister_registryWasConfiguredCorrectly() {
         subject.register()
-        
+
         subject.unregister()
 
         XCTAssertNil(subject.registry.delegate)
@@ -68,45 +68,28 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
     // MARK: - pushRegistry(_:didReceiveIncomingPushWith:for:completion:)
 
     func test_pushRegistryDidReceiveIncomingPush_typeIsVoIP_reportIncomingCallWasCalledAsExpected() {
-        let pushPayload = MockPKPushPayload()
-        pushPayload.stubType = .voIP
-        pushPayload.stubDictionaryPayload = [
-            "stream": [
-                "call_cid": "123",
-                "created_by_display_name": "TestUser",
-                "created_by_id": "test_user"
-            ]
-        ]
-
-        let completionWasCalledExpectation = expectation(description: "Completion was called.")
-        subject.pushRegistry(
-            subject.registry,
-            didReceiveIncomingPushWith: pushPayload,
-            for: pushPayload.type,
-            completion: { completionWasCalledExpectation.fulfill() }
+        assertDidReceivePushNotification(
+            .init(
+                cid: "123",
+                localizedCallerName: "TestUser",
+                callerId: "test_user"
+            )
         )
+    }
 
-        XCTAssertEqual(callKitService.reportIncomingCallWasCalled?.cid, "123")
-        XCTAssertEqual(callKitService.reportIncomingCallWasCalled?.callerName, "TestUser")
-        XCTAssertEqual(callKitService.reportIncomingCallWasCalled?.callerId, "test_user")
-        callKitService.reportIncomingCallWasCalled?.completion(nil)
-
-        wait(for: [completionWasCalledExpectation], timeout: defaultTimeout)
+    func test_pushRegistryDidReceiveIncomingPush_typeIsVoIPWithDisplayNameAndCallerName_reportIncomingCallWasCalledAsExpected() {
+        assertDidReceivePushNotification(
+            .init(
+                cid: "123",
+                localizedCallerName: "TestUser",
+                callerId: "test_user"
+            ),
+            displayName: "Stream Group Call"
+        )
     }
 
     func test_pushRegistryDidReceiveIncomingPush_typeIsNotVoIP_reportIncomingCallWasNotCalled() {
-        let pushPayload = MockPKPushPayload()
-        pushPayload.stubType = .fileProvider
-        pushPayload.stubDictionaryPayload = [:]
-
-        subject.pushRegistry(
-            subject.registry,
-            didReceiveIncomingPushWith: pushPayload,
-            for: pushPayload.type,
-            completion: {}
-        )
-
-        XCTAssertNil(callKitService.reportIncomingCallWasCalled)
+        assertDidReceivePushNotification(contentType: .fileProvider)
     }
 
     // MARK: - Private helpers
@@ -123,6 +106,64 @@ final class CallKitPushNotificationAdapterTests: XCTestCase {
             didUpdate: stubPushCredentials,
             for: .voIP
         )
+    }
+
+    private func assertDidReceivePushNotification(
+        _ content: CallKitPushNotificationAdapter.Content? = nil,
+        contentType: PKPushType = .voIP,
+        displayName: String = "",
+        file: StaticString = #file,
+        line: UInt = #line
+    ) {
+        let pushPayload = MockPKPushPayload()
+        pushPayload.stubType = contentType
+        pushPayload.stubDictionaryPayload = content.map { [
+            "stream": [
+                "call_cid": $0.cid,
+                "call_display_name": displayName,
+                "created_by_display_name": $0.localizedCallerName,
+                "created_by_id": $0.callerId
+            ]
+        ] } ?? [:]
+
+        let completionWasCalledExpectation = expectation(description: "Completion was called.")
+        completionWasCalledExpectation.isInverted = content == nil
+        subject.pushRegistry(
+            subject.registry,
+            didReceiveIncomingPushWith: pushPayload,
+            for: pushPayload.type,
+            completion: { completionWasCalledExpectation.fulfill() }
+        )
+
+        if let content {
+            XCTAssertEqual(
+                callKitService.reportIncomingCallWasCalled?.cid,
+                content.cid,
+                file: file,
+                line: line
+            )
+            XCTAssertEqual(
+                callKitService.reportIncomingCallWasCalled?.callerName,
+                displayName.isEmpty ? content.localizedCallerName : displayName,
+                file: file,
+                line: line
+            )
+            XCTAssertEqual(
+                callKitService.reportIncomingCallWasCalled?.callerId,
+                content.callerId,
+                file: file,
+                line: line
+            )
+            callKitService.reportIncomingCallWasCalled?.completion(nil)
+        } else {
+            XCTAssertNil(
+                callKitService.reportIncomingCallWasCalled,
+                file: file,
+                line: line
+            )
+        }
+
+        wait(for: [completionWasCalledExpectation], timeout: defaultTimeout)
     }
 }
 
