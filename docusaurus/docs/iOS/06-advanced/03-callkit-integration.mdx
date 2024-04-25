@@ -130,6 +130,19 @@ struct MyCustomView: View {
 
 By doing that, the `CallKitAdapter` will make sure to unregister the `VoIP` token from receiving notifications._createMdxContent
 
+#### Call display name
+
+The Stream backend fills 2 properties in the VoIP push notification payload that can be used as the display name of the call.
+- **call_display_name**
+The `call_display_name` is a calculated property that evaluates the following properties on the Call object, in the order they are being presented: 
+    - `display_name` 
+    - `name` 
+    - `title`
+If none of the fields above are being set, the property will be empty.
+
+- **created_by_display_name**
+The property is always set and contains the name of the user who created the call.
+
 ### VoIP Token Observation
 
 Even though by using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there are still cases where you may want to acces the device's `VoIP` token (e.g. to persist it ).

@@ -8,17 +8,29 @@ import PushKit
 /// Handles push notifications for CallKit integration.
 open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, ObservableObject {
 
+    /// Represents the keys that the Payload dictionary
+    public enum PayloadKey: String {
+        case stream
+        case callCid = "call_cid"
+        case displayName = "call_display_name"
+        case createdByName = "created_by_display_name"
+        case createdById = "created_by_id"
+    }
+
     /// Represents the content of a VoIP push notification.
-    fileprivate struct StreamVoIPPushNotificationContent {
+    public struct Content {
         var cid: String
         var localizedCallerName: String
         var callerId: String
 
-        init(from payload: PKPushPayload, defaultCallText: String) {
-            let streamDict = payload.dictionaryPayload["stream"] as? [String: Any]
-            cid = streamDict?["call_cid"] as? String ?? "unknown"
-            localizedCallerName = streamDict?["created_by_display_name"] as? String ?? defaultCallText
-            callerId = streamDict?["created_by_id"] as? String ?? defaultCallText
+        public init(
+            cid: String,
+            localizedCallerName: String,
+            callerId: String
+        ) {
+            self.cid = cid
+            self.localizedCallerName = localizedCallerName
+            self.callerId = callerId
         }
     }
 
@@ -82,10 +94,8 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
     ) {
         guard type == .voIP else { return }
         
-        let content = StreamVoIPPushNotificationContent(
-            from: payload,
-            defaultCallText: defaultCallText
-        )
+        let content = decodePayload(payload)
+
         log
             .debug(
                 "Received VoIP push notification with cid:\(content.cid) callerId:\(content.callerId) callerName:\(content.localizedCallerName)."
@@ -101,6 +111,45 @@ open class CallKitPushNotificationAdapter: NSObject, PKPushRegistryDelegate, Obs
                 }
                 completion()
             }
+        )
+    }
+
+    /// Decodes push notification Payload to a type that the CallKit implementation can use.
+    open func decodePayload(
+        _ payload: PKPushPayload
+    ) -> Content {
+        func string(from: [String: Any], key: PayloadKey, fallback: String) -> String {
+            from[key.rawValue] as? String ?? fallback
+        }
+
+        guard
+            let streamDict = payload.dictionaryPayload[PayloadKey.stream.rawValue] as? [String: Any]
+        else {
+            return .init(
+                cid: "unknown",
+                localizedCallerName: defaultCallText,
+                callerId: defaultCallText
+            )
+        }
+
+        let cid = string(from: streamDict, key: .callCid, fallback: "unknown")
+
+        let displayName = string(from: streamDict, key: .displayName, fallback: "")
+        /// If no displayName ("display_name", "name", "title") was set, we default to the creator's name.
+        let localizedCallerName = displayName.isEmpty
+            ? string(from: streamDict, key: .createdByName, fallback: defaultCallText)
+            : displayName
+        
+        let callerId = string(
+            from: streamDict,
+            key: .createdById,
+            fallback: defaultCallText
+        )
+
+        return .init(
+            cid: cid,
+            localizedCallerName: localizedCallerName,
+            callerId: callerId
         )
     }
 }
