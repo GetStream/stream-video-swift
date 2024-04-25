@@ -27,7 +27,11 @@ struct TranscriptionButtonView: View {
 
     init(viewModel: CallViewModel) {
         self.viewModel = viewModel
-        self.isTranscriptionAvailable = (viewModel.call?.state.settings?.transcription.mode ?? .disabled) != .disabled
+        if let mode = viewModel.call?.state.settings?.transcription.mode {
+            self.isTranscriptionAvailable = mode != .disabled
+        } else {
+            self.isTranscriptionAvailable = false    
+        }
         self.isTranscribing = viewModel.call?.state.transcribing == true
     }
 
@@ -39,9 +43,9 @@ struct TranscriptionButtonView: View {
                         Task {
                             do {
                                 if isTranscribing {
-                                    try await viewModel.call?.stopTranscription()
+                                    try await call.stopTranscription()
                                 } else {
-                                    try await viewModel.call?.startTranscription()
+                                    try await call.startTranscription()
                                 }
                             } catch {
                                 log.error(error)
