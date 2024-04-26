@@ -163,9 +163,9 @@ The property is always set and contains the name of the user who created the cal
 
 ### Registering for VoIP Push Notifications
 
-Even though by using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there is still need for you to register/unregister the deviceToken.
+Even though using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there is still a need for you to register/unregister the deviceToken.
 
-You can observe the `voIP` token value by accessing the `deviceToken` property on the `CallKitPushNotificationAdapter`. Whenever the values changes you should register it with StreamVideo, like below:
+You can observe the `voIP` token value by accessing the `deviceToken` property on the `CallKitPushNotificationAdapter`. Whenever the value changes, you should register it with StreamVideo, like below:
 ```swift
 @Injected(\.streamVideo) var streamVideo
 @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
