@@ -56,10 +56,19 @@ fileprivate func content() {
 
     container {
         struct MyCustomView: View {
+            @Injected(\.streamVideo) var streamVideo
             @Injected(\.callKitAdapter) var callKitAdapter
+            @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
 
             var body: some View {
                 Button {
+                    let deviceToken = callKitPushNotificationAdapter.deviceToken
+                    if !deviceToken.isEmpty {
+                        Task {
+                            // Unregister the device token
+                            try await streamVideo.deleteDevice(id: deviceToken)
+                        }
+                    }
                     // Perform any other logout operations
                     callKitAdapter.streamVideo = nil
                 } label: {
@@ -70,16 +79,19 @@ fileprivate func content() {
     }
 
     container {
+        @Injected(\.streamVideo) var streamVideo
         @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
+        var lastVoIPToken: String?
+        var voIPTokenObservationCancellable: AnyCancellable?
 
-        let voIPDeviceToken = callKitPushNotificationAdapter.deviceToken
-    }
-
-    container {
-        @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
-
-        callKitPushNotificationAdapter.$deviceToken.sink { updatedDeviceToken in
-            log.debug("VoIP device token updated: \(updatedDeviceToken)")
+        voIPTokenObservationCancellable = callKitPushNotificationAdapter.$deviceToken.sink { [streamVideo] updatedDeviceToken in
+            Task {
+                if let lastVoIPToken {
+                    try await streamVideo.deleteDevice(id: updatedDeviceToken)
+                }
+                try await streamVideo.setVoipDevice(id: updatedDeviceToken)
+                lastVoIPToken = updatedDeviceToken
+            }
         }
     }
 
