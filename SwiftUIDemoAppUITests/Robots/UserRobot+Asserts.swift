@@ -162,10 +162,13 @@ extension UserRobot {
         XCTAssertTrue(CallPage.ConnectingView.callConnectingView.wait().exists, "callConnectingView should appear")
         XCTAssertTrue(CallPage.ConnectingView.callingIndicator.exists, "callingIndicator should appear")
         if participantCount > 3 {
-            XCTAssertEqual(3, CallPage.ConnectingView.participantsBubbles.count)
-            XCTAssertEqual("+\(participantCount - 2)", CallPage.ConnectingView.participantsBubbles.lastMatch?.text)
+            XCTAssertEqual(3, CallPage.ConnectingView.participantsBubblesWithImages.count + CallPage.ConnectingView.participantsBubblesWithoutImages.count)
+            XCTAssertEqual("+\(participantCount - 2)", CallPage.ConnectingView.participantsBubblesWithoutImages.lastMatch?.text)
         } else if participantCount > 1 {
-            XCTAssertEqual(participantCount, CallPage.ConnectingView.participantsBubbles.count)
+            XCTAssertEqual(participantCount, CallPage.ConnectingView.participantsBubblesWithImages.count + CallPage.ConnectingView.participantsBubblesWithoutImages.count)
+            if let name = CallPage.ConnectingView.participantsBubblesWithoutImages.lastMatch?.text {
+                XCTAssertFalse(name.contains("+"))
+            }
         } else if participantCount > 0 {
             XCTAssertTrue(CallPage.ConnectingView.callConnectingParticipantView.exists, "callConnectingParticipantView should appear")
         }

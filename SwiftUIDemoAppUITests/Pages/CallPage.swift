@@ -42,7 +42,10 @@ enum CallPage {
         static var callConnectingView: XCUIElement { app.staticTexts["callConnectingView"] }
         static var callingIndicator: XCUIElement { app.otherElements["callingIndicator"] }
         static var callConnectingParticipantView: XCUIElement { app.staticTexts["callConnectingParticipantView"] }
-        static var participantsBubbles: XCUIElementQuery {
+        static var participantsBubblesWithImages: XCUIElementQuery {
+            app.staticTexts["callConnectingGroupView"].images
+        }
+        static var participantsBubblesWithoutImages: XCUIElementQuery {
             app.staticTexts["callConnectingGroupView"].staticTexts
         }
     }
