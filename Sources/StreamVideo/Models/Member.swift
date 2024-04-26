@@ -27,7 +27,7 @@ public struct Member: Identifiable, Equatable, Sendable, Codable {
     }
     
     public init(userId: String, role: String? = nil, customData: [String: RawJSON] = [:], updatedAt: Date? = nil) {
-        self.user = User(id: userId)
+        user = User(id: userId)
         self.role = role ?? user.role
         self.customData = customData
         self.updatedAt = updatedAt
