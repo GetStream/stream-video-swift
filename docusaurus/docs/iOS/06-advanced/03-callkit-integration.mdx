@@ -175,7 +175,7 @@ var voIPTokenObservationCancellable: AnyCancellable?
 voIPTokenObservationCancellable = callKitPushNotificationAdapter.$deviceToken.sink { [streamVideo] updatedDeviceToken in
     Task {
         if let lastVoIPToken {
-            try await streamVideo.deleteDevice(id: updatedDeviceToken)
+            try await streamVideo.deleteDevice(id: lastVoIPToken)
         }
         try await streamVideo.setVoipDevice(id: updatedDeviceToken)
         lastVoIPToken = updatedDeviceToken
