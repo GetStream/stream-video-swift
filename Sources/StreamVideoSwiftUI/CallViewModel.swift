@@ -100,7 +100,7 @@ open class CallViewModel: ObservableObject {
     @Published public var moreControlsShown = false
 
     /// List of the outgoing call members.
-    @Published public var outgoingCallMembers = [MemberRequest]()
+    @Published public var outgoingCallMembers = [Member]()
         
     /// Dictionary of the call participants.
     @Published public private(set) var callParticipants = [String: CallParticipant]() {
@@ -299,19 +299,20 @@ open class CallViewModel: ObservableObject {
     public func startCall(
         callType: String,
         callId: String,
-        members: [MemberRequest],
+        members: [Member],
         ring: Bool = false
     ) {
         outgoingCallMembers = members
         callingState = ring ? .outgoing : .joining
+        let membersRequest = members.map(\.toMemberRequest)
         if !ring {
-            enterCall(callType: callType, callId: callId, members: members, ring: ring)
+            enterCall(callType: callType, callId: callId, members: membersRequest, ring: ring)
         } else {
             let call = streamVideo.call(callType: callType, callId: callId)
             self.call = call
             Task {
                 do {
-                    let callData = try await call.create(members: members, ring: ring)
+                    let callData = try await call.create(members: membersRequest, ring: ring)
                     let timeoutSeconds = TimeInterval(
                         callData.settings.ring.autoCancelTimeoutMs / 1000
                     )
@@ -342,7 +343,7 @@ open class CallViewModel: ObservableObject {
     public func enterLobby(
         callType: String,
         callId: String,
-        members: [MemberRequest]
+        members: [Member]
     ) {
         let lobbyInfo = LobbyInfo(callId: callId, callType: callType, participants: members)
         callingState = .lobby(lobbyInfo)
@@ -601,7 +602,7 @@ open class CallViewModel: ObservableObject {
     
     private func handleRejectedEvent(_ callEvent: CallEvent) {
         if case let .rejected(event) = callEvent, event.callId == call?.callId {
-            let outgoingMembersCount = outgoingCallMembers.filter { $0.userId != streamVideo.user.id }.count
+            let outgoingMembersCount = outgoingCallMembers.filter { $0.id != streamVideo.user.id }.count
             let rejections = call?.state.session?.rejectedBy.count ?? 0
             let accepted = call?.state.session?.acceptedBy.count ?? 0
                         
@@ -673,7 +674,7 @@ public enum CallingState: Equatable {
 public struct LobbyInfo: Equatable {
     public let callId: String
     public let callType: String
-    public let participants: [MemberRequest]
+    public let participants: [Member]
 }
 
 public enum ParticipantsLayout {

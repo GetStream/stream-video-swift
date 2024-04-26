@@ -7,7 +7,7 @@ import Combine
 fileprivate func content() {
     viewContainer {
         Button {
-            viewModel.startCall(callType: "default", callId: callId, members: members, ring: false)
+            viewModel.startCall(callType: "default", callId: callId, members: callMembers, ring: false)
         } label: {
             Text("Start a call")
         }

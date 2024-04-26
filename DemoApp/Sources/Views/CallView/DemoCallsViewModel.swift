@@ -61,14 +61,12 @@ class DemoCallsViewModel: ObservableObject {
     }
     
     func startCall(with employees: [StreamEmployee]) {
-        var memberRequests = [MemberRequest]()
-        memberRequests.append(MemberRequest(userId: streamVideo.user.id))
-        let members = employees.map { MemberRequest(userId: $0.id) }
-        memberRequests.append(contentsOf: members)
+        var members = employees.map { Member(user: User(id: $0.id, name: $0.name, imageURL: $0.imageURL)) }
+        members.append(Member(user: streamVideo.user))
         callViewModel.startCall(
             callType: .default,
             callId: UUID().uuidString,
-            members: memberRequests,
+            members: members,
             ring: true
         )
     }
