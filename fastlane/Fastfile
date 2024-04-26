@@ -151,7 +151,15 @@ private_lane :upload_beta do |options|
     app_target: options[:app_target],
     app_identifier: options[:app_identifier],
     configuration: configuration,
-    extensions: ['CallIntent', 'ScreenSharing']
+    extensions: ['CallIntent', 'ScreenSharing'],
+    export_options: {
+      provisioningProfiles: {
+        "io.getstream.iOS.VideoDemoApp" => "match AppStore io.getstream.iOS.VideoDemoApp",
+        "io.getstream.iOS.DemoAppUIKit" => "match AppStore io.getstream.iOS.DemoAppUIKit",
+        "io.getstream.iOS.VideoDemoApp.CallIntent" => "match AppStore io.getstream.iOS.VideoDemoApp.CallIntent",
+        "io.getstream.iOS.VideoDemoApp.ScreenSharing" => "match AppStore io.getstream.iOS.VideoDemoApp.ScreenSharing"
+      }
+    }
   )
 end
 
