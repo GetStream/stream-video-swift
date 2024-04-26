@@ -115,10 +115,19 @@ final class MyCustomViewController: UIViewController {
 In order to unregister the device from receiving VoIP push notifications we need to simply call the `CallKitAdapter` and update its `streamVideo` property with `nil`
 ```swift
 struct MyCustomView: View {
+    @Injected(\.streamVideo) var streamVideo
     @Injected(\.callKitAdapter) var callKitAdapter
+    @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
 
     var body: some View {
         Button {
+            let deviceToken = callKitPushNotificationAdapter.deviceToken
+            if !deviceToken.isEmpty {
+                Task {
+                    // Unregister the device token
+                    try await streamVideo.deleteDevice(id: deviceToken)
+                }
+            }
             // Perform any other logout operations
             callKitAdapter.streamVideo = nil
         } label: {
@@ -152,23 +161,25 @@ If none of the fields above are being set, the property will be an empty string.
 - **created_by_display_name**
 The property is always set and contains the name of the user who created the call.
 
-### VoIP Token Observation
+### Registering for VoIP Push Notifications
 
-Even though by using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there are still cases where you may want to acces the device's `VoIP` token (e.g. to persist it ).
+Even though by using the `CallKitAdapter` abstracts most of the `CallKit` & `PushKit` complexity from you, there is still need for you to register/unregister the deviceToken.
 
-You can achieve that by accessing the `deviceToken` property on the `CallKitPushNotificationAdapter`
+You can observe the `voIP` token value by accessing the `deviceToken` property on the `CallKitPushNotificationAdapter`. Whenever the values changes you should register it with StreamVideo, like below:
 ```swift
+@Injected(\.streamVideo) var streamVideo
 @Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
+var lastVoIPToken: String?
+var voIPTokenObservationCancellable: AnyCancellable?
 
-let voIPDeviceToken = callKitPushNotificationAdapter.deviceToken
-```
-
-If you prefer to receive updates whenever the `deviceToken` changes you can observe property using Combine:
-```swift
-@Injected(\.callKitPushNotificationAdapter) var callKitPushNotificationAdapter
-
-callKitPushNotificationAdapter.$deviceToken.sink { updatedDeviceToken in
-    log.debug("VoIP device token updated: \(updatedDeviceToken)")
+voIPTokenObservationCancellable = callKitPushNotificationAdapter.$deviceToken.sink { [streamVideo] updatedDeviceToken in
+    Task {
+        if let lastVoIPToken {
+            try await streamVideo.deleteDevice(id: updatedDeviceToken)
+        }
+        try await streamVideo.setVoipDevice(id: updatedDeviceToken)
+        lastVoIPToken = updatedDeviceToken
+    }
 }
 ```
 
