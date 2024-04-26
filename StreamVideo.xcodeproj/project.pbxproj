@@ -54,6 +54,8 @@
 		403812F62A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */; };
 		403BE0FE2A24C07300988F65 /* DeeplinkAdapter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */; };
 		403BE1012A24C70000988F65 /* DemoApp+Sentry.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */; };
+		403EFC9F2BDBFE050057C248 /* CallEndedViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */; };
+		403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */; };
 		403FF3E72BA1D2D40092CE8A /* StreamPixelBufferRepository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */; };
 		403FF3E82BA1D2D70092CE8A /* StreamPixelBufferPool.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */; };
 		403FF3E92BA1D2E10092CE8A /* UnfairQueue.swift in Sources */ = {isa = PBXBuildFile; fileRef = 403FF3E02BA1D21E0092CE8A /* UnfairQueue.swift */; };
@@ -1105,6 +1107,8 @@
 		403812F52A6EA2A7009BB2F7 /* MicrophoneChecker_Tests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MicrophoneChecker_Tests.swift; sourceTree = "<group>"; };
 		403BE0FD2A24C07300988F65 /* DeeplinkAdapter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DeeplinkAdapter.swift; sourceTree = "<group>"; };
 		403BE1002A24C70000988F65 /* DemoApp+Sentry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "DemoApp+Sentry.swift"; sourceTree = "<group>"; };
+		403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CallEndedViewModifier.swift; sourceTree = "<group>"; };
+		403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DemoFeedbackView.swift; sourceTree = "<group>"; };
 		403FF3E02BA1D21E0092CE8A /* UnfairQueue.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UnfairQueue.swift; sourceTree = "<group>"; };
 		403FF3E32BA1D2460092CE8A /* StreamPixelBufferRepository.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPixelBufferRepository.swift; sourceTree = "<group>"; };
 		403FF3E52BA1D2610092CE8A /* StreamPixelBufferPool.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StreamPixelBufferPool.swift; sourceTree = "<group>"; };
@@ -2122,6 +2126,7 @@
 		4030E5962A9DF48C003E8CBA /* Components */ = {
 			isa = PBXGroup;
 			children = (
+				403EFC9D2BDBFDEE0057C248 /* Feedback */,
 				40CB9FA52B7FB1B2006BED93 /* Snapshot */,
 				409386182AA09E3900FF5AF4 /* MemoryLogDestination */,
 				40D9463F2AA5ECDC00C8861B /* CodeScanner */,
@@ -2183,6 +2188,15 @@
 				847B47B42A249E7E000714CE /* Examples.swift */,
 			);
 			path = Examples;
+			sourceTree = "<group>";
+		};
+		403EFC9D2BDBFDEE0057C248 /* Feedback */ = {
+			isa = PBXGroup;
+			children = (
+				403EFC9E2BDBFE050057C248 /* CallEndedViewModifier.swift */,
+				403EFCA02BDC003A0057C248 /* DemoFeedbackView.swift */,
+			);
+			path = Feedback;
 			sourceTree = "<group>";
 		};
 		403FF3DF2BA1D20E0092CE8A /* UnfairQueue */ = {
@@ -4539,6 +4553,7 @@
 				4093861C2AA0A11500FF5AF4 /* LogQueue.swift in Sources */,
 				409BFA402A9F79D2003341EF /* View+OptionalPublisher.swift in Sources */,
 				844ADA6D2AD443AC00769F6A /* DemoCallsViewModel.swift in Sources */,
+				403EFCA12BDC003A0057C248 /* DemoFeedbackView.swift in Sources */,
 				847B47AF2A233AE2000714CE /* DemoAppViewFactory.swift in Sources */,
 				40F446042A9E2C78004BE3DA /* MicrophoneChecker+MicrophoneChecking.swift in Sources */,
 				4059C3422AAF0CE40006928E /* DemoChatViewModel+Injection.swift in Sources */,
@@ -4551,6 +4566,7 @@
 				40D946412AA5ECEF00C8861B /* CodeScanner.swift in Sources */,
 				409145FC2B68FEF0007F3C17 /* DemoMoreControlsViewModifier.swift in Sources */,
 				40F445AE2A9DFC34004BE3DA /* UserState.swift in Sources */,
+				403EFC9F2BDBFE050057C248 /* CallEndedViewModifier.swift in Sources */,
 				40F445F52A9E2AA1004BE3DA /* ReactionOverlayView.swift in Sources */,
 				8456E6C2287EB405004E180E /* LoginView.swift in Sources */,
 				844ADA6B2AD4439D00769F6A /* DemoCallsView.swift in Sources */,

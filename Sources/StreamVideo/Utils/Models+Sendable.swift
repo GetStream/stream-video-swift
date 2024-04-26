@@ -7,3 +7,4 @@ import Foundation
 extension StartTranscriptionResponse: @unchecked Sendable {}
 extension StopTranscriptionResponse: @unchecked Sendable {}
 extension TranscriptionSettings: @unchecked Sendable {}
+extension CollectUserFeedbackResponse: @unchecked Sendable {}

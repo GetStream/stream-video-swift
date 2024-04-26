@@ -9,10 +9,10 @@ struct AddUserView: View {
 
     @Injected(\.appearance) var appearance
     @Environment(\.presentationMode) var presentationMode
-    
+
     @State var name = ""
     @State var id = ""
-    
+
     var body: some View {
         NavigationView {
             ScrollView {
@@ -46,7 +46,7 @@ struct AddUserView: View {
             .navigationTitle("Add a new User")
         }
     }
-    
+
     private var buttonDisabled: Bool {
         name.isEmpty || id.isEmpty
     }
@@ -68,5 +68,79 @@ struct DemoTextfieldStyle: TextFieldStyle {
             .background(Color(appearance.colors.background))
             .overlay(clipShape.stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
             .clipShape(clipShape)
+    }
+}
+
+struct DemoTextEditor: View {
+
+    @Injected(\.appearance) var appearance
+
+    var text: Binding<String>
+    @State var cornerRadius: CGFloat = 8
+
+    var placeholder: String
+
+    private let notificationCenter: NotificationCenter = .default
+
+    @ViewBuilder
+    private var clipShape: some Shape { RoundedRectangle(cornerRadius: cornerRadius) }
+
+    var body: some View {
+        withPlaceholder {
+            withClearBackgroundContent
+                .lineLimit(4)
+                .padding()
+                .foregroundColor(
+                    text.wrappedValue == placeholder
+                        ? .init(appearance.colors.textLowEmphasis)
+                        : appearance.colors.text
+                )
+                .background(Color(appearance.colors.background))
+                .overlay(clipShape.stroke(Color(appearance.colors.textLowEmphasis), lineWidth: 1))
+                .clipShape(clipShape)
+                .frame(height: 100)
+        }
+    }
+
+    @ViewBuilder
+    private var withClearBackgroundContent: some View {
+        if #available(iOS 16.0, *) {
+            TextEditor(text: text)
+                .scrollContentBackground(.hidden)
+        } else {
+            TextEditor(text: text)
+        }
+    }
+
+    @ViewBuilder
+    private func withPlaceholder(
+        @ViewBuilder content: () -> some View
+    ) -> some View {
+        content()
+            .onReceive(
+                notificationCenter.publisher(for: UIResponder.keyboardWillShowNotification),
+                perform: { _ in
+                    withAnimation {
+                        if self.text.wrappedValue == placeholder {
+                            self.text.wrappedValue = ""
+                        }
+                    }
+                }
+            )
+            .onReceive(
+                notificationCenter.publisher(for: UIResponder.keyboardWillHideNotification),
+                perform: { _ in
+                    withAnimation {
+                        if self.text.wrappedValue.isEmpty {
+                            self.text.wrappedValue = placeholder
+                        }
+                    }
+                }
+            )
+            .onAppear {
+                if text.wrappedValue.isEmpty {
+                    text.wrappedValue = placeholder
+                }
+            }
     }
 }

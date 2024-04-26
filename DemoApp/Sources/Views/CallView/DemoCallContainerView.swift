@@ -33,6 +33,11 @@ internal struct DemoCallContainerView: View {
                     chatViewModel: chatViewModel
                 )
             )
+            .onCallEnded { call in
+                if #available(iOS 15.0, *), let call {
+                    DemoFeedbackView(call)
+                }
+            }
             .onContinueUserActivity(
                 NSStringFromClass(INStartCallIntent.self),
                 perform: didContinueUserActivity(_:)

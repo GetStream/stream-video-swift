@@ -19,9 +19,11 @@ struct DemoModalNavigationBarViewModifier: ViewModifier {
     func body(content: Content) -> some View {
         VStack(spacing: 0) {
             HStack {
-                Text(title)
-                    .font(fonts.title3)
-                    .fontWeight(.medium)
+                if !title.isEmpty {
+                    Text(title)
+                        .font(fonts.title3)
+                        .fontWeight(.medium)
+                }
 
                 Spacer()
 

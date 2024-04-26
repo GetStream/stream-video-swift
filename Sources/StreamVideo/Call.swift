@@ -352,7 +352,7 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
 
     /// Leave the current call.
     public func leave() {
-        postNotification(with: CallNotification.callEnded)
+        postNotification(with: CallNotification.callEnded, object: self)
         for cancellable in cancellables {
             cancellable.cancel()
         }
@@ -918,6 +918,30 @@ public class Call: @unchecked Sendable, WSEventsSubscriber {
         try await coordinatorClient.stopTranscription(
             type: callType,
             id: callId
+        )
+    }
+
+    /// Collects user feedback asynchronously.
+    ///
+    /// - Parameters:
+    ///   - custom: Optional custom data in the form of a dictionary of String keys and RawJSON values.
+    ///   - rating: Optional rating provided by the user.
+    ///   - reason: Optional reason for the user's feedback.
+    /// - Returns: An instance of `CollectUserFeedbackResponse` representing the result of \
+    /// collecting feedback.
+    /// - Throws: An error if the feedback collection process encounters an issue.
+    @discardableResult
+    @MainActor
+    public func collectUserFeedback(
+        custom: [String: RawJSON]? = nil,
+        rating: Int? = nil,
+        reason: String? = nil
+    ) async throws -> CollectUserFeedbackResponse {
+        try await callController.collectUserFeedback(
+            sessionID: state.sessionId,
+            custom: custom,
+            rating: rating,
+            reason: reason
         )
     }
 
