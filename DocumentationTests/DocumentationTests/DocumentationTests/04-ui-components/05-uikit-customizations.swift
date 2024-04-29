@@ -66,7 +66,7 @@ fileprivate func content() {
 
         final class CustomObject: UIViewController {
             var callViewModel: CallViewModel { viewModel }
-            var selectedParticipants: [MemberRequest] = []
+            var selectedParticipants: [Member] = []
             var text = ""
             var cancellables: Set<AnyCancellable> = []
 

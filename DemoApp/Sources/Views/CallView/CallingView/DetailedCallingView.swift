@@ -35,17 +35,13 @@ struct DetailedCallingView: View {
         text.isEmpty || participants.isEmpty
     }
 
-    private var members: [MemberRequest] {
-        var members: [MemberRequest] = selectedParticipants.map {
-            MemberRequest(custom: $0.customData, role: $0.role, userId: $0.id)
+    private var members: [Member] {
+        var members: [Member] = selectedParticipants.map {
+            Member(user: $0)
         }
         if !selectedParticipants.contains(streamVideo.user) {
             let currentUser = streamVideo.user
-            let member = MemberRequest(
-                custom: currentUser.customData,
-                role: currentUser.role,
-                userId: currentUser.id
-            )
+            let member = Member(user: currentUser)
             members.append(member)
         }
         return members

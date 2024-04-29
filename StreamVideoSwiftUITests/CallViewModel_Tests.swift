@@ -13,9 +13,9 @@ final class CallViewModel_Tests: StreamVideoTestCase {
     
     private let mockResponseBuilder = MockResponseBuilder()
     
-    let firstUser: MemberRequest = Member(user: StreamVideo.mockUser, updatedAt: .now).toMemberRequest
-    let secondUser: MemberRequest = Member(user: User(id: "test2"), updatedAt: .now).toMemberRequest
-    let thirdUser: MemberRequest = Member(user: User(id: "test3"), updatedAt: .now).toMemberRequest
+    let firstUser: Member = Member(user: StreamVideo.mockUser, updatedAt: .now)
+    let secondUser: Member = Member(user: User(id: "test2"), updatedAt: .now)
+    let thirdUser: Member = Member(user: User(id: "test3"), updatedAt: .now)
     let callType: String = .default
     var callId: String!
     var callCid: String!
@@ -611,7 +611,7 @@ final class CallViewModel_Tests: StreamVideoTestCase {
 
     //MARK: - private
     
-    private func callViewModelWithRingingCall(participants: [MemberRequest]) -> CallViewModel {
+    private func callViewModelWithRingingCall(participants: [Member]) -> CallViewModel {
         let callViewModel = CallViewModel()
         let call = streamVideo?.call(callType: callType, callId: callId)
         let callData = mockResponseBuilder.makeCallResponse(
@@ -640,4 +640,8 @@ extension User {
             updatedAt: Date()
         )
     }
+}
+
+extension Member {
+    var userId: String { id }
 }

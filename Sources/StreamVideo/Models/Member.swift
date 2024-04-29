@@ -17,10 +17,17 @@ public struct Member: Identifiable, Equatable, Sendable, Codable {
     public let role: String
     /// Custom data of the member in the call.
     public let customData: [String: RawJSON]
-    public let updatedAt: Date
+    public let updatedAt: Date?
 
-    public init(user: User, role: String? = nil, customData: [String: RawJSON] = [:], updatedAt: Date) {
+    public init(user: User, role: String? = nil, customData: [String: RawJSON] = [:], updatedAt: Date? = nil) {
         self.user = user
+        self.role = role ?? user.role
+        self.customData = customData
+        self.updatedAt = updatedAt
+    }
+    
+    public init(userId: String, role: String? = nil, customData: [String: RawJSON] = [:], updatedAt: Date? = nil) {
+        user = User(id: userId)
         self.role = role ?? user.role
         self.customData = customData
         self.updatedAt = updatedAt

@@ -27,7 +27,7 @@ fileprivate func content() {
         @MainActor
         final class CustomObject: UIViewController {
             var callViewModel: CallViewModel { viewModel }
-            var selectedParticipants: [MemberRequest] = []
+            var selectedParticipants: [Member] = []
             var text = ""
 
             private func didTapStartButton() {

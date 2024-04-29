@@ -49,6 +49,7 @@ var reader: GeometryProxy!
 var participants = [participant]
 var imageURL: URL!
 var members: [MemberRequest] = []
+var callMembers: [Member] = []
 
 func container(_ content: () throws -> Void) {}
 func asyncContainer(_ content: () async throws -> Void) {}

@@ -7,6 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 ### 🔄 Changed
 - The return type of `call.get()` is now the API type `GetCallResponse` which encapsulates the previous `CallResponse` under the `call` property. [#335](https://github.com/GetStream/stream-video-swift/pull/335)
 - Remove Nuke dependency from the SwiftUI SDK. [#340](https://github.com/GetStream/stream-video-swift/pull/340)
+- `members` type changed from `MemberRequest` to `Member` in `startCall` and `enterLobby` in `CallViewModel`. [#368](https://github.com/GetStream/stream-video-swift/pull/368)
 
 ### ✅ Added
 - The SDK now provides a CallKit integration out of the box. [#334](https://github.com/GetStream/stream-video-swift/pull/334)

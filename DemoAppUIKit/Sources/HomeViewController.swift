@@ -129,7 +129,7 @@ final class HomeViewController: UIViewController {
         next.startCall(
             callType: "default",
             callId: text,
-            members: selectedParticipants.map { MemberRequest(userId: $0.id) }
+            members: selectedParticipants.map { Member(user: $0) }
         )
         CallViewHelper.shared.add(callView: next.view)
     }

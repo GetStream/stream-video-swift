@@ -157,7 +157,7 @@ extension ViewFactory {
 
     public func makeOutgoingCallView(viewModel: CallViewModel) -> some View {
         OutgoingCallView(
-            outgoingCallMembers: viewModel.outgoingCallMembers.map(\.toMember),
+            outgoingCallMembers: viewModel.outgoingCallMembers,
             callTopView: makeCallTopView(viewModel: viewModel),
             callControls: makeCallControlsView(viewModel: viewModel)
         )
