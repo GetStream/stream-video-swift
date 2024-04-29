@@ -1,0 +1,68 @@
+---
+title: Noise Cancellation UI
+description: Documentation on toggling noise cancellation.
+---
+
+# Transcriptions
+
+Enabling your application to provide noise cancellation for the audio in the call can be very useful for you users. We understand though, that this can be a difficult feature to implement/support.
+
+This is why, the StreamVideo SDK comes with support for AudioFilters. In addition we offer an easy to integrate package that provides a ready to use `NoiseCancellation` `AudioFilter` using [krisp.ai](https://krisp.ai) technology. You can read more about integrating the `StreamVideoNoiseCancellation` SDK [here](../../guides/noise-cancellation).
+
+With that in mind, we can build a simple UI element that will allow the user to toggle on/off the Noise Cancellation feature. The element will also take care of showing/hiding depending on the feature's availability.
+
+```swift
+struct NoiseCancellationButtonView: View {
+
+    @Injected(\.streamVideo) var streamVideo
+
+    @ObservedObject var viewModel: CallViewModel
+    @State var isNoiseCancellationAvailable = false
+    @State var isActive: Bool = false
+
+    init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        if let mode = viewModel.call?.state.settings?.audio.noiseCancellation?.mode {
+            self.isNoiseCancellationAvailable = mode != .disabled
+        } else {
+            self.isNoiseCancellationAvailable = false
+        }
+        self.isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule.activeAudioFilterId
+    }
+
+    var body: some View {
+        if let call = viewModel.call, let noiseCancellationAudioFilter = streamVideo.videoConfig.noiseCancellationFilter {
+            Group {
+                if isNoiseCancellationAvailable {
+                    Button {
+                        if isActive {
+                            call.setAudioFilter(nil)
+                            isActive = false
+                        } else {
+                            call.setAudioFilter(noiseCancellationAudioFilter)
+                            isActive = true
+                        }
+                    } label: {
+                        Label {
+                            Text(isActive ? "Disable Noise Cancellation" : "Noise Cancellation")
+                        } icon: {
+                            Image(
+                                systemName: isActive
+                                ? "waveform.path.ecg"
+                                : "waveform.path"
+                            )
+                        }
+                    }
+                }
+            }
+            .onReceive(call.state.$settings.map(\.?.audio.noiseCancellation)) {
+                if let mode = $0?.mode {
+                    isNoiseCancellationAvailable = mode != .disabled
+                } else {
+                    isNoiseCancellationAvailable = false
+                }
+            }
+        }
+    }
+}
+```

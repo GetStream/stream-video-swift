@@ -27,6 +27,8 @@
 		40B468982B67B6DF009B5B3E /* 01-deeplinking.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */; };
 		40CB9FA92B7FC7DB006BED93 /* 17-camera-zoom.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */; };
 		40E23B9B2B67BA4100D11FC1 /* 02-push-notifications.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */; };
+		40F290AB2BDFB37000DCF136 /* 16-noise-cancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */; };
+		40F290AD2BDFB3CA00DCF136 /* 19-noise-cancellation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40F290AC2BDFB3CA00DCF136 /* 19-noise-cancellation.swift */; };
 		40FFDC372B63E400004DA7A2 /* 08-permissions-and-moderation.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */; };
 		40FFDC392B63E459004DA7A2 /* 09-reactions-and-custom-events.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */; };
 		40FFDC3B2B63E493004DA7A2 /* 10-view-slots.swift in Sources */ = {isa = PBXBuildFile; fileRef = 40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */; };
@@ -98,6 +100,8 @@
 		40B468972B67B6DF009B5B3E /* 01-deeplinking.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "01-deeplinking.swift"; sourceTree = "<group>"; };
 		40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "17-camera-zoom.swift"; sourceTree = "<group>"; };
 		40E23B9A2B67BA4100D11FC1 /* 02-push-notifications.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "02-push-notifications.swift"; sourceTree = "<group>"; };
+		40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "16-noise-cancellation.swift"; sourceTree = "<group>"; };
+		40F290AC2BDFB3CA00DCF136 /* 19-noise-cancellation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "19-noise-cancellation.swift"; sourceTree = "<group>"; };
 		40FFDC362B63E400004DA7A2 /* 08-permissions-and-moderation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "08-permissions-and-moderation.swift"; sourceTree = "<group>"; };
 		40FFDC382B63E459004DA7A2 /* 09-reactions-and-custom-events.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "09-reactions-and-custom-events.swift"; sourceTree = "<group>"; };
 		40FFDC3A2B63E493004DA7A2 /* 10-view-slots.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "10-view-slots.swift"; sourceTree = "<group>"; };
@@ -216,6 +220,7 @@
 				40FFDC3E2B63E734004DA7A2 /* 12-call-state.swift */,
 				40FFDC432B63E95D004DA7A2 /* 14-swiftui-vs-uikit.swift */,
 				40FFDC452B63EA54004DA7A2 /* 15-migration-from-dolby.swift */,
+				40F290AA2BDFB37000DCF136 /* 16-noise-cancellation.swift */,
 			);
 			path = "03-guides";
 			sourceTree = "<group>";
@@ -255,6 +260,7 @@
 				40AB356A2B73965D00E465CC /* 16-snapshot.swift */,
 				40CB9FA82B7FC7DB006BED93 /* 17-camera-zoom.swift */,
 				408CE0F42BD91B490052EC3A /* 18-transcriptions.swift */,
+				40F290AC2BDFB3CA00DCF136 /* 19-noise-cancellation.swift */,
 			);
 			path = "05-ui-cookbook";
 			sourceTree = "<group>";
@@ -412,12 +418,14 @@
 				400D91D12B63DEA200EBA47D /* 04-camera-and-microphone.swift in Sources */,
 				40FFDC4F2B63EE50004DA7A2 /* 04-active-call.swift in Sources */,
 				40FFDCA02B640676004DA7A2 /* 13-pinning-users.swift in Sources */,
+				40F290AD2BDFB3CA00DCF136 /* 19-noise-cancellation.swift in Sources */,
 				408CE0F52BD91B490052EC3A /* 18-transcriptions.swift in Sources */,
 				409C396D2B67CD780090044C /* 08-recording.swift in Sources */,
 				40FFDC602B63F2EC004DA7A2 /* 04-local-video.swift in Sources */,
 				40FFDC632B63F370004DA7A2 /* 02-sound-indicator.swift in Sources */,
 				40FFDC5E2B63F236004DA7A2 /* 03-call-participants-info-menu.swift in Sources */,
 				40FFDC3F2B63E734004DA7A2 /* 12-call-state.swift in Sources */,
+				40F290AB2BDFB37000DCF136 /* 16-noise-cancellation.swift in Sources */,
 				40FFDC712B63F5C1004DA7A2 /* 05-uikit-customizations.swift in Sources */,
 				40FFDC462B63EA54004DA7A2 /* 15-migration-from-dolby.swift in Sources */,
 				40FFDC532B63EFA2004DA7A2 /* 06-call-app-bar.swift in Sources */,

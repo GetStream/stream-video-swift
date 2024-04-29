@@ -6,9 +6,6 @@ import Foundation
 import StreamVideo
 import StreamVideoSwiftUI
 import SwiftUI
-#if canImport(StreamVideoNoiseCancellation)
-import StreamVideoNoiseCancellation
-#endif
 
 private struct DemoMoreControlsViewModifier: ViewModifier {
 
@@ -66,28 +63,7 @@ private struct DemoMoreControlsViewModifier: ViewModifier {
                                 label: "Snapshot"
                             ) { Image(systemName: "circle.inset.filled") }
 
-                            #if canImport(StreamVideoNoiseCancellation)
-                            if
-                                viewModel.call?.currentUserHasCapability(.enableNoiseCancellation) == true,
-                                let noiseCancellationFilter = viewModel.noiseCancellationAudioFilter {
-                                DemoMoreControlListButtonView(
-                                    action: {
-                                        appState.audioFilter = appState.audioFilter?.id == noiseCancellationFilter.id
-                                            ? nil
-                                            : noiseCancellationFilter
-                                    },
-                                    label: appState.audioFilter?.id == "noise-cancellation"
-                                        ? "Disable Noise Cancellation"
-                                        : "Noise Cancellation"
-                                ) {
-                                    Image(
-                                        systemName: appState.audioFilter?.id == "noise-cancellation"
-                                            ? "circle.slash"
-                                            : "waveform"
-                                    )
-                                }
-                            }
-                            #endif
+                            DemoNoiseCancellationButtonView(viewModel: viewModel)
 
                             DemoMoreControlListButtonView(
                                 action: {
@@ -181,6 +157,60 @@ struct DemoTranscriptionButtonView: View {
                 return
             }
             isTranscriptionAvailable = mode != .disabled
+        }
+    }
+}
+
+struct DemoNoiseCancellationButtonView: View {
+
+    @Injected(\.streamVideo) var streamVideo
+
+    @ObservedObject var viewModel: CallViewModel
+    @State var isNoiseCancellationAvailable = false
+    @State var isActive: Bool = false
+
+    init(viewModel: CallViewModel) {
+        self.viewModel = viewModel
+        if let mode = viewModel.call?.state.settings?.audio.noiseCancellation?.mode {
+            isNoiseCancellationAvailable = mode != .disabled
+        } else {
+            isNoiseCancellationAvailable = false
+        }
+        isActive = streamVideo.videoConfig.noiseCancellationFilter?.id == streamVideo.videoConfig.audioProcessingModule
+            .activeAudioFilter?.id
+    }
+
+    var body: some View {
+        if let call = viewModel.call, let noiseCancellationAudioFilter = streamVideo.videoConfig.noiseCancellationFilter {
+            Group {
+                if isNoiseCancellationAvailable {
+                    DemoMoreControlListButtonView(
+                        action: {
+                            if isActive {
+                                call.setAudioFilter(nil)
+                                isActive = false
+                            } else {
+                                call.setAudioFilter(noiseCancellationAudioFilter)
+                                isActive = true
+                            }
+                        },
+                        label: isActive ? "Disable Noise Cancellation" : "Noise Cancellation"
+                    ) {
+                        Image(
+                            systemName: isActive
+                                ? "waveform.path.ecg"
+                                : "waveform.path"
+                        )
+                    }
+                }
+            }
+            .onReceive(call.state.$settings.map(\.?.audio.noiseCancellation)) {
+                if let mode = $0?.mode {
+                    isNoiseCancellationAvailable = mode != .disabled
+                } else {
+                    isNoiseCancellationAvailable = false
+                }
+            }
         }
     }
 }

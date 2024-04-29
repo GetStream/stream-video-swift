@@ -292,23 +292,9 @@ Button {
 
 ## Audio Filters
 
-The StreamVideo SDK also supports audio processing of the local track. This opens up possibilities for noise cancellation, voice changing or other audio effects.
+The StreamVideo SDK also supports audio processing of the local track. This opens up possibilities for [noise cancellation](../../guides/noise-cancellation)., voice changing or other audio effects.
 
-If you want to have audio processing, you need to either provide your own implementation of the `AudioProcessingModule` protocol in our `VideoConfig` or use the provided one implemented on `StreamAudioFilterProcessingModule`. 
-
-In the following example, we will build a simple audio filter that gives the user's voice a robotic touch.
-
-```swift
-let audioProcessingModule = StreamAudioFilterProcessingModule()
-let filter = RobotVoiceFilter(pitchShift: 0.8)
-audioProcessingModule.setAudioFilter(filter)
-```
-
-In this code, we are using several newly defined objects, so let's go through them. 
-
-Firstly, we create a `StreamAudioFilterProcessingModule`. This in object provided by StreamVideo SDK, which implements the  `RTCAudioCustomProcessingDelegate`. Internally, it knows how to manage audioFilter lifecycle and forward audio processing requests.
-
-Secondly, we are referring to an `AudioFilter` protocol which is defined in the `StreamVideo SDK` and represents an object that can be used to process audio buffers.
+StreamVideo allows any audio filter that conforms to the `AudioFilter` protocol below:
 
 ```swift
 public protocol AudioFilter: Sendable {
@@ -326,9 +312,7 @@ public protocol AudioFilter: Sendable {
 }
 ```
 
-By default, there is no filter (the `audioFilter` property is nil), but we expose a method called `setAudioFilter`, so we can set one from the UI.
-
-Next, let's see our sample implementation of the `AudioFilter` protocol, namely the `RobotVoiceFilter`.
+In the following example, we will build a simple audio filter that gives the user's voice a robotic touch.
 
 ```swift
 final class RobotVoiceFilter: AudioFilter {
@@ -384,3 +368,16 @@ final class RobotVoiceFilter: AudioFilter {
 The filter is initalized with pitch shift, which configures how much the channel buffer's indexes should be shifted for the effect. We use a default value of 0.8, but you can configure it depending on how "robotic" the voice should be.
 
 This is a simple algorithm that just does shifting of the indexes. For a more complex one, you can also use some voice processing library. The important part is that you update the `channelBuffer` with the filtered values.
+
+Finally, we apply the audio filter on our call, like below:
+
+```swift
+// Get a call object
+let call = streamVideo.call(callType: "default", callId: UUID().uuidString)
+
+// Create our audio filter
+let filter = RobotVoiceFilter(pitchShift: 0.8)
+
+// Apply the audio filter on the call. To deactivate the filter we can simply pass `nil`.
+call.setAudioFilter(filter)
+```
